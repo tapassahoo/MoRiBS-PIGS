@@ -1,0 +1,12 @@
+#ignore all object files
+*.o
+#ignore executable
+pimc
+#ignore
+/examples/linear_pigs/results/*
+!/examples/linear_pigs/results/
+/examples/linear_pigs/analyze.cc
+/examples/linear_pigs/yw001.*
+/examples/linear_pigs/#fort.7#
+/examples/linear_pigs/*/
+!/examples/linear_pigs/

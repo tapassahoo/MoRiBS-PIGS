@@ -1,0 +1,54 @@
+1. qmc.input: line 27
+LINEARROTORS  H2 2   BOLTZMANN    0.08  3   h2n2org    PRIMITIVE   #  Included by Tapas Sahoo
+
+2. In mc_input.cc, line 30
+//Added by Tapas Sahoo
+const char IO_LINEARROTORS[]   = "LINEARROTORS"; // linear rotors
+
+3. In mc_input.cc, line 145
+       if ((params==IO_ATOM)||(params==IO_MOLECULE)||(params==IO_LINEARROTORS)||(params==IO_NONLINEAR)||(params==IO_PLANAR)) // Modified by Tapas Sahoo
+
+4. In mc_input.cc, line 194
+        else if (params == IO_LINEARROTORS) //Added by Tapas Sahoo
+          MCAtom[type].molecule = 4;
+
+5. In mc_input.cc, line 202
+           if ((MCAtom[type].molecule == 1)||(MCAtom[type].molecule == 2)||(MCAtom[type].molecule == 3)||(MCAtom[type].molecule == 4))//Modified by Tapas Sahoo
+
+6. In mc_setup.cc, 389
+      if ((MCAtom[type].molecule == 1)||(MCAtom[type].molecule == 2)||(MCAtom[type].molecule == 3)||(MCA||(MCAtom[type].molecule == 4))//Modified by Tapas Sahoo
+
+7. In mc_setup.cc, line 468
+    if ((MCAtom[type].molecule == 1) || (MCAtom[type].molecule == 2)|| (MCAtom[type].molecule == 3)||(MCAtom[type].molecule == 4)) nmolcs += MCAtom[type].numb;//Modified by Tapas Sahoo 
+
+8. In mc_setup.cc, line 514
+    if ((MCAtom[type].molecule == 1) || (MCAtom[type].molecule == 2)|| (MCAtom[type].molecule == 3)||(MCAtom[type].molecule == 4 ))//Modified by Tapas Sahoo
+
+9. In mc_poten.cc, line 98
+    if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)||(MCAtom[atype].molecule == 4))                            // molecules //Modified by Tapas Sahoo
+
+//10. In mc_poten.cc, line 112
+//	if(MCAtom[atype].molecule == 4)
+//	  init_pot2D(atype); //Added by Tapas Sahoo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. In makefile I have added vh2h2.o 
+
+pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_tip4p_gg.o omprng.o rngstream.o vh2h2.o
+
+2. In mc_piqmc.cc, I have added the following subroutine
+//vh2h2 ---> potential H2-H2: added by Tapas Sahoo
+extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *th1, double *th2, double *phi, double *potl)
+
