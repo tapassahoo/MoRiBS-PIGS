@@ -7,14 +7,14 @@
 
 MASTERDIR        ./
 OUTPUTDIR        ./results/
-FILENAMEPREFIX   pigs2.50K #pigs
+FILENAMEPREFIX   pigs0.50K #pigs
 
 #-------  SYSTEM -----------
 
 DIMENSION     3 
 # in the multicomponent system:  the total density for all atoms (molecules excluded)                    
 DENSITY       0.02      #  Angstrom^-3  Used to define the BoxLength
-TEMPERATURE   2.5       #  Kelvin, for a PIGS simulation, this sets the value of beta
+TEMPERATURE   0.5       #  Kelvin, for a PIGS simulation, this sets the value of beta
 
 # LIMITATION:  only one molecular impurity! 
 
@@ -33,7 +33,7 @@ LINEARROTORS  H2 2   BOLTZMANN    0.08  1   h2n2org    PRIMITIVE   #
 # parameters for rotational degrees of freedom of molecules, one line per molecule
 #         [type]  [MC steps for orient df]  [Number of time slices for rotations]
 
-ROTATION   H2    0.3   129 #513
+ROTATION   H2    0.3   201 #513
 
 # parameters for the worm algorithm (C is redefined) 
 #        [type]  [C]   [~m should be < NUMBEROFSLICES > 1]
@@ -48,10 +48,10 @@ ROTATION   H2    0.3   129 #513
 
 #-------- MC PARAMETERS ----
 
-NUMBEROFSLICES     129  #513           #  number of time slices
+NUMBEROFSLICES     201  #513           #  number of time slices
 
 NUMBEROFPASSES     1000       #  number of passes per block
-NUMBEROFBLOCKS     1000  0  #5000 0      #  number of blocks and number of equil blocks
+NUMBEROFBLOCKS     2000  0  #5000 0      #  number of blocks and number of equil blocks
 
 # number of MC steps to skip (mc_setup)
 
