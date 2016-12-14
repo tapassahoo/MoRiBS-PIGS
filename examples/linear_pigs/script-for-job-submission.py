@@ -5,7 +5,15 @@ import time
 from subprocess import call
 from os import system
 import os
+import decimal
  
+
+def dropzeros(number):
+    mynum = decimal.Decimal(number).normalize()
+    # e.g 22000 --> Decimal('2.2E+4')
+    return mynum.__trunc__() if not mynum % 1 else float(mynum)
+
+
 def bconstant():
 	'''
 	This function calculates rotational Bconstant for linear rotor
@@ -14,6 +22,7 @@ def bconstant():
 	energyj1      = -35999.1009407
 	bconst        = 0.5*(energyj1-energyj0)     # in cm^-1
 	return bconst
+
 
 def replace(string_old, string_new, file1, file2):
 	'''
@@ -26,6 +35,7 @@ def replace(string_old, string_new, file1, file2):
 	f1.close()
 	f2.close()
 
+
 def beads(tau,temperature):
 	'''
 	This function determins number of beads
@@ -36,6 +46,7 @@ def beads(tau,temperature):
 	if (numbbeads2 % 2 == 0):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
+
 
 def jobstring(file_name,value):
 	'''
@@ -57,6 +68,7 @@ def jobstring(file_name,value):
 	print job_string
 	return job_string
 
+
 def modify_input(temperature,numbbeads,numbblocks,distance):
 	'''
 	This function modifies parameters in qmc1.input
@@ -67,6 +79,7 @@ def modify_input(temperature,numbbeads,numbblocks,distance):
 	replace("distance_input", str(distance), "qmc4.input", "qmc.input")
 	call(["rm", "qmc2.input", "qmc3.input", "qmc4.input"])
 
+
 def rotmat(molecule,temperature,numbbeads):
 	'''
 	This function generates rotational density matrics .rot
@@ -74,15 +87,9 @@ def rotmat(molecule,temperature,numbbeads):
 	param2  = "%3.2f" % temperature
 	command_linden_run = "../../../linear_prop/linden.x "+str(param2)+" "+str(numbbeads)+" "+str(bconstant())+" 1500 -1"
 	system(command_linden_run)
-
-	if (i == 4 or i == 8 ):
-		param1 = "%d" % temperature
-		file_rotdens = molecule+"_T"+str(param1)+"t"+str(numbbeads)+".rot"
-	else:
-		file_rotdens = molecule+"_T"+str(temperature)+"t"+str(numbbeads)+".rot"
-
-	file_rotdens = molecule+"_T1t"+str(numbbeads)+".rot"
+	file_rotdens = molecule+"_T"+str(temperature)+"t"+str(numbbeads)+".rot"
 	call(["cp", "linden.out", file_rotdens])
+
 
 #generating linden.out
 path_enter_linden = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/"
@@ -116,6 +123,9 @@ for i in range(1, nr+1):
  
 	distance    = i*dr	
 	r_dis       = "%5.3f" % distance
+	temperature = dropzeros(temperature)
+	print temperature
+	exit()
 	numbbeads   = beads(tau,temperature)
 	beta        =1.0/temperature
 	fldr        = "e0vsr"+str(r_dis)+"Angstrom"+str(numbbeads)+"beads"+str(numbblocks)+"blocks"
