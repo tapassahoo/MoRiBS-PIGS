@@ -1,0 +1,575 @@
+
+MasterDir   ./
+OutPut   ./results/
+File Name Prefix   pigs2.50K
+Temperature 1
+Density  0.02
+DIM = 3
+    H2        2   MCAtom[type].molecule   4
+ BOLTZMANN     0.08        1   h2n2org   PRIMITIVE   
+Total number of atoms  2
+Total number of types  1
+
+ROTATION
+Rotational step:           0.3
+Number of Rotational Slices = 33
+Rotational Density Type = 0
+RotOdEvn = 0
+Rotational Energy Estimator offset = 0CM-1
+Rotational Constants (CM-1) :0 0 0
+RS / Noya: 1
+
+NONLINEAR DOPANT SPHERICAL TREATMENT: 0
+Number of Slices = 33
+Number of Passes = 2
+Number of Blocks = 2   0
+Initial Block No.= 0
+
+
+Number of steps to skip to save ACCEPT RATIO   1
+Number of steps to skip to save ACCUML AVERG   1
+Number of steps to skip to evaluate AVERAGES   1
+Intermolecular distance   1.05779
+
+
+
+
+in initLattice
+abox=3.68403 4.64159
+0 0 -0.478779
+0 1 -0.478779
+0 2 -0.478779
+33 0 -0.478779
+33 1 -0.478779
+33 2 3.20525
+initial MCCoords -0.478779
+NThreads=24 chunksize=1
+OpenMP version: 201307
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:       1         H2       -nan       -nan      Rot: 0.727273   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:       2         H2       -nan       -nan      Rot: 0.818182   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:       3         H2       -nan       -nan      Rot: 0.868687   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.998931.05779
+    1.99893
+BLOCK:       1   PASS:       1   STEP:       4         H2       -nan       -nan      Rot: 0.871212   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:       5         H2       -nan       -nan      Rot: 0.884848   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:       6         H2       -nan       -nan      Rot:  0.89899   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.057791.05779        1.99893
+1.99893
+BLOCK:       1   PASS:       1   STEP:       7         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779TAPAS SAHOO line 941 in mc_estim.cc      1.99893
+1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:       8         H2       -nan       -nan      Rot: 0.912879   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       1   STEP:       9         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       1   STEP:      10         H2       -nan       -nan      Rot:  0.90303   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      11         H2       -nan       -nan      Rot: 0.903581   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      12         H2       -nan       -nan      Rot:  0.90404   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      13         H2       -nan       -nan      Rot: 0.899767   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      14         H2       -nan       -nan      Rot: 0.900433   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      15         H2       -nan       -nan      Rot:  0.90101   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       1   STEP:      16         H2       -nan       -nan      Rot: 0.907197   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      17         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      18         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      19         H2       -nan       -nan      Rot: 0.905901   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      20         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      21         H2       -nan       -nan      Rot: 0.910534   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      22         H2       -nan       -nan      Rot: 0.914601   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      23         H2       -nan       -nan      Rot: 0.916996   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      24         H2       -nan       -nan      Rot: 0.919192   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      25         H2       -nan       -nan      Rot:     0.92   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      26         H2       -nan       -nan      Rot: 0.918415   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      27         H2       -nan       -nan      Rot: 0.916947   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.057791.99893    
+1.99893
+BLOCK:       1   PASS:       1   STEP:      28         H2       -nan       -nan      Rot: 0.917749   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      29         H2       -nan       -nan      Rot: 0.915361   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       1   STEP:      30         H2       -nan       -nan      Rot: 0.914141   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.057791.99893    
+1.99893
+BLOCK:       1   PASS:       1   STEP:      31         H2       -nan       -nan      Rot: 0.913001   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       1   STEP:      32         H2       -nan       -nan      Rot: 0.911932   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.998931.99893
+
+BLOCK:       1   PASS:       1   STEP:      33         H2       -nan       -nan      Rot: 0.911846   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      34         H2       -nan       -nan      Rot: 0.909982   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      35         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      36         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      37         H2       -nan       -nan      Rot: 0.911548   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      38         H2       -nan       -nan      Rot: 0.913078   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      39         H2       -nan       -nan      Rot: 0.913753   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      40         H2       -nan       -nan      Rot: 0.913636   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      41         H2       -nan       -nan      Rot: 0.913525   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      42         H2       -nan       -nan      Rot: 0.914863   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      43         H2       -nan       -nan      Rot: 0.914729   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      44         H2       -nan       -nan      Rot: 0.915978   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      45         H2       -nan       -nan      Rot: 0.917172   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.057791.05779        1.998931.99893
+
+BLOCK:       1   PASS:       2   STEP:      46         H2       -nan       -nan      Rot: 0.916996   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      47         H2       -nan       -nan      Rot: 0.918117   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      48         H2       -nan       -nan      Rot: 0.915404   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      49         H2       -nan       -nan      Rot: 0.914657   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      50         H2       -nan       -nan      Rot: 0.914545   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      51         H2       -nan       -nan      Rot: 0.915033   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      52         H2       -nan       -nan      Rot: 0.916084   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      53         H2       -nan       -nan      Rot: 0.915952   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      54         H2       -nan       -nan      Rot: 0.915264   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      55         H2       -nan       -nan      Rot: 0.915702   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      56         H2       -nan       -nan      Rot: 0.915043   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      57         H2       -nan       -nan      Rot:  0.91547   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      58         H2       -nan       -nan      Rot: 0.913271   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      59         H2       -nan       -nan      Rot: 0.913713   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.998931.05779
+    1.99893
+BLOCK:       1   PASS:       2   STEP:      60         H2       -nan       -nan      Rot: 0.914646   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.057791.99893    
+1.99893
+BLOCK:       1   PASS:       2   STEP:      61         H2       -nan       -nan      Rot: 0.915052   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      62         H2       -nan       -nan      Rot: 0.915445   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      63         H2       -nan       -nan      Rot: 0.915344   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      64         H2       -nan       -nan      Rot: 0.913826   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       1   PASS:       2   STEP:      65         H2       -nan       -nan      Rot: 0.913753   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       1   PASS:       2   STEP:      66         H2       -nan       -nan      Rot: 0.913682   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:       1         H2       -nan       -nan      Rot: 0.878788   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.998931.05779
+    1.99893
+BLOCK:       2   PASS:       1   STEP:       2         H2       -nan       -nan      Rot: 0.924242   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       1   STEP:       3         H2       -nan       -nan      Rot:  0.89899   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:       4         H2       -nan       -nan      Rot: 0.886364   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:       5         H2       -nan       -nan      Rot:  0.90303   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:       6         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:       7         H2       -nan       -nan      Rot:  0.91342   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:       8         H2       -nan       -nan      Rot: 0.924242   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:       9         H2       -nan       -nan      Rot: 0.925926   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       1   STEP:      10         H2       -nan       -nan      Rot: 0.933333   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      11         H2       -nan       -nan      Rot:  0.92562   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      12         H2       -nan       -nan      Rot: 0.924242   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      13         H2       -nan       -nan      Rot: 0.918415   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      14         H2       -nan       -nan      Rot: 0.917749   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      15         H2       -nan       -nan      Rot: 0.919192   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      16         H2       -nan       -nan      Rot: 0.914773   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       1   STEP:      17         H2       -nan       -nan      Rot: 0.910873   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      18         H2       -nan       -nan      Rot: 0.912458   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       1   STEP:      19         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    TAPAS SAHOO line 941 in mc_estim.cc  1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      20         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.998931.99893
+
+BLOCK:       2   PASS:       1   STEP:      21         H2       -nan       -nan      Rot: 0.910534   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       1   STEP:      22         H2       -nan       -nan      Rot: 0.910468   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      23         H2       -nan       -nan      Rot: 0.911726   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    TAPAS SAHOO line 941 in mc_estim.cc  1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      24         H2       -nan       -nan      Rot: 0.911616   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.998931.05779
+    1.99893
+BLOCK:       2   PASS:       1   STEP:      25         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.998931.05779
+    1.99893
+BLOCK:       2   PASS:       1   STEP:      26         H2       -nan       -nan      Rot: 0.911422   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      27         H2       -nan       -nan      Rot: 0.914703   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      28         H2       -nan       -nan      Rot: 0.914502   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      29         H2       -nan       -nan      Rot: 0.911181   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      30         H2       -nan       -nan      Rot: 0.912121   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.057791.05779        1.998931.99893
+
+BLOCK:       2   PASS:       1   STEP:      31         H2       -nan       -nan      Rot: 0.913978   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      32         H2       -nan       -nan      Rot: 0.912879   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       1   STEP:      33         H2       -nan       -nan      Rot: 0.912764   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      34         H2       -nan       -nan      Rot: 0.910873   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.998931.05779    
+1.99893
+BLOCK:       2   PASS:       2   STEP:      35         H2       -nan       -nan      Rot: 0.911688   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      36         H2       -nan       -nan      Rot: 0.912458   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       2   STEP:      37         H2       -nan       -nan      Rot: 0.913186   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      38         H2       -nan       -nan      Rot: 0.913078   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      39         H2       -nan       -nan      Rot: 0.912199   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       2   STEP:      40         H2       -nan       -nan      Rot: 0.910606   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      41         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      42         H2       -nan       -nan      Rot: 0.907648   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      43         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      44         H2       -nan       -nan      Rot:  0.90978   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      45         H2       -nan       -nan      Rot: 0.910438   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      46         H2       -nan       -nan      Rot:  0.90975   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      47         H2       -nan       -nan      Rot: 0.911025   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      48         H2       -nan       -nan      Rot:  0.90846   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      49         H2       -nan       -nan      Rot: 0.908472   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      50         H2       -nan       -nan      Rot: 0.908485   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      51         H2       -nan       -nan      Rot: 0.909685   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      52         H2       -nan       -nan      Rot: 0.910839   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.057791.05779        1.998931.99893
+
+BLOCK:       2   PASS:       2   STEP:      53         H2       -nan       -nan      Rot: 0.911378   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      54         H2       -nan       -nan      Rot: 0.911897   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       2   STEP:      55         H2       -nan       -nan      Rot: 0.912397   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.057791.05779        1.998931.99893
+
+BLOCK:       2   PASS:       2   STEP:      56         H2       -nan       -nan      Rot: 0.911797   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       2   STEP:      57         H2       -nan       -nan      Rot: 0.911217   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    TAPAS SAHOO line 941 in mc_estim.cc  1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      58         H2       -nan       -nan      Rot: 0.910136   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      59         H2       -nan       -nan      Rot: 0.910118   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      60         H2       -nan       -nan      Rot: 0.910606   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      61         H2       -nan       -nan      Rot: 0.909091   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      62         H2       -nan       -nan      Rot: 0.908113   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      63         H2       -nan       -nan      Rot: 0.908129   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      64         H2       -nan       -nan      Rot: 0.907197   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.05779    1.99893
+1.99893
+BLOCK:       2   PASS:       2   STEP:      65         H2       -nan       -nan      Rot: 0.907226   
+TAPAS SAHOO line 808 in mc_estim.cc  1.05779    1.99893
+TAPAS SAHOO line 941 in mc_estim.cc  TAPAS SAHOO line 941 in mc_estim.cc  1.05779    1.99893
+1.05779    1.99893
+BLOCK:       2   PASS:       2   STEP:      66         H2       -nan       -nan      Rot: 0.907254   

@@ -803,7 +803,11 @@ double GetPotEnergy_Densities(void)
 					double phi = DihedralAngle;
 	
 					//Dihedral angle calculation is completed here
+#ifdef GETPOT
+                    double rd = Distance/Units.bohr;
+#else 
 					double rd = r/Units.bohr;
+#endif
 					vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
 					spot_pair += potl;
 				}
@@ -931,7 +935,11 @@ double GetTotalEnergy(void)
 					double phi = DihedralAngle;
 	
 					//Dihedral angle calculation is completed here
+#ifdef GETPOT
+                    double rd = Distance/Units.bohr;
+#else 
 					double rd = r/Units.bohr;
+#endif
 					vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
 					spot_pair += potl;
 				}

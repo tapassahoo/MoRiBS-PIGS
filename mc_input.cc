@@ -62,6 +62,9 @@ const char IO_MCSKIP_AVERG[]   = "MCSKIP_AVERG";
 const char STATUS_STARTBLOCK[] = "STARTBLOCK";
 
 //--------------------------------------------------
+#ifdef VPOTTWOLINEARROTORS
+const char IO_DISTANCE[]       = "DISTANCE";
+#endif
 
 string MasterDir;
 string OutputDir;
@@ -334,6 +337,13 @@ void IOReadParams(const char in_file[],int & mc_status)
         inf >> MCSKIP_AVERG;
      } 
      else
+#ifdef GETPOT
+     if (params==IO_DISTANCE)
+     {
+        inf >> Distance;
+     } 
+     else
+#endif
      {}
 
      getline(inf,params,'\n');  // skip comments at the end of the line 
@@ -476,6 +486,9 @@ void IOReadParams(const char in_file[],int & mc_status)
    cout << "Number of steps to skip to save ACCEPT RATIO" << BLANK << MCSKIP_RATIO << endl;
    cout << "Number of steps to skip to save ACCUML AVERG" << BLANK << MCSKIP_TOTAL << endl;
    cout << "Number of steps to skip to evaluate AVERAGES" << BLANK << MCSKIP_AVERG << endl;
+#ifdef GETPOT
+   cout << "Intermolecular distance" << BLANK << Distance << endl;
+#endif
 
    cout << endl;
    cout << endl;

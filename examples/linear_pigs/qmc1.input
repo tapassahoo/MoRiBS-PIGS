@@ -7,7 +7,7 @@
 
 MASTERDIR        ./
 OUTPUTDIR        ./results/
-FILENAMEPREFIX   filename_input #pigs
+FILENAMEPREFIX   pigs
 
 #-------  SYSTEM -----------
 
@@ -59,3 +59,4 @@ MCSKIP_RATIO     10000        # to save information regarding accept ratio
 MCSKIP_TOTAL     10000        # to save accumulated average
 MCSKIP_AVERG     1000           # to evaluate averages
 #BLOCKSKIP_2D	 2	      # skipped blocks to save 2D densities
+DISTANCE         distance_input

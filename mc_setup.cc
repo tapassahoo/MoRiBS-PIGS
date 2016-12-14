@@ -39,6 +39,11 @@ int     NUMB_MOLCTYPES = 0;  // total number of molecules types
  
 int     NDIM;
 double  Temperature;
+
+#ifdef GETPOT
+double Distance;
+#endif
+
 double  Density;
 double  BoxSize;
 
