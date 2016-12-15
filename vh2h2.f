@@ -51,7 +51,7 @@ c --- test for R outside spline endpoints.
 
       if (r.le.4.210625d0) then
 
-         write (7, 6009)
+c         write (7, 6009)
 6009     format ('warning 6009 in VH2H2: R smaller than recommended')
 
          do i=1, 3

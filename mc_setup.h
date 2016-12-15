@@ -38,6 +38,9 @@ extern int     NUMB_MOLCTYPES; // total number of molecules types
 
 extern int     NDIM;
 extern double  Temperature;
+#ifdef GETPOT
+extern double  Distance;
+#endif
 extern double  Density;
 extern double  BoxSize;
 
@@ -155,6 +158,9 @@ extern int NThreads; // the number of threads as a global variable
 extern int MCSKIP_RATIO;     //  to save information regarding the accept ratio
 extern int MCSKIP_TOTAL;     //  to save accumulated average
 extern int MCSKIP_AVERG;     //  to evaluate averages
+#ifdef VPOTTWOLINEARROTORS
+extern int DISTANCE;     //  to evaluate averages
+#endif
 
 // MC move types
 const int MCMAXMOVES = 3;   // Max number of different types of MC moves
