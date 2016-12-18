@@ -18,9 +18,9 @@ def bconstant():
 	'''
 	This function calculates rotational Bconstant for linear rotor
 	'''
-	energyj0        = -36117.5942855
-	energyj1        = -35999.1009407
-	bconst          = 0.5*(energyj1-energyj0)     # in cm^-1
+	energyj0       = -36117.5942855
+	energyj1       = -35999.1009407
+	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
 	return bconst
 
 
@@ -28,8 +28,8 @@ def replace(string_old, string_new, file1, file2):
 	'''
 	This function replaces old string by new string
 	'''
-	f1               = open(file1, 'r')
-	f2               = open(file2, 'w')
+	f1             = open(file1, 'r')
+	f2             = open(file2, 'w')
 	for line in f1:
 		f2.write(line.replace(string_old, string_new))
 	f1.close()
@@ -40,33 +40,46 @@ def beads(tau,beta):
 	'''
 	This function determins number of beads
 	'''
-	numbbeads1      =beta/tau+1
-	numbbeads2      = int(round(numbbeads1,0))
+	numbbeads1     =beta/tau+1
+	numbbeads2     = int(round(numbbeads1,0))
 	if (numbbeads2 % 2 == 0):
-		numbbeads2  = numbbeads2 + 1
+		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
+def exact_value(tau,numbbeads):
+	'''
+	This function determins exact value of beta
+	'''
+	beta_exact     = tau*(numbbeads - 1)
+	return beta_exact
 
 def jobstring(file_name,value):
 	'''
 	This function creats jobstring for #PBS script
 	'''
-	job_name = "job_"+str(file_name)+"%5.3f" % value
-	walltime = "100:00:00"
-	processors = "nodes=1:ppn=12"
+	job_name       = "job_"+str(file_name)+"%5.3f" % value
+	walltime       = "100:00:00"
+	processors     = "nodes=1:ppn=12"
 	command_pimc_run = "./pimc"
 
-	job_string = """    #!/bin/bash
+	job_string     = """    #!/bin/bash
 	#PBS -N %s
 	#PBS -l walltime=%s
 	#PBS -l %s
 	#PBS -o %s.out
 	#PBS -e %s.err
+	export OMP_NUM_THREADS=12
 	cd $PBS_O_WORKDIR
 	%s""" % (job_name, walltime, processors, job_name, job_name, command_pimc_run)
 	print job_string
 	return job_string
 
+def outputstring2(temperature,beta,temperature_exact,beta_exact):
+	'''
+    This function creats jobstring for #PBS script
+	'''
+	output2 ="temperature = "+str(temperature)+", beta = "+str(beta)+", exact_temperature = "+str(temperature_exact)+", exact_beta = "+str(beta_exact)+"\n"
+	return output2
 
 def modify_input(temperature,numbbeads,numbblocks,distance):
 	'''
@@ -83,10 +96,11 @@ def rotmat(molecule,temperature,numbbeads):
 	'''
 	This function generates rotational density matrics .rot
 	'''
-	temperature1 = dropzeros(temperature)
+	#temperature1    = dropzeros(temperature)
+	temperature1    = "%5.3f" % temperature
 	command_linden_run = "../../../linear_prop/linden.x "+str(temperature)+" "+str(numbbeads)+" "+str(bconstant())+" 1500 -1"
 	system(command_linden_run)
-	file_rotdens = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["cp", "linden.out", file_rotdens])
 
 
@@ -103,35 +117,47 @@ call(["rm", "yw*"])
 molecule         = "H2"
 numbbeads 	     = 129
 numbblocks	     = 2000
-temperature	     = 0.5
-tau 		     = 0.005
+temperature	     = 10.0
+tau 		     = 0.01
 
 ntemp   	     = 10
 tempmin 	     = 0.0
 tempmax 	     = 2.5
 dtemp   	     = (tempmax - tempmin)/ntemp
 
-ntau    	     = 10
-dtau    	     = 0.001
+ntau    	     = 20
+dtau    	     = 0.01
 
 rmin             = 0.0
 rmax             = 5.0
 nr               = 20
 dr               = (rmax-rmin)/nr
 
-dbeta            = 0.25
-nbeta            = 10
+dbeta            = 0.02
+nbeta            = 20
 
-src_path        = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+nrange           = ntau                          #change
+displacement     = dtau                          #change
+file1_name       = "e0vstau"                     #change
+file2_name       = "K-1"                          #change
+argument2        = "tau"                         #change
+
+fw = open("Input-parameters-tau.txt", "a")
 # Loop over your jobs
-for i in range(1, ntau+1):
-	tau          = i*dtau
-	r_dis        = "%5.3f" % tau
-	beta         =1.0/temperature
-	numbbeads    = beads(tau,beta)
-	print "tau = ", tau, " temperature = ", temperature," numbblocks = ", numbblocks, " numbbeads = ", numbbeads ," beta = " , beta
+for i in range(1, nrange+1): 
+ 
+	value = i*displacement          
+	r_dis        = "%5.3f" % value 
 
-	fldr         = "e0vstau"+str(r_dis)+"K-1"
+	beta         = 1.0/temperature #value                           #change
+#	temperature  = 1.0/beta                                         #change
+
+	numbbeads    = beads(tau,beta)
+	beta_exact   = exact_value(tau,numbbeads)
+	temperature_exact  = 1.0/beta_exact
+
+	fldr         = file1_name+r_dis+file2_name
 	folder_run   = fldr
 	call(["mkdir", folder_run])
 	call(["mkdir", "-p", folder_run+"/results"])
@@ -145,98 +171,26 @@ for i in range(1, ntau+1):
 	source_file  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"
 	call(["cp", source_file, dest_path])
 
-	argument1    = 0.0                          #change
-	modify_input(temperature,numbbeads,numbblocks,argument1)
+	argument1    = 0.0 #value                          #change
+	modify_input(temperature_exact,numbbeads,numbblocks,argument1)
 	source_file = src_path + "qmc.input"
 	call(["cp", source_file, dest_path])
      
 	# Write submit file for the current cycle
 	os.chdir(dest_path)
-	rotmat(molecule,temperature,numbbeads)
+	rotmat(molecule,temperature_exact,numbbeads)
 
     #job submission
 	fname        = 'submit_'+str(i)
 	fwrite       = open(fname, 'w')
 
-	argument2    = "tau"                         #change
-	argument3    = tau                       #change
-	fwrite.write(jobstring(argument2, argument3))
+	fwrite.write(jobstring(argument2, value))
 
 	fwrite.close()
 	call(["qsub", fname])
 	os.chdir(src_path)
-'''
-for i in range(1, nr+1):
- 
-	distance     = i*dr	
-	r_dis        = "%5.3f" % distance
 
-	numbbeads    = beads(tau,temperature)
-	beta         = 1.0/temperature
-	fldr         = "e0vsr"+str(r_dis)+"Angstrom"+str(numbbeads)+"beads"+str(numbblocks)+"blocks"
-	folder_run   = fldr
-	call(["mkdir", folder_run])
-	call(["mkdir", "-p", folder_run+"/results"])
+#	fw.write(outputstring1(tau,numbblocks,numbbeads))
+	fw.write(outputstring2(temperature,beta,temperature_exact,beta_exact))
 
-	# copy files to running folder
-	dest_path    = src_path +folder_run
-	source_file  = src_path + "h2n2ogr.pot"
-	call(["cp", source_file, dest_path])
-	source_file  = src_path + "xyz.init"
-	call(["cp", source_file, dest_path])
-
-	modify_input(temperature,numbbeads,numbblocks,distance)
-	source_file = src_path + "qmc.input"
-	call(["cp", source_file, dest_path])
-     
-	# Write submit file for the current cycle
-	os.chdir(dest_path)
-	rotmat(molecule,temperature,numbbeads)
-
-    #job submission
-	fname        = 'submit_'+str(i)
-	fwrite       = open(fname, 'w')
-	myfile       = "dist"
-	fwrite.write(jobstring(myfile,distance))
-	fwrite.close()
-	call(["qsub", fname])
-	os.chdir(src_path)
-
-
-'''
-'''
-for i in range(1, ntemp+1):
- 
-	temperature = i*dtemp	
-#	tau=i*dtau
-	numbbeads = beads(tau,temperature)
-	beta=1.0/temperature
-	fldr = "e0vsbeta"+str(beta)+"beta"+str(numbbeads)+"beads"+str(numbblocks)+"blocks"
-
-	# create folder for run pimc 
-#	folder_run = fldr+"%3.2fK" % temperature
-	folder_run = fldr
-	call(["mkdir", folder_run])
-	call(["mkdir", "-p", folder_run+"/results"])
-
-	# copy files to running folder
-	dest_path = src_path +folder_run
-	source_file  = src_path + "h2n2ogr.pot"
-	call(["cp", source_file, dest_path])
-	source_file  = src_path + "xyz.init"
-	call(["cp", source_file, dest_path])
-
-	source_file  = src_path + "qmc.input"
-	call(["cp", source_file, dest_path])
-     
-	# Write submit file for the current cycle
-	os.chdir(dest_path)
-
-    #job submission
-	fname = 'submit_'+str(i)
-	fwrite = open(fname, 'w')
-	fwrite.write(jobstring(temperature))
-	fwrite.close()
-	call(["qsub", fname])
-	os.chdir(src_path)
-'''
+fw.close()

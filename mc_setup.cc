@@ -195,6 +195,7 @@ void MCSetUnits(void)
   Units.mass        = 1.0;   // amu
 #ifdef VPOTTWOLINEARROTORS
   Units.bohr        = 0.529177249; //bohr to Angstrom
+  Units.kelvin      = 0.695;        // kelvin to cm^-1
 #endif
   Units.mass        = 1.0;   // amu
 
