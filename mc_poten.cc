@@ -552,7 +552,7 @@ void init_rotdens(int type)
 #ifndef VPOTTWOLINEARROTORS
     stringstream temp; temp << Temperature*Units.temperature; // temperature
 #else
-    stringstream temp; temp << std::fixed << std::setprecision(2)<<Temperature*Units.temperature; // temperature
+    stringstream temp; temp << std::fixed << std::setprecision(3)<<Temperature*Units.temperature; // temperature
 #endif
 
     fname += ("_T" + temp.str() + "t" + time.str()); 

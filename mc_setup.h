@@ -209,6 +209,7 @@ typedef struct TSystemOfUnits
 // double time;
 #ifdef VPOTTWOLINEARROTORS
    double bohr;
+   double kelvin;
 #endif
    string slength;
    string senergy;

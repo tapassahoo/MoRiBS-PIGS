@@ -436,7 +436,9 @@ int main(int argc, char *argv[])
                        bc.fill('0');
                        bc<<blockCount;
                        string fname = MCFileName + bc.str();  // file name prefix including block #
+#ifndef VPOTTWOLINEARROTORSIO
                        IOxyzAng(IOWrite,fname.c_str());
+#endif
                        PrintXYZprl = 0;
                     }
                  }
@@ -772,7 +774,7 @@ void MCSaveBlockAverages(long int blocknumb)
       SaveDensities1D    (fname.c_str(),avergCount);       
       SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
     }
-#ifdef VPOTTWOLINEARROTORS
+#ifndef VPOTTWOLINEARROTORSIO
     if( IMPURITY && MCAtom[IMTYPE].molecule == 4)
     {
       SaveDensities1D    (fname.c_str(),avergCount);       
@@ -792,8 +794,10 @@ void MCSaveBlockAverages(long int blocknumb)
       // IOxyzAng(IOWrite,fname.c_str());
     }
 
+#ifndef VPOTTWOLINEARROTORSIO
   if (ROTATION) 
     SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
+#endif
 
   SaveEnergy         (MCFileName.c_str(),avergCount,blocknumb);
 

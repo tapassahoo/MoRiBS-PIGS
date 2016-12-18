@@ -809,7 +809,7 @@ double GetPotEnergy_Densities(void)
 					double rd = r/Units.bohr;
 #endif
 					vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-					spot_pair += potl;
+					spot_pair += potl/Units.kelvin;
 				}
 			}     
 #endif
@@ -941,7 +941,7 @@ double GetTotalEnergy(void)
 					double rd = r/Units.bohr;
 #endif
 					vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-					spot_pair += potl;
+					spot_pair += potl/Units.kelvin;
 				}
 			}     
 	// cout<<"in GetPotDensity"<<" _gr1D[0][80]="<<_gr1D[0][80]<<" _gr1D_sum[0][80]="<<_gr1D_sum[0][80]<<endl;
@@ -1182,7 +1182,7 @@ double GetPotEnergy(void)
 //Dihedral angle calculation is completed here
              double rd = r/Units.bohr;
             vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-           spot_pair += potl;
+           spot_pair += potl/Units.kelvin;
          }
 #endif
 //------------- [ATOM - ATOM] ------------------------------- 

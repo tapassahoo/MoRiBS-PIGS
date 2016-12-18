@@ -1464,7 +1464,7 @@ double PotEnergy(int atom0, double **pos)
 //Dihedral angle calculation is completed here
              double rd = r/Units.bohr;
             vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-           spot_pair += potl;
+           spot_pair += potl/Units.kelvin;
          }
 #endif
 //----------------------------------------------- 
@@ -2110,7 +2110,7 @@ double PotEnergy(int atom0, double **pos, int it)
 //Dihedral angle calculation is completed here
              double rd = r/Units.bohr;
             vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-           spot += potl;
+           spot += potl/Units.kelvin;
          }
 #endif
 //----------------------------------------------- 
@@ -2255,7 +2255,7 @@ double PotRotEnergy(int atom0,double ** cosine,int it)
 //Dihedral angle calculation is completed here
          double rd = r/Units.bohr;
          vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-         spot += potl;
+         spot += potl/Units.kelvin;
       }
 #else
           spot += (LPot2D(r,cost,type0));  
