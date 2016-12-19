@@ -14,29 +14,49 @@ def replace(string_old, string_new, file1, file2):
 	f1.close()
 	f2.close()
 
+def beads(tau,beta):
+	'''
+	This function determins number of beads
+	'''
+	numbbeads1     =beta/tau+1
+	numbbeads2     = int(round(numbbeads1,0))
+	if (numbbeads2 % 2 == 0):
+		numbbeads2 = numbbeads2 + 1
+	return numbbeads2
+
+def exact_value(tau,numbbeads):
+	'''
+	This function determins exact value of beta
+	'''
+	beta_exact     = tau*(numbbeads - 1)
+	return beta_exact
+
 #initial parameters for qmc.input
+temperature	     = 10.0
+tau 		     = 0.1
+
 ntau    	     = 20
 dtau    	     = 0.01
 
-rmin             = 0.0
-rmax             = 5.0
-nr               = 20
+rmin             = 3.0
+rmax             = 10.0
+nr               = 70
 dr               = (rmax-rmin)/nr
 
 dbeta            = 0.02
 nbeta            = 20
 
 src_path  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-nrange           = ntau                           #change
-displacement     = dtau                           #change
-file1_name       = "e0vstau"                      #change
-file2_name       = "K-1"                          #change
-fw = open("Energy-vs-tau.txt", "a")               #change
+nrange           = nr                          #change
+displacement     = dr                          #change
+file1_name       = "e0vsr"                      #change
+file2_name       = "Angstrom"                          #change
+fw = open("Energy-vs-distance-4-molecule.txt", "a")               #change
 
 # Loop over your jobs
 for i in range(1, nrange+1): 
  
-	value = i*displacement          
+	value = rmin + i*displacement                      #change
 	r_dis        = "%5.3f" % value 
 
 	fldr         = file1_name+r_dis+file2_name
@@ -64,7 +84,16 @@ for i in range(1, nrange+1):
 
 	os.chdir(src_path)
 
-	fw.write(str1)
+####################################################
+	beta         = 1.0/temperature #value                           #change
+#	temperature  = 1.0/beta                                         #change
+
+	numbbeads    = beads(tau,beta)                                  #change
+	beta_exact   = exact_value(tau,numbbeads)
+	temperature_exact  = 1.0/beta_exact
+####################################################
+
+	fw.write(str(numbbeads)+"  "+str(temperature_exact)+"   "+str(beta)+"  "+str1)
 	fr.close()
 
 fw.close()

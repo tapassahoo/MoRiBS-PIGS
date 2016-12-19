@@ -22,6 +22,7 @@
       sum22var=sum2var/float(nn)
       dev1=sqrt(sum11var-sum11*sum11)
       dev2=sqrt(sum22var-sum22*sum22)
-      write(2,*)nn,param1,sum11,sum22,dev1/float(nn),dev2/float(nn)
+      write(2,*)nn,param1,sum11,sum22,
+     & dev1/sqrt(float(nn)),dev2/sqrt(float(nn))
       stop
       end

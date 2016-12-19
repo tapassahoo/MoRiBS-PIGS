@@ -115,10 +115,9 @@ os.chdir(path_exit_linden)
 #initial parameters for qmc.input
 call(["rm", "yw*"])
 molecule         = "H2"
-numbbeads 	     = 129
 numbblocks	     = 2000
 temperature	     = 10.0
-tau 		     = 0.01
+tau 		     = 0.1
 
 ntemp   	     = 10
 tempmin 	     = 0.0
@@ -128,32 +127,32 @@ dtemp   	     = (tempmax - tempmin)/ntemp
 ntau    	     = 20
 dtau    	     = 0.01
 
-rmin             = 0.0
-rmax             = 5.0
-nr               = 20
+rmin             = 3.0
+rmax             = 10.0
+nr               = 70
 dr               = (rmax-rmin)/nr
 
 dbeta            = 0.02
 nbeta            = 20
 
 src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-nrange           = ntau                          #change
-displacement     = dtau                          #change
-file1_name       = "e0vstau"                     #change
-file2_name       = "K-1"                          #change
-argument2        = "tau"                         #change
+nrange           = nr                          #change
+displacement     = dr                          #change
+file1_name       = "e0vsr"                     #change
+file2_name       = "Angstrom"                  #change
+argument2        = "dist"                       #change
 
-fw = open("Input-parameters-tau.txt", "a")
+fw = open("Input-parameters-dist.txt", "a")    #change
 # Loop over your jobs
 for i in range(1, nrange+1): 
  
-	value = i*displacement          
-	r_dis        = "%5.3f" % value 
+	value = rmin + i*displacement          
+	r_dis        = "%5.3f" % value
 
 	beta         = 1.0/temperature #value                           #change
 #	temperature  = 1.0/beta                                         #change
 
-	numbbeads    = beads(tau,beta)
+	numbbeads    = beads(tau,beta)                                  #change
 	beta_exact   = exact_value(tau,numbbeads)
 	temperature_exact  = 1.0/beta_exact
 
@@ -171,7 +170,7 @@ for i in range(1, nrange+1):
 	source_file  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"
 	call(["cp", source_file, dest_path])
 
-	argument1    = 0.0 #value                          #change
+	argument1    = value                          #change
 	modify_input(temperature_exact,numbbeads,numbblocks,argument1)
 	source_file = src_path + "qmc.input"
 	call(["cp", source_file, dest_path])

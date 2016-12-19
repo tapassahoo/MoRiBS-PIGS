@@ -2,6 +2,9 @@
 *.o
 #ignore executable
 pimc
+bb
+fort.*
+*.txt
 #ignore
 /examples/linear_pigs/results/*
 !/examples/linear_pigs/results/
