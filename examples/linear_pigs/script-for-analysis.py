@@ -33,30 +33,31 @@ def exact_value(tau,numbbeads):
 
 #initial parameters for qmc.input
 temperature	     = 10.0
-tau 		     = 0.1
+tau 		     = 0.001
 
-ntau    	     = 20
-dtau    	     = 0.01
+ntau    	     = 10
+dtau    	     = 0.001
 
 rmin             = 3.0
 rmax             = 10.0
 nr               = 70
 dr               = (rmax-rmin)/nr
 
-dbeta            = 0.02
-nbeta            = 20
+dbeta            = 0.002
+nbeta            = 100
 
 src_path  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-nrange           = nr                          #change
-displacement     = dr                          #change
-file1_name       = "e0vsr"                      #change
-file2_name       = "Angstrom"                          #change
-fw = open("Energy-vs-distance-4-molecule.txt", "a")               #change
+nrange           = ntau                                          #change
+displacement     = dtau                                          #change
+file1_name       = "e0vstau"                                     #change
+file2_name       = "K-1"                                          #change
+fw = open("Energy-vs-tau-2-molecules-beta0.1.txt", "a")                  #change
+value_min        = 0.0                                            #change
 
 # Loop over your jobs
 for i in range(1, nrange+1): 
  
-	value = rmin + i*displacement                      #change
+	value = value_min + i*displacement                                
 	r_dis        = "%5.3f" % value 
 
 	fldr         = file1_name+r_dis+file2_name
@@ -85,7 +86,7 @@ for i in range(1, nrange+1):
 	os.chdir(src_path)
 
 ####################################################
-	beta         = 1.0/temperature #value                           #change
+	beta         = 1.0/temperature #value                    #change
 #	temperature  = 1.0/beta                                         #change
 
 	numbbeads    = beads(tau,beta)                                  #change
@@ -93,7 +94,10 @@ for i in range(1, nrange+1):
 	temperature_exact  = 1.0/beta_exact
 ####################################################
 
-	fw.write(str(numbbeads)+"  "+str(temperature_exact)+"   "+str(beta)+"  "+str1)
+	argu1        = "%7d" % numbbeads
+	argu2        = "%7.5f" % temperature_exact
+	argu3        = "%7.5f" % beta
+	fw.write(argu1+"   "+"   "+argu2+"   "+argu3+"  "+str1)
 	fr.close()
 
 fw.close()

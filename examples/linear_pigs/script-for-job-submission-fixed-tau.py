@@ -46,19 +46,12 @@ def beads(tau,beta):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
-def exact_value_beta(tau,numbbeads):
+def exact_value(tau,numbbeads):
 	'''
 	This function determins exact value of beta
 	'''
 	beta_exact     = tau*(numbbeads - 1)
 	return beta_exact
-
-def exact_value_tau(beta,numbbeads):
-	'''
-	This function determins exact value of beta
-	'''
-	tau_exact     = beta/(numbbeads - 1)
-	return tau_exact
 
 def jobstring(file_name,value):
 	'''
@@ -75,24 +68,23 @@ def jobstring(file_name,value):
 	#PBS -l %s
 	#PBS -o %s.out
 	#PBS -e %s.err
-	export OMP_NUM_THREADS=16
+	export OMP_NUM_THREADS=12
 	cd $PBS_O_WORKDIR
 	%s""" % (job_name, walltime, processors, job_name, job_name, command_pimc_run)
 	print job_string
 	return job_string
 
-def outputstring(numbbeads,tau,tau_exact,temperature,temperature_exact,beta,beta_exact):
+def outputstring2(numbbeads,tau,temperature,beta,temperature_exact,beta_exact):
 	'''
-    This function gives us the exact values of the agruments
+    This function creats jobstring for #PBS script
 	'''
-	argu1          = "%7d"   % numbbeads
+	argu1          = "%7d" % numbbeads
 	argu2          = "%5.3f" % tau
-	argu3          = "%5.3f" % tau_exact
-	argu4	       = "%7.5f" % temperature
+	argu3	       = "%7.5f" % temperature
+	argu4	       = "%7.5f" % beta
 	argu5	       = "%7.5f" % temperature_exact
-	argu6	       = "%7.5f" % beta
-	argu7	       = "%7.5f" % beta_exact
-	output2 ="numbbeads = "+argu1+", tau = "+argu2+", exact_tau = "+argu3+", temperature = "+argu4+", exact_temperature = "+argu5+", beta = "+argu6+", exact_beta = "+argu7+"\n"
+	argu6	       = "%7.5f" % beta_exact
+	output2 ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+", beta = "+argu4+", exact_temperature = "+argu5+", exact_beta = "+argu6+"\n"
 	return output2
 
 def modify_input(temperature,numbbeads,numbblocks,distance):
@@ -139,7 +131,7 @@ tempmax 	     = 2.5
 dtemp   	     = (tempmax - tempmin)/ntemp
 
 ntau    	     = 20
-dtau    	     = 0.001
+dtau    	     = 0.01
 
 rmin             = 3.0
 rmax             = 10.0
@@ -150,29 +142,27 @@ dbeta            = 0.002
 nbeta            = 100
 
 src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-nrange           = ntau                                             #change
-displacement     = dtau                                             #change
-file1_name       = "e0vstau"                                        #change
-file2_name       = "K-1"                                            #change
-argument2        = "tau"                                            #change
-value_min        = 0.0                                              #change
+nrange           = nbeta                                    #change
+displacement     = dbeta                                    #change
+file1_name       = "newe0vsbeta"                               #change
+file2_name       = "K-1"                                    #change
+argument2        = "beta"                                   #change
+value_min        = 0.0                                      #change
 
-fw = open("Input-parameters-tau-2-molecule-beta0.1.txt", "a")      #change
+fw = open("Input-parameters-beta-2-molecule-tau0.001.txt", "a")      #change
 # Loop over your jobs
-for i in range(11, nrange+1): 
+for i in range(1, nrange+1): 
  
 	value = value_min + i*displacement          
 	r_dis        = "%5.3f" % value
 
-	tau          = value                                           #change
-	beta         = 1.0/temperature    #value                       #change
-#	temperature  = 1.0/beta                                        #change
+#	tau          = value                                    #change
+	beta         = value #1.0/temperature    #value         #change
+	temperature  = 1.0/beta                                 #change
 
 	numbbeads    = beads(tau,beta)                         
-	beta_exact   = exact_value_beta(tau,numbbeads)
-#
-	temperature_exact  = 1.0/beta_exact                            
-	tau_exact    = exact_value_tau(beta_exact,numbbeads)
+	beta_exact   = exact_value(tau,numbbeads)
+	temperature_exact  = 1.0/beta_exact
 
 	fldr         = file1_name+r_dis+file2_name
 	folder_run   = fldr
@@ -189,15 +179,13 @@ for i in range(11, nrange+1):
 	call(["cp", source_file, dest_path])
 
 	argument1    = value        
-#	modify_input(temperature_exact,numbbeads,numbblocks,argument1)   #change
-	modify_input(temperature,numbbeads,numbblocks,argument1)
+	modify_input(temperature_exact,numbbeads,numbblocks,argument1)
 	source_file = src_path + "qmc.input"
 	call(["cp", source_file, dest_path])
      
 	# Write submit file for the current cycle
 	os.chdir(dest_path)
-#	rotmat(molecule,temperature_exact,numbbeads)                     #change
-	rotmat(molecule,temperature,numbbeads)
+	rotmat(molecule,temperature_exact,numbbeads)
 
     #job submission
 	fname        = 'submit_'+str(i)
@@ -209,6 +197,7 @@ for i in range(11, nrange+1):
 	call(["qsub", fname])
 	os.chdir(src_path)
 
-	fw.write(outputstring(numbbeads,tau,tau_exact,temperature,temperature_exact,beta,beta_exact))
+#	fw.write(outputstring1(tau,numbblocks,numbbeads))
+	fw.write(outputstring2(numbbeads,tau,temperature,beta,temperature_exact,beta_exact))
 
 fw.close()

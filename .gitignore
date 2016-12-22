@@ -10,6 +10,7 @@ fort.*
 !/examples/linear_pigs/results/
 /examples/linear_pigs/analyze.cc
 /examples/linear_pigs/yw001.*
-/examples/linear_pigs/#fort.7#
+/examples/linear_pigs/Input*
+/examples/linear_pigs/Enrgy*
 /examples/linear_pigs/*/
 !/examples/linear_pigs/
