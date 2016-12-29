@@ -66,13 +66,13 @@ def modify_input(njrot):
 
 #initial parameters for qmc.input
 src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/eigen-values-of-two-rotors/"
-nrange           = 5
+nrange           = 7
 displacement     = 1
 file1_name       = "result-rot-jrot"
 argument		 = "jrot"
 
 # Loop over your jobs
-for i in range(1, nrange+1): 
+for i in range(6, nrange+1): 
  
 	value        = i*displacement          
 	jrot         = "%d" % value
