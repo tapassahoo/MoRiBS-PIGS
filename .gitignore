@@ -16,3 +16,10 @@ fort.*
 !/examples/linear_pigs/
 #
 eigen-values-of-two-rotors/*/
+eigen-values-of-two-rotors/*txt
+eigen-values-of-two-rotors/vh2h2*
+eigen-values-of-two-rotors/*.o
+eigen-values-of-two-rotors/bb
+eigen-values-of-two-rotors/*err
+eigen-values-of-two-rotors/*out
+!eigen-values-of-two-rotors/

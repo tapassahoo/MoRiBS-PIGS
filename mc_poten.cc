@@ -549,7 +549,7 @@ void init_rotdens(int type)
     string  fname = MCAtom[type].type;
 
     stringstream time; time << NumbRotTimes;                  // number of time slices 
-#ifndef VPOTTWOLINEARROTORS
+#ifndef VPOTTWOLINEARROTORSIO
     stringstream temp; temp << Temperature*Units.temperature; // temperature
 #else
     stringstream temp; temp << std::fixed << std::setprecision(3)<<Temperature*Units.temperature; // temperature

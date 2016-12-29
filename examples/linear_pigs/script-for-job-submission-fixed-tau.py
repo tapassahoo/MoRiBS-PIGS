@@ -121,9 +121,9 @@ os.chdir(path_exit_linden)
 #initial parameters for qmc.input
 call(["rm", "yw*"])
 molecule         = "H2"
-numbblocks	     = 2000
+numbblocks	     = 10000
 temperature	     = 10.0
-tau 		     = 0.001
+tau 		     = 0.0005
 
 ntemp   	     = 10
 tempmin 	     = 0.0
@@ -138,18 +138,18 @@ rmax             = 10.0
 nr               = 70
 dr               = (rmax-rmin)/nr
 
-dbeta            = 0.002
+dbeta            = 0.001
 nbeta            = 100
 
 src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-nrange           = nbeta                                    #change
-displacement     = dbeta                                    #change
-file1_name       = "newe0vsbeta"                               #change
-file2_name       = "K-1"                                    #change
-argument2        = "beta"                                   #change
-value_min        = 0.0                                      #change
+nrange           = nbeta                                                                              #change
+displacement     = dbeta                                                                              #change
+file1_name       = "tau"+str(tau)+"blocks"+str(numbblocks)+"e0vsbeta"                                 #change
+file2_name       = "K-1"                                                                              #change
+argument2        = "beta"                                                                             #change
+value_min        = 0.0                                                                                #change
 
-fw = open("Input-parameters-beta-2-molecule-tau0.001.txt", "a")      #change
+fw = open("Input-parameters-beta-2-molecule-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt", "a")      #change
 # Loop over your jobs
 for i in range(1, nrange+1): 
  
@@ -179,13 +179,13 @@ for i in range(1, nrange+1):
 	call(["cp", source_file, dest_path])
 
 	argument1    = value        
-	modify_input(temperature_exact,numbbeads,numbblocks,argument1)
+	modify_input(temperature,numbbeads,numbblocks,argument1)
 	source_file = src_path + "qmc.input"
 	call(["cp", source_file, dest_path])
      
 	# Write submit file for the current cycle
 	os.chdir(dest_path)
-	rotmat(molecule,temperature_exact,numbbeads)
+	rotmat(molecule,temperature,numbbeads)
 
     #job submission
 	fname        = 'submit_'+str(i)
@@ -197,7 +197,6 @@ for i in range(1, nrange+1):
 	call(["qsub", fname])
 	os.chdir(src_path)
 
-#	fw.write(outputstring1(tau,numbblocks,numbbeads))
 	fw.write(outputstring2(numbbeads,tau,temperature,beta,temperature_exact,beta_exact))
 
 fw.close()
