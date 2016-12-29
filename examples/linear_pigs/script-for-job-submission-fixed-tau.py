@@ -59,18 +59,18 @@ def jobstring(file_name,value):
 	'''
 	job_name       = "job_"+str(file_name)+"%5.3f" % value
 	walltime       = "100:00:00"
-	processors     = "nodes=1:ppn=12"
+	processors     = "nodes=1:ppn=16"
 	command_pimc_run = "./pimc"
 
-	job_string     = """    #!/bin/bash
-	#PBS -N %s
-	#PBS -l walltime=%s
-	#PBS -l %s
-	#PBS -o %s.out
-	#PBS -e %s.err
-	export OMP_NUM_THREADS=12
-	cd $PBS_O_WORKDIR
-	%s""" % (job_name, walltime, processors, job_name, job_name, command_pimc_run)
+	job_string     = """#!/bin/bash
+#PBS -N %s
+#PBS -l walltime=%s
+#PBS -l %s
+#PBS -o %s.out
+#PBS -e %s.err
+export OMP_NUM_THREADS=16
+cd $PBS_O_WORKDIR
+%s""" % (job_name, walltime, processors, job_name, job_name, command_pimc_run)
 	print job_string
 	return job_string
 
