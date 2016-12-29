@@ -32,6 +32,7 @@ def exact_value(tau,numbbeads):
 	return beta_exact
 
 #initial parameters for qmc.input
+numbblocks       = 8000
 temperature	     = 10.0
 tau 		     = 0.001
 
@@ -43,16 +44,16 @@ rmax             = 10.0
 nr               = 70
 dr               = (rmax-rmin)/nr
 
-dbeta            = 0.002
-nbeta            = 100
+dbeta            = 0.004
+nbeta            = 50
 
 src_path  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-nrange           = ntau                                          #change
-displacement     = dtau                                          #change
-file1_name       = "e0vstau"                                     #change
-file2_name       = "K-1"                                          #change
-fw = open("Energy-vs-tau-2-molecules-beta0.1.txt", "a")                  #change
-value_min        = 0.0                                            #change
+nrange           = nbeta                                                                    #change
+displacement     = dbeta                                                                    #change
+file1_name       = "tau"+str(tau)+"blocks"+str(numbblocks)+"e0vsbeta"                       #change
+file2_name       = "K-1"                                                                    #change
+fw = open("Energy-vs-beta-2-molecules-tau"+str(tau)+"blocks"+str(numbblocks)+".txt", "a")   #change
+value_min        = 0.0                                                                      #change
 
 # Loop over your jobs
 for i in range(1, nrange+1): 
@@ -69,7 +70,7 @@ for i in range(1, nrange+1):
 	file_pigs = "pigs"
 	num_lines = sum(1 for line in open('pigs.eng'))
 	print num_lines
-	replace("nn_input", str(num_lines), "analyze.f", "analyze1.f")
+	replace("nn_input", str(numbblocks), "analyze.f", "analyze1.f")
 	replace("analyze_input", file_pigs+".eng", "analyze1.f", "analyze2.f")
 	replace("param2", str(r_dis), "analyze2.f", "analyze3.f")
 	call(["mv", "analyze3.f", "analyze.f"])
@@ -86,10 +87,10 @@ for i in range(1, nrange+1):
 	os.chdir(src_path)
 
 ####################################################
-	beta         = 1.0/temperature #value                    #change
-#	temperature  = 1.0/beta                                         #change
+	beta         = value #1.0/temperature                                                  #change
+	temperature  = 1.0/beta                                                                #change
 
-	numbbeads    = beads(tau,beta)                                  #change
+	numbbeads    = beads(tau,beta)                                                         #change
 	beta_exact   = exact_value(tau,numbbeads)
 	temperature_exact  = 1.0/beta_exact
 ####################################################
