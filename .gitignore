@@ -14,3 +14,6 @@ fort.*
 /examples/linear_pigs/Enrgy*
 /examples/linear_pigs/*/
 !/examples/linear_pigs/
+#
+eigen-values-of-two-rotors/*/
+!eigen-values-of-two-rotors/
