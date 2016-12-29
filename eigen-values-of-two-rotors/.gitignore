@@ -1,0 +1,15 @@
+#ignore all object files
+*.o
+run
+script.sh
+DVR-*
+Norm-*
+bb
+all_coefs 
+vh2h2.f
+long_range
+short_range
+*.txt
+#
+eigen-values-of-two-rotors/*/
+!eigen-values-of-two-rotors/
