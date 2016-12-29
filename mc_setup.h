@@ -114,6 +114,9 @@ extern long int NumberOfEQBlocks;  // number of equilibr blocks
 const int SizeRotDen=181*361*361;
 const int SizePotTab=501*181*181;
 
+#ifdef MOLECULEINCAGE
+extern int  MOLECINCAGE;
+#endif
 //------------- MPI PARAMETERS ----------------------------
 extern int NProcs; // the number of processors as a global variable
 extern int chunksize;  // the size of a chunk of rotational time slices treated by MPI
@@ -158,7 +161,7 @@ extern int NThreads; // the number of threads as a global variable
 extern int MCSKIP_RATIO;     //  to save information regarding the accept ratio
 extern int MCSKIP_TOTAL;     //  to save accumulated average
 extern int MCSKIP_AVERG;     //  to evaluate averages
-#ifdef VPOTTWOLINEARROTORS
+#ifdef PIGSROTORSIO
 extern int DISTANCE;     //  to evaluate averages
 #endif
 
@@ -177,10 +180,18 @@ extern long int MCStartBlock;
 extern double ** MCCoords;   // translational degrees of freedom
 extern double ** MCCosine;   // orientational cosines
 extern double ** MCAngles;   // cost and phi
+#ifdef MOLECULEINCAGE
+extern double ** MCCosinex;  //orientational cosine for x axis
+extern double ** MCCosiney;  //orientational cosine for y axis
+#endif
 
 //------------ Initial MCCoords and MCAngles;
 extern double * MCCooInit;   // store the read in MCCoords
 extern double * MCAngInit;   // store the read in MCAngles
+#ifdef MOLECULEINCAGE
+extern double ** RCOMC60;     //store the read in MCCoords
+#endif
+extern double ** RCOMC60;     //store the read in MCCoords
 
 //extern double ** TZMAT; // a temporary matrix for testing data structure
 
@@ -200,19 +211,15 @@ void MCMemFree(void);  // free memory
 
 typedef struct TSystemOfUnits
 {
-   double mass;        
-   double energy;       
-   double length;
-   double temperature;
+	double mass;        
+	double energy;       
+	double length;
+	double temperature;
 // double momentum;
 // double velocity;
 // double time;
-#ifdef VPOTTWOLINEARROTORS
-   double bohr;
-   double kelvin;
-#endif
-   string slength;
-   string senergy;
+	string slength;
+	string senergy;
 };
 
 extern TSystemOfUnits Units;

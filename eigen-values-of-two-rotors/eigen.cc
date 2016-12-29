@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <iostream>
 #include <math.h>
 #include <iomanip>
@@ -5,9 +6,13 @@
 #include <fstream>
 #include <sstream>
 #include <string.h>
+#include <vector>
 #include "eigen.h"
 #include "setup.h"
 #include "input.h"
+/* Complex datatype */
+//struct _dcomplex { double re, im; };
+//typedef struct _dcomplex dcomplex;
 
 using namespace std;
 
@@ -27,7 +32,7 @@ int main()
 	double weightsPhi;
 	phigrid(nSize, phi, weightsPhi);
 	
-	int nSizeTotal        = sizeloop(nSizeRot, nSkip);
+	int nSizeTotal = sizeloop(nSizeRot, nSkip);
 
 	double hMatrixRe[nSizeTotal][nSizeTotal];
 	double hMatrixIm[nSizeTotal][nSizeTotal];
@@ -127,7 +132,11 @@ int main()
 													double potl;
 													double dihedralAngle		= phi[iPhiRotor1]-phi[iPhiRotor2];
 													vh2h2_(&rCOM, &bondLength1, &bondLength2, &theta1, &theta2, &dihedralAngle, &potl);
+#ifndef TESTNORM 
 													double vpot 				= potl/wavenumber;
+#else
+													double vpot					=1.0;
+#endif
 //potential call is end here
 
 													double psiReBra				= spherHarmonicsReBra1*spherHarmonicsReBra2-spherHarmonicsImBra1*spherHarmonicsImBra2;
@@ -152,34 +161,34 @@ int main()
 //loop over coordinates end here//
 
 
-//									cout<<" i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket "<<i1Bra<<"  "<<i1Ket<<"  "<<m1Bra<<"  "<<m1Ket<<"  "<<i2Bra<<"  "<<i2Ket<<"  "<<m2Bra<<"  "<<m2Ket<<"  "<< setw(10)<<sumRotor1Re<<"     "<<setw(10)<<sumRotor1Im<<endl;
-
-#ifdef ROTATIONALENERGY
-									double energyRotor1, energyRotor2;
-									if (i1Bra == i1Ket && m1Bra == m1Ket) 
+									double energyRotor;
+									if (i1Bra == i1Ket && m1Bra == m1Ket && i2Bra == i2Ket && m2Bra == m2Ket) 
 									{
-										energyRotor1 = rotEnergy(i1Bra);
+										energyRotor = rotEnergy(i1Bra) + rotEnergy(i2Bra);
 									}
 									else
 									{
-										energyRotor1 = 0.0;
+										energyRotor = 0.0;
 									}
 
-									if (i2Bra == i2Ket && m2Bra == m2Ket) 
-									{
-										energyRotor2 = rotEnergy(i2Bra);
-									}
-									else
-									{
-										energyRotor2 = 0.0;
-									}
-									double totalRotEnergy = energyRotor1 + energyRotor2;
-
-									hMatrixRe[indexBra][indexKet] = sumRotor1Re + totalRotEnergy;
+#ifndef TESTNORM 
+#ifdef EXCLUDEROTATION
+									hMatrixRe[indexBra][indexKet] = sumRotor1Re;
 									hMatrixIm[indexBra][indexKet] = sumRotor1Im;
+#else
+									hMatrixRe[indexBra][indexKet] = sumRotor1Re + energyRotor;
+									hMatrixIm[indexBra][indexKet] = sumRotor1Im;
+#endif
 #else
 									hMatrixRe[indexBra][indexKet] = sumRotor1Re;
 									hMatrixIm[indexBra][indexKet] = sumRotor1Im;
+#endif
+
+#ifdef IOREAD
+									if (sumRotor1Re > 1e-15)
+									{
+									cout<<" i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket "<<i1Bra<<"  "<<i1Ket<<"  "<<m1Bra<<"  "<<m1Ket<<"  "<<i2Bra<<"  "<<i2Ket<<"  "<<m2Bra<<"  "<<m2Ket<<"  "<< setw(10)<<sumRotor1Re<<"     "<<setw(10)<<sumRotor1Im<<endl;
+									}
 #endif
 
 									indexKet += 1;
@@ -198,13 +207,15 @@ int main()
 
 //Bra loop ended here//
 	
-	double a[nSizeTotal*nSizeTotal];
+	double c[nSizeTotal*nSizeTotal];
+	double d[nSizeTotal*nSizeTotal];
 	int ii = 0;
 	for (int i=0; i<nSizeTotal; i++)
 	{
 		for (int j=0; j<nSizeTotal; j++)
 		{
-			a[ii] = hMatrixRe[i][j];
+			c[ii] = hMatrixRe[i][j];
+			d[ii] = hMatrixIm[i][j];
 			if(hMatrixRe[i][j] != hMatrixRe[j][i])
 			{
 				cout<<i<<"   "<<j<<"   "<<setw(20)<<hMatrixRe[i][j]<<"      "<<setw(20)<<hMatrixRe[j][i]<<endl;
@@ -212,11 +223,279 @@ int main()
 			ii++;
 		}
 	}
-    matrixdiagonalization(nSizeTotal, a);
+    matdiaghermitian(nSizeTotal, c, d);
+    for( int i = 0; i < nSizeTotal; i++ )
+    {
+        double sum = 0.;
+        for( int j = 0; j < nSizeTotal; j++ )
+        {
+            sum += c[i+j*nSizeTotal]*c[i+j*nSizeTotal]+d[i+j*nSizeTotal]*d[i+j*nSizeTotal];
+        }
+//        cout <<"Normlized vecor "<<sum<<endl;
+    }
+	
+/////////////////
+    vector<double> psiRe;
+    vector<double> psiIm;
+    for (int iXRotor1   = 0; iXRotor1<nSize; iXRotor1++)
+    {
+        double xRotor1  = cosTheta[iXRotor1];
+        double theta1   = acos(xRotor1);
+
+        for (int iXRotor2    = 0; iXRotor2<nSize; iXRotor2++)
+        {
+            double xRotor2   = cosTheta[iXRotor2];
+            double theta2    = acos(xRotor2);
+
+            for (int iPhiRotor1    = 0; iPhiRotor1<2*nSize+1; iPhiRotor1++)
+            {
+                for (int iPhiRotor2     = 0; iPhiRotor2<2*nSize+1; iPhiRotor2++)
+                {
+
+
+                    int i = 0;
+                    //Bra loop started here//
+
+                    int indexBra = 0;
+                    double sumRe = 0.;
+                    double sumIm = 0.;
+
+                    for (int i1Bra = 0; i1Bra<nSizeRot; i1Bra++)
+                    {
+                        if (i1Bra%nSkip) continue;
+
+                        for (int i2Bra = 0; i2Bra<nSizeRot; i2Bra++)
+                        {
+                            if (i2Bra%nSkip) continue;
+
+                            for (int m1Bra = -i1Bra; m1Bra<=i1Bra; m1Bra++)
+                            {
+                                int phase1Bra;
+                                if (m1Bra>0) phase1Bra = pow((-1.),(m1Bra));
+                                else phase1Bra=1.;
+
+                                double associatedLegBra1     = phase1Bra*normalizedPlm(i1Bra, m1Bra, xRotor1)*sqrt(weightsTheta[iXRotor1]);
+                                double spherHarmonicsReBra1  = associatedLegBra1*cos((double)m1Bra*phi[iPhiRotor1])*sqrt(weightsPhi);
+                                double spherHarmonicsImBra1  = associatedLegBra1*sin((double)m1Bra*phi[iPhiRotor1])*sqrt(weightsPhi);
+
+                                for (int m2Bra = -i2Bra; m2Bra<=i2Bra; m2Bra++)
+                                {
+                                    int phase2Bra;
+                                    if (m2Bra>0) phase2Bra = pow((-1.),(m2Bra));
+                                    else phase2Bra=1.;
+
+                                    double associatedLegBra2     = phase2Bra*normalizedPlm(i2Bra, m2Bra, xRotor2)*sqrt(weightsTheta[iXRotor2]);
+                                    double spherHarmonicsReBra2  = associatedLegBra2*cos((double)m2Bra*phi[iPhiRotor2])*sqrt(weightsPhi);
+                                    double spherHarmonicsImBra2  = associatedLegBra2*sin((double)m2Bra*phi[iPhiRotor2])*sqrt(weightsPhi);
+                                    double psiReBra              = spherHarmonicsReBra1*spherHarmonicsReBra2-spherHarmonicsImBra1*spherHarmonicsImBra2;
+                                    double psiImBra              = spherHarmonicsReBra1*spherHarmonicsImBra2+spherHarmonicsImBra1*spherHarmonicsReBra2;
+                                    double psiGroundRe           = psiReBra*c[i+indexBra*nSizeTotal]-psiImBra*d[i+indexBra*nSizeTotal];
+                                    double psiGroundIm           = psiReBra*d[i+indexBra*nSizeTotal]+psiImBra*c[i+indexBra*nSizeTotal];
+
+                                    sumRe += psiGroundRe;
+                                    sumIm += psiGroundIm;
+                                    indexBra++;
+                                }
+                            }
+                        }
+                    }
+                    psiRe.push_back(sumRe);
+                    psiIm.push_back(sumIm);
+
+                }
+            }
+        }
+    }
+    double sum2 = 0.;
+    for (int i = 0; i < psiRe.size(); i++)
+    {
+        sum2 +=  psiRe[i]*psiRe[i]+psiIm[i]*psiIm[i];
+
+    }
+//    cout<<"Norm "<<sum2<<endl;
+
+
+
+/////////////////
+    vector<double> psiRe1;
+    vector<double> psiIm1;
+    for (int iXRotor1   = 0; iXRotor1<nSize; iXRotor1++) 
+	{
+        double xRotor1  = cosTheta[iXRotor1];
+        double theta1   = acos(xRotor1);
+
+        for (int iXRotor2    = 0; iXRotor2<nSize; iXRotor2++) 
+		{
+            double xRotor2   = cosTheta[iXRotor2];
+            double theta2    = acos(xRotor2);
+
+	        for (int iPhiRotor1    = 0; iPhiRotor1<2*nSize+1; iPhiRotor1++) 
+			{
+                for (int iPhiRotor2     = 0; iPhiRotor2<2*nSize+1; iPhiRotor2++) 
+				{
+
+
+					int i = 0;
+					//Bra loop started here//
+
+				    int indexBra = 0;
+					double sumRe = 0.;
+					double sumIm = 0.;
+
+				    for (int i1Bra = 0; i1Bra<nSizeRot; i1Bra++)
+				    {
+				        if (i1Bra%nSkip) continue;
+
+				        for (int i2Bra = 0; i2Bra<nSizeRot; i2Bra++)
+				        {
+				            if (i2Bra%nSkip) continue;
+
+				            for (int m1Bra = -i1Bra; m1Bra<=i1Bra; m1Bra++)
+				            {
+				                int phase1Bra;
+				                if (m1Bra>0) phase1Bra = pow((-1.),(m1Bra));
+				                else phase1Bra=1.;
+
+					            double associatedLegBra1     = phase1Bra*normalizedPlm(i1Bra, m1Bra, xRotor1);
+								double spherHarmonicsReBra1  = associatedLegBra1*cos((double)m1Bra*phi[iPhiRotor1]);
+            					double spherHarmonicsImBra1  = associatedLegBra1*sin((double)m1Bra*phi[iPhiRotor1]);
+								/*
+                                double associatedLegBra1     = phase1Bra*normalizedPlm(i1Bra, m1Bra, xRotor1)*sqrt(weightsTheta[iXRotor1]);
+                                double spherHarmonicsReBra1  = associatedLegBra1*cos((double)m1Bra*phi[iPhiRotor1])*sqrt(weightsPhi);
+                                double spherHarmonicsImBra1  = associatedLegBra1*sin((double)m1Bra*phi[iPhiRotor1])*sqrt(weightsPhi);
+								*/
+
+				                for (int m2Bra = -i2Bra; m2Bra<=i2Bra; m2Bra++)
+				                {
+				                    int phase2Bra;
+				                    if (m2Bra>0) phase2Bra = pow((-1.),(m2Bra));
+				                    else phase2Bra=1.;
+									
+					            	double associatedLegBra2     = phase2Bra*normalizedPlm(i2Bra, m2Bra, xRotor2);
+									double spherHarmonicsReBra2  = associatedLegBra2*cos((double)m2Bra*phi[iPhiRotor2]);
+            						double spherHarmonicsImBra2  = associatedLegBra2*sin((double)m2Bra*phi[iPhiRotor2]);
+									/*
+                                    double associatedLegBra2     = phase2Bra*normalizedPlm(i2Bra, m2Bra, xRotor2)*sqrt(weightsTheta[iXRotor2]);
+                                    double spherHarmonicsReBra2  = associatedLegBra2*cos((double)m2Bra*phi[iPhiRotor2])*sqrt(weightsPhi);
+                                    double spherHarmonicsImBra2  = associatedLegBra2*sin((double)m2Bra*phi[iPhiRotor2])*sqrt(weightsPhi);
+									*/
+
+									double psiReBra				 = spherHarmonicsReBra1*spherHarmonicsReBra2-spherHarmonicsImBra1*spherHarmonicsImBra2;
+									double psiImBra				 = spherHarmonicsReBra1*spherHarmonicsImBra2+spherHarmonicsImBra1*spherHarmonicsReBra2;
+									double psiGroundRe           = psiReBra*c[i+indexBra*nSizeTotal]-psiImBra*d[i+indexBra*nSizeTotal];
+									double psiGroundIm           = psiReBra*d[i+indexBra*nSizeTotal]+psiImBra*c[i+indexBra*nSizeTotal];
+
+           							sumRe += psiGroundRe;
+           							sumIm += psiGroundIm;
+									indexBra++;
+								}
+							}
+						}
+    				}
+					psiRe1.push_back(sumRe);	
+					psiIm1.push_back(sumIm);
+
+                }
+            }
+        }
+    }
+	double sum3 = 0.;
+	for (int i = 0; i < psiRe1.size(); i++)
+	{
+		sum3 +=  psiRe1[i]*psiRe1[i]+psiIm1[i]*psiIm1[i];
+
+		//cout << psiRe1[i]*psiRe1[i]+psiIm1[i]*psiIm1[i]<<endl;
+	}
+//	cout<<sum3<<endl;
+	int iii = 0;
+    for (int iXRotor1   = 0; iXRotor1<nSize; iXRotor1++) 
+	{
+        double xRotor1  = cosTheta[iXRotor1];
+        double theta1   = acos(xRotor1);
+
+        for (int iXRotor2    = 0; iXRotor2<nSize; iXRotor2++) 
+		{
+            double xRotor2   = cosTheta[iXRotor2];
+            double theta2    = acos(xRotor2);
+
+            for (int iPhiRotor1    = 0; iPhiRotor1<2*nSize+1; iPhiRotor1++) 
+			{
+                for (int iPhiRotor2     = 0; iPhiRotor2<2*nSize+1; iPhiRotor2++) 
+				{
+
+                    double xx = sin(theta1)*cos(phi[iPhiRotor1])*sin(theta2)*cos(phi[iPhiRotor2]) + sin(theta1)*sin(phi[iPhiRotor1])*sin(theta2)*sin(phi[iPhiRotor2]) + cos(theta1)*cos(theta2);
+					cout<<iii<<"      "<<xx<<"      "<<psiRe1[iii]*psiRe1[iii]+psiIm1[iii]*psiIm1[iii]<<endl;
+					iii++;
+                }
+            }
+        }
+    }
+	exit(0);
+	cout << "Here I am"<<iii<<endl;
+
+
+//==========================bins============================//
+    vector<double> cosThetaTld;
+	for (int iXRotor1   = 0; iXRotor1<nSize; iXRotor1++) {
+    	double xRotor1  = cosTheta[iXRotor1];
+        double theta1   = acos(xRotor1);
+
+		for (int iXRotor2    = 0; iXRotor2<nSize; iXRotor2++) {
+        	double xRotor2   = cosTheta[iXRotor2];
+            double theta2    = acos(xRotor2);
+
+          	for (int iPhiRotor1    = 0; iPhiRotor1<2*nSize+1; iPhiRotor1++) {
+				for (int iPhiRotor2     = 0; iPhiRotor2<2*nSize+1; iPhiRotor2++) {
+
+					double xx = sin(theta1)*cos(phi[iPhiRotor1])*sin(theta2)*cos(phi[iPhiRotor2]) + sin(theta1)*sin(phi[iPhiRotor1])*sin(theta2)*sin(phi[iPhiRotor2]) + cos(theta1)*cos(theta2);
+					cosThetaTld.push_back(xx);
+				}
+			}
+		}
+	}
+
+	//cout << "extended vector size = " << cosThetaTld.size() << endl;
+	for(int i = 0; i < cosThetaTld.size(); i++)
+	{
+    	//cout << "value of vec [" << i << "] = " << cosThetaTld[i] << endl;
+    	cout << i<<"      "<<cosThetaTld[i] << endl;
+   	}
+
+
+	double ctmin = -1.1;
+	double ctmax = 1.1;
+	int numbins  = 101;
+	double dbins = (ctmax - ctmin)/((double)numbins - 1.0);
+	double hist[numbins - 1];
+
+	double sum1 = 0.;
+	for (int i = 0; i < numbins - 1; i++)
+	{
+		double binsi = ctmin + (double)i*dbins;
+		double binsf = binsi + dbins;
+		hist[i] = 0.;
+
+		for (int j = 0; j < cosThetaTld.size(); j++)
+		{
+			if (cosThetaTld[j] >= binsi && cosThetaTld[j] <= binsf) hist[i]+=1.;
+		}
+		sum1 += hist[i]*dbins;
+	}
+	double sum = 0.;
+	for (int i = 0; i < numbins - 1; i++) {
+		//cout<<i<<"  "<<hist[i]/cosThetaTld.size()<<endl;
+		//sum += (hist[i]/(double)cosThetaTld.size());
+		sum += hist[i]/sum1*dbins;
+		double binsi = ctmin + (double)i*dbins;
+        double binsf = binsi + dbins;
+		cout<<binsi<<"  "<<hist[i]/sum1<<endl;
+	}
+	cout<<sum<<endl;
+
 	return 0;
 }
 
-void matrixdiagonalization(int nSizeTotal, double *a)
+void matdiagsymmetric(int nSizeTotal, double *a)
 {
 //Lapack starts here
     /* Locals */
@@ -251,7 +530,7 @@ void matrixdiagonalization(int nSizeTotal, double *a)
 
     /* Print eigenvalues */
     char msg3[] = "Eigenvalues";
-    print_matrix(msg3, 1, n, w, 1);
+//    print_matrix(msg3, 1, n, w, 1);
 
     /* Print eigenvectors */
 /*    char msg4[] = "Eigenvectors (stored columnwise)";
@@ -264,8 +543,111 @@ void matrixdiagonalization(int nSizeTotal, double *a)
 // End of DSYEV Example 
 }
 
+void matdiaghermitian(int nSizeTotal, double *c, double *d)
+{
+//Lapack starts here
+    /* Locals */
+
+	c[nSizeTotal*nSizeTotal];
+	d[nSizeTotal*nSizeTotal];
+
+	int N = nSizeTotal;
+	int LDA = N;
+    int n = N, lda = LDA, info, lwork;
+	dcomplex a[LDA*N];
+
+	for (int i = 0; i < nSizeTotal*nSizeTotal; i++)
+	{
+		a[i] = {c[i],d[i]};
+	}
+	dcomplex wkopt;
+	dcomplex* work;
+
+    /* Local arrays */
+    double w[N], rwork[3*N-2];
+
+    /* Query and allocate the optimal workspace */
+    lwork = -1;
+    char msg1[] = "Vectors";
+    char msg2[] = "Lower";
+	zheev_( msg1, msg2, &n, a, &lda, w, &wkopt, &lwork, rwork, &info );
+	lwork = (int)wkopt.re;
+	work = (dcomplex*)malloc( lwork*sizeof(dcomplex) );
+
+    /* Solve eigenproblem */
+    zheev_( msg1, msg2, &n, a, &lda, w, work, &lwork, rwork, &info );
+	for (int i = 0; i < nSizeTotal*nSizeTotal; i++)
+    {
+        c[i] = a[i].re;
+        d[i] = a[i].im;
+    }
+
+    /* Check for convergence */
+    if( info > 0 ) 
+	{
+		cout<< "The algorithm failed to compute eigenvalues."<<endl;
+        exit( 1 );
+    }
+
+    /* Print eigenvalues */
+    char msg3[] = "Eigenvalues";
+    char msg4[] = "Eigenvectors (stored columnwise)";
+
+	print_rmatrix( msg3, 1, n, w, 1 );
+	/* Print eigenvectors */
+//    print_matrix( msg4, n, n, a, lda );
+
+    /* Free workspace */
+    free( (void*)work );
+//    exit( 0 );
+} /* End of ZHEEV Example */
+
+
+/* Auxiliary routine: printing a real matrix */
+void print_rmatrix( char* desc, int m, int n, double* a, int lda ) 
+{
+	int i, j;
+
+	stringstream bc;
+    bc.width(1);
+    bc.fill('0');
+    bc<<nSizeRot;
+    string fname = "Eigen-values-nSizeRot" + bc.str()+".txt";
+
+    ofstream myfile;
+    myfile.open(fname.c_str());
+
+    for( i = 0; i < m; i++ ) 
+	{
+    	for( j = 0; j < n; j++ )
+		{
+#ifndef TESTNORM 
+			myfile<<setw(14)<< a[i+j*lda]*wavenumber <<endl;
+#else
+			myfile<<setw(14)<< a[i+j*lda] <<endl;
+#endif
+        }
+	}
+	myfile.close();
+}
+
 /* Auxiliary routine: printing a matrix */
-void print_matrix( char* desc, int m, int n, double* a, int lda )
+void print_matrix( char* desc, int m, int n, dcomplex* a, int lda ) 
+{
+	int i, j;
+    for( i = 0; i < m; i++ ) 
+	{
+		double sum = 0.;
+    	for( j = 0; j < n; j++ ) 
+		{
+			sum += a[i+j*lda].re*a[i+j*lda].re+a[i+j*lda].im*a[i+j*lda].im;
+		}
+		//cout <<sum<<endl;
+	}
+}
+
+/* Auxiliary routine: printing a matrix */
+/*void print_matrix_real( char* desc, int m, int n, double* a, int lda )
 {
     int i, j;
 
@@ -273,22 +655,30 @@ void print_matrix( char* desc, int m, int n, double* a, int lda )
 	bc.width(1);
 	bc.fill('0');
     bc<<nSizeRot;
-	string fname = "Eigen-values-nSizeRot" + bc.str()+".txt";
+	string fname = "Eigen-vectors-nSizeRot" + bc.str()+".txt";
 
     ofstream myfile;
     myfile.open(fname.c_str());
 
     for(i=0; i<m; i++)
     {
-        for(j = 0; j<n; j++)
+        for(j = 0; j<n; j+( = 0; i < m; i++ )
+    {
+        double sum = 0.;
+        for( j = 0; j < n; j++ )
         {
-            myfile<<setw(14)<<a[i+j*lda]*wavenumber<<endl;
+            sum += a[i+j*lda].re*a[i+j*lda].re+a[i+j*lda].im*a[i+j*lda].im;
+        }
+        cout <<sum<<endl;
+    })
+        {
+            myfile<<setw(14)<<a[i+j*lda]<<endl;
         }
         cout<<endl;
     }
 	myfile.close();
 }
-
+*/
 void normalizationCheck(int nSize, int nSizeRot)
 {
     double cosTheta[nSize];
@@ -443,7 +833,8 @@ double rotEnergy(int l)
 {
 	double energyj0_v0    = -36117.5942855;  // unit cm^-1
 	double energyj1_v0    = -35999.1009407;  // unit cm^-1
-	double rotConstant    = 0.5*(energyj1_v0 - energyj0_v0)/wavenumber;
+//	double rotConstant    = 0.5*(energyj1_v0 - energyj0_v0)/wavenumber;
+	double rotConstant    = 59.0622/wavenumber;
 	double energy         = rotConstant*(double)l*((double)l + 1.0);
 
 	return energy;

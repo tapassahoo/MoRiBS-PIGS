@@ -41,39 +41,48 @@ const double WNO2K = 0.6950356; // conversion from CM-1 to K
 // S34    33.967 866 83(11) 
 // S36    35.967 080 88(25)  
 
-const double MASS_H1   = 1.0078;   // amu
-const double MASS_H2   = 2.015650642;   // amu
-const double MASS_HE4  = 4.0026032497;   // amu
-const double MASS_C12  = 12.0;     // amu
-const double MASS_N14  = 14.003;   // amu
-const double MASS_O16  = 15.994915;   // amu
-const double MASS_S32  = 31.972;   // amu
+const double MASS_H1  = 1.0078;        // amu
+const double MASS_H2  = 2.015650642;   // amu
+const double MASS_HE4 = 4.0026032497;  // amu
+const double MASS_C12 = 12.0;          // amu
+const double MASS_N14 = 14.003;        // amu
+const double MASS_O16 = 15.994915;     // amu
+const double MASS_S32 = 31.972;        // amu
+#ifdef PIGSROTORS
+const double MASS_F19 = 18.9984032;     //amu
+#endif
 
 //----------- ROTATIONAL CONSTANTS --------------------------
 
-const double B_N2O   = 0.602861;  // [K]  N2O  = 0.4190098 cm^-1
-const double B_OCS   = 0.292;     // [K]  OCS  
-//const double B_CO2   = 0.561122;  // [K]  CO2  = 0.3900 cm^-1 xie  excited(v3=1) 
-//const double B_CO2   = 0.557009;  // [K]  CO2  = 0.387141 cm^-1 exp. excited(v3=1) 
-const double B_CO2   = 0.561437;  // [K]  CO2  = 0.390219 cm^-1   exp. ground(v3=0) 
-const double B_CO   = 2.766086924;  // [K]  CO  = 1.922528955 cm^-1   exp. ground(v=0) 
-const double B_HCN   = 2.12682;   // [K]  1.478 221 834 cm^-1 JCP 114 851 (2001)
+const double B_N2O   = 0.602861;        // [K]  N2O  = 0.4190098 cm^-1
+const double B_OCS   = 0.292;           // [K]  OCS  
+//const double B_CO2   = 0.561122;      // [K]  CO2  = 0.3900 cm^-1 xie  excited(v3=1) 
+//const double B_CO2   = 0.557009;      // [K]  CO2  = 0.387141 cm^-1 exp. excited(v3=1) 
+const double B_CO2   = 0.561437;        // [K]  CO2  = 0.390219 cm^-1   exp. ground(v3=0) 
+const double B_CO    = 2.766086924;      // [K]  CO  = 1.922528955 cm^-1   exp. ground(v=0) 
+const double B_HCN   = 2.12682;         // [K]  1.478 221 834 cm^-1 JCP 114 851 (2001)
 
-const double B_HCCCN = 0.218317;  // [K]  4549 MHz [JCP 119 8379 (2003)] approx 0.1517383 cm^-1
+const double B_HCCCN = 0.218317;        // [K]  4549 MHz [JCP 119 8379 (2003)] approx 0.1517383 cm^-1
+#ifdef PIGSROTORS
+const double B_HF    = 20.9561;         // cm^-1
+#endif
 
 // known atom/molecule types
 
-const char HE4[]   =  "He4";
-const char H2[]   =  "H2";
-const char OCS[]   =  "OCS";
-const char N2O[]   =  "N2O";
-const char CO2[]   =  "CO2";
-const char CO[]   =  "CO";
-const char HCN[]   =  "HCN";
+const char HE4[]     =  "He4";
+const char H2[]      =  "H2";
+const char OCS[]     =  "OCS";
+const char N2O[]     =  "N2O";
+const char CO2[]     =  "CO2";
+const char CO[]      =  "CO";
+const char HCN[]     =  "HCN";
 
-const char HCCCN[] =  "HCCCN";
-const char H2O[] = "H2O";
-const char SO2[] = "SO2";
+const char HCCCN[]   =  "HCCCN";
+const char H2O[]     = "H2O";
+const char SO2[]     = "SO2";
 const char HCOOCH3[] = "HCOOCH3";
+#ifdef PIGSROTORS
+const char HF[]      = "HF";
+#endif
 
 #endif  //MC_const.h

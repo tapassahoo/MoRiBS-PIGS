@@ -57,51 +57,52 @@ cd $PBS_O_WORKDIR
 	print job_string
 	return job_string
 
-def modify_input(njrot):
+def modify_input(njrot,skip):
 	'''
 	This function modifies parameters in parameter.input
 	'''
 	replace("jrot", str(njrot), "parameter.input", "parameter1.input")
+	replace("nskip", str(skip), "parameter1.input", "parameter2.input")
 
 
 #initial parameters for qmc.input
 src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/eigen-values-of-two-rotors/"
-nrange           = 5
-displacement     = 1
-file1_name       = "result-rot-jrot"
-argument		 = "jrot"
+nrange           = 2                                                 #param1
+displacement     = 1                                                 #param2
+skip		     = 1                                                 #param3
+file1_name       = "pot-result-skip"+str(skip)+"-jrot"               #param4
+argument		 = "jrot"                                            #param5
 
 # Loop over your jobs
 for i in range(1, nrange+1): 
+
+	if (((i-1)%skip) == 0 ):
  
-	value        = i*displacement          
-	jrot         = "%d" % value
+		value        = i*displacement          
+		jrot         = "%d" % value
 
-	fldr         = file1_name+str(jrot)
-	folder_run   = fldr
-	call(["mkdir", folder_run])
+		fldr         = file1_name+str(jrot)
+		folder_run   = fldr
+		call(["mkdir", folder_run])
 
-	# copy files to running folder
-	dest_path    = src_path +folder_run
-	source_file  = src_path + "parameter.input"
-	call(["cp", source_file, dest_path])
-	source_file  = src_path + "run"
-	call(["cp", source_file, dest_path])
+		# copy files to running folder
+		dest_path    = src_path +folder_run
+		source_file  = src_path + "parameter.input"
+		call(["cp", source_file, dest_path])
+		source_file  = src_path + "run"
+		call(["cp", source_file, dest_path])
+	
+		os.chdir(dest_path)
+		modify_input(jrot,skip)
+		call(["mv", "parameter2.input", "parameter.input"])
+		call(["rm", "parameter1.input"])
 
-	modify_input(jrot)
-	source_file = src_path + "parameter1.input"
-	call(["cp", source_file, dest_path])
-     
-	# Write submit file for the current cycle
-	os.chdir(dest_path)
-	call(["mv", "parameter1.input", "parameter.input"])
+		#job submission
+		fname        = 'submit_'+str(i)
+		fwrite       = open(fname, 'w')
 
-    #job submission
-	fname        = 'submit_'+str(i)
-	fwrite       = open(fname, 'w')
+		fwrite.write(jobstring(argument, value))
+		fwrite.close()
+		call(["qsub", fname])
 
-	fwrite.write(jobstring(argument, value))
-	fwrite.close()
-	call(["qsub", fname])
-
-	os.chdir(src_path)
+		os.chdir(src_path)

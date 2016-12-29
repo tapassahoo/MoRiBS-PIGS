@@ -27,12 +27,11 @@ const char IO_RESTART[]        = "RESTART";
 const char IO_TEMPERATURE[]    = "TEMPERATURE";
 const char IO_ATOM[]           = "ATOM";
 const char IO_MOLECULE[]       = "MOLECULE"; // linear molecule
-#ifdef VPOTTWOLINEARROTORS
 const char IO_LINEARROTORS[]   = "LINEARROTORS"; // linear rotors
-#endif
+const char IO_MOLECINCAGE[]    = "MOLECINCAGE";
 // Toby's value
 const char IO_NONLINEAR[]      = "NONLINEAR";
-const char IO_PLANAR[]      = "PLANAR";
+const char IO_PLANAR[]         = "PLANAR";
 const char IO_DENSITY[]        = "DENSITY";
 const char IO_READMCCOORDS[]   = "READMCCOORDS";
 
@@ -62,9 +61,7 @@ const char IO_MCSKIP_AVERG[]   = "MCSKIP_AVERG";
 const char STATUS_STARTBLOCK[] = "STARTBLOCK";
 
 //--------------------------------------------------
-#ifdef VPOTTWOLINEARROTORS
 const char IO_DISTANCE[]       = "DISTANCE";
-#endif
 
 string MasterDir;
 string OutputDir;
@@ -109,6 +106,10 @@ void IOReadParams(const char in_file[],int & mc_status)
    string _srot_type;      // the molecule type to sample the rotational degrees of freedom
    string _srot_dens;      // the file name with the rotational density matrix
 
+#ifdef MOLECULEINCAGE
+   MOLECINCAGE  = 0;
+#endif
+
    InitMCCoords = 0;
 
    MCStartBlock = 0;
@@ -146,11 +147,7 @@ void IOReadParams(const char in_file[],int & mc_status)
         inf>>Density;
      }
      else 
-#ifdef VPOTTWOLINEARROTORS
-       if ((params==IO_ATOM)||(params==IO_MOLECULE)||(params==IO_LINEARROTORS)||(params==IO_NONLINEAR)||(params==IO_PLANAR)) // Modified by Tapas Sahoo
-#else
-       if ((params==IO_ATOM)||(params==IO_MOLECULE)||(params==IO_NONLINEAR)||(params==IO_PLANAR))
-#endif
+       if ((params==IO_ATOM)||(params==IO_MOLECULE)||(params==IO_LINEARROTORS)||(params==IO_NONLINEAR)||(params==IO_PLANAR))
      {
         inf>>MCAtom[type].type;          // [1] 
         inf>>MCAtom[type].numb;          // [2]
@@ -175,6 +172,7 @@ void IOReadParams(const char in_file[],int & mc_status)
 
         inf>>MCAtom[type].mcstep;        // [4]
         inf>>MCAtom[type].levels;        // [5]
+#ifndef PIGSROTORSIO
         inf>>MCAtom[type].fpot;          // [6]
 
         string smod;                     // model of interaction 
@@ -187,6 +185,7 @@ void IOReadParams(const char in_file[],int & mc_status)
         nrerror(_proc_,"Unknown model of interaction");
 
         MCAtom[type].pmod = pmod;
+#endif
 
 // ------- set atom/molecule flag ------------------------- 
 
@@ -199,21 +198,15 @@ void IOReadParams(const char in_file[],int & mc_status)
 	  MCAtom[type].molecule = 2;
 	else if (params == IO_PLANAR)
 	  MCAtom[type].molecule = 3;
-#ifdef VPOTTWOLINEARROTORS
 	else if (params == IO_LINEARROTORS) //Added by Tapas Sahoo
 	  MCAtom[type].molecule = 4;
-#endif
         else                        // atom
 	  if (IMPURITY) nrerror(_proc_,"Molecules should follow atoms in input file");
 	//      the latter is important, for example, for the density estimators
 
         if (MCAtom[type].numb > 0)   // ignore this atom/molecule type if N <= 0 
         {
-#ifdef VPOTTWOLINEARROTORS
            if ((MCAtom[type].molecule == 1)||(MCAtom[type].molecule == 2)||(MCAtom[type].molecule == 3)||(MCAtom[type].molecule == 4))//Modified by Tapas Sahoo
-#else
-           if ((MCAtom[type].molecule == 1)||(MCAtom[type].molecule == 2)||(MCAtom[type].molecule == 3))
-#endif
            {  
               IMPURITY         = true;
               NUMB_MOLCS      += MCAtom[type].numb;
@@ -321,6 +314,13 @@ void IOReadParams(const char in_file[],int & mc_status)
      {
         InitMCCoords = 1;
      }
+#ifdef MOLECULEINCAGE
+     else
+     if (params==IO_MOLECINCAGE)
+     {
+        MOLECINCAGE = 1;
+     }
+#endif
      else 
      if (params==IO_MCSKIP_RATIO)
      {
@@ -427,9 +427,7 @@ void IOReadParams(const char in_file[],int & mc_status)
    {
       cout << setw(w) << MCAtom[type].type << BLANK;
       cout << setw(w) << MCAtom[type].numb << BLANK;
-#ifdef VPOTTWOLINEARROTORS
       cout<<"MCAtom[type].molecule   "<<MCAtom[type].molecule<<endl;
-#endif
 
       cout << setw(10) << STATISTICS[MCAtom[type].stat] << BLANK;
 

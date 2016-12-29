@@ -20,9 +20,10 @@ void SaveRhoThetaChi(const char [], double,int); //added by Toby Zeng
 double GetPotEnergy_Diff(void); //added by Hui Li
 
 double GetPotEnergy_Densities(void);
-#ifdef VPOTTWOLINEARROTORS
 double GetTotalEnergy(void);
-#endif
+double GetCosTheta(void);
+void GetCosTheta1(double *);
+double GetPhi(void);
 double GetPotEnergy(void);
 double GetKinEnergy(void);
 
@@ -71,6 +72,7 @@ extern double Erot_termSQ; // sum of square of each bead's rotational energy est
 extern double srotchunk; // chunk summation of rotational energy
 extern double srotsum; // total summation of rotational energy
 //Last two lines added by Tapas Sahoo
+void VectorNormalisation(double *);
 double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
 #endif  // mc_estim.h

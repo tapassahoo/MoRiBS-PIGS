@@ -95,11 +95,7 @@ void InitPotentials(void)
   const char *_proc_=__func__;    // "InitPotentials"; 
 
   for (int atype=0;atype<NumbTypes;atype++)
-#ifdef VPOTTWOLINEARROTORS
-    if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)||(MCAtom[atype].molecule == 4))                            // molecules //Modified by Tapas Sahoo
-#else
-    if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3))
-#endif
+    if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3))                            // molecules
       {
 	if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)) )
 	  nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
@@ -113,10 +109,6 @@ void InitPotentials(void)
 	if(MCAtom[atype].molecule == 3)
 	  init_pot2D(atype);
 	//      init_dpot2D(atype);   //revised by Hui Li
-/*#ifdef VPOTTWOLINEARROTORS
-	if(MCAtom[atype].molecule == 4)
-	  init_pot1D(atype); //Added by Tapas Sahoo
-#endif*/
 
 
 	if(MCAtom[atype].molecule == 2 && NumbTypes > 1)
@@ -182,10 +174,9 @@ void InitRotDensity(void)
    if(MCAtom[IMTYPE].molecule == 3 && RotDenType == 0)
      init_rotdens(IMTYPE);
 
-#ifdef VPOTTWOLINEARROTORS
    if(MCAtom[IMTYPE].molecule == 4 && RotDenType == 0)
      init_rotdens(IMTYPE);
-#endif
+
    if(MCAtom[IMTYPE].molecule == 2 && RotDenType == 0)
    {
       init_rot3D(IMTYPE);
@@ -549,11 +540,8 @@ void init_rotdens(int type)
     string  fname = MCAtom[type].type;
 
     stringstream time; time << NumbRotTimes;                  // number of time slices 
-#ifndef VPOTTWOLINEARROTORS
-    stringstream temp; temp << Temperature*Units.temperature; // temperature
-#else
+//    stringstream temp; temp << Temperature*Units.temperature; // temperature
     stringstream temp; temp << std::fixed << std::setprecision(3)<<Temperature*Units.temperature; // temperature
-#endif
 
     fname += ("_T" + temp.str() + "t" + time.str()); 
     fname += EXT_ROTD;

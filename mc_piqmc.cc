@@ -47,9 +47,16 @@ extern "C" void rflmfz_(double *RCOM,double *hatx,double *haty,double *hatz,doub
 // GG ---> potentiel H2O ---- H2O
 extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eulang_1, double *Eulang_2);
 
-#ifdef VPOTTWOLINEARROTORS
 //vh2h2 ---> potential H2-H2: added by Tapas Sahoo
+#ifdef LINEARROTORS
 extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *t1, double *t2, double *phi, double *potl);
+extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
+#endif
+#ifdef MOLECULEINCAGE
+//Pot of H2O-C60 one cage
+extern "C" void calengy_(double *com_1, double *Eulang_1, double *E_H2OC60);
+//Potential of interaction of two cages with water inside
+extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
 #endif
 
 int PrintYrfl; // integer flag for printing reflected coordinates
@@ -435,12 +442,6 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 #endif
 
    double step   = MCAtom[type].rtstep; 
-   int    offset = MCAtom[type].offset;
- 
-   int atom0  = 0;                   // only one molecular impurtiy
-   offset    += (NumbTimes*atom0);   // the same offset for rotational
-   int gatom  = offset/NumbTimes;    // and translational degrees of freedom
-
    double MCRotChunkTot = 0.0;
    double MCRotChunkAcp = 0.0;
 
@@ -493,31 +494,41 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 */
 
 #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3)
-   for (int itrot=0;itrot<NumbRotTimes;itrot=itrot+2)
-   {
-       rand1=runif(Rng);
-       rand2=runif(Rng);
-       rand3=runif(Rng);
-       MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-   }
+	for (int itrot=0;itrot<NumbRotTimes;itrot += 2)
+	{
+		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
+		{
+			int offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			int gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			rand1=runif(Rng);
+			rand2=runif(Rng);
+			rand3=runif(Rng);
+			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+		}
+	}
 
-   MCTotal[type][MCROTAT] += MCRotChunkTot;
-   MCAccep[type][MCROTAT] += MCRotChunkAcp;
+	MCTotal[type][MCROTAT] += MCRotChunkTot;
+	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
-   MCRotChunkTot = 0;
-   MCRotChunkAcp = 0;
+	MCRotChunkTot = 0;
+	MCRotChunkAcp = 0;
 
 #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3)
-   for (int itrot=1;itrot<NumbRotTimes;itrot=itrot+2)
-   {
-      rand1=runif(Rng);
-      rand2=runif(Rng);
-      rand3=runif(Rng);
-      MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-   }
+	for (int itrot = 1; itrot < NumbRotTimes; itrot += 2)
+	{
+		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
+		{
+			int offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			int gatom  = offset/NumbTimes;    // and translational degrees of freedom
+ 			rand1=runif(Rng);
+			rand2=runif(Rng);
+			rand3=runif(Rng);
+			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+		}
+	}
 
-   MCTotal[type][MCROTAT] += MCRotChunkTot;
-   MCAccep[type][MCROTAT] += MCRotChunkAcp;
+	MCTotal[type][MCROTAT] += MCRotChunkTot;
+	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
 }
 
@@ -775,7 +786,6 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
       }
    }
 
-
    MCTotal[type][MCROTAT] += MCRotChunkTot;
    MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
@@ -795,8 +805,6 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    int t0 = offset + it0;
    int t1 = offset + it1;
    int t2 = offset + it2;
-
-   double n1[NDIM];
 
    double cost = MCAngles[CTH][t1];
    double phi  = MCAngles[PHI][t1];
@@ -841,19 +849,25 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    double rho1,rho2,erot;
 // If t1 = 0 (the first bead), dens_new = SRotDens(p1,type)
 // if t1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
-   if(RotDenType == 0)
-   {
+	if(RotDenType == 0)
+	{
 // PN modification for open path below
 #ifdef PIGSROTORS
-      if (t1==0 || t1 == (NumbRotTimes-1)) 
-	if (t1==0)
-		dens_old = SRotDens(p1,type);
-	else
-                dens_old = SRotDens(p0,type);
-      else
+		if (t1==0 || t1 == (NumbRotTimes-1)) 
+		{
+			if (t1==0)
+			{
+				dens_old = SRotDens(p1,type);
+			}
+			else
+			{
+				dens_old = SRotDens(p0,type);
+			}
+		}
+		else
 #endif
-      	dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-   }
+		dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+	}
    else if(RotDenType == 1)
    {
       rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
@@ -862,7 +876,12 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    }
 
    if (fabs(dens_old)<RZERO) dens_old = 0.0;
+#ifndef NEGATIVEDENSITY
    if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+#else
+// tapas's temporary treatment for negative rho of two linear rotors
+   if (dens_old<0.0) dens_old=fabs(dens_old);
+#endif
 
    double pot_old  = 0.0;
 
@@ -886,76 +905,86 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 
    double dens_new;
 
-   if(RotDenType == 0)
-   {
-// PN modification for open path below
+	if(RotDenType == 0)
+	{
+	// PN modification for open path below
 #ifdef PIGSROTORS
-      if (t1==0 || t1 == (NumbRotTimes-1))
-        if (t1==0)
-                dens_new = SRotDens(p1,type);
-        else
-                dens_new = SRotDens(p0,type);
-      else
+		if (t1==0 || t1 == (NumbRotTimes-1))
+		{
+    		if (t1==0)
+			{
+        		dens_new = SRotDens(p1,type);
+			}
+    		else
+			{
+        		dens_new = SRotDens(p0,type);
+			}
+		}
+		else
 #endif
-      	dens_new = SRotDens(p0,type)*SRotDens(p1,type);
-   }
-   else if(RotDenType == 1)
-   {
-      rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
-      rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
-      dens_new = rho1 + rho2;
-   }
+		dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+	}
+	else if(RotDenType == 1)
+	{
+		rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
+		rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
+		dens_new = rho1 + rho2;
+	}
 
-   if (fabs(dens_new)<RZERO) dens_new = 0.0;
-   if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+	if (fabs(dens_new)<RZERO) dens_new = 0.0;
+#ifndef NEGATIVEDENSITY
+	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+#else
+	if (dens_new<0.0) dens_new=fabs(dens_new);
+#endif
 
-   double pot_new  = 0.0;
+	double pot_new  = 0.0;
 
-   for (int it=itr0;it<itr1;it++)  // average over tr time slices
-   pot_new  += (PotRotEnergy(gatom,newcoords,it));
+	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	pot_new  += (PotRotEnergy(gatom,newcoords,it));
 
-   double rd;
+	double rd;
 
-   if(RotDenType == 0)
-   {
-      if (dens_old>RZERO)
-       rd = dens_new/dens_old;
-      else rd = 1.0;
+	if(RotDenType == 0)
+	{
+		if (dens_old>RZERO)
+			rd = dens_new/dens_old;
+		else rd = 1.0;
 
-      rd *= exp(- MCTau*(pot_new-pot_old));
-   }
-   else if(RotDenType == 1)
-   {
-      rd = dens_new - dens_old - MCTau*(pot_new-pot_old);
-//    rd = exp(rd);
-   }
+		rd *= exp(- MCTau*(pot_new-pot_old));
+	}
+	else if(RotDenType == 1)
+	{
+		rd = dens_new - dens_old - MCTau*(pot_new-pot_old);
+		//rd = exp(rd);
+	}
 
-   bool Accepted = false;
-   if(RotDenType == 0)
-   {
-      if (rd>1.0)         Accepted = true;
-//    else if (rd>rnd7()) Accepted = true;
-      else if (rd>rand3) Accepted = true;
-   }
-   else if (RotDenType == 1)
-   {
-      if (rd > 0.0)   Accepted = true;
-//    else if (rd > log(rnd7())) Accepted = true;
-      else if (rd > log(rand3)) Accepted = true;
-   }
+	bool Accepted = false;
+	if(RotDenType == 0)
+	{
+		if (rd>1.0)         Accepted = true;
+		//else if (rd>rnd7()) Accepted = true;
+		else if (rd>rand3) Accepted = true;
+	}
+	else if (RotDenType == 1)
+	{
+		if (rd > 0.0)   Accepted = true;
+		//else if (rd > log(rnd7())) Accepted = true;
+    	else if (rd > log(rand3)) Accepted = true;
+	}
 
-   MCRotChunkTot += 1.0;
+	MCRotChunkTot += 1.0;
 
-   if (Accepted)
-   {
-      MCRotChunkAcp += 1.0;
+	if (Accepted)
+	{
+		MCRotChunkAcp += 1.0;
 
-      MCAngles[CTH][t1] = cost;
-      MCAngles[PHI][t1] = phi;
+		MCAngles[CTH][t1] = cost;
+		MCAngles[PHI][t1] = phi;
 
-      for (int id=0;id<NDIM;id++)
-      MCCosine [id][t1] = newcoords[id][t1];
-   }
+		for (int id=0;id<NDIM;id++)
+    		MCCosine [id][t1] = newcoords[id][t1];
+	}
 
 }
 
@@ -1084,21 +1113,24 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 // PN pigs
 // ask Toby if rhoold is for PQC only?
 #ifdef PIGSROTORS
-     if (t1==0 || t1 == (NumbRotTimes-1))
-        if (t1==0){
-                dens_old =rho;
-	        rhoold =  rho;
-	}
-        else {
-                dens_old =dens_old; 
-	        rhoold =  rhoold;
-	}
-      else {
+	if (t1 == 0 || t1 == (NumbRotTimes-1))
+   		if (t1 == 0)
+		{
+       		dens_old = rho;
+        	rhoold   = rho;
+		}
+    	else 
+		{
+       		dens_old = dens_old; 
+        	rhoold   =  rhoold;
+		}
+   	else 
+	{
 #endif
-      	dens_old=dens_old*rho;
-      	rhoold = rhoold + rho;
+   	dens_old         = dens_old*rho;
+   	rhoold           = rhoold + rho;
 #ifdef PIGSROTORS
-      }
+   	}
 #endif
 
       if (fabs(dens_old)<RZERO) dens_old = 0.0;
@@ -1164,8 +1196,26 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
          rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
       }
 
-      dens_new = dens_new * rho;
-      rhonew = rhonew + rho;
+#ifdef PIGSROTORS
+	if (t1 == 0 || t1 == (NumbRotTimes-1))
+   	if (t1 == 0)
+	{
+       	dens_new = rho;
+        rhonew   = rho;
+	}
+    else 
+	{
+       	dens_new = dens_new; 
+        rhonew   =  rhonew;
+	}
+   	else 
+	{
+#endif
+   	dens_new     =dens_new*rho;
+   	rhonew       = rhonew + rho;
+#ifdef PIGSROTORS
+   	}
+#endif
 
       if (fabs(dens_new)<RZERO) dens_new = 0.0;
 //    if (dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
@@ -1182,60 +1232,69 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
       double rd;
 
 //    distinginsh between Noya and RS
-      if(RotDenType == 0)
-      {
-         if (dens_old>RZERO)
-             rd = dens_new/dens_old;
-         else rd = 1.0;
-         rd *= exp(- MCTau*(pot_new-pot_old));
-      }
-      else if(RotDenType == 1)
-      {
-//       rd = dens_new/dens_old;
-//       use logarithmic for RS
-         rd = (rhonew - rhoold)/(4.0*(MCRotTau/WNO2K));
-//       cout<<"in cc:"<<rhonew<<" "<<rhoold<<" "<<rd<<" "<<4.0*(MCRotTau/WNO2K)<<endl;
-//       rd = rhonew - rhoold;
-//       rd = exp(rd);
-         rd -= MCTau*(pot_new-pot_old);
-         
-      }
+	if(RotDenType == 0)
+    {
+    	if (dens_old>RZERO)
+        rd = dens_new/dens_old;
+        else rd = 1.0;
+        rd *= exp(- MCTau*(pot_new-pot_old));
+    }
+    else if(RotDenType == 1)
+   	{
+		//rd = dens_new/dens_old;
+		//use logarithmic for RS
+		rd = (rhonew - rhoold)/(4.0*(MCRotTau/WNO2K));
+		//cout<<"in cc:"<<rhonew<<" "<<rhoold<<" "<<rd<<" "<<4.0*(MCRotTau/WNO2K)<<endl;
+		//rd = rhonew - rhoold;
+		//rd = exp(rd);
+		rd -= MCTau*(pot_new-pot_old);
+	}
 
-//    rd *= exp(- MCTau*(pot_new-pot_old));   
+	//rd *= exp(- MCTau*(pot_new-pot_old));   
 
-      bool Accepted = false;
-      if(RotDenType == 0)
-      {
-         if (rd>1.0)         Accepted = true;
-//       else if (rd>rnd7()) Accepted = true;
-         else if (rd>rand4) Accepted = true;
-      }
-      else
-      {
-         if (rd > 0.0)              Accepted = true;
-//       else if (rd > log(rnd7())) Accepted = true;
-         else if (rd > log(rand4)) Accepted = true;
-      }
+	bool Accepted = false;
+	if(RotDenType == 0)
+	{
+		if (rd>1.0)         Accepted = true;
+		//else if (rd>rnd7()) Accepted = true;
+		else if (rd>rand4) Accepted = true;
+    }
+    else
+    {
+    	if (rd > 0.0)       Accepted = true;
+		//else if (rd > log(rnd7())) Accepted = true;
+		else if (rd > log(rand4)) Accepted = true;
+	}
 
-//    MCTotal[type][MCROTAT] += 1.0;  
-      MCRotChunkTot +=1.0;
+	//MCTotal[type][MCROTAT] += 1.0;  
+	MCRotChunkTot +=1.0;
       
-      if (Accepted)
-      {
-//       MCAccep[type][MCROTAT] += 1.0;
-         MCRotChunkAcp +=1.0;
+	if (Accepted)
+    {
+		//MCAccep[type][MCROTAT] += 1.0;
+		MCRotChunkAcp +=1.0;
 
-         MCAngles[CTH][t1] = cost;
-         MCAngles[PHI][t1] = phi;
-         MCAngles[CHI][t1] = chi; //toby adds
+    	MCAngles[CTH][t1] = cost;
+    	MCAngles[PHI][t1] = phi;
+    	MCAngles[CHI][t1] = chi; //toby adds
   
-           sint=sqrt(1.0-cost*cost);
-           MCCosine [AXIS_X][t1] = sint*cos(phi);
-           MCCosine [AXIS_Y][t1] = sint*sin(phi);
-           MCCosine [AXIS_Z][t1] = cost;
-//       This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
-//       and Ieff about and perpendicular to one molecule-ixed axis.
-      }	      
+    	sint=sqrt(1.0-cost*cost);
+    	MCCosine [AXIS_X][t1] = sint*cos(phi);
+    	MCCosine [AXIS_Y][t1] = sint*sin(phi);
+    	MCCosine [AXIS_Z][t1] = cost;
+		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
+		//and Ieff about and perpendicular to one molecule-ixed axis.
+
+#ifdef MOLECULEINCAGE
+		MCCosinex[AXIS_X][t1] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
+        MCCosinex[AXIS_Y][t1] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
+        MCCosinex[AXIS_Z][t1] = -sint*cos(chi);
+
+        MCCosiney[AXIS_X][t1] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
+        MCCosiney[AXIS_Y][t1] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
+        MCCosiney[AXIS_Z][t1] = sint*sin(chi);
+#endif
+	}	      
 }
 
 double PotEnergy(int atom0, double **pos)   
@@ -1407,66 +1466,6 @@ double PotEnergy(int atom0, double **pos)
               spot_pair += E_2H2O;
            //   }
           }
-//---------[LINEAR - LINEAR ]--------------------------------------------------------------
-#ifdef VPOTTWOLINEARROTORS
-         else if ( ((MCAtom[type0].molecule == 4) && (MCAtom[type1].molecule == 4)) && (MCAtom[IMTYPE].numb > 1) )
-         {
-             double r1;
-             double r2;
-             double th1;
-             double th2;
-             double potl;
-             double cstheta1;
-             double cstheta2;
-             double b1[NDIM];
-             double b2[NDIM];
-             double b3[NDIM];  
-             int tm0=offset0 + it/RotRatio;
-             int tm1=offset1 + it/RotRatio;
-             double s1 = 0.0;
-             double s2 = 0.0;
-             double drr;
-             for (int id=0;id<NDIM;id++)
-             {    
-                  cstheta1 = (pos[id][t0] - MCCoords[id][t1])*MCCosine[id][tm0];
-                  cstheta2 = (pos[id][t0] - MCCoords[id][t1])*MCCosine[id][tm1];
-                  s1 += cstheta1;
-                  s2 += cstheta2;
-             }
-             r1 = 1.42001507521844027764;// bond length in bohr
-             r2 = r1;// bond length in bohr
-             th1 = acos(s1/r);
-             th2 = acos(s2/r);
-             for (int id=0;id<NDIM;id++)
-             {    
-                  b1[id] = MCCosine[id][tm0];
-                  b2[id] = (pos[id][t0] - MCCoords[id][t1])/r;
-                  b3[id] = MCCosine[id][tm1];
-             }
-             
-//Calculation of dihedral angle 
-             double n1[3];
-             double n2[3];
-             double mm[3];
-             double xx, yy;
-             double DihedralAngle;
-             
-             CrossProduct(b1, b2, n1);
-             CrossProduct(b2, b3, n2);
-             CrossProduct(n1, b2, mm);
-             
-             xx = DotProduct(n1, n2);
-             yy = DotProduct(mm, n2);
-             
-             DihedralAngle = atan2(yy, xx);
-             double phi = DihedralAngle;
-
-//Dihedral angle calculation is completed here
-             double rd = r/Units.bohr;
-            vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-           spot_pair += potl/Units.kelvin;
-         }
-#endif
 //----------------------------------------------- 
           else 
           spot_pair += SPot1D(r,type1);    // 1D interaction
@@ -2053,67 +2052,6 @@ double PotEnergy(int atom0, double **pos, int it)
            spot += E_2H2O;
            //   }
        }
-//---------[LINEAR - LINEAR ]-------------------------------------------
-#ifdef VPOTTWOLINEARROTORS
-         else if ( ((MCAtom[type0].molecule == 4) && (MCAtom[type1].molecule == 4)) && (MCAtom[IMTYPE].numb > 1) )
-         {
-             double r1;
-             double r2;
-             double th1;
-             double th2;
-             double potl;
-             double cstheta1;
-             double cstheta2;
-             double b1[NDIM];
-             double b2[NDIM];
-             double b3[NDIM];  
-             int tm0=offset0 + it/RotRatio;
-             int tm1=offset1 + it/RotRatio;
-             double s1 = 0.0;
-             double s2 = 0.0;
-             double drr;
-             for (int id=0;id<NDIM;id++)
-             {    
-                  cstheta1 = (pos[id][t0] - MCCoords[id][t1])*MCCosine[id][tm0];
-                  cstheta2 = (pos[id][t0] - MCCoords[id][t1])*MCCosine[id][tm1];
-                  s1 += cstheta1;
-                  s2 += cstheta2;
-             }
-             r1 = 1.42001507521844027764;// bond length in bohr
-             r2 = r1;// bond length in bohr
-             th1 = acos(s1/r);
-             th2 = acos(s2/r);
-             for (int id=0;id<NDIM;id++)
-             {    
-                  b1[id] = MCCosine[id][tm0];
-                  b2[id] = (pos[id][t0] - MCCoords[id][t1])/r;
-                  b3[id] = MCCosine[id][tm1];
-             }
-             
-//Calculation of dihedral angle 
-             double n1[3];
-             double n2[3];
-             double mm[3];
-             double xx, yy;
-             double DihedralAngle;
-             
-             CrossProduct(b1, b2, n1);
-             CrossProduct(b2, b3, n2);
-             CrossProduct(n1, b2, mm);
-             
-             xx = DotProduct(n1, n2);
-             yy = DotProduct(mm, n2);
-             
-             DihedralAngle = atan2(yy, xx);
-             double phi = DihedralAngle;
-
-//Dihedral angle calculation is completed here
-             double rd = r/Units.bohr;
-            vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-           spot += potl/Units.kelvin;
-         }
-#endif
-//----------------------------------------------- 
        else
        spot += SPot1D(r,type1);       // 1D interaction
 
@@ -2127,144 +2065,192 @@ double PotEnergy(int atom0, double **pos, int it)
 double PotRotEnergy(int atom0,double ** cosine,int it)   
 //  Orientational energy 
 {
-   int type0   =  MCType[atom0];
+	int type0   =  MCType[atom0];
+#ifdef DEBUG_PIMC
+	const char *_proc_=__func__;         //  PotRotEnergy()
+
+	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
+	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
+
+#ifndef PIGSROTORSIO
+	if (MCAtom[type0].numb != 1)
+	nrerror(_proc_,"Only one molecular impurity");
+#endif
+#endif
+
+	double spot = 0.0;
+
+#ifndef PIGSROTORS 
+	double dr[NDIM];
+
+	int offset0 =  atom0*NumbTimes;
+
+	for (int atom1=0;atom1<NumbAtoms;atom1++)
+	if (atom1 != atom0)                    // skip "self-interaction"
+	{	
+		int offset1 = atom1*NumbTimes;
+		int type1   = MCType[atom1];
 
 #ifdef DEBUG_PIMC
-   const char *_proc_=__func__;         //  PotRotEnergy()
-
-   if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
-   nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
-
-#ifndef VPOTTWOLINEARROTORS
-   if (MCAtom[type0].numb != 1)
-   nrerror(_proc_,"Only one molecular impurity");
-#endif
+		if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
+		nrerror(_proc_,"More then one molecular impurity type");
 #endif
 
-   double dr[NDIM];
-   double spot = 0.0;
+		bool wline = true;                  // skip if the time slice between ira and masha
 
-   int offset0 =  atom0*NumbTimes;
-
-   for (int atom1=0;atom1<NumbAtoms;atom1++)
-   if (atom1 != atom0)                    // skip "self-interaction"
-   {	
-      int offset1 = atom1*NumbTimes;
-      int type1   = MCType[atom1];
-
-#ifdef DEBUG_PIMC
-      if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
-      nrerror(_proc_,"More then one molecular impurity type");
-#endif
-
-      bool wline = true;                  // skip if the time slice between ira and masha
-
-      if (WORM && Worm.exists && (Worm.type == type1))  
-      wline = WorldLine((atom1-MCAtom[type1].offset/NumbTimes), it);
+		if (WORM && Worm.exists && (Worm.type == type1))  
+		wline = WorldLine((atom1-MCAtom[type1].offset/NumbTimes), it);
     
-      if (wline)
-      {  
-         int t0 = offset0 + it;
-         int t1 = offset1 + it;
+		if (wline)
+		{  
+			int t0 = offset0 + it;
+			int t1 = offset1 + it;
 
-         double dr2 = 0.0;  		 
-         for (int id=0;id<NDIM;id++)
-         {
-            dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+			double dr2 = 0.0;  		 
+			for (int id=0;id<NDIM;id++)
+			{
+				dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
 
-            if (MINIMAGE)
-            {
-            cout << "MIN IMAGE for orient pot" << endl; exit(0);
-            dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
-            }
+				if (MINIMAGE)
+				{
+					cout << "MIN IMAGE for orient pot" << endl; exit(0);
+					dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
+				}
  
-            dr2    += (dr[id]*dr[id]);
-         }
+				dr2    += (dr[id]*dr[id]);
+			}
 	       	 
 //#ifdef _CUTOFF_	     
-//       if (dr2<dljcutoff2)
+//     		if (dr2<dljcutoff2)
 //#endif
-          double r = sqrt(dr2);
+			double r = sqrt(dr2);
 
-          int sgn = -1;   
-          int tm  = offset0 + it/RotRatio;
-//        int tm  = offset0 + (int)floor((double)it/(double)RotRatio);
+			int sgn = -1;   
+			int tm  = offset0 + it/RotRatio;
+//   		int tm  = offset0 + (int)floor((double)it/(double)RotRatio);
 
-          double cost = 0.0;
-          for (int id=0;id<NDIM;id++) // n*dr = r*cos(theta) 
-          cost += (cosine[id][tm]*dr[id]);   	 
+			double cost = 0.0;
+			for (int id=0;id<NDIM;id++) // n*dr = r*cos(theta) 
+			cost += (cosine[id][tm]*dr[id]);   	 
 	 
-          cost /= r;                  // cos(theta)
-          cost *= sgn;                // correct the orientation 
-#ifdef VPOTTWOLINEARROTORS
-//---------[LINEAR - LINEAR ]
-      if ( ((MCAtom[type0].molecule == 4) && (MCAtom[type1].molecule == 4)) && (MCType[atom1] == IMTYPE) )
-      {
-         double r1;
-         double r2;
-         double th1;
-         double th2;
-         double potl;
-         double cstheta1;
-         double cstheta2;
-         double b1[NDIM];
-         double b2[NDIM];
-         double b3[NDIM];  
-         int t0 = offset0 + it;
-         int t1 = offset1 + it;
-
-         int tm0=offset0 + it/RotRatio;
-         int tm1=offset1 + it/RotRatio;
-         double s1 = 0.0;
-         double s2 = 0.0;
-         for (int id=0;id<NDIM;id++)
-         {    
-              cstheta1 = (MCCoords[id][t0] - MCCoords[id][t1])*MCCosine[id][tm0];
-              cstheta2 = (MCCoords[id][t0] - MCCoords[id][t1])*MCCosine[id][tm1];
-              s1 += cstheta1;
-              s2 += cstheta2;
-         }
-         r1 = 1.42001507521844027764;// bond length in bohr
-         r2 = r1;// bond length in bohr
-         th1 = acos(s1/r);
-         th2 = acos(s2/r);
-         for (int id=0;id<NDIM;id++)
-         {    
-              b1[id] = MCCosine[id][tm0];
-              b2[id] = (MCCoords[id][t0] - MCCoords[id][t1])/r;
-              b3[id] = MCCosine[id][tm1];
-         }
-             
-//Calculation of dihedral angle 
-         double n1[3];
-         double n2[3];
-         double mm[3];
-         double xx, yy;
-         double DihedralAngle;
-             
-         CrossProduct(b1, b2, n1);
-         CrossProduct(b2, b3, n2);
-         CrossProduct(n1, b2, mm);
-             
-         xx = DotProduct(n1, n2);
-         yy = DotProduct(mm, n2);
-           
-         DihedralAngle = atan2(yy, xx);
-         double phi = DihedralAngle;
-
-//Dihedral angle calculation is completed here
-         double rd = r/Units.bohr;
-         vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-         spot += potl/Units.kelvin;
-      }
-#else
-          spot += (LPot2D(r,cost,type0));  
+			cost /= r;                  // cos(theta)
+			cost *= sgn;                // correct the orientation 
+          	spot += (LPot2D(r,cost,type0));  
+     	} 
+	}   // END sum over atoms
 #endif
- 
-     } // END sum over time slices 	   
-   }   // END sum over atoms
 
-   return (spot);
+
+#ifdef LINEARROTORS
+	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
+	{
+	    int offset0 =  atom0*NumbTimes;
+
+        for (int atom1=0;atom1<NumbAtoms;atom1++)
+        if (atom1 != atom0)                    
+        {
+            int offset1 = atom1*NumbTimes;
+            int type1   = MCType[atom1];
+
+            int t0  = offset0 + it;
+            int t1  = offset1 + it;
+
+            int tm0 = offset0 + it/RotRatio;
+            int tm1 = offset1 + it/RotRatio;
+
+	        string stype = MCAtom[type0].type;
+			if (stype == H2)
+	        {
+                double s1 = 0.0;
+                double s2 = 0.0;
+                double dr2 = 0.0;
+				double dr[NDIM];
+
+                for (int id=0;id<NDIM;id++)
+                {
+                    dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+                    dr2    += (dr[id]*dr[id]);
+                    double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*cosine[id][tm0];
+                    double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][tm1];
+                    s1 += cst1;
+                    s2 += cst2;
+                }
+                double r = sqrt(dr2);
+                double th1 = acos(s1/r);
+                double th2 = acos(s2/r);
+
+                double b1[NDIM];
+                double b2[NDIM];
+                double b3[NDIM];
+                for (int id=0;id<NDIM;id++)
+                {
+                    b1[id] = cosine[id][tm0];
+                    b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
+                    b3[id] = MCCosine[id][tm1];
+                }
+                VectorNormalisation(b1);
+                VectorNormalisation(b2);
+                VectorNormalisation(b3);
+
+                //Calculation of dihedral angle 
+                double n1[NDIM];
+                double n2[NDIM];
+                double mm[NDIM];
+
+                CrossProduct(b2, b1, n1);
+                CrossProduct(b2, b3, n2);
+                CrossProduct(b2, n2, mm);
+
+                double xx = DotProduct(n1, n2);
+                double yy = DotProduct(n1, mm);
+
+                double phi = atan2(yy, xx);
+                if (phi<0.0) phi += 2.0*M_PI;
+
+                //Dihedral angle calculation is completed here
+                double r1 = 1.42;// bond length in bohr
+                double r2 = r1;// bond length in bohr
+#ifdef GETPOT
+                double rd = Distance/BOHRRADIUS;
+#else
+                double rd = r/BOHRRADIUS;
+#endif
+                double potl;
+                vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
+                spot += potl*CMRECIP2KL;
+			}  //stype
+
+
+
+		    if (stype == HF )
+            {
+
+                double com_1[NDIM],com_2[NDIM];
+                double uvec1[NDIM],uvec2[NDIM];
+                double E12;
+
+                for (int id=0;id<NDIM;id++)
+                {
+                    com_1[id] = MCCoords[id][t0];
+                    com_2[id] = MCCoords[id][t1];
+                    uvec1[id] = cosine[id][tm0];
+                    uvec2[id] = MCCosine[id][tm1];
+                }
+                cluster_(com_1, com_2, uvec1, uvec2, &E12);
+                spot += E12;
+            }  //stype
+        } //loop over atom1 (molecules)
+    }
+#endif
+
+#ifdef PIGSROTORS
+    double weight = 1.0;
+    if (it == 0 || it == (NumbRotTimes - 1))
+    {
+        weight = 0.5;
+    }
+#endif
+    return (spot*weight);
 }
 
 double PotRotE3D(int atom0,double * Eulang,int it)   
@@ -2285,6 +2271,60 @@ double PotRotE3D(int atom0,double * Eulang,int it)
    double spot = 0.0;
 
    int offset0 =  atom0*NumbTimes;
+
+#ifdef MOLECULEINCAGE
+	if (MOLECINCAGE)
+    {
+    	int t0 = offset0 + it;
+        double com_1[NDIM];
+        double Eulang_1[NDIM];
+        double E_H2OC60;
+
+        for (int id=0;id<NDIM;id++)
+        {
+        	com_1[id] = MCCoords[id][t0]-RCOMC60[atom0][id];
+        }
+
+        int tm0=offset0 + it/RotRatio;
+        Eulang_1[PHI]=MCAngles[PHI][tm0];
+        Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+        Eulang_1[CHI]=MCAngles[CHI][tm0];
+        calengy_(com_1, Eulang_1, &E_H2OC60 );
+        spot += E_H2OC60;
+
+        // PAIR of CAGES
+        double spot_pair = 0.0 ;
+        for (int atom1=0;atom1<NumbAtoms;atom1++)
+        if ( atom0 < atom1 )
+        {
+       		int type1   = MCType[atom1];
+           	int offset1 = NumbTimes*atom1;
+           	double com_1[3],com_2[3];
+           	double Eulang_1[3],Eulang_2[3];
+           	double E12;
+            int t0 = offset0 + it;
+            int t1 = offset1 + it;
+            for (int id=0;id<NDIM;id++)
+            {
+            	com_1[id] = MCCoords[id][t0];
+                com_2[id] = MCCoords[id][t1];
+            }
+            int tm0=offset0 + it/RotRatio;
+            int tm1=offset1 + it/RotRatio;
+            Eulang_1[PHI]=MCAngles[PHI][tm0];
+            Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+            Eulang_1[CHI]=MCAngles[CHI][tm0];
+            Eulang_2[PHI]=MCAngles[PHI][tm1];
+            Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+            Eulang_2[CHI]=MCAngles[CHI][tm1];
+            cluster_(com_1, com_2, Eulang_1, Eulang_2, &E12);
+            spot_pair += E12;
+        }// loop over atom1 (molecules)
+        spot +=spot_pair;
+	}//endif MOLECINCAGE
+    else
+    {
+#endif
 
    for (int atom1=0;atom1<NumbAtoms;atom1++)
    if (atom1 != atom0)                    // skip "self-interaction"
@@ -2370,7 +2410,9 @@ double PotRotE3D(int atom0,double * Eulang,int it)
       }
 
    }   // END sum over atoms
-
+#ifdef MOLECULEINCAGE
+    }//endif MOLECINCAGE
+#endif
    return (spot);
 }
 
