@@ -5,6 +5,7 @@ pimc
 bb
 fort.*
 *.txt
+a.out
 #ignore
 /examples/linear_pigs/results/*
 !/examples/linear_pigs/results/
@@ -12,6 +13,8 @@ fort.*
 /examples/linear_pigs/yw001.*
 /examples/linear_pigs/Input*
 /examples/linear_pigs/Enrgy*
+/examples/linear_pigs/a.out
+/examples/linear_pigs/*exe
 /examples/linear_pigs/*/
 !/examples/linear_pigs/
 #
