@@ -96,14 +96,14 @@ def outputstring(numbbeads,tau,tau_exact,temperature,temperature_exact,beta,beta
 	return output2
 
 def outputstring1(numbbeads,tau,temperature):
-    '''
-    This function gives us the exact values of the agruments
-    '''
-    argu1          = "%7d"   % numbbeads
-    argu2          = "%5.3f" % tau
-    argu7          = "%7.5f" % temperature
-    output2 ="numbbeads = "+argu1+", tau = "+argu2+", exact_tau = "+argu3+", temperature = "+argu4+", exact_temperature = "+argu5+", beta = "+argu6+", exact_beta = "+argu7+"\n"
-    return output2
+	'''
+	This function gives us the exact values of the agruments
+	'''
+	argu1          = "%7d"   % numbbeads
+	argu2          = "%20.15f" % tau
+	argu3          = "%7.5f" % temperature
+	output2 ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
+	return output2
 
 def modify_input(temperature,numbbeads,numbblocks,distance):
 	'''
@@ -176,7 +176,7 @@ for i in range(1, nrange+1):
 
 	beta         = 1.0/temperature   
 	tau          = beta/(value-1)
-
+'''
 	fldr         = file1_name+str(numbbeads)+file2_name
 	folder_run   = fldr
 	call(["mkdir", folder_run])
@@ -210,6 +210,7 @@ for i in range(1, nrange+1):
 	call(["qsub", fname])
 	os.chdir(src_path)
 
+'''
 	fw.write(outputstring1(numbbeads,tau,temperature))
 
 fw.close()
