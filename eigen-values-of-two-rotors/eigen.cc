@@ -27,7 +27,7 @@ int main()
 	double weightsPhi;
 	phigrid(nSize, phi, weightsPhi);
 	
-	int nSizeTotal        = sizeloop(nSizeRot, nSkip);
+	int nSizeTotal = sizeloop(nSizeRot, nSkip);
 
 	double hMatrixRe[nSizeTotal][nSizeTotal];
 	double hMatrixIm[nSizeTotal][nSizeTotal];
@@ -127,7 +127,11 @@ int main()
 													double potl;
 													double dihedralAngle		= phi[iPhiRotor1]-phi[iPhiRotor2];
 													vh2h2_(&rCOM, &bondLength1, &bondLength2, &theta1, &theta2, &dihedralAngle, &potl);
+#ifndef TESTNORM 
 													double vpot 				= potl/wavenumber;
+#else
+													double vpot					=1.0;
+#endif
 //potential call is end here
 
 													double psiReBra				= spherHarmonicsReBra1*spherHarmonicsReBra2-spherHarmonicsImBra1*spherHarmonicsImBra2;
@@ -152,34 +156,29 @@ int main()
 //loop over coordinates end here//
 
 
-//									cout<<" i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket "<<i1Bra<<"  "<<i1Ket<<"  "<<m1Bra<<"  "<<m1Ket<<"  "<<i2Bra<<"  "<<i2Ket<<"  "<<m2Bra<<"  "<<m2Ket<<"  "<< setw(10)<<sumRotor1Re<<"     "<<setw(10)<<sumRotor1Im<<endl;
-
 #ifdef ROTATIONALENERGY
-									double energyRotor1, energyRotor2;
-									if (i1Bra == i1Ket && m1Bra == m1Ket) 
+									double energyRotor;
+									if (i1Bra == i1Ket && m1Bra == m1Ket && i2Bra == i2Ket && m2Bra == m2Ket) 
 									{
-										energyRotor1 = rotEnergy(i1Bra);
+										energyRotor = rotEnergy(i1Bra) + rotEnergy(i2Bra);
 									}
 									else
 									{
-										energyRotor1 = 0.0;
+										energyRotor = 0.0;
 									}
 
-									if (i2Bra == i2Ket && m2Bra == m2Ket) 
-									{
-										energyRotor2 = rotEnergy(i2Bra);
-									}
-									else
-									{
-										energyRotor2 = 0.0;
-									}
-									double totalRotEnergy = energyRotor1 + energyRotor2;
-
-									hMatrixRe[indexBra][indexKet] = sumRotor1Re + totalRotEnergy;
+									hMatrixRe[indexBra][indexKet] = sumRotor1Re + energyRotor;
 									hMatrixIm[indexBra][indexKet] = sumRotor1Im;
 #else
 									hMatrixRe[indexBra][indexKet] = sumRotor1Re;
 									hMatrixIm[indexBra][indexKet] = sumRotor1Im;
+#endif
+
+#ifdef IOREAD
+									if (sumRotor1Re > 1e-15)
+									{
+									cout<<" i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket "<<i1Bra<<"  "<<i1Ket<<"  "<<m1Bra<<"  "<<m1Ket<<"  "<<i2Bra<<"  "<<i2Ket<<"  "<<m2Bra<<"  "<<m2Ket<<"  "<< setw(10)<<sumRotor1Re<<"     "<<setw(10)<<sumRotor1Im<<endl;
+									}
 #endif
 
 									indexKet += 1;

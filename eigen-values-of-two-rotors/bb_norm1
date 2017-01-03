@@ -1,0 +1,17 @@
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 0  0  0  0  0  0  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 0  0  0  0  1  1  -1  -1           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 0  0  0  0  1  1  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 0  0  0  0  1  1  1  1           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  -1  -1  0  0  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  0  0  0  0  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  1  1  0  0  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  -1  -1  1  1  -1  -1           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  -1  -1  1  1  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  -1  -1  1  1  1  1           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  0  0  1  1  -1  -1           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  0  0  1  1  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  0  0  1  1  1  1           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  1  1  1  1  -1  -1           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  1  1  1  1  0  0           1              0
+ i1Bra, i1Ket, m1Bra, m1Ket, i2Bra, i2Ket, m2Bra, m2Ket 1  1  1  1  1  1  1  1           1              0
+
