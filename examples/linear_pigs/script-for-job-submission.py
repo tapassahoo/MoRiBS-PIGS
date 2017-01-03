@@ -23,7 +23,6 @@ def bconstant():
 	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
 	return bconst
 
-
 def replace(string_old, string_new, file1, file2):
 	'''
 	This function replaces old string by new string

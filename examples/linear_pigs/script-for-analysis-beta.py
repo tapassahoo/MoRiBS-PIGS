@@ -5,13 +5,6 @@ import time
 from subprocess import call
 from os import system
 import os
-import decimal
-
-def dropzeros(number):
-	mynum          = decimal.Decimal(number).normalize()
-	# e.g 22000 --> Decimal('2.2E+4')
-	return mynum.__trunc__() if not mynum % 1 else float(mynum)
-
  
 def replace(string_old, string_new, file1, file2):
 	f1 = open(file1, 'r')
@@ -41,30 +34,34 @@ def exact_value(tau,numbbeads):
 #initial parameters for qmc.input
 numbblocks       = 10000
 temperature	     = 10.0
-beta             = 1.0/temperature               
+tau 		     = 0.0005
 
-numbbeads        = 50
-dnumbbeads       = 3
+ntau    	     = 10
+dtau    	     = 0.001
+
+rmin             = 3.0
+rmax             = 10.0
+nr               = 70
+dr               = (rmax-rmin)/nr
+
+dbeta            = 0.001
+nbeta            = 100
 
 src_path  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-nrange           = numbbeads                                                                 #change
-displacement     = dnumbbeads                                                                #change
-file1_name       = "temp"+str(temperature)+"blocks"+str(numbblocks)+"e0vsbeads"              #change
-file2_name       = ""                                                                        #change
-
-fw = open("Energy-vs-tau-2-molecules-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt", "a")  #change
-value_min        = 0.0                                                                       #change
+nrange           = nbeta                                                                    #change
+displacement     = dbeta                                                                    #change
+file1_name       = "tau"+str(tau)+"blocks"+str(numbblocks)+"e0vsbeta"                       #change
+file2_name       = "K-1"                                                                    #change
+fw = open("Energy-vs-beta-2-molecules-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt", "a")   #change
+value_min        = 0.0                                                                      #change
 
 # Loop over your jobs
 for i in range(1, nrange+1): 
  
-	value = value_min + i*displacement
-	numbbeads    = dropzeros(value)
+	value = value_min + i*displacement                                
+	r_dis        = "%5.3f" % value 
 
-	beta         = 1.0/temperature
-	tau          = beta/(value-1)
-
-	fldr         = file1_name+str(numbbeads)+file2_name
+	fldr         = file1_name+r_dis+file2_name
 	folder_run = fldr
 	call(["cp", "analyze.f", folder_run+"/results"])
 	path_enter = src_path+folder_run+"/results"
@@ -75,7 +72,7 @@ for i in range(1, nrange+1):
 	print num_lines
 	replace("nn_input", str(numbblocks), "analyze.f", "analyze1.f")
 	replace("analyze_input", file_pigs+".eng", "analyze1.f", "analyze2.f")
-	replace("param2", str(tau), "analyze2.f", "analyze3.f")
+	replace("param2", str(r_dis), "analyze2.f", "analyze3.f")
 	call(["mv", "analyze3.f", "analyze.f"])
 	call(["rm", "analyze1.f", "analyze2.f"])
 
@@ -90,16 +87,16 @@ for i in range(1, nrange+1):
 	os.chdir(src_path)
 
 ####################################################
-#	beta         = value #1.0/temperature                                                  #change
-#	temperature  = 1.0/beta                                                                #change
+	beta         = value #1.0/temperature                                                  #change
+	temperature  = 1.0/beta                                                                #change
 
-#	numbbeads    = beads(tau,beta)                                                         #change
-#	beta_exact   = exact_value(tau,numbbeads)
-#	temperature_exact  = 1.0/beta_exact
+	numbbeads    = beads(tau,beta)                                                         #change
+	beta_exact   = exact_value(tau,numbbeads)
+	temperature_exact  = 1.0/beta_exact
 ####################################################
 
 	argu1        = "%7d" % numbbeads
-	argu2        = "%7.5f" % temperature
+	argu2        = "%7.5f" % temperature_exact
 	argu3        = "%7.5f" % beta
 	fw.write(argu1+"   "+"   "+argu2+"   "+argu3+"  "+str1)
 	fr.close()

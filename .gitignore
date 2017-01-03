@@ -6,10 +6,11 @@ bb
 fort.*
 *.txt
 a.out
+run
+aa.f
 #ignore
 /examples/linear_pigs/results/*
 !/examples/linear_pigs/results/
-/examples/linear_pigs/analyze.cc
 /examples/linear_pigs/yw001.*
 /examples/linear_pigs/Input*
 /examples/linear_pigs/Enrgy*
@@ -22,7 +23,8 @@ eigen-values-of-two-rotors/*/
 eigen-values-of-two-rotors/*txt
 eigen-values-of-two-rotors/vh2h2*
 eigen-values-of-two-rotors/*.o
-eigen-values-of-two-rotors/bb
+eigen-values-of-two-rotors/bb*
+eigen-values-of-two-rotors/*.dat
 eigen-values-of-two-rotors/*err
 eigen-values-of-two-rotors/*out
 !eigen-values-of-two-rotors/
