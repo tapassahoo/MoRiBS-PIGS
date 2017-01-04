@@ -13,13 +13,32 @@ extern "C" void vh2h2_(double *rCOM, double *bondLength1, double *bondLength2, d
 
 //==================================================================================================================================
 
-/*For Matrix diagonalization*/
+/*For Matrix diagonalization (Real Symmetric)*/
+//----------------------------------------------------------------------------------------------------------------------------------
 
 extern "C" void dsyev_( char* jobz, char* uplo, int* n, double* a, int* lda, double* w, double* work, int* lwork, int* info );
 
 void print_matrix( char* desc, int m, int n, double* a, int lda );
+void matdiagsymmetric(int nSizeTotal, double *a);
 
 //==================================================================================================================================
+
+/*For Matrix diagonalization (Complex Hermitian)*/
+//----------------------------------------------------------------------------------------------------------------------------------
+/* Complex datatype */
+struct _dcomplex { double re, im; };
+typedef struct _dcomplex dcomplex;
+
+/* ZHEEV prototype */
+extern "C" void zheev_( char* jobz, char* uplo, int* n, dcomplex* a, int* lda, double* w, dcomplex* work, int* lwork, double* rwork, int* info );
+/* Auxiliary routines prototypes */
+void print_matrix( char* desc, int m, int n, dcomplex* a, int lda );
+void print_rmatrix( char* desc, int m, int n, double* a, int lda );
+
+void matdiaghermitian(int nSizeTotal, double *c, double *d);
+
+//==================================================================================================================================
+
 
 void thetagrid(int nSize, double *cosTheta, double *weightsTheta);
 void phigrid(int nSize, double *phi, double &weightsPhi);
@@ -29,7 +48,6 @@ double normalizedPl0(int j,double x);
 void normalizationCheck(int nSize, int nSizeRot);
 
 int sizeloop(int nSizeRot, int nSkip);
-void matrixdiagonalization(int nSizeTotal, double *a);
 double rotEnergy(int l);
 
 #endif

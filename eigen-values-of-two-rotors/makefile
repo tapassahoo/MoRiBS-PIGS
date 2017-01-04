@@ -3,7 +3,7 @@
 #options= -Ofast -march=native -fopenmp
 options= -Ofast -fopenmp
 
-CFLAGS =-I./sprng/include -I/usr/local/include -DROTATIONALENERGY #-DIOREAD #-DTESTNORM
+CFLAGS =-I./sprng/include -I/usr/local/include #-DTESTNORM #-DIOREAD
 
 #Below is the LDFLAGS Toby Zeng use on nlogn
 #LDFLAGS=-L/home/pnroy/Dev/lib64/ -lm -L./sprng/lib -llcg -L/home/pnroy/Dev/lib64/ -lgfortran  -L/opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
@@ -22,11 +22,8 @@ GCC=gcc
 #FC=/home/pnroy/Dev/bin/gfortran
 
 #-------------------------------------------------------------------------
-# objects for QMC
 
 runOBJS= plgndr.o gauleg.o vh2h2.o input.o
-
-#----------------------------------------- PIMC --------------------------
 
 run:	eigen.o $(runOBJS)
 		$(CC) -o $@  eigen.o $(runOBJS) $(LDFLAGS) -fopenmp

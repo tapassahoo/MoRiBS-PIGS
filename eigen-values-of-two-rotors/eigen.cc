@@ -156,7 +156,6 @@ int main()
 //loop over coordinates end here//
 
 
-#ifdef ROTATIONALENERGY
 									double energyRotor;
 									if (i1Bra == i1Ket && m1Bra == m1Ket && i2Bra == i2Ket && m2Bra == m2Ket) 
 									{
@@ -167,6 +166,7 @@ int main()
 										energyRotor = 0.0;
 									}
 
+#ifndef TESTNORM 
 									hMatrixRe[indexBra][indexKet] = sumRotor1Re + energyRotor;
 									hMatrixIm[indexBra][indexKet] = sumRotor1Im;
 #else
@@ -197,13 +197,15 @@ int main()
 
 //Bra loop ended here//
 	
-	double a[nSizeTotal*nSizeTotal];
+	double c[nSizeTotal*nSizeTotal];
+	double d[nSizeTotal*nSizeTotal];
 	int ii = 0;
 	for (int i=0; i<nSizeTotal; i++)
 	{
 		for (int j=0; j<nSizeTotal; j++)
 		{
-			a[ii] = hMatrixRe[i][j];
+			c[ii] = hMatrixRe[i][j];
+			d[ii] = hMatrixIm[i][j];
 			if(hMatrixRe[i][j] != hMatrixRe[j][i])
 			{
 				cout<<i<<"   "<<j<<"   "<<setw(20)<<hMatrixRe[i][j]<<"      "<<setw(20)<<hMatrixRe[j][i]<<endl;
@@ -211,11 +213,11 @@ int main()
 			ii++;
 		}
 	}
-    matrixdiagonalization(nSizeTotal, a);
+    matdiaghermitian(nSizeTotal, c, d);
 	return 0;
 }
 
-void matrixdiagonalization(int nSizeTotal, double *a)
+void matdiagsymmetric(int nSizeTotal, double *a)
 {
 //Lapack starts here
     /* Locals */
@@ -261,6 +263,88 @@ void matrixdiagonalization(int nSizeTotal, double *a)
     exit(0);
 
 // End of DSYEV Example 
+}
+
+void matdiaghermitian(int nSizeTotal, double *c, double *d)
+{
+//Lapack starts here
+    /* Locals */
+
+	c[nSizeTotal*nSizeTotal];
+	d[nSizeTotal*nSizeTotal];
+
+	int N = nSizeTotal;
+	int LDA = N;
+    int n = N, lda = LDA, info, lwork;
+	dcomplex a[LDA*N];
+
+	for (int i = 0; i < nSizeTotal*nSizeTotal; i++)
+	{
+		a[i] = {c[i],d[i]};
+	}
+	dcomplex wkopt;
+	dcomplex* work;
+
+    /* Local arrays */
+    double w[N], rwork[3*N-2];
+
+    /* Query and allocate the optimal workspace */
+    lwork = -1;
+    char msg1[] = "Vectors";
+    char msg2[] = "Lower";
+	zheev_( msg1, msg2, &n, a, &lda, w, &wkopt, &lwork, rwork, &info );
+	lwork = (int)wkopt.re;
+	work = (dcomplex*)malloc( lwork*sizeof(dcomplex) );
+
+    /* Solve eigenproblem */
+    zheev_( msg1, msg2, &n, a, &lda, w, work, &lwork, rwork, &info );
+
+    /* Check for convergence */
+    if( info > 0 ) 
+	{
+		cout<< "The algorithm failed to compute eigenvalues."<<endl;
+        exit( 1 );
+    }
+
+    /* Print eigenvalues */
+    char msg3[] = "Eigenvalues";
+    char msg4[] = "Eigenvectors (stored columnwise)";
+
+	print_rmatrix( msg3, 1, n, w, 1 );
+	/* Print eigenvectors */
+//    print_matrix( msg4, n, n, a, lda );
+
+    /* Free workspace */
+    free( (void*)work );
+    exit( 0 );
+} /* End of ZHEEV Example */
+
+/* Auxiliary routine: printing a real matrix */
+void print_rmatrix( char* desc, int m, int n, double* a, int lda ) 
+{
+	int i, j;
+
+	stringstream bc;
+    bc.width(1);
+    bc.fill('0');
+    bc<<nSizeRot;
+    string fname = "Eigen-values-nSizeRot" + bc.str()+".txt";
+
+    ofstream myfile;
+    myfile.open(fname.c_str());
+
+    for( i = 0; i < m; i++ ) 
+	{
+    	for( j = 0; j < n; j++ )
+		{
+#ifndef TESTNORM 
+			myfile<<setw(14)<< a[i+j*lda]*wavenumber <<endl;
+#else
+			myfile<<setw(14)<< a[i+j*lda] <<endl;
+#endif
+        }
+	}
+	myfile.close();
 }
 
 /* Auxiliary routine: printing a matrix */
