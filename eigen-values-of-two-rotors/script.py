@@ -66,42 +66,45 @@ def modify_input(njrot):
 
 #initial parameters for qmc.input
 src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/eigen-values-of-two-rotors/"
-nrange           = 7
+nrange           = 5
 displacement     = 1
-file1_name       = "result-rot-jrot"
+skip		     = 1
+file1_name       = "result-skip"+str(skip)+"-jrot"
 argument		 = "jrot"
 
 # Loop over your jobs
-for i in range(6, nrange+1): 
+for i in range(1, nrange+1): 
+
+	if (((i-1)%skip) == 0 ):
  
-	value        = i*displacement          
-	jrot         = "%d" % value
+		value        = i*displacement          
+		jrot         = "%d" % value
 
-	fldr         = file1_name+str(jrot)
-	folder_run   = fldr
-	call(["mkdir", folder_run])
+		fldr         = file1_name+str(jrot)
+		folder_run   = fldr
+		call(["mkdir", folder_run])
 
-	# copy files to running folder
-	dest_path    = src_path +folder_run
-	source_file  = src_path + "parameter.input"
-	call(["cp", source_file, dest_path])
-	source_file  = src_path + "run"
-	call(["cp", source_file, dest_path])
-
-	modify_input(jrot)
-	source_file = src_path + "parameter1.input"
-	call(["cp", source_file, dest_path])
+		# copy files to running folder
+		dest_path    = src_path +folder_run
+		source_file  = src_path + "parameter.input"
+		call(["cp", source_file, dest_path])
+		source_file  = src_path + "run"
+		call(["cp", source_file, dest_path])
+	
+		modify_input(jrot)
+		source_file = src_path + "parameter1.input"
+		call(["cp", source_file, dest_path])
      
-	# Write submit file for the current cycle
-	os.chdir(dest_path)
-	call(["mv", "parameter1.input", "parameter.input"])
+		# Write submit file for the current cycle
+		os.chdir(dest_path)
+		call(["mv", "parameter1.input", "parameter.input"])
 
-    #job submission
-	fname        = 'submit_'+str(i)
-	fwrite       = open(fname, 'w')
+		#job submission
+		fname        = 'submit_'+str(i)
+		fwrite       = open(fname, 'w')
 
-	fwrite.write(jobstring(argument, value))
-	fwrite.close()
-	call(["qsub", fname])
+		fwrite.write(jobstring(argument, value))
+		fwrite.close()
+		call(["qsub", fname])
 
-	os.chdir(src_path)
+		os.chdir(src_path)
