@@ -175,7 +175,6 @@ for i in range(1, nrange+1):
 
 	beta         = 1.0/temperature   
 	tau          = beta/(value-1)
-'''
 	fldr         = file1_name+str(numbbeads)+file2_name
 	folder_run   = fldr
 	call(["mkdir", folder_run])
@@ -209,7 +208,6 @@ for i in range(1, nrange+1):
 	call(["qsub", fname])
 	os.chdir(src_path)
 
-'''
 	fw.write(outputstring1(numbbeads,tau,temperature))
 
 fw.close()

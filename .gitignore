@@ -2,7 +2,7 @@
 *.o
 #ignore executable
 pimc
-bb
+bb*
 fort.*
 *.txt
 a.out
