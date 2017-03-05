@@ -853,9 +853,9 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 	{
 // PN modification for open path below
 #ifdef PIGSROTORS
-		if (t1==0 || t1 == (NumbRotTimes-1)) 
+		if (t1 == 0 || t1 == (NumbRotTimes-1)) 
 		{
-			if (t1==0)
+			if (t1 == 0)
 			{
 				dens_old = SRotDens(p1,type);
 			}
@@ -2061,7 +2061,7 @@ double PotEnergy(int atom0, double **pos, int it)
 
    return (spot);
 }
-
+/*
 double PotRotEnergy(int atom0,double ** cosine,int it)   
 //  Orientational energy 
 {
@@ -2221,7 +2221,6 @@ double PotRotEnergy(int atom0,double ** cosine,int it)
 			}  //stype
 
 
-
 		    if (stype == HF )
             {
 
@@ -2241,16 +2240,60 @@ double PotRotEnergy(int atom0,double ** cosine,int it)
             }  //stype
         } //loop over atom1 (molecules)
     }
+
+	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb = 1) )
+	{
+        const double AuToAngstrom  = 0.52917720859;
+        const double AuToDebye     = 1.0/0.39343;
+        const double AuToCmInverse = 219474.63137;
+        const double AuToKelvin    = 315777.0;
+
+        int offset0 =  0;
+        int t0  = offset0 + it;
+        int tm0 = offset0 + it/RotRatio;
+
+        double dm   = 1.86/AuToDebye;
+        double dm2  = dm*dm;
+        double RR   = 10.05/AuToAngstrom;
+        double E12 = -2.0*dm2*cosine[2][tm0]/(RR*RR*RR);
+        spot        = E12*AuToKelvin;
+    }
 #endif
 
-#ifdef PIGSROTORS
     double weight = 1.0;
+#ifdef PIGSROTORS
     if (it == 0 || it == (NumbRotTimes - 1))
     {
         weight = 0.5;
     }
 #endif
     return (spot*weight);
+}
+*/
+double PotRotEnergy(int atom0,double **cosine,int it)   
+{
+	int type0   =  MCType[atom0];
+    const double AuToAngstrom  = 0.52917720859;
+    const double AuToDebye     = 1.0/0.39343;
+    const double AuToCmInverse = 219474.63137;
+    const double AuToKelvin    = 315777.0;
+
+    int offset0 =  0;
+    int t0  = offset0 + it;
+
+    double dm   = 1.86/AuToDebye;
+    double dm2  = dm*dm;
+    double RR   = 10.05/AuToAngstrom;
+    double E12 = -2.0*dm2*cosine[2][t0]/(RR*RR*RR);
+    double spotdd        = E12*AuToKelvin;
+
+    double weight;
+    weight = 1.0;
+    if (it == 0 || it == (NumbRotTimes - 1))
+    {
+        weight = 0.5;
+    }
+    return (spotdd*weight);
 }
 
 double PotRotE3D(int atom0,double * Eulang,int it)   

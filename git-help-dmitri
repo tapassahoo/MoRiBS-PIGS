@@ -1,0 +1,776 @@
+    2  make clean
+    3  make
+    4  vi mc_piqmc.cc
+    5  make
+    6  make clean
+    7  make
+    8  vi mc_piqmc.cc
+    9  make
+   10  vi mc_piqmc.cc
+   11  make
+   12  vi mc_piqmc.cc
+   13  vi mc_estim.cc
+   14  make
+   15  cd examples/linear_pigs/
+   16  ls
+   17  vi submission-and-analysis-fixed-tau.py 
+   18  python submission-and-analysis-fixed-tau.py 
+   19  qstat
+   20  vi submission-and-analysis-fixed-tau.py 
+   21  python submission-and-analysis-fixed-tau.py 
+   22  gnuplot
+   23  python submission-and-analysis-fixed-tau.py 
+   24  gnuplot
+   25  python submission-and-analysis-fixed-tau.py 
+   26  gnuplot
+   27  python submission-and-analysis-fixed-tau.py 
+   28  gnuplot
+   29  python submission-and-analysis-fixed-tau.py 
+   30  gnuplot
+   31  python submission-and-analysis-fixed-tau.py 
+   32  gnuplot
+   33  python submission-and-analysis-fixed-tau.py 
+   34  gnuplot
+   35  python submission-and-analysis-fixed-tau.py 
+   36  gnuplot
+   37  python submission-and-analysis-fixed-tau.py 
+   38  gnuplot
+   39  python submission-and-analysis-fixed-tau.py 
+   40  gnuplot
+   41  python submission-and-analysis-fixed-tau.py 
+   42  gnuplot
+   43  ls
+   44  cd -
+   45  vi mc_piqmc.cc
+   46  make clean
+   47  make
+   48  vi mc_piqmc.cc
+   49  vi mc_estim.cc
+   50  cd -
+   51  python submission-and-analysis-fixed-tau.py 
+   52  gnuplot
+   53  ls
+   54  cd -
+   55  vi mc_estim.cc
+   56  make clean
+   57  make
+   58  ls
+   59  cd -
+   60  ls
+   61  python submission-and-analysis-fixed-tau.py 
+   62  gnuplot
+   63  ls
+   64  cd -
+   65  vi make file
+   66  vi makefile
+   67  ls
+   68  cd -
+   69  ls
+   70  vi submission-and-analysis-fixed-tau.py 
+   71  python submission-and-analysis-fixed-tau.py 
+   72  qstat
+   73  vi submission-and-analysis-fixed-tau.py 
+   74  python submission-and-analysis-fixed-tau.py 
+   75  cd -
+   76  vi mc_estim.cc
+   77  vi mc_estim.cc -O2 mc_piqmc.cc
+   78  vi mc_estim.cc
+   79  make clean
+   80  make
+   81  vi mc_estim.cc
+   82  make
+   83  vi mc_const.h 
+   84  vi mc_estim.cc
+   85  make clean
+   86  vi mc_piqmc.cc
+   87  fgrep "bohr" *cc
+   88  fgrep "bohr" *h
+   89  vi mc_setup.h 
+   90  fgrep "autokelvin" *h
+   91  fgrep "autokelvin" *c
+   92  vi mc_setup.h 
+   93  vi mc_setup.cc
+   94  make
+   95  make clean
+   96  mak
+   97  make
+   98  cd -
+   99  python submission-and-analysis-fixed-tau.py 
+  100  qstat
+  101  cd -
+  102  make mc_main.cc
+  103  vi mc_main.cc
+  104  vi mc_setup.h 
+  105  vi mc_setup.cc 
+  106  vi mc_piqmc.cc
+  107  vi mc_piqmc.h 
+  108  make clean
+  109  make
+  110  qstat
+  111  qdel 1256219
+  112  qdel 1256218
+  113  qdel 1256217
+  114  qdel 1256216
+  115  qdel 1256215
+  116  qdel 1256214
+  117  qdel 1256213
+  118  qdel 1256212
+  119  qstat
+  120  qdel 1256218
+  121  qdel 1256211
+  122  qdel 1256210
+  123  qstat
+  124  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads3/job_beads3.out 
+  125  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads5/job_beads5.out 
+  126  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads5/qmc.input 
+  127  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads7/job_beads7.out 
+  128  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads5/qmc.input 
+  129  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads7/qmc.input 
+  130  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads9/job_beads9.out 
+  131  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads9/qmc.input 
+  132  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads11/job_beads11.out 
+  133  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads11/qmc.input 
+  134  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads13/job_beads13.out 
+  135  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads13/qmc.input 
+  136  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads15/job_beads15.out 
+  137  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads1
+  138  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads17/job_beads17.out 
+  139  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads17/qmc.input 
+  140  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads19/qmc.input 
+  141  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads19/job_beads19.out 
+  142  cat /work/tapas/linear_rotors/Rpt3.5-tau0.2Kinv-Blocks10000-System2H2-e0vsbeads21/job_beads21.out 
+  143  make clean
+  144  make
+  145  cd -
+  146  vi submission-and-analysis-fixed-tau.py 
+  147  python submission-and-analysis-fixed-tau.py 
+  148  vi submission-and-analysis-fixed-tau.py 
+  149  python submission-and-analysis-fixed-tau.py 
+  150  qstat
+  151  vi submission-and-analysis-fixed-tau.py 
+  152  python submission-and-analysis-fixed-tau.py 
+  153  vi submission-and-analysis-fixed-tau.py 
+  154  python submission-and-analysis-fixed-tau.py 
+  155  gnuplot
+  156  python submission-and-analysis-fixed-tau.py 
+  157  gnuplot
+  158  cd
+  159  cd /work/tapas/linear_rotors/
+  160  ls
+  161  gnuplot
+  162  qstat
+  163  cd 
+  164  ls
+  165  cd H2H2/
+  166  ls
+  167  vi src
+  168  cd src
+  169  ls
+  170  vi H2H2rigid.cxx 
+  171  cd
+  172  cd Moribs-pigs/MoRiBS-PIMC5/examples/linear_pigs/
+  173  ls
+  174  python submission-and-analysis-fixed-tau.py 
+  175  vi submission-and-analysis-fixed-beta.py 
+  176  python submission-and-analysis-fixed-tau.py 
+  177  python submission-and-analysis-fixed-beta.py 
+  178  qstat
+  179  vi submission-and-analysis-fixed-beta.py 
+  180  python submission-and-analysis-fixed-beta.py 
+  181  qstat
+  182  cd Moribs-pigs/MoRiBS-PIMC5/
+  183  ls
+  184  source ~/.bashrc
+  185  cd examples/linear_pigs/
+  186  ls
+  187  python submission-and-analysis-fixed-tau.py 
+  188  gnuplot
+  189  vi submission-and-analysis-fixed-tau.py 
+  190  python submission-and-analysis-fixed-tau.py 
+  191  source ~/.bashrc 
+  192  cd Moribs-pigs/MoRiBS-PIMC5/
+  193  ls
+  194  cd examples/linear_pigs/
+  195  vi IhRCOMC60.xyz 
+  196  python submission-and-analysis-fixed-
+  197  python submission-and-analysis-fixed-tau.py 
+  198  vi submission-and-analysis-fixed-tau.py 
+  199  python submission-and-analysis-fixed-tau.py 
+  200  ls
+  201  cd ../../../MoRiBS-PIMC4/eigen-values-of-two-rotors-new/
+  202  vi eigen.cc 
+  203  make clean
+  204  make
+  205  vi parameter.input 
+  206  ./run 
+  207  vi Eigen-values-nSizeRot3.txt 
+  208  vi parameter.input 
+  209  ./run 
+  210  vi Eigen-values-nSizeRot2.txt 
+  211  head Eigen-values-nSizeRot2.txt 
+  212  head Eigen-values-nSizeRot3.txt 
+  213  vi parameter.input 
+  214  ./run 
+  215  ./run &
+  216  top
+  217  ls
+  218  top
+  219  ls
+  220  qstat
+  221  cd ../
+  222  ls
+  223  cd ../
+  224  ls
+  225  gnuplot
+  226  cd MoRiBS-PIMC5/
+  227  ls
+  228  cd examples/linear_pigs/
+  229  gnuplot
+  230  ls
+  231  vi submission-and-analysis-fixed-tau.py 
+  232  python submission-and-analysis-fixed-tau.py 
+  233  gnuplot
+  234  ls
+  235  top
+  236  head ../../../MoRiBS-PIMC4/eigen-values-of-two-rotors-new/Eigen-values-nSizeRot2.txt 
+  237  head ../../../MoRiBS-PIMC4/eigen-values-of-two-rotors-new/Eigen-values-nSizeRot3.txt 
+  238  head ../../../MoRiBS-PIMC4/eigen-values-of-two-rotors-new/Eigen-values-nSizeRot4.txt 
+  239  head ../../../MoRiBS-PIMC4/eigen-values-of-two-rotors-new/eigen.cc
+  240  vi ../../../MoRiBS-PIMC4/eigen-values-of-two-rotors-new/eigen.cc
+  241  source ~/.bashrc
+  242  ls
+  243  cd /work/tapas/linear_rotors/
+  244  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads3/job_beads3.out 
+  245  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads5/job_beads5.out 
+  246  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads7/job_beads7.out 
+  247  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads9/job_beads9.out 
+  248  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads11/job_beads11.out 
+  249  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads13/job_beads13.out 
+  250  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads15/job_beads15.out 
+  251  cat single-tau0.02Kinv-Blocks5-System2HF-C60-e0vsbeads17/job_beads17.out 
+  252  cd Moribs-pigs/MoRiBS-PIMC5/
+  253  vi mc_piqmc.cc
+  254  make clean
+  255  make
+  256  cd examples/linear_pigs/
+  257  vi submission-and-analysis-fixed-tau.py 
+  258  python submission-and-analysis-fixed-tau.py 
+  259  vi submission-and-analysis-fixed-tau.py 
+  260  python submission-and-analysis-fixed-tau.py 
+  261  vi submission-and-analysis-fixed-tau.py 
+  262  python submission-and-analysis-fixed-tau.py 
+  263  qstat
+  264  cd Moribs-pigs/MoRiBS-PIMC5/
+  265  ls
+  266  cd examples/linear_pigs/
+  267  python submission-and-analysis-fixed-tau.py 
+  268  vi submission-and-analysis-fixed-tau.py 
+  269  python submission-and-analysis-fixed-tau.py 
+  270  gnuplot
+  271  python submission-and-analysis-fixed-tau.py 
+  272  python submission-and-analysis-fixed-tau.py 
+  273  cd Moribs-pigs/MoRiBS-PIMC3/
+  274  vi h2oc60_pair.f 
+  275  cp h2oc60_pair.f hfhf_pair.f
+  276  vi hfhf_pair.f 
+  277  vi hfhf_pair.f 
+  278  gfortran hfhf_pair.f 
+  279  ls
+  280  ls
+  281  source ~/.bashrc 
+  282  gfortran hfhf_pair.f 
+  283  vi hfhf_pair.f 
+  284  gfortran -c hfhf_pair.f 
+  285  ls
+  286  cd ../
+  287  cp -r MoRiBS-PIMC3/ MoRiBS-PIMC4
+  288  cd MoRiBS-PIMC4/
+  289  ls
+  290  vi makefile
+  291  fgrep "LINEARROTORSIO" *cc
+  292  fgrep "LINEARROTORSIO" *h
+  293  vi mc_main.cc 
+  294  make clean
+  295  make
+  296  vi hfhf_pair.f 
+  297  vi makefile
+  298  vi hfhf_pair.f 
+  299  make clean
+  300  make
+  301  vi mc_estim.cc
+  302  vi makefile
+  303  make
+  304  make clean
+  305  make
+  306  vi mc_piqmc.cc 
+  307  ls
+  308  vi mc_estim.cc 
+  309  vi mc_main.cc 
+  310  vi mc_piqmc.cc 
+  311  make clean
+  312  make
+  313  cd examples/linear_pigs/
+  314  ls
+  315  rm -rf Rpt3.5temp100.0blocks10000molecule2H2e0vsbeads*
+  316  ls
+  317  cd test_run/
+  318  ls
+  319  rm results/*
+  320  ls
+  321  cp ../../../pimc .
+  322  ./pimc 
+  323  vi qmc.input 
+  324  ./pimc 
+  325  rm yw001.*
+  326  ./pimc 
+  327  cd -
+  328  cd ../../
+  329  fgrep "terminate called after throwing an instance of" *cc
+  330  fgrep "terminate" *cc
+  331  fgrep "terminate" *h
+  332  ls
+  333  make clean
+  334  make
+  335  cd examples/linear_pigs/test_run/
+  336  ls
+  337  rm yw001.*
+  338  ls
+  339  ../../../pimc 
+  340  cd -
+  341  vi mc_main.cc 
+  342  make
+  343  cd -
+  344  rm yw001.*
+  345  ../../../pimc 
+  346  cd -
+  347  vi mc_main.cc 
+  348  cd -
+  349  make
+  350  cd -
+  351  ../../../pimc 
+  352  rm yw001.*
+  353  ../../../pimc 
+  354  cd -
+  355  vi mc_main.cc 
+  356  make
+  357  cd -
+  358  rm yw001.*
+  359  ../../../pimc 
+  360  cd -
+  361  vi makefile
+  362  make clean
+  363  make
+  364  cd -
+  365  rm yw001.*
+  366  ../../../pimc 
+  367  cd -
+  368  vi mc_main.cc 
+  369  make
+  370  cd -
+  371  rm yw001.*
+  372  ../../../pimc 
+  373  cd -
+  374  vi mc_main.cc 
+  375  make
+  376  cd -
+  377  rm yw001.*
+  378  ../../../pimc 
+  379  cd -
+  380  vi mc_main.cc 
+  381  vi mc_estim.cc 
+  382  vi mc_main.cc 
+  383  fgrep "InitMCEstims" *cc
+  384  vi mc_estim.cc 
+  385  cd ../MoRiBS-PIMC3/examples/nonlinear_pigs/
+  386  ls
+  387  qstat
+  388  cd ../../
+  389  make clean
+  390  make
+  391  cd -
+  392  qstat
+  393  vi submission-and-analysis-fixed-beta.py 
+  394  python submission-and-analysis-fixed-beta.py 
+  395  qstat
+  396  cd /work/tapas/nonlinear_rotors/Temperature4.04K-Blocks10-System2H2O-C60-e0vsbeads5/
+  397  ls
+  398  vi job_beads5.out 
+  399  cd ../
+  400  gnuplot
+  401  cd ../linear_rotors/
+  402  ls
+  403  cat Temperature10.0K-Blocks10000-System2HF-C60-e0vsbeads5/results/pigs.eng 
+  404  gnuplot
+  405  ls
+  406  gnuplot
+  407  ls
+  408  gnuplot
+  409  q
+  410  gnuplot
+  411  cd 
+  412  cd Moribs-pigs/MoRiBS-PIMC4/
+  413  vi mc_piqmc.cc 
+  414  cd ../
+  415  cd MoRiBS-PIMC5/examples/linear_pigs/
+  416  ls
+  417  python submission-and-analysis-fixed-beta.py 
+  418  gnuplot
+  419  cd -
+  420  cd MoRiBS-PIMC5/
+  421  ls
+  422  vi mc_piqmc.cc
+  423  cd ../
+  424  rm -rf MoRiBS-PIMC-entanglement/
+  425  cp -r MoRiBS-PIMC5/ MoRiBS-PIMC-entanglement/ 
+  426  cd MoRiBS-PIMC-entanglement/
+  427  ls
+  428  make clean
+  429  make
+  430  cd examples/linear_pigs/
+  431  ls
+  432  gnuplot
+  433  ls
+  434  cd ../../
+  435  ls
+  436  vi mc_estim.cc
+  437  vi mc_piqmc.cc
+  438  make clean
+  439  make
+  440  cd examples/linear_pigs/
+  441  ls
+  442  vi submission-and-analysis-fixed-beta.py 
+  443  ls
+  444  cd ../../
+  445  ls
+  446  vi mc_piqmc.cc
+  447  cp mc_piqmc.cc mc_piqmc.cc-orig 
+  448  vi mc_piqmc.cc
+  449  qstat
+  450  vi mc_piqmc.cc
+  451  ls
+  452  vi mc_piqmc.cc
+  453  cd ../
+  454  rm -rf MoRiBS-PIMC5/
+  455  cd MoRiBS-PIMC5/
+  456  ls
+  457  make clean
+  458  make
+  459  vi mc_piqmc.cc 
+  460  cp ../MoRiBS-PIMC-entanglement/mc_main.cc .
+  461  make
+  462  cp ../MoRiBS-PIMC-entanglement/mc_confg.h .
+  463  make
+  464  cp ../MoRiBS-PIMC-entanglement/mc_input.h .
+  465  make
+  466  cp ../MoRiBS-PIMC-entanglement/mc_randg.h .
+  467  make
+  468  cp ../MoRiBS-PIMC-entanglement/mc_utils.h .
+  469  make
+  470  cp ../MoRiBS-PIMC-entanglement/mc_piqmc.h .
+  471  make
+  472  cp ../MoRiBS-PIMC-entanglement/mc_qworm.h .
+  473  make
+  474  cp ../MoRiBS-PIMC-entanglement/mc_poten.cc .
+  475  make
+  476  make clean
+  477  make
+  478  source ~/.bashrc
+  479  cd Moribs-pigs/MoRiBS-PIMC
+  480  ls
+  481  git log --all -- '*.eng'
+  482  git log --all -- 'H2O*.eng'
+  483  git log --all -- 'H2O*'
+  484  git log --all -- 'H2O'
+  485  git log --all -- 'H2'
+  486  git log --all -- '*.eng'
+  487  ls
+  488  git commit -a
+  489  git checkout fa7b04cdcffdacd1e43d3accde00761095a2b1fc path/to/file
+  490  git checkout 09e78133e8518cb10b67a4111e94267864af7801 examples/nonlinear_pigs/
+  491  git checkout ccf3574d6aa8e609217c0725b4fc0070edf9bd6 examples/nonlinear_pigs/
+  492  git checkout 7a64cabb3644c6961b1ff8eb0582a3a98f4c1261 examples/nonlinear_pigs/
+  493  git log --all -- '*.eng'
+  494  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a examples/nonlinear_pigs/
+  495  git log --all -- '*.eng'
+  496  git rm ad57b9781:examples/nonlinear_pigs/H2O_T50t5.*
+  497  git reset HEAD  examples/nonlinear_pigs/H2O_T50t5.*
+  498  git log --all -- '*.eng'
+  499  git commit -c ORIG_HEAD  
+  500  git log --all -- '*.eng'
+  501  source ~/.bashrc
+  502  cd Moribs-pigs/MoRiBS-PIMC
+  503  git log --all -- '*.eng'
+  504  git checkout 7a64cabb3644c6961b1ff8eb0582a3a98f4c1261 examples/nonlinear_pigs/H2O_T50t5.eng
+  505  git checkout 7a64cabb3644c6961b1ff8eb0582a3a98f4c1261:examples/nonlinear_pigs/H2O_T50t5.eng
+  506  git checkout 7a64cabb3644c6961b1ff8eb0582a3a98f4c1261 examples/nonlinear_pigs/H2O_T50t5.eng
+  507  git rm  examples/nonlinear_pigs/H2O_T50t5.eng
+  508  git rebase 09e78133e8518cb10b67a4111e94267864af7801~1 -i
+  509  pick 35c23c2 the first commit
+  510  fixup 0d78b28 remove unwanted files
+  511  git rebase 09e78133e8518cb10b67a4111e94267864af7801~1 -i
+  512  git log --all -- '*.eng'
+  513  git gui citool --amend
+  514  git show ad57b9781ad91ba4e5f55903def3d95794dba48a
+  515  git reset HEAD examples/nonlinear_pigs/H2O_T50t5.*
+  516  git status
+  517  git reset HEAD H2O_T50t5.eng
+  518  git reset HEAD H2O_T50t5.esq
+  519  git reset HEAD H2O_T50t5.rho
+  520  git status
+  521  git checkout -- H2O_T50t5.eng
+  522  git checkout -- examples/nonlinear_pigs/H2O_T50t5.eng
+  523  git status
+  524  gid­:H2O_T50t5.eng
+  525  id­:H2O_T50t5.eng
+  526  git show ad57b9781ad91ba4e5f55903def3d95794dba48a:H2O_T50t5.eng
+  527  git show ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  528  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  529  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a:H2O_T50t5.eng
+  530  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  531  git checkout 7a64cabb3644c6961b1ff8eb0582a3a98f4c1261:examples/nonlinear_pigs/H2O_T50t5.eng
+  532  git show 7a64cabb3644c6961b1ff8eb0582a3a98f4c1261:examples/nonlinear_pigs/H2O_T50t5.eng
+  533  git show ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  534  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  535  git show ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  536  git reset ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  537  git show ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  538  git rm ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  539  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a examples/nonlinear_pigs/H2O_T50t5.eng
+  540  git show ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  541  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a examples/nonlinear_pigs/H2O_T50t5.eng
+  542  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a examples/nonlinear_pigs/H2O_T50t5.esq
+  543  git checkout ad57b9781ad91ba4e5f55903def3d95794dba48a examples/nonlinear_pigs/H2O_T50t5.rho
+  544  git commit -am "tapas"
+  545  git stash
+  546  qstat
+  547  vi mc_piqmc.cc 
+  548  make clean
+  549  make
+  550  vi mc_estim.cc 
+  551  make clean
+  552  make
+  553  vi mc_piqmc.cc 
+  554  vi ~pnroy/Moribs-pigs/MoRiBS-PIMC/mc_piqmc.cc 
+  555  git add *
+  556  git add .
+  557  git add *
+  558  git add .
+  559  git status
+  560  ls
+  561  cd examples/linear_pigs/
+  562  ls
+  563  vi submission-and-analysis-fixed-tau.py 
+  564  python submission-and-analysis-fixed-tau.py 
+  565  git rm -r --cached ../nonlinear_pigs/H2O_T50t5.*
+  566  git rm -r --cached ../nonlinear_pigs/H2O_T50t5.eng 
+  567  git checkout origin/branch3 ../nonlinear_pigs/H2O_T50t5.eng
+  568  git checkout origin/branch3:../nonlinear_pigs/H2O_T50t5.eng
+  569  git checkout origin/branch3  ../nonlinear_pigs/H2O_T50t5.eng
+  570  ls
+  571  vi qmc_run.input 
+  572  python submission-and-analysis-fixed-tau.py 
+  573  git reset HEAD ../nonlinear_pigs/H2O_T50t5.eng
+  574  vi qmc_run.input 
+  575  git reset HEAD ../nonlinear_pigs/H2O_T50t5.esq
+  576  git reset HEAD ../nonlinear_pigs/H2O_T50t5.rho
+  577  git add .
+  578  git commit -M "tapas"
+  579  git commit -m "tapas"
+  580  git push origin master
+  581  git push --help
+  582  git push origin master
+  583  git checkout origin/branch3 ../nonlinear_pigs/H2O_T50t5.eng
+  584  git show ad57b9781ad91ba4e5f55903def3d95794dba48a:examples/nonlinear_pigs/H2O_T50t5.eng
+  585  ls
+  586  cd -
+  587  git add .
+  588  git commit -m "tapas"
+  589  ls
+  590  git status
+  591  git log
+  592  ls
+  593  cd -
+  594  ls
+  595  vi submission-and-analysis-fixed-tau.py 
+  596  python  submission-and-analysis-fixed-tau.py 
+  597  qstat
+  598  python  submission-and-analysis-fixed-beta.py 
+  599  gnuplot
+  600  python  submission-and-analysis-fixed-beta.py 
+  601  gnuplot
+  602  python  submission-and-analysis-fixed-beta.py 
+  603  qstat
+  604  vi submission-and-analysis-fixed-tau.py 
+  605  python submission-and-analysis-fixed-tau.py 
+  606  gnuplot
+  607  vi submission-and-analysis-fixed-tau.py 
+  608  mv Energy-vs-beta-2-HF-C60-fixed-tau0.001-blocks80000.txt Energy-vs-beta-2-HF-C60-fixed-tau0.001-blocks80000.txt1 
+  609  python submission-and-analysis-fixed-tau.py 
+  610  gnuplot
+  611  vi submission-and-analysis-fixed-beta.py 
+  612  vi submission-and-analysis-fixed-tau.py 
+  613  python submission-and-analysis-fixed-tau.py 
+  614  gnuplot
+  615  python submission-and-analysis-fixed-tau.py 
+  616  gnuplot
+  617  python submission-and-analysis-fixed-tau.py 
+  618  gnuplot
+  619  cd -
+  620  vi hfhf_pair.f 
+  621  make clean
+  622  make
+  623  cd -
+  624  vi submission-and-analysis-fixed-beta.py 
+  625  vi support.py
+  626  vi submission-and-analysis-fixed-beta.py 
+  627  python submission-and-analysis-fixed-beta.py 
+  628  vi submission-and-analysis-fixed-beta.py 
+  629  python submission-and-analysis-fixed-beta.py 
+  630  vi submission-and-analysis-fixed-beta.py 
+  631  python submission-and-analysis-fixed-beta.py 
+  632  vi submission-and-analysis-fixed-beta.py 
+  633  python submission-and-analysis-fixed-beta.py 
+  634  vi submission-and-analysis-fixed-beta.py 
+  635  python submission-and-analysis-fixed-beta.py 
+  636  vi submission-and-analysis-fixed-beta.py 
+  637  python submission-and-analysis-fixed-beta.py 
+  638  vi submission-and-analysis-fixed-beta.py 
+  639  python submission-and-analysis-fixed-beta.py 
+  640  vi submission-and-analysis-fixed-beta.py 
+  641  python submission-and-analysis-fixed-beta.py 
+  642  qstat
+  643  vi submission-and-analysis-fixed-beta.py 
+  644  python submission-and-analysis-fixed-beta.py 
+  645  gnuplot
+  646  python submission-and-analysis-fixed-beta.py 
+  647  gnuplot
+  648  python submission-and-analysis-fixed-beta.py 
+  649  gnuplot
+  650  python submission-and-analysis-fixed-beta.py 
+  651  gnuplot
+  652  python submission-and-analysis-fixed-beta.py 
+  653  gnuplot
+  654  python submission-and-analysis-fixed-beta.py 
+  655  gnuplot
+  656  ls
+  657  gnuplot
+  658  cd -
+  659  ls
+  660  git status
+  661  git add .
+  662  git commit -m "Final version"
+  663  git status
+  664  git log | less
+  665  git log examples/nonlinear_pigs/H2O_T50t5.* | less
+  666  git log --graph | less
+  667  git log --graph --oneline | less
+  668  git log --graph --oneline examples/nonlinear_pigs/H2O_T50t5.* | less
+  669  git rebase -i 09e7813~
+  670  ls examples/nonlinear_pigs/
+  671  g show
+  672  git show
+  673  git show --summary
+  674  git status
+  675  git rm examples/nonlinear_pigs/H2O_T50t5.*
+  676  git status
+  677  git commit --amend -CHEAD
+  678  git rebase --continue
+  679  git log --graph --oneline examples/nonlinear_pigs/H2O_T50t5.* | less
+  680  git rebase -i f61deb4~
+  681  git status
+  682  git rm examples/nonlinear_pigs/H2O_T50t5.*
+  683  git status
+  684  git commit --amend -CHEAD
+  685  git status
+  686  git commit --amend -CHEAD
+  687  git status
+  688  git log
+  689  git status
+  690  git status --short
+  691  git show --summary
+  692  git reset
+  693  git status
+  694  git reset --hard
+  695  git status
+  696  git rebase --continue
+  697  git log --graph --oneline examples/nonlinear_pigs/H2O_T50t5.* | less
+  698  git rebase -i f61deb4~
+  699  git log --graph --oneline examples/nonlinear_pigs/H2O_T50t5.* | less
+  700  git log --graph --oneline
+  701  g reflog
+  702  girt reflog
+  703  git reflog
+  704  git show de1b6e6
+  705  git reflog
+  706  git log --graph --oneline
+  707  git show 70e3196
+  708  git status
+  709  git rebase --continue
+  710  git log --graph --oneline
+  711  git show cdefec5
+  712  git show cdefec5~
+  713  git log --graph --oneline
+  714  git reflog
+  715  man git-reflog
+  716  git log --graph --oneline
+  717  git show
+  718  git show --stat
+  719  git log --graph --oneline
+  720  git log --graph --oneline --all
+  721  g br -av
+  722  git branch -av
+  723  git log --graph --oneline --all
+  724  vim
+  725  EDITOR=vim git rebase -i 9cc230e
+  726  git rebase --abort
+  727  git log --graph --oneline --all
+  728  EDITOR=vim git rebase -i 48e3b78~
+  729  EDITOR=vim git rebase -i 48e3b78
+  730  git log --graph --oneline --all
+  731  git status
+  732  git rebase --abort
+  733  git log --graph --oneline --all
+  734  git log --graph --oneline 
+  735  EDITOR=vim git rebase -i b5cd37e
+  736  git log --graph --oneline 
+  737  git status
+  738  git diff branch3 before-squash
+  739  g br
+  740  git branch
+  741  git branch -av
+  742  git reflog
+  743  git diff cdefec5
+  744  git show cdefec5
+  745  git diff cdefec5
+  746  git log --graph --oneline 
+  747  git branch -D branch1
+  748  git branch -D master
+  749  git branch -av
+  750  git branch --help
+  751  git branch -m branch3 master
+  752  git branch -av
+  753  git log --oneline --graph --all
+  754  git log --oneline --graph --all --refs
+  755  man git-log
+  756  git log --oneline --graph --all --decorate
+  757  EDITOR=vim git rebase -i f5a9086
+  758  git log --oneline --graph --all --decorate
+  759  EDITOR=vim git rebase -i 6624d69
+  760  git log
+  761  git log --oneline -graph --all --decorate
+  762  git log --oneline --graph --all --decorate
+  763  git diff cdefec5
+  764  git push origin master
+  765  git push --force origin master
+  766  git log examples/nonlinear_pigs/H2O_T50t5.*
+  767  git log --oneline --graph --all --decorate
+  768  git rm examples/nonlinear_pigs/H2O_T50t5.*
+  769  git status
+  770  git commit --amend -CHEAD
+  771  git diff cdefec5
+  772  git diff cdefec5 --stat
+  773  git log --oneline --graph --all --decorate
+  774  git push --force origin master
+  775  git log --oneline --graph --all --decorate
+  776  git branch -a
+  777  history >>git-help-dmitri

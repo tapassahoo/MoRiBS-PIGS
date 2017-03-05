@@ -57,10 +57,10 @@ def modify_input(njrot,skip):
 
 #initial parameters for qmc.input
 src_path         = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/eigen-values-of-two-rotors-new/"
-nrange           = 5                                                 #param1
+nrange           = 3                                                 #param1
 displacement     = 1                                                 #param2
 skip		     = 1                                                 #param3
-file1_name       = "pot-result-skip"+str(skip)+"-jrot"               #param4
+file1_name       = "result-skip"+str(skip)+"-jrot"               #param4
 argument		 = "jrot"                                            #param5
 
 # Loop over your jobs

@@ -54,8 +54,7 @@ int main()
 				double plBra  = normalizedPl0(iBra, xRotor)*sqrt(weightsTheta[iXRotor]);
 				double plKet  = normalizedPl0(iKet, xRotor)*sqrt(weightsTheta[iXRotor]);
 
-				double vpot   = -10.0*xRotor;
-				sum          += plBra*vpot*plKet;
+				sum          += plBra*vpot(xRotor)*plKet;
 			}
 			double energyRotor;
 			if (iBra == iKet) energyRotor = rotEnergy(iBra);
@@ -152,7 +151,7 @@ void print_matrix( char* desc, int m, int n, double* a, int lda )
     {
         for(j = 0; j<n; j++)
         {
-            myfile<<setw(14)<<a[i+j*lda]<<endl;
+            myfile<<setw(14)<<a[i+j*lda]*AuToKelvin<<endl;
         }
         cout<<endl;
     }
@@ -299,10 +298,8 @@ int sizeloop(int nSizeRot, int nSkip)
 
 double rotEnergy(int l)
 {
-	double energyj0_v0    = -36117.5942855;  // unit cm^-1
-	double energyj1_v0    = -35999.1009407;  // unit cm^-1
-	//double rotConstant    = 0.5*(energyj1_v0 - energyj0_v0)/wavenumber;
-	double rotConstant    = 1.;
+	double rotConstant    = 20.9561;
+	rotConstant          /= AuToCmInverse;
 	double energy         = rotConstant*(double)l*((double)l + 1.0);
 
 	return energy;
@@ -454,3 +451,11 @@ void densityCosTheta(int nSizeTotal, double *cosTheta, double *weightsTheta, dou
 	}
 	cout<<sum<<endl;
 */
+double vpot(double cosTheta)
+{
+    double dm   = 1.86/AuToDebye;
+    double dm2  = dm*dm;
+	double RR   = 10.05/AuToAngstrom;
+    double E_12 = -2.0*dm2*cosTheta/(RR*RR*RR);
+    return E_12;
+}

@@ -38,6 +38,7 @@ c     ROwf, RH1wf, RH2wf, RCwf put as data
       autokJ=2625.5d0!hartree to kJ/mol
 c permanent dipole moment of hfc60  
       data d/0.00d0,0.0d0,1.86d0/ !in Debye
+c      data d/0.00d0,0.0d0,0.45d0/ !in Debye
 
 
 

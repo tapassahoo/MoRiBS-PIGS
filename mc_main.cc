@@ -598,8 +598,10 @@ int main(int argc, char *argv[])
                		sumsCount += 1.0;                 
                		SaveSumEnergy (totalCount,sumsCount);
 #ifdef PIGSROTORSIO
+#ifndef SINGLEROTOR
 					SaveSumAngularDOF(totalCount, sumsCount);
 					SaveInstantAngularDOF(totalCount, sumsCount);
+#endif
 #endif
             	}
 			}  
@@ -753,6 +755,13 @@ void MCGetAverage(void)
 	double skin       = GetKinEnergy();           // kin energy
 	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
 	double stotal     = GetTotalEnergy();         // Total energy
+/*
+	double spott = 0.0;
+	double spottl = 0.0;
+	double spottr = 0.0;
+	GetTotalEnergy1(spott, spottl, spottr);
+	double stotal     = spott;
+*/
 	double srot       = 0.0;
 	//double dspot    = GetPotEnergy_Diff();      // pot energy differencies added by Hui Li 
 
@@ -768,6 +777,7 @@ void MCGetAverage(void)
 
 /* new addition */
 #ifdef PIGSROTORS
+#ifndef SINGLEROTOR
 	double theta, costheta, phi;
 	double scostheta  = GetCosTheta();
 	double stheta     = acos(scostheta);
@@ -787,6 +797,7 @@ void MCGetAverage(void)
 #endif
 	}
 #endif
+#endif
 /* new addition */
 
 	//rotational degrees of freedom
@@ -803,6 +814,12 @@ void MCGetAverage(void)
 		else
 		srot          = GetRotE3D();
         
+#ifdef LINEARROTORS
+#ifndef SINGLEROTOR
+		if(MCAtom[IMTYPE].molecule == 4)
+			srot      = GetRotEnergy1();           // kin energy
+#endif
+#endif
 		_brot        += srot;
 		_rot_total   += srot;
 
@@ -979,7 +996,9 @@ void MCSaveBlockAverages(long int blocknumb)
 
 	SaveEnergy         (MCFileName.c_str(),avergCount,blocknumb);
 #ifdef PIGSROTORSIO
+#ifndef SINGLEROTOT
 	SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
+#endif
 #endif
 
 	if (BOSONS) 
@@ -1021,7 +1040,7 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
-	_brot = _btotal - _bpot;
+	//_brot = _btotal - _bpot;
 	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
 #else
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
@@ -1075,7 +1094,7 @@ void SaveSumEnergy (double acount, double numb)  // global average
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
 	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
 	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
-	_rot_total = _total - _pot_total;
+	//_rot_total = _total - _pot_total;
 	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
 #else
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    

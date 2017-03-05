@@ -15,34 +15,35 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-molecule            = "HF-C60"                                                     #change param1
-#molecule            = "H2"                                                         #change param1
+#molecule            = "HF-C60"                                                    #change param1
+molecule            = "HF"                                                         #change param1
+#molecule            = "H2"                                                        #change param1
 molecule_rot        = "HF"
 #print 5/(support.bconstant(molecule_rot)/0.695)
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
-numbblocks	        = 80000                                                        #change param2
-numbmolecules       = 2                                                            #change param3
-temperature	        = 5.0                                                         #change param4
-Rpt                 = 3.5                                                          #change param7
+numbblocks	        = 5000                                                        #change param2
+numbmolecules       = 1                                                            #change param3
+temperature	        = 0.4                                                          #change param4
+Rpt                 = 0.1                                                          #change param7
 
 skip		        = 2                                                            #change param8
-#status              = "submission"                                                 #change param9
+status              = "submission"                                                 #change param9
 status              = "analysis"                                                   #change param10
 status_rhomat       = "Yes"                                                        #change param10 
 
-nrange             = 8 #41		  						                           #change param12
+nrange              = 8 #41		  						                           #change param12
 
 if (molecule_rot == "H2"):
-	#step                = [1.5,3.0,3.0,3.0,3.0,2.6,2.3,2.5,2.02] #temp 10K         #change param6
-	#step                = [1.5,3.0,3.0,2.5,1.5,1.0,0.7,2.5,2.02] #temp 50K         #change param6
-	step                = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K         #change param6
-	file1_name          = "Rpt"+str(Rpt)+"Angstrom-Temperature"+str(temperature)+"K-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
+	#step           = [1.5,3.0,3.0,3.0,3.0,2.6,2.3,2.5,2.02] #temp 10K             #change param6
+	#step           = [1.5,3.0,3.0,2.5,1.5,1.0,0.7,2.5,2.02] #temp 50K             #change param6
+	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
+	file1_name      = "Rpt"+str(Rpt)+"Angstrom-Temperature"+str(temperature)+"K-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
 
 if (molecule_rot == "HF"):
-	#step                = [3.0,3.0,3.0,3.0,3.0,1.8,1.2,0.80,0.2]                            #change param6
-	step                = [3.0,3.0,3.0,3.0,3.0,2.0,1.2,0.80,0.2]                            #change param6
-	file1_name          = "newTemperature"+str(temperature)+"K-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	#step           = [3.0,3.0,3.0,3.0,3.0,1.8,1.2,0.80,0.2]                       #change param6
+	step            = [3.0,3.0,3.0,3.0,3.0,2.0,1.2,0.80,0.2]                       #change param6
+	file1_name      = "Temperature"+str(temperature)+"K-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 file2_name          = ""                                                           #change param10
 argument2           = "beads"                                                      #change param11
@@ -51,7 +52,7 @@ var                 = "tau"                                                     
 
 src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param13
-run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                  #change param14
+run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                   #change param14
 
 beta                = 1.0/temperature   
 
@@ -81,8 +82,8 @@ if status == "submission":
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	file_output          = "newEnergy-vs-tau-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt"  
-	file_output_angularDOF = "newAngularDOF-vs-tau-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt"  
+	file_output          = "Energy-vs-tau-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt"  
+	file_output_angularDOF = "AngularDOF-vs-tau-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt"  
 	call(["rm", file_output, file_output_angularDOF])
 
 	fanalyze             = open(file_output, "a")           
@@ -99,12 +100,12 @@ for i in range(nrange):                                                  #change
  
 		value        = pow(2,i) + value_min
 
-		numbbeads    	 = support.dropzeros(value)
+		numbbeads    = support.dropzeros(value)
 	
-		tau              = beta/(value-1)
+		tau          = beta/(value-1)
 
 		folder_run   = file1_name+str(numbbeads)+file2_name
-		dest_dir      = dest_path + folder_run 
+		dest_dir     = dest_path + folder_run 
 
 		if status == "submission":
 			os.chdir(dest_path)

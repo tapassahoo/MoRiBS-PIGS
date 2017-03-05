@@ -3,7 +3,7 @@
 #options= -Ofast -march=native -fopenmp
 options= -Ofast -fopenmp
 
-CFLAGS =-I./sprng/include -I/usr/local/include -DMOVECENTROIDTEST -DPIGSROTORS -DPIGSROTORSIO -DLINEARROTORS -DLINEARROTORSIO -DNEGATIVEDENSITY -DGETPOT -DMODIFY
+CFLAGS =-I./sprng/include -I/usr/local/include -DMOVECENTROIDTEST -DPIGSROTORS -DPIGSROTORSIO -DLINEARROTORS -DLINEARROTORSIO -DNEGATIVEDENSITY -DGETPOT -DMODIFY -DSINGLEROTOR
 #CFLAGS =-I./sprng/include -I/usr/local/include -DMOVECENTROIDTEST -DPIGSROTORS -DPIGSROTORSIO -DNEGATIVEDENSITY -DMOLECULEINCAGE #-DGETPOT 
 
 #Below is the LDFLAGS Toby Zeng use on nlogn
@@ -17,6 +17,7 @@ LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran -lblas -llapack
 
 #CC=mpic++
 #CC=g++
+GCC = gcc
 CC=g++
 FC=gfortran
 #FC=/home/pnroy/Dev/bin/gfortran
@@ -24,7 +25,7 @@ FC=gfortran
 #-------------------------------------------------------------------------
 # objects for QMC
  
-pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_tip4p_gg.o omprng.o rngstream.o vh2h2.o h2oc60.o hfhf_pair.o
+pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_tip4p_gg.o omprng.o rngstream.o vh2h2.o h2oc60.o hfhf_pair.o plgndr.o
  
 #----------------------------------------- PIMC --------------------------
 
@@ -74,6 +75,9 @@ wipe:
 
 .f.o:
 	${FC} -O3 -c $<
+
+.c.o:
+	${GCC} -O3 -c $<
 #---------------------------------------------------------------------------
 # %.o: %.cxx
 # $(CC) $(options) -c  $(CFLAGS) $(CPPFLAGS) $< -o $@

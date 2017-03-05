@@ -11,6 +11,7 @@ extern "C" void gauleg(double x1, double x2, double *x, double *w, int n);
 extern "C" void vinit_();
 extern "C" void vh2h2_(double *rCOM, double *bondLength1, double *bondLength2, double *theta1, double *theta2, double *dihedralAngle, double *potl);
 
+double vpot(double cosTheta);
 //==================================================================================================================================
 
 /*For Matrix diagonalization (Real Symmetric)*/

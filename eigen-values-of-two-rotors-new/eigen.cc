@@ -253,6 +253,7 @@ int main()
 	normCheckGroundState(nSizeTotal, cosTheta, weightsTheta, phi, weightsPhi, c, d);
 	densityCosTheta(nSizeTotal, cosTheta, weightsTheta, phi, weightsPhi, c, d);
 #endif
+	normCheckGroundState(nSizeTotal, cosTheta, weightsTheta, phi, weightsPhi, c, d);
 
 	return 0;
 }
@@ -597,6 +598,7 @@ double rotEnergy(int l)
 	double energyj1_v0    = -35999.1009407;  // unit cm^-1
 	//double rotConstant    = 0.5*(energyj1_v0 - energyj0_v0)/wavenumber;
 	double rotConstant    = 20.9561/autoCminverse;
+	//double rotConstant    = 17.5/autoCminverse;
 	double energy         = rotConstant*(double)l*((double)l + 1.0);
 
 	return energy;
@@ -693,7 +695,6 @@ void normCheckGroundState(int nSizeTotal, double *cosTheta, double *weightsTheta
                     }
                     psiRe.push_back(sumRe);
                     psiIm.push_back(sumIm);
-
                 }
             }
         }
@@ -705,7 +706,64 @@ void normCheckGroundState(int nSizeTotal, double *cosTheta, double *weightsTheta
 
     }
 	cout <<"Normalization test of ground state wavefuntion :"<<endl;
-    cout<<"Norm : "<<sum2<<endl;
+    cout<<"Norm : "<<sum2<<" index  " << psiRe.size()<<endl;
+    cout<<endl;
+    cout<<endl;
+	int index = 0;
+	sum2 = 0.0;
+	double sumt1 = 0.0;
+   double sump2;
+    for (int iXRotor1   = 0; iXRotor1<nSize; iXRotor1++)
+    {
+        double xRotor1  = cosTheta[iXRotor1];
+        double theta1   = acos(xRotor1);
+
+		double sumt2 = 0.0;
+        for (int iXRotor2    = 0; iXRotor2<nSize; iXRotor2++)
+        {
+            double xRotor2   = cosTheta[iXRotor2];
+            double theta2    = acos(xRotor2);
+
+			double sump1 = 0.0;
+            for (int iPhiRotor1    = 0; iPhiRotor1<2*nSize+1; iPhiRotor1++)
+            {
+				sump2 = 0.0;
+                for (int iPhiRotor2     = 0; iPhiRotor2<2*nSize+1; iPhiRotor2++)
+                {
+                    double Eulang_1[3];
+                    double Eulang_2[3];
+                    double com_1[3];
+                    double com_2[3];
+
+                    Eulang_1[0] = phi[iPhiRotor1];
+                    Eulang_1[1] = theta1;
+                    Eulang_1[2] = 0.0;
+                    Eulang_2[0] = phi[iPhiRotor2];
+                    Eulang_2[1] = theta2;
+                    Eulang_2[2] = 0.0;
+
+                    //units of com_1 and com_2 are Angstrom
+                    com_1[0]    = 0.0;
+                    com_1[1]    = 0.0;
+                    com_1[2]    = 0.0;
+                    com_2[0]    = 0.0;
+                    com_2[1]    = 0.0;
+                    com_2[2]    = 10.05;
+                    double E12;
+                    cluster_(com_1, com_2, Eulang_1, Eulang_2, &E12);
+                    double vpot                 = E12/autoKelvin;
+
+        			sump2 +=  psiRe[index]*vpot*psiRe[index]+psiIm[index]*vpot*psiIm[index];
+					index++;
+                }
+				sump1 += sump2;
+            }
+			sumt2 += sump1;
+        }
+		sumt1 += sumt2;
+    }
+	double Vavg = autoKelvin;
+    cout<<"Vavg: "<<Vavg<< "  "<<index<<endl;
 	psiRe.clear();
 	psiIm.clear();
 }

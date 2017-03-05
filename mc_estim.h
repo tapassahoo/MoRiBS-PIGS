@@ -21,6 +21,9 @@ double GetPotEnergy_Diff(void); //added by Hui Li
 
 double GetPotEnergy_Densities(void);
 double GetTotalEnergy(void);
+double GetTotalEnergyLeft(void);
+double GetTotalEnergyRight(void);
+void  GetTotalEnergy1(double &spot, double &spotl, double &spotr);
 double GetCosTheta(void);
 void GetCosTheta1(double *);
 double GetPhi(void);
@@ -51,6 +54,7 @@ void GetPermutation(void);
 // Rotations
 
 double GetRotEnergy(void);
+double GetRotEnergy1(void);
 double GetRotPlanarEnergy(void);
 double GetRotE3D(void); // get rotational energy for nonlinear rotor, added by toby
 double GetRotE3Dstep(int, int); // real step in loop of GetRotE3D, added by toby

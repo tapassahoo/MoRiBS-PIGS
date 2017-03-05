@@ -32,7 +32,7 @@ def bconstant(molecule_rot):
 	energyj1       = -35999.1009407
 	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
 	if (molecule_rot == "HF"):
-		bconst		   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
+		bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
 	return bconst
 
 def replace(string_old, string_new, file1, file2):
@@ -105,7 +105,6 @@ def outputstring2(numbbeads,tau,mean_pot,mean_tot,mean_rot,error_pot,error_tot,e
 	output += "        "+argu6+"          "+argu7+"          "+argu8+"\n"
 	return output
 
-
 def formatting(status,variable):
 	'''
 	This function gives us the output 
@@ -154,3 +153,14 @@ def rotmat(molecule,temperature,numbbeads):
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
+
+def rotmat1(molecule,temperature,numbbeads):
+	'''
+	This function generates rotational density matrix - linden.dat
+	'''
+	#temperature1    = dropzeros(temperature)
+	temperature1    = "%5.3f" % temperature
+	numbbeads1		= numbbeads - 1
+	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 3000 -1"
+	print command_linden_run
+	system(command_linden_run)

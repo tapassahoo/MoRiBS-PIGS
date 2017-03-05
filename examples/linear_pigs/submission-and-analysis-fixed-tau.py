@@ -15,17 +15,18 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-molecule            = "HF-C60"                                                     #change param1
+#molecule            = "HF-C60"                                                     #change param1
+molecule            = "HF"                                                     #change param1
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 80000                                                        #change param3
-numbmolecules       = 2                                                            #change param4
-tau                 = 0.0005                                                       #change param5
+numbblocks	        = 5000                                                        #change param3
+numbmolecules       = 1                                                            #change param4
+tau                 = 0.02                                                       #change param5
 
 Rpt                 = 3.5                                                          #change param6
 
-skip		        = 40                                                           #change param7
+skip		        = 2                                                           #change param7
 status              = "submission"                                                 #change param8
 status              = "analysis"                                                   #change param8
 status_rhomat       = "Yes"                                                        #change param9 
@@ -33,7 +34,7 @@ status_rhomat       = "Yes"                                                     
 if (molecule_rot == "H2"):
 	nrange          = 201  			  						                       #change param10
 if (molecule_rot == "HF"):
-	nrange          = 201  			  						                       #change param10
+	nrange          = 10  			  						                       #change param10
 
 if (molecule_rot == "H2"):
 	#step            = [1., 1., 3.0, 1., 1.5, 1., 1.0, 1., 0.7, 1., 0.5, 1., 0.5, 1., 0.4, 1., 0.4, 1., 0.3, 1., 0.3]  #tau = 0.02       #change param11
@@ -43,8 +44,9 @@ if (molecule_rot == "H2"):
 
 if (molecule_rot == "HF"):
 	#step            = [1., 1., 2.0, 1., 1.0, 1., 0.6, 1., 0.4, 1., 0.3, 1., 0.2, 1., 0.2, 1., 0.4, 1., 0.3, 1., 0.3]  #tau = 0.02      #change param12
-	step            = [0.5, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6]  #tau = 0.001      #change param11
-	file1_name      = "tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	#step            = [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8]  #tau = 0.001      #change param11
+	step            = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]  #tau = 0.002      #change param11
+	file1_name      = "newtau"+str(tau)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 file2_name          = ""                                                           #change param13
 argument2           = "beads"                                                      #change param14
@@ -71,19 +73,14 @@ if status == "submission":
 		path_exit_linden  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
 		os.chdir(path_exit_linden)
 
-	file_input = "Input-parameters-vs-beads-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"
-	call(["rm", file_input])
-	fsubmit    = open(file_input, "a")  
-
-
 #===============================================================================
 #                                                                              |
 #   Analysis of output files 												   |
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	file_output          = "Energy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
-	file_output_angularDOF = "AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
+	file_output          = "newEnergy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
+	file_output_angularDOF = "newAngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
 	call(["rm", file_output, file_output_angularDOF])
 
 	fanalyze             = open(file_output, "a")           
@@ -92,24 +89,21 @@ if status == "analysis":
 	fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
 	fanalyze_angularDOF.write(support.formatting1(status,var))
 
-
 # Loop over jobs
 for i in range(nrange):                                                  #change param19
-	if (i>1 and i % skip == 0 ):
 
-		if i % 2 != 0:
-			value        = i
-		else:
-			value        = i+value_min
+	if (i>0):
 
-		numbbeads    	 = support.dropzeros(value)
-		beta             = tau*(value-1)
-		temperature      = 1.0/beta
+		value        = pow(2,i) + value_min
+
+		numbbeads    = support.dropzeros(value)
+		beta         = tau*(value-1)
+		temperature  = 1.0/beta
 
 		folder_run   = file1_name+str(numbbeads)+file2_name
-		dest_dir      = dest_path + folder_run 
+		dest_dir     = dest_path + folder_run 
 
-		if status == "submission":
+		if status   == "submission":
 			os.chdir(dest_path)
 			call(["rm", "-rf", folder_run])
 			call(["mkdir", folder_run])
@@ -130,8 +124,9 @@ for i in range(nrange):                                                  #change
 			argument1     = Rpt
 			level         = support.levels(numbbeads)
 			jj            = i/skip
-			step1         = step[jj]
+			step1         = 2.0;#step[jj]
 			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1)
+
 			if status_rhomat == "Yes":
 				support.rotmat(molecule_rot,temperature,numbbeads)
 	
@@ -144,8 +139,6 @@ for i in range(nrange):                                                  #change
 			fwrite.close()
 			call(["qsub", fname, ])
 			os.chdir(src_path)
-
-			fsubmit.write(support.outputstring1(numbbeads,tau,temperature))
 
 		if status == "analysis":
 
@@ -188,9 +181,6 @@ for i in range(nrange):                                                  #change
 			except:
 				print "no file ", i
 				pass
-
-if status == "submission":
-	fsubmit.close()
 
 if status == "analysis":
 	fanalyze.close()
