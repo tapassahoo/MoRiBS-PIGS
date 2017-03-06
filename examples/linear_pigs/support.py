@@ -79,7 +79,7 @@ cd $PBS_O_WORKDIR
 	print job_string
 	return job_string
 
-def outputstring1(numbbeads,tau,temperature):
+def inputstr(numbbeads,tau,temperature):
 	'''
 	This function gives us the exact values of the agruments
 	'''
@@ -89,7 +89,7 @@ def outputstring1(numbbeads,tau,temperature):
 	output ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
 	return output
 
-def outputstring2(numbbeads,tau,mean_pot,mean_tot,mean_rot,error_pot,error_tot,error_rot):
+def outputstr_energy(numbbeads,tau,mean_pot,mean_tot,mean_rot,error_pot,error_tot,error_rot):
 	'''
 	This function gives us the output 
 	'''
@@ -105,7 +105,20 @@ def outputstring2(numbbeads,tau,mean_pot,mean_tot,mean_rot,error_pot,error_tot,e
 	output += "        "+argu6+"          "+argu7+"          "+argu8+"\n"
 	return output
 
-def formatting(status,variable):
+def outputstr_angle(numbbeads,tau,mean_argu1,mean_argu2,error_argu1,error_argu2):
+	'''
+	This function gives us the output 
+	'''
+	argu1          = "%5d"   % numbbeads
+	argu2          = "%11.6f" % tau
+	argu3          = "%10.5f" % mean_argu1
+	argu4          = "%10.5f" % mean_argu2
+	argu5          = "%10.5f" % error_argu1
+	argu6          = "%10.5f" % error_argu2
+	output  = " "+argu1+" "+argu2+"   "+argu3+"     "+argu4+"     "+argu5+"          "+argu6+"\n"
+	return output
+
+def fmt_energy(status,variable):
 	'''
 	This function gives us the output 
 	'''
@@ -115,14 +128,14 @@ def formatting(status,variable):
 		output    += "#==============================================================================================================================\n"
 		return output
 
-def formatting1(status,variable):
+def fmt_angle(status,variable):
 	'''
 	This function gives us the output 
 	'''
 	if status == "analysis":
-		output     = "#  Beads    "+variable+"       Avg. CosTheta    Avg. Theta     Avg. Phi   Error of CosTheta    Error of Theta     Error of Phi  \n"
-		output    += "#          (1/K)         (Radian)       (Radian)      (Radian)       (Radian)            (Radian)           (Radian)   \n"
-	output    += "#==========================================================================================================================\n"
+		output     = "#  Beads    "+variable+"     Avg. CosTheta    Avg. Theta   Error of CosTheta    Error of Theta  \n"
+		output    += "#          (1/K)        (Radian)       (Radian)       (Radian)            (Radian)             \n"
+	output    += "#=======================================================================================================\n"
 	return output
 
 

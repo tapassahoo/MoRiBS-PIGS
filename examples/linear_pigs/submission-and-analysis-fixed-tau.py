@@ -20,21 +20,20 @@ molecule            = "HF"                                                     #
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 5000                                                        #change param3
-numbmolecules       = 1                                                            #change param4
-tau                 = 0.02                                                       #change param5
+numbblocks	        = 50000                                                        #change param3
+numbmolecules       = 2                                                            #change param4
+tau                 = 0.001                                                       #change param5
 
 Rpt                 = 3.5                                                          #change param6
 
-skip		        = 2                                                           #change param7
 status              = "submission"                                                 #change param8
 status              = "analysis"                                                   #change param8
 status_rhomat       = "Yes"                                                        #change param9 
 
 if (molecule_rot == "H2"):
-	nrange          = 201  			  						                       #change param10
+	nrange          = 8  			  						                       #change param10
 if (molecule_rot == "HF"):
-	nrange          = 10  			  						                       #change param10
+	nrange          = 8  			  						                       #change param10
 
 if (molecule_rot == "H2"):
 	#step            = [1., 1., 3.0, 1., 1.5, 1., 1.0, 1., 0.7, 1., 0.5, 1., 0.5, 1., 0.4, 1., 0.4, 1., 0.3, 1., 0.3]  #tau = 0.02       #change param11
@@ -46,7 +45,7 @@ if (molecule_rot == "HF"):
 	#step            = [1., 1., 2.0, 1., 1.0, 1., 0.6, 1., 0.4, 1., 0.3, 1., 0.2, 1., 0.2, 1., 0.4, 1., 0.3, 1., 0.3]  #tau = 0.02      #change param12
 	#step            = [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8]  #tau = 0.001      #change param11
 	step            = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]  #tau = 0.002      #change param11
-	file1_name      = "newtau"+str(tau)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	file1_name      = "tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 file2_name          = ""                                                           #change param13
 argument2           = "beads"                                                      #change param14
@@ -79,15 +78,15 @@ if status == "submission":
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	file_output          = "newEnergy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
-	file_output_angularDOF = "newAngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
+	file_output          = "Energy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
+	file_output_angularDOF = "AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
 	call(["rm", file_output, file_output_angularDOF])
 
 	fanalyze             = open(file_output, "a")           
-	fanalyze.write(support.formatting(status,var))
+	fanalyze.write(support.fmt_energy(status,var))
 
 	fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
-	fanalyze_angularDOF.write(support.formatting1(status,var))
+	fanalyze_angularDOF.write(support.fmt_angle(status,var))
 
 # Loop over jobs
 for i in range(nrange):                                                  #change param19
@@ -123,8 +122,7 @@ for i in range(nrange):                                                  #change
 			os.chdir(dest_dir)
 			argument1     = Rpt
 			level         = support.levels(numbbeads)
-			jj            = i/skip
-			step1         = 2.0;#step[jj]
+			step1         = 3.0;#step[jj]
 			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1)
 
 			if status_rhomat == "Yes":
@@ -160,24 +158,20 @@ for i in range(nrange):                                                  #change
 				error_rot     = sqrt((mean_sq_rot-mean_rot*mean_rot)/len(col_block))
 				print i, len(col_block)
 			
-				fanalyze.write(support.outputstring2(numbbeads,variable,mean_pot,mean_tot,mean_rot,error_pot,error_tot,error_rot))
+				fanalyze.write(support.outputstr_energy(numbbeads,variable,mean_pot,mean_tot,mean_rot,error_pot,error_tot,error_rot))
 
 
-				col_block, col_costheta, col_theta, col_phi = loadtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3])
+				col_block, col_costheta, col_theta = loadtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2])
 				mean_costheta = np.sum(col_costheta)/len(col_block)
 				mean_theta    = np.sum(col_theta)/len(col_block)
-				mean_phi      = np.sum(col_phi)/len(col_block)
 				x2			  = np.multiply(col_costheta, col_costheta)
 				y2			  = np.multiply(col_theta, col_theta)
-				z2			  = np.multiply(col_phi, col_phi)
 				mean_sq_costheta = np.sum(x2)/len(col_block)
 				mean_sq_theta = np.sum(y2)/len(col_block)
-				mean_sq_phi   = np.sum(z2)/len(col_block)
 				error_costheta   = sqrt((mean_sq_costheta - mean_costheta*mean_costheta)/len(col_block))
 				error_theta   = sqrt((mean_sq_theta - mean_theta*mean_theta)/len(col_block))
-				error_phi     = sqrt((mean_sq_phi - mean_phi*mean_phi)/len(col_block))
 			
-				fanalyze_angularDOF.write(support.outputstring2(numbbeads,variable,mean_costheta,mean_theta,mean_phi,error_costheta,error_theta,error_phi))
+				fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,mean_costheta,mean_theta,error_costheta,error_theta))
 			except:
 				print "no file ", i
 				pass

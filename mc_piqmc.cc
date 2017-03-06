@@ -2061,8 +2061,8 @@ double PotEnergy(int atom0, double **pos, int it)
 
    return (spot);
 }
-/*
-double PotRotEnergy(int atom0,double ** cosine,int it)   
+
+double PotRotEnergy(int atom0, double **cosine, int it)   
 //  Orientational energy 
 {
 	int type0   =  MCType[atom0];
@@ -2145,17 +2145,16 @@ double PotRotEnergy(int atom0,double ** cosine,int it)
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
 	{
 	    int offset0 =  atom0*NumbTimes;
+        int t0  = offset0 + it;
+        int tm0 = offset0 + it/RotRatio;
 
+        spot = 0.0;
         for (int atom1=0;atom1<NumbAtoms;atom1++)
         if (atom1 != atom0)                    
         {
             int offset1 = atom1*NumbTimes;
             int type1   = MCType[atom1];
-
-            int t0  = offset0 + it;
             int t1  = offset1 + it;
-
-            int tm0 = offset0 + it/RotRatio;
             int tm1 = offset1 + it/RotRatio;
 
 	        string stype = MCAtom[type0].type;
@@ -2223,7 +2222,6 @@ double PotRotEnergy(int atom0,double ** cosine,int it)
 
 		    if (stype == HF )
             {
-
                 double com_1[NDIM],com_2[NDIM];
                 double uvec1[NDIM],uvec2[NDIM];
                 double E12;
@@ -2241,21 +2239,14 @@ double PotRotEnergy(int atom0,double ** cosine,int it)
         } //loop over atom1 (molecules)
     }
 
-	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb = 1) )
+	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
 	{
-        const double AuToAngstrom  = 0.52917720859;
-        const double AuToDebye     = 1.0/0.39343;
-        const double AuToCmInverse = 219474.63137;
-        const double AuToKelvin    = 315777.0;
-
-        int offset0 =  0;
-        int t0  = offset0 + it;
-        int tm0 = offset0 + it/RotRatio;
-
         double dm   = 1.86/AuToDebye;
         double dm2  = dm*dm;
-        double RR   = 10.05/AuToAngstrom;
-        double E12 = -2.0*dm2*cosine[2][tm0]/(RR*RR*RR);
+        double RR   = 10.05/BOHRRADIUS;
+	    int offset0 =  atom0*NumbRotTimes;
+        int t0  = offset0 + it;
+        double E12 = -2.0*dm2*cosine[2][t0]/(RR*RR*RR);
         spot        = E12*AuToKelvin;
     }
 #endif
@@ -2268,32 +2259,6 @@ double PotRotEnergy(int atom0,double ** cosine,int it)
     }
 #endif
     return (spot*weight);
-}
-*/
-double PotRotEnergy(int atom0,double **cosine,int it)   
-{
-	int type0   =  MCType[atom0];
-    const double AuToAngstrom  = 0.52917720859;
-    const double AuToDebye     = 1.0/0.39343;
-    const double AuToCmInverse = 219474.63137;
-    const double AuToKelvin    = 315777.0;
-
-    int offset0 =  0;
-    int t0  = offset0 + it;
-
-    double dm   = 1.86/AuToDebye;
-    double dm2  = dm*dm;
-    double RR   = 10.05/AuToAngstrom;
-    double E12 = -2.0*dm2*cosine[2][t0]/(RR*RR*RR);
-    double spotdd        = E12*AuToKelvin;
-
-    double weight;
-    weight = 1.0;
-    if (it == 0 || it == (NumbRotTimes - 1))
-    {
-        weight = 0.5;
-    }
-    return (spotdd*weight);
 }
 
 double PotRotE3D(int atom0,double * Eulang,int it)   

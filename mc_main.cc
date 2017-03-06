@@ -57,10 +57,8 @@ double _total;  // potential energy, global average
 #ifdef PIGSROTORS
 double _btheta;
 double _bcostheta;
-double _bphi;
 double _theta_total;
 double _costheta_total;
-double _phi_total;
 #endif
 
 double _brot;       // rotational kin energy, block average
@@ -598,10 +596,8 @@ int main(int argc, char *argv[])
                		sumsCount += 1.0;                 
                		SaveSumEnergy (totalCount,sumsCount);
 #ifdef PIGSROTORSIO
-#ifndef SINGLEROTOR
 					SaveSumAngularDOF(totalCount, sumsCount);
 					SaveInstantAngularDOF(totalCount, sumsCount);
-#endif
 #endif
             	}
 			}  
@@ -729,7 +725,6 @@ void MCResetBlockAverage(void)
 #ifdef PIGSROTORS
 	_btheta    = 0.0;
 	_bcostheta = 0.0;
-	_bphi      = 0.0;	
 #endif
 	_bkin        = 0.0;
 
@@ -752,9 +747,18 @@ void MCGetAverage(void)
 	avergCount       += 1.0;
 	totalCount       += 1.0;  
 
-	double skin       = GetKinEnergy();           // kin energy
+    double skin       = 0.;
+#ifndef PIGSROTORS
+	skin       = GetKinEnergy();           // kin energy
+	_bkin            += skin;                     // block average for kin energy
+	_kin_total       += skin;                     // accumulated average 
+#endif
 	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
+	_bpot            += spot;                     // block average for pot energy
+	_pot_total       += spot;
 	double stotal     = GetTotalEnergy();         // Total energy
+	_btotal          += stotal;                   // kin+pot
+	_total           += stotal;
 /*
 	double spott = 0.0;
 	double spottl = 0.0;
@@ -762,49 +766,31 @@ void MCGetAverage(void)
 	GetTotalEnergy1(spott, spottl, spottr);
 	double stotal     = spott;
 */
-	double srot       = 0.0;
 	//double dspot    = GetPotEnergy_Diff();      // pot energy differencies added by Hui Li 
 
-	_bkin            += skin;                     // block average for kin energy
-	_bpot            += spot;                     // block average for pot energy
-	_btotal          += stotal;                   // kin+pot
 	//_dbpot         += dspot;                    // block average for pot energy differencies added by Hui Li
  
-	_kin_total       += skin;                     // accumulated average 
-	_pot_total       += spot;
-	_total           += stotal;
 	//_dpot_total    += dspot;                    //added by Hui Li
 
 /* new addition */
 #ifdef PIGSROTORS
-#ifndef SINGLEROTOR
-	double theta, costheta, phi;
+	double theta, costheta;
+
 	double scostheta  = GetCosTheta();
-	double stheta     = acos(scostheta);
-
-	_btheta          += stheta; 
 	_bcostheta       += scostheta; 
-
-	_theta_total     += stheta;
 	_costheta_total  += scostheta;
 
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-#ifdef LINEARROTORS
-		double sphi       = GetPhi();
-		_bphi            += sphi;
-		_phi_total       += sphi;
-#endif
-	}
-#endif
+	double stheta     = acos(scostheta);
+	_btheta          += stheta; 
+	_theta_total     += stheta;
 #endif
 /* new addition */
 
 	//rotational degrees of freedom
 	/* reactive */
+		double srot;
 	if (ROTATION)
 	{
-		//double srot;
 
 		if(MCAtom[IMTYPE].molecule == 1)
 			srot      = GetRotEnergy();           // kin energy
@@ -815,10 +801,8 @@ void MCGetAverage(void)
 		srot          = GetRotE3D();
         
 #ifdef LINEARROTORS
-#ifndef SINGLEROTOR
 		if(MCAtom[IMTYPE].molecule == 4)
-			srot      = GetRotEnergy1();           // kin energy
-#endif
+			srot      = GetRotEnergyPIGS();           // kin energy
 #endif
 		_brot        += srot;
 		_rot_total   += srot;
@@ -996,9 +980,7 @@ void MCSaveBlockAverages(long int blocknumb)
 
 	SaveEnergy         (MCFileName.c_str(),avergCount,blocknumb);
 #ifdef PIGSROTORSIO
-#ifndef SINGLEROTOT
 	SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
-#endif
 #endif
 
 	if (BOSONS) 
@@ -1040,7 +1022,6 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
-	//_brot = _btotal - _bpot;
 	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
 #else
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
@@ -1080,7 +1061,6 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
     fid << setw(IO_WIDTH) << _bcostheta/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _btheta/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _bphi/avergCount << BLANK;  
     fid << endl;
     fid.close();
 }
@@ -1094,7 +1074,6 @@ void SaveSumEnergy (double acount, double numb)  // global average
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
 	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
 	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
-	//_rot_total = _total - _pot_total;
 	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
 #else
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
@@ -1143,7 +1122,6 @@ void SaveSumAngularDOF(double acount, double numb)
     _fang << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total/acount << BLANK;
     _fang << setw(IO_WIDTH) << _theta_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _phi_total/acount << BLANK;
 
     _fang << endl;
 }
@@ -1152,21 +1130,13 @@ void SaveInstantAngularDOF(double acount, double numb)
 {
     const char *_proc_=__func__;
 
-    double theta, costheta, phi;
+    double theta, costheta;
     double scostheta  = GetCosTheta();
     double stheta     = acos(scostheta);
 
     _fangins << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fangins << setw(IO_WIDTH) << scostheta << BLANK;
     _fangins << setw(IO_WIDTH) << stheta << BLANK;
-#ifdef LINEARROTORS
-	if (MCAtom[IMTYPE].numb > 1)
-	{
-    	double sphi       = GetPhi();
-    	_fangins << setw(IO_WIDTH) << sphi << BLANK;
-	}
-#endif
-
     _fangins << endl;
 }
 #endif
@@ -1184,7 +1154,6 @@ void InitTotalAverage(void)  // DUMP
 #ifdef PIGSROTORS
 	_theta_total = 0.0;
 	_costheta_total = 0.0;
-	_phi_total = 0.0;
 #endif
 	_dpot_total = 0.0;  //added by Hui Li
 

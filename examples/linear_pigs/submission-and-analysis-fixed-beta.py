@@ -22,28 +22,30 @@ molecule_rot        = "HF"
 #print 5/(support.bconstant(molecule_rot)/0.695)
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
-numbblocks	        = 5000                                                        #change param2
+numbblocks	        = 50000                                                        #change param2
 numbmolecules       = 1                                                            #change param3
-temperature	        = 0.4                                                          #change param4
-Rpt                 = 0.1                                                          #change param7
+beta     	        = 0.128                                                        #change param4
+Rpt                 = 3.5                                                          #change param7
 
 skip		        = 2                                                            #change param8
 status              = "submission"                                                 #change param9
 status              = "analysis"                                                   #change param10
 status_rhomat       = "Yes"                                                        #change param10 
 
-nrange              = 8 #41		  						                           #change param12
+nrange              = 8 		  						                           #change param12
 
 if (molecule_rot == "H2"):
 	#step           = [1.5,3.0,3.0,3.0,3.0,2.6,2.3,2.5,2.02] #temp 10K             #change param6
 	#step           = [1.5,3.0,3.0,2.5,1.5,1.0,0.7,2.5,2.02] #temp 50K             #change param6
 	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
-	file1_name      = "Rpt"+str(Rpt)+"Angstrom-Temperature"+str(temperature)+"K-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
+	file1_name      = "Rpt"+str(Rpt)+"Angstrom-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
 
 if (molecule_rot == "HF"):
-	#step           = [3.0,3.0,3.0,3.0,3.0,1.8,1.2,0.80,0.2]                       #change param6
-	step            = [3.0,3.0,3.0,3.0,3.0,2.0,1.2,0.80,0.2]                       #change param6
-	file1_name      = "Temperature"+str(temperature)+"K-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	#step           = [3.0,3.0,3.0,3.0,3.0,1.8,1.2,0.8,0.2]                       #change param6
+	#step            = [3.0,1.0,1.5,3.0,3.0,3.0,2.3,1.5,0.2] # 1 HF beta 0.512 K-1 #change param6
+	#step            = [3.0,2.0,3.0,3.0,3.0,2.5,1.5,1.1,2.0] # 1 HF beta 0.256 K-1 #change param6
+	step            = [3.0,3.0,3.0,3.0,3.0,1.8,1.1,0.8,2.0] # 1 HF beta 0.128 K-1 #change param6
+	file1_name      = "beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 file2_name          = ""                                                           #change param10
 argument2           = "beads"                                                      #change param11
@@ -54,7 +56,7 @@ src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param13
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                   #change param14
 
-beta                = 1.0/temperature   
+temperature         = 1.0/beta   
 
 #===============================================================================
 #                                                                              |
@@ -70,11 +72,6 @@ if status == "submission":
 		call(["make"])
 		path_exit_linden  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
 		os.chdir(path_exit_linden)
-
-	file_input = "Input-parameters-vs-beads-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt"
-	call(["rm", file_input])
-	fsubmit    = open(file_input, "a")  
-
 
 #===============================================================================
 #                                                                              |
@@ -142,7 +139,6 @@ for i in range(nrange):                                                  #change
 			call(["qsub", fname, ])
 			os.chdir(src_path)
 
-			fsubmit.write(support.outputstring1(numbbeads,tau,temperature))
 
 		if status == "analysis":
 
@@ -185,9 +181,6 @@ for i in range(nrange):                                                  #change
 			except:
 				print "no file ", i
 				pass
-
-if status == "submission":
-	fsubmit.close()
 
 if status == "analysis":
 	fanalyze.close()
