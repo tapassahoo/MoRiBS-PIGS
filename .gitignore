@@ -43,3 +43,13 @@ eigen-values-of-two-rotors/*.dat
 eigen-values-of-two-rotors/*err
 eigen-values-of-two-rotors/*out
 !eigen-values-of-two-rotors/
+#
+eigen-values-of-two-rotors-new/*/
+eigen-values-of-two-rotors-new/*txt
+eigen-values-of-two-rotors-new/vh2h2*
+eigen-values-of-two-rotors-new/*.o
+eigen-values-of-two-rotors-new/bb*
+eigen-values-of-two-rotors-new/*.dat
+eigen-values-of-two-rotors-new/*err
+eigen-values-of-two-rotors-new/*out
+!eigen-values-of-two-rotors-new/
