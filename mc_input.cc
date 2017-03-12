@@ -337,7 +337,7 @@ void IOReadParams(const char in_file[],int & mc_status)
         inf >> MCSKIP_AVERG;
      } 
      else
-#ifdef GETPOT
+#ifdef GETR
      if (params==IO_DISTANCE)
      {
         inf >> Distance;
@@ -484,7 +484,7 @@ void IOReadParams(const char in_file[],int & mc_status)
    cout << "Number of steps to skip to save ACCEPT RATIO" << BLANK << MCSKIP_RATIO << endl;
    cout << "Number of steps to skip to save ACCUML AVERG" << BLANK << MCSKIP_TOTAL << endl;
    cout << "Number of steps to skip to evaluate AVERAGES" << BLANK << MCSKIP_AVERG << endl;
-#ifdef GETPOT
+#ifdef GETR
    cout << "Intermolecular distance" << BLANK << Distance << endl;
 #endif
 

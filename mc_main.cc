@@ -59,6 +59,12 @@ double _btheta;
 double _bcostheta;
 double _theta_total;
 double _costheta_total;
+#ifdef DIPOLE
+double _btheta1;
+double _bcostheta1;
+double _theta_total1;
+double _costheta_total1;
+#endif
 #endif
 
 double _brot;       // rotational kin energy, block average
@@ -725,6 +731,10 @@ void MCResetBlockAverage(void)
 #ifdef PIGSROTORS
 	_btheta    = 0.0;
 	_bcostheta = 0.0;
+#ifdef DIPOLE
+	_btheta1   = 0.0;
+	_bcostheta1= 0.0;
+#endif
 #endif
 	_bkin        = 0.0;
 
@@ -774,9 +784,20 @@ void MCGetAverage(void)
 
 /* new addition */
 #ifdef PIGSROTORS
-	double theta, costheta;
-
+#ifndef DIPOLE
 	double scostheta  = GetCosTheta();
+#else
+    double scostheta  = 0.;
+    double scostheta1 = 0.;
+    GetCosTheta1(scostheta,scostheta1);
+	_bcostheta1      += scostheta1; 
+	_costheta_total1 += scostheta1;
+
+	double stheta1    = acos(scostheta1);
+	_btheta1         += stheta1; 
+	_theta_total1    += stheta1;
+#endif
+
 	_bcostheta       += scostheta; 
 	_costheta_total  += scostheta;
 
@@ -1061,6 +1082,10 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
     fid << setw(IO_WIDTH) << _bcostheta/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _btheta/avergCount << BLANK;
+#ifdef DIPOLE
+    fid << setw(IO_WIDTH) << _bcostheta1/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _btheta1/avergCount << BLANK;
+#endif
     fid << endl;
     fid.close();
 }
@@ -1122,6 +1147,10 @@ void SaveSumAngularDOF(double acount, double numb)
     _fang << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total/acount << BLANK;
     _fang << setw(IO_WIDTH) << _theta_total/acount << BLANK;
+#ifdef DIPOLE
+    _fang << setw(IO_WIDTH) << _costheta_total1/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _theta_total1/acount << BLANK;
+#endif
 
     _fang << endl;
 }
@@ -1130,13 +1159,24 @@ void SaveInstantAngularDOF(double acount, double numb)
 {
     const char *_proc_=__func__;
 
-    double theta, costheta;
+#ifndef DIPOLE
     double scostheta  = GetCosTheta();
     double stheta     = acos(scostheta);
+#else
+    double scostheta  = 0.;
+    double scostheta1 = 0.;
+    GetCosTheta1(scostheta,scostheta1);
+    double stheta     = acos(scostheta);
+    double stheta1    = acos(scostheta1);
+#endif
 
     _fangins << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fangins << setw(IO_WIDTH) << scostheta << BLANK;
     _fangins << setw(IO_WIDTH) << stheta << BLANK;
+#ifdef DIPOLE
+    _fangins << setw(IO_WIDTH) << scostheta1 << BLANK;
+    _fangins << setw(IO_WIDTH) << stheta1 << BLANK;
+#endif
     _fangins << endl;
 }
 #endif
@@ -1154,6 +1194,10 @@ void InitTotalAverage(void)  // DUMP
 #ifdef PIGSROTORS
 	_theta_total = 0.0;
 	_costheta_total = 0.0;
+#ifdef DIPOLE
+	_theta_total1 = 0.0;
+	_costheta_total1 = 0.0;
+#endif
 #endif
 	_dpot_total = 0.0;  //added by Hui Li
 

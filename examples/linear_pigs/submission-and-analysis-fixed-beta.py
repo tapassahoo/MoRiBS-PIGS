@@ -22,12 +22,11 @@ molecule_rot        = "HF"
 #print 5/(support.bconstant(molecule_rot)/0.695)
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
-numbblocks	        = 50000                                                        #change param2
+numbblocks	        = 20000                                                        #change param2
 numbmolecules       = 1                                                            #change param3
 beta     	        = 0.128                                                        #change param4
-Rpt                 = 3.5                                                          #change param7
+Rpt                 = 2.0                                                        #change param7
 
-skip		        = 2                                                            #change param8
 status              = "submission"                                                 #change param9
 status              = "analysis"                                                   #change param10
 status_rhomat       = "Yes"                                                        #change param10 
@@ -41,11 +40,18 @@ if (molecule_rot == "H2"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
 
 if (molecule_rot == "HF"):
-	#step           = [3.0,3.0,3.0,3.0,3.0,1.8,1.2,0.8,0.2]                       #change param6
+	#step           = [0.7,1.4,2.3,4.2,7.8,5.0,2.5,1.5,0.2]  # 2 HF beta 0.512 K-1 #change param6
+	#step           = [0.7,3.0,5.0,8.5,5.0,3.0,1.6,1.0,0.2]  # 2 HF beta 0.256 K-1 #change param6
+	#step           = [0.7,7.0,9.5,5.5,3.0,1.5,1.0,0.6,0.2]  # 2 HF beta 0.128 K-1 #change param6
 	#step            = [3.0,1.0,1.5,3.0,3.0,3.0,2.3,1.5,0.2] # 1 HF beta 0.512 K-1 #change param6
 	#step            = [3.0,2.0,3.0,3.0,3.0,2.5,1.5,1.1,2.0] # 1 HF beta 0.256 K-1 #change param6
-	step            = [3.0,3.0,3.0,3.0,3.0,1.8,1.1,0.8,2.0] # 1 HF beta 0.128 K-1 #change param6
-	file1_name      = "beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	#step            = [3.0,3.0,3.0,3.0,3.0,1.8,1.1,0.8,2.0] # 1 HF beta 0.128 K-1 Rpt = 10.05 #change param6
+	#step            = [1.0, 0.03, 0.05, 0.08, 0.17, 0.25, 0.3, 0.3, 2.0] # 1 HF beta 0.128 K-1 Rpt = 2.0 #change param6
+	#step            = [1.0, 0.5, 0.8, 1.0, 1.2, 1.2, 0.85, 0.6, 2.0] # 1 HF beta 0.128 K-1 Rpt = 5.0 #change param6
+	step            = [3.0,4.0,4.5,4.0,3.0,1.8,1.1,0.8,2.0] # 1 HF beta 0.128 K-1 Rpt = 10.0 #change param6
+	file1_name      = "Rpt"+str(Rpt)+"Angstrom-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
+	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	#file1_name      = "test"
 
 file2_name          = ""                                                           #change param10
 argument2           = "beads"                                                      #change param11
@@ -57,6 +63,7 @@ dest_path           = "/work/tapas/linear_rotors/"                              
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                   #change param14
 
 temperature         = 1.0/beta   
+trunc               = 10000
 
 #===============================================================================
 #                                                                              |
@@ -66,12 +73,7 @@ temperature         = 1.0/beta
 #===============================================================================
 if status == "submission":
 	if status_rhomat == "Yes":
-		path_enter_linden = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/"
-		os.chdir(path_enter_linden)
-		call(["make", "clean"])
-		call(["make"])
-		path_exit_linden  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
-		os.chdir(path_exit_linden)
+		support.compile_rotmat()
 
 #===============================================================================
 #                                                                              |
@@ -79,15 +81,17 @@ if status == "submission":
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	file_output          = "Energy-vs-tau-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt"  
-	file_output_angularDOF = "AngularDOF-vs-tau-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+".txt"  
+	file_output          = "Energy-vs-tau-"+str(numbmolecules)+"-"+str(molecule)
+	file_output         += "-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom.txt"  
+	file_output_angularDOF = "AngularDOF-vs-tau-"+str(numbmolecules)+"-"+str(molecule)
+	file_output_angularDOF+= "-fixed-beta"+str(beta)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom.txt"  
 	call(["rm", file_output, file_output_angularDOF])
 
 	fanalyze             = open(file_output, "a")           
-	fanalyze.write(support.formatting(status,var))
+	fanalyze.write(support.fmt_energy(status,var))
 
 	fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
-	fanalyze_angularDOF.write(support.formatting1(status,var))
+	fanalyze_angularDOF.write(support.fmt_angle(status,var))
 
 
 
@@ -143,44 +147,8 @@ for i in range(nrange):                                                  #change
 		if status == "analysis":
 
 			variable = tau
-			try:
-				#Reading input data using numpy module
-				col_block, col_pot, col_tot, col_rot = loadtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3])
-				mean_pot   = np.sum(col_pot)/len(col_block)
-				mean_tot      = np.sum(col_tot)/len(col_block)
-				mean_rot      = np.sum(col_rot)/len(col_block)
-				x2			  = np.multiply(col_pot, col_pot)
-				y2			  = np.multiply(col_tot, col_tot)
-				z2			  = np.multiply(col_rot, col_rot)
-				mean_sq_pot   = np.sum(x2)/len(col_block)
-				mean_sq_tot   = np.sum(y2)/len(col_block)
-				mean_sq_rot   = np.sum(z2)/len(col_block)
-				error_pot     = sqrt((mean_sq_pot-mean_pot*mean_pot)/len(col_block))
-				error_tot     = sqrt((mean_sq_tot-mean_tot*mean_tot)/len(col_block))
-				error_rot     = sqrt((mean_sq_rot-mean_rot*mean_rot)/len(col_block))
-				print i, len(col_block)
-			
-				fanalyze.write(support.outputstring2(numbbeads,variable,mean_pot,mean_tot,mean_rot,error_pot,error_tot,error_rot))
-
-
-				col_block, col_costheta, col_theta, col_phi = loadtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3])
-				mean_costheta = np.sum(col_costheta)/len(col_block)
-				mean_theta    = np.sum(col_theta)/len(col_block)
-				mean_phi      = np.sum(col_phi)/len(col_block)
-				x2			  = np.multiply(col_costheta, col_costheta)
-				y2			  = np.multiply(col_theta, col_theta)
-				z2			  = np.multiply(col_phi, col_phi)
-				mean_sq_costheta = np.sum(x2)/len(col_block)
-				mean_sq_theta = np.sum(y2)/len(col_block)
-				mean_sq_phi   = np.sum(z2)/len(col_block)
-				error_costheta   = sqrt((mean_sq_costheta - mean_costheta*mean_costheta)/len(col_block))
-				error_theta   = sqrt((mean_sq_theta - mean_theta*mean_theta)/len(col_block))
-				error_phi     = sqrt((mean_sq_phi - mean_phi*mean_phi)/len(col_block))
-			
-				fanalyze_angularDOF.write(support.outputstring2(numbbeads,variable,mean_costheta,mean_theta,mean_phi,error_costheta,error_theta,error_phi))
-			except:
-				print "no file ", i
-				pass
+			fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc))
+			fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc))
 
 if status == "analysis":
 	fanalyze.close()

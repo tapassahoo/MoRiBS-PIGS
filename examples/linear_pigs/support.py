@@ -8,6 +8,21 @@ import decimal
 import numpy as np
 from numpy import *
 
+def compile_rotmat():
+	path_enter_linden = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/"
+	os.chdir(path_enter_linden)
+	call(["make", "clean"])
+	call(["make"])
+	path_exit_linden  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+	os.chdir(path_exit_linden)
+
+def jackknife(mean,data):
+	ai            = [((np.sum(data) - data[j])/(len(data) - 1.0)) for j in range(len(data))]
+	deviation     = ai - mean
+	devsq         = np.multiply(deviation,deviation)
+	error         = sqrt(np.sum(devsq)*(len(data)-1.0)/len(data))
+	return error
+
 def levels(number):
 	for j in range (10):
 		jj=pow(2,j)
@@ -89,10 +104,36 @@ def inputstr(numbbeads,tau,temperature):
 	output ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
 	return output
 
-def outputstr_energy(numbbeads,tau,mean_pot,mean_tot,mean_rot,error_pot,error_tot,error_rot):
+def outputstr_energy(numbbeads,tau,dest_dir,trunc):
 	'''
 	This function gives us the output 
 	'''
+	try:
+		col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], max_rows=trunc)
+	except:
+		print 'I/O error in outputstr_energy'
+		pass
+	print len(col_tot)
+	
+	mean_pot      = np.mean(col_pot)
+	mean_tot      = np.mean(col_tot)
+	mean_rot      = np.mean(col_rot)
+
+	'''
+	var_pot       = np.var(col_pot)
+	var_tot       = np.var(col_tot)
+	var_rot       = np.var(col_rot)
+   
+	error_pot     = sqrt(var_pot/len(col_block))
+	error_tot     = sqrt(var_tot/len(col_block))
+	error_rot     = sqrt(var_rot/len(col_block))
+	'''
+
+	error_pot     = jackknife(mean_pot,col_pot)
+	error_tot     = jackknife(mean_tot,col_tot)
+	error_rot     = jackknife(mean_rot,col_rot)
+	#print i, len(col_block)
+
 	argu1          = "%5d"   % numbbeads
 	argu2          = "%11.6f" % tau
 	argu3          = "%10.5f" % mean_pot
@@ -105,16 +146,36 @@ def outputstr_energy(numbbeads,tau,mean_pot,mean_tot,mean_rot,error_pot,error_to
 	output += "        "+argu6+"          "+argu7+"          "+argu8+"\n"
 	return output
 
-def outputstr_angle(numbbeads,tau,mean_argu1,mean_argu2,error_argu1,error_argu2):
+def outputstr_angle(numbbeads,tau,dest_dir,trunc):
 	'''
 	This function gives us the output 
 	'''
+	try:
+		col_block, col_costheta, col_theta = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2], max_rows=trunc)
+	except:
+		print 'I/O Error in outputstr_angle'
+		pass
+
+	mean_costheta = np.mean(col_costheta)
+	mean_theta    = np.mean(col_theta)
+
+	'''
+	var_costheta  = np.var(col_costheta)
+	var_theta     = np.var(col_theta)
+
+	error_costheta = sqrt(var_costheta/len(col_block))
+	error_theta   = sqrt(var_theta/len(col_block))
+	'''
+
+	error_costheta = jackknife(mean_costheta,col_costheta)
+	error_theta   = jackknife(mean_theta,col_theta)
+			
 	argu1          = "%5d"   % numbbeads
 	argu2          = "%11.6f" % tau
-	argu3          = "%10.5f" % mean_argu1
-	argu4          = "%10.5f" % mean_argu2
-	argu5          = "%10.5f" % error_argu1
-	argu6          = "%10.5f" % error_argu2
+	argu3          = "%10.5f" % mean_costheta
+	argu4          = "%10.5f" % mean_theta
+	argu5          = "%10.5f" % error_costheta
+	argu6          = "%10.5f" % error_theta
 	output  = " "+argu1+" "+argu2+"   "+argu3+"     "+argu4+"     "+argu5+"          "+argu6+"\n"
 	return output
 
@@ -161,7 +222,7 @@ def rotmat(molecule,temperature,numbbeads):
 	#temperature1    = dropzeros(temperature)
 	temperature1    = "%5.3f" % temperature
 	numbbeads1		= numbbeads - 1
-	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 3000 -1"
+	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 12000 -1"
 	print command_linden_run
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"

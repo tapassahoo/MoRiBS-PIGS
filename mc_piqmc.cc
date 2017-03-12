@@ -2209,7 +2209,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                 //Dihedral angle calculation is completed here
                 double r1 = 1.42;// bond length in bohr
                 double r2 = r1;// bond length in bohr
-#ifdef GETPOT
+#ifdef GETR
                 double rd = Distance/BOHRRADIUS;
 #else
                 double rd = r/BOHRRADIUS;
@@ -2222,19 +2222,18 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 
 		    if (stype == HF )
             {
-                double com_1[NDIM],com_2[NDIM];
                 double uvec1[NDIM],uvec2[NDIM];
                 double E12;
 
                 for (int id=0;id<NDIM;id++)
                 {
-                    com_1[id] = MCCoords[id][t0];
-                    com_2[id] = MCCoords[id][t1];
                     uvec1[id] = cosine[id][tm0];
                     uvec2[id] = MCCosine[id][tm1];
                 }
-                cluster_(com_1, com_2, uvec1, uvec2, &E12);
-                spot += E12;
+
+                //cluster_(com_1, com_2, uvec1, uvec2, &E12);
+                //spot += E12;
+				spot += PotFunc(Distance,uvec1, uvec2);
             }  //stype
         } //loop over atom1 (molecules)
     }
@@ -2243,7 +2242,9 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 	{
         double dm   = 1.86/AuToDebye;
         double dm2  = dm*dm;
-        double RR   = 10.05/BOHRRADIUS;
+#ifdef GETR
+        double RR   = Distance/BOHRRADIUS;
+#endif
 	    int offset0 =  atom0*NumbRotTimes;
         int t0  = offset0 + it;
         double E12 = -2.0*dm2*cosine[2][t0]/(RR*RR*RR);
@@ -2445,3 +2446,4 @@ void MFreeMCCounts(void)
    free_doubleMatrix(MCTotal);
    free_doubleMatrix(MCAccep);
 }
+

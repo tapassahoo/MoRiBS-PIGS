@@ -38,7 +38,7 @@ extern int     NUMB_MOLCTYPES; // total number of molecules types
 
 extern int     NDIM;
 extern double  Temperature;
-#ifdef GETPOT
+#ifdef GETR
 extern double  Distance;
 #endif
 extern double  Density;

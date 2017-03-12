@@ -59,4 +59,4 @@ MCSKIP_RATIO     200       # to save information regarding accept ratio
 MCSKIP_TOTAL     200        # to save accumulated average
 MCSKIP_AVERG     200        # to evaluate averages
 #BLOCKSKIP_2D	 2	        # skipped blocks to save 2D densities
-DISTANCE         3.5 #distance_input
+DISTANCE         distance_input

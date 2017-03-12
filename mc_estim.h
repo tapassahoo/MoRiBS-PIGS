@@ -23,6 +23,7 @@ double GetPotEnergy_Densities(void);
 double GetTotalEnergy(void);
 void   GetTotalEnergy1(double &spot, double &spotl, double &spotr);
 double GetCosTheta(void);
+void   GetCosTheta1(double &dipole, double &dipole1);
 double GetPhi(void);
 double GetPotEnergy(void);
 double GetKinEnergy(void);
@@ -76,4 +77,5 @@ extern double srotsum; // total summation of rotational energy
 void VectorNormalisation(double *);
 double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
+double PotFunc(double ,double *, double *);
 #endif  // mc_estim.h

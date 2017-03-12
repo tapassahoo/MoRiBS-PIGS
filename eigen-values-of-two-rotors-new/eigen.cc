@@ -135,25 +135,6 @@ int main()
 
 													vh2h2_(&rCOM, &bondLength1, &bondLength2, &theta1, &theta2, &dihedralAngle, &potl);
 */
-													double Eulang_1[3];
-													double Eulang_2[3];
-													double com_1[3];
-													double com_2[3];
-
-													Eulang_1[0] = phi[iPhiRotor1];
-													Eulang_1[1] = theta1;
-													Eulang_1[2] = 0.0;
-													Eulang_2[0] = phi[iPhiRotor2];
-													Eulang_2[1] = theta2;
-													Eulang_2[2] = 0.0;
-													
-													//units of com_1 and com_2 are Angstrom
-													com_1[0]    = 0.0;
-													com_1[1]    = 0.0;
-													com_1[2]    = 0.0;
-													com_2[0]    = 0.0;
-													com_2[1]    = 0.0;
-													com_2[2]    = 10.05;
 													double E12;
 													cluster_(com_1, com_2, Eulang_1, Eulang_2, &E12);
 #ifndef TESTNORM 
@@ -927,4 +908,15 @@ void densityCosTheta(int nSizeTotal, double *cosTheta, double *weightsTheta, dou
         cout<<binsi<<"  "<<hist[i]/sum1<<endl;
     }
     cout<<sum<<endl;
+}
+
+double PotFunc(double *uvec1, double *uvec2)
+{
+    double dm     = 1.86;    // in Debye
+    double dm_au  = dm/AuToDebye;
+    double Rpt    = 10.05;   // in Angstrom
+    double Rpt_au = Rpt/BOHRRADIUS;
+
+    double pot_au = dm_au*dm_au*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2])/(Rpt_au*Rpt_au*Rpt_au);
+    return (pot_au*AuToKelvin);
 }

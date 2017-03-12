@@ -659,7 +659,7 @@ double GetPotEnergy_Densities(void)
                 //Dihedral angle calculation is completed here
                 double r1 = 1.42;// bond length in bohr
                 double r2 = r1;// bond length in bohr
-#ifdef GETPOT
+#ifdef GETR
                 double rd = Distance/BOHRRADIUS;
 #else
                 double rd = r/BOHRRADIUS;
@@ -671,18 +671,14 @@ double GetPotEnergy_Densities(void)
 
             if (stype == HF)
             {
-                double com_1[NDIM],com_2[NDIM];
                 double uvec1[NDIM],uvec2[NDIM];
                 double E12;
                 for (int id=0;id<NDIM;id++)
                 {
-                    com_1[id] = MCCoords[id][t0];
-                    com_2[id] = MCCoords[id][t1];
                     uvec1[id] = MCCosine[id][tm0];
 			        uvec2[id] = MCCosine[id][tm1];
                 }
-                cluster_(com_1, com_2, uvec1, uvec2, &E12);
-                spot += E12;
+                spot += PotFunc(Distance, uvec1, uvec2);
             } //stype
         }// loop over atoms (molecules)
     }
@@ -691,7 +687,9 @@ double GetPotEnergy_Densities(void)
         spot = 0.0;
         double dm   = 1.86/AuToDebye;
         double dm2  = dm*dm;
-        double RR   = 10.05/BOHRRADIUS;
+#ifdef GETR
+        double RR = Distance/BOHRRADIUS;
+#endif
 
         int offset0 = 0;
 
@@ -1027,7 +1025,7 @@ double GetTotalEnergy(void)
                     //Dihedral angle calculation is completed here
                     double r1 = 1.42;// bond length in bohr
                     double r2 = r1;// bond length in bohr
-#ifdef GETPOT
+#ifdef GETR
                     double rd = Distance/BOHRRADIUS;
 #else
                     double rd = r/BOHRRADIUS;
@@ -1039,18 +1037,14 @@ double GetTotalEnergy(void)
                 if (stype == HF)
                 {
                     spot_pair = 0.0;
-                    double com_1[NDIM],com_2[NDIM];
                     double uvec1[NDIM],uvec2[NDIM];
                     double E12;
                     for (int id=0;id<NDIM;id++)
                     {
-                        com_1[id] = MCCoords[id][t0];
-                        com_2[id] = MCCoords[id][t1];
                         uvec1[id] = MCCosine[id][t0];
 			            uvec2[id] = MCCosine[id][t1];
                     }
-                    cluster_(com_1, com_2, uvec1, uvec2, &E12);
-                    spot_pair += E12;
+                    spot_pair  += PotFunc(Distance,uvec1,uvec2);
                 } //stype
 			}//loop over two terminal beads
 			spot += spot_pair;
@@ -1061,7 +1055,9 @@ double GetTotalEnergy(void)
     {
         double dm   = 1.86/AuToDebye;
         double dm2  = dm*dm;
-        double RR   = 10.05/BOHRRADIUS;
+#ifdef GETR
+        double RR   = Distance/BOHRRADIUS;
+#endif
 
         int offset0 = 0;
 
@@ -1349,8 +1345,9 @@ double GetCosTheta(void)
     		}     // LOOP OVER ATOM PAIRS
 		}
 	}
-	else
+	if(MCAtom[IMTYPE].numb == 1)
 	{
+		// Initial configurations //
         double phi1  = 0.0;
         double cost1 = 1.0;
         double sint1 = sqrt(1.0 - cost1*cost1);
@@ -1374,10 +1371,73 @@ double GetCosTheta(void)
 		cosTheta     = cst;
 	}
     int jrot = 2; 
-    double dipole    = plgndr(jrot,0,cosTheta);
+    double dipole    = cosTheta;// plgndr(jrot,0,cosTheta);
     return dipole;
 }
 
+void GetCosTheta1(double &dipole, double &dipole1)
+{
+    const char *_proc_=__func__; 
+    //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
+
+    double cosTheta;
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+        cosTheta            = 0.0;
+    	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+        {    
+    	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+    	    {
+       		    int type0   = MCType[atom0];
+        	    int type1   = MCType[atom1];
+
+        	    int offset0 = NumbRotTimes*atom0;
+        	    int offset1 = NumbRotTimes*atom1;
+
+        	    int it      = (NumbRotTimes - 1)/2;
+       		    int t0      = offset0 + it;
+        	    int t1      = offset1 + it;
+
+           	    int tm0     = offset0 + it/RotRatio;
+           	    int tm1     = offset1 + it/RotRatio;
+                double cst   = 0.0;
+           	    for (int id = 0; id < NDIM; id++)
+           	    {    
+               	    cst    += MCCosine[id][t0]*MCCosine[id][t1];
+           	    }
+           	    cosTheta   += cst;
+    		}     // LOOP OVER ATOM PAIRS
+		}
+	}
+	if(MCAtom[IMTYPE].numb == 1)
+	{
+		// Initial configurations //
+        double phi1  = 0.0;
+        double cost1 = 1.0;
+        double sint1 = sqrt(1.0 - cost1*cost1);
+
+        double uvec1[NDIM];
+        uvec1[0]     = sint1*cos(phi1);
+        uvec1[1]     = sint1*sin(phi1);
+        uvec1[2]     = cost1;
+
+        cosTheta     = 0.0;
+		int atom0    = 0;
+     	int type0    = MCType[atom0];
+       	int offset0  = NumbRotTimes*atom0;
+       	int it       = (NumbRotTimes - 1)/2;
+        int tm0      = offset0 + it/RotRatio;
+        double cst   = 0.0;
+        for (int id = 0; id < NDIM; id++)
+        {    
+       	    cst    += MCCosine[id][tm0]*uvec1[id];
+        }
+		cosTheta     = cst;
+	}
+    int jrot = 2; 
+    dipole    = cosTheta;
+    dipole1   = plgndr(jrot,0,cosTheta);
+}
 double GetPotEnergy(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc
 {
@@ -3495,5 +3555,15 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[0] = w[1] * v[2] - w[2] * v[1];
     cross[1] = w[2] * v[0] - w[0] * v[2];
     cross[2] = w[0] * v[1] - w[1] * v[0];
+}
+
+double PotFunc(double Rpt, double *uvec1, double *uvec2)
+{
+    double dm     = 1.86;    // in Debye
+    double dm_au  = dm/AuToDebye;
+    double Rpt_au = Rpt/BOHRRADIUS;
+   
+    double pot_au = dm_au*dm_au*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2])/(Rpt_au*Rpt_au*Rpt_au);
+    return (pot_au*AuToKelvin);
 }
 #endif

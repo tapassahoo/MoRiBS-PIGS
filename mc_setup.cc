@@ -40,7 +40,7 @@ int     NUMB_MOLCTYPES = 0;  // total number of molecules types
 int     NDIM;
 double  Temperature;
 
-#ifdef GETPOT
+#ifdef GETR
 double Distance;
 #endif
 
