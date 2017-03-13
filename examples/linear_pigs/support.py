@@ -119,23 +119,13 @@ def outputstr_energy(numbbeads,tau,dest_dir,trunc):
 	mean_tot      = np.mean(col_tot)
 	mean_rot      = np.mean(col_rot)
 
-	'''
-	var_pot       = np.var(col_pot)
-	var_tot       = np.var(col_tot)
-	var_rot       = np.var(col_rot)
-   
-	error_pot     = sqrt(var_pot/len(col_block))
-	error_tot     = sqrt(var_tot/len(col_block))
-	error_rot     = sqrt(var_rot/len(col_block))
-	'''
-
 	error_pot     = jackknife(mean_pot,col_pot)
 	error_tot     = jackknife(mean_tot,col_tot)
 	error_rot     = jackknife(mean_rot,col_rot)
 	#print i, len(col_block)
 
 	argu1          = "%5d"   % numbbeads
-	argu2          = "%11.6f" % tau
+	argu2          = "%10.5f" % tau
 	argu3          = "%10.5f" % mean_pot
 	argu4          = "%10.5f" % mean_tot
 	argu5          = "%10.5f" % mean_rot
@@ -151,41 +141,47 @@ def outputstr_angle(numbbeads,tau,dest_dir,trunc):
 	This function gives us the output 
 	'''
 	try:
-		col_block, col_costheta, col_theta = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2], max_rows=trunc)
+		col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], max_rows=trunc)
 	except:
 		print 'I/O Error in outputstr_angle'
 		pass
 
-	mean_costheta = np.mean(col_costheta)
-	mean_theta    = np.mean(col_theta)
-
-	'''
-	var_costheta  = np.var(col_costheta)
-	var_theta     = np.var(col_theta)
-
-	error_costheta = sqrt(var_costheta/len(col_block))
-	error_theta   = sqrt(var_theta/len(col_block))
-	'''
+	mean_costheta  = np.mean(col_costheta)
+	mean_theta     = np.mean(col_theta)
+	mean_costheta1 = np.mean(col_costheta1)
+	mean_theta1    = np.mean(col_theta1)
 
 	error_costheta = jackknife(mean_costheta,col_costheta)
-	error_theta   = jackknife(mean_theta,col_theta)
-			
+	error_theta    = jackknife(mean_theta,col_theta)
+	error_costheta1= jackknife(mean_costheta1,col_costheta1)
+	error_theta1   = jackknife(mean_theta1,col_theta1)
+
 	argu1          = "%5d"   % numbbeads
-	argu2          = "%11.6f" % tau
+	argu2          = "%10.5f" % tau
 	argu3          = "%10.5f" % mean_costheta
 	argu4          = "%10.5f" % mean_theta
 	argu5          = "%10.5f" % error_costheta
 	argu6          = "%10.5f" % error_theta
-	output  = " "+argu1+" "+argu2+"   "+argu3+"     "+argu4+"     "+argu5+"          "+argu6+"\n"
+	argu7          = "%10.5f" % mean_costheta1
+	argu8          = "%10.5f" % mean_theta1
+	argu9          = "%10.5f" % error_costheta1
+	argu10         = "%10.5f" % error_theta1
+	output         = " "+argu1+" "+argu2+"   "+argu3+"     "+argu4+"     "+argu5+"          "+argu6
+	output        += "          "+argu7+"      "+argu8+"        "+argu9+"        "+argu10+"\n"
 	return output
 
 def fmt_energy(status,variable):
 	'''
 	This function gives us the output 
 	'''
+	if variable == "Rpt":
+		unit = "Angstrom"
+	else:
+		unit = "1/K"
+
 	if status == "analysis":
 		output     = "#  Beads    "+variable+"     Avg. Potential   Avg. Total   Avg. rotational  Error of Potential     Error of Total    Error of Rotational \n"
-		output    += "#          (1/K)      Energy (K)     Energy (K)      Energy (K)        Energy (K)           Energy (K)          Energy (K) \n"
+		output    += "#          ("+str(unit)+")      Energy (K)     Energy (K)      Energy (K)        Energy (K)           Energy (K)          Energy (K) \n"
 		output    += "#==============================================================================================================================\n"
 		return output
 
@@ -193,14 +189,21 @@ def fmt_angle(status,variable):
 	'''
 	This function gives us the output 
 	'''
+	if variable == "Rpt":
+		unit = "Angstrom"
+	else:
+		unit = "1/K"
+
 	if status == "analysis":
-		output     = "#  Beads    "+variable+"     Avg. CosTheta    Avg. Theta   Error of CosTheta    Error of Theta  \n"
-		output    += "#          (1/K)        (Radian)       (Radian)       (Radian)            (Radian)             \n"
-	output    += "#=======================================================================================================\n"
+		output     = "#  Beads    "+variable+"     Avg. CosTheta    Avg. Theta   Error of CosTheta    Error of Theta  "
+		output    += "   Avg. CosTheta1    Avg. Theta1   Error of CosTheta1   Error of Theta1  \n"
+		output    += "#          ("+str(unit)+")        (Radian)       (Radian)       (Radian)            (Radian)            "
+		output    += "(Radian)        (Radian)         (Radian)            (Radian)             \n"
+	output    += "#=================================================================================================================================================\n"
 	return output
 
 
-def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,distance,level,step):
+def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,distance,level,step,dipolemoment):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
@@ -211,8 +214,9 @@ def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,dis
 	replace("distance_input", str(distance), "qmc5.input", "qmc6.input")
 	replace("molecule_input", str(molecule_rot), "qmc6.input", "qmc7.input")
 	replace("level_input", str(level), "qmc7.input", "qmc8.input")
-	replace("dstep_input", str(step), "qmc8.input", "qmc.input")
-	call(["rm", "qmc_run.input", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input"])
+	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
+	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc.input")
+	call(["rm", "qmc_run.input", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input", "qmc9.input"])
 
 
 def rotmat(molecule,temperature,numbbeads):
@@ -222,7 +226,7 @@ def rotmat(molecule,temperature,numbbeads):
 	#temperature1    = dropzeros(temperature)
 	temperature1    = "%5.3f" % temperature
 	numbbeads1		= numbbeads - 1
-	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 12000 -1"
+	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 1500 -1"
 	print command_linden_run
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"

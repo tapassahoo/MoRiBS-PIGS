@@ -60,3 +60,4 @@ MCSKIP_TOTAL     200        # to save accumulated average
 MCSKIP_AVERG     200        # to evaluate averages
 #BLOCKSKIP_2D	 2	        # skipped blocks to save 2D densities
 DISTANCE         distance_input
+DIPOLEMOMENT     dipolemoment_input

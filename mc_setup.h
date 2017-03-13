@@ -41,6 +41,9 @@ extern double  Temperature;
 #ifdef GETR
 extern double  Distance;
 #endif
+#ifdef GETDIPOLE
+extern double DipoleMoment;
+#endif
 extern double  Density;
 extern double  BoxSize;
 

@@ -685,7 +685,7 @@ double GetPotEnergy_Densities(void)
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         spot = 0.0;
-        double dm   = 1.86/AuToDebye;
+        double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
 #ifdef GETR
         double RR = Distance/BOHRRADIUS;
@@ -1053,7 +1053,7 @@ double GetTotalEnergy(void)
     }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
-        double dm   = 1.86/AuToDebye;
+        double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
 #ifdef GETR
         double RR   = Distance/BOHRRADIUS;
@@ -3559,8 +3559,7 @@ void CrossProduct(double *v, double *w, double *cross)
 
 double PotFunc(double Rpt, double *uvec1, double *uvec2)
 {
-    double dm     = 1.86;    // in Debye
-    double dm_au  = dm/AuToDebye;
+    double dm_au  = DipoleMoment/AuToDebye; // DipoleMoment in Debye
     double Rpt_au = Rpt/BOHRRADIUS;
    
     double pot_au = dm_au*dm_au*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2])/(Rpt_au*Rpt_au*Rpt_au);

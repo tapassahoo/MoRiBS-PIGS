@@ -2153,7 +2153,6 @@ double PotRotEnergy(int atom0, double **cosine, int it)
         if (atom1 != atom0)                    
         {
             int offset1 = atom1*NumbTimes;
-            int type1   = MCType[atom1];
             int t1  = offset1 + it;
             int tm1 = offset1 + it/RotRatio;
 
@@ -2223,7 +2222,6 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 		    if (stype == HF )
             {
                 double uvec1[NDIM],uvec2[NDIM];
-                double E12;
 
                 for (int id=0;id<NDIM;id++)
                 {
@@ -2231,16 +2229,14 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                     uvec2[id] = MCCosine[id][tm1];
                 }
 
-                //cluster_(com_1, com_2, uvec1, uvec2, &E12);
-                //spot += E12;
-				spot += PotFunc(Distance,uvec1, uvec2);
+				spot += PotFunc(Distance, uvec1, uvec2);
             }  //stype
         } //loop over atom1 (molecules)
     }
 
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
 	{
-        double dm   = 1.86/AuToDebye;
+        double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
 #ifdef GETR
         double RR   = Distance/BOHRRADIUS;

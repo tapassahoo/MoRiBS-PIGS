@@ -61,7 +61,12 @@ const char IO_MCSKIP_AVERG[]   = "MCSKIP_AVERG";
 const char STATUS_STARTBLOCK[] = "STARTBLOCK";
 
 //--------------------------------------------------
+#ifdef GETR
 const char IO_DISTANCE[]       = "DISTANCE";
+#endif
+#ifdef GETDIPOLE
+const char IO_DIPOLEMOMENT[]   = "DIPOLEMOMENT";
+#endif
 
 string MasterDir;
 string OutputDir;
@@ -344,6 +349,13 @@ void IOReadParams(const char in_file[],int & mc_status)
      } 
      else
 #endif
+#ifdef GETDIPOLE
+     if (params==IO_DIPOLEMOMENT)
+     {
+        inf >> DipoleMoment;
+     } 
+     else
+#endif
      {}
 
      getline(inf,params,'\n');  // skip comments at the end of the line 
@@ -486,6 +498,9 @@ void IOReadParams(const char in_file[],int & mc_status)
    cout << "Number of steps to skip to evaluate AVERAGES" << BLANK << MCSKIP_AVERG << endl;
 #ifdef GETR
    cout << "Intermolecular distance" << BLANK << Distance << endl;
+#endif
+#ifdef GETDIPOLE
+   cout << "Dipole Moment " << BLANK << DipoleMoment << endl;
 #endif
 
    cout << endl;
