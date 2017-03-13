@@ -33,7 +33,7 @@ status              = "submission"                                              
 status              = "analysis"                                                   #change param9
 status_rhomat       = "Yes"                                                        #change param10 
 
-nrange              = 18 		  						                           #change param11
+nrange              = 19 		  						                           #change param11
 
 temperature         = 1.0/beta   
 tau                 = beta/(numbbeads-1)

@@ -1146,56 +1146,6 @@ double GetTotalEnergy(void)
 	return (0.5*spot);
 }
 
-#ifdef LINEARROTORS
-void  GetTotalEnergy1(double &spot, double &spotl, double &spotr)
-{
-    string stype = MCAtom[IMTYPE].type;
-    for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
-    {	
-        for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
-        {
-            int offset0 = NumbTimes*atom0;
-            int offset1 = NumbTimes*atom1;
-
-        	double spot_pair=0.0;
-        	double spot_pairl=0.0;
-        	double spot_pairr=0.0;
-            for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
-			{
-                int t0 = offset0 + it;
-                int t1 = offset1 + it;
-                int tm0=offset0 + it/RotRatio;
-                int tm1=offset1 + it/RotRatio;
-
-                double com_1[NDIM],com_2[NDIM];
-                double uvec1[NDIM],uvec2[NDIM];
-                double E12;
-                for (int id=0;id<NDIM;id++)
-                {
-                     com_1[id] = MCCoords[id][t0];
-                     com_2[id] = MCCoords[id][t1];
-                     uvec1[id] = MCCosine[id][t0];
-			         uvec2[id] = MCCosine[id][t1];
-                }
-                cluster_(com_1, com_2, uvec1, uvec2, &E12);
-                spot_pair += E12;
-				if (it == 0)
-				{
-					spot_pairl = E12;
-				}
-				if (it == (NumbTimes - 1))
-				{
-					spot_pairr = E12;
-				}
-			}
-			spot += 0.5*spot_pair;
-			spotl += spot_pairl;
-			spotr += spot_pairr;
-        }
-    }
-}
-#endif
-
 #ifdef PIGSROTORS
 double GetRotEnergyPIGS(void)
 {
@@ -1311,7 +1261,7 @@ double GetPhi(void)
 }
 #endif
 
-double GetCosTheta(void)
+double *GetCosTheta()
 {
     const char *_proc_=__func__; 
     //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
@@ -1371,73 +1321,12 @@ double GetCosTheta(void)
 		cosTheta     = cst;
 	}
     int jrot = 2; 
-    double dipole    = cosTheta;// plgndr(jrot,0,cosTheta);
-    return dipole;
+    double *angle = new double[2];
+    angle[0]      = cosTheta;
+    angle[1]      = plgndr(jrot,0,cosTheta);
+    return angle;
 }
 
-void GetCosTheta1(double &dipole, double &dipole1)
-{
-    const char *_proc_=__func__; 
-    //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
-
-    double cosTheta;
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-        cosTheta            = 0.0;
-    	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
-        {    
-    	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
-    	    {
-       		    int type0   = MCType[atom0];
-        	    int type1   = MCType[atom1];
-
-        	    int offset0 = NumbRotTimes*atom0;
-        	    int offset1 = NumbRotTimes*atom1;
-
-        	    int it      = (NumbRotTimes - 1)/2;
-       		    int t0      = offset0 + it;
-        	    int t1      = offset1 + it;
-
-           	    int tm0     = offset0 + it/RotRatio;
-           	    int tm1     = offset1 + it/RotRatio;
-                double cst   = 0.0;
-           	    for (int id = 0; id < NDIM; id++)
-           	    {    
-               	    cst    += MCCosine[id][t0]*MCCosine[id][t1];
-           	    }
-           	    cosTheta   += cst;
-    		}     // LOOP OVER ATOM PAIRS
-		}
-	}
-	if(MCAtom[IMTYPE].numb == 1)
-	{
-		// Initial configurations //
-        double phi1  = 0.0;
-        double cost1 = 1.0;
-        double sint1 = sqrt(1.0 - cost1*cost1);
-
-        double uvec1[NDIM];
-        uvec1[0]     = sint1*cos(phi1);
-        uvec1[1]     = sint1*sin(phi1);
-        uvec1[2]     = cost1;
-
-        cosTheta     = 0.0;
-		int atom0    = 0;
-     	int type0    = MCType[atom0];
-       	int offset0  = NumbRotTimes*atom0;
-       	int it       = (NumbRotTimes - 1)/2;
-        int tm0      = offset0 + it/RotRatio;
-        double cst   = 0.0;
-        for (int id = 0; id < NDIM; id++)
-        {    
-       	    cst    += MCCosine[id][tm0]*uvec1[id];
-        }
-		cosTheta     = cst;
-	}
-    int jrot = 2; 
-    dipole    = cosTheta;
-    dipole1   = plgndr(jrot,0,cosTheta);
-}
 double GetPotEnergy(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc
 {

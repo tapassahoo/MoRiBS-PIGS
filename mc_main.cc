@@ -769,13 +769,6 @@ void MCGetAverage(void)
 	double stotal     = GetTotalEnergy();         // Total energy
 	_btotal          += stotal;                   // kin+pot
 	_total           += stotal;
-/*
-	double spott = 0.0;
-	double spottl = 0.0;
-	double spottr = 0.0;
-	GetTotalEnergy1(spott, spottl, spottr);
-	double stotal     = spott;
-*/
 	//double dspot    = GetPotEnergy_Diff();      // pot energy differencies added by Hui Li 
 
 	//_dbpot         += dspot;                    // block average for pot energy differencies added by Hui Li
@@ -784,26 +777,25 @@ void MCGetAverage(void)
 
 /* new addition */
 #ifdef PIGSROTORS
-#ifndef DIPOLE
-	double scostheta  = GetCosTheta();
-#else
-    double scostheta  = 0.;
-    double scostheta1 = 0.;
-    GetCosTheta1(scostheta,scostheta1);
-	_bcostheta1      += scostheta1; 
-	_costheta_total1 += scostheta1;
+    double* scostheta;
+    scostheta = GetCosTheta();
 
-	double stheta1    = acos(scostheta1);
+	_bcostheta       += scostheta[0]; 
+	_costheta_total  += scostheta[0];
+
+	double stheta     = acos(scostheta[0]);
+	_btheta          += stheta; 
+	_theta_total     += stheta;
+#ifdef DIPOLE
+	_bcostheta1      += scostheta[1]; 
+	_costheta_total1 += scostheta[1];
+
+	double stheta1    = acos(scostheta[1]);
 	_btheta1         += stheta1; 
 	_theta_total1    += stheta1;
 #endif
-
-	_bcostheta       += scostheta; 
-	_costheta_total  += scostheta;
-
-	double stheta     = acos(scostheta);
-	_btheta          += stheta; 
-	_theta_total     += stheta;
+    delete[] scostheta;
+    
 #endif
 /* new addition */
 
@@ -1159,25 +1151,20 @@ void SaveInstantAngularDOF(double acount, double numb)
 {
     const char *_proc_=__func__;
 
-#ifndef DIPOLE
-    double scostheta  = GetCosTheta();
-    double stheta     = acos(scostheta);
-#else
-    double scostheta  = 0.;
-    double scostheta1 = 0.;
-    GetCosTheta1(scostheta,scostheta1);
-    double stheta     = acos(scostheta);
-    double stheta1    = acos(scostheta1);
-#endif
+    double* scostheta;
+    scostheta = GetCosTheta();
+    double stheta     = acos(scostheta[0]);
 
     _fangins << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-    _fangins << setw(IO_WIDTH) << scostheta << BLANK;
+    _fangins << setw(IO_WIDTH) << scostheta[0] << BLANK;
     _fangins << setw(IO_WIDTH) << stheta << BLANK;
 #ifdef DIPOLE
-    _fangins << setw(IO_WIDTH) << scostheta1 << BLANK;
+    double stheta1    = acos(scostheta[1]);
+    _fangins << setw(IO_WIDTH) << scostheta[1] << BLANK;
     _fangins << setw(IO_WIDTH) << stheta1 << BLANK;
 #endif
     _fangins << endl;
+    delete[] scostheta;
 }
 #endif
 

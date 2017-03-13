@@ -21,9 +21,7 @@ double GetPotEnergy_Diff(void); //added by Hui Li
 
 double GetPotEnergy_Densities(void);
 double GetTotalEnergy(void);
-void   GetTotalEnergy1(double &spot, double &spotl, double &spotr);
-double GetCosTheta(void);
-void   GetCosTheta1(double &dipole, double &dipole1);
+double *GetCosTheta();
 double GetPhi(void);
 double GetPotEnergy(void);
 double GetKinEnergy(void);
