@@ -16,48 +16,35 @@ import support
 #                                                                              |
 #===============================================================================
 #molecule            = "HF-C60"                                                     #change param1
-molecule            = "HF"                                                     #change param1
+molecule            = "HF"                                                         #change param1
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 50000                                                        #change param3
-numbmolecules       = 1                                                            #change param4
-tau                 = 0.001                                                       #change param5
+numbblocks	        = 20000                                                        #change param3
+numbmolecules       = 2                                                            #change param4
+tau                 = 0.001                                                        #change param5
 
-Rpt                 = 3.5                                                          #change param6
+Rpt                 = 5.0                                                         #change param6
+dipolemoment        = 1.86
 
 status              = "submission"                                                 #change param8
 status              = "analysis"                                                   #change param8
 status_rhomat       = "Yes"                                                        #change param9 
 
-if (molecule_rot == "H2"):
-	nrange          = 8  			  						                       #change param10
-if (molecule_rot == "HF"):
-	nrange          = 8  			  						                       #change param10
+nrange              = 8  			  						                       #change param10
 
-if (molecule_rot == "H2"):
-	#step            = [1., 1., 3.0, 1., 1.5, 1., 1.0, 1., 0.7, 1., 0.5, 1., 0.5, 1., 0.4, 1., 0.4, 1., 0.3, 1., 0.3]  #tau = 0.02       #change param11
-	step            = [1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.2, 1.1, 1.1, 1.1]  #tau = 0.001      #change param11
-	#step            = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]  #tau = 0.0005      #change param11
-	file1_name      = "Rpt"+str(Rpt)+"Angstrom-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
-
-if (molecule_rot == "HF"):
-	#step            = [1., 1., 2.0, 1., 1.0, 1., 0.6, 1., 0.4, 1., 0.3, 1., 0.2, 1., 0.2, 1., 0.4, 1., 0.3, 1., 0.3]  #tau = 0.02      #change param12
-	#step            = [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8]  #tau = 0.001      #change param11
-	step            = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]  #tau = 0.002      #change param11
-	#file1_name      = "rotgrid12000tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
-	file1_name      = "tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+file1_name          = "Rpt"+str(Rpt)+"Angstrom-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+file1_name         += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
 
 file2_name          = ""                                                           #change param13
 argument2           = "beads"                                                      #change param14
 value_min           = 1                                                            #change param15
-var                 = "Beta"                                                       #change param16
+var                 = "beta"                                                       #change param16
 
 src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param17
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                  #change param18
-trunc               = 2000
-print 'trunc =', trunc
+trunc               = 5000
 
 
 #===============================================================================
@@ -75,20 +62,24 @@ if status == "submission":
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	#file_output          = "rotgrid12000Energy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
-	#file_output_angularDOF = "rotgrid12000AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
-	file_output          = "Energy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
-	file_output_angularDOF = "AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+".txt"  
-	call(["rm", file_output, file_output_angularDOF])
+	file_output          = "Energy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)
+	file_output         += "-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom-trunc"+str(trunc)+".txt"  
+	file_output_angularDOF = "AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)
+	file_output_angularDOF+= "-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom-trunc"+str(trunc)+".txt"
+	file_output_angularDOF1 = "AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)
+	file_output_angularDOF1+= "-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom-trunc"+str(trunc)+"for-zdir.txt"
+	call(["rm", file_output, file_output_angularDOF,file_output_angularDOF1])
 
 	fanalyze             = open(file_output, "a")           
 	fanalyze.write(support.fmt_energy(status,var))
 
 	fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
 	fanalyze_angularDOF.write(support.fmt_angle(status,var))
+	fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
+	fanalyze_angularDOF1.write(support.fmt_angle1(status,var))
 
 # Loop over jobs
-for i in range(7,nrange):                                                  #change param19
+for i in range(nrange):                                                  #change param19
 
 	if (i>0):
 
@@ -122,7 +113,7 @@ for i in range(7,nrange):                                                  #chan
 			argument1     = Rpt
 			level         = support.levels(numbbeads)
 			step1         = 0.7;#step[jj]
-			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1)
+			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
 
 			if status_rhomat == "Yes":
 				support.rotmat(molecule_rot,temperature,numbbeads)
@@ -142,11 +133,16 @@ for i in range(7,nrange):                                                  #chan
 			variable          = beta
 			fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc))
 			fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc))
+			fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc))
 
 if status == "analysis":
 	fanalyze.close()
 	fanalyze_angularDOF.close()
+	fanalyze_angularDOF1.close()
 	call(["cat",file_output])
 	print
 	print
 	call(["cat",file_output_angularDOF])
+	print
+	print
+	call(["cat",file_output_angularDOF1])

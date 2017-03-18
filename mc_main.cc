@@ -64,6 +64,14 @@ double _btheta1;
 double _bcostheta1;
 double _theta_total1;
 double _costheta_total1;
+double _btheta2;
+double _bcostheta2;
+double _theta_total2;
+double _costheta_total2;
+double _btheta3;
+double _bcostheta3;
+double _theta_total3;
+double _costheta_total3;
 #endif
 #endif
 
@@ -734,6 +742,10 @@ void MCResetBlockAverage(void)
 #ifdef DIPOLE
 	_btheta1   = 0.0;
 	_bcostheta1= 0.0;
+	_btheta2   = 0.0;
+	_bcostheta2= 0.0;
+	_btheta3   = 0.0;
+	_bcostheta3= 0.0;
 #endif
 #endif
 	_bkin        = 0.0;
@@ -793,6 +805,22 @@ void MCGetAverage(void)
 	double stheta1    = acos(scostheta[1]);
 	_btheta1         += stheta1; 
 	_theta_total1    += stheta1;
+
+//particle 1
+	_bcostheta2      += scostheta[2]; 
+	_costheta_total2 += scostheta[2];
+
+	double stheta2    = acos(scostheta[2]);
+	_btheta2         += stheta2; 
+	_theta_total2    += stheta2;
+
+//particle 2
+	_bcostheta3      += scostheta[3]; 
+	_costheta_total3 += scostheta[3];
+
+	double stheta3    = acos(scostheta[3]);
+	_btheta3         += stheta3; 
+	_theta_total3    += stheta3;
 #endif
     delete[] scostheta;
     
@@ -1077,6 +1105,10 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
 #ifdef DIPOLE
     fid << setw(IO_WIDTH) << _bcostheta1/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _btheta1/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _bcostheta2/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _btheta2/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _bcostheta3/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _btheta3/avergCount << BLANK;
 #endif
     fid << endl;
     fid.close();
@@ -1142,6 +1174,10 @@ void SaveSumAngularDOF(double acount, double numb)
 #ifdef DIPOLE
     _fang << setw(IO_WIDTH) << _costheta_total1/acount << BLANK;
     _fang << setw(IO_WIDTH) << _theta_total1/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _costheta_total2/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _theta_total2/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _costheta_total3/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _theta_total3/acount << BLANK;
 #endif
 
     _fang << endl;
@@ -1162,6 +1198,15 @@ void SaveInstantAngularDOF(double acount, double numb)
     double stheta1    = acos(scostheta[1]);
     _fangins << setw(IO_WIDTH) << scostheta[1] << BLANK;
     _fangins << setw(IO_WIDTH) << stheta1 << BLANK;
+
+//particle 1
+	double stheta2    = acos(scostheta[2]);
+    _fangins << setw(IO_WIDTH) << scostheta[2] << BLANK;
+    _fangins << setw(IO_WIDTH) << stheta2 << BLANK;
+//particle 2
+	double stheta3    = acos(scostheta[3]);
+    _fangins << setw(IO_WIDTH) << scostheta[3] << BLANK;
+    _fangins << setw(IO_WIDTH) << stheta3 << BLANK;
 #endif
     _fangins << endl;
     delete[] scostheta;
@@ -1184,6 +1229,10 @@ void InitTotalAverage(void)  // DUMP
 #ifdef DIPOLE
 	_theta_total1 = 0.0;
 	_costheta_total1 = 0.0;
+	_theta_total2 = 0.0;
+	_costheta_total2 = 0.0;
+	_theta_total3 = 0.0;
+	_costheta_total3 = 0.0;
 #endif
 #endif
 	_dpot_total = 0.0;  //added by Hui Li

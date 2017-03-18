@@ -12,138 +12,289 @@ from scipy.optimize import curve_fit
 #                                                                              |
 #===============================================================================
 #molecule            = "HF-C60"                                                     #change param1
-molecule            = "HF"                                                     #change param1
-#molecule            = "H2"                                                         #change param1
+molecule            = "HF"                                                         #change param1
+#molecule            = "H2"                                                         #change param2
 molecule_rot        = "HF"                                                         #change param2
 
 numbblocks          = 20000                                                        #change param3
-numbmolecules       = 1                                                            #change param4
+numbmolecules       = 2                                                            #change param4
 nrange              = 1                                                            #change param5
 
-Rpt                 = 3.5                                                          #change param6
-#values              = [0.128, 0.256, 0.512]                                        #change param8
-values              = [0.001, 0.002, 0.004, 0.01]                                  #change param7
-values              = [0.004]                                  #change param7
-values              = [0.128]
-Avg_total_energy    = -11.823                                                      #change param9
-Avg_potential_energy= -21.1273                                                     #change param10
-var2                = "beta"                                                       #change param11
-var1                = "tau"                                                        #change param12
-num1                = 2
-trunc 				= 7
+Rpt                 = 10.05                                                        #change param6
+dipolemoment        = 0.45                                                         #change param7
+beta                = 0.256                                                        #change param7
+numbbeads           = 129
+tau                 = beta/(numbbeads - 1)
+
+Avg_total_energy    = -11.823                                                      #change param8
+Avg_potential_energy= -21.1273                                                     #change param9
+Avg_total_energy    = -0.0115404                                                   #change param8
+Avg_potential_energy= -0.0230796                                                   #change param9
+Avg_rotational_energy = 0.0115393
+Avg_costheta        = -0.0159729
+
+var1                = "tau"
+var2                = "beta"                                                       #change param10
+var3                = "tau"
+
+num1                = 2                                                            #change param12
+trunc 				= 20000                                                            #change param13
+trunc1              = 20
+font=18
 
 #======================================================================================================================
 
 class Specification:
 	def __init__(self):
-		self.color1               = itertools.cycle(('r', 'b', 'g', 'm'))
+		self.color1               = itertools.cycle(('b', 'r', 'g', 'm'))
 		self.marker1              = itertools.cycle(('o', 'v', '^', '<', '>', 's', '8', 'p'))
-		self.line1                = itertools.cycle(('-','--','-.',':'))
-		self.color2               = itertools.cycle(('r', 'b', 'g', 'm'))
+		self.line1                = itertools.cycle(('--','-','-.',':'))
+		self.color2               = itertools.cycle(('b', 'r', 'g', 'm'))
 		self.marker2              = itertools.cycle(('o', 'v', '^', '<', '>', 's', '8', 'p'))
-		self.line2                = itertools.cycle(('-','--','-.',':'))
+		self.line2                = itertools.cycle(('--','-','-.',':'))
 
-def plotenergy(func,var1,var2,var3,numbmolecules,molecule,numbblocks,x,trunc):
+def plotenergy(status,func,var1,var2,var3,Rpt,dipolemoment,beta,tau,numbmolecules,molecule,numbblocks,x,trunc,trunc1,numbbeads):
 	markersize_fig = 1
-	srcfile     = "Energy-vs-"+var1+"-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-"+var2+str(var3)+"-blocks"+str(numbblocks)+".txt"
-	label_fig   = r'$\tau$ = '+str(var3)+' K $^{-1}$'
-	data        = loadtxt(srcfile,unpack=True, usecols=[1,2,3,5,6])
-	var, pot, tot, err_pot, err_tot = data
-	var = var[0:trunc]
-	pot = pot[0:trunc]
-	tot = tot[0:trunc]
-	err_pot = err_pot[0:trunc]
-	err_tot = err_tot[0:trunc]
 
-	if func == 'Energy':
+	if var1 == "tau":
+		if status == "Rotation":
+			srcfile      = "AngularDOF-vs-"+var1+"-fixed-"
+			srcfile     += var2+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+			srcfile     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+
+			data         = loadtxt(srcfile,unpack=True, usecols=[1,2,3,4,5])
+			var, costheta, theta, err_costheta, err_theta = data
+			var          = var[0:trunc1]
+			costheta     = costheta[0:trunc1]
+			theta        = theta[0:trunc1]
+			err_costheta = err_costheta[0:trunc1]
+			err_theta    = err_theta[0:trunc1]
+
+		if status == "Energy":
+			srcfile      = "Energy-vs-"+var1+"-fixed-"
+			srcfile     += var2+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+			srcfile     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+
+			data         = loadtxt(srcfile,unpack=True, usecols=[1,2,3,4,5,6,7])
+			var, pot, tot, rot, err_pot, err_tot, err_rot = data
+			var          = var[0:trunc1]
+			pot          = pot[0:trunc1]
+			tot          = tot[0:trunc1]
+			rot          = rot[0:trunc1]
+			err_pot      = err_pot[0:trunc1]
+			err_tot      = err_tot[0:trunc1]
+			err_rot      = err_rot[0:trunc1]
+
+	if var1 == "Rpt":
+		if status == "Rotation":
+			srcfile      = "AngularDOF-vs-"+var1+"-fixed-"
+			srcfile     += var2+str(beta)+"Kinv-"+var3+str(tau)+"Kinv-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+			srcfile     += "-System"+str(numbmolecules)+str(molecule)+"-Beads"+str(numbbeads)+"-trunc"+str(trunc)+".txt"
+
+			data         = loadtxt(srcfile,unpack=True, usecols=[1,2,3,4,5])
+			var, costheta, theta, err_costheta, err_theta = data
+			var          = var[0:trunc1]
+			costheta     = costheta[0:trunc1]
+			theta        = theta[0:trunc1]
+			err_costheta = err_costheta[0:trunc1]
+			err_theta    = err_theta[0:trunc1]
+
+
+		if status == "Energy":
+			srcfile      = "Energy-vs-"+var1+"-fixed-"
+			srcfile     += var2+str(beta)+"Kinv-"+var3+str(tau)+"Kinv-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+			srcfile     += "-System"+str(numbmolecules)+str(molecule)+"-Beads"+str(numbbeads)+"-trunc"+str(trunc)+".txt"
+
+			data         = loadtxt(srcfile,unpack=True, usecols=[1,2,3,4,5,6,7])
+			var, pot, tot, rot, err_pot, err_tot, err_rot = data
+			var          = var[0:trunc1]
+			pot          = pot[0:trunc1]
+			tot          = tot[0:trunc1]
+			rot          = rot[0:trunc1]
+			err_pot      = err_pot[0:trunc1]
+			err_tot      = err_tot[0:trunc1]
+			err_rot      = err_rot[0:trunc1]
+
+
+	if func == 'TotalEnergy':
 		val     = tot
 		err_val = err_tot
-	if func == 'Potential':
+	if func == 'PotentialEnergy':
 		val     = pot
 		err_val = err_pot
+	if func == 'RotationalEnergy':
+		val     = rot
+		err_val = err_rot
+	if func == "RelativeAngle":
+		val     = costheta
+		err_val = err_costheta
 		
-	plt.plot(var, val, linestyle = x.line1.next(), color = x.color1.next(), label = label_fig, lw = 2)
-	plt.errorbar(var, val, yerr = err_val, ecolor = x.color2.next(), fmt = x.marker2.next(), markersize = markersize_fig)
+	plt.plot(var, val, linestyle = x.line1.next(), color = x.color1.next(), marker = x.marker1.next(), label = 'PIGS', lw = 1)
+	plt.errorbar(var, val, yerr = err_val, linestyle="None", marker="None", color= x.color2.next())
 
 def fitFunc(var, a, b):
 	return a + b*var*var
 
-def plotfitting(func,Avg_energy,b,var1,var2,var3,numbmolecules,molecule,numbblocks,x,trunc):
+def plotfitting(status, var1, var2, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc, x, trunc1,  b):
 	markersize_fig = 10
-	srcfile     = "Energy-vs-"+var1+"-"+str(numbmolecules)+"-"+str(molecule)+"-fixed-"+var2+str(var3)+"-blocks"+str(numbblocks)+".txt"
-	label_fig   = r'$\tau$ = '+str(var3)+' K $^{-1}$'
-	data        = loadtxt(srcfile,unpack=True, usecols=[1,2,3,5,6])
-	var, pot, tot, err_pot, err_tot = data
-	var = var[0:trunc]
-	pot = pot[0:trunc]
-	tot = tot[0:trunc]
-	err_pot = err_pot[0:trunc]
-	err_tot = err_tot[0:trunc]
+	if status == "Energy":
+		srcfile      = "Energy-vs-"+var1+"-fixed-"
+		srcfile     += var2+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		srcfile     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
 
-	if func == 'Energy':
+		data        = loadtxt(srcfile, unpack=True, usecols=[1,2,3,5,6])
+		var, pot, tot, err_pot, err_tot = data
+		var = var[0:trunc1]
+		pot = pot[0:trunc1]
+		tot = tot[0:trunc1]
+		err_pot = err_pot[0:trunc1]
+		err_tot = err_tot[0:trunc1]
+
+	if func == 'TotalEnergy':
 		val     = tot
 		err_val = err_tot
-	if func == 'Potential':
+	if func == 'PotentialEnergy':
 		val     = pot
 		err_val = err_pot
 		
 	fitParams, fitCovariances = curve_fit(fitFunc, var, val, sigma = err_val)
-
-	plt.plot(var, fitFunc(var, fitParams[0], fitParams[1]), linestyle = x.line1.next(), color = 'g', label = label_fig, lw = 2)
-
-
-def plotenergylebel(num1,num2,Avg_energy):
-	if num1 == num2:
-		#plt.text(0.1, -2.0, r'$\tau$ = 0.001 K $^{-1}$')
-		plt.ylabel('V'r'$ [K^{-1}]$')
-		plt.xlabel(r'$\beta$' r'$ [K^{-1}]$')
-
-		#plt.grid(True)
-		#plt.xlim((0,0.201))
-		#plt.xticks(np.linspace(-0, 0.2, 5, endpoint=True))
-		plt.axhline(y=Avg_energy, color='black', lw = 3.0, linestyle='--')
-		plt.legend(loc='upper right')
-	if num1 != num2:
-		plt.title(r'$\beta$' ' convergence for 1 HF')
-		#plt.text(0.1, -2.0, r'$\tau$ = 0.001 K $^{-1}$')
-		plt.ylabel('E'r'$_{0}  [K^{-1}]$')
-		#plt.grid(True)
-		#plt.xlim((0,0.205))
-		#plt.xticks(np.linspace(-0.1, 1.4, 5, endpoint=True))
-		#plt.yticks(np.linspace(-4.5, -0.5, 5, endpoint=True))
-		plt.axhline(y=Avg_energy, color='black', lw = 3.0, linestyle='--')
-		plt.legend(loc='upper right')
-		#plt.ylim((-3.5,-3.2))
+	plt.plot(var, fitFunc(var, fitParams[0], fitParams[1]), linestyle = x.line1.next(), color = x.color1.next(), marker = x.marker1.next(), label = 'Fit', lw = 1)
 
 
-plt.figure(figsize=(4, 8), dpi=100)
+def plotenergylabel(num1,num2,Avg_energy,xmin,xmax,ymin,ymax,xlabel1,ylabel1,font):
+	plt.axhline(y=Avg_energy, color='black', lw = 3.0, linestyle='--', label = 'Exact')
 
-num2 = 1
-plt.subplot(num1, 1, num2)
-x = Specification()
-func = "Energy"
-for i in range(nrange):
-	var3     = values[i]
-	plotenergy(func,var1,var2,var3,numbmolecules,molecule,numbblocks,x,trunc)
-	plotenergylebel(num1,num2,Avg_total_energy)
+	plt.grid(True)
+	plt.legend(loc='upper right')
 
-# fitting done here
-	if var1 == 'tau':
-		b = -100.0
-		plotfitting(func,Avg_total_energy,b,var1,var2,var3,numbmolecules,molecule,numbblocks,x,trunc)
 
-num2 = 2
-plt.subplot(num1, 1, num2)
-x = Specification()
-func = "Potential"
-for i in range(nrange):
-	var3     = values[i]
-	plotenergy(func,var1,var2,var3,numbmolecules,molecule,numbblocks,x,trunc)
-	plotenergylebel(num1,num2,Avg_potential_energy)
+	if xlabel1 == "Rpt":
+		plt.xlabel(r'R ($\AA$)', fontsize = font)
+		plt.xlim(xmin,xmax)
+		plt.ylim(ymin,ymax)
+	if xlabel1 == "tau":
+		plt.xlabel(r'$\tau (K^{-1})$', fontsize = font)
+	if xlabel1 == "beta":
+		plt.xlabel(r'$\beta (K^{-1})$', fontsize = font)
+
+	if ylabel1 == "TotalEnergy":
+		plt.ylabel(r'$\langle E_{0} \rangle (K^{-1})$', fontsize = font)
+	if ylabel1 == "PotentialEnergy":
+		plt.ylabel(r'$\langle V_{0} \rangle (K^{-1})$', fontsize = font)
+	if ylabel1 == "RotationalEnergy":
+		plt.ylabel(r'$\langle T_{0} \rangle (K^{-1})$', fontsize = font)
+	if ylabel1 == "RelativeAngle":
+		plt.ylabel(r'$\langle u_{1} \cdot u_{2} \rangle$', fontsize = font)
+
+	#plt.xticks(np.linspace(-0, 0.2, 5, endpoint=True))
+	#plt.text(0.1, -2.0, r'$\tau$ = 0.001 K $^{-1}$')
+
+
+fig = plt.figure(figsize=(4, 8), dpi=100)
+if var1 == 'Rpt':
+	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$')
+if var1 == 'tau':
+	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, Rpt = '+str(Rpt)+' '+r'$\AA$')
+
+#=========================================
+#
+# Fig1
+#
+#=========================================
+num2   = 1
+x      = Specification()
+status = "Energy"
+func   = "TotalEnergy"
+plt.subplot(num1, 2, num2)
+
+plotenergy(status,func,var1,var2,var3,Rpt,dipolemoment,beta,tau,numbmolecules,molecule,numbblocks,x,trunc,trunc1,numbbeads)
 
 # fitting done here
-	if var1 == 'tau':
-		b = -100.0
-		plotfitting(func,Avg_potential_energy,b,var1,var2,var3,numbmolecules,molecule,numbblocks,x,trunc)
+if var1 == "tau":
+	b = -100.0
+	plotfitting(status, var1, var2, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc, x, trunc1, b)
 
+xmin = 0.0
+xmax = 10.1
+ymin = -25000.0
+ymax = 500.0
+xlabel = var1
+ylabel = func
+
+plotenergylabel(num1,num2,Avg_total_energy,xmin,xmax,ymin,ymax,xlabel,ylabel,font)
+
+#=========================================
+#
+# Fig2
+#
+#=========================================
+num2   = 2
+x      = Specification()
+status = "Energy"
+func   = "PotentialEnergy"
+plt.subplot(num1, 2, num2)
+
+plotenergy(status,func,var1,var2,var3,Rpt,dipolemoment,beta,tau,numbmolecules,molecule,numbblocks,x,trunc,trunc1,numbbeads)
+
+# fitting done here
+if var1 == "tau":
+	b = -100.0
+	plotfitting(status, var1, var2, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc, x, trunc1, b)
+
+xmin = 0.0
+xmax = 10.1
+ymin = -25000.0
+ymax = 500.0
+xlabel = var1
+ylabel = func
+plotenergylabel(num1,num2,Avg_potential_energy,xmin,xmax,ymin,ymax,xlabel,ylabel,font)
+
+#=========================================
+#
+# Fig3
+#
+#=========================================
+num2   = 3
+x      = Specification()
+status = "Energy"
+func   = "RotationalEnergy"
+plt.subplot(num1, 2, num2)
+
+plotenergy(status,func,var1,var2,var3,Rpt,dipolemoment,beta,tau,numbmolecules,molecule,numbblocks,x,trunc,trunc1,numbbeads)
+
+xmin = 0.0
+xmax = 10.1
+ymin = -10.0
+ymax = 800.0
+xlabel = var1
+ylabel = func
+
+plotenergylabel(num1,num2,Avg_rotational_energy,xmin,xmax,ymin,ymax,xlabel,ylabel,font)
+
+#=========================================
+#
+# Fig3
+#
+#=========================================
+num2   = 4
+x      = Specification()
+status = "Rotation"
+func   = "RelativeAngle"
+plt.subplot(num1, 2, num2)
+
+plotenergy(status,func,var1,var2,var3,Rpt,dipolemoment,beta,tau,numbmolecules,molecule,numbblocks,x,trunc,trunc1,numbbeads)
+
+xmin = 0.0
+xmax = 10.1
+ymin = -0.01
+ymax = 1.0
+xlabel = var1
+ylabel = func
+
+plotenergylabel(num1,num2,Avg_costheta,xmin,xmax,ymin,ymax,xlabel,ylabel,font)
+
+#===============================================================================
+
+plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25,
+                    wspace=0.35)
 plt.show()

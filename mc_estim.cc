@@ -1165,7 +1165,7 @@ double GetRotEnergyPIGS(void)
         double p1 = 0.0;
         for (int id=0;id<NDIM;id++)
         {
-            p0 += (MCCosine[id][t0]*MCCosine[id][tm]);
+            p0 += (MCCosine[id][tm]*MCCosine[id][t0]);
             p1 += (MCCosine[id][t0]*MCCosine[id][tp]);
 	    } 
 
@@ -1266,7 +1266,7 @@ double *GetCosTheta()
     const char *_proc_=__func__; 
     //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
 
-    double cosTheta;
+    double cosTheta, cosTheta1, cosTheta2;
 	if(MCAtom[IMTYPE].numb > 1)
 	{
         cosTheta            = 0.0;
@@ -1274,9 +1274,6 @@ double *GetCosTheta()
         {    
     	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
     	    {
-       		    int type0   = MCType[atom0];
-        	    int type1   = MCType[atom1];
-
         	    int offset0 = NumbRotTimes*atom0;
         	    int offset1 = NumbRotTimes*atom1;
 
@@ -1284,8 +1281,6 @@ double *GetCosTheta()
        		    int t0      = offset0 + it;
         	    int t1      = offset1 + it;
 
-           	    int tm0     = offset0 + it/RotRatio;
-           	    int tm1     = offset1 + it/RotRatio;
                 double cst   = 0.0;
            	    for (int id = 0; id < NDIM; id++)
            	    {    
@@ -1294,6 +1289,11 @@ double *GetCosTheta()
            	    cosTheta   += cst;
     		}     // LOOP OVER ATOM PAIRS
 		}
+   	    int it      = (NumbRotTimes - 1)/2;
+	    int t0      = it;
+   	    int t1      = NumbRotTimes + it;
+        cosTheta1   = MCCosine[2][t0];
+        cosTheta2   = MCCosine[2][t1];
 	}
 	if(MCAtom[IMTYPE].numb == 1)
 	{
@@ -1321,9 +1321,11 @@ double *GetCosTheta()
 		cosTheta     = cst;
 	}
     int jrot = 2; 
-    double *angle = new double[2];
+    double *angle = new double[4];
     angle[0]      = cosTheta;
     angle[1]      = plgndr(jrot,0,cosTheta);
+    angle[2]      = cosTheta1;
+    angle[3]      = cosTheta2;
     return angle;
 }
 

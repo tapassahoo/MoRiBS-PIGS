@@ -108,11 +108,7 @@ def outputstr_energy(numbbeads,tau,dest_dir,trunc):
 	'''
 	This function gives us the output 
 	'''
-	try:
-		col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], max_rows=trunc)
-	except:
-		print 'I/O error in outputstr_energy'
-		pass
+	col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], max_rows=trunc)
 	print len(col_tot)
 	
 	mean_pot      = np.mean(col_pot)
@@ -124,27 +120,15 @@ def outputstr_energy(numbbeads,tau,dest_dir,trunc):
 	error_rot     = jackknife(mean_rot,col_rot)
 	#print i, len(col_block)
 
-	argu1          = "%5d"   % numbbeads
-	argu2          = "%10.5f" % tau
-	argu3          = "%10.5f" % mean_pot
-	argu4          = "%10.5f" % mean_tot
-	argu5          = "%10.5f" % mean_rot
-	argu6          = "%10.5f" % error_pot
-	argu7          = "%10.5f" % error_tot
-	argu8          = "%10.5f" % error_rot
-	output  = " "+argu1+" "+argu2+"   "+argu3+"     "+argu4+"     "+argu5
-	output += "        "+argu6+"          "+argu7+"          "+argu8+"\n"
+	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_pot, mean_tot, mean_rot, error_pot, error_tot, error_rot)
+	output  += "\n"
 	return output
 
 def outputstr_angle(numbbeads,tau,dest_dir,trunc):
 	'''
 	This function gives us the output 
 	'''
-	try:
-		col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], max_rows=trunc)
-	except:
-		print 'I/O Error in outputstr_angle'
-		pass
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], max_rows=trunc)
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_theta     = np.mean(col_theta)
@@ -156,18 +140,28 @@ def outputstr_angle(numbbeads,tau,dest_dir,trunc):
 	error_costheta1= jackknife(mean_costheta1,col_costheta1)
 	error_theta1   = jackknife(mean_theta1,col_theta1)
 
-	argu1          = "%5d"   % numbbeads
-	argu2          = "%10.5f" % tau
-	argu3          = "%10.5f" % mean_costheta
-	argu4          = "%10.5f" % mean_theta
-	argu5          = "%10.5f" % error_costheta
-	argu6          = "%10.5f" % error_theta
-	argu7          = "%10.5f" % mean_costheta1
-	argu8          = "%10.5f" % mean_theta1
-	argu9          = "%10.5f" % error_costheta1
-	argu10         = "%10.5f" % error_theta1
-	output         = " "+argu1+" "+argu2+"   "+argu3+"     "+argu4+"     "+argu5+"          "+argu6
-	output        += "          "+argu7+"      "+argu8+"        "+argu9+"        "+argu10+"\n"
+	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_costheta, mean_theta, error_costheta, error_theta, mean_costheta1, mean_theta1, error_costheta1, error_theta1)
+	output  += "\n"
+	return output
+
+def outputstr_angle1(numbbeads,tau,dest_dir,trunc):
+	'''
+	This function gives us the output 
+	'''
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,5,6,7,8], max_rows=trunc)
+
+	mean_costheta  = np.mean(col_costheta)
+	mean_theta     = np.mean(col_theta)
+	mean_costheta1 = np.mean(col_costheta1)
+	mean_theta1    = np.mean(col_theta1)
+
+	error_costheta = jackknife(mean_costheta,col_costheta)
+	error_theta    = jackknife(mean_theta,col_theta)
+	error_costheta1= jackknife(mean_costheta1,col_costheta1)
+	error_theta1   = jackknife(mean_theta1,col_theta1)
+
+	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_costheta, mean_theta, error_costheta, error_theta, mean_costheta1, mean_theta1, error_costheta1, error_theta1)
+	output  += "\n"
 	return output
 
 def fmt_energy(status,variable):
@@ -175,14 +169,19 @@ def fmt_energy(status,variable):
 	This function gives us the output 
 	'''
 	if variable == "Rpt":
-		unit = "Angstrom"
+		unit = "(Angstrom)"
 	else:
-		unit = "1/K"
+		unit = "(1/K)"
 
 	if status == "analysis":
-		output     = "#  Beads    "+variable+"     Avg. Potential   Avg. Total   Avg. rotational  Error of Potential     Error of Total    Error of Rotational \n"
-		output    += "#          ("+str(unit)+")      Energy (K)     Energy (K)      Energy (K)        Energy (K)           Energy (K)          Energy (K) \n"
-		output    += "#==============================================================================================================================\n"
+		output     ="#"
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable, 'Avg. Potential', 'Avg. Total', 'Avg. rotational', 'Error of Potential', 'Error of Total', 'Error of Rotational')
+		output    +="\n"
+		output    +="#"
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('', (str(unit)), 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)')
+		output    +="\n"
+		output    += '{:=<155}'.format('#')
+		output    +="\n"
 		return output
 
 def fmt_angle(status,variable):
@@ -190,17 +189,43 @@ def fmt_angle(status,variable):
 	This function gives us the output 
 	'''
 	if variable == "Rpt":
-		unit = "Angstrom"
+		unit = "(Angstrom)"
 	else:
-		unit = "1/K"
+		unit = "(1/K)"
 
 	if status == "analysis":
-		output     = "#  Beads    "+variable+"     Avg. CosTheta    Avg. Theta   Error of CosTheta    Error of Theta  "
-		output    += "   Avg. CosTheta1    Avg. Theta1   Error of CosTheta1   Error of Theta1  \n"
-		output    += "#          ("+str(unit)+")        (Radian)       (Radian)       (Radian)            (Radian)            "
-		output    += "(Radian)        (Radian)         (Radian)            (Radian)             \n"
-	output    += "#=================================================================================================================================================\n"
+		output     ="#"
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable, 'Avg. CosTheta', 'Avg. Theta', 'Error of CosTheta', 'Error of Theta', 'Avg. CosTheta1', 'Avg. Theta1', 'Error of CosTheta1', 'Error of Theta1')
+		output    +="\n"
+		output    +="#"
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
+		output    +="\n"
+		output    += '{:=<195}'.format('#')
+		output    +="\n"
+
 	return output
+
+def fmt_angle1(status,variable):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output     ="#"
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable, 'Avg. CosTheta', 'Avg. Theta', 'Error of CosTheta', 'Error of Theta', 'Avg. CosTheta1', 'Avg. Theta1', 'Error of CosTheta1', 'Error of Theta1')
+		output    +="\n"
+		output    +="#"
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
+		output    +="\n"
+		output    += '{:=<195}'.format('#')
+		output    +="\n"
+
+	return output
+
 
 
 def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,distance,level,step,dipolemoment):
