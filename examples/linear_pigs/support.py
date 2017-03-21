@@ -241,7 +241,7 @@ def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,dis
 	replace("level_input", str(level), "qmc7.input", "qmc8.input")
 	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
 	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc.input")
-	call(["rm", "qmc_run.input", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input", "qmc9.input"])
+	call(["rm", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input", "qmc9.input"])
 
 
 def rotmat(molecule,temperature,numbbeads):
@@ -267,3 +267,43 @@ def rotmat1(molecule,temperature,numbbeads):
 	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 3000 -1"
 	print command_linden_run
 	system(command_linden_run)
+
+def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir):
+	'''
+	This function creats jobstring for #PBS script
+	'''
+	job_name       = "job_"+str(file_name)+str(value)
+	walltime       = "200:00:00"
+	processors     = "nodes=1:ppn="+str(thread)
+	command_pimc_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"
+	omp_thread     = str(thread)
+	output_dir     = run_dir+"/results"
+	temperature1    = "%5.3f" % temperature
+	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	logpath        = final_dir+"/"
+
+	input_file    = "qmc_beads"+str(value)+".input"
+	print input_file
+
+	job_string     = """#!/bin/bash
+#PBS -N %s
+#PBS -l walltime=%s
+##PBS -q medium
+#PBS -l %s
+#PBS -o %s%s.out
+#PBS -e %s%s.err
+export OMP_NUM_THREADS=%s
+rm -rf %s
+mkdir -p %s
+#cd /home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs
+cd $PBS_O_WORKDIR
+cp IhRCOMC60.xyz %s
+mv %s %s
+mv %s %s 
+cd %s
+cp %s qmc.input
+%s
+mv %s /work/tapas/linear_rotors
+""" % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, input_file, command_pimc_run, run_dir)
+	print job_string
+	return job_string

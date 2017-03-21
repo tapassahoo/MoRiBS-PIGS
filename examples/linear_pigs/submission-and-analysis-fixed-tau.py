@@ -20,7 +20,7 @@ molecule            = "HF"                                                      
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 5                                                        #change param3
+numbblocks	        = 5000                                                        #change param3
 numbmolecules       = 2                                                            #change param4
 tau                 = 0.002                                                        #change param5
 
@@ -28,7 +28,7 @@ Rpt                 = 9.0                                                       
 dipolemoment        = 1.86
 
 status              = "submission"                                                 #change param8
-#status              = "analysis"                                                   #change param8
+status              = "analysis"                                                   #change param8
 status_rhomat       = "Yes"                                                        #change param9 
 
 nrange              = 8  			  						                       #change param10
