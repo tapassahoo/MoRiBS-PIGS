@@ -71,18 +71,15 @@ def beads(tau,beta):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
-def jobstring(file_name, value, thread, run_dir, molecule, temperature, numbbeads):
+def jobstring(file_name,value,thread):
 	'''
 	This function creats jobstring for #PBS script
 	'''
 	job_name       = "job_"+str(file_name)+str(value)
 	walltime       = "200:00:00"
 	processors     = "nodes=1:ppn="+str(thread)
-	command_pimc_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"
+	command_pimc_run = "./pimc"
 	omp_thread     = str(thread)
-	output_dir     = run_dir+"/results"
-	temperature1    = "%5.3f" % temperature
-	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 
 	job_string     = """#!/bin/bash
 #PBS -N %s
@@ -92,15 +89,8 @@ def jobstring(file_name, value, thread, run_dir, molecule, temperature, numbbead
 #PBS -o %s.out
 #PBS -e %s.err
 export OMP_NUM_THREADS=%s
-mkdir -p %s
-cd /home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs
-cp IhRCOMC60.xyz %s
-mv qmc.input %s
-mv %s %s 
-cd %s
-%s
-mv %s /work/tapas/
-""" % (job_name, walltime, processors, job_name, job_name, omp_thread, output_dir, run_dir, run_dir, file_rotdens, run_dir, run_dir, command_pimc_run, run_dir)
+cd $PBS_O_WORKDIR
+%s""" % (job_name, walltime, processors, job_name, job_name, omp_thread, command_pimc_run)
 	print job_string
 	return job_string
 
@@ -251,7 +241,7 @@ def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,dis
 	replace("level_input", str(level), "qmc7.input", "qmc8.input")
 	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
 	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc.input")
-	call(["rm", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input", "qmc9.input"])
+	call(["rm", "qmc_run.input", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input", "qmc9.input"])
 
 
 def rotmat(molecule,temperature,numbbeads):

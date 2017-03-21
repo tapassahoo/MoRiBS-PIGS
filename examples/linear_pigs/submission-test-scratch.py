@@ -20,11 +20,11 @@ molecule            = "HF"                                                      
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 5                                                        #change param3
-numbmolecules       = 2                                                            #change param4
-tau                 = 0.002                                                        #change param5
+numbblocks	        = 200                                                        #change param3
+numbmolecules       = 1                                                            #change param4
+tau                 = 0.001                                                        #change param5
 
-Rpt                 = 6.0                                                         #change param6
+Rpt                 = 10.0                                                         #change param6
 dipolemoment        = 1.86
 
 status              = "submission"                                                 #change param8
@@ -33,8 +33,8 @@ status_rhomat       = "Yes"                                                     
 
 nrange              = 8  			  						                       #change param10
 
-file1_name           = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
-file1_name          += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+file1_name          = "Rpt"+str(Rpt)+"Angstrom-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+file1_name         += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
 
 file2_name          = ""                                                           #change param13
 argument2           = "beads"                                                      #change param14
@@ -42,7 +42,7 @@ value_min           = 1                                                         
 var                 = "beta"                                                       #change param16
 
 src_path            = os.getcwd()
-dest_path           = "/work/tapas/linear_rotors/"                                 #change param17
+dest_path           = "/scratch/tapas/linear_rotors/"                                 #change param17
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                  #change param18
 trunc               = 5000
 
@@ -62,15 +62,12 @@ if status == "submission":
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	file_output             = "Energy-vs-"+str(var)+"-fixed-"
-	file_output            += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-	file_output            += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-	file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
-	file_output_angularDOF += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-	file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-	file_output_angularDOF1  = "AngularDOF-vs-"+str(var)+"-fixed-"
-	file_output_angularDOF1 += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-	file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
+	file_output          = "Energy-vs-beta-"+str(numbmolecules)+"-"+str(molecule)
+	file_output         += "-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom-trunc"+str(trunc)+".txt"  
+	file_output_angularDOF = "AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)
+	file_output_angularDOF+= "-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom-trunc"+str(trunc)+".txt"
+	file_output_angularDOF1 = "AngularDOF-vs-beta-"+str(numbmolecules)+"-"+str(molecule)
+	file_output_angularDOF1+= "-fixed-tau"+str(tau)+"-blocks"+str(numbblocks)+"Rpt"+str(Rpt)+"Angstrom-trunc"+str(trunc)+"for-zdir.txt"
 	call(["rm", file_output, file_output_angularDOF,file_output_angularDOF1])
 
 	fanalyze             = open(file_output, "a")           
@@ -96,26 +93,10 @@ for i in range(nrange):                                                  #change
 		dest_dir     = dest_path + folder_run 
 
 		if status   == "submission":
-			os.chdir(dest_path)
-			call(["rm", "-rf", folder_run])
-			call(["mkdir", folder_run])
-			call(["mkdir", "-p", folder_run+"/results"])
-			os.chdir(src_path)
-
-
-			# copy files to running folder
-			src_file      = src_path + "/IhRCOMC60.xyz"
-			call(["cp", src_file, dest_dir])
-			call(["cp", run_file, dest_dir])
-
-			src_file      = src_path + "/qmc_run.input"
-			call(["cp", src_file, dest_dir])
-
 			# Write submit file for the current cycle
-			os.chdir(dest_dir)
 			argument1     = Rpt
 			level         = support.levels(numbbeads)
-			step1         = 0.7;#step[jj]
+			step1         = 1.0;#step[jj]
 			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
 
 			if status_rhomat == "Yes":
@@ -125,7 +106,7 @@ for i in range(nrange):                                                  #change
 			fname         = 'submit_'+str(i)
 			fwrite        = open(fname, 'w')
 	
-			fwrite.write(support.jobstring(argument2,numbbeads,numbmolecules))
+			fwrite.write(support.jobstring(argument2,numbbeads,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads))
 
 			fwrite.close()
 			call(["qsub", fname])
