@@ -24,7 +24,7 @@ numbblocks	        = 5                                                        #c
 numbmolecules       = 2                                                            #change param4
 tau                 = 0.002                                                        #change param5
 
-Rpt                 = 6.0                                                         #change param6
+Rpt                 = 9.0                                                         #change param6
 dipolemoment        = 1.86
 
 status              = "submission"                                                 #change param8
@@ -44,7 +44,7 @@ var                 = "beta"                                                    
 src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param17
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                  #change param18
-trunc               = 5000
+trunc               = 20000
 
 
 #===============================================================================
@@ -115,7 +115,7 @@ for i in range(nrange):                                                  #change
 			os.chdir(dest_dir)
 			argument1     = Rpt
 			level         = support.levels(numbbeads)
-			step1         = 0.7;#step[jj]
+			step1         = 1.0;#step[jj]
 			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
 
 			if status_rhomat == "Yes":
@@ -134,9 +134,12 @@ for i in range(nrange):                                                  #change
 		if status == "analysis":
 
 			variable          = beta
-			fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc))
-			fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc))
-			fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc))
+			try:
+				fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc))
+				fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc))
+				fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc))
+			except:
+				pass
 
 if status == "analysis":
 	fanalyze.close()
