@@ -826,6 +826,14 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 //     phi  = phi  + M_PI;
    }
 
+#ifdef MODIFY
+	if (abs(cost) > 2.0) 
+	{
+        cout<<"Upper or lower limit of cost is excided " << cost<<endl;
+		exit(0);
+	}
+#endif
+
    double sint = sqrt(1.0 - cost*cost);
 
    newcoords[AXIS_X][t1] = sint*cos(phi);

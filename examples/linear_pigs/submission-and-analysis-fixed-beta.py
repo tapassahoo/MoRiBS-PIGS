@@ -24,13 +24,14 @@ molecule_rot        = "HF"
 #exit()
 numbblocks	        = 20000                                                        #change param2
 numbmolecules       = 2                                                            #change param3
-beta     	        = 0.256                                                        #change param4
-Rpt                 = 10.05                                                        #change param7
-dipolemoment        = 0.45
+beta     	        = 0.032                                                        #change param4
+Rpt                 = 10.0                                                        #change param7
+dipolemoment        = 1.86
 
 status              = "submission"                                                 #change param9
 status              = "analysis"                                                   #change param10
 status_rhomat       = "Yes"                                                        #change param10 
+RUNDIR              = "scratch"
 
 nrange              = 8 		  						                           #change param12
 
@@ -43,8 +44,9 @@ if (molecule_rot == "HF"):
 	#step           = [0.7,1.4,2.3,4.2,7.8,5.0,2.5,1.5,0.2]  # 2 HF beta 0.512 K-1 #change param6 for 10 Angstrom
 	#step           = [0.7,3.0,5.0,8.5,5.0,3.0,1.6,1.0,0.2]  # 2 HF beta 0.256 K-1 #change param6 for 10 Angstrom
 	#step           = [0.7,7.0,9.5,5.5,3.0,1.5,1.0,0.7,0.2]  # 2 HF beta 0.128 K-1 #change param6 for 10 Angstrom
+	step           = [0.7,1.0,1.0,1.0,1.0,0.7,0.5,0.3,0.2]  # 2 HF beta 0.032 K-1 #change param6 for 10 Angstrom
 	#step            = [0.7, 15.0, 13.0, 8.0, 2.5,1.5,1.0,0.7,0.2]  # 2 HF beta 0.128 K-1 #change param6  for 10.05 Angstrom   DM 0.45
-	step            = [0.7, 10.0, 10.0, 6.0, 5.0, 2.7, 1.8, 1.2, 0.2]  # 2 HF beta 0.256 K-1 #change param6  for 10.05 Angstrom DM 0.45 
+	#step            = [0.7, 10.0, 10.0, 6.0, 5.0, 2.7, 1.8, 1.2, 0.2]  # 2 HF beta 0.256 K-1 #change param6  for 10.05 Angstrom DM 0.45 
 	#step            = [3.0,1.0,1.5,3.0,3.0,3.0,2.3,1.5,0.2] # 1 HF beta 0.512 K-1 #change param6 for 10 Angstrom
 	#step            = [3.0,2.0,3.0,3.0,3.0,2.5,1.5,1.1,2.0] # 1 HF beta 0.256 K-1 #change param6 for 10 Angstrom
 	#step            = [3.0,3.0,3.0,3.0,3.0,1.8,1.1,0.8,2.0] # 1 HF beta 0.128 K-1 Rpt = 10.05 #change param6
@@ -64,8 +66,13 @@ src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param13
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                   #change param14
 
+if status   == "submission":
+	if RUNDIR == "scratch":
+		dest_path       = "/scratch/tapas/linear_rotors/" 
+		final_path      = "/work/tapas/linear_rotors/"                                 #change param17
+
 temperature         = 1.0/beta   
-trunc               = 20000
+trunc               = 5000
 
 #===============================================================================
 #                                                                              |
@@ -118,23 +125,25 @@ for i in range(nrange):                                                  #change
 		dest_dir     = dest_path + folder_run 
 
 		if status == "submission":
-			os.chdir(dest_path)
-			call(["rm", "-rf", folder_run])
-			call(["mkdir", folder_run])
-			call(["mkdir", "-p", folder_run+"/results"])
-			os.chdir(src_path)
+			if RUNDIR != "scratch":
+				os.chdir(dest_path)
+				call(["rm", "-rf", folder_run])
+				call(["mkdir", folder_run])
+				call(["mkdir", "-p", folder_run+"/results"])
+				os.chdir(src_path)
 
 
-			# copy files to running folder
-			src_file      = src_path + "/IhRCOMC60.xyz"
-			call(["cp", src_file, dest_dir])
-			call(["cp", run_file, dest_dir])
+				# copy files to running folder
+				src_file      = src_path + "/IhRCOMC60.xyz"
+				call(["cp", src_file, dest_dir])
+				call(["cp", run_file, dest_dir])
 
-			src_file      = src_path + "/qmc_run.input"
-			call(["cp", src_file, dest_dir])
+				src_file      = src_path + "/qmc_run.input"
+				call(["cp", src_file, dest_dir])
 
-			# Write submit file for the current cycle
-			os.chdir(dest_dir)
+				# Write submit file for the current cycle
+				os.chdir(dest_dir)
+
 			argument1     = Rpt
 			level         = support.levels(numbbeads)
 			step1         = step[i]
@@ -146,11 +155,21 @@ for i in range(nrange):                                                  #change
 			fname         = 'submit_'+str(i)
 			fwrite        = open(fname, 'w')
 	
-			fwrite.write(support.jobstring(argument2,numbbeads,numbmolecules))
+			if RUNDIR == "scratch":
+				final_dir     = final_path + folder_run 
+				call(["rm", "-rf", final_dir])
+				input_file    = "qmc_beads"+str(numbbeads)+".input"
+				print input_file
+				call(["mv", "qmc.input", input_file])
+				fwrite.write(support.jobstring_scratch(argument2,numbbeads,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir))
+			else: 
+				fwrite.write(support.jobstring(argument2,numbbeads,numbmolecules))
+				
 
 			fwrite.close()
 			call(["qsub", fname, ])
-			os.chdir(src_path)
+			if RUNDIR != "scratch":
+				os.chdir(src_path)
 
 
 		if status == "analysis":

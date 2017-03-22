@@ -20,6 +20,7 @@ test-hfhf.f
 /examples/linear_pigs/*exe
 /examples/linear_pigs/*/
 !/examples/linear_pigs/
+/examples/test_run/
 #
 /examples/nonlinear_pigs/results/*
 !/examples/nonlinear_pigs/results/

@@ -295,7 +295,6 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
-#cd /home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs
 cd $PBS_O_WORKDIR
 cp IhRCOMC60.xyz %s
 mv %s %s

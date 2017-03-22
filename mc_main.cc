@@ -190,6 +190,7 @@ int main(int argc, char *argv[])
       RandomInit(MPIrank,MPIsize);
 
       MCConfigInit();                // generate initial configurations
+#ifdef IOWRITE
 #ifdef MODIFY
         double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
         ifstream myfile ("IhRCOMC60.xyz");
@@ -234,34 +235,6 @@ int main(int argc, char *argv[])
             }
         } //loop over number of cages
 #endif
-#ifdef LINEARROTORSIO
-    for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
-    for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
-    {
-        int type0   = MCType[atom0];
-        int type1   = MCType[atom1];
-
-        int offset0 = NumbTimes*atom0;
-        int offset1 = NumbTimes*atom1;
-
-//        #pragma omp parallel for reduction(+: spot_pair)
-        for (int it=0;it<NumbTimes;it++)
-        {
-            double dr[NDIM];
-            int t0 = offset0 + it;
-            int t1 = offset1 + it;
-
-            double dr2 = 0.0;
-            for (int id=0;id<NDIM;id++)
-            {
-                dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
-
-                dr2    += (dr[id]*dr[id]);
-            }
-			double r=sqrt(dr2);
-            cout<<"Inter molecular distance "<<atom0 <<"   "<<atom1<< "   "<<it<<"    "<<r<<endl;
-		}
-	}
 #endif
 #ifdef MOLECULEINCAGE
 	if (MOLECINCAGE)

@@ -465,6 +465,7 @@ void MCConfigInit(void)
 {
 	const char *_proc_=__func__;    // "MCConfigInit()";
 
+#ifdef IOWRITE
 #ifndef HOSC_TEST
 	initLattice_config(MCCoords); 
 	replInitial_config(MCCoords);
@@ -478,6 +479,7 @@ void MCConfigInit(void)
 #endif
 
 	cout<<"initial MCCoords "<<MCCoords[0][0]<<endl;
+#endif
 
 	for (int it=0;it<(NumbAtoms*NumbTimes);it++)
     {

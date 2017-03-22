@@ -1266,7 +1266,8 @@ double *GetCosTheta()
     const char *_proc_=__func__; 
     //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
 
-    double cosTheta, cosTheta1, cosTheta2;
+    double cosTheta1[NumbAtoms];
+    double cosTheta;
 	if(MCAtom[IMTYPE].numb > 1)
 	{
         cosTheta            = 0.0;
@@ -1274,14 +1275,14 @@ double *GetCosTheta()
         {    
     	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
     	    {
-        	    int offset0 = NumbRotTimes*atom0;
-        	    int offset1 = NumbRotTimes*atom1;
+        	    int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        	    int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
 
         	    int it      = (NumbRotTimes - 1)/2;
        		    int t0      = offset0 + it;
         	    int t1      = offset1 + it;
 
-                double cst   = 0.0;
+                double cst  = 0.0;
            	    for (int id = 0; id < NDIM; id++)
            	    {    
                	    cst    += MCCosine[id][t0]*MCCosine[id][t1];
@@ -1289,11 +1290,13 @@ double *GetCosTheta()
            	    cosTheta   += cst;
     		}     // LOOP OVER ATOM PAIRS
 		}
-   	    int it      = (NumbRotTimes - 1)/2;
-	    int t0      = it;
-   	    int t1      = NumbRotTimes + it;
-        cosTheta1   = MCCosine[2][t0];
-        cosTheta2   = MCCosine[2][t1];
+		for (int atom = 0; atom < NumbAtoms; atom++)
+        {
+   	        int it          = (NumbRotTimes - 1)/2;
+		    int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
+            int tt          = offset + it;
+            cosTheta1[atom] = MCCosine[2][tt];
+        }
 	}
 	if(MCAtom[IMTYPE].numb == 1)
 	{
@@ -1310,7 +1313,7 @@ double *GetCosTheta()
         cosTheta     = 0.0;
 		int atom0    = 0;
      	int type0    = MCType[atom0];
-       	int offset0  = NumbRotTimes*atom0;
+       	int offset0  = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
        	int it       = (NumbRotTimes - 1)/2;
         int tm0      = offset0 + it/RotRatio;
         double cst   = 0.0;
@@ -1321,11 +1324,13 @@ double *GetCosTheta()
 		cosTheta     = cst;
 	}
     int jrot = 2; 
-    double *angle = new double[4];
+    double *angle = new double[2+NumbAtoms];
     angle[0]      = cosTheta;
     angle[1]      = plgndr(jrot,0,cosTheta);
-    angle[2]      = cosTheta1;
-    angle[3]      = cosTheta2;
+    for (int atom = 0; atom < NumbAtoms; atom++)
+    {
+        angle[atom+2]      = cosTheta1[atom];
+    }
     return angle;
 }
 

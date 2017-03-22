@@ -22,7 +22,7 @@ numbmolecules       = 2                                                         
 numbbeads           = 129
 nrange              = 1                                                            #change param5
 
-Rpt                 = 5.0                                                         #change param6
+Rpt                 = 10.0                                                         #change param6
 dipolemoment        = 1.86                                                         #change param7
 beta                = 0.256                                                        #change param7
 tau                 = 0.002
@@ -39,7 +39,7 @@ var2                = "tau"                                                     
 var3                = "tau"
 
 num1                = 2                                                            #change param12
-trunc 				= 20000                                                            #change param13
+trunc 				= 10000                                                            #change param13
 trunc1              = 20
 font=18
 
