@@ -20,22 +20,21 @@ molecule            = "HF"                                                      
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 20000                                                        #change param3
-numbmolecules       = 2                                                            #change param4
+numbblocks	        = 100                                                        #change param3
+numbmolecules       = 4                                                            #change param4
 tau                 = 0.002                                                        #change param5
 
 Rpt                 = 10.0                                                         #change param6
 dipolemoment        = 1.86
-skip                = 5
 
 status              = "submission"                                                 #change param8
 status              = "analysis"                                                   #change param8
 status_rhomat       = "Yes"                                                        #change param9 
 RUNDIR              = "scratch"
 
-nrange              = 151  			  						                       #change param10
+nrange              = 4  			  						                       #change param10
 
-file1_name           = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+file1_name           = "Entanglement-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
 file1_name          += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 file2_name          = ""                                                           #change param13
@@ -52,7 +51,7 @@ if status   == "submission":
 		dest_path       = "/scratch/tapas/linear_rotors/" 
 		final_path      = "/work/tapas/linear_rotors/"                                 #change param17
 
-trunc               = 20000
+trunc               = 5000
 
 
 #===============================================================================
@@ -70,43 +69,22 @@ if status == "submission":
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	file_output             = "Energy-vs-"+str(var)+"-fixed-"
+	file_output             = "Entropy-vs-"+str(var)+"-fixed-"
 	file_output            += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 	file_output            += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-	file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
-	file_output_angularDOF += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-	file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-	file_output_angularDOF1  = "AngularDOF-vs-"+str(var)+"-fixed-"
-	file_output_angularDOF1 += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-	file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
-	call(["rm", file_output, file_output_angularDOF,file_output_angularDOF1])
+	call(["rm", file_output])
 
 	fanalyze             = open(file_output, "a")           
-	fanalyze.write(support.fmt_energy(status,var))
-
-	fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
-	fanalyze_angularDOF.write(support.fmt_angle(status,var))
-	fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
-	fanalyze_angularDOF1.write(support.fmt_angle1(status,var))
+	fanalyze.write(support.fmt_entropy(status,var))
 
 # Loop over jobs
 for i in range(nrange):                                                  #change param19
 
-	'''
-	if (i>0):
+	if (i>1):
 
-		#value        = pow(2,i) + value_min
-		value        = beads_list[i]
-	'''
-	if (i>1 and i % skip == 0 ):
+		value        = pow(2,i) + value_min
 
-		if i % 2 != 0:
-			value        = i
-		else:
-			value        = i+value_min
-
-
-		numbbeads    = value #support.dropzeros(value)
+		numbbeads    = support.dropzeros(value)
 		beta         = tau*(value-1)
 		temperature  = 1.0/beta
 
@@ -114,9 +92,6 @@ for i in range(nrange):                                                  #change
 		dest_dir     = dest_path + folder_run 
 
 		if status   == "submission":
-			os.chdir(final_path)
-			call(["rm", "-rf", folder_run])
-			os.chdir(src_path)
 			if RUNDIR != "scratch":
 				os.chdir(dest_path)
 				call(["rm", "-rf", folder_run])
@@ -169,22 +144,10 @@ for i in range(nrange):                                                  #change
 
 			variable          = beta
 			try:
-				fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc))
-				fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc))
-				fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc))
+				fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc))
 			except:
 				pass
 
 if status == "analysis":
 	fanalyze.close()
-	fanalyze_angularDOF.close()
-	fanalyze_angularDOF1.close()
 	call(["cat",file_output])
-	'''
-	print
-	print
-	call(["cat",file_output_angularDOF])
-	print
-	print
-	call(["cat",file_output_angularDOF1])
-	'''

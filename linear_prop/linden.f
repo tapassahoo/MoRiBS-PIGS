@@ -3,7 +3,7 @@
 
       parameter(maxl=500)
       parameter(taunit=1.4387752224d+00,bh2=59.3220,
-     +          pi=3.14159265358979323846d+00,eps=1.d-16)
+     +          pi=3.14159265358979323846d+00,eps=1.d-20)
       dimension pl(0:maxl)
       character argum*30
 

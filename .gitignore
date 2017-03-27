@@ -18,6 +18,7 @@ test-hfhf.f
 /examples/linear_pigs/*.txt*
 /examples/linear_pigs/a.out
 /examples/linear_pigs/*exe
+/examples/linear_pigs/submit_*
 /examples/linear_pigs/*/
 !/examples/linear_pigs/
 /examples/test_run/

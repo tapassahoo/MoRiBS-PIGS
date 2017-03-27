@@ -859,29 +859,45 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 // if t1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
 	if(RotDenType == 0)
 	{
-// PN modification for open path below
 #ifdef PIGSROTORS
-		if (t1 == 0 || t1 == (NumbRotTimes-1)) 
-		{
-			if (t1 == 0)
-			{
-				dens_old = SRotDens(p1,type);
-			}
-			else
-			{
-				dens_old = SRotDens(p0,type);
-			}
-		}
-		else
+        if (t1 == 0 || t1 == (NumbRotTimes - 1))
+        {
+            if (t1 == 0)
+            {
+                dens_old = SRotDens(p1, type);
+            }
+            else
+            {
+                dens_old = SRotDens(p0, type);
+            }
+        }
+        else
+        {
+            dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+        }
+#ifdef ENTANGLEMENT
+        if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
+        {
+            if (t1 == ((NumbRotTimes - 1)/2))
+            {
+                dens_old = SRotDens(p1,type);
+            }
+            if (t1 == (((NumbRotTimes - 1)/2) - 1))
+            {
+                dens_old = SRotDens(p0,type);
+            }
+        }
 #endif
-		dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+#else
+        dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+#endif
 	}
-   else if(RotDenType == 1)
-   {
-      rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
-      rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
-      dens_old = rho1+rho2;
-   }
+    else if(RotDenType == 1)
+    {
+        rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
+        rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
+        dens_old = rho1+rho2;
+    }
 
    if (fabs(dens_old)<RZERO) dens_old = 0.0;
 #ifndef NEGATIVEDENSITY
@@ -915,22 +931,38 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 
 	if(RotDenType == 0)
 	{
-	// PN modification for open path below
 #ifdef PIGSROTORS
-		if (t1==0 || t1 == (NumbRotTimes-1))
-		{
-    		if (t1==0)
-			{
-        		dens_new = SRotDens(p1,type);
-			}
-    		else
-			{
-        		dens_new = SRotDens(p0,type);
-			}
-		}
-		else
+        if (t1 == 0 || t1 == (NumbRotTimes - 1))
+        {
+            if (t1 == 0)
+            {
+                dens_new = SRotDens(p1, type);
+            }
+            else
+            {
+                dens_new = SRotDens(p0, type);
+            }
+        }
+        else
+        {
+            dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+        }
+#ifdef ENTANGLEMENT
+        if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
+        {
+            if (t1 == ((NumbRotTimes - 1)/2))
+            {
+                dens_new = SRotDens(p1,type);
+            }
+            if (t1 == (((NumbRotTimes - 1)/2) - 1))
+            {
+                dens_new = SRotDens(p0,type);
+            }
+        }
 #endif
-		dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+#else
+        dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+#endif
 	}
 	else if(RotDenType == 1)
 	{
@@ -991,7 +1023,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 		MCAngles[PHI][t1] = phi;
 
 		for (int id=0;id<NDIM;id++)
-    		MCCosine [id][t1] = newcoords[id][t1];
+    		MCCosine[id][t1] = newcoords[id][t1];
 	}
 
 }
@@ -2148,7 +2180,6 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 	}   // END sum over atoms
 #endif
 
-
 #ifdef LINEARROTORS
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
 	{
@@ -2157,7 +2188,22 @@ double PotRotEnergy(int atom0, double **cosine, int it)
         int tm0 = offset0 + it/RotRatio;
 
         spot = 0.0;
-        for (int atom1=0;atom1<NumbAtoms;atom1++)
+
+        int atom1Init  = 0;
+        int NumbAtoms1 = NumbAtoms;
+#ifdef ENTANGLEMENT
+        if (atom0 < (NumbAtoms/2))
+        {
+            atom1Init  = 0;
+            NumbAtoms1 = (NumbAtoms/2);
+        }
+        else
+        {
+            atom1Init  = (NumbAtoms/2);
+            NumbAtoms1 = NumbAtoms;
+        }
+#endif
+        for (int atom1 = atom1Init; atom1 < NumbAtoms1; atom1++)
         if (atom1 != atom0)                    
         {
             int offset1 = atom1*NumbTimes;
@@ -2262,6 +2308,15 @@ double PotRotEnergy(int atom0, double **cosine, int it)
     {
         weight = 0.5;
     }
+#ifdef ENTANGLEMENT
+    if ((atom0 > ((NumbAtoms/4) - 1)) && (atom0 < (3*NumbAtoms/4)))
+    {
+        if (it == ((NumbRotTimes - 1)/2))
+        {
+            weight = 0.5;
+        }
+    }
+#endif
 #endif
     return (spot*weight);
 }

@@ -1165,18 +1165,21 @@ double GetRotEnergyPIGS(void)
         double p1 = 0.0;
         for (int id=0;id<NDIM;id++)
         {
-            p0 += (MCCosine[id][tm]*MCCosine[id][t0]);
+            p0 += (MCCosine[id][t0]*MCCosine[id][tm]);
             p1 += (MCCosine[id][t0]*MCCosine[id][tp]);
 	    } 
 
-        if (RotDenType == 0)
-        {
-            double rdens0 = SRotDens(p0,type);
-            double rdens1 = SRotDens(p1,type);
-            double norm   = (((double)NumbRotTimes) - 1.0);
+        double rdens0 = SRotDens(p0,type);
+        double rdens1 = SRotDens(p1,type);
+        double norm   = (((double)NumbRotTimes) - 1.0);
 
-            if (fabs(rdens0)>RZERO && fabs(rdens1)>RZERO)               // need to find asymptotic for small rot dens
-            srot += (norm*SRotDensDeriv(p0,type)/rdens0) + (norm*SRotDensDeriv(p1,type)/rdens1);
+        if (fabs(rdens0) > RZERO)               // need to find asymptotic for small rot dens
+        {
+            srot += norm*SRotDensDeriv(p0,type)/rdens0;
+        }
+        if (fabs(rdens1) > RZERO)               // need to find asymptotic for small rot dens
+        {
+            srot += norm*SRotDensDeriv(p1,type)/rdens1;
         }
 	}
     return (0.5*srot);
@@ -1333,6 +1336,130 @@ double *GetCosTheta()
     }
     return angle;
 }
+
+#ifdef ENTANGLEMENT
+double GetPotEnergy_Entanglement(int atom0, int atom1)
+{
+    const char *_proc_=__func__;
+
+    int it      = (NumbRotTimes - 1)/2;
+
+    int offset0 = NumbRotTimes*atom0;
+    int offset1 = NumbRotTimes*atom1;
+    int t0      = offset0 + it;
+    int t1      = offset1 + it;
+    int tm0     = offset0 + it/RotRatio;
+    int tm1     = offset1 + it/RotRatio;
+
+    double uvec1[NDIM],uvec2[NDIM];
+    double spot;
+    for (int id=0;id<NDIM;id++)
+    {
+        uvec1[id] = MCCosine[id][tm0];
+        uvec2[id] = MCCosine[id][tm1];
+    }
+    spot = PotFunc(Distance, uvec1, uvec2);
+    return spot;
+}
+#endif
+
+#ifdef ENTANGLEMENT
+double GetEstimNM(void)
+{
+    int type        = IMTYPE;
+
+    double spot    = 0.0;
+    for (int atom0 = 0; atom0 < (NumbAtoms/4); atom0++)
+    {
+        for (int atom1 = (NumbAtoms/2); atom1 < (3*NumbAtoms/4); atom1++)
+        {
+            spot      += GetPotEnergy_Entanglement(atom0, atom1);
+        }
+    }
+
+    for (int atom0 = (3*(NumbAtoms/4)); atom0 < NumbAtoms; atom0++)
+    {
+        for (int atom1 = (NumbAtoms/4); atom1 < (NumbAtoms/2); atom1++)
+        {
+            spot      += GetPotEnergy_Entanglement(atom0, atom1);
+        }
+    }
+    double potEstimNM = exp(-0.5*MCRotTau*spot);
+
+    double dens = 1.0;
+    for (int atom0 = (NumbAtoms/4); atom0 < (NumbAtoms/2); atom0++)
+    {
+
+        int it0  = (((NumbRotTimes - 1)/2)-1);
+        int it1   = ((NumbRotTimes - 1)/2);
+
+        int atom1   = atom0 + ((NumbAtoms/2)-1) - (2*(atom0 - (NumbAtoms/4)));
+        int offset0 = NumbRotTimes*atom0;
+        int offset1 = NumbRotTimes*atom1;
+
+        int t1M1 = offset0 + it0;
+        int t1M = offset1 + it1;
+        int t2M1 = offset1 + it0;
+        int t2M = offset0 + it1;
+
+        double p0   = 0.0;
+        double p1   = 0.0;
+        for (int id = 0;id<NDIM;id++)
+        {
+            p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+            p1 += (MCCosine[id][t2M1]*MCCosine[id][t2M]);
+        }
+        dens *= SRotDens(p0,type)*SRotDens(p1,type);
+    }
+    double estimNM = dens*potEstimNM;
+    return estimNM;
+}
+
+double GetEstimDM(void)
+{
+    int type       = IMTYPE;
+
+    double spot    = 0.0;
+    for (int atom0 = 0; atom0 < (NumbAtoms/4); atom0++)
+    {
+        for (int atom1 = (NumbAtoms/4); atom1 < (NumbAtoms/2); atom1++)
+        {
+            spot      += GetPotEnergy_Entanglement(atom0, atom1);
+        }
+    }
+
+    for (int atom0 = (3*(NumbAtoms/4)); atom0 < NumbAtoms; atom0++)
+    {	
+        for (int atom1 = (NumbAtoms/2); atom1 < (3*(NumbAtoms/4)); atom1++)
+        {
+            spot      += GetPotEnergy_Entanglement(atom0, atom1);
+        }
+    }
+    double potEstimDM = exp(-0.5*MCRotTau*spot);
+
+    double dens = 1.0;
+    for (int atom0 = (NumbAtoms/4); atom0 < (3*NumbAtoms/4); atom0++)
+    {
+
+        int it0  = (((NumbRotTimes - 1)/2)-1);
+        int it1   = ((NumbRotTimes - 1)/2);
+
+        int offset0 = NumbRotTimes*atom0;
+
+        int t0 = offset0 + it0;
+        int t1 = offset0 + it1;
+
+        double p0   = 0.0;
+        for (int id = 0;id<NDIM;id++)
+        {
+            p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+        }
+        dens *= SRotDens(p0,type);
+    }
+    double estimDM = dens*potEstimDM;
+    return estimDM;
+}
+#endif
 
 double GetPotEnergy(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc

@@ -25,6 +25,11 @@ double *GetCosTheta();
 double GetPhi(void);
 double GetPotEnergy(void);
 double GetKinEnergy(void);
+#ifdef ENTANGLEMENT
+double GetPotEnergy_Entanglement(int atom0, int atom1);
+double GetEstimNM(void);
+double GetEstimDM(void);
+#endif
 
 double GetConfPoten_Densities(void); // HA test
 

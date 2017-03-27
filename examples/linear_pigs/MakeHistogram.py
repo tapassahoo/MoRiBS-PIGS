@@ -28,6 +28,7 @@ def plothistogram(srcfile, numbmolecules, molecule, dipolemoment, beta, tau,Rpt)
 	plt.grid(True)
 
 
+	#plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$'+' R = '+str(Rpt)+r'$\AA$', fontsize =10)
 	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$'+' R = '+str(Rpt)+r'$\AA$', fontsize =10)
 	plt.xlabel(r'$\cos(\theta)$', fontsize = 20)
 	plt.ylabel('Density', fontsize = 20)
@@ -41,46 +42,43 @@ def plothistogram(srcfile, numbmolecules, molecule, dipolemoment, beta, tau,Rpt)
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-#molecule            = "HF-C60"                                                    #change param1
 molecule            = "HF"                                                         #change param1
-#molecule            = "H2"                                                        #change param1
 molecule_rot        = "HF"                                                         #change param2
 numbblocks	        = 20000                                                        #change param3
 numbmolecules       = 2                                                            #change param4
-numbbeads           = 129                                                          #change param5
-beta     	        = 0.128                                                        #change param6
-dipolemoment        = 0.45                                                         #change param7
-dRpt                = 0.5                                                          #change param7
+tau                 = 0.002
+dipolemoment        = 1.86                                                         #change param7
+Rpt                 = 10.0
 
-nrange              = 20		  						                           #change param11
+nrange              = 151		  						                           #change param11
+skip                = 5
 
-temperature         = 1.0/beta   
-tau                 = beta/(numbbeads-1)
+file1_name          = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+file1_name         += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
 
-file1_name          = "beta"+str(beta)+"Kinv-tau"+str(tau)+"Kinv-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-file1_name         += "-System"+str(numbmolecules)+str(molecule)+"-Beads"+str(numbbeads)+"-e0vsRpt" 
-
-file2_name          = "Angstrom"                                                   #change param10
-argument2           = "Rpt"                                                        #change param11
-value_min           = 0.5                                                            #change param12
-var                 = "Rpt"                                                        #change param13
+file2_name          = ""                                                   #change param10
+value_min           = 1                                                            #change param12
 
 src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param13
-run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                   #change param14
 
 trunc               = 20000
-nbins = 100          #change
+nbins               = 100          #change
 
 # Loop over jobs
 for i in range(nrange):                                                  #change param13
  
-	value        = i*dRpt + value_min
+	if (i>1 and i % skip == 0 ):
 
-	Rpt          = '{:2.1f}'.format(value)
+		if i % 2 != 0:
+			value        = i
+		else:
+			value        = i + value_min
 
-	folder_run   = file1_name+str(Rpt)+file2_name
-	dest_dir     = dest_path + folder_run + "/results"
-	src_file     = dest_dir+"/pigs.dof"
+		numbbeads    = value
+		beta         = tau*(numbbeads - 1)
+		folder_run   = file1_name+str(value)+file2_name
+		dest_dir     = dest_path + folder_run + "/results"
+		src_file     = dest_dir+"/pigs_instant.dof"
 
-	plothistogram(src_file, numbmolecules, molecule, dipolemoment, beta, tau, Rpt)
+		plothistogram(src_file, numbmolecules, molecule, dipolemoment, beta, tau, Rpt)

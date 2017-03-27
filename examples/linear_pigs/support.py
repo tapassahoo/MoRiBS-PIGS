@@ -251,7 +251,7 @@ def rotmat(molecule,temperature,numbbeads):
 	#temperature1    = dropzeros(temperature)
 	temperature1    = "%5.3f" % temperature
 	numbbeads1		= numbbeads - 1
-	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 1500 -1"
+	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 15000 -1"
 	print command_linden_run
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
@@ -282,7 +282,7 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	logpath        = final_dir+"/"
 
-	input_file    = "qmc_beads"+str(value)+".input"
+	input_file    = "qmc_"+file_name+str(value)+".input"
 	print input_file
 
 	job_string     = """#!/bin/bash
@@ -306,3 +306,41 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, input_file, command_pimc_run, run_dir)
 	print job_string
 	return job_string
+
+def outputstr_entropy(numbbeads,tau,dest_dir,trunc):
+	'''
+	This function gives us the output 
+	'''
+	col_block, col_NM, col_DM, col_EN = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], max_rows=trunc)
+	print len(col_NM)
+	
+	mean_NM      = np.mean(col_NM)
+	mean_DM      = np.mean(col_DM)
+	mean_EN      = np.mean(col_EN)
+
+	error_NM     = jackknife(mean_NM,col_NM)
+	error_DM     = jackknife(mean_DM,col_DM)
+	error_EN     = jackknife(mean_EN,col_EN)
+	#print i, len(col_block)
+
+	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_NM, mean_DM, mean_EN, error_NM, error_DM, error_EN)
+	output  += "\n"
+	return output
+
+def fmt_entropy(status,variable):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output     ="#"
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Entropy')
+		output    +="\n"
+		output    += '{:=<155}'.format('#')
+		output    +="\n"
+		return output
+
