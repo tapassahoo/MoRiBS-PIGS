@@ -579,8 +579,7 @@ double GetPotEnergy_Diff(void)
 }
 */
 
-double GetPotEnergy_Densities(void)
-// should be compatible with PotEnergy() from mc_piqmc.cc
+double GetPotEnergy_PIGS(void)
 {
 	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
 
@@ -763,10 +762,144 @@ double GetPotEnergy_Densities(void)
         spot +=spot_pair;
 
     }//endif MOLECINCAGE
-    else
-    {
 #endif
-#ifndef PIGSROTORS
+	return spot;
+}
+
+double GetPotEnergy_Densities(void)
+// should be compatible with PotEnergy() from mc_piqmc.cc
+{
+	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+
+#ifdef DEBUG_WORM
+	if (Worm.exists)
+	nrerror(_proc_," Only for Z-configurations");
+#endif
+
+	// double dr[NDIM];
+    string stype = MCAtom[IMTYPE].type;
+	double spot = 0.0;
+#ifdef LINEARROTORS
+	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
+	{
+        spot = 0.0;
+        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+		{
+        for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+        {
+            int offset0 = NumbTimes*atom0;
+            int offset1 = NumbTimes*atom1;
+
+
+		    double spot_pair = 0.0;
+#pragma omp parallel for reduction(+: spot_pair)
+		    for (int it = 0; it < NumbTimes; it++) 	    
+		    {  
+                int t0 = offset0 + it;
+                int t1 = offset1 + it;
+                int tm0=offset0 + it/RotRatio;
+                int tm1=offset1 + it/RotRatio;
+
+                if (stype == H2)
+                {
+                    double s1 = 0.0;
+                    double s2 = 0.0;
+                    double dr2 = 0.0;
+				    double dr[NDIM];
+                    for (int id=0;id<NDIM;id++)
+                    {
+                        dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+                        dr2    += (dr[id]*dr[id]);
+                        double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][tm0];
+                        double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][tm1];
+                        s1 += cst1;
+                        s2 += cst2;
+                    }
+                    double r = sqrt(dr2);
+                    double th1 = acos(s1/r);
+                    double th2 = acos(s2/r);
+
+                    double b1[NDIM];
+                    double b2[NDIM];
+                    double b3[NDIM];
+                    for (int id = 0; id < NDIM; id++)
+                    {
+                        b1[id] = MCCosine[id][tm0];
+                        b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
+                        b3[id] = MCCosine[id][tm1];
+                    }
+                    VectorNormalisation(b1);
+                    VectorNormalisation(b2);
+                    VectorNormalisation(b3);
+
+                    //Calculation of dihedral angle 
+                    double n1[NDIM];
+                    double n2[NDIM];
+                    double mm[NDIM];
+
+                    CrossProduct(b2, b1, n1);
+                    CrossProduct(b2, b3, n2);
+                    CrossProduct(b2, n2, mm);
+
+                    double xx = DotProduct(n1, n2);
+                    double yy = DotProduct(n1, mm);
+
+                    double phi = atan2(yy, xx);
+                    if (phi<0.0) phi += 2.0*M_PI;
+
+                    //Dihedral angle calculation is completed here
+                    double r1 = 1.42;// bond length in bohr
+                    double r2 = r1;// bond length in bohr
+#ifdef GETR
+                    double rd = Distance/BOHRRADIUS;
+#else
+                    double rd = r/BOHRRADIUS;
+#endif
+                    double potl;
+                    vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
+                    spot_pair += potl*CMRECIP2KL;
+                } //stype
+
+                if (stype == HF)
+                {
+                    double uvec1[NDIM],uvec2[NDIM];
+                    double E12;
+                    for (int id = 0; id < NDIM; id++)
+                    {
+                        uvec1[id] = MCCosine[id][tm0];
+			            uvec2[id] = MCCosine[id][tm1];
+                    }
+                    spot_pair += PotFunc(Distance, uvec1, uvec2);
+                } //stype
+            }
+            spot += spot_pair;
+        }// loop over atoms (molecules)
+        }// loop over atoms (molecules)
+    }
+    if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+    {
+        spot = 0.0;
+        double dm   = DipoleMoment/AuToDebye;
+        double dm2  = dm*dm;
+#ifdef GETR
+        double RR = Distance/BOHRRADIUS;
+#endif
+
+        int offset0 = 0;
+
+        double spot_pair = 0.0;
+#pragma omp parallel for reduction(+: spot_pair)
+	    for (int it = 0; it < NumbTimes; it++) 	  
+        {  
+            int t0  = offset0 + it;
+
+            double E12 = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
+            spot_pair  = E12*AuToKelvin;
+        }
+      	spot += spot_pair;
+    }
+#endif
+#ifdef IOWRITE
 	if ( MCAtom[IMTYPE].numb > 1)
     {
 	for (int atom0=0;atom0<(NumbAtoms-1);atom0++)      
@@ -940,15 +1073,7 @@ double GetPotEnergy_Densities(void)
    	}     // LOOP OVER ATOM PAIRS
 	}
 #endif
-
-#ifdef MOLECULEINCAGE
-}
-#endif
-#ifdef PIGSROTORS
-	return spot;
-#else
 	return (spot/(double)NumbTimes);
-#endif
 }
 
 double GetTotalEnergy(void)
@@ -1046,7 +1171,7 @@ double GetTotalEnergy(void)
                     }
                     spot_pair  += PotFunc(Distance,uvec1,uvec2);
                 } //stype
-			}//loop over two terminal beads
+			}//loop over beads
 			spot += spot_pair;
         }// loop over atoms (molecules)
         }// loop over atoms (molecules)
@@ -1151,6 +1276,7 @@ double GetRotEnergyPIGS(void)
 {
     double srot = 0.0;
     int type  = IMTYPE;
+    double nslice = (((double)NumbRotTimes) - 1.0);
 
     for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
     {
@@ -1169,20 +1295,23 @@ double GetRotEnergyPIGS(void)
             p1 += (MCCosine[id][t0]*MCCosine[id][tp]);
 	    } 
 
+
+#ifndef ROTENERGYESTIM
         double rdens0 = SRotDens(p0,type);
         double rdens1 = SRotDens(p1,type);
-        double norm   = (((double)NumbRotTimes) - 1.0);
-
         if (fabs(rdens0) > RZERO)               // need to find asymptotic for small rot dens
         {
-            srot += norm*SRotDensDeriv(p0,type)/rdens0;
+            srot += SRotDensDeriv(p0,type)/rdens0;
         }
         if (fabs(rdens1) > RZERO)               // need to find asymptotic for small rot dens
         {
-            srot += norm*SRotDensDeriv(p1,type)/rdens1;
+            srot += SRotDensDeriv(p1,type)/rdens1;
         }
+#else
+        srot += SRotDensDeriv(p0,type) + SRotDensDeriv(p1,type);
+#endif
 	}
-    return (0.5*srot);
+    return (0.5*nslice*srot);
 }
 #endif
 
@@ -1763,53 +1892,63 @@ double GetRotEnergy(void)
 
 double GetRotPlanarEnergy(void)
 {
-  if(RotDenType != 0) {cerr<<"only SOS rho"<<endl; exit(0);}
+    if(RotDenType != 0) {cerr<<"only SOS rho"<<endl; exit(0);}
   
-  int type = IMTYPE; 
-  int offset = MCAtom[type].offset;
+    int type = IMTYPE; 
+    int offset = MCAtom[type].offset;
 
-  double ERotPlanar=0.0;
-  // changed by PN below
-  ErotSQ=0.0;  // a global variable
-  Erot_termSQ=0.0;  // a global variable
+    double ERotPlanar=0.0;
+    // changed by PN below
+    ErotSQ=0.0;  // a global variable
+    Erot_termSQ=0.0;  // a global variable
 
-  for(int atom  = 0;atom<MCAtom[type].numb;atom++)                   // multi molecular impurtiy
+    for (int atom = 0; atom<MCAtom[type].numb; atom++)                   // multi molecular impurtiy
     {
-      offset   += (NumbTimes*atom);
-      int gatom = offset/NumbTimes;    // the same offset for rot and trans degrees
+        offset    = (NumbTimes*atom);
+        int gatom = offset/NumbTimes;    // the same offset for rot and trans degrees
 
-      double srot = 0.0;
-      double sesq = 0.0;
-      double se_termsq=0.0;
+        double srot = 0.0;
+        double sesq = 0.0;
+        double se_termsq=0.0;
        
 #pragma omp parallel for reduction(+: srot,sesq,se_termsq)       
-      for (int it0=0;it0<NumbRotTimes;it0++)
-	{
-	  int t0 = offset +  it0;
-	  int t1 = offset + (it0 + 1) % NumbRotTimes;
+        for (int it0 = 0; it0 < NumbRotTimes; it0++)
+	    {
+	        int t0 = offset +  it0;
+	        int t1 = offset + (it0 + 1) % NumbRotTimes;
 	   
-	  double p0 = 0.0;
-	  for (int id=0;id<NDIM;id++)
-	    p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+            double p0 = 0.0;
+	        for (int id = 0; id < NDIM; id++)
+	        p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
 
-	  double rdens = SRotDens(p0,type);
+#ifdef TYPE0
+	        double rdens = SRotDens(p0,type);
 
-	  if  (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
-	    srot += (SRotDensDeriv(p0,type)/rdens);
-	  se_termsq += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
-	  sesq += SRotDensEsqrt(p0,type)/rdens;
-	}
-      //      srot = srot / ((double)(NumbRotTimes));
-      // sesq = sesq / ((double)(NumbRotTimes)*(double)(NumbRotTimes));
-      // se_termsq = se_termsq/ ((double)(NumbRotTimes)*(double)(NumbRotTimes));
-      // TOBY question: should I divide by NumbRotTimes above?
+	        if (fabs(rdens) > RZERO)               // need to find asymptotic for small rot dens
+	        srot += (SRotDensDeriv(p0,type)/rdens);
+#endif
+#ifdef TYPE1
+	        srot += SRotDensDeriv(p0,type);
+#endif
+#ifdef IOWRITE
+	        se_termsq += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
+	        sesq += SRotDensEsqrt(p0,type)/rdens;
+#endif
+	    }
+        //      srot = srot / ((double)(NumbRotTimes));
+        // sesq = sesq / ((double)(NumbRotTimes)*(double)(NumbRotTimes));
+        // se_termsq = se_termsq/ ((double)(NumbRotTimes)*(double)(NumbRotTimes));
+        // TOBY question: should I divide by NumbRotTimes above?
       
-      ERotPlanar += srot;
-      ErotSQ += sesq;
-      Erot_termSQ += se_termsq; 
+        ERotPlanar += srot;
+#ifdef IOWRITE
+        ErotSQ += sesq;
+        Erot_termSQ += se_termsq; 
+#endif
     }
-  return (ERotPlanar);	      
+    return (ERotPlanar);	      
 }
+
 double GetRotE3D(void)
 {
   int type = IMTYPE;

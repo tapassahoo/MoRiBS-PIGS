@@ -177,7 +177,7 @@ void IOReadParams(const char in_file[],int & mc_status)
 
         inf>>MCAtom[type].mcstep;        // [4]
         inf>>MCAtom[type].levels;        // [5]
-#ifndef PIGSROTORSIO
+#ifdef IOWRITE
         inf>>MCAtom[type].fpot;          // [6]
 
         string smod;                     // model of interaction 

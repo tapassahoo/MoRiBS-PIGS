@@ -2106,13 +2106,13 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 //  Orientational energy 
 {
 	int type0   =  MCType[atom0];
+#ifdef IOWRITE
 #ifdef DEBUG_PIMC
 	const char *_proc_=__func__;         //  PotRotEnergy()
 
 	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
 	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
 
-#ifndef PIGSROTORSIO
 	if (MCAtom[type0].numb != 1)
 	nrerror(_proc_,"Only one molecular impurity");
 #endif
@@ -2120,7 +2120,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 
 	double spot = 0.0;
 
-#ifndef PIGSROTORS 
+#ifdef IOWRITE
 	double dr[NDIM];
 
 	int offset0 =  atom0*NumbTimes;
@@ -2183,7 +2183,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 #ifdef LINEARROTORS
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
 	{
-	    int offset0 =  atom0*NumbTimes;
+	    int offset0 =  atom0*NumbRotTimes;
         int t0  = offset0 + it;
         int tm0 = offset0 + it/RotRatio;
 

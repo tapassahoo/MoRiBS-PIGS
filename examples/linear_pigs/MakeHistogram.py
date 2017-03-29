@@ -13,18 +13,18 @@ import matplotlib.pyplot as plt
 from os import system
 from sys import argv
 
-def plothistogram(srcfile, numbmolecules, molecule, dipolemoment, beta, tau,Rpt):
-	col_costheta1, col_theta1 = loadtxt(srcfile, unpack=True, usecols=[5,6])
-	col_costheta2, col_theta2 = loadtxt(srcfile, unpack=True, usecols=[7,8])
+def plothistogram(srcfile, numbmolecules, molecule, dipolemoment, beta, tau, Rpt):
+	col_costheta1, col_theta1 = loadtxt(srcfile, unpack=True, usecols=[1,3])
+#	col_costheta2, col_theta2 = loadtxt(srcfile, unpack=True, usecols=[7,8])
 
 	hist1, bins1 = np.histogram(col_costheta1,nbins,density=True)
-	hist2, bins2 = np.histogram(col_costheta2,nbins,density=True)
+#	hist2, bins2 = np.histogram(col_costheta2,nbins,density=True)
 	print len(hist1), len(bins1)
 	print np.sum(hist1)
 	print np.sum(hist1*np.diff(bins1))
 
 	plt.hist( col_costheta1, bins='auto', normed = 1)  # plt.hist passes it's arguments to np.histogram
-	plt.hist( col_costheta2, bins='auto', normed = 1)  # plt.hist passes it's arguments to np.histogram
+#	plt.hist( col_costheta2, bins='auto', normed = 1)  # plt.hist passes it's arguments to np.histogram
 	plt.grid(True)
 
 
@@ -45,12 +45,12 @@ def plothistogram(srcfile, numbmolecules, molecule, dipolemoment, beta, tau,Rpt)
 molecule            = "HF"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 numbblocks	        = 20000                                                        #change param3
-numbmolecules       = 2                                                            #change param4
-tau                 = 0.002
+numbmolecules       = 1                                                            #change param4
+tau                 = 0.001
 dipolemoment        = 1.86                                                         #change param7
 Rpt                 = 10.0
 
-nrange              = 151		  						                           #change param11
+nrange              = 51		  						                           #change param11
 skip                = 5
 
 file1_name          = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
@@ -62,23 +62,21 @@ value_min           = 1                                                         
 src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param13
 
-trunc               = 20000
 nbins               = 100          #change
 
 # Loop over jobs
 for i in range(nrange):                                                  #change param13
- 
+
 	if (i>1 and i % skip == 0 ):
 
 		if i % 2 != 0:
 			value        = i
 		else:
-			value        = i + value_min
+			value        = i+value_min
 
 		numbbeads    = value
 		beta         = tau*(numbbeads - 1)
 		folder_run   = file1_name+str(value)+file2_name
 		dest_dir     = dest_path + folder_run + "/results"
-		src_file     = dest_dir+"/pigs_instant.dof"
-
+		src_file     = dest_dir+"/pigs_instant.eng"
 		plothistogram(src_file, numbmolecules, molecule, dipolemoment, beta, tau, Rpt)

@@ -21,8 +21,8 @@ molecule            = "HF"                                                      
 molecule_rot        = "HF"                                                         #change param2
 
 numbblocks	        = 20000                                                        #change param3
-numbmolecules       = 2                                                            #change param4
-tau                 = 0.002                                                        #change param5
+numbmolecules       = 1                                                            #change param4
+tau                 = 0.001                                                        #change param5
 
 Rpt                 = 10.0                                                         #change param6
 dipolemoment        = 1.86
@@ -33,9 +33,11 @@ status              = "analysis"                                                
 status_rhomat       = "Yes"                                                        #change param9 
 RUNDIR              = "scratch"
 
-nrange              = 151  			  						                       #change param10
+nrange              = 51  			  						                       #change param10
 
 file1_name           = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+#file1_name           = "RotEstimRpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+#file1_name           = "FintiteTRpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
 file1_name          += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 file2_name          = ""                                                           #change param13
@@ -71,6 +73,8 @@ if status == "submission":
 #===============================================================================
 if status == "analysis":
 	file_output             = "Energy-vs-"+str(var)+"-fixed-"
+	#file_output             = "RotEstimEnergy-vs-"+str(var)+"-fixed-"
+	#file_output             = "FiniteTEnergy-vs-"+str(var)+"-fixed-"
 	file_output            += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 	file_output            += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
 	file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"

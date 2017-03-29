@@ -94,19 +94,23 @@ double _Cv_rot_total;    // rotational heat capacity, global average
 fstream _feng;      // save accumulated energy
 fstream _fang;      // save accumulated energy
 fstream _fangins;      // save accumulated energy
+fstream _fengins;      // save accumulated energy
 #ifdef ENTANGLEMENT
 fstream _fentropy;
 #endif
 
 //---------------- ESTIMATORS ---------------
 
-#ifdef PIGSROTORS
 #ifndef ENTANGLEMENT
 void SaveEnergy    (const char [],double,long int); // block average
+void SaveSumEnergy (double,double);                 // accumulated average
+void SaveInstantEnergy (double);                 // accumulated average
+#endif
+#ifdef PIGSROTORS
+#ifndef ENTANGLEMENT
 void SaveAngularDOF(const char [],double,long int);
 void SaveSumAngularDOF(double,double);              // accumulated average
-void SaveInstantAngularDOF(double,double); 
-void SaveSumEnergy (double,double);                 // accumulated average
+void SaveInstantAngularDOF(double); 
 #else
 void SaveTrReducedDens(const char [], double , long int );
 void SaveSumTrReducedDens(double , double);
@@ -391,7 +395,7 @@ int main(int argc, char *argv[])
 
 // BEGIN loop over blocks ------------------------
 
-#ifndef PIGSROTORS
+#ifdef IOWRITE
    InitPotentials();
 #endif
 
@@ -547,8 +551,8 @@ int main(int argc, char *argv[])
     }
     double ratio1 = sumt1/sumt1z;
     cout<<"Here I am "<<ratio1<<"     "<<sumt1<<"    "<< sumt1z<<endl;
-#endif
     exit(0);
+#endif
 /*
 // try openmp for loop
    int chunksize,nthrds;
@@ -676,7 +680,7 @@ int main(int argc, char *argv[])
                     		bc.fill('0');
                     		bc<<blockCount;
                     		string fname = MCFileName + bc.str();  // file name prefix including block #
-#ifndef PIGSROTORSIO
+#ifdef IOWRITE
                     		IOxyzAng(IOWrite,fname.c_str());
 #endif
                     		PrintXYZprl = 0;
@@ -691,13 +695,14 @@ int main(int argc, char *argv[])
                		sumsCount += 1.0;                 
 #ifndef ENTANGLEMENT
                		SaveSumEnergy (totalCount,sumsCount);
+                    SaveInstantEnergy (sumsCount); 
 #else
                     SaveSumTrReducedDens(totalCount, sumsCount);
 #endif
 #ifdef PIGSROTORSIO
 #ifndef ENTANGLEMENT
 					SaveSumAngularDOF(totalCount, sumsCount);
-					SaveInstantAngularDOF(totalCount, sumsCount);
+					SaveInstantAngularDOF(sumsCount);
 #endif
 #endif
             	}
@@ -713,7 +718,7 @@ int main(int argc, char *argv[])
 		{
    			MCSaveBlockAverages(blockCount);
 
-#ifndef PIGSROTORSIO
+#ifdef IOWRITE
 			// save accumulated interatomic distribution
 			SaveGraSum(MCFileName.c_str(),totalCount);
 
@@ -785,7 +790,7 @@ void PIMCPass(int type,int time)
 {
 
   // skip solvent and translation moves for rotations only
-#ifndef PIGSROTORS
+#ifdef MOVECOM
    if (time == 0)
    MCMolecularMove(type);        
 // move the solvent particles
@@ -862,15 +867,23 @@ void MCGetAverage(void)
 
 #ifndef ENTANGLEMENT
     double skin       = 0.;
-#ifndef PIGSROTORS
+#ifdef IOWRITE
 	skin              = GetKinEnergy();           // kin energy
 	_bkin            += skin;                     // block average for kin energy
 	_kin_total       += skin;                     // accumulated average 
 #endif
+#ifdef PIGSROTORS
+	double spot       = GetPotEnergy_PIGS(); // pot energy and density distributions
+#else
 	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
+#endif
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
+#ifdef PIGSROTORS
 	double stotal     = GetTotalEnergy();         // Total energy
+#else
+    double stotal     = 0.0;
+#endif
 	_btotal          += stotal;                   // kin+pot
 	_total           += stotal;
 	//double dspot    = GetPotEnergy_Diff();      // pot energy differencies added by Hui Li 
@@ -943,7 +956,11 @@ void MCGetAverage(void)
         
 #ifdef LINEARROTORS
 		if(MCAtom[IMTYPE].molecule == 4)
+#ifdef PIGSROTORS
 			srot      = GetRotEnergyPIGS();           // kin energy
+#else
+			srot      = GetRotPlanarEnergy();     // kin energy
+#endif
 #endif
 		_brot        += srot;
 		_rot_total   += srot;
@@ -954,7 +971,7 @@ void MCGetAverage(void)
        GetRCF(); 
 	}
 
-#ifndef PIGSROTORS 
+#ifndef IOWRITE
 // accumulate terms for Cv
    double sCv;
    sCv = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
@@ -1096,7 +1113,7 @@ void MCSaveBlockAverages(long int blocknumb)
       SaveDensities1D    (fname.c_str(),avergCount);       
       SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
     }
-#ifndef PIGSROTORSIO
+#ifdef IOWRITE 
     if( IMPURITY && MCAtom[IMTYPE].molecule == 4)
     {
       SaveDensities1D    (fname.c_str(),avergCount);       
@@ -1116,7 +1133,7 @@ void MCSaveBlockAverages(long int blocknumb)
     }
 #endif
 
-#ifndef PIGSROTORSIO
+#ifdef IOWRITE
 	if (ROTATION) 
     SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
 #endif
@@ -1167,7 +1184,7 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 	if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
-#ifdef PIGSROTORSIO
+#ifndef IOWRITE
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
@@ -1253,7 +1270,7 @@ void SaveSumEnergy (double acount, double numb)  // global average
 {
 	const char *_proc_=__func__;    //  SaveSumEnergy()
  
-#ifdef PIGSROTORS
+#ifndef IOWRITE
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
 	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
 	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
@@ -1317,7 +1334,7 @@ void SaveSumAngularDOF(double acount, double numb)
     _fang << endl;
 }
 
-void SaveInstantAngularDOF(double acount, double numb)
+void SaveInstantAngularDOF(double numb)
 {
     const char *_proc_=__func__;
 
@@ -1346,6 +1363,30 @@ void SaveInstantAngularDOF(double acount, double numb)
     delete[] scostheta;
 }
 #endif
+
+void SaveInstantEnergy(double numb)
+{
+    const char *_proc_=__func__;
+
+    double srotinst, spotinst, stotalinst;
+    if (MCAtom[IMTYPE].molecule == 4)
+    {
+#ifdef PIGSROTORS
+    srotinst   = GetRotEnergyPIGS();
+	spotinst   = GetPotEnergy_PIGS(); 
+	stotalinst = GetTotalEnergy();
+#else
+    srotinst   = GetRotPlanarEnergy(); 
+	spotinst   = GetPotEnergy_Densities(); 
+    stotalinst = 0.0;
+#endif
+    }
+    _fengins << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
+    _fengins << setw(IO_WIDTH) << spotinst << BLANK;
+    _fengins << setw(IO_WIDTH) << stotalinst << BLANK;
+    _fengins << setw(IO_WIDTH) << srotinst << BLANK;
+    _fengins << endl;
+}
 
 #ifdef ENTANGLEMENT
 void SaveSumTrReducedDens(double acount, double numb)
@@ -1463,6 +1504,20 @@ void InitTotalAverage(void)  // DUMP
     if (!_fentropy.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fentropy.c_str());
 #endif
+
+    string fenergyins;
+
+    fenergyins  = MCFileName + "_instant";
+    fenergyins += ".eng";
+
+    if (FileExist(fenergyins.c_str()))   // backup the output of previous simulations
+    IOFileBackUp(fenergyins.c_str());
+
+    _fengins.open(fenergyins.c_str(), ios::out);
+    io_setout(_fengins);
+
+    if (!_fengins.is_open())
+    _io_error(_proc_,IO_ERR_FOPEN,fenergyins.c_str());
 }
 
 void DoneTotalAverage(void)
