@@ -1315,50 +1315,158 @@ double GetRotEnergyPIGS(void)
 }
 #endif
 
+double *GetCosTheta()
+{
+    const char *_proc_=__func__; 
+    //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
+
+    double cosTheta1[NumbAtoms];
+    double cosTheta;
+    int it          = (NumbRotTimes - 1)/2;
+
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+        cosTheta            = 0.0;
+    	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+        {    
+    	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+    	    {
+        	    int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        	    int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+
+       		    int t0      = offset0 + it;
+        	    int t1      = offset1 + it;
+
+                double cst  = 0.0;
+           	    for (int id = 0; id < NDIM; id++)
+           	    {    
+               	    cst    += MCCosine[id][t0]*MCCosine[id][t1];
+           	    }
+           	    cosTheta   += cst;
+    		}     // LOOP OVER ATOM PAIRS
+		}
+		for (int atom = 0; atom < NumbAtoms; atom++)
+        {
+		    int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
+            int tt          = offset + it;
+            cosTheta1[atom] = MCCosine[2][tt];
+        }
+	}
+	if(MCAtom[IMTYPE].numb == 1)
+	{
+		// Initial configurations //
+        double phi1  = 0.0;
+        double cost1 = 1.0;
+        double sint1 = sqrt(1.0 - cost1*cost1);
+
+        double uvec1[NDIM];
+        uvec1[0]     = sint1*cos(phi1);
+        uvec1[1]     = sint1*sin(phi1);
+        uvec1[2]     = cost1;
+
+        cosTheta     = 0.0;
+		int atom0    = 0;
+     	int type0    = MCType[atom0];
+       	int offset0  = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        int tm0      = offset0 + it/RotRatio;
+        double cst   = 0.0;
+        for (int id = 0; id < NDIM; id++)
+        {    
+       	    cst    += MCCosine[id][tm0]*uvec1[id];
+        }
+		cosTheta     = cst;
+	}
+
+    int SizeAngle;
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+    	SizeAngle = NumbAtoms + 1;
+    }
+	else
+    {
+    	SizeAngle = NumbAtoms;
+    }
+
+    double *angle = new double[SizeAngle];
+    angle[0]      = cosTheta;
+	if (MCAtom[IMTYPE].numb > 1)
+	{
+        for (int atom = 0; atom < NumbAtoms; atom++)
+        {
+             angle[atom+1]      = cosTheta1[atom];
+        }
+    }
+    return angle;
+}
+
+#ifdef INSTANT
+double *GetCosThetaEntanglement()
+{
+    const char *_proc_=__func__; 
+
+    double *cosTheta = new double [2*NumbAtoms*NDIM];
+	int BeadMminus1 = (((NumbRotTimes - 1)/2) - 1); 
+    int BeadM       = ((NumbRotTimes - 1)/2);
+
+	for (int id = 0; id < NDIM; id++)
+   	{
+		for (int it = BeadMminus1; it <= BeadM; it++) 
+		{
+            int jj = (it - BeadMminus1) + 2*id;
+			for (int atom = 0; atom < NumbAtoms; atom++)
+   			{
+				int kk = atom + jj*NumbAtoms;
+	    		int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
+        		int tt          = offset + it;
+        		cosTheta[kk] = MCCosine[id][tt];
+			}
+		}
+    }
+    return cosTheta;
+}
+#endif
+
 #ifdef LINEARROTORS
 double GetPhi(void)
 {
-	const char *_proc_=__func__; 
-	if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
+    const char *_proc_=__func__;
+    if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
 
-	double phi;
-	for (int atom0=0;atom0<(NumbAtoms-1);atom0++)      
-	for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
-	{
-		int type0   = MCType[atom0];
-		int type1   = MCType[atom1];
+    double phi;
+    for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
+    for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
+    {
+        int type0   = MCType[atom0];
+        int type1   = MCType[atom1];
 
-		int offset0 = NumbTimes*atom0;
-		int offset1 = NumbTimes*atom1;
+        int offset0 = NumbTimes*atom0;
+        int offset1 = NumbTimes*atom1;
 
-		int it      = (NumbTimes - 1)/2;
-		int t0      = offset0 + it;
-		int t1      = offset1 + it;
+        int it      = (NumbTimes - 1)/2;
+        int t0      = offset0 + it;
+        int t1      = offset1 + it;
 
-		double dr2  = 0.0;  		 
-		for (int id = 0; id < NDIM; id++)
-		{
-			double dr = (MCCoords[id][t0] - MCCoords[id][t1]);
-			dr2    += dr*dr;
-		}
-		double r    = sqrt(dr2);
+#ifdef GETR
+		MCCoords[0][t0] = 0.0;
+		MCCoords[1][t0] = 0.0;
+		MCCoords[2][t0] = 0.0;
+		MCCoords[0][t1] = 0.0;
+		MCCoords[1][t1] = 0.0;
+		MCCoords[2][t1] = Distance;
+#endif
+        double dr2  = 0.0;
+        for (int id = 0; id < NDIM; id++)
+        {
+            double dr = (MCCoords[id][t0] - MCCoords[id][t1]);
+            dr2    += dr*dr;
+        }
+        double r    = sqrt(dr2);
 
-       	if ( ((MCAtom[type0].molecule == 4) && (MCAtom[type1].molecule == 4)) && (MCAtom[IMTYPE].numb > 1) )
-		{
-			int tm0=offset0 + it/RotRatio;
-			int tm1=offset1 + it/RotRatio;
-			double s1  = 0.;
-			double s2  = 0.;
-			for (int id=0;id<NDIM;id++)
-			{    
-				double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][tm0];
-				double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][tm1];
-				s1  += cst1;
-				s2  += cst2;
-			}
-			double th1   = acos(s1/r);
-			double th2   = acos(s2/r);
-	
+        if ( ((MCAtom[type0].molecule == 4) && (MCAtom[type1].molecule == 4)) && (MCAtom[IMTYPE].numb > 1) )
+        {
+            int tm0=offset0 + it/RotRatio;
+            int tm1=offset1 + it/RotRatio;
+
             double b1[NDIM];
             double b2[NDIM];
             double b3[NDIM];
@@ -1387,84 +1495,12 @@ double GetPhi(void)
             phi       = atan2(yy, xx);
             if (phi<0.0) phi += 2.0*M_PI;
 
-      	}  // LOOP OVER TIME SLICES
-   	}     // LOOP OVER ATOM PAIRS
-	return phi;
+        }  // LOOP OVER TIME SLICES
+    }     // LOOP OVER ATOM PAIRS
+    return phi;
 }
 #endif
 
-double *GetCosTheta()
-{
-    const char *_proc_=__func__; 
-    //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
-
-    double cosTheta1[NumbAtoms];
-    double cosTheta;
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-        cosTheta            = 0.0;
-    	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
-        {    
-    	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
-    	    {
-        	    int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-        	    int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
-
-        	    int it      = (NumbRotTimes - 1)/2;
-       		    int t0      = offset0 + it;
-        	    int t1      = offset1 + it;
-
-                double cst  = 0.0;
-           	    for (int id = 0; id < NDIM; id++)
-           	    {    
-               	    cst    += MCCosine[id][t0]*MCCosine[id][t1];
-           	    }
-           	    cosTheta   += cst;
-    		}     // LOOP OVER ATOM PAIRS
-		}
-		for (int atom = 0; atom < NumbAtoms; atom++)
-        {
-   	        int it          = (NumbRotTimes - 1)/2;
-		    int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
-            int tt          = offset + it;
-            cosTheta1[atom] = MCCosine[2][tt];
-        }
-	}
-	if(MCAtom[IMTYPE].numb == 1)
-	{
-		// Initial configurations //
-        double phi1  = 0.0;
-        double cost1 = 1.0;
-        double sint1 = sqrt(1.0 - cost1*cost1);
-
-        double uvec1[NDIM];
-        uvec1[0]     = sint1*cos(phi1);
-        uvec1[1]     = sint1*sin(phi1);
-        uvec1[2]     = cost1;
-
-        cosTheta     = 0.0;
-		int atom0    = 0;
-     	int type0    = MCType[atom0];
-       	int offset0  = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-       	int it       = (NumbRotTimes - 1)/2;
-        int tm0      = offset0 + it/RotRatio;
-        double cst   = 0.0;
-        for (int id = 0; id < NDIM; id++)
-        {    
-       	    cst    += MCCosine[id][tm0]*uvec1[id];
-        }
-		cosTheta     = cst;
-	}
-    int jrot = 2; 
-    double *angle = new double[2+NumbAtoms];
-    angle[0]      = cosTheta;
-    angle[1]      = plgndr(jrot,0,cosTheta);
-    for (int atom = 0; atom < NumbAtoms; atom++)
-    {
-        angle[atom+2]      = cosTheta1[atom];
-    }
-    return angle;
-}
 
 #ifdef ENTANGLEMENT
 double GetPotEnergy_Entanglement(int atom0, int atom1)
@@ -2233,6 +2269,22 @@ void bin_1Ddensity(double r,int dtype)
      _gr1D_sum[dtype][bin_r] += 1.0;
    }
 }
+
+/*
+#ifdef LINEARROTORS
+void bin_1DdensityCost(double cost)
+{
+   int bin_cost = (int)floor((cost-_min_cost)/_delta_cost);
+
+   if ((bin_cost<MC_BINSCOST) && (bin_cost>=0))
+   {
+     _gr1D[dtype][bin_r] += 1.0;
+     _gr1D_sum[dtype][bin_r] += 1.0;
+   }
+}
+#endif
+*/
+
 
 void SaveGraSum(const char fname [], double acount)
 // accumulate sum for inter-atomic distribution.  should be similar to the pair distribution in SaveDensities1D
@@ -3725,6 +3777,10 @@ double PotFunc(double Rpt, double *uvec1, double *uvec2)
     double Rpt_au = Rpt/BOHRRADIUS;
    
     double pot_au = dm_au*dm_au*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2])/(Rpt_au*Rpt_au*Rpt_au);
-    return (pot_au*AuToKelvin);
+    double potreturn = pot_au*AuToKelvin;
+#ifdef POTZERO
+	potreturn = 0;
+#endif
+    return potreturn;
 }
 #endif

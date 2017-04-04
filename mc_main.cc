@@ -104,13 +104,17 @@ fstream _fentropy;
 #ifndef ENTANGLEMENT
 void SaveEnergy    (const char [],double,long int); // block average
 void SaveSumEnergy (double,double);                 // accumulated average
-void SaveInstantEnergy (double);                 // accumulated average
 #endif
+
+#ifdef INSTANT
+void SaveInstantAngularDOF(); 
+void SaveInstantEnergy ();                 // accumulated average
+#endif
+
 #ifdef PIGSROTORS
 #ifndef ENTANGLEMENT
 void SaveAngularDOF(const char [],double,long int);
 void SaveSumAngularDOF(double,double);              // accumulated average
-void SaveInstantAngularDOF(double); 
 #else
 void SaveTrReducedDens(const char [], double , long int );
 void SaveSumTrReducedDens(double , double);
@@ -637,6 +641,12 @@ int main(int argc, char *argv[])
         	} 
        		else
    			PIMCPass(type,time);
+#ifdef INSTANT
+#ifdef IOWRITE
+            SaveInstantEnergy (); 
+#endif
+		    SaveInstantAngularDOF();
+#endif
 
    			if (blockCount>NumberOfEQBlocks)        // skip equilibration steps
    			{
@@ -695,14 +705,12 @@ int main(int argc, char *argv[])
                		sumsCount += 1.0;                 
 #ifndef ENTANGLEMENT
                		SaveSumEnergy (totalCount,sumsCount);
-                    SaveInstantEnergy (sumsCount); 
 #else
                     SaveSumTrReducedDens(totalCount, sumsCount);
 #endif
 #ifdef PIGSROTORSIO
 #ifndef ENTANGLEMENT
 					SaveSumAngularDOF(totalCount, sumsCount);
-					SaveInstantAngularDOF(sumsCount);
 #endif
 #endif
             	}
@@ -904,6 +912,7 @@ void MCGetAverage(void)
 	_btheta          += stheta; 
 	_theta_total     += stheta;
 #ifdef DIPOLE
+//particle 1
 	_bcostheta1      += scostheta[1]; 
 	_costheta_total1 += scostheta[1];
 
@@ -911,7 +920,7 @@ void MCGetAverage(void)
 	_btheta1         += stheta1; 
 	_theta_total1    += stheta1;
 
-//particle 1
+//particle 2
 	_bcostheta2      += scostheta[2]; 
 	_costheta_total2 += scostheta[2];
 
@@ -919,13 +928,6 @@ void MCGetAverage(void)
 	_btheta2         += stheta2; 
 	_theta_total2    += stheta2;
 
-//particle 2
-	_bcostheta3      += scostheta[3]; 
-	_costheta_total3 += scostheta[3];
-
-	double stheta3    = acos(scostheta[3]);
-	_btheta3         += stheta3; 
-	_theta_total3    += stheta3;
 #endif
     delete[] scostheta;
     
@@ -971,7 +973,7 @@ void MCGetAverage(void)
        GetRCF(); 
 	}
 
-#ifndef IOWRITE
+#ifdef IOWRITE
 // accumulate terms for Cv
    double sCv;
    sCv = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
@@ -1334,37 +1336,37 @@ void SaveSumAngularDOF(double acount, double numb)
     _fang << endl;
 }
 
-void SaveInstantAngularDOF(double numb)
+void SaveInstantAngularDOF()
 {
     const char *_proc_=__func__;
 
     double* scostheta;
+
+#ifdef ENTANGLEMENT
+    scostheta = GetCosThetaEntanglement();
+	for (int i = 0; i < (2*NumbAtoms*NDIM); i++)
+	{
+    	_fangins << setw(IO_WIDTH) << scostheta[i] << BLANK;
+	}
+#else
     scostheta = GetCosTheta();
-    double stheta     = acos(scostheta[0]);
 
-    _fangins << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fangins << setw(IO_WIDTH) << scostheta[0] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta << BLANK;
-#ifdef DIPOLE
-    double stheta1    = acos(scostheta[1]);
-    _fangins << setw(IO_WIDTH) << scostheta[1] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta1 << BLANK;
-
 //particle 1
-	double stheta2    = acos(scostheta[2]);
-    _fangins << setw(IO_WIDTH) << scostheta[2] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta2 << BLANK;
+    _fangins << setw(IO_WIDTH) << scostheta[1] << BLANK;
 //particle 2
-	double stheta3    = acos(scostheta[3]);
-    _fangins << setw(IO_WIDTH) << scostheta[3] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta3 << BLANK;
+    _fangins << setw(IO_WIDTH) << scostheta[2] << BLANK;
+
+    double sphi = GetPhi();
+    _fangins << setw(IO_WIDTH) << sphi << BLANK;
 #endif
+
     _fangins << endl;
     delete[] scostheta;
 }
 #endif
 
-void SaveInstantEnergy(double numb)
+void SaveInstantEnergy()
 {
     const char *_proc_=__func__;
 
@@ -1381,7 +1383,6 @@ void SaveInstantEnergy(double numb)
     stotalinst = 0.0;
 #endif
     }
-    _fengins << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fengins << setw(IO_WIDTH) << spotinst << BLANK;
     _fengins << setw(IO_WIDTH) << stotalinst << BLANK;
     _fengins << setw(IO_WIDTH) << srotinst << BLANK;

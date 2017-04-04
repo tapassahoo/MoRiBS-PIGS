@@ -809,9 +809,14 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    double cost = MCAngles[CTH][t1];
    double phi  = MCAngles[PHI][t1];
 
+#ifdef STEPCOST
+   double stepcost = 0.5;
 // cost += (step*(rnd1()-0.5));
 // phi  += (step*(rnd1()-0.5));
+   cost += (stepcost*(rand1-0.5));
+#else
    cost += (step*(rand1-0.5));
+#endif
    phi  += (step*(rand2-0.5));
 
    if (cost >  1.0)
