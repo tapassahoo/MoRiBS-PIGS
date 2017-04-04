@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from itertools import cycle
 import itertools
 from scipy.optimize import curve_fit
+from subprocess import call
 
 #===============================================================================
 #                                                                              |
@@ -17,13 +18,14 @@ molecule            = "HF"                                                      
 #molecule            = "H2"                                                         #change param2
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks          = 20000                                                        #change param3
-numbmolecules       = 2                                                            #change param4
-numbbeads           = 129
-nrange              = 1                                                            #change param5
-
 Rpt                 = 10.0                                                         #change param6
 dipolemoment        = 1.86                                                         #change param7
+nrange              = 51                                                            #change param5
+
+numbblocks          = 10000                                                        #change param3
+numbmolecules       = 2                                                            #change param4
+numbbeads           = 129
+
 beta                = 0.256                                                        #change param7
 tau                 = 0.002
 
@@ -40,7 +42,7 @@ var3                = "tau"
 
 num1                = 2                                                            #change param12
 trunc 				= 10000                                                            #change param13
-trunc1              = 20
+trunc1              = 40
 font=18
 
 if Rpt == 10.0:
@@ -61,10 +63,10 @@ if Rpt == 10.0:
 			yminAng = 0.4
 			ymaxAng = 1.0
 		if numbmolecules == 2:
-			Avg_total_energy      = -3.46462
-			Avg_potential_energy  = -6.72346
-			Avg_rotational_energy = 3.335816437
-			Avg_costheta          = 0.00637
+			Avg_total_energy      = -3.424708242
+			Avg_potential_energy  = -6.760526705
+			Avg_rotational_energy = 3.335818463
+			Avg_costheta          = 0.003822145993
 			xmin = 1.9
 			xmax = 10.1
 			yminTot = -6000.0
@@ -72,17 +74,25 @@ if Rpt == 10.0:
 			yminPot = yminTot
 			ymaxPot = ymaxTot
 			yminRot = -1.0
-			ymaxRot = 300.0
+			ymaxRot = 30.0
 			yminAng = 0.0
 			ymaxAng = 1.0
+if  ((var1 == 'tau') or (var1 == 'beta')): 
+	if var1 == "tau":
+		value = beta
+	else:
+		value = tau
+	Figfile      = "Figure-Energy-vs-"+var1+"-fixed-"
+	Figfile     += var2+str(value)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+	Figfile     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".png"
 
 
 if Rpt == 5.0:
 	if ((var1 == 'tau') or (var1 == 'beta') and (numbmolecules == 2) and (Rpt == 5.0) and (dipolemoment == 1.86)):
-		Avg_total_energy      = -260.9482959
-		Avg_potential_energy  = -322.9182172 
-		Avg_rotational_energy = 61.96992130
-		Avg_costheta          = 0.8054300738
+		Avg_total_energy      = -152.6933564
+		Avg_potential_energy  = -241.4271184
+		Avg_rotational_energy = 88.73376201
+		Avg_costheta          = 0.3862223062
 		xmin = 1.9
 		xmax = 10.1
 		yminTot = -6000.0
@@ -267,7 +277,7 @@ def plotenergylabel(num1,num2,Avg_energy,xmin,xmax,ymin,ymax,xlabel1,ylabel1,fon
 		plt.axhline(y=Avg_energy, color='black', lw = 3.0, linestyle='--', label = 'Exact')
 
 	plt.grid(True)
-	plt.legend(loc='upper right')
+#	plt.legend(loc='upper right')
 
 
 	if xlabel1 == "Rpt":
@@ -285,6 +295,7 @@ def plotenergylabel(num1,num2,Avg_energy,xmin,xmax,ymin,ymax,xlabel1,ylabel1,fon
 		plt.ylabel(r'$\langle V_{0} \rangle (K^{-1})$', fontsize = font)
 	if ylabel1 == "RotationalEnergy":
 		plt.ylabel(r'$\langle T_{0} \rangle (K^{-1})$', fontsize = font)
+		plt.ylim(-1,20)
 	if ylabel1 == "RelativeAngle":
 		plt.ylabel(r'$\langle u_{1} \cdot u_{2} \rangle$', fontsize = font)
 
@@ -385,7 +396,10 @@ plotenergylabel(num1,num2,Avg_costheta,xmin,xmax,yminAng,ymaxAng,xlabel,ylabel,f
 
 #===============================================================================
 
-plt.subplots_adjust(top=0.90, bottom=0.15, left=0.15, right=0.98, hspace=0.5,
+plt.subplots_adjust(top=0.90, bottom=0.20, left=0.15, right=0.98, hspace=0.6,
                     wspace=0.5)
-#plt.savefig('myfig')
+plt.legend(loc=3, bbox_to_anchor=(-0.75,-0.70), ncol=3, borderaxespad=0.)
+
+fig.savefig(Figfile, dpi=100, format='png')
+#call(["convert", 'image_output.png', 'image_output.pdf'])
 plt.show()

@@ -108,7 +108,7 @@ def outputstr_energy(numbbeads,tau,dest_dir,trunc):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], skip_header=5000, max_rows=trunc)
+	col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], skip_header=000, max_rows=trunc)
 	print len(col_tot)
 	
 	mean_pot      = np.mean(col_pot)
@@ -128,7 +128,7 @@ def outputstr_angle(numbbeads,tau,dest_dir,trunc):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=5000,max_rows=trunc)
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=1000,max_rows=trunc)
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_theta     = np.mean(col_theta)
@@ -148,7 +148,7 @@ def outputstr_angle1(numbbeads,tau,dest_dir,trunc):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,5,6,7,8], skip_header=5000, max_rows=trunc)
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,5,6,7,8], skip_header=1000, max_rows=trunc)
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_theta     = np.mean(col_theta)

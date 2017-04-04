@@ -13,29 +13,6 @@ import matplotlib.pyplot as plt
 from os import system
 from sys import argv
 
-def plothistogram(srcfile, numbmolecules, molecule, dipolemoment, beta, tau, Rpt):
-	col_costheta1, col_theta1 = loadtxt(srcfile, unpack=True, usecols=[1,3])
-#	col_costheta2, col_theta2 = loadtxt(srcfile, unpack=True, usecols=[7,8])
-
-	hist1, bins1 = np.histogram(col_costheta1,nbins,density=True)
-#	hist2, bins2 = np.histogram(col_costheta2,nbins,density=True)
-	print len(hist1), len(bins1)
-	print np.sum(hist1)
-	print np.sum(hist1*np.diff(bins1))
-
-	plt.hist( col_costheta1, bins='auto', normed = 1)  # plt.hist passes it's arguments to np.histogram
-#	plt.hist( col_costheta2, bins='auto', normed = 1)  # plt.hist passes it's arguments to np.histogram
-	plt.grid(True)
-
-
-	#plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$'+' R = '+str(Rpt)+r'$\AA$', fontsize =10)
-	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$'+' R = '+str(Rpt)+r'$\AA$', fontsize =10)
-	plt.xlabel(r'$\cos(\theta)$', fontsize = 20)
-	plt.ylabel('Density', fontsize = 20)
-	plt.xlim(-1.01,1.01)
-	plt.grid(True)
-	plt.show()
-
 #===============================================================================
 #                                                                              |
 #   Some parameters for submission of jobs and analysis outputs.               |
@@ -63,6 +40,26 @@ src_path            = os.getcwd()
 dest_path           = "/work/tapas/linear_rotors/"                                 #change param13
 
 nbins               = 100          #change
+
+
+def plothistogram(srcfile, numbmolecules, molecule, dipolemoment, beta, tau, Rpt):
+	col_costheta1, col_theta1 = loadtxt(srcfile, unpack=True, usecols=[0,1,2,3])
+
+	hist1, bins1 = np.histogram(col_costheta1,nbins,density=True)
+	print len(hist1), len(bins1)
+	print np.sum(hist1)
+	print np.sum(hist1*np.diff(bins1))
+
+	plt.hist( col_costheta1, bins='auto', normed = 1)  # plt.hist passes it's arguments to np.histogram
+	plt.grid(True)
+
+
+	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$'+' R = '+str(Rpt)+r'$\AA$', fontsize =10)
+	plt.xlabel(r'$\cos(\theta)$', fontsize = 20)
+	plt.ylabel('Density', fontsize = 20)
+	plt.xlim(-1.01,1.01)
+	plt.grid(True)
+	plt.show()
 
 # Loop over jobs
 for i in range(nrange):                                                  #change param13
