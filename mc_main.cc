@@ -30,8 +30,13 @@ void MCWormAverageReset(void);
 
 double avergCount;   // # of calls of get_estim inside a block
 double totalCount;   // sum avergCount   
-         
+
+#ifdef ENTANGLEMENT12
+void PIMCPass1(int,int);
+void PIMCPass2(int,int);
+#else
 void PIMCPass(int,int);
+#endif
 
 void MCGetAverage(void);
 
@@ -640,7 +645,14 @@ int main(int argc, char *argv[])
            		}
         	} 
        		else
-   			PIMCPass(type,time);
+			{
+#ifdef ENTANGLEMENT12
+   			    PIMCPass1(type,time);
+   			    PIMCPass2(type,time);
+#else
+   			    PIMCPass(type,time);
+#endif
+            }
 #ifdef INSTANT
 #ifdef IOWRITE
             SaveInstantEnergy (); 
@@ -821,6 +833,36 @@ void PIMCPass(int type,int time)
    		if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
      		MCRotations3D(type);
 	}
+#endif
+}
+
+void PIMCPass1(int type,int time)
+{
+#ifdef LINEARROTORS
+    if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
+        MCRotationsMove(type);
+#endif
+#ifdef MOLECULEINCAGE
+    if (MOLECINCAGE)
+    {
+        if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
+            MCRotations3D(type);
+    }
+#endif
+}
+
+void PIMCPass2(int type,int time)
+{
+#ifdef LINEARROTORS
+    if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4) 
+        MCRotationsMove(type);
+#endif
+#ifdef MOLECULEINCAGE
+    if (MOLECINCAGE)
+    {
+        if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2) 
+            MCRotations3D(type);
+    }
 #endif
 }
 
@@ -1344,10 +1386,21 @@ void SaveInstantAngularDOF()
 
 #ifdef ENTANGLEMENT
     scostheta = GetCosThetaEntanglement();
+    double* sphi;
+    sphi = GetPhiEntanglement();
 	for (int i = 0; i < (2*NumbAtoms*NDIM); i++)
 	{
     	_fangins << setw(IO_WIDTH) << scostheta[i] << BLANK;
 	}
+	for (int i = 0; i < (2*NumbAtoms); i++)
+	{
+    	_fangins << setw(IO_WIDTH) << sphi[i] << BLANK;
+	}
+    delete[] sphi;
+    double snm        = GetEstimNM();
+    double sdm        = GetEstimDM();
+    _fangins << setw(IO_WIDTH) << snm << BLANK;
+    _fangins << setw(IO_WIDTH) << sdm << BLANK;
 #else
     scostheta = GetCosTheta();
 

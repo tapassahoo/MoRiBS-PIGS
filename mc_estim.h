@@ -31,6 +31,7 @@ double GetPotEnergy_Entanglement(int atom0, int atom1);
 double GetEstimNM(void);
 double GetEstimDM(void);
 double *GetCosThetaEntanglement();
+double *GetPhiEntanglement();
 #endif
 
 double GetConfPoten_Densities(void); // HA test

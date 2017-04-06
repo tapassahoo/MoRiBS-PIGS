@@ -750,7 +750,7 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
    RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
    double rand1,rand2,rand3,rand4;
 
-   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+//   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
    for (int itrot=0;itrot<NumbRotTimes;itrot=itrot+2)
    {
       for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
@@ -771,7 +771,7 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
    MCRotChunkTot = 0;
    MCRotChunkAcp = 0;
 
-   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+//   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
    for (int itrot=1;itrot<NumbRotTimes;itrot=itrot+2)
    {
       for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
@@ -809,14 +809,9 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    double cost = MCAngles[CTH][t1];
    double phi  = MCAngles[PHI][t1];
 
-#ifdef STEPCOST
-   double stepcost = 0.5;
 // cost += (step*(rnd1()-0.5));
 // phi  += (step*(rnd1()-0.5));
-   cost += (stepcost*(rand1-0.5));
-#else
    cost += (step*(rand1-0.5));
-#endif
    phi  += (step*(rand2-0.5));
 
    if (cost >  1.0)
@@ -883,13 +878,13 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 #ifdef ENTANGLEMENT
         if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
         {
-            if (t1 == ((NumbRotTimes - 1)/2))
-            {
-                dens_old = SRotDens(p1,type);
-            }
             if (t1 == (((NumbRotTimes - 1)/2) - 1))
             {
                 dens_old = SRotDens(p0,type);
+            }
+            if (t1 == ((NumbRotTimes - 1)/2))
+            {
+                dens_old = SRotDens(p1,type);
             }
         }
 #endif
@@ -928,8 +923,8 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 
    for (int id=0;id<NDIM;id++)
    {
-       p0 += (MCCosine [id][t0]*newcoords[id][t1]);
-       p1 += (newcoords[id][t1]*MCCosine [id][t2]);
+       p0 += (MCCosine[id][t0]*newcoords[id][t1]);
+       p1 += (newcoords[id][t1]*MCCosine[id][t2]);
    }
 
    double dens_new;
@@ -955,13 +950,13 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 #ifdef ENTANGLEMENT
         if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
         {
-            if (t1 == ((NumbRotTimes - 1)/2))
-            {
-                dens_new = SRotDens(p1,type);
-            }
             if (t1 == (((NumbRotTimes - 1)/2) - 1))
             {
                 dens_new = SRotDens(p0,type);
+            }
+            if (t1 == ((NumbRotTimes - 1)/2))
+            {
+                dens_new = SRotDens(p1,type);
             }
         }
 #endif

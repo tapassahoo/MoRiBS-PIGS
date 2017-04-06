@@ -1400,6 +1400,27 @@ double *GetCosTheta()
 }
 
 #ifdef INSTANT
+double *GetPhiEntanglement()
+{
+    const char *_proc_=__func__; 
+
+    double *phiInstant = new double [2*NumbAtoms];
+	int BeadMminus1 = (((NumbRotTimes - 1)/2) - 1); 
+    int BeadM       = ((NumbRotTimes - 1)/2);
+
+	for (int it = BeadMminus1; it <= BeadM; it++) 
+	{
+		for (int atom = 0; atom < NumbAtoms; atom++)
+   		{
+			int kk = atom + (it - BeadMminus1)*NumbAtoms;
+    		int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
+       		int tt          = offset + it;
+       		phiInstant[kk] = MCAngles[PHI][tt];
+		}
+    }
+    return phiInstant;
+}
+
 double *GetCosThetaEntanglement()
 {
     const char *_proc_=__func__; 
@@ -1513,15 +1534,13 @@ double GetPotEnergy_Entanglement(int atom0, int atom1)
     int offset1 = NumbRotTimes*atom1;
     int t0      = offset0 + it;
     int t1      = offset1 + it;
-    int tm0     = offset0 + it/RotRatio;
-    int tm1     = offset1 + it/RotRatio;
 
     double uvec1[NDIM],uvec2[NDIM];
     double spot;
     for (int id=0;id<NDIM;id++)
     {
-        uvec1[id] = MCCosine[id][tm0];
-        uvec2[id] = MCCosine[id][tm1];
+        uvec1[id] = MCCosine[id][t0];
+        uvec2[id] = MCCosine[id][t1];
     }
     spot = PotFunc(Distance, uvec1, uvec2);
     return spot;
