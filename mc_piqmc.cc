@@ -750,7 +750,7 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
    RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
    double rand1,rand2,rand3,rand4;
 
-//   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
    for (int itrot=0;itrot<NumbRotTimes;itrot=itrot+2)
    {
       for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
@@ -771,7 +771,7 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
    MCRotChunkTot = 0;
    MCRotChunkAcp = 0;
 
-//   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+   #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
    for (int itrot=1;itrot<NumbRotTimes;itrot=itrot+2)
    {
       for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
