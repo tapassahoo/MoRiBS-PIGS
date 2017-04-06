@@ -3798,7 +3798,7 @@ double PotFunc(double Rpt, double *uvec1, double *uvec2)
     double pot_au = dm_au*dm_au*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2])/(Rpt_au*Rpt_au*Rpt_au);
     double potreturn = pot_au*AuToKelvin;
 #ifdef POTZERO
-	potreturn = 0;
+	potreturn = 0.0;
 #endif
     return potreturn;
 }

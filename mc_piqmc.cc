@@ -991,7 +991,9 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 			rd = dens_new/dens_old;
 		else rd = 1.0;
 
+#ifndef POTZERO
 		rd *= exp(- MCTau*(pot_new-pot_old));
+#endif
 	}
 	else if(RotDenType == 1)
 	{
