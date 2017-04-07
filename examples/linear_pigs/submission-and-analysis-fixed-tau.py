@@ -20,7 +20,7 @@ molecule            = "HF"                                                      
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 10                                                        #change param3
+numbblocks	        = 1000                                                        #change param3
 numbmolecules       = 2                                                            #change param4
 tau                 = 0.002                                                        #change param5
 
@@ -31,12 +31,12 @@ skip                = 10
 Type                = "Entanglement"
 #Type                = "PIGS"
 status              = "submission"                                                 #change param8
-#status              = "analysis"                                                   #change param8
+status              = "analysis"                                                   #change param8
 status_rhomat       = "Yes"                                                        #change param9 
-RUNDIR              = "work"
-#RUNDIR              = "scratch"
+#RUNDIR              = "work"
+RUNDIR              = "scratch"
 
-nrange              = 51 #31  			  						                       #change param10
+nrange              = 21 #31  			  						                       #change param10
 
 if (Type == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
@@ -112,7 +112,7 @@ if status == "analysis":
 		fanalyze_angularDOF1.write(support.fmt_angle1(status,var))
 
 # Loop over jobs
-for i in range(49,nrange):                                                  #change param19
+for i in range(nrange):                                                  #change param19
 
 	'''
 	if (i>0):

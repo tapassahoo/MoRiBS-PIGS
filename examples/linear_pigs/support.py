@@ -272,6 +272,7 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 	'''
 	This function creats jobstring for #PBS script
 	'''
+	thread = 1
 	job_name       = "job_"+str(file_name)+str(value)
 	walltime       = "200:00:00"
 	processors     = "nodes=1:ppn="+str(thread)
@@ -301,8 +302,8 @@ mv %s %s
 mv %s %s 
 cd %s
 cp %s qmc.input
-cp /home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc %s
-./pimc
+cp /home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc2 %s
+./pimc2
 mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, input_file, run_dir, run_dir)
 	print job_string

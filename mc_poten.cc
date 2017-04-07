@@ -570,6 +570,13 @@ void init_rotdens(int type)
 
 double SRotDens(double gamma,int type)   // rotational density matrix 
 {
+   double rdens;
+
+#ifdef DENSONE
+	rdens = 1.0;
+	return rdens;
+#endif
+
    int size = _rotsize[type];
 
    if (gamma > _rotgrid[type][size-1])   // replace with extrapolation ?  
@@ -590,11 +597,7 @@ double SRotDens(double gamma,int type)   // rotational density matrix
 #endif
    }
 
-   double rdens;
    splint(_rotgrid[type],_rotdens[type],_rotdens_drv2[type],size,gamma,rdens);
-#ifdef DENSONE
-	rdens = 1.0;
-#endif
    return rdens;
 }
 

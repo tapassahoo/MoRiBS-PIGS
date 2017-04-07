@@ -31,12 +31,7 @@ void MCWormAverageReset(void);
 double avergCount;   // # of calls of get_estim inside a block
 double totalCount;   // sum avergCount   
 
-#ifdef ENTANGLEMENT12
-void PIMCPass1(int,int);
-void PIMCPass2(int,int);
-#else
 void PIMCPass(int,int);
-#endif
 
 void MCGetAverage(void);
 
@@ -645,14 +640,7 @@ int main(int argc, char *argv[])
            		}
         	} 
        		else
-			{
-#ifdef ENTANGLEMENT12
-   			    PIMCPass1(type,time);
-   			    PIMCPass2(type,time);
-#else
-   			    PIMCPass(type,time);
-#endif
-            }
+		    PIMCPass(type,time);
 #ifdef INSTANT
 #ifdef IOWRITE
             SaveInstantEnergy (); 
