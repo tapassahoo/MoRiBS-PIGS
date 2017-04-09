@@ -104,11 +104,11 @@ def inputstr(numbbeads,tau,temperature):
 	output ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
 	return output
 
-def outputstr_energy(numbbeads,tau,dest_dir,trunc):
+def outputstr_energy(numbbeads,tau,dest_dir,trunc,preskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], skip_header=000, max_rows=trunc)
+	col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], skip_header=preskip, max_rows=trunc)
 	print len(col_tot)
 	
 	mean_pot      = np.mean(col_pot)
@@ -124,11 +124,11 @@ def outputstr_energy(numbbeads,tau,dest_dir,trunc):
 	output  += "\n"
 	return output
 
-def outputstr_angle(numbbeads,tau,dest_dir,trunc):
+def outputstr_angle(numbbeads,tau,dest_dir,trunc,preskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=1000,max_rows=trunc)
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip,max_rows=trunc)
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_theta     = np.mean(col_theta)
@@ -144,11 +144,11 @@ def outputstr_angle(numbbeads,tau,dest_dir,trunc):
 	output  += "\n"
 	return output
 
-def outputstr_angle1(numbbeads,tau,dest_dir,trunc):
+def outputstr_angle1(numbbeads,tau,dest_dir,trunc,preskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,5,6,7,8], skip_header=1000, max_rows=trunc)
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,5,6,7,8], skip_header=preskip, max_rows=trunc)
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_theta     = np.mean(col_theta)
@@ -228,7 +228,7 @@ def fmt_angle1(status,variable):
 
 
 
-def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,distance,level,step,dipolemoment):
+def modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,dipolemoment):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
@@ -240,8 +240,13 @@ def modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,dis
 	replace("molecule_input", str(molecule_rot), "qmc6.input", "qmc7.input")
 	replace("level_input", str(level), "qmc7.input", "qmc8.input")
 	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
-	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc.input")
+	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc10.input")
+	replace("numbpass_input", str(numbpass), "qmc10.input", "qmc11.input")
+	mcskip = numbbeads*numbpass
+	replace("mskip_input", str(mcskip), "qmc11.input", "qmc.input")
 	call(["rm", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input", "qmc9.input"])
+	call(["rm", "qmc10.input"])
+	call(["rm", "qmc11.input"])
 
 
 def rotmat(molecule,temperature,numbbeads):
@@ -272,7 +277,6 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 	'''
 	This function creats jobstring for #PBS script
 	'''
-	thread = 1
 	job_name       = "job_"+str(file_name)+str(value)
 	walltime       = "200:00:00"
 	processors     = "nodes=1:ppn="+str(thread)
@@ -302,8 +306,8 @@ mv %s %s
 mv %s %s 
 cd %s
 cp %s qmc.input
-cp /home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc2 %s
-./pimc2
+cp /home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc %s
+./pimc
 mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, input_file, run_dir, run_dir)
 	print job_string

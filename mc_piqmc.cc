@@ -855,14 +855,14 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 
    double dens_old;
    double rho1,rho2,erot;
-// If t1 = 0 (the first bead), dens_new = SRotDens(p1,type)
-// if t1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
+// If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
+// if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
 	if(RotDenType == 0)
 	{
 #ifdef PIGSROTORS
-        if (t1 == 0 || t1 == (NumbRotTimes - 1))
+        if (it1 == 0 || it1 == (NumbRotTimes - 1))
         {
-            if (t1 == 0)
+            if (it1 == 0)
             {
                 dens_old = SRotDens(p1, type);
             }
@@ -878,11 +878,11 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 #ifdef ENTANGLEMENT
         if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
         {
-            if (t1 == (((NumbRotTimes - 1)/2) - 1))
+            if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
                 dens_old = SRotDens(p0,type);
             }
-            if (t1 == ((NumbRotTimes - 1)/2))
+            if (it1 == ((NumbRotTimes - 1)/2))
             {
                 dens_old = SRotDens(p1,type);
             }
@@ -932,9 +932,9 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 	if(RotDenType == 0)
 	{
 #ifdef PIGSROTORS
-        if (t1 == 0 || t1 == (NumbRotTimes - 1))
+        if (it1 == 0 || it1 == (NumbRotTimes - 1))
         {
-            if (t1 == 0)
+            if (it1 == 0)
             {
                 dens_new = SRotDens(p1, type);
             }
@@ -950,11 +950,11 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 #ifdef ENTANGLEMENT
         if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
         {
-            if (t1 == (((NumbRotTimes - 1)/2) - 1))
+            if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
                 dens_new = SRotDens(p0,type);
             }
-            if (t1 == ((NumbRotTimes - 1)/2))
+            if (it1 == ((NumbRotTimes - 1)/2))
             {
                 dens_new = SRotDens(p1,type);
             }

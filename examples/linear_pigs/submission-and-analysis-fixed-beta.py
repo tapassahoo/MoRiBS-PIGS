@@ -23,22 +23,23 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 5000                                                        #change param2
+numbblocks	        = 10000                                                        #change param2
 numbmolecules       = 2                                                           #change param3
+numbpass            = 100
 beta     	        = 0.2                                                         #change param4
 
 Rpt                 = 10.0                                                        #change param7
 dipolemoment        = 1.86
-skip                = 10
+skip                = 5
 
-Type                = "Entanglement"
-#Type                = "PIGS"
+#Type                = "Entanglement"
+Type                = "PIGS"
 
 status              = "submission"                                                 #change param9
 status              = "analysis"                                                   #change param10
 status_rhomat       = "Yes"                                                        #change param10 
-RUNDIR              = "work"
-#RUNDIR              = "scratch"
+#RUNDIR              = "work"
+RUNDIR              = "scratch"
 
 nrange              = 101 		  						                           #change param12
 
@@ -68,7 +69,8 @@ if status   == "submission":
 
 temperature         = 1.0/beta   
 
-trunc               = 5000
+trunc               = numbblocks
+preskip             = 0
 
 #==================================== MCStep ===================================# 
 if (molecule_rot == "H2"):
@@ -77,18 +79,7 @@ if (molecule_rot == "H2"):
 	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
 
 if (molecule_rot == "HF"):
-	#step           = [0.7,1.4,2.3,4.2,7.8,5.0,2.5,1.5,0.2]  # 2 HF beta 0.512 K-1 #change param6 for 10 Angstrom
-	#step           = [0.7,3.0,5.0,8.5,5.0,3.0,1.6,1.0,0.2]  # 2 HF beta 0.256 K-1 #change param6 for 10 Angstrom
-	#step           = [0.7,7.0,9.5,5.5,3.0,1.5,1.0,0.7,0.2]  # 2 HF beta 0.128 K-1 #change param6 for 10 Angstrom
-	step           = [0.7,1.0,1.0,1.0,1.0,0.7,0.5,0.3,0.2]  # 2 HF beta 0.032 K-1 #change param6 for 10 Angstrom
-	#step            = [0.7, 15.0, 13.0, 8.0, 2.5,1.5,1.0,0.7,0.2]  # 2 HF beta 0.128 K-1 #change param6  for 10.05 Angstrom   DM 0.45
-	#step            = [0.7, 10.0, 10.0, 6.0, 5.0, 2.7, 1.8, 1.2, 0.2]  # 2 HF beta 0.256 K-1 #change param6  for 10.05 Angstrom DM 0.45 
-	#step            = [3.0,1.0,1.5,3.0,3.0,3.0,2.3,1.5,0.2] # 1 HF beta 0.512 K-1 #change param6 for 10 Angstrom
-	#step            = [3.0,2.0,3.0,3.0,3.0,2.5,1.5,1.1,2.0] # 1 HF beta 0.256 K-1 #change param6 for 10 Angstrom
-	#step            = [3.0,3.0,3.0,3.0,3.0,1.8,1.1,0.8,2.0] # 1 HF beta 0.128 K-1 Rpt = 10.05 #change param6
-	#step            = [1.0, 0.03, 0.05, 0.08, 0.17, 0.25, 0.3, 0.3, 2.0] # 1 HF beta 0.128 K-1 Rpt = 2.0 #change param6
-	#step            = [1.0, 0.5, 0.8, 1.0, 1.2, 1.2, 0.85, 0.6, 2.0] # 1 HF beta 0.128 K-1 Rpt = 5.0 #change param6
-	#step            = [3.0,4.0,4.5,4.0,3.0,1.8,1.1,0.8,2.0] # 1 HF beta 0.128 K-1 Rpt = 10.0 #change param6
+	step           = [0.7,1.5,1.5,1.5,1.5,1.5,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.0,1.0,1.0,1.0,1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom
 
 #===============================================================================
 #                                                                              |
@@ -180,7 +171,7 @@ for i in range(nrange):                                                  #change
 			level         = support.levels(numbbeads)
 			istep         = i/skip
 			step1         = step[istep]
-			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
+			support.modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
 			if status_rhomat == "Yes":
 				support.rotmat(molecule_rot,temperature,numbbeads)
 	
@@ -212,11 +203,11 @@ for i in range(nrange):                                                  #change
 			variable          = tau
 			try:
 				if (Type == "Entanglement"):
-					fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc))
+					fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc,preskip))
 				else:
-					fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc))
-					fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc))
-					fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc))
+					fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc,preskip))
+					fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc,preskip))
+					fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc,preskip))
 			except:
 				pass
 

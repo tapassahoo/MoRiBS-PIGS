@@ -1399,7 +1399,6 @@ double *GetCosTheta()
     return angle;
 }
 
-#ifdef INSTANT
 double *GetPhiEntanglement()
 {
     const char *_proc_=__func__; 
@@ -1445,7 +1444,6 @@ double *GetCosThetaEntanglement()
     }
     return cosTheta;
 }
-#endif
 
 #ifdef LINEARROTORS
 double GetPhi(void)

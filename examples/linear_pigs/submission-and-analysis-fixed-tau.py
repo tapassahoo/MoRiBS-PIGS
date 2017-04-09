@@ -20,27 +20,28 @@ molecule            = "HF"                                                      
 #molecule            = "H2"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-numbblocks	        = 1000                                                        #change param3
+numbblocks	        = 10000                                                        #change param3
 numbmolecules       = 2                                                            #change param4
+numbpass            = 100
+
 tau                 = 0.002                                                        #change param5
 
 Rpt                 = 10.0                                                         #change param6
 dipolemoment        = 1.86
-skip                = 10
+skip                = 5
 
-Type                = "Entanglement"
-#Type                = "PIGS"
+#Type                = "Entanglement"
+Type                = "PIGS"
 status              = "submission"                                                 #change param8
 status              = "analysis"                                                   #change param8
 status_rhomat       = "Yes"                                                        #change param9 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
 
-nrange              = 21 #31  			  						                       #change param10
+nrange              = 101 #31  			  						                       #change param10
 
 if (Type == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
-	#file1_name     = "FintiteTRpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
 	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 if (Type == "Entanglement"):
@@ -60,10 +61,11 @@ run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                
 
 if status   == "submission":
 	if RUNDIR == "scratch":
-		dest_path       = "/scratch/tapas/linear_rotors/" 
-		final_path      = "/work/tapas/linear_rotors/"                                 #change param17
+		dest_path   = "/scratch/tapas/linear_rotors/" 
+		final_path  = "/work/tapas/linear_rotors/"                                 #change param17
 
-trunc               = 5000
+trunc               = numbblocks
+preskip             = 000
 
 
 #===============================================================================
@@ -82,14 +84,13 @@ if status == "submission":
 #===============================================================================
 if status == "analysis":
 	if (Type == "PIGS"):
-		file_output      = "newEnergy-vs-"+str(var)+"-fixed-"
-		#file_output     = "FiniteTEnergy-vs-"+str(var)+"-fixed-"
+		file_output      = "Energy-vs-"+str(var)+"-fixed-"
 		file_output     += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-		file_output_angularDOF  = "newAngularDOF-vs-"+str(var)+"-fixed-"
+		file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
 		file_output_angularDOF += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-		file_output_angularDOF1  = "newAngularDOF-vs-"+str(var)+"-fixed-"
+		file_output_angularDOF1  = "AngularDOF-vs-"+str(var)+"-fixed-"
 		file_output_angularDOF1 += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
 		call(["rm", file_output, file_output_angularDOF,file_output_angularDOF1])
@@ -158,7 +159,7 @@ for i in range(nrange):                                                  #change
 			argument1     = Rpt
 			level         = support.levels(numbbeads)
 			step1         = 1.0;#step[jj]
-			support.modify_input(temperature,numbbeads,numbblocks,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
+			support.modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
 
 			if status_rhomat == "Yes":
 				support.rotmat(molecule_rot,temperature,numbbeads)
@@ -192,11 +193,11 @@ for i in range(nrange):                                                  #change
 			variable          = beta
 			try:
 				if (Type == "Entanglement"):
-					fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc))
+					fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc,preskip))
 				else:
-					fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc))
-					fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc))
-					fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc))
+					fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc,preskip))
+					fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc,preskip))
+					fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc,preskip))
 			except:
 				pass
 
@@ -206,10 +207,10 @@ if status == "analysis":
 		fanalyze_angularDOF.close()
 		fanalyze_angularDOF1.close()
 	call(["cat",file_output])
-	'''
 	print
 	print
 	call(["cat",file_output_angularDOF])
+	'''
 	print
 	print
 	call(["cat",file_output_angularDOF1])

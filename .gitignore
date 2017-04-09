@@ -23,7 +23,6 @@ test-hfhf.f
 /examples/linear_pigs/*.input
 /examples/linear_pigs/*.rot
 /examples/linear_pigs/*.out
-/examples/linear_pigs/pimc*
 /examples/linear_pigs/*.dof
 /examples/linear_pigs/*.eng
 /examples/linear_pigs/*.rden
