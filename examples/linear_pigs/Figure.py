@@ -22,11 +22,11 @@ Rpt                 = 10.0                                                      
 dipolemoment        = 1.86                                                         #change param7
 nrange              = 51                                                            #change param5
 
-numbblocks          = 10000                                                        #change param3
+numbblocks          = 40000                                                        #change param3
 numbmolecules       = 2                                                            #change param4
 numbbeads           = 129
 
-beta                = 0.256                                                        #change param7
+beta                = 0.2                                                        #change param7
 tau                 = 0.002
 
 Avg_total_energy    = -11.823                                                      #change param8
@@ -36,13 +36,13 @@ Avg_potential_energy= -0.0230796                                                
 Avg_rotational_energy = 0.0115393
 Avg_costheta        = -0.0159729
 
-var1                = "beta"
-var2                = "tau"                                                       #change param10
+var1                = "beta"  #varaible                                                     #change param10
+var2                = "tau" # fixed
 var3                = "tau"
 
 num1                = 2                                                            #change param12
-trunc 				= 10000                                                            #change param13
-trunc1              = 40
+trunc 				= 40000                                                            #change param13
+trunc1              = 20
 font=18
 
 if Rpt == 10.0:

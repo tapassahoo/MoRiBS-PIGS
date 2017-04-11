@@ -19,7 +19,7 @@ test-hfhf.f
 /examples/linear_pigs/*.png*
 /examples/linear_pigs/a.out
 /examples/linear_pigs/*exe
-/examples/linear_pigs/submit_*
+/examples/linear_pigs/jobsubmit_*
 /examples/linear_pigs/*.input
 /examples/linear_pigs/*.rot
 /examples/linear_pigs/*.out

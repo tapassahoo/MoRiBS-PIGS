@@ -67,16 +67,16 @@ c       rho=rho/(4.0*Pi)
      +       nslice,erotsq)
         erotf = erot1/rho
 c       call ratrho(cost,tau,bconst,rho2,erot2,iodevn,nslice)
-        dtau = tau/10000.0d0
-        taup = tau + dtau
-        call exarho(cost,lmax,maxl,pl,rhop,erot1,taup,bconst,iodevn,
-     +       nslice,erotsq)
-        taum = tau - dtau
-        call exarho(cost,lmax,maxl,pl,rhom,erot1,taum,bconst,iodevn,
-     +       nslice,erotsq)
-        erot2 = 0.5d0*log(rhom/rhop)/dtau
-        boltz=0.69503476d0
-        erot2 = erot2/(nslice*boltz)
+c        dtau = tau/10000.0d0
+c        taup = tau + dtau
+c        call exarho(cost,lmax,maxl,pl,rhop,erot1,taup,bconst,iodevn,
+c     +       nslice,erotsq)
+c        taum = tau - dtau
+c        call exarho(cost,lmax,maxl,pl,rhom,erot1,taum,bconst,iodevn,
+c     +       nslice,erotsq)
+c        erot2 = 0.5d0*log(rhom/rhop)/dtau
+c        boltz=0.69503476d0
+c        erot2 = erot2/(nslice*boltz)
 c        write(7,'(1p,7(1x,E15.8))')cost,rho,erot2,erotsq
         write(7,'(1p,7(1x,E15.8))')cost,rho,erotf,erotsq
         

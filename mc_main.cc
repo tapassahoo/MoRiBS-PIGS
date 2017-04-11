@@ -910,8 +910,9 @@ void MCGetAverage(void)
 	_bkin            += skin;                     // block average for kin energy
 	_kin_total       += skin;                     // accumulated average 
 #endif
+
 #ifdef PIGSROTORS
-	double spot       = GetPotEnergy_PIGS(); // pot energy and density distributions
+	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
 #else
 	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
 #endif
@@ -1416,7 +1417,7 @@ void SaveInstantEnergy()
     {
 #ifdef PIGSROTORS
     srotinst   = GetRotEnergyPIGS();
-	spotinst   = GetPotEnergy_PIGS(); 
+	spotinst   = GetPotEnergyPIGS(); 
 	stotalinst = GetTotalEnergy();
 #else
     srotinst   = GetRotPlanarEnergy(); 

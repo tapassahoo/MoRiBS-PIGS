@@ -91,7 +91,6 @@ def jobstring(file_name,value,thread):
 export OMP_NUM_THREADS=%s
 cd $PBS_O_WORKDIR
 %s""" % (job_name, walltime, processors, job_name, job_name, omp_thread, command_pimc_run)
-	print job_string
 	return job_string
 
 def inputstr(numbbeads,tau,temperature):
@@ -249,13 +248,16 @@ def modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmole
 	call(["rm", "qmc11.input"])
 
 
-def rotmat(molecule,temperature,numbbeads):
+def rotmat(TypeCal,molecule,temperature,numbbeads):
 	'''
 	This function generates rotational density matrix - linden.dat
 	'''
 	#temperature1    = dropzeros(temperature)
 	temperature1    = "%5.3f" % temperature
-	numbbeads1		= numbbeads - 1
+	if (TypeCal == 'PIMC'):
+		numbbeads1		= numbbeads
+	else:
+		numbbeads1		= numbbeads - 1
 	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 15000 -1"
 	print command_linden_run
 	system(command_linden_run)
@@ -268,27 +270,30 @@ def rotmat1(molecule,temperature,numbbeads):
 	'''
 	#temperature1    = dropzeros(temperature)
 	temperature1    = "%5.3f" % temperature
-	numbbeads1		= numbbeads - 1
+	if (TypeCal == 'PIMC'):
+		numbbeads1		= numbbeads
+	else:
+		numbbeads1		= numbbeads - 1
 	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 3000 -1"
 	print command_linden_run
 	system(command_linden_run)
 
-def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir):
+def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dest_pimc):
 	'''
 	This function creats jobstring for #PBS script
 	'''
 	job_name       = "job_"+str(file_name)+str(value)
 	walltime       = "200:00:00"
 	processors     = "nodes=1:ppn="+str(thread)
-	command_pimc_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"
 	omp_thread     = str(thread)
 	output_dir     = run_dir+"/results"
-	temperature1    = "%5.3f" % temperature
-	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	temperature1   = "%5.3f" % temperature
+	file_rotdens   = dest_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	logpath        = final_dir+"/"
 
-	input_file    = "qmc_"+file_name+str(value)+".input"
-	print input_file
+	input_file     = dest_pimc+"/qmc"+file_name+str(value)+".input"
+	exe_file       = dest_pimc+"/pimc"
+	qmcinp         = "qmc"+file_name+str(value)+".input"
 
 	job_string     = """#!/bin/bash
 #PBS -N %s
@@ -306,18 +311,17 @@ mv %s %s
 mv %s %s 
 cd %s
 cp %s qmc.input
-cp /home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc %s
+cp %s %s
 ./pimc
 mv %s /work/tapas/linear_rotors
-""" % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, input_file, run_dir, run_dir)
-	print job_string
+""" % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def outputstr_entropy(numbbeads,tau,dest_dir,trunc):
+def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_NM, col_DM, col_EN = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], max_rows=trunc)
+	col_block, col_NM, col_DM, col_EN = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, max_rows=trunc)
 	print len(col_NM)
 	
 	mean_NM      = np.mean(col_NM)
@@ -350,3 +354,124 @@ def fmt_entropy(status,variable):
 		output    +="\n"
 		return output
 
+def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, tau, trunc, preskip,dest_pimc):
+	if RUNDIR != "scratch":
+		os.chdir(dest_path)
+		call(["rm", "-rf", folder_run])
+		call(["mkdir", folder_run])
+		call(["mkdir", "-p", folder_run+"/results"])
+		os.chdir(src_path)
+
+
+		# copy files to running folder
+		src_file      = src_path + "/IhRCOMC60.xyz"
+		call(["cp", src_file, dest_dir])
+		call(["cp", run_file, dest_dir])
+
+		src_file      = src_path + "/qmc_run.input"
+		call(["cp", src_file, dest_dir])
+
+		# Write submit file for the current cycle
+		os.chdir(dest_dir)
+
+	argument1     = Rpt
+	level         = levels(numbbeads)
+	istep         = i/skip
+	step1         = step[istep]
+	modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
+	if status_rhomat == "Yes":
+		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
+
+	#job submission
+	fname         = 'jobsubmit_'+str(i)
+	fwrite        = open(fname, 'w')
+
+	if RUNDIR == "scratch":
+		os.chdir(final_path)
+		call(["rm", "-rf", folder_run])
+		os.chdir(src_path)
+		final_dir     = final_path + folder_run 
+
+		#mv some files to pimc folder in /work
+		input_file    = "qmc"+argument2+str(i)+".input"
+		call(["mv", "qmc.input", dest_pimc+"/"+input_file])
+		temperature1    = "%5.3f" % temperature
+		file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+		call(["mv", file_rotdens, dest_pimc])
+
+		fwrite.write(jobstring_scratch(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc))
+	else: 
+		fwrite.write(support.jobstring(argument2,numbbeads,numbmolecules))
+			
+
+	fwrite.close()
+	call(["qsub", fname])
+	if RUNDIR != "scratch":
+		os.chdir(src_path)
+
+
+def FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc):
+	if (TypeCal == "PIGS"):
+		file_output             = "Energy-vs-"+str(var)+"-fixed-"
+		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output            += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+
+		file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
+		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+	
+		file_output_angularDOF1  = "AngularDOF-vs-"+str(var)+"-fixed-"
+		file_output_angularDOF1 += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
+	
+		call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
+	
+	
+	if (TypeCal == "PIMC"):
+		file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
+		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output            += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+
+		file_output_angularDOF  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
+		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+
+		file_output_angularDOF1  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
+		file_output_angularDOF1 += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
+
+		call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
+
+	
+	if (TypeCal == "ENT"):
+		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
+		file_output     += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+		call(["rm", file_output])
+	
+	
+	if (TypeCal == "ENT"):
+		fanalyze             = open(file_output, "a")
+		fanalyze.write(fmt_entropy(status,var))
+	else:
+		fanalyze             = open(file_output, "a")           
+		fanalyze.write(fmt_energy(status,var))
+		fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
+		fanalyze_angularDOF.write(fmt_angle(status,var))
+		fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
+
+
+def FileClose(TypeCal):
+	fanalyze.close()
+	if (TypeCal != "ENT"):
+		fanalyze_angularDOF.close()
+		fanalyze_angularDOF1.close()
+	call(["cat",file_output])
+'''
+	print
+	print
+	call(["cat",file_output_angularDOF])
+	print
+	print
+	call(["cat",file_output_angularDOF1])
+'''

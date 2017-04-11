@@ -17,6 +17,10 @@
 #include <omp.h>
 
 // -----  density distributions ----------------------------
+//Tapas adds the following three lines
+//double dm_au  = DipoleMoment/AuToDebye; // DipoleMoment in Debye
+//double Rpt_au = Distance/BOHRRADIUS;
+//double PreFactor = AuToKelvin*dm_au*dm_au/(Rpt_au*Rpt_au*Rpt_au);
 
 int NUMB_DENS1D;                // number of 1D density distributions
 int NUMB_DENS2D;                // number of 2D density distributions
@@ -579,7 +583,7 @@ double GetPotEnergy_Diff(void)
 }
 */
 
-double GetPotEnergy_PIGS(void)
+double GetPotEnergyPIGS(void)
 {
 	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
 
@@ -677,7 +681,7 @@ double GetPotEnergy_PIGS(void)
                     uvec1[id] = MCCosine[id][tm0];
 			        uvec2[id] = MCCosine[id][tm1];
                 }
-                spot += PotFunc(Distance, uvec1, uvec2);
+                spot += PotFunc(uvec1, uvec2);
             } //stype
         }// loop over atoms (molecules)
     }
@@ -869,7 +873,7 @@ double GetPotEnergy_Densities(void)
                         uvec1[id] = MCCosine[id][tm0];
 			            uvec2[id] = MCCosine[id][tm1];
                     }
-                    spot_pair += PotFunc(Distance, uvec1, uvec2);
+                    spot_pair += PotFunc(uvec1, uvec2);
                 } //stype
             }
             spot += spot_pair;
@@ -1169,7 +1173,7 @@ double GetTotalEnergy(void)
                         uvec1[id] = MCCosine[id][t0];
 			            uvec2[id] = MCCosine[id][t1];
                     }
-                    spot_pair  += PotFunc(Distance,uvec1,uvec2);
+                    spot_pair  += PotFunc(uvec1,uvec2);
                 } //stype
 			}//loop over beads
 			spot += spot_pair;
@@ -1540,7 +1544,7 @@ double GetPotEnergy_Entanglement(int atom0, int atom1)
         uvec1[id] = MCCosine[id][t0];
         uvec2[id] = MCCosine[id][t1];
     }
-    spot = PotFunc(Distance, uvec1, uvec2);
+    spot = PotFunc(uvec1, uvec2);
     return spot;
 }
 #endif
@@ -3788,16 +3792,16 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[2] = w[0] * v[1] - w[1] * v[0];
 }
 
-double PotFunc(double Rpt, double *uvec1, double *uvec2)
+double PotFunc(double *uvec1, double *uvec2)
 {
-    double dm_au  = DipoleMoment/AuToDebye; // DipoleMoment in Debye
-    double Rpt_au = Rpt/BOHRRADIUS;
-   
-    double pot_au = dm_au*dm_au*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2])/(Rpt_au*Rpt_au*Rpt_au);
-    double potreturn = pot_au*AuToKelvin;
+	double dm_au  = DipoleMoment/AuToDebye; // DipoleMoment in Debye
+	double Rpt_au = Distance/BOHRRADIUS;
+	double PreFactor = AuToKelvin*dm_au*dm_au/(Rpt_au*Rpt_au*Rpt_au);
+    double pot_au = PreFactor*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2]);
+    double PotReturn = pot_au;
 #ifdef POTZERO
-	potreturn = 0.0;
+	PotReturn = 0.0;
 #endif
-    return potreturn;
+    return PotReturn;
 }
 #endif

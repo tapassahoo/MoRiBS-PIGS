@@ -991,9 +991,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 			rd = dens_new/dens_old;
 		else rd = 1.0;
 
-#ifndef POTZERO
 		rd *= exp(- MCTau*(pot_new-pot_old));
-#endif
 	}
 	else if(RotDenType == 1)
 	{
@@ -2285,7 +2283,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                     uvec2[id] = MCCosine[id][tm1];
                 }
 
-				spot += PotFunc(Distance, uvec1, uvec2);
+				spot += PotFunc(uvec1, uvec2);
             }  //stype
         } //loop over atom1 (molecules)
     }

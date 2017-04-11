@@ -20,7 +20,7 @@ void SaveRhoThetaChi(const char [], double,int); //added by Toby Zeng
 double GetPotEnergy_Diff(void); //added by Hui Li
 
 double GetPotEnergy_Densities(void);
-double GetPotEnergy_PIGS(void);
+double GetPotEnergyPIGS(void);
 double GetTotalEnergy(void);
 double *GetCosTheta();
 double GetPhi();
@@ -83,5 +83,5 @@ extern double srotsum; // total summation of rotational energy
 void VectorNormalisation(double *);
 double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
-double PotFunc(double ,double *, double *);
+double PotFunc(double *, double *);
 #endif  // mc_estim.h

@@ -15,38 +15,44 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-#molecule            = "HF-C60"                                                     #change param1
-molecule            = "HF"                                                         #change param1
-#molecule            = "H2"                                                         #change param1
-molecule_rot        = "HF"                                                         #change param2
+TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 
-numbblocks	        = 10000                                                        #change param3
-numbmolecules       = 2                                                            #change param4
-numbpass            = 100
-
-tau                 = 0.002                                                        #change param5
-
-Rpt                 = 10.0                                                         #change param6
-dipolemoment        = 1.86
-skip                = 5
-
-#Type                = "Entanglement"
-Type                = "PIGS"
-status              = "submission"                                                 #change param8
-status              = "analysis"                                                   #change param8
-status_rhomat       = "Yes"                                                        #change param9 
+#status              = "submission"                                                
+status              = "analysis"                                                  
+status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
 
-nrange              = 101 #31  			  						                       #change param10
+#molecule            = "HF-C60"                                                 
+molecule            = "HF"                                                     
+#molecule            = "H2"                                                   
+molecule_rot        = "HF"                                                   
 
-if (Type == "PIGS"):
+numbblocks	        = 10000                                                 
+numbmolecules       = 2                                                    
+numbpass            = 50
+skip                = 5
+
+tau                 = 0.002                                               
+
+Rpt                 = 10.0                                               
+dipolemoment        = 1.86
+
+
+nrange              = 101 #31  			  						        
+
+if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
 	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
-if (Type == "Entanglement"):
+if (TypeCal == "ENT"):
 	numbmolecules   *= 2
 	file1_name      = "Entanglement-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+
+if (TypeCal == "PIMC"):
+	file1_name      = "Finite-Temperature-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
 	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 
@@ -65,7 +71,7 @@ if status   == "submission":
 		final_path  = "/work/tapas/linear_rotors/"                                 #change param17
 
 trunc               = numbblocks
-preskip             = 000
+preskip             = 1000
 
 
 #===============================================================================
@@ -83,7 +89,7 @@ if status == "submission":
 #                                                                              |
 #===============================================================================
 if status == "analysis":
-	if (Type == "PIGS"):
+	if (TypeCal == "PIGS"):
 		file_output      = "Energy-vs-"+str(var)+"-fixed-"
 		file_output     += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
@@ -95,13 +101,13 @@ if status == "analysis":
 		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
 		call(["rm", file_output, file_output_angularDOF,file_output_angularDOF1])
 
-	if (Type == "Entanglement"):
+	if (TypeCal == "ENT"):
 		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
 		file_output     += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
 		call(["rm", file_output])
 
-	if (Type == "Entanglement"):
+	if (TypeCal == "ENT"):
 		fanalyze             = open(file_output, "a")
 		fanalyze.write(support.fmt_entropy(status,var))
 	else:
@@ -165,7 +171,7 @@ for i in range(nrange):                                                  #change
 				support.rotmat(molecule_rot,temperature,numbbeads)
 	
 			#job submission
-			fname         = 'submit_'+str(i)
+			fname         = 'jobsubmit_'+str(i)
 			fwrite        = open(fname, 'w')
 	
 
@@ -175,7 +181,7 @@ for i in range(nrange):                                                  #change
 				os.chdir(src_path)
 				final_dir     = final_path + folder_run 
 				call(["rm", "-rf", final_dir])
-				input_file    = "qmc_"+argument2+str(i)+".input"
+				input_file    = "qmc"+argument2+str(i)+".input"
 				print input_file
 				call(["mv", "qmc.input", input_file])
 				fwrite.write(support.jobstring_scratch(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir))
@@ -192,10 +198,11 @@ for i in range(nrange):                                                  #change
 
 			variable          = beta
 			try:
-				if (Type == "Entanglement"):
+				if (TypeCal == "ENT"):
 					fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc,preskip))
 				else:
 					fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc,preskip))
+					print dest_dir
 					fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,trunc,preskip))
 					fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,trunc,preskip))
 			except:
@@ -203,14 +210,14 @@ for i in range(nrange):                                                  #change
 
 if status == "analysis":
 	fanalyze.close()
-	if (Type != "Entanglement"):
+	if (TypeCal != "ENT"):
 		fanalyze_angularDOF.close()
 		fanalyze_angularDOF1.close()
 	call(["cat",file_output])
+	'''
 	print
 	print
 	call(["cat",file_output_angularDOF])
-	'''
 	print
 	print
 	call(["cat",file_output_angularDOF1])

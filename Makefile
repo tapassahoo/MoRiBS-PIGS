@@ -4,7 +4,7 @@
 options= -Ofast -fopenmp
 
 # First CFLAGS is for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DPIGSROTORS -DPIGSROTORSIO -DLINEARROTORS -DLINEARROTORSIO -DGETR -DMODIFY -DDIPOLE -DGETDIPOLE -DROTENERGYESTIM
+#CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DPIGSROTORS -DPIGSROTORSIO -DLINEARROTORS -DLINEARROTORSIO -DGETR -DMODIFY -DDIPOLE -DGETDIPOLE -DROTENERGYESTIM
 #-DSTEPCOST
 #-DMODIFYSROTDENS
 
@@ -12,7 +12,8 @@ CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DPIGSROTORS -DPIGSROTORS
 #-DINSTANT -DPOTZERO
 
 # Second CFLAGS is for Finite Temperature Calculations 
-#CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DLINEARROTORS -DLINEARROTORSIO -DNEGATIVEDENSITY -DGETR -DMODIFY -DDIPOLE -DGETDIPOLE -DROTENERGYESTIM -DTYPE1#-DTESTCODE #-DENTANGLEMENT
+CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DLINEARROTORS -DLINEARROTORSIO -DGETR -DMODIFY -DDIPOLE -DGETDIPOLE -DROTENERGYESTIM -DTYPE1 -DPOTZERO
+#-DTESTCODE #-DENTANGLEMENT
 
 #Below is the LDFLAGS Toby Zeng use on nlogn
 #LDFLAGS=-L/home/pnroy/Dev/lib64/ -lm -L./sprng/lib -llcg -L/home/pnroy/Dev/lib64/ -lgfortran  -L/opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
