@@ -876,7 +876,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
             dens_old = SRotDens(p0,type)*SRotDens(p1,type);
         }
 #ifdef ENTANGLEMENT
-        if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
+        if ((gatom >= (NumbAtoms/4)) && (gatom <= (2*NumbAtoms/4)))
         {
             if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
@@ -948,7 +948,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
             dens_new = SRotDens(p0,type)*SRotDens(p1,type);
         }
 #ifdef ENTANGLEMENT
-        if (gatom > ((NumbAtoms/4) - 1) && gatom < (3*NumbAtoms/4))
+        if ((gatom >= (NumbAtoms/4)) && (gatom <= (2*NumbAtoms/4)))
         {
             if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
@@ -2309,7 +2309,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
         weight = 0.5;
     }
 #ifdef ENTANGLEMENT
-    if ((atom0 > ((NumbAtoms/4) - 1)) && (atom0 < (3*NumbAtoms/4)))
+    if ((atom0 >= (NumbAtoms/4)) && (atom0 <= (2*NumbAtoms/4)))
     {
         if (it == ((NumbRotTimes - 1)/2))
         {

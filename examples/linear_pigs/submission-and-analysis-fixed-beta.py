@@ -8,7 +8,6 @@ import decimal
 import numpy as np
 from numpy import *
 import support
-from support import FileOutput
 
 #===============================================================================
 #                                                                              |
@@ -17,8 +16,8 @@ from support import FileOutput
 #                                                                              |
 #===============================================================================
 TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 
 #molecule            = "HF-C60"                                                  
 molecule            = "HF"                                                      
@@ -29,14 +28,14 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 10000                                                       
+numbblocks	        = 160000                                                       
 numbmolecules       = 2                                                          
-numbpass            = 50
-beta     	        = 0.1                                                       
+numbpass            = 10
+beta     	        = 0.2                                                       
 
 Rpt                 = 10.0                                                     
 dipolemoment        = 1.86
-skip                = 2
+skip                = 5
 
 status              = "submission"                                            
 status              = "analysis"                                            
@@ -45,6 +44,8 @@ status_rhomat       = "Yes"
 RUNDIR              = "scratch"
 
 nrange              = 51 		  						                          
+trunc               = numbblocks
+preskip             = 2000
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
@@ -78,8 +79,6 @@ final_path          = "/work/tapas/linear_rotors/"                              
 
 temperature         = 1.0/beta   
 
-trunc               = numbblocks
-preskip             = 0
 
 #==================================== MCStep ===================================# 
 if (molecule_rot == "H2"):
@@ -89,7 +88,7 @@ if (molecule_rot == "H2"):
 
 if (molecule_rot == "HF"):
 	step           = [0.7,1.5,1.5,1.5,1.5,1.5,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.0,1.0,1.0,1.0,1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
-	step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
+	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
 
 #===============================================================================
 #                                                                              |
@@ -156,13 +155,6 @@ if status == "analysis":
 		fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
 	#support.FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc)
 
-	fanalyze             = open(file_output, "a")           
-	fanalyze.write(support.fmt_energy(status,var))
-	fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
-	fanalyze_angularDOF.write(support.fmt_angle(status,var))
-	fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
-
-	
 # Loop over jobs
 for i in range(nrange):                                                
 
@@ -176,7 +168,7 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.SubmissionAndAnalysis(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, tau, trunc, preskip,dest_pimc)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc)
 
 			if status == "analysis":
 
@@ -203,7 +195,7 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.SubmissionAndAnalysis(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, tau, trunc, preskip, dest_pimc)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc)
 
 			if status == "analysis":
 

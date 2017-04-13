@@ -824,36 +824,6 @@ void PIMCPass(int type,int time)
 #endif
 }
 
-void PIMCPass1(int type,int time)
-{
-#ifdef LINEARROTORS
-    if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
-        MCRotationsMove(type);
-#endif
-#ifdef MOLECULEINCAGE
-    if (MOLECINCAGE)
-    {
-        if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
-            MCRotations3D(type);
-    }
-#endif
-}
-
-void PIMCPass2(int type,int time)
-{
-#ifdef LINEARROTORS
-    if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4) 
-        MCRotationsMove(type);
-#endif
-#ifdef MOLECULEINCAGE
-    if (MOLECINCAGE)
-    {
-        if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2) 
-            MCRotations3D(type);
-    }
-#endif
-}
-
 void MCResetBlockAverage(void) 
 {
 	avergCount = 0.0;
@@ -1292,8 +1262,6 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;
     fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
-    double Entropy = -log((_bnm/avergCount)/(_bdm/avergCount));
-    fid << setw(IO_WIDTH) << Entropy << BLANK;
     fid << endl;
     fid.close();
 }
@@ -1439,9 +1407,6 @@ void SaveSumTrReducedDens(double acount, double numb)
     _fentropy << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fentropy << setw(IO_WIDTH) << _nm_total/acount << BLANK;
     _fentropy << setw(IO_WIDTH) << _dm_total/acount << BLANK;
-    double Entropy = -log((_nm_total/acount)/(_dm_total/acount));
-    _fentropy << setw(IO_WIDTH) << Entropy << BLANK;
-
     _fentropy << endl;
 }
 #endif

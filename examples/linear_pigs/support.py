@@ -7,6 +7,7 @@ import os
 import decimal
 import numpy as np
 from numpy import *
+import math
 
 def compile_rotmat():
 	path_enter_linden = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/"
@@ -321,16 +322,16 @@ def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_NM, col_DM, col_EN = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, max_rows=trunc)
+	col_block, col_NM, col_DM = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, max_rows=trunc)
 	print len(col_NM)
 	
 	mean_NM      = np.mean(col_NM)
 	mean_DM      = np.mean(col_DM)
-	mean_EN      = np.mean(col_EN)
+	mean_EN      = -log(mean_NM/mean_DM)
 
 	error_NM     = jackknife(mean_NM,col_NM)
 	error_DM     = jackknife(mean_DM,col_DM)
-	error_EN     = jackknife(mean_EN,col_EN)
+	error_EN     = sqrt((error_DM/mean_DM)*(error_DM/mean_DM) + (error_NM/mean_NM)*(error_NM/mean_NM))
 	#print i, len(col_block)
 
 	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_NM, mean_DM, mean_EN, error_NM, error_DM, error_EN)
@@ -354,7 +355,7 @@ def fmt_entropy(status,variable):
 		output    +="\n"
 		return output
 
-def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, tau, trunc, preskip,dest_pimc):
+def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc):
 	if RUNDIR != "scratch":
 		os.chdir(dest_path)
 		call(["rm", "-rf", folder_run])
