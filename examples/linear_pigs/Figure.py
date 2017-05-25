@@ -6,6 +6,7 @@ from itertools import cycle
 import itertools
 from scipy.optimize import curve_fit
 from subprocess import call
+from matplotlib.backends.backend_pdf import PdfPages
 
 #===============================================================================
 #                                                                              |
@@ -18,7 +19,7 @@ molecule            = "HF"                                                      
 #molecule            = "H2"                                                         #change param2
 molecule_rot        = "HF"                                                         #change param2
 
-Rpt                 = 10.0                                                         #change param6
+Rpt                 = 7.0                                                         #change param6
 dipolemoment        = 1.86                                                         #change param7
 nrange              = 51                                                            #change param5
 
@@ -36,13 +37,13 @@ Avg_potential_energy= -0.0230796                                                
 Avg_rotational_energy = 0.0115393
 Avg_costheta        = -0.0159729
 
-var1                = "beta"  #varaible                                                     #change param10
-var2                = "tau" # fixed
+var2                = "beta"  #varaible                                                     #change param10
+var1                = "tau" # fixed
 var3                = "tau"
 
 num1                = 2                                                            #change param12
 trunc 				= 40000                                                            #change param13
-trunc1              = 20
+trunc1              = 15
 font=18
 
 if Rpt == 10.0:
@@ -87,12 +88,12 @@ if  ((var1 == 'tau') or (var1 == 'beta')):
 	Figfile     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".png"
 
 
-if Rpt == 5.0:
-	if ((var1 == 'tau') or (var1 == 'beta') and (numbmolecules == 2) and (Rpt == 5.0) and (dipolemoment == 1.86)):
-		Avg_total_energy      = -152.6933564
-		Avg_potential_energy  = -241.4271184
-		Avg_rotational_energy = 88.73376201
-		Avg_costheta          = 0.3862223062
+if Rpt == 7.0:
+	if ((var1 == 'tau') or (var1 == 'beta') and (numbmolecules == 2) and (Rpt == 7.0) and (dipolemoment == 1.86)):
+		Avg_total_energy      = -26.85431770
+		Avg_potential_energy  = -49.57886525
+		Avg_rotational_energy = 22.72454755   
+		Avg_costheta          = 0.06758428991
 		xmin = 1.9
 		xmax = 10.1
 		yminTot = -6000.0
@@ -264,12 +265,16 @@ def plotfitting(status, var1, var2, beta, Rpt, dipolemoment, numbblocks, numbmol
 	if func == 'TotalEnergy':
 		val     = tot
 		err_val = err_tot
+		fitParams, fitCovariances = curve_fit(fitFunc, var, val, sigma = err_val)
+		plt.plot(var, fitFunc(var, fitParams[0], fitParams[1]), linestyle = x.line1.next(), color = x.color1.next(), marker = x.marker1.next(), label = 'Fit', lw = 1)
 	if func == 'PotentialEnergy':
 		val     = pot
 		err_val = err_pot
+		fitParams, fitCovariances = curve_fit(fitFunc, var, val, sigma = err_val)
+		plt.plot(var, fitFunc(var, fitParams[0], fitParams[1]), linestyle = x.line1.next(), color = x.color1.next(), marker = x.marker1.next(), label = 'Fit', lw = 1)
 		
-	fitParams, fitCovariances = curve_fit(fitFunc, var, val, sigma = err_val)
-	plt.plot(var, fitFunc(var, fitParams[0], fitParams[1]), linestyle = x.line1.next(), color = x.color1.next(), marker = x.marker1.next(), label = 'Fit', lw = 1)
+#	fitParams, fitCovariances = curve_fit(fitFunc, var, val, sigma = err_val)
+#	plt.plot(var, fitFunc(var, fitParams[0], fitParams[1]), linestyle = x.line1.next(), color = x.color1.next(), marker = x.marker1.next(), label = 'Fit', lw = 1)
 
 
 def plotenergylabel(num1,num2,Avg_energy,xmin,xmax,ymin,ymax,xlabel1,ylabel1,font):
@@ -277,6 +282,7 @@ def plotenergylabel(num1,num2,Avg_energy,xmin,xmax,ymin,ymax,xlabel1,ylabel1,fon
 		plt.axhline(y=Avg_energy, color='black', lw = 3.0, linestyle='--', label = 'Exact')
 
 	plt.grid(True)
+#	plt.xlim(0,0.2)
 #	plt.legend(loc='upper right')
 
 
@@ -285,19 +291,19 @@ def plotenergylabel(num1,num2,Avg_energy,xmin,xmax,ymin,ymax,xlabel1,ylabel1,fon
 		plt.xlim(xmin,xmax)
 		plt.ylim(ymin,ymax)
 	if xlabel1 == "tau":
-		plt.xlabel(r'$\tau (K^{-1})$', fontsize = font)
+		plt.xlabel(r'$\mathrm{\tau (K^{-1})}$', fontsize = font)
 	if xlabel1 == "beta":
-		plt.xlabel(r'$\beta (K^{-1})$', fontsize = font)
+		plt.xlabel(r'$\mathrm{\beta (K^{-1})}$', fontsize = font)
 
 	if ylabel1 == "TotalEnergy":
-		plt.ylabel(r'$\langle E_{0} \rangle (K^{-1})$', fontsize = font)
+		plt.ylabel(r'$\mathrm{\langle E_{0} \rangle (Kelvin)}$', fontsize = font)
 	if ylabel1 == "PotentialEnergy":
-		plt.ylabel(r'$\langle V_{0} \rangle (K^{-1})$', fontsize = font)
+		plt.ylabel(r'$\mathrm{\langle V_{0} \rangle (Kelvin)}$', fontsize = font)
 	if ylabel1 == "RotationalEnergy":
-		plt.ylabel(r'$\langle T_{0} \rangle (K^{-1})$', fontsize = font)
-		plt.ylim(-1,20)
+		plt.ylabel(r'$\mathrm{\langle T_{0} \rangle (Kelvin)}$', fontsize = font)
+		#plt.ylim(-1,20)
 	if ylabel1 == "RelativeAngle":
-		plt.ylabel(r'$\langle u_{1} \cdot u_{2} \rangle$', fontsize = font)
+		plt.ylabel(r'$\mathrm{\langle \vec{e}_{1} \cdot \vec{e}_{2} \rangle}$', fontsize = font)
 
 	#plt.xticks(np.linspace(-0, 0.2, 5, endpoint=True))
 	#plt.text(0.1, -2.0, r'$\tau$ = 0.001 K $^{-1}$')
@@ -305,13 +311,14 @@ def plotenergylabel(num1,num2,Avg_energy,xmin,xmax,ymin,ymax,xlabel1,ylabel1,fon
 
 fig = plt.figure(figsize=(8, 4), dpi=100)
 
+'''
 if var1 == 'Rpt':
 	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$')
 if var1 == 'tau':
 	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, Rpt = '+str(Rpt)+' '+r'$\AA$')
 if var1 == 'beta':
 	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$, Rpt = '+str(Rpt)+' '+r'$\AA$')
-
+'''
 
 #=========================================
 #
@@ -358,6 +365,7 @@ xlabel = var1
 ylabel = func
 plotenergylabel(num1,num2,Avg_potential_energy,xmin,xmax,yminPot,ymaxPot,xlabel,ylabel,font)
 
+plt.legend(loc=2, bbox_to_anchor=(-1.05,-2.15), ncol=3, borderaxespad=0.)
 #=========================================
 #
 # Fig3
@@ -396,9 +404,9 @@ plotenergylabel(num1,num2,Avg_costheta,xmin,xmax,yminAng,ymaxAng,xlabel,ylabel,f
 
 #===============================================================================
 
-plt.subplots_adjust(top=0.90, bottom=0.20, left=0.15, right=0.98, hspace=0.6,
+plt.subplots_adjust(top=0.95, bottom=0.25, left=0.15, right=0.98, hspace=0.6,
                     wspace=0.5)
-plt.legend(loc=3, bbox_to_anchor=(-0.75,-0.70), ncol=3, borderaxespad=0.)
+#plt.legend(loc=3, bbox_to_anchor=(-0.75,-0.70), ncol=5, borderaxespad=0.)
 
 fig.savefig(Figfile, dpi=100, format='png')
 #call(["convert", 'image_output.png', 'image_output.pdf'])

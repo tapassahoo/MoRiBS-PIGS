@@ -355,7 +355,7 @@ def fmt_entropy(status,variable):
 		output    +="\n"
 		return output
 
-def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN):
+def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc):
 	if RUNDIR != "scratch":
 		os.chdir(dest_path)
 		call(["rm", "-rf", folder_run])
@@ -400,21 +400,13 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 		file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 		call(["mv", file_rotdens, dest_pimc])
 
-		if RUNIN == "CPU":
-			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc, src_path))
-		else:
-			fwrite.write(jobstring_scratch(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc))
+		fwrite.write(jobstring_scratch(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc))
 	else: 
 		fwrite.write(support.jobstring(argument2,numbbeads,numbmolecules))
 			
 
 	fwrite.close()
-	call(["chmod", "755", fname])
-	#command_pimc_run = "./"+fname + ">"+ dest_dir+"/outpimc"+str(i)+" & "
-	command_pimc_run = "./"+fname + ">outpimc"+str(i)+" & "
-	print command_pimc_run
-	system(command_pimc_run)
-
+	call(["qsub", fname])
 	if RUNDIR != "scratch":
 		os.chdir(src_path)
 
@@ -485,7 +477,7 @@ def FileClose(TypeCal):
 	call(["cat",file_output_angularDOF1])
 '''
 
-def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dest_pimc, src_path):
+def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dest_pimc):
 	'''
 	This function creats jobstring for #PBS script
 	'''
@@ -502,15 +494,15 @@ def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperatu
 export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
-cd %s
+cd $PBS_O_WORKDIR
 cp IhRCOMC60.xyz %s
 mv %s %s
 mv %s %s 
 cd %s
 cp %s qmc.input
 cp %s %s
-./pimc 
+./pimc
 mv %s /work/tapas/linear_rotors
-""" % (omp_thread, run_dir, output_dir, src_path, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+""" % (omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 

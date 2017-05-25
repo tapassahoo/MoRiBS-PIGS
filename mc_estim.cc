@@ -767,6 +767,9 @@ double GetPotEnergyPIGS(void)
 
     }//endif MOLECINCAGE
 #endif
+#ifdef POTZERO
+    spot = 0.0;
+#endif
 	return spot;
 }
 
@@ -1077,6 +1080,9 @@ double GetPotEnergy_Densities(void)
    	}     // LOOP OVER ATOM PAIRS
 	}
 #endif
+#ifdef POTZERO
+    spot = 0.0;
+#endif
 	return (spot/(double)NumbTimes);
 }
 
@@ -1271,6 +1277,9 @@ double GetTotalEnergy(void)
         }// loop over atoms (molecules)
 
     }//endif MOLECINCAGE
+#endif
+#ifdef POTZERO
+    spot = 0.0;
 #endif
 	return (0.5*spot);
 }
@@ -1831,6 +1840,9 @@ double GetPotEnergy(void)
    }     // LOOP OVER ATOM PAIRS
 
 // cout<<"in GetPotDensity"<<" _gr1D[0][80]="<<_gr1D[0][80]<<" _gr1D_sum[0][80]="<<_gr1D_sum[0][80]<<endl;
+#ifdef POTZERO
+    spot = 0.0;
+#endif
    return (spot/(double)NumbTimes);
 }
 
@@ -1904,7 +1916,7 @@ double GetRotEnergy(void)
    int offset = MCAtom[type].offset;
  
    int atom  = 0;                   // only one molecular impurtiy
-   offset   += (NumbTimes*atom);
+   offset   = NumbTimes*atom;
    int gatom = offset/NumbTimes;    // the same offset for rot and trans degrees
 
    double srot = 0.0;
@@ -2019,7 +2031,7 @@ double GetRotE3D(void)
 
   for(int atom  = 0;atom<MCAtom[type].numb;atom++)                   // multi molecular impurtiy
     {
-      offset   += (NumbTimes*atom);
+      offset   = NumbTimes*atom;
       int gatom = offset/NumbTimes;    // the same offset for rot and trans degrees
        
       double srot = 0.0;
@@ -2112,7 +2124,7 @@ void GetRCF(void)
    int offset = MCAtom[type].offset; // the same offset for rot and trans coordinates
  
    int atom  = 0;                    // only one molecular impurtiy
-   offset   += (NumbTimes*atom);
+   offset   = NumbTimes*atom;
    int gatom = offset/NumbTimes;
 
    for (int it0=0;it0<NumbRotTimes;it0++)    

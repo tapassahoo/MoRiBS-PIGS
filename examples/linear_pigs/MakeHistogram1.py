@@ -21,22 +21,23 @@ import support
 molecule            = "HF"                                                         #change param1
 molecule_rot        = "HF"                                                         #change param2
 
-Rpt2                = 5.0                                                         #change param6
-Rpt1                = 10.0                                                         #change param6
+Rpt1                = 7.0                                                         #change param6
 dipolemoment        = 1.86                                                         #change param7
 
-numbblocks          = 40000                                                        #change param3
+numbblocks          = 5000                                                        #change param3
 numbmolecules       = 2                                                            #change param4
 
-tau                 = 0.002
+#tau                 = 0.002
+beta                = 0.2
 
-var1                = "beta"
-var2                = "tau"                                                       #change param10
+var1                = "beta"                                                       #change param10
+var2                = "tau"
 
 num1                = 2                                                            #change param12
-numbbeads           = 11
+numbbeads           = 31
 
-beta                = tau*(numbbeads-1)
+#beta                = tau*(numbbeads-1)
+tau                 = beta/(numbbeads-1)
 
 
 ls1                 = '-'
@@ -61,7 +62,8 @@ if  ((var1 == 'tau') or (var1 == 'beta')):
 def plotenergy(Rpt, dipolemoment, tau, numbblocks, numbmolecules, molecule, numbbeads, numb_col, ls1, color1):
 
 #
-	file1_name   = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+	#file1_name   = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
+	file1_name   = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
 	file1_name  += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"
 	file2_name   = ""
 
@@ -95,7 +97,7 @@ def plotenergy(Rpt, dipolemoment, tau, numbblocks, numbmolecules, molecule, numb
 		plt.xlim(-1.01,1.01)
 
 	if (numb_col == 0):
-		plt.xlabel(r'$\cos(\theta)$', fontsize = 20)
+		plt.xlabel(r'$\mathrm{\vec{e}_{1} \cdot \vec{e}_{2} }$', fontsize = 20)
 		src_exact = 'DensityCosThetaTilde.txt'
 
 	if (numb_col == 1):
@@ -117,11 +119,13 @@ def plotenergy(Rpt, dipolemoment, tau, numbblocks, numbmolecules, molecule, numb
 
 fig = plt.figure(figsize=(8, 4), dpi=100)
 
+'''
 if var1 == 'tau':
 	plt.suptitle('Parameters: System '+str(numbmolecules)+" "+str(molecule)+", "+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, Rpt = '+str(Rpt1)+' '+r'$\AA$' )
 if var1 == 'beta':
 	plt.suptitle('Parameters: System '+str(numbmolecules)+' '+str(molecule)+', '+r'$\mu$ = '+str(dipolemoment)+' Debye, '+r'$\tau$ = '+str(tau)+' '+r'$K^{-1}$, '+r'$\beta$ = '+str(beta)+' '+r'$K^{-1}$, Rpt = '+str(Rpt1)+' '+r'$\AA$' )
 
+'''
 
 #=========================================
 #

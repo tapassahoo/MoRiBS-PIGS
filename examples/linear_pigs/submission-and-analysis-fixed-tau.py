@@ -30,18 +30,18 @@ molecule            = "HF"
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 40000                                                 
-numbmolecules       = 2                                                    
-numbpass            = 10
+numbmolecules       = 4                                                    
+numbpass            = 50
 skip                = 5
 
-tau                 = 0.008                                               
+tau                 = 0.002                                               
 
 Rpt                 = 10.0                                               
 dipolemoment        = 1.86
 
-nrange              = 151 #31  			  						        
+nrange              = 101 #31  			  						        
 trunc               = numbblocks
-preskip             = 00000
+preskip             = 1000
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)

@@ -2283,7 +2283,11 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                     uvec2[id] = MCCosine[id][tm1];
                 }
 
+#ifdef POTZERO
+				spot = 0.0;
+#else
 				spot += PotFunc(uvec1, uvec2);
+#endif
             }  //stype
         } //loop over atom1 (molecules)
     }

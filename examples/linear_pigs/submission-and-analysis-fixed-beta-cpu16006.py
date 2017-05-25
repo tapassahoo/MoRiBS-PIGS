@@ -15,8 +15,8 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
+#TypeCal             = 'PIMC'
+TypeCal             = 'PIGS'
 #TypeCal             = 'ENT'
 
 #molecule            = "HF-C60"                                                  
@@ -28,12 +28,12 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 10                                                      
-numbmolecules       = 2
+numbblocks	        = 10000                                                      
+numbmolecules       = 8                                                          
 numbpass            = 10
 beta     	        = 0.1                                                       
 
-Rpt                 = 5.0                                                     
+Rpt                 = 10.0                                                     
 dipolemoment        = 1.86
 skip                = 10
 
@@ -42,6 +42,7 @@ status              = "submission"
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
+RUNIN               = "CPU"
 
 nrange              = 101 		  						                          
 trunc               = numbblocks
@@ -54,7 +55,6 @@ if (TypeCal == "PIGS"):
 if (TypeCal == "PIMC"):
 	file1_name      = "PIMC-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
 	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
-
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
@@ -87,7 +87,7 @@ if (molecule_rot == "H2"):
 	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
 
 if (molecule_rot == "HF"):
-	step           = [2.0,2.0,1.5,1.3,1.0,1.5,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.0,1.0,1.0,1.0,1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
+	step           = [0.7,1.5,1.5,1.5,1.3,1.3,1.0,1.0,0.8,0.8,0.7,0.7,1.2,1.2,1.2,1.2,1.0,1.0,1.0,1.0,1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
 	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
 
 #===============================================================================
@@ -156,8 +156,11 @@ if status == "analysis":
 	#support.FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc)
 
 # Loop over jobs
-for i in range(nrange):                                                
+#list_nb = [8,16,32,64,96,128]
+#skip    = 2
+#for i in list_nb:
 
+for i in range(nrange):                                                
 	if (TypeCal == 'PIMC'):
 
 		if (i>1 and i%skip == 0):
@@ -168,7 +171,7 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN)
 
 			if status == "analysis":
 
@@ -195,7 +198,7 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN)
 
 			if status == "analysis":
 
