@@ -212,7 +212,6 @@ int main(int argc, char *argv[])
       RandomInit(MPIrank,MPIsize);
 
       MCConfigInit();                // generate initial configurations
-#ifdef IOWRITE
 #ifdef MODIFY
         double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
         ifstream myfile ("IhRCOMC60.xyz");
@@ -256,7 +255,6 @@ int main(int argc, char *argv[])
                 cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
             }
         } //loop over number of cages
-#endif
 #endif
 #ifdef MOLECULEINCAGE
 	if (MOLECINCAGE)

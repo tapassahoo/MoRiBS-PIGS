@@ -17,10 +17,6 @@
 #include <omp.h>
 
 // -----  density distributions ----------------------------
-//Tapas adds the following three lines
-//double dm_au  = DipoleMoment/AuToDebye; // DipoleMoment in Debye
-//double Rpt_au = Distance/BOHRRADIUS;
-//double PreFactor = AuToKelvin*dm_au*dm_au/(Rpt_au*Rpt_au*Rpt_au);
 
 int NUMB_DENS1D;                // number of 1D density distributions
 int NUMB_DENS2D;                // number of 2D density distributions
@@ -676,23 +672,28 @@ double GetPotEnergyPIGS(void)
             {
                 double uvec1[NDIM],uvec2[NDIM];
                 double E12;
+                double dr[NDIM];
+                double dr2    = 0.0;
+
                 for (int id=0;id<NDIM;id++)
                 {
                     uvec1[id] = MCCosine[id][tm0];
 			        uvec2[id] = MCCosine[id][tm1];
+                    dr[id]    = (MCCoords[id][t0] - MCCoords[id][t1]);
+                    dr2      += (dr[id]*dr[id]);
                 }
-                spot += PotFunc(uvec1, uvec2);
+                double r = sqrt(dr2);
+                spot += PotFunc(uvec1, uvec2, r);
             } //stype
         }// loop over atoms (molecules)
     }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
+#ifdef GETR
         spot = 0.0;
         double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
-#ifdef GETR
         double RR = Distance/BOHRRADIUS;
-#endif
 
         int offset0 = 0;
 
@@ -701,6 +702,7 @@ double GetPotEnergyPIGS(void)
 
         double E12     = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
+#endif
     }
 #endif
 #ifdef MOLECULEINCAGE
@@ -871,12 +873,18 @@ double GetPotEnergy_Densities(void)
                 {
                     double uvec1[NDIM],uvec2[NDIM];
                     double E12;
+                    double dr[NDIM];
+                    double dr2    = 0.0;
+
                     for (int id = 0; id < NDIM; id++)
                     {
                         uvec1[id] = MCCosine[id][tm0];
 			            uvec2[id] = MCCosine[id][tm1];
+                        dr[id]    = (MCCoords[id][t0] - MCCoords[id][t1]);
+                        dr2      += (dr[id]*dr[id]);
                     }
-                    spot_pair += PotFunc(uvec1, uvec2);
+                    double r = sqrt(dr2);
+                    spot_pair += PotFunc(uvec1, uvec2, r);
                 } //stype
             }
             spot += spot_pair;
@@ -885,12 +893,11 @@ double GetPotEnergy_Densities(void)
     }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
+#ifdef GETR
         spot = 0.0;
         double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
-#ifdef GETR
         double RR = Distance/BOHRRADIUS;
-#endif
 
         int offset0 = 0;
 
@@ -904,6 +911,7 @@ double GetPotEnergy_Densities(void)
             spot_pair  = E12*AuToKelvin;
         }
       	spot += spot_pair;
+#endif
     }
 #endif
 #ifdef IOWRITE
@@ -1174,12 +1182,17 @@ double GetTotalEnergy(void)
                     spot_pair = 0.0;
                     double uvec1[NDIM],uvec2[NDIM];
                     double E12;
+                    double dr[NDIM];
+                    double dr2    = 0.0;
                     for (int id=0;id<NDIM;id++)
                     {
                         uvec1[id] = MCCosine[id][t0];
 			            uvec2[id] = MCCosine[id][t1];
+                        dr[id]    = (MCCoords[id][t0] - MCCoords[id][t1]);
+                        dr2      += (dr[id]*dr[id]);
                     }
-                    spot_pair  += PotFunc(uvec1,uvec2);
+                    double r = sqrt(dr2);
+                    spot_pair  += PotFunc(uvec1,uvec2, r);
                 } //stype
 			}//loop over beads
 			spot += spot_pair;
@@ -1188,11 +1201,10 @@ double GetTotalEnergy(void)
     }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
+#ifdef GETR
         double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
-#ifdef GETR
         double RR   = Distance/BOHRRADIUS;
-#endif
 
         int offset0 = 0;
 
@@ -1205,6 +1217,7 @@ double GetTotalEnergy(void)
             E12     = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
             spot   += E12*AuToKelvin;
         }
+#endif
     }
 #endif
 #ifdef MOLECULEINCAGE
@@ -1537,7 +1550,7 @@ double GetPhi(void)
 #ifdef ENTANGLEMENT
 double GetPotEnergy_Entanglement(int atom0, int atom1)
 {
-    const char *_proc_=__func__;
+	const char *_proc_=__func__;
 
     int it      = (NumbRotTimes - 1)/2;
 
@@ -1548,17 +1561,23 @@ double GetPotEnergy_Entanglement(int atom0, int atom1)
 
     double uvec1[NDIM],uvec2[NDIM];
     double spot;
+    double dr[NDIM];
+    double dr2    = 0.0;
     for (int id=0;id<NDIM;id++)
     {
         uvec1[id] = MCCosine[id][t0];
         uvec2[id] = MCCosine[id][t1];
+        dr[id]    = (MCCoords[id][t0] - MCCoords[id][t1]);
+        dr2      += (dr[id]*dr[id]);
     }
-    spot = PotFunc(uvec1, uvec2);
+    double r = sqrt(dr2);
+    spot = PotFunc(uvec1, uvec2, r);
     return spot;
 }
 #endif
 
 #ifdef ENTANGLEMENT
+/*
 double GetEstimNM(void)
 {
     int type        = IMTYPE;
@@ -1609,7 +1628,55 @@ double GetEstimNM(void)
     double estimNM = dens*potEstimNM;
     return estimNM;
 }
+*/
+double GetEstimNM(void)
+{
+    int atom0, atom1;
+    int type        = IMTYPE;
 
+    int particleA1 = (NumbAtoms/2) - 1;
+    int particleA2 = particleA1 + 1;
+
+    double spot    = 0.0;
+    atom0 = particleA1;
+    for (int atom1 = (particleA2+1); atom1 < NumbAtoms; atom1++)
+    {
+        spot      += GetPotEnergy_Entanglement(atom0, atom1);
+    }
+
+    atom0 = particleA2;
+    for (int atom1 = 0; atom1 < particleA1; atom1++)
+    {
+        spot      += GetPotEnergy_Entanglement(atom0, atom1);
+    }
+    double potEstimNM = exp(-0.5*MCRotTau*spot);
+
+    double dens = 1.0;
+    int it0  = (((NumbRotTimes - 1)/2)-1);
+    int it1   = ((NumbRotTimes - 1)/2);
+
+    atom0 = particleA1;
+    atom1 = particleA2;
+    int offset0 = NumbRotTimes*atom0;
+    int offset1 = NumbRotTimes*atom1;
+
+    int t1M1 = offset0 + it0;
+    int t1M = offset1 + it1;
+    int t2M1 = offset1 + it0;
+    int t2M = offset0 + it1;
+
+    double p0   = 0.0;
+    double p1   = 0.0;
+    for (int id = 0;id<NDIM;id++)
+    {
+        p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+        p1 += (MCCosine[id][t2M1]*MCCosine[id][t2M]);
+    }
+    dens = SRotDens(p0,type)*SRotDens(p1,type);
+    double estimNM = dens*potEstimNM;
+    return estimNM;
+}
+/*
 double GetEstimDM(void)
 {
     int type       = IMTYPE;
@@ -1624,7 +1691,7 @@ double GetEstimDM(void)
     }
 
     for (int atom0 = (3*(NumbAtoms/4)); atom0 < NumbAtoms; atom0++)
-    {	
+    {
         for (int atom1 = (NumbAtoms/2); atom1 < (3*(NumbAtoms/4)); atom1++)
         {
             spot      += GetPotEnergy_Entanglement(atom0, atom1);
@@ -1654,6 +1721,53 @@ double GetEstimDM(void)
     double estimDM = dens*potEstimDM;
     return estimDM;
 }
+*/
+
+double GetEstimDM(void)
+{
+    int type       = IMTYPE;
+
+    int particleA1 = (NumbAtoms/2) - 1;
+    int particleA2 = particleA1 + 1;
+
+    double spot    = 0.0;
+
+    int atom0 = particleA1;
+    for (int atom1 = 0; atom1 < particleA1; atom1++)
+    {
+        spot      += GetPotEnergy_Entanglement(atom0, atom1);
+    }
+
+    atom0 = particleA2; 
+    for (int atom1 = (particleA2+1); atom1 < NumbAtoms; atom1++)
+    {
+        spot      += GetPotEnergy_Entanglement(atom0, atom1);
+    }
+    double potEstimDM = exp(-0.5*MCRotTau*spot);
+
+    double dens = 1.0;
+    for (int atom0 = particleA1; atom0 <= particleA2; atom0++)
+    {
+
+        int it0 = (((NumbRotTimes - 1)/2)-1);
+        int it1 = ((NumbRotTimes - 1)/2);
+
+        int offset0 = NumbRotTimes*atom0;
+
+        int t0 = offset0 + it0;
+        int t1 = offset0 + it1;
+
+        double p0   = 0.0;
+        for (int id = 0;id<NDIM;id++)
+        {
+            p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+        }
+        dens *= SRotDens(p0,type);
+    }
+    double estimDM = dens*potEstimDM;
+    return estimDM;
+}
+
 #endif
 
 double GetPotEnergy(void)
@@ -3804,10 +3918,10 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[2] = w[0] * v[1] - w[1] * v[0];
 }
 
-double PotFunc(double *uvec1, double *uvec2)
+double PotFunc(double *uvec1, double *uvec2, double RptAng)
 {
 	double dm_au  = DipoleMoment/AuToDebye; // DipoleMoment in Debye
-	double Rpt_au = Distance/BOHRRADIUS;
+	double Rpt_au = RptAng/BOHRRADIUS;
 	double PreFactor = AuToKelvin*dm_au*dm_au/(Rpt_au*Rpt_au*Rpt_au);
     double pot_au = PreFactor*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2]);
     double PotReturn = pot_au;

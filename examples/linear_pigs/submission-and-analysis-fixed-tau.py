@@ -16,32 +16,33 @@ import support
 #                                                                              |
 #===============================================================================
 TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+#TypeCal             = 'ENT'
 
-status              = "submission"                                                
-status              = "analysis"                                                  
+status              = "submission"
+status              = "analysis"
 status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
+RUNIN               = "CPU"
 
 #molecule            = "HF-C60"                                                 
 molecule            = "HF"                                                     
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 40000                                                 
-numbmolecules       = 4                                                    
+numbblocks	        = 10000
+numbmolecules       = 7
 numbpass            = 50
-skip                = 5
+skip                = 10
 
 tau                 = 0.002                                               
 
-Rpt                 = 10.0                                               
+Rpt                 = 10.05
 dipolemoment        = 1.86
 
-nrange              = 101 #31  			  						        
+nrange              = 101  			  						        
 trunc               = numbblocks
-preskip             = 1000
+preskip             = 2000
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
@@ -117,7 +118,7 @@ if status == "analysis":
 		fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
 		fanalyze_angularDOF1.write(support.fmt_angle1(status,var))
 
-step = [2.0 for i in range(nrange)]
+step = [1.0 for i in range(nrange)]
 # Loop over jobs
 for i in range(nrange):                                                  #change param19
 
@@ -137,7 +138,7 @@ for i in range(nrange):                                                  #change
 		dest_dir     = dest_path + folder_run 
 
 		if status   == "submission":
-			support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc)
+			support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN)
 
 
 		if status == "analysis":

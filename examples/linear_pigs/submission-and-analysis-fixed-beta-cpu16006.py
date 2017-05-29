@@ -16,8 +16,8 @@ import support
 #                                                                              |
 #===============================================================================
 #TypeCal             = 'PIMC'
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 
 #molecule            = "HF-C60"                                                  
 molecule            = "HF"                                                      
@@ -28,25 +28,25 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 10000                                                      
-numbmolecules       = 8                                                          
+numbblocks	        = 1000
+numbmolecules       = 2                                                          
 numbpass            = 10
-beta     	        = 0.1                                                       
+beta     	        = 0.2                                                       
 
-Rpt                 = 10.0                                                     
+Rpt                 = 10.05
 dipolemoment        = 1.86
 skip                = 10
 
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
 RUNIN               = "CPU"
 
-nrange              = 101 		  						                          
+nrange              = 101  
 trunc               = numbblocks
-preskip             = 2000
+preskip             = 0
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)

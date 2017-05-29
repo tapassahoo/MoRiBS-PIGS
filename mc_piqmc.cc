@@ -857,6 +857,11 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    double rho1,rho2,erot;
 // If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
 // if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
+#ifdef ENTANGLEMENT
+        int particleA1 = (NumbAtoms/2) - 1;
+        int particleA2 = particleA1 + 1;
+#endif
+
 	if(RotDenType == 0)
 	{
 #ifdef PIGSROTORS
@@ -876,7 +881,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
             dens_old = SRotDens(p0,type)*SRotDens(p1,type);
         }
 #ifdef ENTANGLEMENT
-        if ((gatom >= (NumbAtoms/4)) && (gatom <= (2*NumbAtoms/4)))
+        if ((gatom == particleA1) || (gatom == particleA2))
         {
             if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
@@ -948,7 +953,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
             dens_new = SRotDens(p0,type)*SRotDens(p1,type);
         }
 #ifdef ENTANGLEMENT
-        if ((gatom >= (NumbAtoms/4)) && (gatom <= (2*NumbAtoms/4)))
+        if ((gatom == particleA1) || (gatom == particleA2))
         {
             if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
@@ -2180,6 +2185,15 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 	}   // END sum over atoms
 #endif
 
+    double weight  = 1.0;
+    double weight1 = 1.0;
+#ifdef PIGSROTORS
+    if (it == 0 || it == (NumbRotTimes - 1))
+    {
+        weight = 0.5;
+    }
+#endif
+
 #ifdef LINEARROTORS
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
 	{
@@ -2191,7 +2205,11 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 
         int atom1Init  = 0;
         int NumbAtoms1 = NumbAtoms;
+
 #ifdef ENTANGLEMENT
+        int particleA1 = (NumbAtoms/2) - 1;
+        int particleA2 = particleA1 + 1;
+
         if (atom0 < (NumbAtoms/2))
         {
             atom1Init  = 0;
@@ -2276,53 +2294,53 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 		    if (stype == HF )
             {
                 double uvec1[NDIM],uvec2[NDIM];
+                double dr[NDIM];
+                double dr2    = 0.0;
 
                 for (int id=0;id<NDIM;id++)
                 {
                     uvec1[id] = cosine[id][tm0];
                     uvec2[id] = MCCosine[id][tm1];
+                    dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+                    dr2    += (dr[id]*dr[id]);
                 }
+
+
+                double r = sqrt(dr2);
 
 #ifdef POTZERO
 				spot = 0.0;
 #else
-				spot += PotFunc(uvec1, uvec2);
+				spot += PotFunc(uvec1, uvec2, r);
 #endif
             }  //stype
+#ifdef ENTANGLEMENT
+            if ((atom0 == particleA1) || (atom0 == particleA2) || (atom1 == particleA1) || (atom1 == particleA2))
+            {
+                if (it == ((NumbRotTimes - 1)/2))
+                {
+                    weight1 = 0.5;
+                }
+            } 
+#endif
         } //loop over atom1 (molecules)
     }
 
+#ifdef GETR
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
 	{
         double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
-#ifdef GETR
         double RR   = Distance/BOHRRADIUS;
-#endif
 	    int offset0 =  atom0*NumbRotTimes;
         int t0  = offset0 + it;
         double E12 = -2.0*dm2*cosine[2][t0]/(RR*RR*RR);
         spot        = E12*AuToKelvin;
     }
 #endif
+#endif
 
-    double weight = 1.0;
-#ifdef PIGSROTORS
-    if (it == 0 || it == (NumbRotTimes - 1))
-    {
-        weight = 0.5;
-    }
-#ifdef ENTANGLEMENT
-    if ((atom0 >= (NumbAtoms/4)) && (atom0 <= (2*NumbAtoms/4)))
-    {
-        if (it == ((NumbRotTimes - 1)/2))
-        {
-            weight = 0.5;
-        }
-    }
-#endif
-#endif
-    return (spot*weight);
+    return (spot*weight*weight1);
 }
 
 double PotRotE3D(int atom0,double * Eulang,int it)   

@@ -409,15 +409,19 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 			
 
 	fwrite.close()
-	call(["chmod", "755", fname])
-	#command_pimc_run = "./"+fname + ">"+ dest_dir+"/outpimc"+str(i)+" & "
-	command_pimc_run = "./"+fname + ">outpimc"+str(i)+" & "
-	print command_pimc_run
-	system(command_pimc_run)
+
+	if (RUNIN == "CPU"):
+		call(["chmod", "755", fname])
+		#command_pimc_run = "./"+fname + ">"+ dest_dir+"/outpimc"+str(i)+" & "
+		command_pimc_run = "./"+fname + ">outpimc"+str(i)+" & "
+		print command_pimc_run
+		system(command_pimc_run)
+	else:
+		call(["qsub", fname])
+		
 
 	if RUNDIR != "scratch":
 		os.chdir(src_path)
-
 
 def FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc):
 	if (TypeCal == "PIGS"):

@@ -83,5 +83,5 @@ extern double srotsum; // total summation of rotational energy
 void VectorNormalisation(double *);
 double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
-double PotFunc(double *, double *);
+double PotFunc(double *, double *, double);
 #endif  // mc_estim.h
