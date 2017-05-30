@@ -12,6 +12,7 @@ aa.f
 *2.cc
 test-hfhf.f
 #ignore
+linear_prop/*.x
 /examples/linear_pigs/results/
 /examples/linear_pigs/yw001.*
 /examples/linear_pigs/Input*

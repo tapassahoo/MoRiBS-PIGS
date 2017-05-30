@@ -15,34 +15,34 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 
 status              = "submission"
 status              = "analysis"
 status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
-RUNIN               = "CPU"
+RUNIN               = "noCPU"
 
 #molecule            = "HF-C60"                                                 
 molecule            = "HF"                                                     
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 10000
-numbmolecules       = 7
-numbpass            = 50
-skip                = 10
+numbblocks	        = 40000
+numbmolecules       = 2
+numbpass            = 10
+skip                = 2
 
 tau                 = 0.002                                               
 
-Rpt                 = 10.05
+Rpt                 = 5.05
 dipolemoment        = 1.86
 
-nrange              = 101  			  						        
+nrange              = 101
 trunc               = numbblocks
-preskip             = 2000
+preskip             = 0
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
@@ -72,6 +72,10 @@ if status   == "submission":
 		dest_path   = "/scratch/tapas/linear_rotors/" 
 		final_path  = "/work/tapas/linear_rotors/"                                 #change param17
 
+if TypeCal == "ENT":
+	intvalue = 3
+else:
+	intvalue =1
 
 
 #===============================================================================
@@ -122,7 +126,7 @@ step = [1.0 for i in range(nrange)]
 # Loop over jobs
 for i in range(nrange):                                                  #change param19
 
-	if (i>1 and i % skip == 0 ):
+	if (i>intvalue and i % skip == 0 ):
 
 		if i % 2 != 0:
 			value        = i

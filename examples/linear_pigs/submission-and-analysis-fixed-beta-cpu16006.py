@@ -28,23 +28,23 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 1000
+numbblocks	        = 10000
 numbmolecules       = 2                                                          
 numbpass            = 10
 beta     	        = 0.2                                                       
 
 Rpt                 = 10.05
 dipolemoment        = 1.86
-skip                = 10
+skip                = 2
 
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
-RUNIN               = "CPU"
+RUNIN               = "noCPU"
 
-nrange              = 101  
+nrange              = 50  
 trunc               = numbblocks
 preskip             = 0
 
