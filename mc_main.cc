@@ -211,100 +211,14 @@ int main(int argc, char *argv[])
       SEED = 985456376;
       RandomInit(MPIrank,MPIsize);
 
-      MCConfigInit();                // generate initial configurations
-#ifdef MODIFY
-        double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
-        ifstream myfile ("IhRCOMC60.xyz");
-        if (myfile.is_open ())
-        {
-            for(int ii=0; ii<NumbAtoms; ii++)
-            {
-                myfile >> RCOMC60[ii][0]>>RCOMC60[ii][1]>>RCOMC60[ii][2];
-                cout << RCOMC60[ii][0]<< "  "<<RCOMC60[ii][1]<< "  "<<RCOMC60[ii][2]<< endl;
-            }
-            myfile.close();
-        }
-        else
-        {
-            if (NumbAtoms == 1)
-            {
-                for(int id=0;id<NDIM;id++)
-                RCOMC60[0][id]=0.0;
-            }
-            else
-            {
-                cout << "ERROR: For Number of Cages > 1, please, provide IhRCOMC60.xyz file with RCOM position of each cage "<<endl;
-                nrerror;
-                exit(0);
-            }
-        }
-        int ii = -1;
-        for (int i=0;i<NumbAtoms;i++)
-        for (int it=0;it<NumbTimes;it++)
-        {
-            ii +=1;
-            for (int id=0;id<NDIM;id++)
-            RCOMC60temp[ii][id]=RCOMC60[i][id];
-        }
-
-        for (int it=0;it<NumbAtoms*NumbTimes;it++)
-        {
-            for(int id=0;id<NDIM;id++)
-            {
-                MCCoords[id][it]=RCOMC60temp[it][id];
-                cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
-            }
-        } //loop over number of cages
-#endif
-#ifdef MOLECULEINCAGE
-	if (MOLECINCAGE)
+    MCConfigInit();                // generate initial configurations
+    for (int it=0;it<NumbAtoms*NumbTimes;it++)
     {
-    	double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
-        ifstream myfile ("IhRCOMC60.xyz");
-        if (myfile.is_open ())
+        for (int id=0;id<NDIM;id++)
         {
-        	for(int ii=0; ii<NumbAtoms; ii++)
-            {
-          		myfile >> RCOMC60[ii][0]>>RCOMC60[ii][1]>>RCOMC60[ii][2];
-          		cout << RCOMC60[ii][0]<< "  "<<RCOMC60[ii][1]<< "  "<<RCOMC60[ii][2]<< endl;
-            }
-          	myfile.close();
+            cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
         }
-        else
-        {
-        	if (NumbAtoms == 1)
-            {
-            	for(int id=0;id<NDIM;id++)
-            	RCOMC60[0][id]=0.0;
-            }
-            else
-            {
-            	cout << "ERROR: For Number of Cages > 1, please, provide IhRCOMC60.xyz file with RCOM position of each cage "<<endl;
-            	nrerror;
-            	exit(0);
-            }
-        }
-        int ii = -1;
-        for (int i=0;i<NumbAtoms;i++)
-        for (int it=0;it<NumbTimes;it++)
-        {
-        	ii +=1;
-          	for (int id=0;id<NDIM;id++)
-          	RCOMC60temp[ii][id]=RCOMC60[i][id];
-        }
-
-        for (int it=0;it<NumbAtoms*NumbTimes;it++)
-        {
-        	for(int id=0;id<NDIM;id++)
-            {
-            	MCCoords[id][it]=RCOMC60temp[it][id];
-            	MCAngles[id][it]=0.0;
-              	cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
-            }
-       	} //loop over number of cages
-	}//endif MOLECINCAGE
-#endif
-
+    } //loop over number of cages
 //    read in initial MCCoords and MCAngles
       if(InitMCCoords)
       {

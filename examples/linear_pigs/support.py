@@ -228,7 +228,7 @@ def fmt_angle1(status,variable):
 
 
 
-def modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,dipolemoment):
+def modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,dipolemoment,particleA):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
@@ -243,10 +243,19 @@ def modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmole
 	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc10.input")
 	replace("numbpass_input", str(numbpass), "qmc10.input", "qmc11.input")
 	mcskip = numbbeads*numbpass
-	replace("mskip_input", str(mcskip), "qmc11.input", "qmc.input")
-	call(["rm", "qmc2.input", "qmc3.input", "qmc4.input", "qmc5.input", "qmc6.input", "qmc7.input", "qmc8.input", "qmc9.input"])
+	replace("mskip_input", str(mcskip), "qmc11.input", "qmc12.input")
+	replace("numbparticle_input", str(particleA), "qmc12.input", "qmc.input")
+	call(["rm", "qmc2.input"])
+	call(["rm", "qmc3.input"])
+	call(["rm", "qmc4.input"])
+	call(["rm", "qmc5.input"])
+	call(["rm", "qmc6.input"])
+	call(["rm", "qmc7.input"])
+	call(["rm", "qmc8.input"])
+	call(["rm", "qmc9.input"])
 	call(["rm", "qmc10.input"])
 	call(["rm", "qmc11.input"])
+	call(["rm", "qmc12.input"])
 
 
 def rotmat(TypeCal,molecule,temperature,numbbeads):
@@ -307,7 +316,6 @@ export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
 cd $PBS_O_WORKDIR
-cp IhRCOMC60.xyz %s
 mv %s %s
 mv %s %s 
 cd %s
@@ -315,7 +323,7 @@ cp %s qmc.input
 cp %s %s
 ./pimc
 mv %s /work/tapas/linear_rotors
-""" % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+""" % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
 def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip):
@@ -355,7 +363,7 @@ def fmt_entropy(status,variable):
 		output    +="\n"
 		return output
 
-def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN):
+def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN,particleA):
 	if RUNDIR != "scratch":
 		os.chdir(dest_path)
 		call(["rm", "-rf", folder_run])
@@ -363,10 +371,7 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 		call(["mkdir", "-p", folder_run+"/results"])
 		os.chdir(src_path)
 
-
 		# copy files to running folder
-		src_file      = src_path + "/IhRCOMC60.xyz"
-		call(["cp", src_file, dest_dir])
 		call(["cp", run_file, dest_dir])
 
 		src_file      = src_path + "/qmc_run.input"
@@ -379,12 +384,12 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 	level         = levels(numbbeads)
 	istep         = i/skip
 	step1         = step[istep]
-	modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment)
+	modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment,particleA)
 	if status_rhomat == "Yes":
 		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
 
 	#job submission
-	fname         = 'jobsubmit_'+str(i)
+	fname         = 'entanglement_'+str(numbmolecules)+'particleA_'+str(particleA)+'jobsubmit_'+str(i)
 	fwrite        = open(fname, 'w')
 
 	if RUNDIR == "scratch":
@@ -507,7 +512,6 @@ export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
 cd %s
-cp IhRCOMC60.xyz %s
 mv %s %s
 mv %s %s 
 cd %s
@@ -515,6 +519,6 @@ cp %s qmc.input
 cp %s %s
 ./pimc 
 mv %s /work/tapas/linear_rotors
-""" % (omp_thread, run_dir, output_dir, src_path, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+""" % (omp_thread, run_dir, output_dir, src_path, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 

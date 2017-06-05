@@ -67,6 +67,9 @@ const char IO_DISTANCE[]       = "DISTANCE";
 #ifdef GETDIPOLE
 const char IO_DIPOLEMOMENT[]   = "DIPOLEMOMENT";
 #endif
+#ifdef TEST
+const char IO_NUMBPARTICLE[]       = "NUMBPARTICLE";
+#endif
 
 string MasterDir;
 string OutputDir;
@@ -346,6 +349,13 @@ void IOReadParams(const char in_file[],int & mc_status)
      if (params==IO_DISTANCE)
      {
         inf >> Distance;
+     } 
+     else
+#endif
+#ifdef TEST
+     if (params==IO_NUMBPARTICLE)
+     {
+        inf >> NumbParticle;
      } 
      else
 #endif

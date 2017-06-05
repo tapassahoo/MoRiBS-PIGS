@@ -30,28 +30,28 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 40000
-numbmolecules       = 2
-numbpass            = 10
-skip                = 2
+numbblocks	        = 1000
+numbmolecules       = 8
+numbpass            = 50
+skip                = 5
 
 tau                 = 0.002                                               
 
-Rpt                 = 5.05
+Rpt                 = 10.05
 dipolemoment        = 1.86
 
 nrange              = 101
 trunc               = numbblocks
 preskip             = 0
+particleA           = 1
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
 	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 if (TypeCal == "ENT"):
-	numbmolecules  *= 2
 	file1_name      = "Entanglement-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
-	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-ParticleA"+str(particleA)+"-e0vsbeads" 
 
 
 file2_name          = ""                                                           #change param13
@@ -108,7 +108,7 @@ if status == "analysis":
 	if (TypeCal == "ENT"):
 		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
 		file_output     += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
+		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-ParticleA"+str(particleA)+"-trunc"+str(trunc)+".txt"
 		call(["rm", file_output])
 
 	if (TypeCal == "ENT"):
@@ -121,6 +121,9 @@ if status == "analysis":
 		fanalyze_angularDOF.write(support.fmt_angle(status,var))
 		fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
 		fanalyze_angularDOF1.write(support.fmt_angle1(status,var))
+
+if (TypeCal == "ENT"):
+	numbmolecules  *= 2
 
 step = [1.0 for i in range(nrange)]
 # Loop over jobs
@@ -142,7 +145,7 @@ for i in range(nrange):                                                  #change
 		dest_dir     = dest_path + folder_run 
 
 		if status   == "submission":
-			support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN)
+			support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA)
 
 
 		if status == "analysis":

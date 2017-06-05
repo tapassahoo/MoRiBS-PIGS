@@ -44,6 +44,9 @@ extern double  Distance;
 #ifdef GETDIPOLE
 extern double DipoleMoment;
 #endif
+#ifdef TEST
+extern int     NumbParticle;
+#endif
 extern double  Density;
 extern double  BoxSize;
 
@@ -165,6 +168,7 @@ extern int MCSKIP_RATIO;     //  to save information regarding the accept ratio
 extern int MCSKIP_TOTAL;     //  to save accumulated average
 extern int MCSKIP_AVERG;     //  to evaluate averages
 extern int DISTANCE;     //  to evaluate averages
+extern int NUMBPARTICLE;     //  to evaluate averages
 
 // MC move types
 const int MCMAXMOVES = 3;   // Max number of different types of MC moves

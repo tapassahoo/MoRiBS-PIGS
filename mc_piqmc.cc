@@ -858,8 +858,10 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 // If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
 // if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
 #ifdef ENTANGLEMENT
-        int particleA1 = (NumbAtoms/2) - 1;
-        int particleA2 = particleA1 + 1;
+   	int particleA1Min = (NumbAtoms/2) - NumbParticle;
+   	int particleA1Max = particleA1Min + NumbParticle - 1;
+   	int particleA2Min = particleA1Max + 1;
+   	int particleA2Max = particleA2Min + NumbParticle - 1;
 #endif
 
 	if(RotDenType == 0)
@@ -881,7 +883,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
             dens_old = SRotDens(p0,type)*SRotDens(p1,type);
         }
 #ifdef ENTANGLEMENT
-        if ((gatom == particleA1) || (gatom == particleA2))
+        if ((gatom >= particleA1Min) && (gatom <= particleA2Max))
         {
             if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
@@ -953,7 +955,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
             dens_new = SRotDens(p0,type)*SRotDens(p1,type);
         }
 #ifdef ENTANGLEMENT
-        if ((gatom == particleA1) || (gatom == particleA2))
+        if ((gatom >= particleA1Min) && (gatom <= particleA2Max))
         {
             if (it1 == (((NumbRotTimes - 1)/2) - 1))
             {
@@ -2207,8 +2209,10 @@ double PotRotEnergy(int atom0, double **cosine, int it)
         int NumbAtoms1 = NumbAtoms;
 
 #ifdef ENTANGLEMENT
-        int particleA1 = (NumbAtoms/2) - 1;
-        int particleA2 = particleA1 + 1;
+   	    int particleA1Min = (NumbAtoms/2) - NumbParticle;
+   	    int particleA1Max = particleA1Min + NumbParticle - 1;
+   	    int particleA2Min = particleA1Max + 1;
+   	    int particleA2Max = particleA2Min + NumbParticle - 1;
 
         if (atom0 < (NumbAtoms/2))
         {
@@ -2305,7 +2309,6 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                     dr2    += (dr[id]*dr[id]);
                 }
 
-
                 double r = sqrt(dr2);
 
 #ifdef POTZERO
@@ -2315,12 +2318,24 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 #endif
             }  //stype
 #ifdef ENTANGLEMENT
-            if ((atom0 == particleA1) || (atom0 == particleA2) || (atom1 == particleA1) || (atom1 == particleA2))
+/*
+            if ((atom0 == particleA1Min) || (atom0 == particleA2Min) || (atom1 == particleA1Min) || (atom1 == particleA2Min))
             {
                 if (it == ((NumbRotTimes - 1)/2))
                 {
                     weight1 = 0.5;
                 }
+            }
+*/
+            if ((atom0 >= particleA1Min) && (atom0 <= particleA2Max)) 
+            {
+				if ((atom1 < particleA1Min) || (atom1 > particleA2Max))
+                {
+               		if (it == ((NumbRotTimes - 1)/2))
+                	{
+                    	weight1 = 0.5;
+                	}
+				}
             } 
 #endif
         } //loop over atom1 (molecules)
