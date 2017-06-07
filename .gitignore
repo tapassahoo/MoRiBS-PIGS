@@ -37,6 +37,7 @@ examples/linear_pigs/submission-and-analysis-fixed-tau-cpu-for-test.py
 mc_main-original.cc
 mc_piqmc-correct.cc
 mc_piqmc-modified.cc
+mc_estim-modified.cc
 #
 /examples/nonlinear_pigs/results/*
 !/examples/nonlinear_pigs/results/

@@ -1627,6 +1627,7 @@ double GetEstimNM1(void)
     double estimNM = dens*potEstimNM;
     return estimNM;
 }
+
 double GetEstimNM(void)
 {
     int atom0, atom1;
@@ -1638,6 +1639,7 @@ double GetEstimNM(void)
    	int particleA2Max = particleA2Min + NumbParticle - 1;
 
     double spot    = 0.0;
+
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
     {
         for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)

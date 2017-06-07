@@ -2318,23 +2318,18 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 #endif
             }  //stype
 #ifdef ENTANGLEMENT
-/*
-            if ((atom0 == particleA1Min) || (atom0 == particleA2Min) || (atom1 == particleA1Min) || (atom1 == particleA2Min))
+			if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
             {
-                if (it == ((NumbRotTimes - 1)/2))
-                {
-                    weight1 = 0.5;
-                }
-            }
-*/
-            if ((atom0 >= particleA1Min) && (atom0 <= particleA2Max)) 
+           		if (it == ((NumbRotTimes - 1)/2))
+              	{
+                   	weight1 = 0.5;
+				}
+            } 
+            if (((atom0 >= particleA1Min) && (atom0 <= particleA2Max)) && ((atom1 < particleA1Min) || (atom1 > particleA2Max)))
             {
-				if ((atom1 < particleA1Min) || (atom1 > particleA2Max))
-                {
-               		if (it == ((NumbRotTimes - 1)/2))
-                	{
-                    	weight1 = 0.5;
-                	}
+            	if (it == ((NumbRotTimes - 1)/2))
+               	{
+                   	weight1 = 0.5;
 				}
             } 
 #endif
