@@ -31,16 +31,16 @@ molecule            = "HF"
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 1000
-numbmolecules       = 8
+numbmolecules       = 2
 numbpass            = 50
-skip                = 5
+skip                = 2
 
 tau                 = 0.002                                               
 
 Rpt                 = 10.05
 dipolemoment        = 1.86
 
-nrange              = 101
+nrange              = 11
 trunc               = numbblocks
 preskip             = 0
 particleA           = 1
@@ -72,6 +72,8 @@ if status   == "submission":
 		dest_path   = "/scratch/tapas/linear_rotors/" 
 		final_path  = "/work/tapas/linear_rotors/"                                 #change param17
 
+#ENT_TYPE = "SWAP"
+ENT_TYPE = "BROKENPATH"
 if TypeCal == "ENT":
 	intvalue = 3
 else:
@@ -113,7 +115,7 @@ if status == "analysis":
 
 	if (TypeCal == "ENT"):
 		fanalyze             = open(file_output, "a")
-		fanalyze.write(support.fmt_entropy(status,var))
+		fanalyze.write(support.fmt_entropy(status,var,ENT_TYPE))
 	else:
 		fanalyze             = open(file_output, "a")           
 		fanalyze.write(support.fmt_energy(status,var))
@@ -153,7 +155,7 @@ for i in range(nrange):                                                  #change
 			variable          = beta
 			try:
 				if (TypeCal == "ENT"):
-					fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc,preskip))
+					fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,trunc,preskip,ENT_TYPE))
 				else:
 					fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,trunc,preskip))
 					print dest_dir

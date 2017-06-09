@@ -326,27 +326,41 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip):
+def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip,ENT_TYPE):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_NM, col_DM = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, max_rows=trunc)
-	print len(col_NM)
+	if ENT_TYPE == 'BROKENPATH':
+		col_block, col_NM, col_DM = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, max_rows=trunc)
+		print len(col_NM)
 	
-	mean_NM      = np.mean(col_NM)
-	mean_DM      = np.mean(col_DM)
-	mean_EN      = -log(mean_NM/mean_DM)
+		mean_NM      = np.mean(col_NM)
+		mean_DM      = np.mean(col_DM)
+		mean_EN      = -log(mean_NM/mean_DM)
 
-	error_NM     = jackknife(mean_NM,col_NM)
-	error_DM     = jackknife(mean_DM,col_DM)
-	error_EN     = sqrt((error_DM/mean_DM)*(error_DM/mean_DM) + (error_NM/mean_NM)*(error_NM/mean_NM))
-	#print i, len(col_block)
+		error_NM     = jackknife(mean_NM,col_NM)
+		error_DM     = jackknife(mean_DM,col_DM)
+		error_EN     = sqrt((error_DM/mean_DM)*(error_DM/mean_DM) + (error_NM/mean_NM)*(error_NM/mean_NM))
 
-	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_NM, mean_DM, mean_EN, error_NM, error_DM, error_EN)
-	output  += "\n"
+		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_NM, mean_DM, mean_EN, error_NM, error_DM, error_EN)
+		output  += "\n"
+
+	if ENT_TYPE == "SWAP":
+		col_block, col_Tr = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1], skip_header=preskip, max_rows=trunc)
+		print len(col_Tr)
+	
+		mean_Tr      = np.mean(col_Tr)
+		mean_EN      = -log(1/mean_Tr)
+
+		error_Tr     = jackknife(mean_Tr,col_Tr)
+		error_EN     = error_Tr/mean_Tr
+
+		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_Tr, mean_EN, error_Tr, error_EN)
+		output  += "\n"
+
 	return output
 
-def fmt_entropy(status,variable):
+def fmt_entropy(status,variable,ENT_TYPE):
 	'''
 	This function gives us the output 
 	'''
@@ -357,7 +371,10 @@ def fmt_entropy(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Entropy')
+		if ENT_TYPE == 'BROKENPATH':
+			output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Entropy')
+		if ENT_TYPE == 'SWAP':
+			output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable+'  (1/K)', '<TrSq>', 'Avg. Entropy', 'Error of TrSq', 'Error of Entropy')
 		output    +="\n"
 		output    += '{:=<155}'.format('#')
 		output    +="\n"
@@ -428,7 +445,7 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 	if RUNDIR != "scratch":
 		os.chdir(src_path)
 
-def FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc):
+def FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc,ENT_TYPE):
 	if (TypeCal == "PIGS"):
 		file_output             = "Energy-vs-"+str(var)+"-fixed-"
 		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
@@ -470,7 +487,7 @@ def FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmo
 	
 	if (TypeCal == "ENT"):
 		fanalyze             = open(file_output, "a")
-		fanalyze.write(fmt_entropy(status,var))
+		fanalyze.write(fmt_entropy(status,var,ENT_TYPE))
 	else:
 		fanalyze             = open(file_output, "a")           
 		fanalyze.write(fmt_energy(status,var))

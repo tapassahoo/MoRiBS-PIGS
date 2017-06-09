@@ -79,6 +79,8 @@ double _bnm;
 double _bdm;
 double _nm_total;
 double _dm_total;
+double _trOfDensitySq;
+double _trOfDensitySq_total;
 #endif
 
 double _brot;       // rotational kin energy, block average
@@ -762,6 +764,7 @@ void MCResetBlockAverage(void)
 #ifdef ENTANGLEMENT
     _bnm       = 0.0;
     _bdm       = 0.0;
+	_trOfDensitySq = 0.0;
 #endif
 #endif
 	_bkin        = 0.0;
@@ -850,8 +853,10 @@ void MCGetAverage(void)
     double sdm        = GetEstimDM();
     _bnm             += snm;
     _bdm             += sdm;
+	_trOfDensitySq   += sdm/snm;
     _nm_total        += snm;
     _dm_total        += sdm;
+	_trOfDensitySq_total += sdm/snm;
 #endif
 /* new addition */
 
@@ -1172,8 +1177,13 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;
+#ifdef BROKENPATH
     fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
+#endif
+#ifdef SWAP
+    fid << setw(IO_WIDTH) << _trOfDensitySq/avergCount << BLANK;
+#endif
     fid << endl;
     fid.close();
 }
@@ -1317,8 +1327,13 @@ void SaveSumTrReducedDens(double acount, double numb)
     const char *_proc_=__func__;
 
     _fentropy << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
+#ifdef BROKENPATH
     _fentropy << setw(IO_WIDTH) << _nm_total/acount << BLANK;
     _fentropy << setw(IO_WIDTH) << _dm_total/acount << BLANK;
+#endif
+#ifdef SWAP
+    _fentropy << setw(IO_WIDTH) << _trOfDensitySq_total/acount << BLANK;
+#endif
     _fentropy << endl;
 }
 #endif
@@ -1346,6 +1361,7 @@ void InitTotalAverage(void)  // DUMP
 #ifdef ENTANGLEMENT
     _nm_total  = 0.0;
     _dm_total  = 0.0;
+    _trOfDensitySq_total = 0.0;
 #endif
 #endif
 	_dpot_total = 0.0;  //added by Hui Li
