@@ -19,7 +19,7 @@ import support
 TypeCal             = 'ENT'
 
 status              = "submission"
-status              = "analysis"
+#status              = "analysis"
 status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
@@ -30,9 +30,9 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 1000
+numbblocks	        = 10000
 numbmolecules       = 2
-numbpass            = 50
+numbpass            = 10
 skip                = 2
 
 tau                 = 0.002                                               
@@ -40,7 +40,7 @@ tau                 = 0.002
 Rpt                 = 10.05
 dipolemoment        = 1.86
 
-nrange              = 11
+nrange              = 21
 trunc               = numbblocks
 preskip             = 0
 particleA           = 1
@@ -73,7 +73,8 @@ if status   == "submission":
 		final_path  = "/work/tapas/linear_rotors/"                                 #change param17
 
 #ENT_TYPE = "SWAP"
-ENT_TYPE = "BROKENPATH"
+#ENT_TYPE = "BROKENPATH"
+ENT_TYPE = "REGULARPATH"
 if TypeCal == "ENT":
 	intvalue = 3
 else:

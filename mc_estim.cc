@@ -3948,8 +3948,8 @@ double PotFunc(double *uvec1, double *uvec2, double RptAng)
 	double dm_au  = DipoleMoment/AuToDebye; // DipoleMoment in Debye
 	double Rpt_au = RptAng/BOHRRADIUS;
 	double PreFactor = AuToKelvin*dm_au*dm_au/(Rpt_au*Rpt_au*Rpt_au);
-    double pot_au = PreFactor*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2]);
-    double PotReturn = pot_au;
+    double PotInKelvin = PreFactor*(uvec1[0]*uvec2[0] + uvec1[1]*uvec2[1] - 2.0*uvec1[2]*uvec2[2]);
+    double PotReturn = PotInKelvin;
 #ifdef POTZERO
 	PotReturn = 0.0;
 #endif

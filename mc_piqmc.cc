@@ -882,6 +882,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
         {
             dens_old = SRotDens(p0,type)*SRotDens(p1,type);
         }
+#ifndef REGULARPATH
 #ifdef ENTANGLEMENT
 #ifdef BROKENPATH
         if ((gatom >= particleA1Min) && (gatom <= particleA2Max))
@@ -952,6 +953,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
         }
 #endif
 #endif
+#endif
 #else
         dens_old = SRotDens(p0,type)*SRotDens(p1,type);
 #endif
@@ -1011,7 +1013,9 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
         {
             dens_new = SRotDens(p0,type)*SRotDens(p1,type);
         }
+#ifndef REGULARPATH
 #ifdef ENTANGLEMENT
+#ifdef BROKENPATH
         if ((gatom >= particleA1Min) && (gatom <= particleA2Max))
         {
             if (it1 == (((NumbRotTimes - 1)/2) - 1))
@@ -1023,6 +1027,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
                 dens_new = SRotDens(p1,type);
             }
         }
+#endif
 #ifdef SWAP
         if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
         {
@@ -1077,6 +1082,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
                 dens_new = SRotDens(pSwap,type)*SRotDens(p1,type);
             }
         }
+#endif
 #endif
 #endif
 #else
@@ -2300,13 +2306,16 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 #endif
 
 	double spotSwap = 0.0;
-    double weight  = 1.0;
-    double weight1 = 1.0;
+    double weight, weight1;
 #ifdef PIGSROTORS
     if (it == 0 || it == (NumbRotTimes - 1))
     {
         weight = 0.5;
     }
+	else
+	{
+		weight = 1.0;
+	}
 #endif
 
 #ifdef LINEARROTORS
@@ -2316,11 +2325,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
         int t0  = offset0 + it;
         int tm0 = offset0 + it/RotRatio;
 
-        spot = 0.0;
-
-        int atom1Init  = 0;
-        int NumbAtoms1 = NumbAtoms;
-
+		int atom1Init, NumbAtoms1;
 #ifdef ENTANGLEMENT
    	    int particleA1Min = (NumbAtoms/2) - NumbParticle;
    	    int particleA1Max = particleA1Min + NumbParticle - 1;
@@ -2337,7 +2342,11 @@ double PotRotEnergy(int atom0, double **cosine, int it)
             atom1Init  = particleA2Min;
             NumbAtoms1 = NumbAtoms;
         }
+#else
+        atom1Init  = 0;
+        NumbAtoms1 = NumbAtoms;
 #endif
+        spot = 0.0;
         for (int atom1 = atom1Init; atom1 < NumbAtoms1; atom1++)
         if (atom1 != atom0)                    
         {
@@ -2418,34 +2427,31 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                 {
                     uvec1[id] = cosine[id][tm0];
                     uvec2[id] = MCCosine[id][tm1];
-                    dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
-                    dr2    += (dr[id]*dr[id]);
+                    dr[id]    = (MCCoords[id][t0] - MCCoords[id][t1]);
+                    dr2      += (dr[id]*dr[id]);
                 }
-
                 double r = sqrt(dr2);
-
-#ifdef POTZERO
-				spot = 0.0;
-#else
-				spot += PotFunc(uvec1, uvec2, r);
-#endif
-            }  //stype
+				weight1 = 1.0;
+#ifndef REGULARPATH
 #ifdef ENTANGLEMENT
-			if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
-            {
-           		if (it == ((NumbRotTimes - 1)/2))
-              	{
-                   	weight1 = 0.5;
-				}
-            } 
-            if (((atom0 >= particleA1Min) && (atom0 <= particleA2Max)) && ((atom1 < particleA1Min) || (atom1 > particleA2Max)))
-            {
-            	if (it == ((NumbRotTimes - 1)/2))
-               	{
-                   	weight1 = 0.5;
-				}
-            } 
+				if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
+            	{
+           			if (it == ((NumbRotTimes - 1)/2))
+              		{
+                   		weight1 = 0.5;
+					}
+            	} 
+            	if (((atom0 >= particleA1Min) && (atom0 <= particleA2Max)) && ((atom1 < particleA1Min) || (atom1 > particleA2Max)))
+            	{
+            		if (it == ((NumbRotTimes - 1)/2))
+               		{
+                   		weight1 = 0.5;
+					}
+            	} 
 #endif
+#endif
+				spot += weight*weight1*PotFunc(uvec1, uvec2, r);
+            }  //stype
         } //loop over atom1 (molecules)
 #ifdef SWAP
 		spotSwap = 0.0;
@@ -2494,7 +2500,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                     }
 
                     double r = sqrt(dr2);
-                    spotSwap += PotFunc(uvec1, uvec2, r);
+                    spotSwap += 0.5*PotFunc(uvec1, uvec2, r);
                 }  //stype
 		    }
         }
@@ -2514,7 +2520,8 @@ double PotRotEnergy(int atom0, double **cosine, int it)
     }
 #endif
 #endif
-    return (spot*weight*weight1+weight1*spotSwap);
+	double spotReturn = spot+spotSwap;
+    return spotReturn;
 }
 
 double PotRotE3D(int atom0,double * Eulang,int it)   

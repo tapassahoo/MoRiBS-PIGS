@@ -214,6 +214,7 @@ int main(int argc, char *argv[])
       RandomInit(MPIrank,MPIsize);
 
     MCConfigInit();                // generate initial configurations
+#ifdef IOWRITE
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
     {
         for (int id=0;id<NDIM;id++)
@@ -221,6 +222,14 @@ int main(int argc, char *argv[])
             cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
         }
     } //loop over number of cages
+    for (int it=0;it<NumbAtoms*NumbTimes;it++)
+    {
+        for (int id=0;id<NDIM;id++)
+        {
+            cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
+        }
+    } //loop over number of cages
+#endif
 //    read in initial MCCoords and MCAngles
       if(InitMCCoords)
       {
@@ -849,14 +858,20 @@ void MCGetAverage(void)
     
 #endif
 #else
-    double snm        = GetEstimNM();
-    double sdm        = GetEstimDM();
+    double snm        = GetEstimNM1();
+    double sdm        = GetEstimDM1();
     _bnm             += snm;
     _bdm             += sdm;
-	_trOfDensitySq   += sdm/snm;
     _nm_total        += snm;
     _dm_total        += sdm;
+#ifdef SWAP
+	_trOfDensitySq   += sdm/snm;
 	_trOfDensitySq_total += sdm/snm;
+#endif
+#ifdef REGULARPATH
+	_trOfDensitySq   += snm/sdm;
+	_trOfDensitySq_total += snm/sdm;
+#endif
 #endif
 /* new addition */
 
@@ -1181,9 +1196,7 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
 #endif
-#ifdef SWAP
     fid << setw(IO_WIDTH) << _trOfDensitySq/avergCount << BLANK;
-#endif
     fid << endl;
     fid.close();
 }
@@ -1276,8 +1289,8 @@ void SaveInstantAngularDOF()
     	_fangins << setw(IO_WIDTH) << sphi[i] << BLANK;
 	}
     delete[] sphi;
-    double snm        = GetEstimNM();
-    double sdm        = GetEstimDM();
+    double snm        = GetEstimNM1();
+    double sdm        = GetEstimDM1();
     _fangins << setw(IO_WIDTH) << snm << BLANK;
     _fangins << setw(IO_WIDTH) << sdm << BLANK;
 #else
@@ -1331,9 +1344,7 @@ void SaveSumTrReducedDens(double acount, double numb)
     _fentropy << setw(IO_WIDTH) << _nm_total/acount << BLANK;
     _fentropy << setw(IO_WIDTH) << _dm_total/acount << BLANK;
 #endif
-#ifdef SWAP
     _fentropy << setw(IO_WIDTH) << _trOfDensitySq_total/acount << BLANK;
-#endif
     _fentropy << endl;
 }
 #endif

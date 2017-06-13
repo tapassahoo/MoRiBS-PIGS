@@ -355,7 +355,20 @@ def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip,ENT_TYPE):
 		error_Tr     = jackknife(mean_Tr,col_Tr)
 		error_EN     = error_Tr/mean_Tr
 
-		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_Tr, mean_EN, error_Tr, error_EN)
+		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, 1/mean_Tr, mean_EN, error_Tr, error_EN)
+		output  += "\n"
+
+	if ENT_TYPE == "REGULARPATH":
+		col_block, col_Tr = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1], skip_header=preskip, max_rows=trunc)
+		print len(col_Tr)
+	
+		mean_Tr      = np.mean(col_Tr)
+		mean_EN      = -log(mean_Tr)
+
+		error_Tr     = jackknife(mean_Tr,col_Tr)
+		error_EN     = error_Tr/mean_Tr
+
+		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, 1/mean_Tr, mean_EN, error_Tr, error_EN)
 		output  += "\n"
 
 	return output
