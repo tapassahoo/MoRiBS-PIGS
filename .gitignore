@@ -33,6 +33,7 @@ test-hfhf.f
 /examples/linear_pigs/outpimc*
 /examples/linear_pigs/ts
 /examples/linear_pigs/*/
+examples/linear_pigs/support.pyc
 !/examples/linear_pigs/
 /examples/test_run/
 examples/linear_pigs/entanglement_*particleA_*jobsubmit_*

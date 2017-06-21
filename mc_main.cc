@@ -109,7 +109,7 @@ void SaveSumEnergy (double,double);                 // accumulated average
 #endif
 
 #ifdef INSTANT
-void SaveInstantAngularDOF(); 
+void SaveInstantAngularDOF(long int); 
 void SaveInstantEnergy ();                 // accumulated average
 #endif
 
@@ -214,7 +214,6 @@ int main(int argc, char *argv[])
       RandomInit(MPIrank,MPIsize);
 
     MCConfigInit();                // generate initial configurations
-#ifdef IOWRITE
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
     {
         for (int id=0;id<NDIM;id++)
@@ -229,7 +228,6 @@ int main(int argc, char *argv[])
             cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
         }
     } //loop over number of cages
-#endif
 //    read in initial MCCoords and MCAngles
       if(InitMCCoords)
       {
@@ -382,6 +380,7 @@ int main(int argc, char *argv[])
    InitMCEstims();
    InitTotalAverage();      // DUMP 
    double sumsCount = 0.0;  // counter for accum sums
+   double totalStep = 0.0;
    
    ResetMCCounts();
    ResetQWCounts();
@@ -565,10 +564,11 @@ int main(int argc, char *argv[])
        		else
 		    PIMCPass(type,time);
 #ifdef INSTANT
+			totalStep++;
 #ifdef IOWRITE
             SaveInstantEnergy (); 
 #endif
-		    SaveInstantAngularDOF();
+		    SaveInstantAngularDOF(totalStep);
 #endif
 
    			if (blockCount>NumberOfEQBlocks)        // skip equilibration steps
@@ -734,10 +734,8 @@ void PIMCPass(int type,int time)
     	MCRotationsMove(type);
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
     	MCRotations3D(type);
-#ifdef LINEARROTORS
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
     	MCRotationsMove(type);
-#endif
 #ifdef MOLECULEINCAGE
 	if (MOLECINCAGE)
     {
@@ -858,8 +856,8 @@ void MCGetAverage(void)
     
 #endif
 #else
-    double snm        = GetEstimNM1();
-    double sdm        = GetEstimDM1();
+    double snm        = GetEstimNM();
+    double sdm        = GetEstimDM();
     _bnm             += snm;
     _bdm             += sdm;
     _nm_total        += snm;
@@ -1192,10 +1190,8 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;
-#ifdef BROKENPATH
     fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
-#endif
     fid << setw(IO_WIDTH) << _trOfDensitySq/avergCount << BLANK;
     fid << endl;
     fid.close();
@@ -1269,14 +1265,16 @@ void SaveSumAngularDOF(double acount, double numb)
 
     _fang << endl;
 }
+#endif
 
-void SaveInstantAngularDOF()
+void SaveInstantAngularDOF(long int numb)
 {
     const char *_proc_=__func__;
 
     double* scostheta;
 
 #ifdef ENTANGLEMENT
+   	_fangins << setw(IO_WIDTH) << numb << BLANK;
     scostheta = GetCosThetaEntanglement();
     double* sphi;
     sphi = GetPhiEntanglement();
@@ -1289,11 +1287,21 @@ void SaveInstantAngularDOF()
     	_fangins << setw(IO_WIDTH) << sphi[i] << BLANK;
 	}
     delete[] sphi;
-    double snm        = GetEstimNM1();
-    double sdm        = GetEstimDM1();
+    double snm        = GetEstimNM();
+    double sdm        = GetEstimDM();
     _fangins << setw(IO_WIDTH) << snm << BLANK;
     _fangins << setw(IO_WIDTH) << sdm << BLANK;
-#else
+    _fangins << setw(IO_WIDTH) << snm/sdm << BLANK;
+#endif
+#ifdef PIMCINSTANT
+   	_fangins << setw(IO_WIDTH) << numb << BLANK;
+    scostheta = GetProdUvec12();
+	for (int i = 0; i < (2*NumbRotTimes*NumbAtoms); i++)
+	{
+    	_fangins << setw(IO_WIDTH) << scostheta[i] << BLANK;
+	}
+#endif
+/*
     scostheta = GetCosTheta();
 
     _fangins << setw(IO_WIDTH) << scostheta[0] << BLANK;
@@ -1305,11 +1313,11 @@ void SaveInstantAngularDOF()
     double sphi = GetPhi();
     _fangins << setw(IO_WIDTH) << sphi << BLANK;
 #endif
+*/
 
     _fangins << endl;
     delete[] scostheta;
 }
-#endif
 
 void SaveInstantEnergy()
 {
@@ -1340,10 +1348,8 @@ void SaveSumTrReducedDens(double acount, double numb)
     const char *_proc_=__func__;
 
     _fentropy << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-#ifdef BROKENPATH
     _fentropy << setw(IO_WIDTH) << _nm_total/acount << BLANK;
     _fentropy << setw(IO_WIDTH) << _dm_total/acount << BLANK;
-#endif
     _fentropy << setw(IO_WIDTH) << _trOfDensitySq_total/acount << BLANK;
     _fentropy << endl;
 }
@@ -1403,8 +1409,8 @@ void InitTotalAverage(void)  // DUMP
 	_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
 
-#ifdef PIGSROTORSIO
 
+#ifdef IOWRITE
     string fangular;
 
     fangular  = MCFileName + IO_SUM;
@@ -1418,9 +1424,10 @@ void InitTotalAverage(void)  // DUMP
 
     if (!_fang.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fangular.c_str());
+#endif
 
 
-
+#ifdef IOFILES
     string fangularins;
 
     fangularins  = MCFileName + "_instant";
