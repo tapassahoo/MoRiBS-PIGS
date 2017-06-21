@@ -42,7 +42,7 @@ extern double  Temperature;
 extern double  Distance;
 #endif
 extern double DipoleMoment;
-#ifdef TEST
+#ifdef BIPARTITION
 extern int     NumbParticle;
 #endif
 extern double  Density;

@@ -1297,7 +1297,6 @@ double GetTotalEnergy(void)
 	return (0.5*spot);
 }
 
-#ifdef PIGSROTORS
 double GetRotEnergyPIGS(void)
 {
     double srot = 0.0;
@@ -1322,7 +1321,7 @@ double GetRotEnergyPIGS(void)
 	    } 
 
 
-#ifndef ROTENERGYESTIM
+#ifdef TYPE0
         double rdens0 = SRotDens(p0,type);
         double rdens1 = SRotDens(p1,type);
         if (fabs(rdens0) > RZERO)               // need to find asymptotic for small rot dens
@@ -1333,23 +1332,21 @@ double GetRotEnergyPIGS(void)
         {
             srot += SRotDensDeriv(p1,type)/rdens1;
         }
-#else
+#endif
+#ifdef TYPE1
         srot += SRotDensDeriv(p0,type) + SRotDensDeriv(p1,type);
 #endif
 	}
     return (0.5*nslice*srot);
 }
-#endif
 
-/*
 double *GetCosTheta()
 {
     const char *_proc_=__func__; 
-    //if (NumbAtoms <= 1) nrerror(_proc_," Only one rotor/atom/molecule");
 
     double cosTheta1[NumbAtoms];
     double cosTheta;
-    int it          = (NumbRotTimes - 1)/2;
+    int it = (NumbRotTimes - 1)/2;
 
 	if(MCAtom[IMTYPE].numb > 1)
 	{
@@ -1425,7 +1422,6 @@ double *GetCosTheta()
     }
     return angle;
 }
-*/
 
 double *GetPhiEntanglement()
 {

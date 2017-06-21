@@ -15,11 +15,11 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 
 status              = "submission"
-status              = "analysis"
+#status              = "analysis"
 status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
@@ -30,17 +30,17 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 40000
+numbblocks	        = 20000
 numbmolecules       = 2
 numbpass            = 10
 skip                = 2
 
-tau                 = 0.001                                               
+tau                 = 0.005 
 
 Rpt                 = 10.05
 dipolemoment        = 1.86
 
-nrange              = 21
+nrange              = 51
 trunc               = numbblocks
 preskip             = 1000
 particleA           = 1
@@ -129,7 +129,7 @@ if status == "analysis":
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
 
-step = [0.8 for i in range(nrange)]
+step = [1.8 for i in range(nrange)]
 # Loop over jobs
 for i in range(nrange):                                                  #change param19
 
