@@ -15,8 +15,8 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
+#TypeCal             = 'PIMC'
+TypeCal             = 'PIGS'
 #TypeCal             = 'ENT'
 
 #molecule            = "HF-C60"                                                  
@@ -28,14 +28,14 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 20000
-numbmolecules       = 2                                                          
+numbblocks	        = 10000
+numbmolecules       = 8                                                          
 numbpass            = 10
-beta     	        = 0.02
+beta     	        = 0.1
 
-Rpt                 = 5.0
+Rpt                 = 10.05
 dipolemoment        = 1.86
-skip                = 8
+skip                = 2
 
 status              = "submission"                                            
 status              = "analysis"                                            
@@ -44,9 +44,9 @@ status_rhomat       = "Yes"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-nrange              = 9
+nrange              = 51
 trunc               = numbblocks
-preskip             = 100
+preskip             = 1000
 particleA           = 1
 
 if (TypeCal == "PIGS"):
@@ -97,9 +97,9 @@ if (molecule_rot == "H2"):
 	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
 
 if (molecule_rot == "HF"):
-	#step           = [0.7,1.5,1.5,1.5,1.3,1.3,1.0,1.0,0.8,0.8,0.7,0.7,1.2,1.2,1.2,1.2,1.0,1.0,1.0,1.0,1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
+	step           = [0.7,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.3,1.3,1.2,1.2,1.1,1.1,1.1,1.0,1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
 	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
-	step           = [4.5,1.5,2.0]  # 2 HF beta 0.1 K-1 PIMC
+	#step           = [4.5,1.5,2.0]  # 2 HF beta 0.1 K-1 PIMC
 
 #===============================================================================
 #                                                                              |
@@ -145,8 +145,7 @@ if status == "analysis":
 		file_output_angularDOF1 += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
 
-		call(["rm", file_output_angularDOF, file_output_angularDOF1])
-		#call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
+		call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
 
 	
 	if (TypeCal == "ENT"):
@@ -174,11 +173,12 @@ if (TypeCal == "ENT"):
 #list_nb = [8,16,32,64,96,128]
 #skip    = 2
 #for i in list_nb:
+skipBefore = 9
 
 for i in range(nrange):                                                
 	if (TypeCal == 'PIMC'):
 
-		if (i>1 and i%skip == 0):
+		if (i>skipBefore and i%skip == 0):
 			value = i
 			tau          = beta/value
 			numbbeads    = value
@@ -201,7 +201,7 @@ for i in range(nrange):
 				except:
 					pass
 	else:
-		if (i>1 and i % skip == 0 ):
+		if (i>skipBefore and i % skip == 0 ):
 
 			if i % 2 != 0:
 				value        = i
@@ -213,7 +213,7 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA)
 
 			if status == "analysis":
 

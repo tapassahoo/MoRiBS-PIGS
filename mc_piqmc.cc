@@ -2564,7 +2564,6 @@ double PotEnergy(int atom0, double **pos, int it)
    return (spot);
 }
 
-/*
 double PotRotEnergy(int atom0, double **cosine, int it)   
 //  Orientational energy 
 {
@@ -2855,8 +2854,8 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 	double spotReturn = spot + spotSwap;
     return spotReturn;
 }
-*/
 
+/*
 double PotRotEnergy(int atom0, double **cosine, int it)   
 {
 	int type0   =  MCType[atom0];
@@ -2888,6 +2887,7 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 	double spotReturn = spot;
     return spotReturn;
 }
+*/
 
 double PotRotE3D(int atom0,double * Eulang,int it)   
 //  Orientational energy 

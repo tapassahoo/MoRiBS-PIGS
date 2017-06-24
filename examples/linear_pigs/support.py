@@ -268,7 +268,7 @@ def rotmat(TypeCal,molecule,temperature,numbbeads):
 		numbbeads1		= numbbeads
 	else:
 		numbbeads1		= numbbeads - 1
-	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 150000 -1"
+	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 15000 -1"
 	print command_linden_run
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
@@ -416,7 +416,12 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
 
 	#job submission
-	fname         = 'entanglement_'+str(numbmolecules)+'particleA_'+str(particleA)+'jobsubmit_'+str(i)
+	if (TypeCal == 'PIGS'):
+		fname         = 'job-pigs-'+str(i)+'-for-'+folder_run
+	if (TypeCal == 'PIMC'):
+		fname         = 'job-pimc-'+str(i)+'-for-'+folder_run
+	if (TypeCal == 'ENT'):
+		fname         = 'job-ent-'+str(i)+'-for-'+folder_run
 	fwrite        = open(fname, 'w')
 
 	if RUNDIR == "scratch":

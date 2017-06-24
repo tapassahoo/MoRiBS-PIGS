@@ -19,7 +19,7 @@ TypeCal             = 'PIGS'
 #TypeCal             = 'ENT'
 
 status              = "submission"
-#status              = "analysis"
+status              = "analysis"
 status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
@@ -30,8 +30,8 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 20000
-numbmolecules       = 2
+numbblocks	        = 80000
+numbmolecules       = 7
 numbpass            = 10
 skip                = 2
 
@@ -42,7 +42,7 @@ dipolemoment        = 1.86
 
 nrange              = 51
 trunc               = numbblocks
-preskip             = 1000
+preskip             = 5000
 particleA           = 1
 
 #ENT_TYPE = "SWAP"

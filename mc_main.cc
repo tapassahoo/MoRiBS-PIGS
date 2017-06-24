@@ -84,7 +84,9 @@ double _trOfDensitySq_total;
 #endif
 
 double _brot;       // rotational kin energy, block average
+double _brot1;       // rotational kin energy, block average
 double _rot_total;  // rotational kin energy, global average
+double _rot_total1;  // rotational kin energy, global average
 double _brotsq;     // rotational energy square, block average
 double _rotsq_total; // rotational energy square, global average
 double _Cv_total;    // heat capacity, global average
@@ -777,6 +779,7 @@ void MCResetBlockAverage(void)
 	_bkin        = 0.0;
 
 	_brot        = 0.0;
+	_brot1        = 0.0;
 	_brotsq      = 0.0;
 	_bCv         = 0.0;
 	_bCv_trans   = 0.0;
@@ -812,6 +815,7 @@ void MCGetAverage(void)
 	_pot_total       += spot;
 #ifdef PIGSROTORS
 	double stotal     = GetTotalEnergy();         // Total energy
+	double srot1      = (GetTotalEnergy() - GetPotEnergyPIGS());
 #else
     double stotal     = 0.0;
 #endif
@@ -902,6 +906,11 @@ void MCGetAverage(void)
 		_rotsq_total += ErotSQ;
 
        GetRCF(); 
+
+#ifdef PIGSROTORSIO
+		_brot1       += srot1;
+		_rot_total1   += srot1;
+#endif
 	}
 
 #ifdef IOWRITE
@@ -1122,6 +1131,7 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
 	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
+	fid << setw(IO_WIDTH) << _brot1*Units.energy/avergCount << BLANK;    // rot energy 5  
 #else
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
     fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // kinetic energy 2
@@ -1207,6 +1217,7 @@ void SaveSumEnergy (double acount, double numb)  // global average
 	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
 	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
 	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
+	_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
 #else
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
 	_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
@@ -1384,6 +1395,7 @@ void InitTotalAverage(void)  // DUMP
 	_dpot_total = 0.0;  //added by Hui Li
 
 	_rot_total = 0.0;
+	_rot_total1 = 0.0;
 	_rotsq_total = 0.0;
 	_Cv_total = 0.0;
 	_Cv_trans_total = 0.0;
