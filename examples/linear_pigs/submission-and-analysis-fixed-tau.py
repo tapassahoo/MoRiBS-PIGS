@@ -19,7 +19,7 @@ TypeCal             = 'PIGS'
 #TypeCal             = 'ENT'
 
 status              = "submission"
-status              = "analysis"
+#status              = "analysis"
 status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
@@ -31,7 +31,7 @@ molecule            = "HF"
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 80000
-numbmolecules       = 4
+numbmolecules       = 3
 numbpass            = 10
 skip                = 2
 
