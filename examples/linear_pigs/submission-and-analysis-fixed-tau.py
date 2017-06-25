@@ -31,7 +31,7 @@ molecule            = "HF"
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 80000
-numbmolecules       = 7
+numbmolecules       = 4
 numbpass            = 10
 skip                = 2
 

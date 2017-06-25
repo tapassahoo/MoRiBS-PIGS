@@ -108,19 +108,21 @@ def outputstr_energy(numbbeads,tau,dest_dir,trunc,preskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_pot, col_tot, col_rot = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3], skip_header=preskip, max_rows=trunc)
+	col_block, col_pot, col_tot, col_rot, col_rot1 = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, max_rows=trunc)
 	print len(col_tot)
 	
 	mean_pot      = np.mean(col_pot)
 	mean_tot      = np.mean(col_tot)
 	mean_rot      = np.mean(col_rot)
+	mean_rot1     = np.mean(col_rot1)
 
 	error_pot     = jackknife(mean_pot,col_pot)
 	error_tot     = jackknife(mean_tot,col_tot)
 	error_rot     = jackknife(mean_rot,col_rot)
+	error_rot1    = jackknife(mean_rot1,col_rot1)
 	#print i, len(col_block)
 
-	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_pot, mean_tot, mean_rot, error_pot, error_tot, error_rot)
+	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_pot, mean_tot, mean_rot, mean_rot1, error_pot, error_tot, error_rot, error_rot1)
 	output  += "\n"
 	return output
 
@@ -175,12 +177,12 @@ def fmt_energy(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable, 'Avg. Potential', 'Avg. Total', 'Avg. rotational', 'Error of Potential', 'Error of Total', 'Error of Rotational')
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable, 'Avg. Potential', 'Avg. Total', 'Avg. rotational', 'Avg. (E - V)', 'Error of Potential', 'Error of Total', 'Error of Rotational', 'Error of (E - V)')
 		output    +="\n"
 		output    +="#"
-		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('', (str(unit)), 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)')
+		output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('', (str(unit)), 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)')
 		output    +="\n"
-		output    += '{:=<155}'.format('#')
+		output    += '{:=<200}'.format('#')
 		output    +="\n"
 		return output
 
