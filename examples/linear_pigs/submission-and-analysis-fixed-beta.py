@@ -38,7 +38,7 @@ dipolemoment        = 1.86
 skip                = 2
 
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
