@@ -29,7 +29,7 @@ molecule_rot        = "HF"
 #exit()
 
 numbblocks	        = 80000
-numbmolecules       = 3
+numbmolecules       = 2
 numbpass            = 10
 beta     	        = 0.1
 
