@@ -18,6 +18,8 @@ test-hfhf.f
 /linear_prop/linden-original.f
 /examples/linear_pigs/results/
 /examples/linear_pigs/yw001.*
+/examples/linear_pigs/PIGS-Results*
+/examples/linear_pigs/fit.log
 /examples/linear_pigs/Input*
 /examples/linear_pigs/*.txt*
 /examples/linear_pigs/*.png*

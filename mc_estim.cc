@@ -1608,58 +1608,6 @@ double GetPotEnergy_Entanglement(int atom0, int atom1)
 #endif
 
 #ifdef ENTANGLEMENT
-/*
-double GetEstimNM1(void)
-{
-    int type        = IMTYPE;
-
-    double spot    = 0.0;
-    for (int atom0 = 0; atom0 < (NumbAtoms/4); atom0++)
-    {
-        for (int atom1 = (NumbAtoms/2); atom1 < (3*NumbAtoms/4); atom1++)
-        {
-            spot      += GetPotEnergy_Entanglement(atom0, atom1);
-        }
-    }
-
-    for (int atom0 = (3*(NumbAtoms/4)); atom0 < NumbAtoms; atom0++)
-    {
-        for (int atom1 = (NumbAtoms/4); atom1 < (NumbAtoms/2); atom1++)
-        {
-            spot      += GetPotEnergy_Entanglement(atom0, atom1);
-        }
-    }
-    double potEstimNM = exp(-0.5*MCRotTau*spot);
-
-    double dens = 1.0;
-    for (int atom0 = (NumbAtoms/4); atom0 < (NumbAtoms/2); atom0++)
-    {
-
-        int it0  = (((NumbRotTimes - 1)/2)-1);
-        int it1   = ((NumbRotTimes - 1)/2);
-
-        int atom1   = atom0 + ((NumbAtoms/2)-1) - (2*(atom0 - (NumbAtoms/4)));
-        int offset0 = NumbRotTimes*atom0;
-        int offset1 = NumbRotTimes*atom1;
-
-        int t1M1 = offset0 + it0;
-        int t1M = offset1 + it1;
-        int t2M1 = offset1 + it0;
-        int t2M = offset0 + it1;
-
-        double p0   = 0.0;
-        double p1   = 0.0;
-        for (int id = 0;id<NDIM;id++)
-        {
-            p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
-            p1 += (MCCosine[id][t2M1]*MCCosine[id][t2M]);
-        }
-        dens *= SRotDens(p0,type)*SRotDens(p1,type);
-    }
-    double estimNM = dens*potEstimNM;
-    return estimNM;
-}
-*/
 double GetEstimNM(void)
 {
     int atom0, atom1;
@@ -1670,7 +1618,6 @@ double GetEstimNM(void)
    	int particleA2Min = particleA1Max + 1;
    	int particleA2Max = particleA2Min + NumbParticle - 1;
 
-/*
     double spot    = 0.0;
 
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
@@ -1689,12 +1636,11 @@ double GetEstimNM(void)
     	}
 	}
     double potEstimNM = exp(-0.5*MCRotTau*spot);
-*/
 
-    double dens1 = 1.0;
     int it0  = (((NumbRotTimes - 1)/2)-1);
     int it1  = ((NumbRotTimes - 1)/2);
 
+    double dens1 = 1.0;
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
 	{
     	int atom1 = particleA2Max - (atom0 - particleA1Min);
@@ -1730,55 +1676,10 @@ double GetEstimNM(void)
     	}
     	dens2 *= SRotDens(p0,type);
 	}
-  	double estimNM = dens1*dens2;//*potEstimNM;
+  	double estimNM = dens1*dens2*potEstimNM;
     return estimNM;
 }
-/*
-double GetEstimDM1(void)
-{
-    int type       = IMTYPE;
 
-    double spot    = 0.0;
-    for (int atom0 = 0; atom0 < (NumbAtoms/4); atom0++)
-    {
-        for (int atom1 = (NumbAtoms/4); atom1 < (NumbAtoms/2); atom1++)
-        {
-            spot      += GetPotEnergy_Entanglement(atom0, atom1);
-        }
-    }
-
-    for (int atom0 = (3*(NumbAtoms/4)); atom0 < NumbAtoms; atom0++)
-    {
-        for (int atom1 = (NumbAtoms/2); atom1 < (3*(NumbAtoms/4)); atom1++)
-        {
-            spot      += GetPotEnergy_Entanglement(atom0, atom1);
-        }
-    }
-    double potEstimDM = exp(-0.5*MCRotTau*spot);
-
-    double dens = 1.0;
-    for (int atom0 = (NumbAtoms/4); atom0 < (3*NumbAtoms/4); atom0++)
-    {
-
-        int it0  = (((NumbRotTimes - 1)/2)-1);
-        int it1   = ((NumbRotTimes - 1)/2);
-
-        int offset0 = NumbRotTimes*atom0;
-
-        int t0 = offset0 + it0;
-        int t1 = offset0 + it1;
-
-        double p0   = 0.0;
-        for (int id = 0;id<NDIM;id++)
-        {
-            p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
-        }
-        dens *= SRotDens(p0,type);
-    }
-    double estimDM = dens*potEstimDM;
-    return estimDM;
-}
-*/
 double GetEstimDM(void)
 {
     int type       = IMTYPE;
@@ -1788,7 +1689,6 @@ double GetEstimDM(void)
    	int particleA2Min = particleA1Max + 1;
    	int particleA2Max = particleA2Min + NumbParticle - 1;
 
-/*
     double spot    = 0.0;
 
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
@@ -1807,7 +1707,6 @@ double GetEstimDM(void)
     	}
 	}
     double potEstimDM = exp(-0.5*MCRotTau*spot);
-*/
 
     double dens = 1.0;
     for (int atom0 = particleA1Min; atom0 <= particleA2Max; atom0++)
@@ -1827,7 +1726,7 @@ double GetEstimDM(void)
         }
         dens *= SRotDens(p0,type);
     }
-    double estimDM = dens;//*potEstimDM;
+    double estimDM = dens*potEstimDM;
     return estimDM;
 }
 #endif

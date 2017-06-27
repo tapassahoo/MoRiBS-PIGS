@@ -19,7 +19,7 @@ TypeCal             = 'PIGS'
 #TypeCal             = 'ENT'
 
 status              = "submission"
-#status              = "analysis"
+status              = "analysis"
 status_rhomat       = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
