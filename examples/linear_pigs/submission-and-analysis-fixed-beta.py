@@ -29,7 +29,7 @@ molecule_rot        = "HF"
 #exit()
 
 numbblocks	        = 80000
-numbmolecules       = 10
+numbmolecules       = 11
 numbpass            = 10
 beta     	        = 0.1
 
@@ -38,7 +38,7 @@ dipolemoment        = 1.86
 skip                = 2
 
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
