@@ -141,11 +141,19 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 #ifdef LINEARROTORS
 extern "C" void vinit_();
 #endif
+#ifdef SWAPTOUNSWAP
+  	int Distribution = 1;
+	double MCAccepSwap;
+	double MCAccepUnSwap;
+#endif
 
 //-------------------------------------------
 
 int main(int argc, char *argv[])
 {
+#ifdef SWAPTOUNSWAP
+srand( time(NULL) );
+#endif
 #ifdef LINEARROTORS
    vinit_();
 #endif
@@ -749,6 +757,10 @@ void PIMCPass(int type,int time)
 
 void MCResetBlockAverage(void) 
 {
+#ifdef SWAPTOUNSWAP
+    MCAccepSwap = 0.0;
+    MCAccepUnSwap = 0.0;
+#endif
 	avergCount = 0.0;
 
 	ResetMCEstims();
@@ -860,8 +872,13 @@ void MCGetAverage(void)
     
 #endif
 #else
+#ifdef SWAPTOUNSWAP
+    double snm        = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
+    double sdm        = MCAccepUnSwap/(MCAccepSwap+MCAccepUnSwap);
+#else
     double snm        = GetEstimNM();
     double sdm        = GetEstimDM();
+#endif
     _bnm             += snm;
     _bdm             += sdm;
     _nm_total        += snm;
@@ -907,9 +924,11 @@ void MCGetAverage(void)
 
        GetRCF(); 
 
+#ifndef ENTANGLEMENT
 #ifdef PIGSROTORSIO
 		_brot1       += srot1;
 		_rot_total1   += srot1;
+#endif
 #endif
 	}
 
