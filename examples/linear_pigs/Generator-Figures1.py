@@ -62,13 +62,13 @@ if (TypePlot == 2):
 	TotalEnergy2 = TotalEnergy2/NumbRotors2
 
 if (TypePlot == 3):
-	plt.xlim(1.90,10.10)
+	plt.xlim(1.90,11.10)
 	mu1 = []
 	errormu1 = []
 	num1 = []
 	mu2 = []
 	num2 = []
-	for i in range(1,9):
+	for i in range(1,10):
 		ii = i-1
 		mu1.append(TotalEnergy1[i] - TotalEnergy1[ii])
 		num1.append(NumbRotors1[i])

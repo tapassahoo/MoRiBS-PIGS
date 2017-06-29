@@ -28,8 +28,8 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 80000
-numbmolecules       = 11
+numbblocks	        = 400000
+numbmolecules       = 2
 numbpass            = 10
 beta     	        = 0.1
 
