@@ -458,9 +458,10 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
-			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 #ifdef SWAPTOUNSWAP
 			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp, Distribution);
+#else
+			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 #endif
 		}
 	}
@@ -481,9 +482,10 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
  			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
-			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 #ifdef SWAPTOUNSWAP
 			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp, Distribution);
+#else
+			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 #endif
 		}
 	}
@@ -492,8 +494,8 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
 #ifdef SWAPTOUNSWAP
-    double rand4 = (double)rand() / ((double)RAND_MAX + 1);
-    //double rand4 = runif(Rng);
+    //double rand4 = (double)rand() / ((double)RAND_MAX + 1);
+    double rand4 = runif(Rng);
     MCSwap(rand4, Distribution);
     if (Distribution == 2) MCAccepSwap += 1;
     else MCAccepUnSwap += 1;
@@ -1614,16 +1616,12 @@ void MCSwap(double rand4, int &Distribution)
 
     if (Distribution == 1)
     {
-    //  if (GetEstimDM() > RZERO)
-            rd = GetEstimNM()/GetEstimDM();
-    //  else rd = 1.0;
+        rd = GetEstimNM()/GetEstimDM();
     }
 
     if (Distribution == 2)
     {
-    //  if (GetEstimNM() > RZERO)
-            rd = GetEstimDM()/GetEstimNM();
-    //  else rd = 1.0;
+        rd = GetEstimDM()/GetEstimNM();
     }
 
     bool Accepted = false;

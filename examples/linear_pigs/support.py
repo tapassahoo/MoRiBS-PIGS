@@ -104,11 +104,11 @@ def inputstr(numbbeads,tau,temperature):
 	output ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
 	return output
 
-def outputstr_energy(numbbeads,tau,dest_dir,trunc,preskip):
+def outputstr_energy(numbbeads,tau,dest_dir,preskip,postskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_pot, col_tot, col_rot, col_rot1 = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, max_rows=trunc)
+	col_block, col_pot, col_tot, col_rot, col_rot1 = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 	print len(col_tot)
 	
 	mean_pot      = np.mean(col_pot)
@@ -116,51 +116,51 @@ def outputstr_energy(numbbeads,tau,dest_dir,trunc,preskip):
 	mean_rot      = np.mean(col_rot)
 	mean_rot1     = np.mean(col_rot1)
 
-	error_pot     = jackknife(mean_pot,col_pot)
-	error_tot     = jackknife(mean_tot,col_tot)
-	error_rot     = jackknife(mean_rot,col_rot)
-	error_rot1    = jackknife(mean_rot1,col_rot1)
+	error_pot     = np.std(col_pot,ddof=1,dtype=np.float64) #jackknife(mean_pot,col_pot)
+	error_tot     = np.std(col_tot,ddof=1) #jackknife(mean_tot,col_tot)
+	error_rot     = np.std(col_rot,ddof=1) #jackknife(mean_rot,col_rot)
+	error_rot1    = np.std(col_rot1,ddof=1) #jackknife(mean_rot1,col_rot1)
 	#print i, len(col_block)
 
 	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_pot, mean_tot, mean_rot, mean_rot1, error_pot, error_tot, error_rot, error_rot1)
 	output  += "\n"
 	return output
 
-def outputstr_angle(numbbeads,tau,dest_dir,trunc,preskip):
+def outputstr_angle(numbbeads,tau,dest_dir,preskip,postskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip,max_rows=trunc)
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_theta     = np.mean(col_theta)
 	mean_costheta1 = np.mean(col_costheta1)
 	mean_theta1    = np.mean(col_theta1)
 
-	error_costheta = jackknife(mean_costheta,col_costheta)
-	error_theta    = jackknife(mean_theta,col_theta)
-	error_costheta1= jackknife(mean_costheta1,col_costheta1)
-	error_theta1   = jackknife(mean_theta1,col_theta1)
+	error_costheta = np.std(col_costheta,ddof=1) #jackknife(mean_costheta,col_costheta)
+	error_theta    = np.std(col_theta,ddof=1) #jackknife(mean_theta,col_theta)
+	error_costheta1= np.std(col_costheta1,ddof=1) #jackknife(mean_costheta1,col_costheta1)
+	error_theta1   = np.std(col_theta1,ddof=1) #jackknife(mean_theta1,col_theta1)
 
 	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_costheta, mean_theta, error_costheta, error_theta, mean_costheta1, mean_theta1, error_costheta1, error_theta1)
 	output  += "\n"
 	return output
 
-def outputstr_angle1(numbbeads,tau,dest_dir,trunc,preskip):
+def outputstr_angle1(numbbeads,tau,dest_dir,preskip,postskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,5,6,7,8], skip_header=preskip, max_rows=trunc)
+	col_block, col_costheta, col_theta, col_costheta1, col_theta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,5,6,7,8], skip_header=preskip, skip_footer=postskip)
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_theta     = np.mean(col_theta)
 	mean_costheta1 = np.mean(col_costheta1)
 	mean_theta1    = np.mean(col_theta1)
 
-	error_costheta = jackknife(mean_costheta,col_costheta)
-	error_theta    = jackknife(mean_theta,col_theta)
-	error_costheta1= jackknife(mean_costheta1,col_costheta1)
-	error_theta1   = jackknife(mean_theta1,col_theta1)
+	error_costheta = np.std(col_costheta,ddof=1) #jackknife(mean_costheta,col_costheta)
+	error_theta    = np.std(col_theta,ddof=1) #jackknife(mean_theta,col_theta)
+	error_costheta1= np.std(col_costheta1,ddof=1) #jackknife(mean_costheta1,col_costheta1)
+	error_theta1   = np.std(col_theta1,ddof=1) #jackknife(mean_theta1,col_theta1)
 
 	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_costheta, mean_theta, error_costheta, error_theta, mean_costheta1, mean_theta1, error_costheta1, error_theta1)
 	output  += "\n"
@@ -314,27 +314,44 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip,ENT_TYPE):
+def outputstr_entropy(numbbeads,tau,dest_dir,preskip,postskip,ENT_TYPE):
 	'''
 	This function gives us the output 
 	'''
-	if ENT_TYPE == 'BROKENPATH':
-		col_block, col_NM, col_DM = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, max_rows=trunc)
-		print len(col_NM)
+	if ENT_TYPE == "SWAPTOUNSWAP":
+		col_block, col_nm, col_dm = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+		print len(col_block)
 	
-		mean_NM      = np.mean(col_NM)
-		mean_DM      = np.mean(col_DM)
-		mean_EN      = -log(mean_NM/mean_DM)
+		mean_nm      = np.mean(col_nm)
+		mean_dm      = np.mean(col_dm)
+		purity       = mean_nm/mean_dm
+		mean_EN      = -log(purity)
 
-		error_NM     = jackknife(mean_NM,col_NM)
-		error_DM     = jackknife(mean_DM,col_DM)
-		error_EN     = sqrt((error_DM/mean_DM)*(error_DM/mean_DM) + (error_NM/mean_NM)*(error_NM/mean_NM))
+		error_nm     = np.std(col_nm) #jackknife(mean_nm,col_nm)
+		error_dm     = np.std(col_dm) #jackknife(mean_dm,col_dm)
+		error_Tr     = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 
-		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_NM, mean_DM, mean_EN, error_NM, error_DM, error_EN)
+		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  += "\n"
+
+	if ENT_TYPE == 'BROKENPATH':
+		col_block, col_nm, col_dm = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+		print len(col_nm)
+	
+		mean_nm      = np.mean(col_nm)
+		mean_dm      = np.mean(col_dm)
+		mean_EN      = -log(mean_nm/mean_dm)
+
+		error_nm     = jackknife(mean_nm,col_nm)
+		error_dm     = jackknife(mean_dm,col_dm)
+		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+
+		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
 		output  += "\n"
 
 	if ENT_TYPE == "SWAP":
-		col_block, col_nm, col_dm, col_TrInv = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, max_rows=trunc)
+		col_block, col_nm, col_dm, col_TrInv = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		print len(col_block)
 	
 		mean_nm      = np.mean(col_nm)
@@ -346,13 +363,13 @@ def outputstr_entropy(numbbeads,tau,dest_dir,trunc,preskip,ENT_TYPE):
 		error_nm     = jackknife(mean_nm,col_nm)
 		error_dm     = jackknife(mean_dm,col_dm)
 		error_Tr     = jackknife(mean_TrInv,col_TrInv)
-		error_EN     = 0
+		error_EN     = 0 #Write the proper equation
 
 		output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
 		output  += "\n"
 
 	if ENT_TYPE == "REGULARPATH":
-		col_block, col_nm, col_dm, col_Tr = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, max_rows=trunc)
+		col_block, col_nm, col_dm, col_Tr = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		print len(col_Tr)
 	
 		mean_nm      = np.mean(col_nm)
@@ -381,6 +398,8 @@ def fmt_entropy(status,variable,ENT_TYPE):
 
 	if status == "analysis":
 		output     ="#"
+		if ENT_TYPE == 'SWAPTOUNSWAP':
+			output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Purity', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Purity', 'Error of Entropy')
 		if ENT_TYPE == 'BROKENPATH':
 			output    += '{:^15}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}{:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Entropy')
 		if ENT_TYPE == 'SWAP':

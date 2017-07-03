@@ -612,6 +612,8 @@ srand( time(NULL) );
                 	else
                  	{
                     	MCGetAverage();
+						cout<<"TAPAS == "<< passTotal<<endl;
+						cout<<"TAPAS totalCount =  "<< totalCount<<endl;
 					    //omp_set_num_threads(1);
 					    //MCGetAverage();
 					    //omp_set_num_threads(NThreads);
@@ -1147,6 +1149,8 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 #ifndef IOWRITE
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+	fid << setw(IO_WIDTH_BLOCK) << acount  << BLANK;                 // block number 1 
+	fid << setw(IO_WIDTH_BLOCK) << avergCount  << BLANK;                 // block number 1 
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
 	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
