@@ -16,8 +16,8 @@ import support
 #                                                                              |
 #===============================================================================
 #TypeCal             = 'PIMC'
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 
 #molecule            = "HF-C60"                                                  
 molecule            = "HF"                                                      
@@ -28,17 +28,17 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 1000
+numbblocks	        = 400000
 numbmolecules       = 2
 numbpass            = 10
-beta     	        = 0.1
+beta     	        = 0.2
 
 Rpt                 = 10.05
 dipolemoment        = 1.86
 skip                = 2
 
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
@@ -49,9 +49,10 @@ postskip            = 0
 preskip             = 0
 particleA           = 1
 
+ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "SWAP"
 #ENT_TYPE = "BROKENPATH"
-ENT_TYPE = "REGULARPATH"
+#ENT_TYPE = "REGULARPATH"
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
@@ -62,7 +63,6 @@ if (TypeCal == "PIMC"):
 	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 if (TypeCal == "ENT"):
-	numbmolecules  *= 2
 	file1_name      = "Entanglement-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
 	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"+ENT_TYPE
 
@@ -96,7 +96,8 @@ if (molecule_rot == "H2"):
 	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
 
 if (molecule_rot == "HF"):
-	step           = [0.7,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.3,1.3,1.2,1.2,1.1,1.1,1.1,1.0,1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
+	#step           = [0.7,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.3,1.3,1.2,1.2,1.1,1.1,1.1,1.0,1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
+	step           = [0.7,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.6,1.5,1.5,1.5]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
 	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
 	#step           = [4.5,1.5,2.0]  # 2 HF beta 0.1 K-1 PIMC
 
@@ -155,7 +156,7 @@ if status == "analysis":
 	
 	if (TypeCal == "ENT"):
 		fanalyze             = open(file_output, "a")
-		fanalyze.write(support.fmt_entropy(status,var))
+		fanalyze.write(support.fmt_entropy(status,var,ENT_TYPE))
 	else:
 		fanalyze             = open(file_output, "a")           
 		fanalyze.write(support.fmt_energy(status,var))
@@ -218,7 +219,7 @@ for i in range(nrange):
 				variable          = tau
 				try:
 					if (TypeCal == "ENT"):
-						fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,preskip,postskip))
+						fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,preskip,postskip,ENT_TYPE))
 					else:
 						fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,preskip,postskip))
 						fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,preskip,postskip))

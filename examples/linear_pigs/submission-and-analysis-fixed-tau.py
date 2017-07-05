@@ -30,7 +30,7 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 20000
+numbblocks	        = 400000
 numbmolecules       = 2
 numbpass            = 10
 skip                = 2

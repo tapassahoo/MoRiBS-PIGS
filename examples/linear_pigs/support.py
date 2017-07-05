@@ -116,11 +116,14 @@ def outputstr_energy(numbbeads,tau,dest_dir,preskip,postskip):
 	mean_rot      = np.mean(col_rot)
 	mean_rot1     = np.mean(col_rot1)
 
-	error_pot     = np.std(col_pot,ddof=1,dtype=np.float64) #jackknife(mean_pot,col_pot)
-	error_tot     = np.std(col_tot,ddof=1) #jackknife(mean_tot,col_tot)
-	error_rot     = np.std(col_rot,ddof=1) #jackknife(mean_rot,col_rot)
-	error_rot1    = np.std(col_rot1,ddof=1) #jackknife(mean_rot1,col_rot1)
-	#print i, len(col_block)
+	#error_pot     = jackknife(mean_pot,col_pot)
+	#error_tot     = jackknife(mean_tot,col_tot)
+	#error_rot     = jackknife(mean_rot,col_rot)
+	#error_rot1    = jackknife(mean_rot1,col_rot1)
+	error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
+	error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
+	error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
+	error_rot1    = np.std(col_rot1,ddof=1)/sqrt(len(col_rot1))
 
 	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_pot, mean_tot, mean_rot, mean_rot1, error_pot, error_tot, error_rot, error_rot1)
 	output  += "\n"
@@ -137,10 +140,14 @@ def outputstr_angle(numbbeads,tau,dest_dir,preskip,postskip):
 	mean_costheta1 = np.mean(col_costheta1)
 	mean_theta1    = np.mean(col_theta1)
 
-	error_costheta = np.std(col_costheta,ddof=1) #jackknife(mean_costheta,col_costheta)
-	error_theta    = np.std(col_theta,ddof=1) #jackknife(mean_theta,col_theta)
-	error_costheta1= np.std(col_costheta1,ddof=1) #jackknife(mean_costheta1,col_costheta1)
-	error_theta1   = np.std(col_theta1,ddof=1) #jackknife(mean_theta1,col_theta1)
+	#error_costheta = jackknife(mean_costheta,col_costheta)
+	#error_theta    = jackknife(mean_theta,col_theta)
+	#error_costheta1= jackknife(mean_costheta1,col_costheta1)
+	#error_theta1   = jackknife(mean_theta1,col_theta1)
+	error_costheta = np.std(col_costheta,ddof=1)/sqrt(len(col_costheta))
+	error_theta    = np.std(col_theta,ddof=1)/sqrt(len(col_theta))
+	error_costheta1= np.std(col_costheta1,ddof=1)/sqrt(len(col_costheta1))
+	error_theta1   = np.std(col_theta1,ddof=1)/sqrt(len(col_theta1)) 
 
 	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_costheta, mean_theta, error_costheta, error_theta, mean_costheta1, mean_theta1, error_costheta1, error_theta1)
 	output  += "\n"
@@ -157,10 +164,14 @@ def outputstr_angle1(numbbeads,tau,dest_dir,preskip,postskip):
 	mean_costheta1 = np.mean(col_costheta1)
 	mean_theta1    = np.mean(col_theta1)
 
-	error_costheta = np.std(col_costheta,ddof=1) #jackknife(mean_costheta,col_costheta)
-	error_theta    = np.std(col_theta,ddof=1) #jackknife(mean_theta,col_theta)
-	error_costheta1= np.std(col_costheta1,ddof=1) #jackknife(mean_costheta1,col_costheta1)
-	error_theta1   = np.std(col_theta1,ddof=1) #jackknife(mean_theta1,col_theta1)
+	#error_costheta = jackknife(mean_costheta,col_costheta)
+	#error_theta    = jackknife(mean_theta,col_theta)
+	#error_costheta1= jackknife(mean_costheta1,col_costheta1)
+	#error_theta1   = jackknife(mean_theta1,col_theta1)
+	error_costheta = np.std(col_costheta,ddof=1)/sqrt(len(col_costheta))
+	error_theta    = np.std(col_theta,ddof=1)/sqrt(len(col_theta))
+	error_costheta1= np.std(col_costheta1,ddof=1)/sqrt(len(col_costheta1))
+	error_theta1   = np.std(col_theta1,ddof=1)/sqrt(len(col_theta1)) 
 
 	output  = '{:10d}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}{:20.5f}'.format(numbbeads, tau, mean_costheta, mean_theta, error_costheta, error_theta, mean_costheta1, mean_theta1, error_costheta1, error_theta1)
 	output  += "\n"
@@ -280,6 +291,8 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 	'''
 	This function creats jobstring for #PBS script
 	'''
+	if (thread > 16):
+		thread = 16
 	job_name       = "job_"+str(file_name)+str(value)
 	walltime       = "200:00:00"
 	processors     = "nodes=1:ppn="+str(thread)
@@ -327,8 +340,8 @@ def outputstr_entropy(numbbeads,tau,dest_dir,preskip,postskip,ENT_TYPE):
 		purity       = mean_nm/mean_dm
 		mean_EN      = -log(purity)
 
-		error_nm     = np.std(col_nm) #jackknife(mean_nm,col_nm)
-		error_dm     = np.std(col_dm) #jackknife(mean_dm,col_dm)
+		error_nm     = np.std(col_nm,ddof=1)/sqrt(len(col_block)) 
+		error_dm     = np.std(col_dm,ddof=1)/sqrt(len(col_block))
 		error_Tr     = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 
