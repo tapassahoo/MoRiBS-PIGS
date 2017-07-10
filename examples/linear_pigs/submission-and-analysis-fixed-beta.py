@@ -15,9 +15,11 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
+NameOfServer        = "nlogn"
+#NameOfServer        = "graham"
 #TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 
 #molecule            = "HF-C60"                                                  
 molecule            = "HF"                                                      
@@ -31,7 +33,7 @@ molecule_rot        = "HF"
 numbblocks	        = 400000
 numbmolecules       = 2
 numbpass            = 10
-beta     	        = 0.2
+beta     	        = 0.1
 
 Rpt                 = 10.05
 dipolemoment        = 1.86
@@ -73,14 +75,18 @@ value_min           = 1                                                         
 var                 = "tau"                                                        #change param13
 
 src_path            = os.getcwd()
-dest_path           = "/work/tapas/linear_rotors/"                                 #change param13
-run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"                   #change param14
+dest_path           = "/work/tapas/linear_rotors/"           
+run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"     
 
 if status   == "submission":
 	if RUNDIR == "scratch":
 		dest_path   = "/scratch/tapas/linear_rotors/" 
+			
 
-final_path          = "/work/tapas/linear_rotors/"                                 #change param17
+if (NameOfServer == "graham"):
+	final_path      = "/scratch/tapas/linear_rotors/"     
+else:
+	final_path      = "/work/tapas/linear_rotors/"             
 
 temperature         = 1.0/beta   
 
@@ -108,7 +114,10 @@ if (molecule_rot == "HF"):
 #                                                                              |
 #===============================================================================
 if status == "submission":
-	dest_pimc = "/work/tapas/linear_rotors/"+file1_name+"PIMC"
+	if (NameOfServer == "graham"):
+		dest_pimc = "/scratch/tapas/linear_rotors/"+file1_name+"PIMC"
+	else:
+		dest_pimc = "/work/tapas/linear_rotors/"+file1_name+"PIMC"
 	call(["rm", "-rf",  dest_pimc])
 	call(["mkdir", "-p", dest_pimc])
 	call(["cp", run_file, dest_pimc])
@@ -156,12 +165,12 @@ if status == "analysis":
 	
 	if (TypeCal == "ENT"):
 		fanalyze             = open(file_output, "a")
-		fanalyze.write(support.fmt_entropy(status,var,ENT_TYPE))
+		fanalyze.write(support.fmtAverageEntropy(status,var,ENT_TYPE))
 	else:
 		fanalyze             = open(file_output, "a")           
-		fanalyze.write(support.fmt_energy(status,var))
+		fanalyze.write(support.fmtAverageEnergy(status,var))
 		fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
-		fanalyze_angularDOF.write(support.fmt_angle(status,var))
+		fanalyze_angularDOF.write(support.fmtAverageOrientation(status,var))
 		fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
 	#support.FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc)
 
@@ -192,11 +201,10 @@ for i in range(nrange):
 				variable          = tau
 				try:
 					if (TypeCal == "ENT"):
-						fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,preskip,postskip))
+						fanalyze.write(support.GetAverageEntropy(numbbeads,variable,dest_dir,preskip,postskip))
 					else:
-						fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,preskip,postskip))
-						fanalyze_angularDOF.write(outputstr_angle(support.numbbeads,variable,dest_dir,preskip,postskip))
-						fanalyze_angularDOF1.write(outputstr_angle1(support.numbbeads,variable,dest_dir,preskip,postskip))
+						fanalyze.write(support.GetAverageEnergy(numbbeads,variable,dest_dir,preskip,postskip))
+						fanalyze_angularDOF.write(GetAverageOrientation(support.numbbeads,variable,dest_dir,preskip,postskip))
 				except:
 					pass
 	else:
@@ -212,18 +220,17 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer)
 
 			if status == "analysis":
 
 				variable          = tau
 				try:
 					if (TypeCal == "ENT"):
-						fanalyze.write(support.outputstr_entropy(numbbeads,variable,dest_dir,preskip,postskip,ENT_TYPE))
+						fanalyze.write(support.GetAverageEntropy(numbbeads,variable,dest_dir,preskip,postskip,ENT_TYPE))
 					else:
-						fanalyze.write(support.outputstr_energy(numbbeads,variable,dest_dir,preskip,postskip))
-						fanalyze_angularDOF.write(support.outputstr_angle(numbbeads,variable,dest_dir,preskip,postskip))
-						fanalyze_angularDOF1.write(support.outputstr_angle1(numbbeads,variable,dest_dir,preskip,postskip))
+						fanalyze.write(support.GetAverageEnergy(numbbeads,variable,dest_dir,preskip,postskip))
+						fanalyze_angularDOF.write(support.GetAverageOrientation(numbbeads,variable,dest_dir,preskip,postskip))
 				except:
 					pass
 
@@ -238,7 +245,4 @@ if status == "analysis":
 	print
 	print
 	call(["cat",file_output_angularDOF])
-	print
-	print
-	call(["cat",file_output_angularDOF1])
 '''

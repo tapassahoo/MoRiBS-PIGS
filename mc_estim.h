@@ -22,7 +22,10 @@ double GetPotEnergy_Diff(void); //added by Hui Li
 double GetPotEnergy_Densities(void);
 double GetPotEnergyPIGS(void);
 double GetTotalEnergy(void);
+#ifdef IOWRITE
 double *GetCosTheta();
+#endif
+void GetCosTheta(double &, double &);
 double GetPhi();
 double GetPotEnergy(void);
 double GetKinEnergy(void);

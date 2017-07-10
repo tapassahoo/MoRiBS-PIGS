@@ -1340,6 +1340,71 @@ double GetRotEnergyPIGS(void)
     return (0.5*nslice*srot);
 }
 
+void GetCosTheta(double &cosTheta, double &cosTheta1)
+{
+    const char *_proc_=__func__; 
+
+    int it = (NumbRotTimes - 1)/2;
+
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+        cosTheta           = 0.0;
+    	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+        {    
+    	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+    	    {
+        	    int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        	    int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+
+       		    int t0      = offset0 + it;
+        	    int t1      = offset1 + it;
+
+                double cst  = 0.0;
+           	    for (int id = 0; id < NDIM; id++)
+           	    {    
+               	    cst    += MCCosine[id][t0]*MCCosine[id][t1];
+           	    }
+           	    cosTheta   += cst;
+    		}     // LOOP OVER ATOM PAIRS
+		}
+
+        cosTheta1       = 0.0;
+    	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+        {    
+            int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+       		int t0      = offset0 + it;
+			cosTheta1  += MCCosine[2][t0];
+		}
+		cosTheta1  /= NumbAtoms;
+	}
+	if(MCAtom[IMTYPE].numb == 1)
+	{
+		// Initial configurations //
+        double phi1  = 0.0;
+        double cost1 = 1.0;
+        double sint1 = sqrt(1.0 - cost1*cost1);
+
+        double uvec1[NDIM];
+        uvec1[0]     = sint1*cos(phi1);
+        uvec1[1]     = sint1*sin(phi1);
+        uvec1[2]     = cost1;
+
+        cosTheta     = 0.0;
+		int atom0    = 0;
+     	int type0    = MCType[atom0];
+       	int offset0  = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        int tm0      = offset0 + it/RotRatio;
+        double cst   = 0.0;
+        for (int id = 0; id < NDIM; id++)
+        {    
+       	    cst    += MCCosine[id][tm0]*uvec1[id];
+        }
+		cosTheta     = cst;
+		cosTheta1    = MCCosine[2][tm0];
+	}
+}
+
+#ifdef IOWRITE
 double *GetCosTheta()
 {
     const char *_proc_=__func__; 
@@ -1422,6 +1487,7 @@ double *GetCosTheta()
     }
     return angle;
 }
+#endif
 
 double *GetPhiEntanglement()
 {

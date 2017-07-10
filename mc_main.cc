@@ -57,8 +57,10 @@ double _total;  // potential energy, global average
 #ifdef PIGSROTORS
 double _btheta;
 double _bcostheta;
+double _bcostheta1;
 double _theta_total;
 double _costheta_total;
+double _costheta_total1;
 #ifdef DIPOLE
 double _btheta1;
 double _bcostheta1;
@@ -612,8 +614,6 @@ srand( time(NULL) );
                 	else
                  	{
                     	MCGetAverage();
-						cout<<"TAPAS == "<< passTotal<<endl;
-						cout<<"TAPAS totalCount =  "<< totalCount<<endl;
 					    //omp_set_num_threads(1);
 					    //MCGetAverage();
 					    //omp_set_num_threads(NThreads);
@@ -776,6 +776,7 @@ void MCResetBlockAverage(void)
 #ifdef PIGSROTORS
 	_btheta    = 0.0;
 	_bcostheta = 0.0;
+	_bcostheta1 = 0.0;
 #ifdef DIPOLE
 	_btheta1   = 0.0;
 	_bcostheta1= 0.0;
@@ -843,6 +844,19 @@ void MCGetAverage(void)
 
 /* new addition */
 #ifdef PIGSROTORS
+	double cosTheta, cosTheta1;
+	GetCosTheta(cosTheta, cosTheta1);
+	double scostheta  = cosTheta;
+	double scostheta1 = cosTheta1;
+
+	_bcostheta       += scostheta; 
+	_costheta_total  += scostheta;
+
+	_bcostheta1      += scostheta1; 
+	_costheta_total1 += scostheta1;
+#endif
+/*
+#ifdef PIGSROTORS
     double* scostheta;
     scostheta = GetCosTheta();
 
@@ -873,6 +887,7 @@ void MCGetAverage(void)
     delete[] scostheta;
     
 #endif
+*/
 #else
 #ifdef SWAPTOUNSWAP
     double snm        = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
@@ -1149,8 +1164,6 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 #ifndef IOWRITE
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-	fid << setw(IO_WIDTH_BLOCK) << acount  << BLANK;                 // block number 1 
-	fid << setw(IO_WIDTH_BLOCK) << avergCount  << BLANK;                 // block number 1 
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
 	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
@@ -1192,8 +1205,9 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
 
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
     fid << setw(IO_WIDTH) << _bcostheta/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _bcostheta1/avergCount << BLANK;
 #ifdef DIPOLE
+    fid << setw(IO_WIDTH) << _btheta/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _bcostheta1/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _btheta1/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _bcostheta2/avergCount << BLANK;
@@ -1287,8 +1301,9 @@ void SaveSumAngularDOF(double acount, double numb)
 
     _fang << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _costheta_total1/acount << BLANK;
 #ifdef DIPOLE
+    _fang << setw(IO_WIDTH) << _theta_total/acount << BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total1/acount << BLANK;
     _fang << setw(IO_WIDTH) << _theta_total1/acount << BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total2/acount << BLANK;
