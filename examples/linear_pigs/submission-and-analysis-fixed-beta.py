@@ -133,12 +133,8 @@ if status == "analysis":
 		file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
 		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
-
-		file_output_angularDOF1  = "AngularDOF-vs-"+str(var)+"-fixed-"
-		file_output_angularDOF1 += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+"-for-zdir.txt"
 		
-		call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
+		call(["rm", file_output, file_output_angularDOF])
 	
 	if (TypeCal == "PIMC"):
 		file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
@@ -149,11 +145,7 @@ if status == "analysis":
 		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 
-		file_output_angularDOF1  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
-		file_output_angularDOF1 += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+"-for-zdir.txt"
-
-		call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
+		call(["rm", file_output, file_output_angularDOF])
 	
 	if (TypeCal == "ENT"):
 		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
@@ -171,7 +163,6 @@ if status == "analysis":
 		fanalyze.write(support.fmtAverageEnergy(status,var))
 		fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
 		fanalyze_angularDOF.write(support.fmtAverageOrientation(status,var))
-		fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
 	#support.FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc)
 
 if (TypeCal == "ENT"):
@@ -239,7 +230,6 @@ if status == "analysis":
 	fanalyze.close()
 	if (TypeCal != "ENT"):
 		fanalyze_angularDOF.close()
-		fanalyze_angularDOF1.close()
 	call(["cat",file_output])
 '''
 	print
