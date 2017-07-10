@@ -137,7 +137,11 @@ def GetAverageOrientation(numbbeads,tau,dest_dir,preskip,postskip):
 	error_costheta = np.std(col_costheta,ddof=1)/sqrt(len(col_costheta))
 	error_costheta1= np.std(col_costheta1,ddof=1)/sqrt(len(col_costheta1))
 
-	output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, tau, mean_costheta, mean_theta, error_costheta, error_theta, mean_costheta1, mean_theta1, error_costheta1, error_theta1)
+	col_costheta1_abs = np.fabs(col_costheta1)
+	mean_costheta1_abs = np.mean(col_costheta1_abs)
+	error_costheta1_abs= np.std(col_costheta1_abs,ddof=1)/sqrt(len(col_costheta1_abs))
+
+	output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, tau, mean_costheta, mean_costheta1, mean_costheta1_abs, error_costheta, error_costheta2, error_costheta1_abs)
 	output  += "\n"
 	return output
 
@@ -172,10 +176,10 @@ def fmtAverageOrientation(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. CosTheta', 'Avg. Theta', 'Error of CosTheta', 'Error of Theta', 'Avg. CosTheta1', 'Avg. Theta1', 'Error of CosTheta1', 'Error of Theta1')
+		output    += '{0:^15}{1:^20}{2:^20}{3:^40}{4:^40}{5:^20}{6:^20}{7:^20}'.format('Beads', variable, '<sum of ei.ej>', '<sum of ei(z).ej(z)/N>', '<sum of abs(ei(z).ej(z)/N)>', 'Error of col3', 'Error of col4', 'Error of col5')
 		output    +="\n"
 		output    +="#"
-		output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
+		output    += '{0:^15}{1:^20}{2:^20}{3:^40}{4:^40}{5:^20}{6:^20}{7:^20}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
 		output    +="\n"
 		output    += '{0:=<195}'.format('#')
 		output    +="\n"
