@@ -369,7 +369,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer):
+def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition):
 	if RUNDIR != "scratch":
 		os.chdir(dest_path)
 		call(["rm", "-rf", folder_run])
@@ -434,7 +434,10 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 		system(command_pimc_run)
 	else:
 		#call(["qsub", fname])
-		call(["sbatch", fname])
+		if (NameOfPartition == 'tapas'):
+			call(["sbatch", "-p", "tapas", fname])
+		else:
+			call(["sbatch", fname])
 		
 
 	if RUNDIR != "scratch":
@@ -562,7 +565,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 #SBATCH --time=%s
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=512mb
+#SBATCH --mem-per-cpu=700mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s

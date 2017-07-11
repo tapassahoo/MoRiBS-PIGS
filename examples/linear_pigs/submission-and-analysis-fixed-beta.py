@@ -15,7 +15,10 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
+status              = "submission"                                            
+status              = "analysis"                                            
 NameOfServer        = "nlogn"
+NameOfPartition      = "tapas"
 #NameOfServer        = "graham"
 #TypeCal             = 'PIMC'
 TypeCal             = 'PIGS'
@@ -30,7 +33,7 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 400000
+numbblocks	        = 1000
 numbmolecules       = 2
 numbpass            = 10
 beta     	        = 0.1
@@ -39,8 +42,6 @@ Rpt                 = 10.05
 dipolemoment        = 1.86
 skip                = 2
 
-status              = "submission"                                            
-status              = "analysis"                                            
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
@@ -75,7 +76,10 @@ value_min           = 1                                                         
 var                 = "tau"                                                        #change param13
 
 src_path            = os.getcwd()
-dest_path           = "/work/tapas/linear_rotors/"           
+if (NameOfServer == "graham"):
+    dest_path           = "/scratch/tapas/linear_rotors/"
+else:
+    dest_path           = "/work/tapas/linear_rotors/"
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"     
 
 if status   == "submission":
@@ -185,7 +189,7 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfPartition)
 
 			if status == "analysis":
 
@@ -211,7 +215,7 @@ for i in range(nrange):
 			dest_dir     = dest_path + folder_run 
 
 			if status   == "submission":
-				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer)
+				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition)
 
 			if status == "analysis":
 

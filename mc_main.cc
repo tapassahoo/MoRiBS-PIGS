@@ -844,7 +844,8 @@ void MCGetAverage(void)
 
 /* new addition */
 #ifdef PIGSROTORS
-	double cosTheta, cosTheta1;
+	double cosTheta  = 0.0;
+	double cosTheta1 = 0.0;
 	GetCosTheta(cosTheta, cosTheta1);
 	double scostheta  = cosTheta;
 	double scostheta1 = cosTheta1;
