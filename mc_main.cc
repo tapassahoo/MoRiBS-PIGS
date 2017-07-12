@@ -526,7 +526,8 @@ srand( time(NULL) );
        	long int passTotal = 0;        // total number of Moves = passCount*time 
 
        	while (passCount++ < NumberOfMCPasses) 
-       	for (int time=0; time<NumbTimes; time++)
+       	//for (int time=0; time<NumbTimes; time++)
+       	for (int time=0; time<1; time++)
        	{
         	passTotal++;  
 
@@ -1244,9 +1245,9 @@ void SaveInstantAngularDOF(long int numb)
 {
     const char *_proc_=__func__;
 
-    double* scostheta;
 
 #ifdef ENTANGLEMENT
+    double* scostheta;
    	_fangins << setw(IO_WIDTH) << numb << BLANK;
     scostheta = GetCosThetaEntanglement();
     double* sphi;
@@ -1265,31 +1266,28 @@ void SaveInstantAngularDOF(long int numb)
     _fangins << setw(IO_WIDTH) << snm << BLANK;
     _fangins << setw(IO_WIDTH) << sdm << BLANK;
     _fangins << setw(IO_WIDTH) << snm/sdm << BLANK;
+    delete[] scostheta;
 #endif
 #ifdef PIMCINSTANT
+    double* scostheta;
    	_fangins << setw(IO_WIDTH) << numb << BLANK;
     scostheta = GetProdUvec12();
 	for (int i = 0; i < (2*NumbRotTimes*NumbAtoms); i++)
 	{
     	_fangins << setw(IO_WIDTH) << scostheta[i] << BLANK;
 	}
+    delete[] scostheta;
 #endif
-/*
-    scostheta = GetCosTheta();
-
-    _fangins << setw(IO_WIDTH) << scostheta[0] << BLANK;
-//particle 1
-    _fangins << setw(IO_WIDTH) << scostheta[1] << BLANK;
-//particle 2
-    _fangins << setw(IO_WIDTH) << scostheta[2] << BLANK;
-
-    double sphi = GetPhi();
-    _fangins << setw(IO_WIDTH) << sphi << BLANK;
-#endif
-*/
+#ifdef PIGSROTORS
+   	_fangins << setw(IO_WIDTH) << numb << BLANK;
+	double cosTheta  = 0.0;
+	double cosTheta1 = 0.0;
+	GetCosTheta(cosTheta, cosTheta1);
+   	_fangins << setw(IO_WIDTH) << cosTheta << BLANK;
+   	_fangins << setw(IO_WIDTH) << cosTheta1 << BLANK;
+#endif 
 
     _fangins << endl;
-    delete[] scostheta;
 }
 
 void SaveInstantEnergy()
@@ -1376,7 +1374,7 @@ void InitTotalAverage(void)  // DUMP
 
 
 
-#ifdef IOWRITE
+#ifdef IOFILES
     string fangular;
 
     fangular  = MCFileName + IO_SUM;

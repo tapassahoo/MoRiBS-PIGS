@@ -35,9 +35,9 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 10000
+numbblocks	        = 50000
 numbmolecules       = 2
-numbpass            = 10
+numbpass            = 100
 beta     	        = 0.1
 
 Rpt                 = 10.05
@@ -49,7 +49,7 @@ status_rhomat       = "Yes"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-nrange              = 61
+nrange              = 51
 postskip            = 0
 preskip             = 0
 particleA           = 1
@@ -108,10 +108,10 @@ if (molecule_rot == "H2"):
 	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
 
 if (molecule_rot == "HF"):
-	#step           = [0.7,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.3,1.3,1.2,1.2,1.1,1.1,1.1,1.0,1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
-	step           = [0.7,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.6,1.5,1.5,1.5]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIGS
-	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  # 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
-	#step           = [4.5,1.5,2.0]  # 2 HF beta 0.1 K-1 PIMC
+	step           	= [0.7,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.3]  
+					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS
+	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  
+					# 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
 
 #===============================================================================
 #                                                                              |

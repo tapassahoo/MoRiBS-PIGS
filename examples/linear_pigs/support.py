@@ -297,7 +297,8 @@ def modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmole
 	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
 	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc10.input")
 	replace("numbpass_input", str(numbpass), "qmc10.input", "qmc11.input")
-	mcskip = numbbeads*numbpass
+	#mcskip = numbbeads*numbpass
+	mcskip = numbpass
 	replace("mskip_input", str(mcskip), "qmc11.input", "qmc12.input")
 	replace("numbparticle_input", str(particleA), "qmc12.input", "qmc.input")
 	call(["rm", "qmc2.input"])
