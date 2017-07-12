@@ -141,7 +141,7 @@ def GetAverageOrientation(numbbeads,tau,dest_dir,preskip,postskip):
 	mean_costheta1_abs = np.mean(col_costheta1_abs)
 	error_costheta1_abs= np.std(col_costheta1_abs,ddof=1)/sqrt(len(col_costheta1_abs))
 
-	output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, tau, mean_costheta, mean_costheta1, mean_costheta1_abs, error_costheta, error_costheta2, error_costheta1_abs)
+	output  = '{0:10d}{1:20.5f}{2:20.5f}{3:40.5f}{4:40.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, tau, mean_costheta, mean_costheta1, mean_costheta1_abs, error_costheta, error_costheta1, error_costheta1_abs)
 	output  += "\n"
 	return output
 
@@ -544,7 +544,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 	if (thread > 24):
 		thread = 24
 	job_name       = str(file_name)+str(value)
-	walltime       = "00-24:00"
+	walltime       = "00-30:00"
 	omp_thread     = str(thread)
 	output_dir     = run_dir+"/results"
 	temperature1   = "%5.3f" % temperature

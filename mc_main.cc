@@ -55,26 +55,10 @@ double _pot_total;  // kinetic   energy, global average
 double _kin_total;  // potential energy, global average 
 double _total;  // potential energy, global average 
 #ifdef PIGSROTORS
-double _btheta;
 double _bcostheta;
 double _bcostheta1;
-double _theta_total;
 double _costheta_total;
 double _costheta_total1;
-#ifdef DIPOLE
-double _btheta1;
-double _bcostheta1;
-double _theta_total1;
-double _costheta_total1;
-double _btheta2;
-double _bcostheta2;
-double _theta_total2;
-double _costheta_total2;
-double _btheta3;
-double _bcostheta3;
-double _theta_total3;
-double _costheta_total3;
-#endif
 #endif
 #ifdef ENTANGLEMENT
 double _bnm;
@@ -774,17 +758,8 @@ void MCResetBlockAverage(void)
 	_bpot      = 0.0;
 	_btotal    = 0.0;
 #ifdef PIGSROTORS
-	_btheta    = 0.0;
 	_bcostheta = 0.0;
 	_bcostheta1 = 0.0;
-#ifdef DIPOLE
-	_btheta1   = 0.0;
-	_bcostheta1= 0.0;
-	_btheta2   = 0.0;
-	_bcostheta2= 0.0;
-	_btheta3   = 0.0;
-	_bcostheta3= 0.0;
-#endif
 #ifdef ENTANGLEMENT
     _bnm       = 0.0;
     _bdm       = 0.0;
@@ -856,39 +831,6 @@ void MCGetAverage(void)
 	_bcostheta1      += scostheta1; 
 	_costheta_total1 += scostheta1;
 #endif
-/*
-#ifdef PIGSROTORS
-    double* scostheta;
-    scostheta = GetCosTheta();
-
-	_bcostheta       += scostheta[0]; 
-	_costheta_total  += scostheta[0];
-
-	double stheta     = acos(scostheta[0]);
-	_btheta          += stheta; 
-	_theta_total     += stheta;
-#ifdef DIPOLE
-//particle 1
-	_bcostheta1      += scostheta[1]; 
-	_costheta_total1 += scostheta[1];
-
-	double stheta1    = acos(scostheta[1]);
-	_btheta1         += stheta1; 
-	_theta_total1    += stheta1;
-
-//particle 2
-	_bcostheta2      += scostheta[2]; 
-	_costheta_total2 += scostheta[2];
-
-	double stheta2    = acos(scostheta[2]);
-	_btheta2         += stheta2; 
-	_theta_total2    += stheta2;
-
-#endif
-    delete[] scostheta;
-    
-#endif
-*/
 #else
 #ifdef SWAPTOUNSWAP
     double snm        = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
@@ -1207,15 +1149,6 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
     fid << setw(IO_WIDTH) << _bcostheta/avergCount << BLANK;
     fid << setw(IO_WIDTH) << _bcostheta1/avergCount << BLANK;
-#ifdef DIPOLE
-    fid << setw(IO_WIDTH) << _btheta/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _bcostheta1/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta1/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _bcostheta2/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta2/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _bcostheta3/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta3/avergCount << BLANK;
-#endif
     fid << endl;
     fid.close();
 }
@@ -1303,16 +1236,6 @@ void SaveSumAngularDOF(double acount, double numb)
     _fang << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total/acount << BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total1/acount << BLANK;
-#ifdef DIPOLE
-    _fang << setw(IO_WIDTH) << _theta_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _costheta_total1/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total1/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _costheta_total2/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total2/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _costheta_total3/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total3/acount << BLANK;
-#endif
-
     _fang << endl;
 }
 #endif
@@ -1415,16 +1338,8 @@ void InitTotalAverage(void)  // DUMP
 	_pot_total = 0.0;
 	_total = 0.0;
 #ifdef PIGSROTORS
-	_theta_total = 0.0;
 	_costheta_total = 0.0;
-#ifdef DIPOLE
-	_theta_total1 = 0.0;
 	_costheta_total1 = 0.0;
-	_theta_total2 = 0.0;
-	_costheta_total2 = 0.0;
-	_theta_total3 = 0.0;
-	_costheta_total3 = 0.0;
-#endif
 #ifdef ENTANGLEMENT
     _nm_total  = 0.0;
     _dm_total  = 0.0;

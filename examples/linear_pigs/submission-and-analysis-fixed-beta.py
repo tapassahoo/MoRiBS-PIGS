@@ -16,9 +16,11 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
+
 NameOfServer        = "nlogn"
-NameOfPartition      = "tapas"
+NameOfPartition      = "ntapas"
+
 #NameOfServer        = "graham"
 #TypeCal             = 'PIMC'
 TypeCal             = 'PIGS'
@@ -33,7 +35,7 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 1000
+numbblocks	        = 10000
 numbmolecules       = 2
 numbpass            = 10
 beta     	        = 0.1
@@ -47,7 +49,7 @@ status_rhomat       = "Yes"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-nrange              = 51
+nrange              = 61
 postskip            = 0
 preskip             = 0
 particleA           = 1
@@ -235,8 +237,6 @@ if status == "analysis":
 	if (TypeCal != "ENT"):
 		fanalyze_angularDOF.close()
 	call(["cat",file_output])
-'''
 	print
 	print
 	call(["cat",file_output_angularDOF])
-'''
