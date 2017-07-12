@@ -16,7 +16,7 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
 NameOfPartition      = "ntapas"
@@ -51,7 +51,7 @@ RUNIN               = "nCPU"
 
 nrange              = 51
 postskip            = 0
-preskip             = 0
+preskip             = 40000
 particleA           = 1
 
 ENT_TYPE = "SWAPTOUNSWAP"

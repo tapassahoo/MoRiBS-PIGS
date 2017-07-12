@@ -176,7 +176,7 @@ def fmtAverageOrientation(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{0:^15}{1:^20}{2:^20}{3:^40}{4:^40}{5:^20}{6:^20}{7:^20}'.format('Beads', variable, '<sum of ei.ej>', '<sum of ei(z).ej(z)/N>', '<sum of abs(ei(z).ej(z)/N)>', 'Error of col3', 'Error of col4', 'Error of col5')
+		output    += '{0:^15}{1:^20}{2:^20}{3:^40}{4:^40}{5:^20}{6:^20}{7:^20}'.format('Beads', variable, '<sum of ei.ej>', '<sum of ei(z).ej(z)/N>', '< abs(sum of (ei(z).ej(z)/N))>', 'Error of col3', 'Error of col4', 'Error of col5')
 		output    +="\n"
 		output    +="#"
 		output    += '{0:^15}{1:^20}{2:^20}{3:^40}{4:^40}{5:^20}{6:^20}{7:^20}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')

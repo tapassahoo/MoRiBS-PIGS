@@ -25,7 +25,7 @@ double GetTotalEnergy(void);
 #ifdef IOWRITE
 double *GetCosTheta();
 #endif
-void GetCosTheta(double &, double &);
+void GetCosTheta(double &, double *);
 double GetPhi();
 double GetPotEnergy(void);
 double GetKinEnergy(void);

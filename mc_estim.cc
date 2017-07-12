@@ -1340,15 +1340,18 @@ double GetRotEnergyPIGS(void)
     return (0.5*nslice*srot);
 }
 
-void GetCosTheta(double &cosTheta, double &cosTheta1)
+void GetCosTheta(double &cosTheta, double *compxyz)
 {
     const char *_proc_=__func__; 
 
     int it = (NumbRotTimes - 1)/2;
 
+	double scosTheta;
+	double scompxyz[NDIM];
+
 	if(MCAtom[IMTYPE].numb > 1)
 	{
-        cosTheta           = 0.0;
+        scosTheta    = 0.0;
     	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
         {    
     	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
@@ -1364,18 +1367,23 @@ void GetCosTheta(double &cosTheta, double &cosTheta1)
            	    {    
                	    cst    += MCCosine[id][t0]*MCCosine[id][t1];
            	    }
-           	    cosTheta   += cst;
+           	    scosTheta   += cst;
     		}     // LOOP OVER ATOM PAIRS
 		}
 
-        cosTheta1       = 0.0;
+		scompxyz[0] = 0.0;
+		scompxyz[1] = 0.0;
+		scompxyz[2] = 0.0;
+
     	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
         {    
             int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
        		int t0      = offset0 + it;
-			cosTheta1  += MCCosine[2][t0];
+
+			scompxyz[0] += MCCosine[0][t0];
+			scompxyz[1] += MCCosine[1][t0];
+			scompxyz[2] += MCCosine[2][t0];
 		}
-		cosTheta1  /= NumbAtoms;
 	}
 	if(MCAtom[IMTYPE].numb == 1)
 	{
@@ -1389,19 +1397,26 @@ void GetCosTheta(double &cosTheta, double &cosTheta1)
         uvec1[1]     = sint1*sin(phi1);
         uvec1[2]     = cost1;
 
-        cosTheta     = 0.0;
 		int atom0    = 0;
      	int type0    = MCType[atom0];
        	int offset0  = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
         int tm0      = offset0 + it/RotRatio;
+
         double cst   = 0.0;
         for (int id = 0; id < NDIM; id++)
         {    
        	    cst    += MCCosine[id][tm0]*uvec1[id];
         }
-		cosTheta     = cst;
-		cosTheta1    = MCCosine[2][tm0];
+		scosTheta   = cst;
+		scompxyz[0] = MCCosine[0][tm0];
+		scompxyz[1] = MCCosine[1][tm0];
+		scompxyz[2] = MCCosine[2][tm0];
 	}
+
+	cosTheta = scosTheta;
+	compxyz[0] = scompxyz[0]/NumbAtoms;
+	compxyz[1] = scompxyz[1]/NumbAtoms;
+	compxyz[2] = scompxyz[2]/NumbAtoms;
 }
 
 #ifdef IOWRITE
