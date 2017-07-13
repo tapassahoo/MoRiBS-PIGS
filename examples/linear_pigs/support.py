@@ -129,19 +129,29 @@ def GetAverageOrientation(numbbeads,tau,dest_dir,preskip,postskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_costheta1 = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+	col_block, col_costheta, col_compx, col_compy, col_compz = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 
 	mean_costheta  = np.mean(col_costheta)
-	mean_costheta1 = np.mean(col_costheta1)
+	mean_compx     = np.mean(col_compx)
+	mean_compy     = np.mean(col_compy)
+	mean_compz     = np.mean(col_compz)
 
 	error_costheta = np.std(col_costheta,ddof=1)/sqrt(len(col_costheta))
-	error_costheta1= np.std(col_costheta1,ddof=1)/sqrt(len(col_costheta1))
+	error_compx    = np.std(col_compx,ddof=1)/sqrt(len(col_compx))
+	error_compy    = np.std(col_compy,ddof=1)/sqrt(len(col_compy))
+	error_compz    = np.std(col_compz,ddof=1)/sqrt(len(col_compz))
 
-	col_costheta1_abs = np.fabs(col_costheta1)
-	mean_costheta1_abs = np.mean(col_costheta1_abs)
-	error_costheta1_abs= np.std(col_costheta1_abs,ddof=1)/sqrt(len(col_costheta1_abs))
+	col_abscompx   = np.fabs(col_compx)
+	col_abscompy   = np.fabs(col_compy)
+	col_abscompz   = np.fabs(col_compz)
+	mean_abscompx  = np.mean(col_abscompx)
+	mean_abscompy  = np.mean(col_abscompy)
+	mean_abscompz  = np.mean(col_abscompz)
+	error_abscompx = np.std(col_abscompx,ddof=1)/sqrt(len(col_abscompx))
+	error_abscompy = np.std(col_abscompy,ddof=1)/sqrt(len(col_abscompy))
+	error_abscompz = np.std(col_abscompz,ddof=1)/sqrt(len(col_abscompz))
 
-	output  = '{0:10d}{1:20.5f}{2:20.5f}{3:40.5f}{4:40.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, tau, mean_costheta, mean_costheta1, mean_costheta1_abs, error_costheta, error_costheta1, error_costheta1_abs)
+	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, tau, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz)
 	output  += "\n"
 	return output
 
@@ -176,12 +186,15 @@ def fmtAverageOrientation(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{0:^15}{1:^20}{2:^20}{3:^40}{4:^40}{5:^20}{6:^20}{7:^20}'.format('Beads', variable, '<sum of ei.ej>', '<sum of ei(z).ej(z)/N>', '< abs(sum of (ei(z).ej(z)/N))>', 'Error of col3', 'Error of col4', 'Error of col5')
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('Beads', variable, '<sum of ei.ej>', '< compx >', '< compy >', '< compz >', '< abscompx >', '< abscompy >', '< abscompz >', 'Error: ei.ej', 'Error: compx', 'Error: compy', 'Error: compz', 'Error: abscompx', 'Error: abscompy', 'Error: abscompz')
 		output    +="\n"
 		output    +="#"
-		output    += '{0:^15}{1:^20}{2:^20}{3:^40}{4:^40}{5:^20}{6:^20}{7:^20}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
 		output    +="\n"
-		output    += '{0:=<195}'.format('#')
+		output    +="#"
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
+		output    +="\n"
+		output    += '{0:=<250}'.format('#')
 		output    +="\n"
 
 	return output
