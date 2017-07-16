@@ -25,6 +25,7 @@ double PotEnergy(int,double **);
 double PotEnergy(int,double **,int);
 
 double PotRotEnergy(int,double **,int it);   
+double PotRotEnergy(int, double *,int it);   
 double PotRotE3D(int,double *,int it);   
 #ifdef LINEARROTORS
 double PotRotE3DHF(int,double **,int it);   

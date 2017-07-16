@@ -16,7 +16,7 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
 NameOfPartition      = "ntapas"
@@ -35,41 +35,45 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 400000
+numbblocks	        = 10000
 numbmolecules       = 2
-numbpass            = 200
+numbpass            = 400
 beta     	        = 0.1
 
 Rpt                 = 10.05
 dipolemoment        = 1.86
-skip                = 2
 
 status_rhomat       = "Yes"                                                 
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-nrange              = 51
-postskip            = 0
-preskip             = 100000
-particleA           = 1
+loopStart           = 10
+loopEnd             = 51
+skip                = 2
 
+preskip             = 0
+postskip            = 0
+
+particleA           = 1
 ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "SWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
+extra_file_name     = "-Passes"+str(numbpass)
+#extra_file_name     = ""
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
-	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	file1_name     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 if (TypeCal == "PIMC"):
 	file1_name      = "PIMC-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
-	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	file1_name     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 if (TypeCal == "ENT"):
 	file1_name      = "Entanglement-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
-	file1_name     += "-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"+ENT_TYPE
+	file1_name     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads"+ENT_TYPE
 
 
 file2_name          = ""                                                           #change param10
@@ -134,29 +138,29 @@ if status == "analysis":
 	if (TypeCal == "PIGS"):
 		file_output             = "Energy-vs-"+str(var)+"-fixed-"
 		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output            += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+		file_output            += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 
 		file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
 		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+		file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 		
 		call(["rm", file_output, file_output_angularDOF])
 	
 	if (TypeCal == "PIMC"):
 		file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
 		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output            += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+		file_output            += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 
 		file_output_angularDOF  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
 		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+		file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 
 		call(["rm", file_output, file_output_angularDOF])
 	
 	if (TypeCal == "ENT"):
 		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
 		file_output     += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+"-"+ENT_TYPE+".txt"
+		file_output     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+"-"+ENT_TYPE+".txt"
 
 		call(["rm", file_output])
 	
@@ -178,12 +182,11 @@ if (TypeCal == "ENT"):
 #list_nb = [8,16,32,64,96,128]
 #skip    = 2
 #for i in list_nb:
-skipBefore = 9
 
-for i in range(nrange):                                                
+for i in range(loopStart, loopEnd, skip):                                                
 	if (TypeCal == 'PIMC'):
 
-		if (i>skipBefore and i%skip == 0):
+		if (i%skip == 0):
 			value = i
 			tau          = beta/value
 			numbbeads    = value
@@ -205,9 +208,9 @@ for i in range(nrange):
 				except:
 					pass
 	else:
-		if (i>skipBefore and i % skip == 0 ):
+		if (i % skip == 0 ):
 
-			if i % 2 != 0:
+			if ((i % 2) != 0):
 				value        = i
 			else:
 				value        = i+value_min

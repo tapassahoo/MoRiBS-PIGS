@@ -788,36 +788,39 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 
 void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
 {
+	int it0 = (it1 - 1);
+	int it2 = (it1 + 1);
 
-   int it0 = (it1 - 1);
-   int it2 = (it1 + 1);
+   	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
+   	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
 
-   if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
-   if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+   	int t0 = offset + it0;
+   	int t1 = offset + it1;
+   	int t2 = offset + it2;
 
-   int t0 = offset + it0;
-   int t1 = offset + it1;
-   int t2 = offset + it2;
+   	double cost = MCAngles[CTH][t1];
+   	double phi  = MCAngles[PHI][t1];
+	double EulangOld[NDIM], EulangNew[NDIM];
+	EulangOld[PHI] = phi;
+	EulangOld[CTH] = acos(cost);
+	EulangOld[CHI] = 0.0;
 
-   double cost = MCAngles[CTH][t1];
-   double phi  = MCAngles[PHI][t1];
+// 	cost += (step*(rnd1()-0.5));
+// 	phi  += (step*(rnd1()-0.5));
+   	cost += (step*(rand1-0.5));
+   	phi  += (step*(rand2-0.5));
 
-// cost += (step*(rnd1()-0.5));
-// phi  += (step*(rnd1()-0.5));
-   cost += (step*(rand1-0.5));
-   phi  += (step*(rand2-0.5));
+   	if (cost >  1.0)
+   	{
+      	cost = 2.0 - cost;
+//    	phi  = phi + M_PI;
+   	}
 
-   if (cost >  1.0)
-   {
-      cost = 2.0 - cost;
-//    phi  = phi + M_PI;
-   }
-
-   if (cost < -1.0)
-   {
-       cost = -2.0 - cost;
-//     phi  = phi  + M_PI;
-   }
+   	if (cost < -1.0)
+   	{
+       	cost = -2.0 - cost;
+//     	phi  = phi  + M_PI;
+   	}
 
 	if (abs(cost) > 2.0) 
 	{
@@ -825,29 +828,33 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 		exit(0);
 	}
 
-   double sint = sqrt(1.0 - cost*cost);
+	EulangNew[PHI] = phi;
+	EulangNew[CTH] = acos(cost);
+	EulangNew[CHI] = 0.0;
 
-   newcoords[AXIS_X][t1] = sint*cos(phi);
-   newcoords[AXIS_Y][t1] = sint*sin(phi);
-   newcoords[AXIS_Z][t1] = cost;
+   	double sint = sqrt(1.0 - cost*cost);
+
+   	newcoords[AXIS_X][t1] = sint*cos(phi);
+   	newcoords[AXIS_Y][t1] = sint*sin(phi);
+   	newcoords[AXIS_Z][t1] = cost;
 
 //----------------------------------------------
 
-// the old density
+// 	the old density
 
-   double p0 = 0.0;
-   double p1 = 0.0;
+   	double p0 = 0.0;
+   	double p1 = 0.0;
 
-   for (int id=0;id<NDIM;id++)
-   {
-      p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
-      p1 += (MCCosine[id][t1]*MCCosine[id][t2]);
-   }
+   	for (int id=0;id<NDIM;id++)
+   	{
+      	p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+      	p1 += (MCCosine[id][t1]*MCCosine[id][t2]);
+   	}
 
-   double dens_old;
-   double rho1,rho2,erot;
-// If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
-// if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
+   	double dens_old;
+   	double rho1,rho2,erot;
+// 	If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
+// 	if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
 #ifdef ENTANGLEMENT
    	int particleA1Min = (NumbAtoms/2) - NumbParticle;
    	int particleA1Max = particleA1Min + NumbParticle - 1;
@@ -969,8 +976,11 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    int itr0 = it1  * RotRatio;     // interval to average over
    int itr1 = itr0 + RotRatio;     // translational time slices
 
-   for (int it=itr0;it<itr1;it++)  // average over tr time slices
-   pot_old  += (PotRotEnergy(gatom,MCCosine,it));
+   	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	{
+   		//pot_old  += (PotRotEnergy(gatom,MCCosine,it));
+   		pot_old  += (PotRotEnergy(gatom,EulangOld,it));
+	}
 
 // the new density 
 
@@ -1097,7 +1107,10 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 	double pot_new  = 0.0;
 
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
-	pot_new  += (PotRotEnergy(gatom,newcoords,it));
+	{
+		//pot_new  += (PotRotEnergy(gatom,newcoords,it));
+		pot_new  += (PotRotEnergy(gatom,EulangNew,it));
+	}
 
 	double rd;
 
@@ -1160,6 +1173,10 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
    double cost = MCAngles[CTH][t1];
    double phi  = MCAngles[PHI][t1];
+	double EulangOld[NDIM], EulangNew[NDIM];
+	EulangOld[PHI] = phi;
+	EulangOld[CTH] = acos(cost);
+	EulangOld[CHI] = 0.0;
 
 // cost += (step*(rnd1()-0.5));
 // phi  += (step*(rnd1()-0.5));
@@ -1183,6 +1200,10 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
         cout<<"Upper or lower limit of cost is excided " << cost<<endl;
 		exit(0);
 	}
+
+	EulangNew[PHI] = phi;
+	EulangNew[CTH] = acos(cost);
+	EulangNew[CHI] = 0.0;
 
    double sint = sqrt(1.0 - cost*cost);
 
@@ -1309,8 +1330,10 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    int itr0 = it1  * RotRatio;     // interval to average over
    int itr1 = itr0 + RotRatio;     // translational time slices
 
-   for (int it=itr0;it<itr1;it++)  // average over tr time slices
-   pot_old  += (PotRotEnergySwap(gatom,MCCosine,it,Distribution));
+   	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	{
+		pot_old  += (PotRotEnergySwap(gatom,EulangOld,it,Distribution));
+	}
 
 // the new density 
 
@@ -1420,7 +1443,9 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 	double pot_new  = 0.0;
 
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
-	pot_new  += (PotRotEnergySwap(gatom,newcoords,it,Distribution));
+	{
+		pot_new  += (PotRotEnergySwap(gatom,EulangNew,it,Distribution));
+	}
 
 	double rd;
 
@@ -1467,8 +1492,8 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
 }
 
-double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)   
-//  Orientational energy 
+//double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)   
+double PotRotEnergySwap(int atom0, double *Eulang0, int it, int Distribution)   
 {
 	int type0   =  MCType[atom0];
 	double spot, spotSwap;
@@ -1483,7 +1508,6 @@ double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)
 	{
 	    int offset0 =  atom0*NumbRotTimes;
         int t0  = offset0 + it;
-        int tm0 = offset0 + it/RotRatio;
 
 		int atom1Init, NumbAtoms1;
 #ifdef ENTANGLEMENT
@@ -1512,23 +1536,16 @@ double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)
         {
             int offset1 = atom1*NumbTimes;
             int t1  = offset1 + it;
-            int tm1 = offset1 + it/RotRatio;
+			
 
 	        string stype = MCAtom[type0].type;
 		    if (stype == HF )
             {
-                double uvec1[NDIM],uvec2[NDIM];
-                double dr[NDIM];
-                double dr2    = 0.0;
+				double Eulang1[NDIM];
+				Eulang1[PHI] = MCAngles[PHI][t1];
+                Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+                Eulang1[CHI] = 0.0;
 
-                for (int id=0;id<NDIM;id++)
-                {
-                    uvec1[id] = cosine[id][tm0];
-                    uvec2[id] = MCCosine[id][tm1];
-                    dr[id]    = (MCCoords[id][t0] - MCCoords[id][t1]);
-                    dr2      += (dr[id]*dr[id]);
-                }
-                double r = sqrt(dr2);
 				weight1 = 1.0;
 				if (Distribution == 2)
 				{
@@ -1547,7 +1564,7 @@ double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)
 						}
 	            	} 
 				}
-				spot += weight*weight1*PotFunc(uvec1, uvec2, r);
+				spot += weight*weight1*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
             }  //stype
         } //loop over atom1 (molecules)
 		spotSwap = 0.0;
@@ -1581,24 +1598,14 @@ double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)
 	    		{
                 	int offsetSwap = NumbRotTimes*atomSwap;
                 	int tSwap  = offsetSwap + it;
-                	int tmSwap = offsetSwap + it/RotRatio;
 	        		string stype = MCAtom[type0].type;
                 	if (stype == HF )
                 	{
-                    	double uvec1[NDIM],uvec2[NDIM];
-                    	double dr[NDIM];
-                    	double dr2    = 0.0;
-
-                    	for (int id=0;id<NDIM;id++)
-                    	{
-                        	uvec1[id] = cosine[id][tm0];
-                        	uvec2[id] = MCCosine[id][tmSwap];
-                        	dr[id]  = (MCCoords[id][t0] - MCCoords[id][tSwap]);
-                        	dr2    += (dr[id]*dr[id]);
-                    	}
-
-                    	double r = sqrt(dr2);
-                    	spotSwap += 0.5*PotFunc(uvec1, uvec2, r);
+						double EulangSwap[NDIM];
+						EulangSwap[PHI] = MCAngles[PHI][tSwap];
+                		EulangSwap[CTH] = acos(MCAngles[CTH][tSwap]);
+                		EulangSwap[CHI] = 0.0;
+                    	spotSwap += 0.5*PotFunc(atom0, atomSwap, Eulang0, EulangSwap, it);
                 	}  //stype
 		    	}
         	}
@@ -3072,7 +3079,8 @@ double PotEnergy(int atom0, double **pos, int it)
    return (spot);
 }
 
-double PotRotEnergy(int atom0, double **cosine, int it)   
+//double PotRotEnergy(int atom0, double **cosine, int it)   
+double PotRotEnergy(int atom0, double *Eulang0, int it)   
 //  Orientational energy 
 {
 	int type0   =  MCType[atom0];
@@ -3162,7 +3170,6 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 	{
 	    int offset0 =  atom0*NumbRotTimes;
         int t0  = offset0 + it;
-        int tm0 = offset0 + it/RotRatio;
 
 		int atom1Init, NumbAtoms1;
 #ifdef ENTANGLEMENT
@@ -3191,9 +3198,9 @@ double PotRotEnergy(int atom0, double **cosine, int it)
         {
             int offset1 = atom1*NumbTimes;
             int t1  = offset1 + it;
-            int tm1 = offset1 + it/RotRatio;
 
 	        string stype = MCAtom[type0].type;
+#ifdef IOWRITE
 			if (stype == H2)
 	        {
                 double s1 = 0.0;
@@ -3205,8 +3212,8 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                 {
                     dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
                     dr2    += (dr[id]*dr[id]);
-                    double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*cosine[id][tm0];
-                    double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][tm1];
+                    double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*cosine[id][t0];
+                    double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][t1];
                     s1 += cst1;
                     s2 += cst2;
                 }
@@ -3219,9 +3226,9 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                 double b3[NDIM];
                 for (int id=0;id<NDIM;id++)
                 {
-                    b1[id] = cosine[id][tm0];
+                    b1[id] = cosine[id][t0];
                     b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
-                    b3[id] = MCCosine[id][tm1];
+                    b3[id] = MCCosine[id][t1];
                 }
                 VectorNormalisation(b1);
                 VectorNormalisation(b2);
@@ -3254,22 +3261,11 @@ double PotRotEnergy(int atom0, double **cosine, int it)
                 vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
                 spot += potl*CMRECIP2KL;
 			}  //stype
+#endif
 
 
 		    if (stype == HF )
             {
-                double uvec1[NDIM],uvec2[NDIM];
-                double dr[NDIM];
-                double dr2    = 0.0;
-
-                for (int id=0;id<NDIM;id++)
-                {
-                    uvec1[id] = cosine[id][tm0];
-                    uvec2[id] = MCCosine[id][tm1];
-                    dr[id]    = (MCCoords[id][t0] - MCCoords[id][t1]);
-                    dr2      += (dr[id]*dr[id]);
-                }
-                double r = sqrt(dr2);
 				weight1 = 1.0;
 #ifndef REGULARPATH
 #ifdef ENTANGLEMENT
@@ -3289,11 +3285,14 @@ double PotRotEnergy(int atom0, double **cosine, int it)
             	} 
 #endif
 #endif
-				spot += weight*weight1*PotFunc(uvec1, uvec2, r);
+				double Eulang1[NDIM];
+				Eulang1[PHI] = MCAngles[PHI][t1];
+        		Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+        		Eulang1[CHI] = 0.0;
+        		spot += weight*weight1*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
             }  //stype
         } //loop over atom1 (molecules)
 #ifdef SWAP
-		spotSwap = 0.0;
 		if (it == ((NumbRotTimes - 1)/2))
 		{
 			int atomSwapMin, atomSwapMax;
@@ -3322,30 +3321,21 @@ double PotRotEnergy(int atom0, double **cosine, int it)
 	    	{
                 int offsetSwap = NumbRotTimes*atomSwap;
                 int tSwap  = offsetSwap + it;
-                int tmSwap = offsetSwap + it/RotRatio;
 	        	string stype = MCAtom[type0].type;
                 if (stype == HF )
                 {
-                    double uvec1[NDIM],uvec2[NDIM];
-                    double dr[NDIM];
-                    double dr2    = 0.0;
-
-                    for (int id=0;id<NDIM;id++)
-                    {
-                        uvec1[id] = cosine[id][tm0];
-                        uvec2[id] = MCCosine[id][tmSwap];
-                        dr[id]  = (MCCoords[id][t0] - MCCoords[id][tSwap]);
-                        dr2    += (dr[id]*dr[id]);
-                    }
-
-                    double r = sqrt(dr2);
-                    spotSwap += 0.5*PotFunc(uvec1, uvec2, r);
+					double EulangSwap[NDIM];
+					EulangSwap[PHI] = MCAngles[PHI][tSwap];
+        			EulangSwap[CTH] = acos(MCAngles[CTH][tSwap]);
+        			EulangSwap[CHI] = 0.0;
+        			spotSwap += 0.5*PotFunc(atom0, atomSwap, Eulang0, EulangSwap, it);
                 }  //stype
 		    }
         }
 #endif
     }
 
+#ifdef IOWRITE
 #ifdef GETR
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
 	{
@@ -3359,7 +3349,14 @@ double PotRotEnergy(int atom0, double **cosine, int it)
     }
 #endif
 #endif
-	double spotReturn = spot + spotSwap;
+#endif //LINEARROTORS
+    double spot_onecage;
+#ifdef CAGEPOT
+    spot_onecage = GetPotEnergyCage(it);
+#else
+    spot_onecage = 0.0;
+#endif
+	double spotReturn = (spot + spotSwap + spot_onecage);
     return spotReturn;
 }
 
@@ -3547,4 +3544,3 @@ void MFreeMCCounts(void)
    free_doubleMatrix(MCTotal);
    free_doubleMatrix(MCAccep);
 }
-

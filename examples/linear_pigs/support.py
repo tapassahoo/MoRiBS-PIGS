@@ -49,6 +49,7 @@ def bconstant(molecule_rot):
 	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
 	if (molecule_rot == "HF"):
 		bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
+		#bconst	   = 20.561                      # in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12, page 1464, year 1967
 	return bconst
 
 def replace(string_old, string_new, file1, file2):
@@ -130,6 +131,16 @@ def GetAverageOrientation(numbbeads,tau,dest_dir,preskip,postskip):
 	This function gives us the output 
 	'''
 	col_block, col_costheta, col_compx, col_compy, col_compz = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+	'''
+	fd             = open(dest_dir+'/results/pigs_instant.dof', 'rb')
+	shape          = (-1,5) 
+	dataBin        = np.fromfile(file=fd, count = -1, dtype=np.float64).reshape(shape)
+	col_block      = dataBin[:,0]
+	col_costheta   = dataBin[:,1]
+	col_compx      = dataBin[:,2]
+	col_compy      = dataBin[:,3]
+	col_compz      = dataBin[:,4]
+	'''
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_compx     = np.mean(col_compx)

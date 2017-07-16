@@ -42,7 +42,7 @@ dipolemoment        = 1.86
 
 nrange              = 51
 postskip            = 0
-preskip             = 0
+preskip             = 10000
 particleA           = 1
 
 ENT_TYPE = "SWAPTOUNSWAP"
