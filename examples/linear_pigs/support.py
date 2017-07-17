@@ -590,7 +590,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 #SBATCH --time=%s
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=700mb
+#SBATCH --mem-per-cpu=1400mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s

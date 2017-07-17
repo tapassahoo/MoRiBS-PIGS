@@ -16,7 +16,7 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
 NameOfPartition      = "ntapas"
@@ -35,9 +35,9 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 10000
+numbblocks	        = 400000
 numbmolecules       = 2
-numbpass            = 400
+numbpass            = 500
 beta     	        = 0.1
 
 Rpt                 = 10.05
@@ -52,7 +52,7 @@ loopStart           = 10
 loopEnd             = 51
 skip                = 2
 
-preskip             = 0
+preskip             = 10000
 postskip            = 0
 
 particleA           = 1

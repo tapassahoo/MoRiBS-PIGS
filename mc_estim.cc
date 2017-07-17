@@ -1375,7 +1375,7 @@ void GetDipoleCorrelation(double *DipoleCorr)
            	    	{    
                	    	cst    += MCCosine[id][t0]*MCCosine[id][t1];
            	    	}
-           	    	DipoleCorr[ii]   += cst;
+           	    	DipoleCorr[ii] = cst;
 					ii++;
 				}
     		}

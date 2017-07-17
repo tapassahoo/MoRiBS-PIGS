@@ -64,8 +64,10 @@ double _costheta_total;
 double _ucompx_total;
 double _ucompy_total;
 double _ucompz_total;
+#ifdef DDCORR
 vector<double> _cdipole;
 vector<double> _cdipole_total;
+#endif
 #endif
 #ifdef ENTANGLEMENT
 double _bnm;
@@ -111,10 +113,12 @@ void SaveInstantEnergy ();                 // accumulated average
 
 #ifdef PIGSROTORS
 #ifndef ENTANGLEMENT
+#ifdef DDCORR
 void SaveDipoleCorr(const char [],double,long int);
+void SaveSumDipoleCorr(double,double);              // accumulated average
+#endif
 void SaveAngularDOF(const char [],double,long int);
 void SaveSumAngularDOF(double,double);              // accumulated average
-void SaveSumDipoleCorr(double,double);              // accumulated average
 #else
 void SaveTrReducedDens(const char [], double , long int );
 void SaveSumTrReducedDens(double , double);
@@ -226,14 +230,44 @@ srand( time(NULL) );
         {
             cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
         }
-    } //loop over number of cages
+    } 
+    cout<<"  "<<endl;
+    cout<<"  "<<endl;
+	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+	{
+        int offset0 = NumbTimes*atom0;
+		for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+		{
+			if (atom0 != atom1)
+			{
+            	int offset1 = NumbTimes*atom1;
+
+            	int it = ((NumbRotTimes - 1)/2);
+            	int t0 = offset0 + it;
+            	int t1 = offset1 + it;
+
+            	double dr;
+            	double dr2 = 0.0;
+            	for (int id=0;id<NDIM;id++)
+            	{
+                	dr   = (MCCoords[id][t0] - MCCoords[id][t1]);
+                	dr2 += (dr*dr);
+            	}
+            	double r = sqrt(dr2);
+				cout<<"atom0 "<<atom0<<" atom1 "<<atom1<<" RCOM "<<r<<endl;
+			}
+		}
+		cout<<"  "<<endl;
+	}
+    cout<<"  "<<endl;
+    cout<<"  "<<endl;
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
     {
         for (int id=0;id<NDIM;id++)
         {
             cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
         }
-    } //loop over number of cages
+    } 
 //    read in initial MCCoords and MCAngles
       if(InitMCCoords)
       {
@@ -641,7 +675,9 @@ srand( time(NULL) );
 #ifdef PIGSROTORSIO
 #ifndef ENTANGLEMENT
 					SaveSumAngularDOF(totalCount, sumsCount);
+#ifdef DDCORR
 					SaveSumDipoleCorr(totalCount, sumsCount);
+#endif
 #endif
 #endif
             	}
@@ -776,11 +812,13 @@ void MCResetBlockAverage(void)
 	_ucompx     = 0.0;
 	_ucompy     = 0.0;
 	_ucompz     = 0.0;
-	double NDIMP = NumbAtoms*(NumbAtoms-1)/2;
-	for (int idp = 0; idp < 10; idp++) 
+#ifdef DDCORR
+	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
+	for (int idp = 0; idp < NDIMDP; idp++) 
 	{
 		_cdipole.push_back(0.0);
 	}
+#endif
 #ifdef ENTANGLEMENT
     _bnm       = 0.0;
     _bdm       = 0.0;
@@ -861,19 +899,17 @@ void MCGetAverage(void)
 	_ucompx_total    += scompx;
 	_ucompy_total    += scompy;
 	_ucompz_total    += scompz;
-#ifdef DDCORRELATION
-    double DipoleCorr[10];
-    double sdipolecorr;
 
-	double NDIMP = NumbAtoms*(NumbAtoms-1)/2;
-	for (int idp = 0; idp < NIDMDP; idp++) DipoleCorr[idp] = 0.0;
-	GetDipoleCorrelation(DipoleCorr)
+#ifdef DDCORR
+	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
+    double DipoleCorr[NDIMDP];
+	for (int idp = 0; idp < NDIMDP; idp++) DipoleCorr[idp] = 0.0;
+	GetDipoleCorrelation(DipoleCorr);
 
-	for (int idp = 0; idp < NIDMDP; idp++)
+	for (int idp = 0; idp < NDIMDP; idp++)
 	{
-		sdipolecorr  = DipoleCorr[idp];
-		_cdipole[idp] += sdipolecorr;
-		_cdipole_total[idp] += sdipolecorr;
+		_cdipole[idp] += DipoleCorr[idp];
+		_cdipole_total[idp] += DipoleCorr[idp];
 	}
 #endif
 #endif
@@ -1111,7 +1147,9 @@ void MCSaveBlockAverages(long int blocknumb)
 #ifdef PIGSROTORSIO
 #ifndef ENTANGLEMENT
 	SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
+#ifdef DDCORR
 	SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
+#endif
 #else
     SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
 #endif
@@ -1178,6 +1216,7 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 }
 
 #ifdef PIGSROTORS
+#ifdef DDCORR
 void SaveDipoleCorr(const char fname [], double acount, long int blocknumb)
 {
     const char *_proc_=__func__;    
@@ -1195,13 +1234,15 @@ void SaveDipoleCorr(const char fname [], double acount, long int blocknumb)
 
 
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
-	for (int idp = 0; idp < 10; idp++)
+	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
+	for (int idp = 0; idp < NDIMDP; idp++)
 	{ 
     	fid << setw(IO_WIDTH) << _cdipole[idp]/acount << BLANK;
 	}
     fid << endl;
     fid.close();
 }
+#endif
 
 void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
 {
@@ -1303,17 +1344,20 @@ void SaveSumEnergy (double acount, double numb)  // global average
 }
 
 #ifdef PIGSROTORS
+#ifdef DDCORR
 void SaveSumDipoleCorr(double acount, double numb)
 {
     const char *_proc_=__func__;
 
     _fdc << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-	for (int idp = 0; idp < 10; idp++)
+	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
+	for (int idp = 0; idp < NDIMDP; idp++)
 	{ 
     	_fdc << setw(IO_WIDTH) << _cdipole_total[idp]/acount << BLANK;
 	}
     _fdc << endl;
 }
+#endif
 
 void SaveSumAngularDOF(double acount, double numb)
 {
@@ -1449,11 +1493,13 @@ void InitTotalAverage(void)  // DUMP
 	_ucompx_total  = 0.0;
 	_ucompy_total  = 0.0;
 	_ucompz_total  = 0.0;
-	double NDIMP = NumbAtoms*(NumbAtoms-1)/2;
-	for (int idp = 0; idp < NDIM; idp++)
+#ifdef DDCORR
+	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
+	for (int idp = 0; idp < NDIMDP; idp++)
 	{
 		 _cdipole_total.push_back(0.0);
 	}
+#endif
 #ifdef ENTANGLEMENT
     _nm_total  = 0.0;
     _dm_total  = 0.0;
@@ -1506,6 +1552,7 @@ void InitTotalAverage(void)  // DUMP
     _io_error(_proc_,IO_ERR_FOPEN,fangular.c_str());
 
 //
+#ifdef DDCORR
     string fdipolecorr;
 
     fdipolecorr  = MCFileName + IO_SUM;
@@ -1519,6 +1566,7 @@ void InitTotalAverage(void)  // DUMP
 
     if (!_fdc.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fdipolecorr.c_str());
+#endif
 
 //
 #ifdef IOFILES
@@ -1557,6 +1605,7 @@ void InitTotalAverage(void)  // DUMP
     _io_error(_proc_,IO_ERR_FOPEN,fentropy.c_str());
 #endif
 
+#ifdef IOFILES
     string fenergyins;
 
     fenergyins  = MCFileName + "_instant";
@@ -1570,6 +1619,7 @@ void InitTotalAverage(void)  // DUMP
 
     if (!_fengins.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fenergyins.c_str());
+#endif
 }
 
 void DoneTotalAverage(void)

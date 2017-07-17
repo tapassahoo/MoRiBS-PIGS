@@ -433,20 +433,20 @@ void MCBisectionMoveExchange(int type, int time0)  // multilevel Metropolis
 void MCRotationsMove(int type) // update all time slices for rotational degrees of freedom
 {
 #ifdef DEBUG_PIMC
-   const char *_proc_=__func__;    //  MCRotationsMove() 
-   if (type != IMTYPE)
-   nrerror(_proc_,"Wrong impurity type");
+	const char *_proc_=__func__;    //  MCRotationsMove() 
+   	if (type != IMTYPE)
+   	nrerror(_proc_,"Wrong impurity type");
 
-   if (NDIM != 3)
-   nrerror(_proc_,"Rotational sampling for 3D systems only");
+   	if (NDIM != 3)
+   	nrerror(_proc_,"Rotational sampling for 3D systems only");
 #endif
 
-   double step   = MCAtom[type].rtstep; 
-   double MCRotChunkTot = 0.0;
-   double MCRotChunkAcp = 0.0;
+   	double step   = MCAtom[type].rtstep; 
+   	double MCRotChunkTot = 0.0;
+   	double MCRotChunkAcp = 0.0;
 
-   RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
-   double rand1,rand2,rand3;
+   	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+   	double rand1,rand2,rand3;
 
 #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3)
 	for (int itrot=0;itrot<NumbRotTimes;itrot += 2)
@@ -459,7 +459,7 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 			rand2=runif(Rng);
 			rand3=runif(Rng);
 #ifdef SWAPTOUNSWAP
-			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp, Distribution);
+			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
 #else
 			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 #endif
@@ -483,7 +483,7 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 			rand2=runif(Rng);
 			rand3=runif(Rng);
 #ifdef SWAPTOUNSWAP
-			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp, Distribution);
+			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
 #else
 			MCRotLinStep(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 #endif
