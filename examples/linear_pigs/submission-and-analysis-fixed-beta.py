@@ -16,7 +16,7 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
 NameOfPartition      = "ntapas"

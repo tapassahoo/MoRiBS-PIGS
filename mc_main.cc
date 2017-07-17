@@ -2,6 +2,7 @@
 //         main()
 //
 
+#include <string>
 #include <stdlib.h>
 //#include <stdlib>
 #include <sstream>
@@ -142,7 +143,7 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 extern "C" void vinit_();
 #endif
 #ifdef SWAPTOUNSWAP
-  	int Distribution = 1;
+  	string Distribution = "UnSwap";
 	double MCAccepSwap;
 	double MCAccepUnSwap;
 #endif

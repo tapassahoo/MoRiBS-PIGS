@@ -1539,7 +1539,7 @@ double GetPhi(void)
 
 
 #ifdef ENTANGLEMENT
-double GetPotEnergy_Entanglement(int atom0, int atom1)
+double GetPotEnergyEntanglement(int atom0, int atom1)
 {
 	const char *_proc_=__func__;
 
@@ -1558,12 +1558,10 @@ double GetPotEnergy_Entanglement(int atom0, int atom1)
    	Eulang1[PHI] = MCAngles[PHI][t1];
    	Eulang1[CTH] = acos(MCAngles[CTH][t1]);
    	Eulang1[CHI] = 0.0;
-    spot = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+    spot = 0.5*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
     return spot;
 }
-#endif
 
-#ifdef ENTANGLEMENT
 double GetEstimNM(void)
 {
     int atom0, atom1;
@@ -1580,7 +1578,7 @@ double GetEstimNM(void)
     {
         for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
         {
-            spot      += GetPotEnergy_Entanglement(atom0, atom1);
+            spot      += GetPotEnergyEntanglement(atom0, atom1);
 		}
     }
 
@@ -1588,10 +1586,10 @@ double GetEstimNM(void)
     {
     	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
     	{
-        	spot      += GetPotEnergy_Entanglement(atom0, atom1);
+        	spot      += GetPotEnergyEntanglement(atom0, atom1);
     	}
 	}
-    double potEstimNM = exp(-0.5*MCRotTau*spot);
+    double potEstimNM = exp(-MCRotTau*spot);
 
     int it0  = (((NumbRotTimes - 1)/2)-1);
     int it1  = ((NumbRotTimes - 1)/2);
@@ -1651,7 +1649,7 @@ double GetEstimDM(void)
 	{
     	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
     	{
-        	spot      += GetPotEnergy_Entanglement(atom0, atom1);
+        	spot      += GetPotEnergyEntanglement(atom0, atom1);
     	}
 	}
 
@@ -1659,10 +1657,10 @@ double GetEstimDM(void)
 	{
     	for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
     	{
-        	spot      += GetPotEnergy_Entanglement(atom0, atom1);
+        	spot      += GetPotEnergyEntanglement(atom0, atom1);
     	}
 	}
-    double potEstimDM = exp(-0.5*MCRotTau*spot);
+    double potEstimDM = exp(-MCRotTau*spot);
 
     double dens = 1.0;
     for (int atom0 = particleA1Min; atom0 <= particleA2Max; atom0++)
