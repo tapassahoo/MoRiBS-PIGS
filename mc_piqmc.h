@@ -5,10 +5,10 @@ void MCMolecularMove(int);
 void MCBisectionMove(int,int);
 void MCRotationsMove(int);
 #ifdef SWAPTOUNSWAP
-void MCSwap(double, int &);
-void MCRotLinStepSwap(int,int,int,int,double,double,double,double,double &,double &, int);
-double PotRotEnergySwap(int,double *,int it, int Distribution);   
-//double PotRotEnergySwap(int,double **,int it, int Distribution);   
+void MCSwap(double, string &);
+void MCRotLinStepSwap(int,int,int,int,double,double,double,double,double &,double &, string);
+double PotRotEnergySwap(int,const double *,int it, string);   
+//double PotRotEnergySwap(int,double **,int it, int );   
 #endif
 // Toby adds rotation move for nonlinear rotor
 void MCRotations3D(int);

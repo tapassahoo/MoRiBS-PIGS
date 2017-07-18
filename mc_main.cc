@@ -143,7 +143,7 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 extern "C" void vinit_();
 #endif
 #ifdef SWAPTOUNSWAP
-  	int Distribution = 1;
+  	string Distribution = "unSwap";
 	double MCAccepSwap;
 	double MCAccepUnSwap;
 #endif

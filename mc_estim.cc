@@ -3867,7 +3867,7 @@ double GetPotEnergyCage(double *EulangJ)
 	return spot_onecage;
 }
 
-double PotFunc(int atom0, int atom1, double *Eulang0, double *Eulang1, int it)
+double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang1, int it)
 {
 	double DipoleMomentInAU = DipoleMoment/AuToDebye; // DipoleMoment in Debye
 	double dm[NDIM];
@@ -3941,7 +3941,7 @@ double PotFunc(int atom0, int atom1, double *Eulang0, double *Eulang1, int it)
     return PotReturn;
 }
 
-void UnitVectors(double *Eulang, double *RotMat)
+void UnitVectors(const double *Eulang, double *RotMat)
 {
 	double theta = Eulang[CTH];
 	double phi   = Eulang[PHI];

@@ -20,7 +20,7 @@ status              = "submission"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 
 #TypeCal             = 'PIGS'
 TypeCal             = 'ENT'
@@ -31,7 +31,7 @@ molecule            = "HF"
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 400000
-numbmolecules       = 2
+numbmolecules       = 4
 numbpass            = 500
 tau                 = 0.005
 
@@ -56,7 +56,7 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
 
-extra_file_name     = "-Passes"+str(numbpass)
+extra_file_name     = "-Passes"+str(numbpass)+"MemCheck"
 #extra_file_name     = ""
 
 if (TypeCal == "PIGS"):
@@ -139,9 +139,9 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 5
+	loopStart       = 49
 
-step = [1.8 for i in range(loopStart, (loopEnd+2*skip), skip)]
+step = [1.8 for i in range(loopStart, 1000, skip)]
 # Loop over jobs
 for i in range(loopStart, loopEnd, skip):                                                
 
