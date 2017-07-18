@@ -143,7 +143,7 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 extern "C" void vinit_();
 #endif
 #ifdef SWAPTOUNSWAP
-  	string Distribution = "UnSwap";
+  	int Distribution = 1;
 	double MCAccepSwap;
 	double MCAccepUnSwap;
 #endif
@@ -1521,6 +1521,7 @@ void InitTotalAverage(void)  // DUMP
 	// open files for output
 	// ENERGY
 
+#ifndef ENTANGLEMENT
 	string fenergy;
 
 	fenergy  = MCFileName + IO_SUM; 
@@ -1590,22 +1591,6 @@ void InitTotalAverage(void)  // DUMP
     _io_error(_proc_,IO_ERR_FOPEN,fangularins.c_str());
 #endif
 
-#ifdef ENTANGLEMENT
-    string fentropy;
-
-    fentropy  = MCFileName + IO_SUM;
-    fentropy += ".rden";
-
-    if (FileExist(fentropy.c_str()))   // backup the output of previous simulations 
-    IOFileBackUp(fentropy.c_str());
-
-    _fentropy.open(fentropy.c_str(), ios::out);
-    io_setout(_fentropy);
-
-    if (!_fentropy.is_open())
-    _io_error(_proc_,IO_ERR_FOPEN,fentropy.c_str());
-#endif
-
 #ifdef IOFILES
     string fenergyins;
 
@@ -1620,6 +1605,23 @@ void InitTotalAverage(void)  // DUMP
 
     if (!_fengins.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fenergyins.c_str());
+#endif
+#endif
+
+#ifdef ENTANGLEMENT
+    string fentropy;
+
+    fentropy  = MCFileName + IO_SUM;
+    fentropy += ".rden";
+
+    if (FileExist(fentropy.c_str()))   // backup the output of previous simulations 
+    IOFileBackUp(fentropy.c_str());
+
+    _fentropy.open(fentropy.c_str(), ios::out);
+    io_setout(_fentropy);
+
+    if (!_fentropy.is_open())
+    _io_error(_proc_,IO_ERR_FOPEN,fentropy.c_str());
 #endif
 }
 

@@ -647,7 +647,7 @@ void initChain_config(double **pos)
 	NumbAtoms1 = NumbAtoms;
 #endif
 
-	double LatticeTheta = 0.25*M_PI;
+	double LatticeTheta = 0.0; //0.25*M_PI;
 	double LatticePhi   = 0.25*M_PI;
     for (int atom = 0; atom < NumbAtoms1; atom++)
     {

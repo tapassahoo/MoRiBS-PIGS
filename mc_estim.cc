@@ -119,7 +119,7 @@ extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *t1, double *t
 extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
 extern "C" double plgndr(int l, int m, double x);
 #endif
-extern "C" void enhfc60_(double *RCOMHF, double *EulangL, double *EulangJ, double *EHFC60);
+extern "C" void enhfc60_(double *RCOMHF, double *EulangL1, double *EulangL2, double *EulangJ1, double *EulangJ2, double *EHFC60);
 #ifdef MOLECULEINCAGE
 //Pot of H2O-C60 one cage
 extern "C" void calengy_(double *com_1, double *Eulang_1, double *E_H2OC60);
@@ -701,12 +701,15 @@ double GetPotEnergyPIGS(void)
     }
 #endif
 	double spot_onecage;
+/*
 #ifdef CAGEPOT
     int it = ((NumbRotTimes - 1)/2);
 	spot_onecage = GetPotEnergyCage(it);
 #else
 	spot_onecage = 0.0;
 #endif
+*/
+	spot_onecage = 0.0;
 	double spotReturn = (spot + spot_onecage);
 	return spotReturn;
 }
@@ -1211,6 +1214,7 @@ double GetTotalEnergy(void)
     }//endif MOLECINCAGE
 #endif
 	double spot_onecage;
+/*
 #ifdef CAGEPOT
 	spot_onecage = 0.0;
     for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
@@ -1220,6 +1224,8 @@ double GetTotalEnergy(void)
 #else
 	spot_onecage = 0.0;
 #endif
+*/
+	spot_onecage = 0.0;
 	double spotReturn = 0.5*(spot + spot_onecage);
 	return spotReturn;
 }
@@ -3832,40 +3838,27 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[2] = w[0] * v[1] - w[1] * v[0];
 }
 
-double GetPotEnergyCage(int it)
+double GetPotEnergyCage(double *EulangJ)
 {
 	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
 
     string stype = MCAtom[IMTYPE].type;
 	double spot_onecage;
 
-	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
-	{
-		if (stype == HF)
-        {
-   			double EHFC60;
-           	double EulangJ[2];
-           	double EulangL[2];
-			double RCOMHF = 0.0;
+	if (stype == HF)
+    {
+   		double EHFC60;
+		double RCOMHF = 0.0;
 
-    		spot_onecage = 0.0;
-        	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-        	{
-           		int offset0 = NumbRotTimes*atom0;
-           		int t0 = offset0 + it;
+   		double EulangL1 = 0.0;
+   		double EulangL2 = 0.0;
+		double EulangJ1 = EulangJ[CTH];
+		double EulangJ2 = EulangJ[PHI];
 
-
-           		EulangL[0] = 0.0;
-           		EulangL[1] = 0.0;
-           		EulangJ[0] = acos(MCAngles[CTH][t0]);
-           		EulangJ[1] = MCAngles[PHI][t0];
-
-				enhfc60_(&RCOMHF, EulangL, EulangJ, &EHFC60);
-           		spot_onecage += EHFC60;
-        	}
-			spot_onecage *= KCalperMolToCmInverse;
-			spot_onecage *= CMRECIP2KL;
-		}
+		enhfc60_(&RCOMHF, &EulangL1, &EulangL2, &EulangJ1, &EulangJ2, &EHFC60);
+   		spot_onecage += EHFC60;
+		spot_onecage *= KCalperMolToCmInverse;
+		spot_onecage *= CMRECIP2KL;
 	}
 	
 #ifdef POTZERO

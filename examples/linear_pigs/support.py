@@ -569,7 +569,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 	if (thread > 24):
 		thread = 24
 	job_name       = str(file_name)+str(value)
-	walltime       = "00-30:00"
+	walltime       = "00-48:00"
 	omp_thread     = str(thread)
 	output_dir     = run_dir+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -590,7 +590,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 #SBATCH --time=%s
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=1400mb
+#SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s

@@ -497,7 +497,7 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
     //double rand4 = (double)rand() / ((double)RAND_MAX + 1);
     double rand4 = runif(Rng);
     MCSwap(rand4, Distribution);
-    if (Distribution == "Swap") MCAccepSwap += 1;
+    if (Distribution == 2) MCAccepSwap += 1;
     else MCAccepUnSwap += 1;
 #endif
 }
@@ -1226,7 +1226,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	int particleA2Min = particleA1Max + 1;
    	int particleA2Max = particleA2Min + NumbParticle - 1;
 
-	if ((Distribution == "UnSwap") || (Distribution == "Swap"))
+	if ((Distribution == 1) || (Distribution == 2))
 	{
        	if (it1 == 0 || it1 == (NumbRotTimes - 1))
        	{
@@ -1244,7 +1244,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
            	dens_old = SRotDens(p0,type)*SRotDens(p1,type);
        	}
 	}
-	if (Distribution == "Swap")
+	if (Distribution == 2)
 	{
        	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
        	{
@@ -1333,7 +1333,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
    	double dens_new;
 
-	if ((Distribution == "UnSwap") || (Distribution == "Swap"))
+	if ((Distribution == 1) || (Distribution == 2))
     {
        	if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
        	{
@@ -1351,7 +1351,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
            	dens_new = SRotDens(p0,type)*SRotDens(p1,type);
        	}
 	}
-	if (Distribution == "Swap")
+	if (Distribution == 2)
     {
        	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
        	{
@@ -1498,7 +1498,7 @@ double PotRotEnergySwap(int atom0, double *Eulang0, int it, int Distribution)
                 Eulang1[CHI] = 0.0;
 
 				weight1 = 1.0;
-				if (Distribution == "Swap")
+				if (Distribution == 2)
 				{
 					if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
             		{
@@ -1519,7 +1519,7 @@ double PotRotEnergySwap(int atom0, double *Eulang0, int it, int Distribution)
             }  //stype
         } //loop over atom1 (molecules)
 		spotSwap = 0.0;
-		if (Distribution == "Swap")
+		if (Distribution == 2)
 		{
 			if (it == ((NumbRotTimes - 1)/2))
 			{
@@ -1563,7 +1563,13 @@ double PotRotEnergySwap(int atom0, double *Eulang0, int it, int Distribution)
 		}
     }
 
-	double spotReturn = spot + spotSwap;
+    double spot_onecage;
+#ifdef CAGEPOT
+    spot_onecage = weight*GetPotEnergyCage(Eulang0);
+#else
+    spot_onecage = 0.0;
+#endif
+	double spotReturn = spot + spotSwap + spot_onecage;
     return spotReturn;
 }
 
@@ -1572,12 +1578,12 @@ void MCSwap(double rand4, int &Distribution)
 
     double rd;
 
-    if (Distribution == "UnSwap")
+    if (Distribution == 1)
     {
         rd = GetEstimNM()/GetEstimDM();
     }
 
-    if (Distribution == "Swap")
+    if (Distribution == 2)
     {
         rd = GetEstimDM()/GetEstimNM();
     }
@@ -1586,11 +1592,11 @@ void MCSwap(double rand4, int &Distribution)
     if (rd>1.0)         Accepted = true;
     else if (rd>rand4) Accepted = true;
 
-    string DistributionInit = Distribution;
+    int DistributionInit = Distribution;
     if (Accepted)
     {
-        if (DistributionInit == "UnSwap") Distribution = "Swap";
-        if (DistributionInit == "Swap") Distribution = "UnSwap";
+        if (DistributionInit == 1) Distribution = 2;
+        if (DistributionInit == 2) Distribution = 1;
     }
 }
 #endif
@@ -3301,13 +3307,7 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 #endif
 #endif
 #endif //LINEARROTORS
-    double spot_onecage;
-#ifdef CAGEPOT
-    spot_onecage = GetPotEnergyCage(it);
-#else
-    spot_onecage = 0.0;
-#endif
-	double spotReturn = (spot + spotSwap + spot_onecage);
+	double spotReturn = (spot + spotSwap);
     return spotReturn;
 }
 

@@ -1,4 +1,4 @@
-      subroutine enhfc60(R,EulangL,EulangJ,EHFC60)
+      subroutine enhfc60(R,EulangL1,Eulang2,EulangJ1,EulangJ2,EHFC60)
 c
 c     input: coordinates of the center of mass of HF molecule are defined by 
 c            R, AngleL(1)=th, AngleL(2)=ph; rotation of HF in the centre of mass
@@ -9,14 +9,15 @@ c     This potential is based on the DF-LMP2/cc-pVTZ Counterpoise calculations
 
       integer i,j,k,n,p1,p2,p,mp
       parameter(n=12,kcal2k = 503.219565d0)
-      double precision EulangL(2),EulangJ(2),EHFC60,x(n),t,R,R2,R3,R4
+      double precision EulangL1, EulangL2, EulangJ1, EulangJ2,EHFC60
+      double precision x(n),t,R,R2,R3,R4
       double precision th,thp,ph,php 
       dimension p1(n),p2(n),p(n),mp(n)
  
-      th=EulangL(1)
-      ph=EulangL(2)
-      thp=EulangJ(1)
-      php=EulangJ(2)
+      th=EulangL1
+      ph=EulangL2
+      thp=EulangJ1
+      php=EulangJ2
 
          	p1(1)=0    
          	p1(2)=0    
