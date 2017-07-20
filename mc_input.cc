@@ -28,7 +28,6 @@ const char IO_TEMPERATURE[]    = "TEMPERATURE";
 const char IO_ATOM[]           = "ATOM";
 const char IO_MOLECULE[]       = "MOLECULE"; // linear molecule
 const char IO_LINEARROTORS[]   = "LINEARROTORS"; // linear rotors
-const char IO_MOLECINCAGE[]    = "MOLECINCAGE";
 // Toby's value
 const char IO_NONLINEAR[]      = "NONLINEAR";
 const char IO_PLANAR[]         = "PLANAR";
@@ -111,10 +110,6 @@ void IOReadParams(const char in_file[],int & mc_status)
    double  _rot_step;      // step for sampling the rotational degrees of freedom
    string _srot_type;      // the molecule type to sample the rotational degrees of freedom
    string _srot_dens;      // the file name with the rotational density matrix
-
-#ifdef MOLECULEINCAGE
-   MOLECINCAGE  = 0;
-#endif
 
    InitMCCoords = 0;
 
@@ -320,13 +315,6 @@ void IOReadParams(const char in_file[],int & mc_status)
      {
         InitMCCoords = 1;
      }
-#ifdef MOLECULEINCAGE
-     else
-     if (params==IO_MOLECINCAGE)
-     {
-        MOLECINCAGE = 1;
-     }
-#endif
      else 
      if (params==IO_MCSKIP_RATIO)
      {

@@ -155,8 +155,10 @@ int main(int argc, char *argv[])
 #ifdef SWAPTOUNSWAP
 srand( time(NULL) );
 #endif
+#ifdef H2IOWRITE
 #ifdef LINEARROTORS
    vinit_();
+#endif
 #endif
 //int numprocs, rank, namelen;
 //char processor_name[MPI_MAX_PROCESSOR_NAME];
@@ -222,7 +224,8 @@ srand( time(NULL) );
 //    MCStartBlock = 0; 
 //    SEED for head CPU
       SEED = 985456376;
-      RandomInit(MPIrank,MPIsize);
+//Tapas commented out
+      //RandomInit(MPIrank,MPIsize);
 
     MCConfigInit();                // generate initial configurations
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
@@ -330,6 +333,8 @@ srand( time(NULL) );
 
          }
       }
+	delete [] MCCooInit;
+	delete [] MCAngInit;
 
 //    string fname = MCFileName + IO_EXT_XYZ;
 //    IOxyz(IOWrite,fname.c_str());  // test output of initial config
@@ -341,7 +346,8 @@ srand( time(NULL) );
       StatusIO(IOWrite,FSTATUS);
       ConfigIO(IOWrite,FCONFIG);
       TablesIO(IOWrite,FTABLES);
-      RandomIO(IOWrite,FRANDOM);
+//Tapas commented out
+      //RandomIO(IOWrite,FRANDOM);
 
       if (WORM)
       QWormsIO(IOWrite,FQWORMS);
@@ -354,7 +360,8 @@ srand( time(NULL) );
    StatusIO(IORead,FSTATUS);  // load MCStartBlock
    ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
    TablesIO(IORead,FTABLES);  // load permutation tables
-   RandomIO(IORead,FRANDOM);  // load rnd streams 
+//Tapas commented out
+   //RandomIO(IORead,FRANDOM);  // load rnd streams 
 
    if (WORM)
    QWormsIO(IORead,FQWORMS);
@@ -418,7 +425,8 @@ srand( time(NULL) );
 // MPI BLOCK 1 in MASTER done
 */
 
-   InitMCEstims();
+//Tapas commented out
+   //InitMCEstims();
    InitTotalAverage();      // DUMP 
    double sumsCount = 0.0;  // counter for accum sums
    double totalStep = 0.0;
@@ -426,100 +434,6 @@ srand( time(NULL) );
    ResetMCCounts();
    ResetQWCounts();
 
-#ifdef TESTCODE
-    int nGridCost = 20;
-    int nGridPhi = 20;
-	double dcost  = 2.0/nGridCost;
-    double dphi   = 2.0*M_PI/nGridPhi;
-    double cost1, cost2, cost3, sint1, sint2, sint3;
-    double phi1, phi2, phi3;
-    double p1[3];
-    double p2[3];
-    double p3[3];
-    int nslice = NumbRotTimes - 1;
-    int type = 0;
-
-    double sumt1 = 0.0;
-    double sumt1z = 0.0;
-    for (int it1 = 0; it1 < nGridCost; it1++)
-    {
-        cost1 = (double)it1*dcost - 1.0;
-        sint1 = sqrt(1. -  cost1*cost1);
-
-        double sump1 = 0.0;
-        double sump1z = 0.0;
-        for (int ip1 = 0; ip1 < nGridPhi; ip1++)
-        {
-            phi1  = (double)ip1*dphi;
-            p1[0] = sint1*cos(phi1);
-            p1[1] = sint1*sin(phi1);
-            p1[2] = cost1;
-
-            double sumt2 = 0.0;
-            double sumt2z = 0.0;
-            for (int it2 = 0; it2 < nGridCost; it2++)
-            {
-                cost2 = (double)it2*dcost - 1.0;
-                sint2 = sqrt(1. -  cost2*cost2);
-    
-                double sump2 = 0.0;
-                double sump2z = 0.0;
-                for (int ip2 = 0; ip2 < nGridPhi; ip2++)
-                {
-                    phi2  = (double)ip2*dphi;
-                    p2[0] = sint2*cos(phi2);
-                    p2[1] = sint2*sin(phi2);
-                    p2[2] = cost2;
-
-                    double csg12 = 0.0;
-                    for (int id = 0; id < 3; id++)
-                    {
-                        csg12 += p1[id]*p2[id];
-                    }
-                            
-                    double sumt3 = 0.0;
-                    double sumt3z = 0.0;
-                    for (int it3 = 0; it3 < nGridCost; it3++)
-                    {
-                        cost3 = (double)it3*dcost - 1.0;
-                        sint3 = sqrt(1. -  cost3*cost3);
-                        
-                        double sump3 = 0.0;
-                        double sump3z = 0.0;
-                        for (int ip3 = 0; ip3 < nGridPhi; ip3++)
-                        {
-                            phi3  = (double)ip3*dphi;
-                            p3[0] = sint3*cos(phi3);
-                            p3[1] = sint3*sin(phi3);
-                            p3[2] = cost3;
-                            
-                            double csg23 = 0.0;
-                            for (int id = 0; id < 3; id++)
-                            {
-                                csg23 += p2[id]*p3[id];
-                            }
-							sump3 += (double)nslice*SRotDensDeriv(csg12, type)*SRotDens(csg23,type)*dcost*dcost*dcost*dphi*dphi*dphi;
-							sump3z += SRotDens(csg12,type)*SRotDens(csg23,type)*dcost*dcost*dcost*dphi*dphi*dphi;
-                        }
-                        sumt3 += sump3;
-                        sumt3z += sump3z;
-                    }
-					sump2 += sumt3;
-					sump2z += sumt3z;
-                }
-                sumt2 += sump2;
-                sumt2z += sump2z;
-            }
-            sump1 += sumt2;
-            sump1z += sumt2z;
-        }
-        sumt1 += sump1;
-        sumt1z += sump1z;
-    }
-    double ratio1 = sumt1/sumt1z;
-    cout<<"Here I am "<<ratio1<<"     "<<sumt1<<"    "<< sumt1z<<endl;
-    exit(0);
-#endif
 /*
 // try openmp for loop
    int chunksize,nthrds;
@@ -704,9 +618,6 @@ srand( time(NULL) );
 	   		if(IMPURITY && MCAtom[IMTYPE].molecule == 3)
 	     	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
-	   		if(IMPURITY && MCAtom[IMTYPE].molecule == 4)
-	     	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
-
            	if(IMPURITY && MCAtom[IMTYPE].molecule == 2)
            	{
             	SaveDensities3D(MCFileName.c_str(),totalCount,MC_TOTAL); // this step takes lots of space.  temporarily turnned off
@@ -726,7 +637,8 @@ srand( time(NULL) );
 		IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 		IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
 		IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
-		IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+//Tapas commented out
+		//IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
       
 		string fname = MCFileName + IO_EXT_XYZ;
 		IOxyz(IOWrite,fname.c_str());  // test output of initial config
@@ -747,14 +659,16 @@ srand( time(NULL) );
 	if (WORM)
 		MCWormDone();
 
-	DoneMCEstims();
+//TAPAS commented out
+//	DoneMCEstims();
 	DonePotentials();
 
 	if (ROTATION)
 		DoneRotDensity();
 
 	MCMemFree();
-	RandomFree();
+//Tapas commented out
+	//RandomFree();
 
 	MFreeMCCounts();
 	MFreeQWCounts();
@@ -764,7 +678,6 @@ srand( time(NULL) );
 
 void PIMCPass(int type,int time)
 {
-
   // skip solvent and translation moves for rotations only
 #ifdef MOVECOM
    if (time == 0)
@@ -781,15 +694,6 @@ void PIMCPass(int type,int time)
     	MCRotations3D(type);
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
     	MCRotationsMove(type);
-#ifdef IOWRITE
-#ifdef MOLECULEINCAGE
-	if (MOLECINCAGE)
-    {
-   		if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
-     		MCRotations3D(type);
-	}
-#endif
-#endif
 }
 
 void MCResetBlockAverage(void) 
@@ -800,7 +704,8 @@ void MCResetBlockAverage(void)
 #endif
 	avergCount = 0.0;
 
-	ResetMCEstims();
+//Tapas commented out
+//	ResetMCEstims();
 
 	ResetMCCounts();
 	ResetQWCounts();
@@ -871,10 +776,9 @@ void MCGetAverage(void)
 #endif
 	_btotal          += stotal;                   // kin+pot
 	_total           += stotal;
-	//double dspot    = GetPotEnergy_Diff();      // pot energy differencies added by Hui Li 
 
+	//double dspot    = GetPotEnergy_Diff();      // pot energy differencies added by Hui Li 
 	//_dbpot         += dspot;                    // block average for pot energy differencies added by Hui Li
- 
 	//_dpot_total    += dspot;                    //added by Hui Li
 
 /* new addition */
@@ -949,7 +853,7 @@ void MCGetAverage(void)
 		if(MCAtom[IMTYPE].molecule == 3)
 			srot      = GetRotPlanarEnergy();     // kin energy
 		else
-		srot          = GetRotE3D();
+		//srot          = GetRotE3D();
         
 #ifdef LINEARROTORS
 		if(MCAtom[IMTYPE].molecule == 4)
@@ -965,7 +869,10 @@ void MCGetAverage(void)
 		_brotsq      += ErotSQ;
 		_rotsq_total += ErotSQ;
 
-       GetRCF(); 
+//TAPAS commented out
+#ifdef IOWRITE
+     GetRCF(); 
+#endif
 
 #ifndef ENTANGLEMENT
 #ifdef PIGSROTORSIO
@@ -1118,11 +1025,6 @@ void MCSaveBlockAverages(long int blocknumb)
       SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
     }
 #ifdef IOWRITE 
-    if( IMPURITY && MCAtom[IMTYPE].molecule == 4)
-    {
-      SaveDensities1D    (fname.c_str(),avergCount);       
-      SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
-    }
   if( IMPURITY && MCAtom[IMTYPE].molecule == 2)
     {
       SaveDensities1D    (fname.c_str(),avergCount);

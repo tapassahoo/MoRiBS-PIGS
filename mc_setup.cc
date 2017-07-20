@@ -114,14 +114,6 @@ int NThreads; // the number of threads as a global variable
 double ** MCCoords;   // translational degrees of freedom
 double ** MCCosine;   // orientational cosines
 double ** MCAngles;
-#ifdef LINEARROTORS
-double ** RCOMC60;
-#endif
-#ifdef MOLECULEINCAGE
-double ** MCCosinex; // orientational cosines for x axis
-double ** MCCosiney; // orientational cosines for y axis
-double ** RCOMC60;
-#endif
 
 //------------ Initial MCCoords and MCAngles;
 double * MCCooInit;   // store the read in MCCoords
@@ -137,9 +129,6 @@ double *  rhoprp;     // rotatinal propagator for non-linear rotor
 double *  erotpr;     // rotational energy estimator for non-linear rotor
 double *  erotsq;     // rotational energy square estimator for non-linear rotor
 
-#ifdef MOLECULEINCAGE
-int       MOLECINCAGE;  // integer flag for the molecule in a cage
-#endif
 int       InitMCCoords; // integer flag for read in MCCoords;
 
 //----------------------------------------------------------
@@ -161,15 +150,6 @@ void MCMemAlloc(void)  // allocate  memmory
   // MCCosine  = doubleMatrix (NDIM,NumbAtoms*NumbTimes);  
   MCCosine  = doubleMatrix (3,NumbAtoms*NumbTimes); 
   MCAngles  = doubleMatrix (3,NumbAtoms*NumbTimes); 
-#ifdef LINEARROTORS
-   RCOMC60 =    doubleMatrix (NumbAtoms,NDIM);
-#endif
-#ifdef MOLECULEINCAGE
-   MCCosinex  = doubleMatrix (3,NumbAtoms*NumbTimes);
-   MCCosiney  = doubleMatrix (3,NumbAtoms*NumbTimes);
-
-   RCOMC60 =    doubleMatrix (NumbAtoms,NDIM);
-#endif
 
   MCCooInit = new double [NDIM*NumbAtoms*NumbTimes];
   MCAngInit = new double [NDIM*NumbAtoms*NumbTimes];
@@ -191,21 +171,19 @@ void MCMemFree(void)  //  free memory
   free_doubleMatrix(MCCoords);  
   free_doubleMatrix(newcoords); 
 
+  free_doubleMatrix(MCCosine); 
+  free_doubleMatrix(MCAngles); 
+
   delete [] atom_list;
 
   delete [] rhoprp;
   delete [] erotpr;
+  delete [] erotsq;
 
-#ifdef MOLECULEINCAGE
-   free_doubleMatrix(MCCosinex);
-   free_doubleMatrix(MCCosiney);
-#endif
-  free_doubleMatrix(MCCosine); 
-  free_doubleMatrix(MCAngles); 
 
-  delete MCType;
-  delete PIndex;
-  delete RIndex;
+  delete [] MCType;
+  delete [] PIndex;
+  delete [] RIndex;
 }
 
 //------------ MC SYSTEM OF UNITS --------------------------
@@ -494,24 +472,12 @@ void MCConfigInit(void)
 		MCAngles[CHI][it] = 0.0;
 
 		double phi  = MCAngles[PHI][it];
-#ifdef MOLECULEINCAGE
-       double chi  = MCAngles[CHI][it];
-#endif      
 		double cost = MCAngles[CTH][it];
 		double sint = sqrt(1.0 - cost*cost);
   
 		MCCosine[AXIS_X][it] = sint*cos(phi);
 		MCCosine[AXIS_Y][it] = sint*sin(phi);
 		MCCosine[AXIS_Z][it] = cost;
-#ifdef MOLECULEINCAGE
-       MCCosinex[AXIS_X][it] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
-       MCCosinex[AXIS_Y][it] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
-       MCCosinex[AXIS_Z][it] = -sint*cos(chi);
-
-       MCCosiney[AXIS_X][it] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
-       MCCosiney[AXIS_Y][it] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
-       MCCosiney[AXIS_Z][it] = sint*sin(chi);
-#endif
 	}
 }
 

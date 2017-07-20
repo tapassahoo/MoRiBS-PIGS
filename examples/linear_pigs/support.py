@@ -600,7 +600,8 @@ mv %s %s
 cd %s
 cp %s qmc.input
 cp %s %s
-./pimc
+#####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
+./pimc 
 %s
 """ % (job_name, logpath, walltime, omp_thread, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, CommandForMove)
 	return job_string

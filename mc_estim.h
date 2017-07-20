@@ -21,7 +21,7 @@ double GetPotEnergy_Diff(void); //added by Hui Li
 
 double GetPotEnergy_Densities(void);
 double GetPotEnergyPIGS(void);
-double GetPotEnergyCage(double *);
+double GetPotEnergyCage(const double *);
 double GetTotalEnergy(void);
 void GetDipoleCorrelation(double *);
 void GetCosTheta(double &, double *);

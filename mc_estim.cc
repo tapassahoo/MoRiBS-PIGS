@@ -263,10 +263,6 @@ void densities_init(void)
    // Toby adds 3d distribution
    if (IMPURITY && (MCAtom[IMTYPE].molecule == 2))                          
      NUMB_DENS3D = NUMB_ATOMTYPES+NUMB_MOLCTYPES;  //# non-linear molecule-atoms distributions 
-#ifdef LINEARROTORS //Modified by Tapas Sahoo
-   if (IMPURITY && (MCAtom[IMTYPE].molecule == 4))                          
-     NUMB_DENS3D = NUMB_ATOMTYPES+NUMB_MOLCTYPES;  //# linear molecule-atoms distributions 
-#endif
 
   _max_radius   = MAX_RADIUS/Units.length;  // max radius for radial distributions;
   _min_radius   = MIN_RADIUS/Units.length;  // min radius for radial distributions;
@@ -280,184 +276,152 @@ void densities_init(void)
 void densities_malloc(void)
 // memory allocation for densities
 {
-  _gr1D  = doubleMatrix(NUMB_DENS1D,MC_BINSR);
-  _gr1D_sum  = doubleMatrix(NUMB_DENS1D,MC_BINSR);
+	_gr1D  = doubleMatrix(NUMB_DENS1D,MC_BINSR);
+	_gr1D_sum  = doubleMatrix(NUMB_DENS1D,MC_BINSR);
 
-  if (IMPURITY && (MCAtom[IMTYPE].molecule == 1))
+	if (IMPURITY && (MCAtom[IMTYPE].molecule == 1))
     {
-      _gr2D  = new double ** [NUMB_DENS2D];
-      _gr2D_sum  = new double ** [NUMB_DENS2D];  //added by Hui Li
+    	_gr2D  = new double ** [NUMB_DENS2D];
+      	_gr2D_sum  = new double ** [NUMB_DENS2D];  //added by Hui Li
 
-      for (int id=0;id<NUMB_DENS2D;id++) 
-	{
-	  _gr2D[id] = doubleMatrix(MC_BINSR,MC_BINST);
-	  _gr2D_sum[id] = doubleMatrix(MC_BINSR,MC_BINST); //added by Hui Li
-	}
+      	for (int id=0;id<NUMB_DENS2D;id++) 
+		{
+	  		_gr2D[id] = doubleMatrix(MC_BINSR,MC_BINST);
+	  		_gr2D_sum[id] = doubleMatrix(MC_BINSR,MC_BINST); //added by Hui Li
+		}
     }
 
-  if (IMPURITY && (MCAtom[IMTYPE].molecule == 3))
+  	if (IMPURITY && (MCAtom[IMTYPE].molecule == 3))
     {
-      _gr2D  = new double ** [NUMB_DENS2D];
-      _gr2D_sum  = new double ** [NUMB_DENS2D];  //added by Hui Li
+      	_gr2D  = new double ** [NUMB_DENS2D];
+      	_gr2D_sum  = new double ** [NUMB_DENS2D];  //added by Hui Li
 
-      for (int id=0;id<NUMB_DENS2D;id++) 
-	{
-	  _gr2D[id] = doubleMatrix(MC_BINSR,MC_BINST);
-	  _gr2D_sum[id] = doubleMatrix(MC_BINSR,MC_BINST); //added by Hui Li
-	}
+      	for (int id=0;id<NUMB_DENS2D;id++) 
+		{
+	  		_gr2D[id] = doubleMatrix(MC_BINSR,MC_BINST);
+	  		_gr2D_sum[id] = doubleMatrix(MC_BINSR,MC_BINST); //added by Hui Li
+		}
     }
 // the following if block added by Toby
-  if (IMPURITY && (MCAtom[IMTYPE].molecule == 2))
-  {
-     _gr3D  = doubleMatrix(NUMB_DENS3D,MC_BINSR*MC_BINST*MC_BINSC);
-     _gr3D_sum  = doubleMatrix(NUMB_DENS3D,MC_BINSR*MC_BINST*MC_BINSC);
+  	if (IMPURITY && (MCAtom[IMTYPE].molecule == 2))
+  	{
+     	_gr3D  = doubleMatrix(NUMB_DENS3D,MC_BINSR*MC_BINST*MC_BINSC);
+     	_gr3D_sum  = doubleMatrix(NUMB_DENS3D,MC_BINSR*MC_BINST*MC_BINSC);
 
-     _relthe_sum = new double [MC_BINST];
-     _relphi_sum = new double [MC_BINSC];
-     _relchi_sum = new double [MC_BINSC];
-
-  }
-  if (IMPURITY && (MCAtom[IMTYPE].molecule == 4))
-  {
-     _gr3D  = doubleMatrix(NUMB_DENS3D,MC_BINSR*MC_BINST*MC_BINSC);
-     _gr3D_sum  = doubleMatrix(NUMB_DENS3D,MC_BINSR*MC_BINST*MC_BINSC);
-
-     _relthe_sum = new double [MC_BINST];
-     _relphi_sum = new double [MC_BINSC];
-     _relchi_sum = new double [MC_BINSC];
-
-  }
+     	_relthe_sum = new double [MC_BINST];
+     	_relphi_sum = new double [MC_BINSC];
+     	_relchi_sum = new double [MC_BINSC];
+  	}
 }
 
 void densities_mfree(void)
 {
-   free_doubleMatrix(_gr1D);
-   free_doubleMatrix(_gr1D_sum);
+	free_doubleMatrix(_gr1D);
+   	free_doubleMatrix(_gr1D_sum);
    
-   if (IMPURITY && MCAtom[IMTYPE].molecule == 1)
-   {
-      for (int id=0;id<NUMB_DENS2D;id++) 
-      {
-      free_doubleMatrix(_gr2D[id]);
-      free_doubleMatrix(_gr2D_sum[id]);    //added by Hui Li
-      }
-      delete [] _gr2D;
-      delete [] _gr2D_sum;   //added by Hui Li
+   	if (IMPURITY && MCAtom[IMTYPE].molecule == 1)
+   	{
+      	for (int id=0;id<NUMB_DENS2D;id++) 
+      	{
+      		free_doubleMatrix(_gr2D[id]);
+      		free_doubleMatrix(_gr2D_sum[id]);    //added by Hui Li
+      	}
+      	delete [] _gr2D;
+      	delete [] _gr2D_sum;   //added by Hui Li
     }
-   if (IMPURITY && MCAtom[IMTYPE].molecule == 3)
-     {
-       for (int id=0;id<NUMB_DENS2D;id++) 
-	 {
-	   free_doubleMatrix(_gr2D[id]);
-	   free_doubleMatrix(_gr2D_sum[id]);    //added by Hui Li
-	 }
-       delete [] _gr2D;
-       delete [] _gr2D_sum;   //added by Hui Li
-     }
-   if (IMPURITY && MCAtom[IMTYPE].molecule == 2)
-   {
-      free_doubleMatrix(_gr3D);
-      free_doubleMatrix(_gr3D_sum);
-   }
-   if (IMPURITY && MCAtom[IMTYPE].molecule == 4)
-     {
-       for (int id=0;id<NUMB_DENS2D;id++) 
-	 {
-	   free_doubleMatrix(_gr2D[id]);
-	   free_doubleMatrix(_gr2D_sum[id]);    //added by Hui Li
-	 }
-       delete [] _gr2D;
-       delete [] _gr2D_sum;   //added by Hui Li
-     }
+   	if (IMPURITY && MCAtom[IMTYPE].molecule == 3)
+    {
+       	for (int id=0;id<NUMB_DENS2D;id++) 
+	 	{
+	   		free_doubleMatrix(_gr2D[id]);
+	   		free_doubleMatrix(_gr2D_sum[id]);    //added by Hui Li
+	 	}
+       	delete [] _gr2D;
+       	delete [] _gr2D_sum;   //added by Hui Li
+    }
+   	if (IMPURITY && MCAtom[IMTYPE].molecule == 2)
+   	{
+      	free_doubleMatrix(_gr3D);
+      	free_doubleMatrix(_gr3D_sum);
+   	}
 }
 
 void densities_reset(int mode)     //revised by Hui Li
 {
 #ifdef DEBUG_PIMC
-   const char *_proc_= __func__; //  rcf_reset() 
+   	const char *_proc_= __func__; //  rcf_reset() 
 
-   if ((mode != MC_BLOCK) && (mode != MC_TOTAL))
-     nrerror(_proc_,"Unknow mode");
+   	if ((mode != MC_BLOCK) && (mode != MC_TOTAL))
+	nrerror(_proc_,"Unknow mode");
 #endif
 
-   for (int id=0;id<NUMB_DENS1D;id++) 
-     for (int ir=0;ir<MC_BINSR;ir++) 
-       {
-	 if(mode == MC_BLOCK)
-	   _gr1D[id][ir] = 0.0;
+   	for (int id=0;id<NUMB_DENS1D;id++) 
+    for (int ir=0;ir<MC_BINSR;ir++) 
+    {
+	 	if(mode == MC_BLOCK)
+	   	_gr1D[id][ir] = 0.0;
 
-	 if(mode == MC_TOTAL)
-	   _gr1D_sum[id][ir] = 0.0;
-       }
+	 	if(mode == MC_TOTAL)
+	   	_gr1D_sum[id][ir] = 0.0;
+    }
 
-   if (IMPURITY && (MCAtom[IMTYPE].molecule == 1))
-     for (int id=0;id<NUMB_DENS2D;id++) 
-       for (int ir=0;ir<MC_BINSR;ir++) 
-	 for (int it=0;it<MC_BINST;it++) 
-	   {
-	     if(mode == MC_BLOCK)
-	       _gr2D[id][ir][it] = 0.0;     // block average
+   	if (IMPURITY && (MCAtom[IMTYPE].molecule == 1))
+	for (int id=0;id<NUMB_DENS2D;id++) 
+    for (int ir=0;ir<MC_BINSR;ir++) 
+	for (int it=0;it<MC_BINST;it++) 
+	{
+		if(mode == MC_BLOCK)
+	    _gr2D[id][ir][it] = 0.0;     // block average
 
-	     if(mode == MC_TOTAL)        
-	       _gr2D_sum[id][ir][it] = 0.0;     // accumulated average
-	   }
+	    if(mode == MC_TOTAL)        
+	    _gr2D_sum[id][ir][it] = 0.0;     // accumulated average
+	}
 
-   if (IMPURITY && (MCAtom[IMTYPE].molecule == 3))
-     for (int id=0;id<NUMB_DENS2D;id++) 
-       for (int ir=0;ir<MC_BINSR;ir++) 
-	 for (int it=0;it<MC_BINST;it++) 
-	   {
-	     if(mode == MC_BLOCK)
-	       _gr2D[id][ir][it] = 0.0;     // block average
+   	if (IMPURITY && (MCAtom[IMTYPE].molecule == 3))
+    for (int id=0;id<NUMB_DENS2D;id++) 
+    for (int ir=0;ir<MC_BINSR;ir++) 
+	for (int it=0;it<MC_BINST;it++) 
+	{
+	    if(mode == MC_BLOCK)
+	    _gr2D[id][ir][it] = 0.0;     // block average
 
-	     if(mode == MC_TOTAL)        
-	       _gr2D_sum[id][ir][it] = 0.0;     // accumulated average
-	   }
+	    if(mode == MC_TOTAL)        
+	    _gr2D_sum[id][ir][it] = 0.0;     // accumulated average
+	}
     
-   if (IMPURITY && (MCAtom[IMTYPE].molecule == 4))
-     for (int id=0;id<NUMB_DENS2D;id++) 
-       for (int ir=0;ir<MC_BINSR;ir++) 
-         for (int it=0;it<MC_BINST;it++)
-           { 
-             if(mode == MC_BLOCK)
-               _gr2D[id][ir][it] = 0.0;     // block average
-               
-             if(mode == MC_TOTAL)
-               _gr2D_sum[id][ir][it] = 0.0;     // accumulated average
-           }   
-   if (IMPURITY && (MCAtom[IMTYPE].molecule == 2))
-     {
-       for (int id=0;id<NUMB_DENS3D;id++)
-	 for (int ir=0;ir<MC_BINSR;ir++)
-	   for (int it=0;it<MC_BINST;it++)
-	     for (int ic=0;ic<MC_BINSC;ic++)
-	       {
+   	if (IMPURITY && (MCAtom[IMTYPE].molecule == 2))
+	{
+       	for (int id=0;id<NUMB_DENS3D;id++)
+	 	for (int ir=0;ir<MC_BINSR;ir++)
+	   	for (int it=0;it<MC_BINST;it++)
+	    for (int ic=0;ic<MC_BINSC;ic++)
+	    {
 
-		 int ijk = (ir*MC_BINST + it)*MC_BINSC + ic;
+			int ijk = (ir*MC_BINST + it)*MC_BINSC + ic;
 
-		 if(mode == MC_BLOCK)
-		   _gr3D[id][ijk] = 0.0;     // block average
+			if(mode == MC_BLOCK)
+			_gr3D[id][ijk] = 0.0;     // block average
 
-		 if(mode == MC_TOTAL)
-		   _gr3D_sum[id][ijk] = 0.0;     // accumulated average
+			if(mode == MC_TOTAL)
+			_gr3D_sum[id][ijk] = 0.0;     // accumulated average
 
-	       }
+	    }
 
-       if(mode == MC_TOTAL)
-	 {
+       	if(mode == MC_TOTAL)
+	 	{
 
-	   for (int it=0;it<MC_BINST;it++)
-	     _relthe_sum[it]=0.0;
+	   		for (int it=0;it<MC_BINST;it++)
+	     	_relthe_sum[it]=0.0;
 
-	   for (int ic=0;ic<MC_BINSC;ic++)
-	     {
-	       _relphi_sum[ic]=0.0;
-	       _relchi_sum[ic]=0.0;
-	     }
+	   		for (int ic=0;ic<MC_BINSC;ic++)
+	     	{
+	       		_relphi_sum[ic]=0.0;
+	       		_relchi_sum[ic]=0.0;
+	     	}
 
-	 }
+	 	}
 
-     }
+	}
 }
 
 //------- RCF -------------------
@@ -482,19 +446,19 @@ void rcf_mfree(void)
 void rcf_reset(int mode)
 {
 #ifdef DEBUG_PIMC
-   const char *_proc_= __func__; //  rcf_reset() 
+   	const char *_proc_= __func__; //  rcf_reset() 
 
-   if ((mode != MC_BLOCK) && (mode != MC_TOTAL))
-   nrerror(_proc_,"Unknow mode"); 
+   	if ((mode != MC_BLOCK) && (mode != MC_TOTAL))
+   	nrerror(_proc_,"Unknow mode"); 
 #endif 
 
-   for (int ip=0;ip<NUMB_RCF; ip++) 
-   for (int it=0;it<NumbRotTimes;it++)
-   { 
-      _rcf    [ip][it] = 0.0;  // block average
+   	for (int ip=0;ip<NUMB_RCF; ip++) 
+   	for (int it=0;it<NumbRotTimes;it++)
+   	{ 
+      	_rcf    [ip][it] = 0.0;  // block average
 
-       if (mode == MC_TOTAL)   // total average
-      _rcf_sum[ip][it] = 0.0;
+       	if (mode == MC_TOTAL)   // total average
+      	_rcf_sum[ip][it] = 0.0;
     }
 }
 /*
@@ -1141,77 +1105,6 @@ double GetTotalEnergy(void)
         }
 #endif
     }
-#endif
-#ifdef MOLECULEINCAGE
-	if (MOLECINCAGE)
-    {
-		spot = 0.0;
-    	double spot_onecage=0.0;
-        for (int atom0=0;atom0<NumbAtoms;atom0++)
-        {
-        	int type0   = MCType[atom0];
-           	int offset0 = NumbTimes*atom0;
-
-            double com_1[NDIM];
-            double Eulang_1[NDIM];
-            double E_H2OC60;
-
-            #pragma omp parallel for reduction(+: spot_onecage)
-			for (int it = 0; it < NumbTimes; it += (NumbTimes - 1)) 	    
-			{  
-            	int t0 = offset0 + it;
-
-            	for (int id=0;id<NDIM;id++)
-             	{
-                	com_1[id] = MCCoords[id][t0]-RCOMC60[atom0][id];
-             	}
-             	int tm0=offset0 + it/RotRatio;
-             	Eulang_1[PHI]=MCAngles[PHI][tm0];
-             	Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
-             	Eulang_1[CHI]=MCAngles[CHI][tm0];
-             	calengy_(com_1, Eulang_1, &E_H2OC60);
-             	spot_onecage += E_H2OC60;
-            }//loop over it (time slices)
-        }// loop over atoms (molecules)
-        spot +=spot_onecage;
-    	// PAIR of CAGES
-        double spot_pair=0.0;
-		for (int atom0=0;atom0<(NumbAtoms-1);atom0++)      
-		for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
-		{
-        	int type0   = MCType[atom0];
-           	int type1   = MCType[atom1];
-           	int offset0 = NumbTimes*atom0;
-           	int offset1 = NumbTimes*atom1;
-           	double com_1[NDIM],com_2[NDIM];
-           	double Eulang_1[NDIM],Eulang_2[NDIM];
-           	double E12;
-
-            #pragma omp parallel for reduction(+: spot_pair)
-			for (int it = 0; it < NumbTimes; it += (NumbTimes - 1)) 	    
-			{  
-            	int t0 = offset0 + it;
-            	int t1 = offset1 + it;
-             	for (int id=0;id<NDIM;id++)
-             	{
-                  	com_1[id] = MCCoords[id][t0];
-                  	com_2[id] = MCCoords[id][t1];
-             	}
-             	int tm0=offset0 + it/RotRatio;
-             	int tm1=offset1 + it/RotRatio;
-             	Eulang_1[PHI]=MCAngles[PHI][tm0];
-             	Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
-             	Eulang_1[CHI]=MCAngles[CHI][tm0];
-             	Eulang_2[PHI]=MCAngles[PHI][tm1];
-             	Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
-             	Eulang_2[CHI]=MCAngles[CHI][tm1];
-             	cluster_(com_1, com_2, Eulang_1, Eulang_2, &E12);
-             	spot_pair += E12;
-            }//loop over it (time slices)
-        	spot +=spot_pair;
-        }// loop over atoms (molecules)
-
-    }//endif MOLECINCAGE
 #endif
 	double spot_onecage;
 /*
@@ -3838,7 +3731,7 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[2] = w[0] * v[1] - w[1] * v[0];
 }
 
-double GetPotEnergyCage(double *EulangJ)
+double GetPotEnergyCage(const double *EulangJ)
 {
 	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
 

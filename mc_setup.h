@@ -123,9 +123,6 @@ extern long int NumberOfEQBlocks;  // number of equilibr blocks
 const int SizeRotDen=181*361*361;
 const int SizePotTab=501*181*181;
 
-#ifdef MOLECULEINCAGE
-extern int  MOLECINCAGE;
-#endif
 //------------- MPI PARAMETERS ----------------------------
 extern int NProcs; // the number of processors as a global variable
 extern int chunksize;  // the size of a chunk of rotational time slices treated by MPI
