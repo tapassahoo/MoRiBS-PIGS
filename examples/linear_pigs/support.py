@@ -17,6 +17,14 @@ def compile_rotmat():
 	path_exit_linden  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
 	os.chdir(path_exit_linden)
 
+def compile_cagepot():
+	path_enter_cagepot = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/tabulated_potential/"
+	os.chdir(path_enter_cagepot)
+	call(["make", "clean"])
+	call(["make"])
+	path_exit_cagepot  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+	os.chdir(path_exit_cagepot)
+
 def jackknife(mean,data):
 	ai            = [((np.sum(data) - data[j])/(len(data) - 1.0)) for j in range(len(data))]
 	deviation     = ai - mean
@@ -48,8 +56,8 @@ def bconstant(molecule_rot):
 	energyj1       = -35999.1009407
 	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
 	if (molecule_rot == "HF"):
-		bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
-		#bconst	   = 20.561                      # in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12, page 1464, year 1967
+		#bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
+		bconst	   = 20.561                      # in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12, page 1464, year 1967
 	return bconst
 
 def replace(string_old, string_new, file1, file2):
@@ -349,10 +357,18 @@ def rotmat(TypeCal,molecule,temperature,numbbeads):
 	else:
 		numbbeads1		= numbbeads - 1
 	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 15000 -1"
-	print(command_linden_run)
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
+
+def cagepot():
+	'''
+	This function generates tabulated potential - cagepot.dat
+	'''
+	command_cagepot_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/tabulated_potential/hfc60.x 100 360"
+	system(command_cagepot_run)
+	file_cagepot    = "hfc60.pot"
+	call(["mv", "cagepot.out", file_cagepot])
 
 def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dest_pimc):
 	'''
@@ -394,7 +410,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition):
+def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition, status_cagepot):
 	if RUNDIR != "scratch":
 		os.chdir(dest_path)
 		call(["rm", "-rf", folder_run])
@@ -418,6 +434,8 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 	modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment,particleA)
 	if status_rhomat == "Yes":
 		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
+	if status_cagepot == "Yes":
+		cagepot();
 
 	#job submission
 	if (TypeCal == 'PIGS'):
@@ -440,6 +458,7 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 		temperature1    = "%5.3f" % temperature
 		file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 		call(["mv", file_rotdens, dest_pimc])
+		call(["mv", "hfc60.pot", dest_pimc])
 
 		if RUNIN == "CPU":
 			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc, src_path))
@@ -579,6 +598,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 	input_file     = dest_pimc+"/qmc"+file_name+str(value)+".input"
 	exe_file       = dest_pimc+"/pimc"
 	qmcinp         = "qmc"+file_name+str(value)+".input"
+	cagepot_file   = dest_pimc+"/hfc60.pot"
 	if (NameOfServer == "nlogn"):
 		CommandForMove = "mv "+str(run_dir)+" /work/tapas/linear_rotors"
 	if (NameOfServer == "graham"):
@@ -597,11 +617,12 @@ rm -rf %s
 mkdir -p %s
 mv %s %s
 mv %s %s
+mv %s %s
 cd %s
 cp %s qmc.input
 cp %s %s
 #####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 ./pimc 
 %s
-""" % (job_name, logpath, walltime, omp_thread, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, CommandForMove)
+""" % (job_name, logpath, walltime, omp_thread, omp_thread, run_dir, output_dir, cagepot_file, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, CommandForMove)
 	return job_string

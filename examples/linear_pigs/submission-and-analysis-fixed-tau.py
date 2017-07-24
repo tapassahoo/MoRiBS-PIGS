@@ -20,7 +20,7 @@ status              = "submission"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 
 #TypeCal             = 'PIGS'
 TypeCal             = 'ENT'
@@ -31,14 +31,15 @@ molecule            = "HF"
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 400000
-numbmolecules       = 6
+numbmolecules       = 2
 numbpass            = 500
 tau                 = 0.005
 
 Rpt                 = 10.05
-dipolemoment        = 1.86
+dipolemoment        = 0.45
 
 status_rhomat       = "Yes"                                                      
+status_cagepot      = "Yes"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
@@ -56,7 +57,7 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
 
-extra_file_name     = "-Passes"+str(numbpass)
+extra_file_name     = "-Passes"+str(numbpass)+"MemCheck-InintEstims-GetRotE3D-Cage"
 #extra_file_name     = ""
 
 if (TypeCal == "PIGS"):
@@ -106,6 +107,8 @@ if status == "submission":
 	call(["cp", run_file, dest_pimc])
 	if status_rhomat == "Yes":
 		support.compile_rotmat()
+	if status_cagepot == "Yes":
+		support.compile_cagepot()
 
 #===============================================================================
 #                                                                              |
@@ -139,7 +142,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 4
+	loopStart       = 49
 
 step = [1.8 for i in range(loopStart, 1000, skip)]
 # Loop over jobs
@@ -159,7 +162,7 @@ for i in range(loopStart, loopEnd, skip):
 	dest_dir     = dest_path + folder_run 
 
 	if status   == "submission":
-		support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition)
+		support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition, status_cagepot)
 
 
 	if status == "analysis":

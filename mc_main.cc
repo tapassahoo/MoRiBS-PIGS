@@ -196,190 +196,171 @@ srand( time(NULL) );
 
 // only internal system of units after this point 
  
-   MCInit();
+	MCInit();
 
-   if (WORM)
-   MCWormInit();
+	if (WORM)
+	MCWormInit();
 
 // clean the permutation sampling from the last run
-   if (FileExist(FPERMU))
-   _io_error("QMC ->",IO_ERR_FEXST,FPERMU);
+   	if (FileExist(FPERMU))
+   	_io_error("QMC ->",IO_ERR_FEXST,FPERMU);
 
-   if (!restart) // new run, generate new status, rnd() streams and config files     
-   {
+   	if (!restart) // new run, generate new status, rnd() streams and config files     
+   	{
 // check the existence of the old files first
   
-      if (FileExist(FSTATUS))    
-     _io_error("QMC ->",IO_ERR_FEXST,FSTATUS);
+      	if (FileExist(FSTATUS))    
+     	_io_error("QMC ->",IO_ERR_FEXST,FSTATUS);
        
-      if (FileExist(FCONFIG)) 
-     _io_error("QMC ->",IO_ERR_FEXST,FCONFIG);
+      	if (FileExist(FCONFIG)) 
+     	_io_error("QMC ->",IO_ERR_FEXST,FCONFIG);
 
-      if (FileExist(FRANDOM)) 
-     _io_error("QMC ->",IO_ERR_FEXST,FRANDOM);
+      	if (FileExist(FRANDOM)) 
+     	_io_error("QMC ->",IO_ERR_FEXST,FRANDOM);
 
 //--------------------------------------------------------
-//    generate tables - potentals, configurations etc, status
+//    	generate tables - potentals, configurations etc, status
 
-//    MCStartBlock = 0; 
-//    SEED for head CPU
-      SEED = 985456376;
-//Tapas commented out
-      //RandomInit(MPIrank,MPIsize);
+//    	MCStartBlock = 0; 
+//    	SEED for head CPU
+      	SEED = 985456376;
+      	RandomInit(MPIrank,MPIsize);
 
-    MCConfigInit();                // generate initial configurations
-    for (int it=0;it<NumbAtoms*NumbTimes;it++)
-    {
-        for (int id=0;id<NDIM;id++)
-        {
-            cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
-        }
-    } 
-    cout<<"  "<<endl;
-    cout<<"  "<<endl;
-	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-	{
-        int offset0 = NumbTimes*atom0;
-		for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+    	MCConfigInit();                // generate initial configurations
+    	for (int it=0;it<NumbAtoms*NumbTimes;it++)
+    	{
+        	for (int id=0;id<NDIM;id++)
+        	{
+            	cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
+        	}
+    	} 
+    	cout<<"  "<<endl;
+    	cout<<"  "<<endl;
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
-			if (atom0 != atom1)
+        	int offset0 = NumbTimes*atom0;
+			for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
 			{
-            	int offset1 = NumbTimes*atom1;
+				if (atom0 != atom1)
+				{
+            		int offset1 = NumbTimes*atom1;
 
-            	int it = ((NumbRotTimes - 1)/2);
-            	int t0 = offset0 + it;
-            	int t1 = offset1 + it;
+            		int it = ((NumbRotTimes - 1)/2);
+            		int t0 = offset0 + it;
+            		int t1 = offset1 + it;
 
-            	double dr;
-            	double dr2 = 0.0;
-            	for (int id=0;id<NDIM;id++)
-            	{
-                	dr   = (MCCoords[id][t0] - MCCoords[id][t1]);
-                	dr2 += (dr*dr);
-            	}
-            	double r = sqrt(dr2);
-				cout<<"atom0 "<<atom0<<" atom1 "<<atom1<<" RCOM "<<r<<endl;
+            		double dr;
+            		double dr2 = 0.0;
+            		for (int id=0;id<NDIM;id++)
+            		{
+                		dr   = (MCCoords[id][t0] - MCCoords[id][t1]);
+                		dr2 += (dr*dr);
+            		}
+            		double r = sqrt(dr2);
+					cout<<"atom0 "<<atom0<<" atom1 "<<atom1<<" RCOM "<<r<<endl;
+				}
 			}
+			cout<<"  "<<endl;
 		}
-		cout<<"  "<<endl;
-	}
-    cout<<"  "<<endl;
-    cout<<"  "<<endl;
-    for (int it=0;it<NumbAtoms*NumbTimes;it++)
-    {
-        for (int id=0;id<NDIM;id++)
-        {
-            cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
-        }
-    } 
-//    read in initial MCCoords and MCAngles
-      if(InitMCCoords)
-      {
-         cout<<"read in MCCoords and MCAngles from xyz.init file"<<endl;
-         int ntotal=NumbAtoms*NumbTimes;
-         int iperm,nboson;
-         nboson=0;
-         if(BOSONS)
-         {
-            nboson=MCAtom[BSTYPE].numb;
-         }
-//       initconf_(MCCooInit,MCAngInit,&ntotal,&MCAtom[BSTYPE].numb,PIndex,RIndex);
-         initconf_(MCCooInit,MCAngInit,&ntotal,&nboson,PIndex,RIndex);
-         if(BOSONS)
-         {
-            cout<<"read PIndex: "<<" ";
-            for(int id=0;id<MCAtom[BSTYPE].numb;id++)
-            cout<<PIndex[id]<<" ";
+    	cout<<"  "<<endl;
+    	cout<<"  "<<endl;
+    	for (int it=0;it<NumbAtoms*NumbTimes;it++)
+    	{
+        	for (int id=0;id<NDIM;id++)
+        	{
+            	cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
+        	}
+    	}	 
+//    	read in initial MCCoords and MCAngles
+      	if(InitMCCoords)
+      	{
+         	cout<<"read in MCCoords and MCAngles from xyz.init file"<<endl;
+         	int ntotal=NumbAtoms*NumbTimes;
+         	int iperm,nboson;
+         	nboson=0;
+         	if(BOSONS)
+         	{
+            	nboson=MCAtom[BSTYPE].numb;
+         	}
+//       	initconf_(MCCooInit,MCAngInit,&ntotal,&MCAtom[BSTYPE].numb,PIndex,RIndex);
+         	initconf_(MCCooInit,MCAngInit,&ntotal,&nboson,PIndex,RIndex);
+         	if(BOSONS)
+         	{
+            	cout<<"read PIndex: "<<" ";
+            	for(int id=0;id<MCAtom[BSTYPE].numb;id++)
+            	cout<<PIndex[id]<<" ";
 
-            cout<<endl;
+            	cout<<endl;
 
-            cout<<"read RIndex: "<<" ";
-            for(int id=0;id<MCAtom[BSTYPE].numb;id++)
-            cout<<RIndex[id]<<" ";
+            	cout<<"read RIndex: "<<" ";
+            	for(int id=0;id<MCAtom[BSTYPE].numb;id++)
+            	cout<<RIndex[id]<<" ";
 
-            cout<<endl;
-         }
+            	cout<<endl;
+         	}
 
-         for (int it=0;it<NumbAtoms*NumbTimes;it++)
-         {
-            for(int id=0;id<NDIM;id++)
-            {
-               MCCoords[id][it]=MCCooInit[it*NDIM+id];
-               MCAngles[id][it]=MCAngInit[it*NDIM+id];
-            }
+         	for (int it=0;it<NumbAtoms*NumbTimes;it++)
+         	{
+            	for(int id=0;id<NDIM;id++)
+            	{
+               		MCCoords[id][it]=MCCooInit[it*NDIM+id];
+               		MCAngles[id][it]=MCAngInit[it*NDIM+id];
+            	}
 
-//          put into MCCosine
-            double phi  = MCAngles[PHI][it];
-            double cost = MCAngles[CTH][it];
-            double sint = sqrt(1.0 - cost*cost);
-            double chi  = MCAngles[CHI][it];
-#ifdef MOLECULEINCAGE
-            double chi  = MCAngles[CHI][it];
-#endif
+//          	put into MCCosine
+            	double phi  = MCAngles[PHI][it];
+            	double cost = MCAngles[CTH][it];
+            	double sint = sqrt(1.0 - cost*cost);
+            	double chi  = MCAngles[CHI][it];
 
-            MCCosine[AXIS_X][it] = sint*cos(phi);
-            MCCosine[AXIS_Y][it] = sint*sin(phi);
-            MCCosine[AXIS_Z][it] = cost;
+            	MCCosine[AXIS_X][it] = sint*cos(phi);
+            	MCCosine[AXIS_Y][it] = sint*sin(phi);
+            	MCCosine[AXIS_Z][it] = cost;
+         	}
+      	}
+		delete [] MCCooInit;
+		delete [] MCAngInit;
 
-#ifdef MOLECULEINCAGE
-            MCCosinex[AXIS_X][it] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
-            MCCosinex[AXIS_Y][it] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
-            MCCosinex[AXIS_Z][it] = -sint*cos(chi);
-
-            MCCosiney[AXIS_X][it] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
-            MCCosiney[AXIS_Y][it] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
-            MCCosiney[AXIS_Z][it] = sint*sin(chi);
-#endif
-
-         }
-      }
-	delete [] MCCooInit;
-	delete [] MCAngInit;
-
-//    string fname = MCFileName + IO_EXT_XYZ;
-//    IOxyz(IOWrite,fname.c_str());  // test output of initial config
-      string fname = MCFileName;
-      IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
+//    	string fname = MCFileName + IO_EXT_XYZ;
+//    	IOxyz(IOWrite,fname.c_str());  // test output of initial config
+      	string fname = MCFileName;
+      	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 
 //--------------------------------------------------------
 
-      StatusIO(IOWrite,FSTATUS);
-      ConfigIO(IOWrite,FCONFIG);
-      TablesIO(IOWrite,FTABLES);
-//Tapas commented out
-      //RandomIO(IOWrite,FRANDOM);
+      	StatusIO(IOWrite,FSTATUS);
+      	ConfigIO(IOWrite,FCONFIG);
+      	TablesIO(IOWrite,FTABLES);
+      	RandomIO(IOWrite,FRANDOM);
 
-      if (WORM)
-      QWormsIO(IOWrite,FQWORMS);
-   }
+      	if (WORM)
+      	QWormsIO(IOWrite,FQWORMS);
+   	}
 
-   MCWormAverageReset();      // debug worm
+   	MCWormAverageReset();      // debug worm
 
 // --- RESTART/START NEW RUN ----------------------------
 
-   StatusIO(IORead,FSTATUS);  // load MCStartBlock
-   ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
-   TablesIO(IORead,FTABLES);  // load permutation tables
-//Tapas commented out
-   //RandomIO(IORead,FRANDOM);  // load rnd streams 
+   	StatusIO(IORead,FSTATUS);  // load MCStartBlock
+   	ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
+   	TablesIO(IORead,FTABLES);  // load permutation tables
+   	RandomIO(IORead,FRANDOM);  // load rnd streams 
 
-   if (WORM)
-   QWormsIO(IORead,FQWORMS);
+   	if (WORM)
+   	QWormsIO(IORead,FQWORMS);
 
 // BEGIN loop over blocks ------------------------
 
-#ifdef IOWRITE
-   InitPotentials();
-#endif
+   	InitPotentials();
 
-   if (ROTATION)
-     InitRotDensity();
+   	if (ROTATION)
+    	InitRotDensity();
 
-   if((IREFLX == 1 || IREFLY == 1 || IREFLZ == 1) && MCAtom[IMTYPE].molecule != 2)
-   {
-      cout<<IREFLX<<" "<<IREFLY<<" "<<IREFLZ<<" "<<MCAtom[IMTYPE].molecule<<endl;
-      nrerror("main","SYMMETRIZATION IS ONLY IMPLEMENTED FOR TOPS");
-   }
+   	if((IREFLX == 1 || IREFLY == 1 || IREFLZ == 1) && MCAtom[IMTYPE].molecule != 2)
+   	{
+      	cout<<IREFLX<<" "<<IREFLY<<" "<<IREFLZ<<" "<<MCAtom[IMTYPE].molecule<<endl;
+      	nrerror("main","SYMMETRIZATION IS ONLY IMPLEMENTED FOR TOPS");
+   	}
 // MPI BLOCK 1 in MASTER start
 // send run information to all the worker CPUs
 /*
@@ -425,24 +406,23 @@ srand( time(NULL) );
 // MPI BLOCK 1 in MASTER done
 */
 
-//Tapas commented out
-   //InitMCEstims();
-   InitTotalAverage();      // DUMP 
-   double sumsCount = 0.0;  // counter for accum sums
-   double totalStep = 0.0;
+    InitMCEstims();
+   	InitTotalAverage();      // DUMP 
+   	double sumsCount = 0.0;  // counter for accum sums
+   	double totalStep = 0.0;
    
-   ResetMCCounts();
-   ResetQWCounts();
+   	ResetMCCounts();
+   	ResetQWCounts();
 
 /*
-// try openmp for loop
-   int chunksize,nthrds;
-   #pragma omp parallel
-   {
-   int tid=omp_get_thread_num();
-   nthrds=omp_get_num_threads();
-   chunksize=NumbRotTimes/nthrds;
-   cout<<"chunksize="<<chunksize<<endl;
+// 	try openmp for loop
+   	int chunksize,nthrds;
+   	#pragma omp parallel
+   	{
+   	int tid=omp_get_thread_num();
+   	nthrds=omp_get_num_threads();
+   	chunksize=NumbRotTimes/nthrds;
+   	cout<<"chunksize="<<chunksize<<endl;
    int itini=chunksize*tid;
    int itfnl=itini+chunksize;
 // #pragma omp for
@@ -659,16 +639,14 @@ srand( time(NULL) );
 	if (WORM)
 		MCWormDone();
 
-//TAPAS commented out
-//	DoneMCEstims();
+	DoneMCEstims();
 	DonePotentials();
 
 	if (ROTATION)
 		DoneRotDensity();
 
 	MCMemFree();
-//Tapas commented out
-	//RandomFree();
+	RandomFree();
 
 	MFreeMCCounts();
 	MFreeQWCounts();
@@ -694,6 +672,8 @@ void PIMCPass(int type,int time)
     	MCRotations3D(type);
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
     	MCRotationsMove(type);
+    if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
+        MCRotations3D(type);
 }
 
 void MCResetBlockAverage(void) 
@@ -704,8 +684,7 @@ void MCResetBlockAverage(void)
 #endif
 	avergCount = 0.0;
 
-//Tapas commented out
-//	ResetMCEstims();
+	ResetMCEstims();
 
 	ResetMCCounts();
 	ResetQWCounts();
@@ -843,44 +822,50 @@ void MCGetAverage(void)
 
 	//rotational degrees of freedom
 	/* reactive */
-		double srot;
+#ifndef ENTANGLEMENT
+	double srot;
 	if (ROTATION)
 	{
-
 		if(MCAtom[IMTYPE].molecule == 1)
+		{
 			srot      = GetRotEnergy();           // kin energy
-		else
+		}
+
 		if(MCAtom[IMTYPE].molecule == 3)
+		{
 			srot      = GetRotPlanarEnergy();     // kin energy
-		else
-		//srot          = GetRotE3D();
+		}
+
+		if(MCAtom[IMTYPE].molecule == 3)
+		{
+			srot          = GetRotE3D();
+		}
         
-#ifdef LINEARROTORS
 		if(MCAtom[IMTYPE].molecule == 4)
+		{
 #ifdef PIGSROTORS
 			srot      = GetRotEnergyPIGS();           // kin energy
 #else
 			srot      = GetRotPlanarEnergy();     // kin energy
 #endif
-#endif
+		}
 		_brot        += srot;
 		_rot_total   += srot;
 
 		_brotsq      += ErotSQ;
 		_rotsq_total += ErotSQ;
 
-//TAPAS commented out
+//Tapas commented out
 #ifdef IOWRITE
-     GetRCF(); 
+	     GetRCF(); 
 #endif
 
-#ifndef ENTANGLEMENT
 #ifdef PIGSROTORSIO
 		_brot1       += srot1;
 		_rot_total1   += srot1;
 #endif
-#endif
 	}
+#endif
 
 #ifdef IOWRITE
 // accumulate terms for Cv
@@ -912,7 +897,6 @@ void MCGetAverage(void)
    _bCv_rot += sCv_rot;
    _Cv_rot_total += sCv_rot;
 
-/* reactive */
 // check whether there're bosons in the system
 
 	if (BOSONS) 
@@ -988,7 +972,6 @@ void MCGetAverage(void)
         if(rndrot < 0.5)
         RotSymConfig();
     }
-
 }
 
 void MCWormAverageReset(void)
