@@ -552,24 +552,39 @@ double GetPotEnergyPIGS(void)
 	nrerror(_proc_," Only for Z-configurations");
 #endif
 
-	// double dr[NDIM];
     string stype = MCAtom[IMTYPE].type;
+   	int it = ((NumbRotTimes - 1)/2);
 	double spot;
 #ifdef LINEARROTORS
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
+		double Eulang0[NDIM], Eulang1[NDIM];
+
         spot = 0.0;
         for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
 		{
+           	int offset0 = NumbTimes*atom0;
+           	int t0 = offset0 + it;
+
+			if (stype == HF)
+			{
+   				Eulang0[PHI] = MCAngles[PHI][t0];
+   				Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+   				Eulang0[CHI] = 0.0;
+			}
+
         	for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
        		{
-            	int offset0 = NumbTimes*atom0;
             	int offset1 = NumbTimes*atom1;
-
-
-            	int it = ((NumbRotTimes - 1)/2);
-            	int t0 = offset0 + it;
             	int t1 = offset1 + it;
+
+            	if (stype == HF)
+            	{
+   					Eulang1[PHI] = MCAngles[PHI][t1];
+   					Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+   					Eulang1[CHI] = 0.0;
+                	spot += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+            	} //stype
 
             	if (stype == H2)
            		{
@@ -631,17 +646,6 @@ double GetPotEnergyPIGS(void)
                 	spot += potl*CMRECIP2KL;
             	} //stype
 
-            	if (stype == HF)
-            	{
-					double Eulang0[NDIM], Eulang1[NDIM];
-   					Eulang0[PHI] = MCAngles[PHI][t0];
-   					Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-   					Eulang0[CHI] = 0.0;
-   					Eulang1[PHI] = MCAngles[PHI][t1];
-   					Eulang1[CTH] = acos(MCAngles[CTH][t1]);
-   					Eulang1[CHI] = 0.0;
-                	spot += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
-            	} //stype
         	}// loop over atoms1 
        	}// loop over atoms0 
     }
@@ -652,28 +656,29 @@ double GetPotEnergyPIGS(void)
         double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
         double RR = Distance/BOHRRADIUS;
-
         int offset0 = 0;
-
-        int it  = (NumbRotTimes - 1)/2;
         int t0  = offset0 + it;
-
         double E12     = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
 #endif
     }
 #endif
-	double spot_onecage;
-/*
+
+    double spot_cage = 0.0;
 #ifdef CAGEPOT
-    int it = ((NumbRotTimes - 1)/2);
-	spot_onecage = GetPotEnergyCage(it);
-#else
-	spot_onecage = 0.0;
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+	{
+        int offset0 = NumbTimes*atom0;
+        int t0 = offset0 + it;
+    	double cost = MCAngles[CTH][t0];
+    	double phi = MCAngles[PHI][t0];
+    	if (phi < 0.0) phi = 2.0*M_PI + phi;
+    	phi = fmod(phi,2.0*M_PI);
+		int type0   =  MCType[atom0];
+    	spot_cage += LPot2DRotDOF(cost,phi,type0);
+	}
 #endif
-*/
-	spot_onecage = 0.0;
-	double spotReturn = (spot + spot_onecage);
+	double spotReturn = (spot + spot_cage);
 	return spotReturn;
 }
 
@@ -696,11 +701,10 @@ double GetPotEnergy_Densities(void)
         spot = 0.0;
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
+           	int offset0 = NumbTimes*atom0;
         	for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
         	{
-            	int offset0 = NumbTimes*atom0;
             	int offset1 = NumbTimes*atom1;
-
 
 		    	double spot_pair = 0.0;
 #pragma omp parallel for reduction(+: spot_pair)
@@ -982,6 +986,29 @@ double GetPotEnergy_Densities(void)
    	}     // LOOP OVER ATOM PAIRS
 	}
 #endif
+
+    double spot_cage = 0.0;
+#ifdef CAGEPOT
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    {
+        int offset0 = NumbTimes*atom0;
+
+        double spot_beads=0.0;
+        #pragma omp parallel for reduction(+: spot_beads)
+        for (int it = 0; it < NumbTimes; it++)
+        {
+            int t0 = offset0 + it;
+            double cost = MCAngles[CTH][t0];
+            double phi = MCAngles[PHI][t0];
+            if (phi < 0.0) phi = 2.0*M_PI + phi;
+            phi = fmod(phi,2.0*M_PI);
+            int type0   =  MCType[atom0];
+            spot_beads += LPot2DRotDOF(cost,phi,type0);
+        }
+        spot_cage += spot_beads;
+    }
+#endif
+	double spotReturn = spot + spot_cage;
 	return (spot/(double)NumbTimes);
 }
 
@@ -995,9 +1022,10 @@ double GetTotalEnergy(void)
         spot = 0.0;
         for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
 		{
+           	int offset0 = NumbTimes*atom0;
+
         	for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
         	{
-            	int offset0 = NumbTimes*atom0;
             	int offset1 = NumbTimes*atom1;
 
         		double spot_pair=0.0;
@@ -1105,20 +1133,29 @@ double GetTotalEnergy(void)
 #endif
     }
 #endif
-	double spot_onecage;
-/*
+
+    double spot_cage = 0.0;
 #ifdef CAGEPOT
-	spot_onecage = 0.0;
-    for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
-	{
-		spot_onecage += GetPotEnergyCage(it);
-	}
-#else
-	spot_onecage = 0.0;
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    {
+        int offset0 = NumbTimes*atom0;
+
+   		double spot_beads=0.0;
+       	#pragma omp parallel for reduction(+: spot_beads)
+       	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
+		{
+        	int t0 = offset0 + it;
+        	double cost = MCAngles[CTH][t0];
+        	double phi = MCAngles[PHI][t0];
+        	if (phi < 0.0) phi = 2.0*M_PI + phi;
+        	phi = fmod(phi,2.0*M_PI);
+        	int type0   =  MCType[atom0];
+        	spot_beads += LPot2DRotDOF(cost,phi,type0);
+		}
+		spot_cage += spot_beads;
+    }
 #endif
-*/
-	spot_onecage = 0.0;
-	double spotReturn = 0.5*(spot + spot_onecage);
+	double spotReturn = 0.5*(spot + spot_cage);
 	return spotReturn;
 }
 

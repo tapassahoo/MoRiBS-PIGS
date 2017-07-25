@@ -16,14 +16,14 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"
-status              = "analysis"
+#status              = "analysis"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
 NameOfPartition     = "ntapas"
 
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 
 molecule            = "HFC60"                                                 
 #molecule            = "HF"                                                     
@@ -31,7 +31,7 @@ molecule            = "HFC60"
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 400000
-numbmolecules       = 4
+numbmolecules       = 2
 numbpass            = 500
 tau                 = 0.005
 

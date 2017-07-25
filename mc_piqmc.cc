@@ -1529,17 +1529,17 @@ double PotRotEnergySwap(int atom0, const double *Eulang0, int it, string Distrib
 		}
     }
 
-    double spot_onecage;
+    double spot_cage;
 #ifdef CAGEPOT
 	double cost = cos(Eulang0[CTH]);
 	double phi = Eulang0[PHI];
     if (phi < 0.0) phi = 2.0*M_PI + phi;
     phi = fmod(phi,2.0*M_PI);
-    spot_onecage = weight*LPot2DRotDOF(cost,phi,type0);
+    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
 #else
-    spot_onecage = 0.0;
+    spot_cage = 0.0;
 #endif
-	double spotReturn = spot + spotSwap + spot_onecage;
+	double spotReturn = spot + spotSwap + spot_cage;
     return spotReturn;
 }
 
@@ -2916,7 +2916,17 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 #endif
 #endif
 #endif //LINEARROTORS
-	double spotReturn = (spot + spotSwap);
+    double spot_cage;
+#ifdef CAGEPOT
+    double cost = cos(Eulang0[CTH]);
+    double phi = Eulang0[PHI];
+    if (phi < 0.0) phi = 2.0*M_PI + phi;
+    phi = fmod(phi,2.0*M_PI);
+    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
+#else
+    spot_cage = 0.0;
+#endif
+	double spotReturn = (spot + spotSwap + spot_cage);
     return spotReturn;
 }
 
@@ -3047,3 +3057,24 @@ void MFreeMCCounts(void)
    free_doubleMatrix(MCTotal);
    free_doubleMatrix(MCAccep);
 }
+
+#ifdef IOWRITE
+double MCQuaternions(double Aa, double Bb, double Cc, double Dd)
+{
+	double RMat[NDIM][NDIM];
+
+	RMat[0][0] = Aa*Aa+Bb*Bb-Cc*Cc-Dd*Dd;
+	RMat[0][1] = 2.0*Bb*Cc-2.0*Aa*Dd;
+	RMat[0][2] = 2.0*Bb*Dd+2.0*Aa*Cc;
+
+	RMat[1][0] = 2.0*Bb*Cc+2.0*Aa*Dd;
+	RMat[1][1] = Aa*Aa-Bb*Bb+Cc*Cc-Dd*Dd;
+	RMat[1][2] = 2.0*Cc*Dd-2.0*Aa*Bb;
+
+	RMat[2][0] = 2.0*Bb*Dd-2.0*Aa*Cc;
+	RMat[2][1] = 2.0*Cc*Dd+2.0*Aa*Bb;
+	RMat[2][2] = Aa*Aa-Bb*Bb-Cc*Cc+Dd*Dd;
+	
+	return MCCosines;
+}
+#endif
