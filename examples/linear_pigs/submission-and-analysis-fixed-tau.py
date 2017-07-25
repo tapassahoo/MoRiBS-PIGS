@@ -16,22 +16,22 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"
-#status              = "analysis"
+status              = "analysis"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
-NameOfPartition     = "tapas"
+NameOfPartition     = "ntapas"
 
 #TypeCal             = 'PIGS'
 TypeCal             = 'ENT'
 
-#molecule            = "HF-C60"                                                 
-molecule            = "HF"                                                     
+molecule            = "HFC60"                                                 
+#molecule            = "HF"                                                     
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 400000
-numbmolecules       = 2
+numbmolecules       = 4
 numbpass            = 500
 tau                 = 0.005
 
@@ -57,8 +57,8 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
 
-extra_file_name     = "-Passes"+str(numbpass)+"MemCheck-InintEstims-GetRotE3D-Cage"
-#extra_file_name     = ""
+#extra_file_name     = "-Passes"+str(numbpass)+"MemCheck-InintEstims-GetRotE3D-Cage"
+extra_file_name     = ""
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
@@ -142,7 +142,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 49
+	loopStart       = 4
 
 step = [1.8 for i in range(loopStart, 1000, skip)]
 # Loop over jobs

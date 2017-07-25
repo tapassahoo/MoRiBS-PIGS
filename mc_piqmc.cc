@@ -1533,7 +1533,7 @@ double PotRotEnergySwap(int atom0, const double *Eulang0, int it, string Distrib
 #ifdef CAGEPOT
 	double cost = cos(Eulang0[CTH]);
 	double phi = Eulang0[PHI];
-    if(phi<0.0) phi = 2.0*M_PI + phi;
+    if (phi < 0.0) phi = 2.0*M_PI + phi;
     phi = fmod(phi,2.0*M_PI);
     spot_onecage = weight*LPot2DRotDOF(cost,phi,type0);
 #else

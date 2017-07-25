@@ -56,8 +56,8 @@ def bconstant(molecule_rot):
 	energyj1       = -35999.1009407
 	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
 	if (molecule_rot == "HF"):
-		#bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
-		bconst	   = 20.561                      # in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12, page 1464, year 1967
+		bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
+		#bconst	   = 20.561                      # in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12, page 1464, year 1967
 	return bconst
 
 def replace(string_old, string_new, file1, file2):
@@ -615,7 +615,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
-mv %s %s
+cp %s %s
 mv %s %s
 mv %s %s
 cd %s

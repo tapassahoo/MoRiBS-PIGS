@@ -119,7 +119,6 @@ extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *t1, double *t
 extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
 extern "C" double plgndr(int l, int m, double x);
 #endif
-extern "C" void enhfc60_(double *RCOMHF, double *EulangL1, double *EulangL2, double *EulangJ1, double *EulangJ2, double *EHFC60);
 #ifdef MOLECULEINCAGE
 //Pot of H2O-C60 one cage
 extern "C" void calengy_(double *com_1, double *Eulang_1, double *E_H2OC60);
@@ -3729,35 +3728,6 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[0] = w[1] * v[2] - w[2] * v[1];
     cross[1] = w[2] * v[0] - w[0] * v[2];
     cross[2] = w[0] * v[1] - w[1] * v[0];
-}
-
-double GetPotEnergyCage(const double *EulangJ)
-{
-	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
-
-    string stype = MCAtom[IMTYPE].type;
-	double spot_onecage;
-
-	if (stype == HF)
-    {
-   		double EHFC60;
-		double RCOMHF = 0.0;
-
-   		double EulangL1 = 0.0;
-   		double EulangL2 = 0.0;
-		double EulangJ1 = EulangJ[CTH];
-		double EulangJ2 = EulangJ[PHI];
-
-		enhfc60_(&RCOMHF, &EulangL1, &EulangL2, &EulangJ1, &EulangJ2, &EHFC60);
-   		spot_onecage += EHFC60;
-		spot_onecage *= KCalperMolToCmInverse;
-		spot_onecage *= CMRECIP2KL;
-	}
-	
-#ifdef POTZERO
-    spot_onecage = 0.0;
-#endif
-	return spot_onecage;
 }
 
 double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang1, int it)

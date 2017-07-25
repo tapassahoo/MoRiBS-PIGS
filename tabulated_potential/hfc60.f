@@ -1,7 +1,8 @@
       program cagepotential
       integer i1,i2,j1,j2,i0, ncost,nphi, ncost1,nphi1
-      double precision EulangJ(2),EulangL(2),EHFC60,R
+      double precision EulangJ(2),EulangL(2),EHFC60,R,Pi,Unitc
       parameter (Pi=3.14159265358979323846d+00)
+      parameter (unitc = 503.2197039379154d+00) ! Kcal/Mol to Kelvin
       character argum*30
       call getarg(1,argum)
       read(argum,*)ncost
@@ -44,7 +45,7 @@
            EulangJ(2) = 0.0d0  + (j2-1)*dphi
       
            call enHFC60(R,EulangL,EulangJ,EHFC60)
-           write(7,'(1p,7(1x,E15.8))') EHFC60
+           write(7,'(1p,7(1x,E15.8))') EHFC60*unitc
 
          enddo
        enddo
