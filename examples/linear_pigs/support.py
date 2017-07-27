@@ -434,8 +434,6 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 	modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment,particleA)
 	if status_rhomat == "Yes":
 		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
-	if status_cagepot == "Yes":
-		cagepot();
 
 	#job submission
 	if (TypeCal == 'PIGS'):
@@ -458,7 +456,6 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 		temperature1    = "%5.3f" % temperature
 		file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 		call(["mv", file_rotdens, dest_pimc])
-		call(["mv", "hfc60.pot", dest_pimc])
 
 		if RUNIN == "CPU":
 			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc, src_path))
@@ -469,6 +466,8 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 			
 
 	fwrite.close()
+	call(["mv", fname, dest_pimc])
+	os.chdir(dest_pimc)
 
 	if (RUNIN == "CPU"):
 		call(["chmod", "755", fname])
@@ -486,6 +485,8 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 
 	if RUNDIR != "scratch":
 		os.chdir(src_path)
+
+	os.chdir(src_path)
 
 def FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc,ENT_TYPE):
 	if (TypeCal == "PIGS"):

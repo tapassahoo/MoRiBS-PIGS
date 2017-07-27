@@ -102,8 +102,7 @@ void InitPotentials(void)
 
   	for (int atype=0;atype<NumbTypes;atype++)
 	{
-#ifndef CAGEPOT
-   		if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3))                            // molecules
+   		if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)) 
    		{
 			if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)))
   			nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
@@ -127,9 +126,17 @@ void InitPotentials(void)
 
     	}
    		else                                                  // atoms
+		{
+#ifdef IOWRITE
       	init_pot1D(atype);
-#else
-  		init_pot2D(atype);
+#endif
+		}
+
+#ifdef CAGEPOT
+   		if (MCAtom[atype].molecule == 4) 
+		{
+  			init_pot2D(atype);
+		}
 		
 #endif
 	}
@@ -166,11 +173,13 @@ void DonePotentials(void)
     }
     else if (MCAtom[atype].molecule == 4)              // molecules
     {
+#ifdef CAGEPOT
 		delete [] _cgrid2D[atype];
 		delete [] _pgrid2D[atype];
  
 		free_doubleMatrix(_poten2D[atype]);  // atoms 
 
+#endif
     }
     else if (MCAtom[atype].molecule == 2)
     {

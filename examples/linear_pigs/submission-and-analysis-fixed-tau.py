@@ -22,24 +22,24 @@ status              = "submission"
 NameOfServer        = "nlogn"
 NameOfPartition     = "ntapas"
 
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 
-molecule            = "HFC60"                                                 
-#molecule            = "HF"                                                     
+#molecule            = "HFC60"                                                 
+molecule            = "HF"                                                     
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
 numbblocks	        = 400000
 numbmolecules       = 2
-numbpass            = 500
+numbpass            = 600
 tau                 = 0.005
 
 Rpt                 = 10.05
-dipolemoment        = 0.45
+dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
 
 status_rhomat       = "Yes"                                                      
-status_cagepot      = "Yes"                                                      
+status_cagepot      = "No"                                                      
 #RUNDIR              = "work"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
@@ -109,6 +109,8 @@ if status == "submission":
 		support.compile_rotmat()
 	if status_cagepot == "Yes":
 		support.compile_cagepot()
+		support.cagepot();
+		call(["mv", "hfc60.pot", dest_pimc])
 
 #===============================================================================
 #                                                                              |
