@@ -44,6 +44,7 @@ examples/linear_pigs/support.pyc
 examples/linear_pigs/job-*
 !/examples/linear_pigs/
 /examples/test_run/
+linear_prop_test/
 examples/linear_pigs/entanglement_*particleA_*jobsubmit_*
 examples/linear_pigs/submission-and-analysis-fixed-tau-cpu-for-test.py
 mc_main-original.cc

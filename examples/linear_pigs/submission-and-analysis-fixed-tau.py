@@ -16,11 +16,11 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"
-#status              = "analysis"
+status              = "analysis"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 
 #TypeCal             = 'PIGS'
 TypeCal             = 'ENT'
@@ -30,7 +30,7 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 400000
+numbblocks	        = 100000
 numbmolecules       = 2
 numbpass            = 600
 tau                 = 0.005
@@ -44,11 +44,11 @@ status_cagepot      = "No"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-loopStart           = 3
+loopStart           = 10
 loopEnd             = 51
-skip                = 2
+skip                = 10
 
-preskip             = 10000
+preskip             = 1000
 postskip            = 0
 particleA           = int(numbmolecules/2)
 
@@ -57,8 +57,8 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
 
-#extra_file_name     = "-Passes"+str(numbpass)+"MemCheck-InintEstims-GetRotE3D-Cage"
-extra_file_name     = ""
+extra_file_name     = "-Passes"+str(numbpass)
+#extra_file_name     = ""
 
 if (TypeCal == "PIGS"):
 	file1_name      = "Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-tau"+str(tau)+"Kinv-Blocks"+str(numbblocks)
@@ -144,7 +144,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 4
+	loopStart       = 10
 
 step = [1.8 for i in range(loopStart, 1000, skip)]
 # Loop over jobs
