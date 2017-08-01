@@ -68,7 +68,7 @@ const double B_CO    = 2.766086924;      // [K]  CO  = 1.922528955 cm^-1   exp. 
 const double B_HCN   = 2.12682;         // [K]  1.478 221 834 cm^-1 JCP 114 851 (2001)
 
 const double B_HCCCN = 0.218317;        // [K]  4549 MHz [JCP 119 8379 (2003)] approx 0.1517383 cm^-1
-const double B_HF    = 20.9561;         // cm^-1
+const double B_HF    = 20.561;         // cm^-1
 
 // known atom/molecule types
 

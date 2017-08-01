@@ -16,11 +16,11 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"
-status              = "analysis"
+#status              = "analysis"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
-NameOfPartition     = "tapas"
+NameOfPartition     = "ntapas"
 
 #TypeCal             = 'PIGS'
 TypeCal             = 'ENT'
@@ -30,9 +30,9 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 100000
-numbmolecules       = 2
-numbpass            = 600
+numbblocks	        = 400000
+numbmolecules       = 4
+numbpass            = 2000
 tau                 = 0.005
 
 Rpt                 = 10.05
@@ -44,9 +44,9 @@ status_cagepot      = "No"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-loopStart           = 10
+loopStart           = 2
 loopEnd             = 51
-skip                = 10
+skip                = 2
 
 preskip             = 1000
 postskip            = 0
@@ -144,7 +144,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 10
+	loopStart       = 5
 
 step = [1.8 for i in range(loopStart, 1000, skip)]
 # Loop over jobs

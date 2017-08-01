@@ -771,6 +771,259 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 	EulangOld[CTH] = acos(cost);
 	EulangOld[CHI] = 0.0;
 
+#ifdef PROPOSED
+	double PreDistribution[NCOST*NPHI];
+    double sum = 0.0;
+	for (int itp = 0; itp < NCOST*NPHI; itp++)
+    {
+		double sintProposed = sqrt(1.0 - costProposed[itp]*costProposed[itp]);
+        tempcoords[0][t1] = sintProposed*cos(phiProposed[itp]);
+        tempcoords[1][t1] = sintProposed*sin(phiProposed[itp]);
+        tempcoords[2][t1] = costProposed[itp];
+
+		double p0 = 0.0;
+   		double p1 = 0.0;
+
+   		for (int id=0;id<NDIM;id++)
+   		{
+   			p0 += (MCCosine[id][t0]*tempcoords[id][t1]);
+   			p1 += (tempcoords[id][t1]*MCCosine[id][t2]);
+   		}
+        PreDistribution[itp] = SRotDens(p0,type)*SRotDens(p1,type);
+        sum += SRotDens(p0,type)*SRotDens(p1,type);
+	}
+	for (int itp = 0; itp < NCOST*NPHI; itp++)
+    {
+        PreDistribution[itp] /= sum;
+	}
+   	iChoose = myRand(PreDistribution, rand1);
+	if (iChoose == -1) exit(0);
+   	cost = costProposed[iChoose];
+   	phi  = phiProposed[iChoose];
+#else
+   	cost += (step*(rand1-0.5));
+   	phi  += (step*(rand2-0.5));
+
+   	if (cost >  1.0)
+   	{
+      	cost = 2.0 - cost;
+   	}
+
+   	if (cost < -1.0)
+   	{
+       	cost = -2.0 - cost;
+   	}
+
+	if (abs(cost) > 2.0) 
+	{
+        cout<<"Upper or lower limit of cost is excided " << cost<<endl;
+		exit(0);
+	}
+#endif
+
+	EulangNew[PHI] = phi;
+	EulangNew[CTH] = acos(cost);
+	EulangNew[CHI] = 0.0;
+
+   	double sint = sqrt(1.0 - cost*cost);
+
+   	newcoords[AXIS_X][t1] = sint*cos(phi);
+   	newcoords[AXIS_Y][t1] = sint*sin(phi);
+   	newcoords[AXIS_Z][t1] = cost;
+
+//----------------------------------------------
+
+// 	the old density
+
+   	double p0 = 0.0;
+   	double p1 = 0.0;
+
+   	for (int id=0;id<NDIM;id++)
+   	{
+      	p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+      	p1 += (MCCosine[id][t1]*MCCosine[id][t2]);
+   	}
+
+   	double dens_old;
+   	double rho1,rho2,erot;
+// 	If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
+// 	if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
+
+	if(RotDenType == 0)
+	{
+#ifdef PIGSROTORS
+        if (it1 == 0 || it1 == (NumbRotTimes - 1))
+        {
+            if (it1 == 0)
+            {
+                dens_old = SRotDens(p1, type);
+            }
+            else
+            {
+                dens_old = SRotDens(p0, type);
+            }
+        }
+        else
+        {
+            dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+        }
+#else
+        dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+#endif
+	}
+    else if(RotDenType == 1)
+    {
+        rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
+        rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
+        dens_old = rho1+rho2;
+    }
+
+   if (fabs(dens_old)<RZERO) dens_old = 0.0;
+#ifndef NEGATIVEDENSITY
+   if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+#else
+// tapas's temporary treatment for negative rho of two linear rotors
+   if (dens_old<0.0) dens_old=fabs(dens_old);
+#endif
+
+   double pot_old  = 0.0;
+
+   int itr0 = it1  * RotRatio;     // interval to average over
+   int itr1 = itr0 + RotRatio;     // translational time slices
+
+   	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	{
+   		//pot_old  += (PotRotEnergy(gatom,MCCosine,it));
+   		pot_old  += (PotRotEnergy(gatom,EulangOld,it));
+	}
+
+// the new density 
+
+   p0 = 0.0;
+   p1 = 0.0;
+
+
+   for (int id=0;id<NDIM;id++)
+   {
+       p0 += (MCCosine[id][t0]*newcoords[id][t1]);
+       p1 += (newcoords[id][t1]*MCCosine[id][t2]);
+   }
+
+   double dens_new;
+
+	if(RotDenType == 0)
+	{
+#ifdef PIGSROTORS
+        if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
+        {
+            if (it1 == 0)
+            {
+                dens_new = SRotDens(p1, type);
+            }
+            else
+            {
+                dens_new = SRotDens(p0, type);
+            }
+        }
+        else
+        {
+            dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+        }
+#else
+        dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+#endif
+	}
+	else if(RotDenType == 1)
+	{
+		rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
+		rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
+		dens_new = rho1 + rho2;
+	}
+
+	if (fabs(dens_new)<RZERO) dens_new = 0.0;
+#ifndef NEGATIVEDENSITY
+	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+#else
+	if (dens_new<0.0) dens_new=fabs(dens_new);
+#endif
+
+	double pot_new  = 0.0;
+
+	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	{
+		//pot_new  += (PotRotEnergy(gatom,newcoords,it));
+		pot_new  += (PotRotEnergy(gatom,EulangNew,it));
+	}
+
+	double rd;
+
+	if(RotDenType == 0)
+	{
+		if (dens_old>RZERO)
+			rd = dens_new/dens_old;
+		else rd = 1.0;
+
+		rd *= exp(- MCTau*(pot_new-pot_old));
+#ifdef PROPOSED
+        rd *= dens_old/PreDistribution[iChoose];
+#endif
+	}
+	else if(RotDenType == 1)
+	{
+		rd = dens_new - dens_old - MCTau*(pot_new-pot_old);
+		//rd = exp(rd);
+	}
+
+	bool Accepted = false;
+	if(RotDenType == 0)
+	{
+		if (rd>1.0)         Accepted = true;
+		//else if (rd>rnd7()) Accepted = true;
+		else if (rd>rand3) Accepted = true;
+	}
+	else if (RotDenType == 1)
+	{
+		if (rd > 0.0)   Accepted = true;
+		//else if (rd > log(rnd7())) Accepted = true;
+    	else if (rd > log(rand3)) Accepted = true;
+	}
+
+	MCRotChunkTot += 1.0;
+
+	if (Accepted)
+	{
+		MCRotChunkAcp += 1.0;
+
+		MCAngles[CTH][t1] = cost;
+		MCAngles[PHI][t1] = phi;
+
+		for (int id=0;id<NDIM;id++)
+    		MCCosine[id][t1] = newcoords[id][t1];
+
+	}
+
+}
+
+#ifdef IOWRITE
+void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
+{
+	int it0 = (it1 - 1);
+	int it2 = (it1 + 1);
+
+   	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
+   	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+
+   	int t0 = offset + it0;
+   	int t1 = offset + it1;
+   	int t2 = offset + it2;
+
+   	double cost = MCAngles[CTH][t1];
+   	double phi  = MCAngles[PHI][t1];
+	double EulangOld[NDIM], EulangNew[NDIM];
+	EulangOld[PHI] = phi;
+	EulangOld[CTH] = acos(cost);
+	EulangOld[CHI] = 0.0;
+
 // 	cost += (step*(rnd1()-0.5));
 // 	phi  += (step*(rnd1()-0.5));
    	cost += (step*(rand1-0.5));
@@ -1122,6 +1375,7 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 	}
 
 }
+#endif
 
 #ifdef SWAPTOUNSWAP 
 void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp, string Distribution)
@@ -3076,5 +3330,39 @@ double MCQuaternions(double Aa, double Bb, double Cc, double Dd)
 	RMat[2][2] = Aa*Aa-Bb*Bb-Cc*Cc+Dd*Dd;
 	
 	return MCCosines;
+}
+#endif
+#ifdef PROPOSED
+int myRand(double *freq, double rand1)
+{
+    // Create and fill prefix array
+    int nn = NCOST*NPHI;
+    double prefix[nn];
+    prefix[0] = freq[0];
+    for (int i = 1; i < nn; ++i)
+    {
+        prefix[i] = prefix[i - 1] + freq[i];
+    }
+
+    // prefix[n-1] is sum of all frequencies. Generate a random number
+    // with value from 1 to this sum
+
+    // Find index of ceiling of r in prefix arrat
+    int indexc = findCeil(prefix, rand1);
+    return indexc;
+}
+
+// Utility function to find ceiling of r in arr[l..h]
+int findCeil(double *arr, double rand1)
+{
+    int l = 0;
+    int h = NCOST*NPHI-1;
+    int mid;
+    while (l < h)
+    {
+        mid = l + ((h - l) >> 1); // Same as mid = (l+h)/2
+        (rand1 > arr[mid]) ? (l = mid + 1) : (h = mid);
+    }
+    return (arr[l] >= rand1) ? l : -1;
 }
 #endif

@@ -147,6 +147,11 @@ extern "C" void vinit_();
 	double MCAccepSwap;
 	double MCAccepUnSwap;
 #endif
+#ifdef PROPOSED
+	int iChooseOld = (int)(NCOST*NPHI/2);
+	int iChooseNew;
+	int iChoose;
+#endif
 
 //-------------------------------------------
 
@@ -197,6 +202,9 @@ srand( time(NULL) );
 // only internal system of units after this point 
  
 	MCInit();
+#ifdef PROPOSED
+proposedGrid();
+#endif
 
 	if (WORM)
 	MCWormInit();

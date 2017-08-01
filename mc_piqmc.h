@@ -53,4 +53,8 @@ extern int PrintZrfl; // integer flag for printing reflected coordinates
 //Last two lines added by Tapas Sahoo
 double DotProduct(double *, double *); 
 void CrossProduct(double *, double *, double *);
+#ifdef PROPOSED
+int myRand(double *, double );
+int findCeil(double *, double);
+#endif
 #endif  //mc_pimc.h

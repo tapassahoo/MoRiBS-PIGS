@@ -115,6 +115,15 @@ double ** MCCoords;   // translational degrees of freedom
 double ** MCCosine;   // orientational cosines
 double ** MCAngles;
 
+#ifdef PROPOSED
+double dcost;
+double dphi;
+int NPHI = 361;
+int NCOST = 101;
+double *costProposed;
+double *phiProposed;
+#endif
+
 //------------ Initial MCCoords and MCAngles;
 double * MCCooInit;   // store the read in MCCoords
 double * MCAngInit;   // store the read in MCAngles
@@ -123,6 +132,9 @@ double * MCAngInit;   // store the read in MCAngles
 //double ** TZMAT; // just a matrix
 
 double ** newcoords;  // buffer for new coordinates
+#ifdef PROPOSED
+double ** tempcoords;  // buffer for new coordinates
+#endif
 int    *  atom_list;  // buffer for atom labels
 
 double *  rhoprp;     // rotatinal propagator for non-linear rotor
@@ -164,6 +176,12 @@ void MCMemAlloc(void)  // allocate  memmory
   MCType    = new int [NumbAtoms];
   PIndex    = new int [NumbAtoms];
   RIndex    = new int [NumbAtoms];
+
+#ifdef PROPOSED
+  	tempcoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
+	costProposed = new double [NCOST*NPHI];
+	phiProposed  = new double [NCOST*NPHI];
+#endif
 }
 
 void MCMemFree(void)  //  free memory
@@ -184,6 +202,12 @@ void MCMemFree(void)  //  free memory
   delete [] MCType;
   delete [] PIndex;
   delete [] RIndex;
+
+#ifdef PROPOSED
+  	free_doubleMatrix(tempcoords); 
+	delete [] costProposed;
+	delete [] phiProposed;
+#endif
 }
 
 //------------ MC SYSTEM OF UNITS --------------------------
@@ -670,3 +694,20 @@ void initChain_config(double **pos)
     }
 #endif
 }
+
+#ifdef PROPOSED
+void proposedGrid(void)
+{
+    dcost = 2.0/((double)NCOST - 1.0); 
+    dphi  = 2.0*M_PI/((double)NPHI - 1.0);
+    for (int ict = 0; ict < NCOST; ict++)
+	{
+ 		for (int ip = 0; ip < NPHI; ip++)
+		{
+			int ii = ip + ict*NPHI;
+        	costProposed[ii] = -1.0+ict*dcost;
+			phiProposed[ii] = ip*dphi;
+		}
+	}
+}
+#endif

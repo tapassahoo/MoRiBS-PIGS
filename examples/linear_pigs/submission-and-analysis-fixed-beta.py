@@ -16,7 +16,7 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
 NameOfPartition     = "ntapas"
@@ -37,7 +37,7 @@ molecule_rot        = "HF"
 
 numbblocks	        = 400000
 numbmolecules       = 2
-numbpass            = 400
+numbpass            = 2000
 beta     	        = 0.1
 
 Rpt                 = 10.05

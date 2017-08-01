@@ -40,6 +40,18 @@ extern string  Distribution;
 extern double  MCAccepSwap;
 extern double  MCAccepUnSwap;
 #endif
+#ifdef PROPOSED
+extern int iChooseOld;
+extern int iChoose;
+extern int iChooseNew;
+extern int NPHI;
+extern int NCOST;
+void proposedGrid();
+extern double *costProposed;
+extern double *phiProposed;
+extern double dcost;
+extern double dphi;
+#endif
 
 extern int     NDIM;
 extern double  Temperature;
@@ -201,6 +213,9 @@ extern double ** RCOMC60;     //store the read in MCCoords
 //extern double ** TZMAT; // a temporary matrix for testing data structure
 
 extern double ** newcoords;  // buffer for new coordinates
+#ifdef PROPOSED
+extern double ** tempcoords;  // buffer for new coordinates
+#endif
 extern int     * atom_list;  // buffer for atom labels
 
 extern double *  rhoprp;     // rotatinal propagator for non-linear rotor
