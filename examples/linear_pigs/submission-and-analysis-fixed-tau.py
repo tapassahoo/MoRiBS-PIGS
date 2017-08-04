@@ -20,19 +20,19 @@ status              = "submission"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 
 #molecule            = "HFC60"                                                 
 molecule            = "HF"                                                     
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 400000
-numbmolecules       = 4
-numbpass            = 2000
+numbblocks	        = 10
+numbmolecules       = 1
+numbpass            = 50
 tau                 = 0.005
 
 Rpt                 = 10.05
@@ -45,10 +45,10 @@ RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
 loopStart           = 2
-loopEnd             = 51
+loopEnd             = 3
 skip                = 2
 
-preskip             = 1000
+preskip             = 100
 postskip            = 0
 particleA           = int(numbmolecules/2)
 
@@ -57,7 +57,7 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
 
-extra_file_name     = "-Passes"+str(numbpass)
+extra_file_name     = "-Passes"+str(numbpass)+"-Exact"
 #extra_file_name     = ""
 
 if (TypeCal == "PIGS"):

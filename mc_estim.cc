@@ -652,13 +652,9 @@ double GetPotEnergyPIGS(void)
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
 #ifdef GETR
-        spot = 0.0;
-        double dm   = DipoleMoment/AuToDebye;
-        double dm2  = dm*dm;
-        double RR = Distance/BOHRRADIUS;
         int offset0 = 0;
         int t0  = offset0 + it;
-        double E12     = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
+        double E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
 #endif
     }
@@ -1114,11 +1110,6 @@ double GetTotalEnergy(void)
     }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
-#ifdef GETR
-        double dm   = DipoleMoment/AuToDebye;
-        double dm2  = dm*dm;
-        double RR   = Distance/BOHRRADIUS;
-
         int offset0 = 0;
 
         spot = 0.0;
@@ -1127,10 +1118,9 @@ double GetTotalEnergy(void)
 		{
             int t0  = offset0 + it;
 
-            E12     = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
+            E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
             spot   += E12*AuToKelvin;
         }
-#endif
     }
 #endif
 

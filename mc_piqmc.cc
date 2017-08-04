@@ -764,12 +764,14 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    	int t1 = offset + it1;
    	int t2 = offset + it2;
 
+#ifndef PROPOSED
    	double cost = MCAngles[CTH][t1];
    	double phi  = MCAngles[PHI][t1];
 	double EulangOld[NDIM], EulangNew[NDIM];
 	EulangOld[PHI] = phi;
 	EulangOld[CTH] = acos(cost);
 	EulangOld[CHI] = 0.0;
+#endif
 
 #ifdef PROPOSED
 	double PreDistribution[NCOST*NPHI];
@@ -789,18 +791,47 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
    			p0 += (MCCosine[id][t0]*tempcoords[id][t1]);
    			p1 += (tempcoords[id][t1]*MCCosine[id][t2]);
    		}
-        PreDistribution[itp] = SRotDens(p0,type)*SRotDens(p1,type);
-        sum += SRotDens(p0,type)*SRotDens(p1,type);
+
+		double weight;
+      	if (it1 == 0 || it1 == (NumbRotTimes - 1))
+        {
+			weight = 0.5;
+            if (it1 == 0)
+            {
+                PreDistribution[itp] = SRotDens(p1, type);
+            }
+            else
+            {
+                PreDistribution[itp] = SRotDens(p0, type);
+            }
+        }
+        else
+        {
+			weight = 1.0;
+            PreDistribution[itp] = SRotDens(p0,type)*SRotDens(p1,type);
+        }
+        
+    	double E12 = -2.0*DipoleMomentAU2*costProposed[itp]*AuToKelvin*weight/(RR*RR*RR);
+        PreDistribution[itp] *= exp(-MCRotTau*E12);
+        sum += PreDistribution[itp];
 	}
 	for (int itp = 0; itp < NCOST*NPHI; itp++)
     {
         PreDistribution[itp] /= sum;
 	}
-   	iChoose = myRand(PreDistribution, rand1);
-	if (iChoose == -1) exit(0);
-   	cost = costProposed[iChoose];
-   	phi  = phiProposed[iChoose];
-#else
+   	iChooseNew = myRand(PreDistribution, rand1);
+	if (iChooseNew == -1) exit(0);
+   	double cost = costProposed[iChooseNew];
+   	double phi  = phiProposed[iChooseNew];
+	MCAngles[CTH][t1] = cost;
+	MCAngles[PHI][t1] = phi;
+
+	double sint = sqrt(1.0 - cost*cost);
+	MCCosine[0][t1] = sint*cos(phi);
+   	MCCosine[1][t1] = sint*sin(phi);
+   	MCCosine[2][t1] = cost;
+#endif
+#ifndef PROPOSED
    	cost += (step*(rand1-0.5));
    	phi  += (step*(rand2-0.5));
 
@@ -819,7 +850,6 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
         cout<<"Upper or lower limit of cost is excided " << cost<<endl;
 		exit(0);
 	}
-#endif
 
 	EulangNew[PHI] = phi;
 	EulangNew[CTH] = acos(cost);
@@ -964,9 +994,6 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 		else rd = 1.0;
 
 		rd *= exp(- MCTau*(pot_new-pot_old));
-#ifdef PROPOSED
-        rd *= dens_old/PreDistribution[iChoose];
-#endif
 	}
 	else if(RotDenType == 1)
 	{
@@ -999,9 +1026,8 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 
 		for (int id=0;id<NDIM;id++)
     		MCCosine[id][t1] = newcoords[id][t1];
-
 	}
-
+#endif
 }
 
 #ifdef IOWRITE
@@ -3155,20 +3181,11 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 #endif
     }
 
-#ifdef IOWRITE
-#ifdef GETR
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
 	{
-        double dm   = DipoleMoment/AuToDebye;
-        double dm2  = dm*dm;
-        double RR   = Distance/BOHRRADIUS;
-	    int offset0 =  atom0*NumbRotTimes;
-        int t0  = offset0 + it;
-        double E12 = -2.0*dm2*cosine[2][t0]/(RR*RR*RR);
+        double E12 = -2.0*DipoleMomentAU2*cos(Eulang0[CTH])/(RR*RR*RR);
         spot        = E12*AuToKelvin;
     }
-#endif
-#endif
 #endif //LINEARROTORS
     double spot_cage;
 #ifdef CAGEPOT
@@ -3366,3 +3383,4 @@ int findCeil(double *arr, double rand1)
     return (arr[l] >= rand1) ? l : -1;
 }
 #endif
+

@@ -44,6 +44,8 @@ double  Temperature;
 double Distance;
 #endif
 double DipoleMoment;
+double DipoleMomentAU2;
+double RR;
 #ifdef BIPARTITION
 int NumbParticle;
 #endif
@@ -711,3 +713,9 @@ void proposedGrid(void)
 	}
 }
 #endif
+void ParamsPotential(void)
+{
+	double DipoleMomentAU   = DipoleMoment/AuToDebye;
+	DipoleMomentAU2  = DipoleMomentAU*DipoleMomentAU;
+	RR   = Distance/BOHRRADIUS;
+}

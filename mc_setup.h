@@ -40,6 +40,8 @@ extern string  Distribution;
 extern double  MCAccepSwap;
 extern double  MCAccepUnSwap;
 #endif
+extern double DipoleMomentAU2;
+extern double RR;
 #ifdef PROPOSED
 extern int iChooseOld;
 extern int iChoose;
@@ -255,5 +257,6 @@ void MCInit(void);
 void MCConfigInit(void);
 
 void MCSetUnits_HO_TEST(void);
+void ParamsPotential(void);
 
 #endif  //MM_setup.h

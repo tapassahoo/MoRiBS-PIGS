@@ -27,6 +27,7 @@
 #include "rngstream.h"
 #include "omprng.h"
 
+
 void MCWormAverage(void);
 void MCWormAverageReset(void);
 
@@ -148,7 +149,7 @@ extern "C" void vinit_();
 	double MCAccepUnSwap;
 #endif
 #ifdef PROPOSED
-	int iChooseOld = (int)(NCOST*NPHI/2);
+	int iChooseOld = 0;
 	int iChooseNew;
 	int iChoose;
 #endif
@@ -165,6 +166,7 @@ srand( time(NULL) );
    vinit_();
 #endif
 #endif
+
 //int numprocs, rank, namelen;
 //char processor_name[MPI_MAX_PROCESSOR_NAME];
 
@@ -205,6 +207,7 @@ srand( time(NULL) );
 #ifdef PROPOSED
 proposedGrid();
 #endif
+ParamsPotential();
 
 	if (WORM)
 	MCWormInit();
@@ -625,8 +628,7 @@ proposedGrid();
 		IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 		IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
 		IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
-//Tapas commented out
-		//IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+		IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
       
 		string fname = MCFileName + IO_EXT_XYZ;
 		IOxyz(IOWrite,fname.c_str());  // test output of initial config
