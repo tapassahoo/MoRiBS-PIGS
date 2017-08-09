@@ -229,6 +229,9 @@ ParamsPotential();
       	if (FileExist(FRANDOM)) 
      	_io_error("QMC ->",IO_ERR_FEXST,FRANDOM);
 
+      	if (FileExist(FSEED)) 
+     	_io_error("QMC ->",IO_ERR_FEXST,FSEED);
+
 //--------------------------------------------------------
 //    	generate tables - potentals, configurations etc, status
 
@@ -317,23 +320,13 @@ ParamsPotential();
                		MCCoords[id][it]=MCCooInit[it*NDIM+id];
                		MCAngles[id][it]=MCAngInit[it*NDIM+id];
             	}
-
-//          	put into MCCosine
-            	double phi  = MCAngles[PHI][it];
-            	double cost = MCAngles[CTH][it];
-            	double sint = sqrt(1.0 - cost*cost);
-            	double chi  = MCAngles[CHI][it];
-
-            	MCCosine[AXIS_X][it] = sint*cos(phi);
-            	MCCosine[AXIS_Y][it] = sint*sin(phi);
-            	MCCosine[AXIS_Z][it] = cost;
          	}
       	}
 		delete [] MCCooInit;
 		delete [] MCAngInit;
 
-//    	string fname = MCFileName + IO_EXT_XYZ;
-//    	IOxyz(IOWrite,fname.c_str());  // test output of initial config
+    	//string fname = MCFileName + IO_EXT_XYZ;
+    	//IOxyz(IOWrite,fname.c_str());  // test output of initial config
       	string fname = MCFileName;
       	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 
@@ -343,6 +336,9 @@ ParamsPotential();
       	ConfigIO(IOWrite,FCONFIG);
       	TablesIO(IOWrite,FTABLES);
       	RandomIO(IOWrite,FRANDOM);
+#ifdef RESTART
+		SeedIO(IOWrite,FSEED);
+#endif
 
       	if (WORM)
       	QWormsIO(IOWrite,FQWORMS);
@@ -352,10 +348,28 @@ ParamsPotential();
 
 // --- RESTART/START NEW RUN ----------------------------
 
-   	StatusIO(IORead,FSTATUS);  // load MCStartBlock
-   	ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
-   	TablesIO(IORead,FTABLES);  // load permutation tables
-   	RandomIO(IORead,FRANDOM);  // load rnd streams 
+   	if (restart) // new run, generate new status, rnd() streams and config files     
+   	{
+		StatusIO(IORead,FSTATUS);  // load MCStartBlock
+   		ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
+   		TablesIO(IORead,FTABLES);  // load permutation tables
+   		RandomIO(IORead,FRANDOM);  // load rnd streams 
+      	string fname = MCFileName;
+      	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
+	}
+
+    for (int it=0;it<NumbAtoms*NumbTimes;it++)
+    {
+
+        double phi  = MCAngles[PHI][it];
+        double cost = MCAngles[CTH][it];
+        double sint = sqrt(1.0 - cost*cost);
+        double chi  = MCAngles[CHI][it];
+
+        MCCosine[AXIS_X][it] = sint*cos(phi);
+        MCCosine[AXIS_Y][it] = sint*sin(phi);
+        MCCosine[AXIS_Z][it] = cost;
+    }
 
    	if (WORM)
    	QWormsIO(IORead,FQWORMS);
@@ -467,7 +481,7 @@ ParamsPotential();
 	// RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 
    	long int blockCount = MCStartBlock;  
-   	while (blockCount<NumberOfMCBlocks+MCStartBlock) // START NEW BLOCK      
+   	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
    	{      
     	blockCount++; 
        	MCResetBlockAverage();
@@ -555,12 +569,12 @@ ParamsPotential();
                         //print the instantaneous xyz and prl info for the closed path
                     	if(PrintXYZprl)
                     	{
+#ifdef IOWRITE
                     		stringstream bc;                // convert block # to string
                     		bc.width(IO_BLOCKNUMB_WIDTH);
                     		bc.fill('0');
                     		bc<<blockCount;
                     		string fname = MCFileName + bc.str();  // file name prefix including block #
-#ifdef IOWRITE
                     		IOxyzAng(IOWrite,fname.c_str());
 #endif
                     		PrintXYZprl = 0;
@@ -623,15 +637,15 @@ ParamsPotential();
 
 		//  CHECKPOINT: save status, rnd streams and configs ------
 
-		// MCStartBlock = blockCount; 
+		MCStartBlock = blockCount; 
 
 		IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 		IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
 		IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
 		IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
       
-		string fname = MCFileName + IO_EXT_XYZ;
-		IOxyz(IOWrite,fname.c_str());  // test output of initial config
+		string fname = MCFileName;// + IO_EXT_XYZ;
+		IOxyzAng(IOWrite,fname.c_str());  // test output of initial config
 
        	if (WORM)
        	{

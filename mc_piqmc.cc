@@ -813,8 +813,10 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
         
     	double E12 = -2.0*DipoleMomentAU2*costProposed[itp]*AuToKelvin*weight/(RR*RR*RR);
         PreDistribution[itp] *= exp(-MCRotTau*E12);
+		//var+=MCRotTau*E12;
         sum += PreDistribution[itp];
 	}
+    //PreDistribution[itp]=exp(-var);
 	for (int itp = 0; itp < NCOST*NPHI; itp++)
     {
         PreDistribution[itp] /= sum;

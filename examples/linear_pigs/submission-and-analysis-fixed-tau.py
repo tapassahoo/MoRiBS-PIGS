@@ -16,23 +16,23 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"
-#status              = "analysis"
+status              = "analysis"
 
 #NameOfServer        = "graham"
 NameOfServer        = "nlogn"
-NameOfPartition     = "tapas"
+NameOfPartition     = "ntapas"
 
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 
 #molecule            = "HFC60"                                                 
 molecule            = "HF"                                                     
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 10
-numbmolecules       = 1
-numbpass            = 50
+numbblocks	        = 400000
+numbmolecules       = 4
+numbpass            = 2000
 tau                 = 0.005
 
 Rpt                 = 10.05
@@ -45,10 +45,10 @@ RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
 loopStart           = 2
-loopEnd             = 3
+loopEnd             = 51
 skip                = 2
 
-preskip             = 100
+preskip             = 10000
 postskip            = 0
 particleA           = int(numbmolecules/2)
 
@@ -57,7 +57,7 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
 
-extra_file_name     = "-Passes"+str(numbpass)+"-Exact"
+extra_file_name     = "-Passes"+str(numbpass)#+"-Exact"
 #extra_file_name     = ""
 
 if (TypeCal == "PIGS"):
@@ -125,21 +125,24 @@ if status == "analysis":
 		file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
 		file_output_angularDOF += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
-		call(["rm", file_output, file_output_angularDOF])
+		SaveEnergy              = src_path+"/ResultsOfPIGS/"+file_output
+		SaveAngDOFS             = src_path+"/ResultsOfPIGS/"+file_output_angularDOF
+		call(["rm", SaveEnergy, SaveAngDOFS])
 
 	if (TypeCal == "ENT"):
 		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
 		file_output     += "tau"+str(tau)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-ParticleA"+str(particleA)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+"-"+ENT_TYPE+".txt"
-		call(["rm", file_output])
+		SaveEntropy             = src_path+"/ResultsOfPIGSENT/"+file_output
+		call(["rm", SaveEntropy])
 
 	if (TypeCal == "ENT"):
-		fanalyze             = open(file_output, "a")
+		fanalyze             = open(SaveEntropy, "a")
 		fanalyze.write(support.fmtAverageEntropy(status,var,ENT_TYPE))
 	else:
-		fanalyze             = open(file_output, "a")           
+		fanalyze             = open(SaveEnergy, "a")           
 		fanalyze.write(support.fmtAverageEnergy(status,var))
-		fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
+		fanalyze_angularDOF  = open(SaveAngDOFS, "a")           
 		fanalyze_angularDOF.write(support.fmtAverageOrientation(status,var))
 
 if (TypeCal == "ENT"):
@@ -180,12 +183,13 @@ for i in range(loopStart, loopEnd, skip):
 			pass
 
 if status == "analysis":
-	fanalyze.close()
-	if (TypeCal != "ENT"):
-		fanalyze_angularDOF.close()
-	call(["cat",file_output])
-	'''
-	print
-	print
-	call(["cat",file_output_angularDOF])
-	'''
+    fanalyze.close()
+    if (TypeCal == "ENT"):
+        call(["cat",SaveEntropy])
+    print
+    print
+    if (TypeCal == "PIGS"):
+        fanalyze_angularDOF.close()
+        call(["cat",SaveAngDOFS])
+        call(["cat",SaveEnergy])
+

@@ -15,6 +15,7 @@ const int IOWrite = 1;
 void IOReadParams (const char [],int &);  
 void StatusIO(int, const char []);       // save/restore status of simulation
 void ConfigIO(int, const char []);       // save/restore init configuration
+void SeedIO(int, const char []);       // save/restore init seeds for omrng
 void TablesIO(int, const char []);       // save/restore permutation tables
 void QWormsIO(int, const char []);       // save/restore status of the worm
 

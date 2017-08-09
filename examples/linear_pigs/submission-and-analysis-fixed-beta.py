@@ -16,7 +16,7 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
 NameOfPartition     = "ntapas"
@@ -35,7 +35,7 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 400000
+numbblocks	        = 50000
 numbmolecules       = 2
 numbpass            = 2000
 beta     	        = 0.1
@@ -53,10 +53,10 @@ loopStart           = 8
 loopEnd             = 51
 skip                = 2
 
-preskip             = 0
+preskip             = 10000
 postskip            = 0
 
-particleA           = 1
+particleA           = int(numbmolecules/2)
 ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "SWAP"
 #ENT_TYPE = "BROKENPATH"
@@ -144,7 +144,9 @@ if status == "analysis":
 		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 		
-		call(["rm", file_output, file_output_angularDOF])
+		SaveEnergy              = src_path+"/ResultsOfPIGS/"+file_output
+		SaveAngDOFS             = src_path+"/ResultsOfPIGS/"+file_output_angularDOF
+		call(["rm", SaveEnergy, SaveAngDOFS])
 	
 	if (TypeCal == "PIMC"):
 		file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
@@ -155,23 +157,26 @@ if status == "analysis":
 		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
 		file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 
-		call(["rm", file_output, file_output_angularDOF])
+		SaveEnergy              = src_path+"/ResultsOfPIMC/"+file_output
+		SaveAngDOFS             = src_path+"/ResultsOfPIMC/"+file_output_angularDOF
+		call(["rm", SaveEnergy, SaveAngDOFS])
 	
 	if (TypeCal == "ENT"):
-		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
-		file_output     += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+"-"+ENT_TYPE+".txt"
+		file_output             = "Entropy-vs-"+str(var)+"-fixed-"
+		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+		file_output            += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-ParticleA"+str(particleA)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+"-"+ENT_TYPE+".txt"
 
-		call(["rm", file_output])
+		SaveEntropy             = src_path+"/ResultsOfPIGSENT/"+file_output
+		call(["rm", SaveEntropy])
 	
 	
 	if (TypeCal == "ENT"):
-		fanalyze             = open(file_output, "a")
+		fanalyze             = open(SaveEntropy, "a")
 		fanalyze.write(support.fmtAverageEntropy(status,var,ENT_TYPE))
 	else:
-		fanalyze             = open(file_output, "a")           
+		fanalyze             = open(SaveEnergy, "a")           
 		fanalyze.write(support.fmtAverageEnergy(status,var))
-		fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
+		fanalyze_angularDOF  = open(SaveAngDOFS, "a")           
 		fanalyze_angularDOF.write(support.fmtAverageOrientation(status,var))
 	#support.FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc)
 
@@ -238,10 +243,11 @@ for i in range(loopStart, loopEnd, skip):
 if status == "analysis":
 #	support.FileClose(TypeCal)
 	fanalyze.close()
-	if (TypeCal != "ENT"):
+	if (TypeCal == "ENT"):
+		call(["cat",SaveEntropy])
+	print("")
+	print("")
+	if (TypeCal == "PIGS" or TypeCal == "PIMC"):
 		fanalyze_angularDOF.close()
-	call(["cat",file_output])
-	print
-	print
-	if (TypeCal != "ENT"):
-		call(["cat",file_output_angularDOF])
+		call(["cat",SaveAngDOFS])
+		call(["cat",SaveEnergy])

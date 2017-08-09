@@ -589,7 +589,7 @@ def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temper
 	if (thread > 24):
 		thread = 24
 	job_name       = str(file_name)+str(value)
-	walltime       = "00-96:00"
+	walltime       = "07-00:00"
 	omp_thread     = str(thread)
 	output_dir     = run_dir+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -622,8 +622,8 @@ mv %s %s
 cd %s
 cp %s qmc.input
 cp %s %s
-valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
-###./pimc 
+####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
+./pimc 
 %s
 """ % (job_name, logpath, walltime, omp_thread, omp_thread, run_dir, output_dir, cagepot_file, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, CommandForMove)
 	return job_string

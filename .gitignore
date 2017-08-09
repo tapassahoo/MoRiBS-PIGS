@@ -51,6 +51,8 @@ mc_main-original.cc
 mc_piqmc-correct.cc
 mc_piqmc-modified.cc
 mc_estim-modified.cc
+mc_main1.*
+mc_estim1.*
 #
 /examples/nonlinear_pigs/results/*
 !/examples/nonlinear_pigs/results/

@@ -584,8 +584,8 @@ void ConfigIO(int tstatus, const char file_name[])
       nrerror (_proc_,IO_ERR_WMODE); break;      
    } 
 
-   fstream fid(file_name,mode);
-//   fstream fid(file_name,mode | ios::binary);
+   //fstream fid(file_name,mode);
+   fstream fid(file_name,mode | ios::binary);
 
    if (!fid.good())
    _io_error(_proc_,IO_ERR_FOPEN,file_name);
@@ -599,18 +599,20 @@ void ConfigIO(int tstatus, const char file_name[])
          size=sizeof(double)*NumbAtoms*NumbTimes;
          fid.write((char *)&size,sizeof(streamsize));
          fid.write((char *)MCCoords[0],size);
-         fid.write((char *)MCCosine[0],size);
-//       Toby replaces the above line by
-//       fid.write((char *)MCAngles[0],size);
-//       to store the three Euler angles
+         fid.write((char *)MCAngles[PHI],size);
+         fid.write((char *)MCCoords[1],size);
+         fid.write((char *)MCAngles[CTH],size);
+         fid.write((char *)MCCoords[2],size);
+         fid.write((char *)MCAngles[CHI],size);
          break;
       case IORead:
          fid.read((char *)&size,sizeof(streamsize));
          fid.read((char *)MCCoords[0],size);
-         fid.read((char *)MCCosine[0],size);
-//       Toby replaces the above line by
-//       fid.read((char *)MCAngles[0],size);
-//       to read the three Euler angles
+         fid.read((char *)MCAngles[PHI],size);
+         fid.read((char *)MCCoords[1],size);
+         fid.read((char *)MCAngles[CTH],size);
+         fid.read((char *)MCCoords[2],size);
+         fid.read((char *)MCAngles[CHI],size);
          break;
       default :  
          nrerror (_proc_,IO_ERR_WMODE);
@@ -620,6 +622,51 @@ void ConfigIO(int tstatus, const char file_name[])
    fid.close();
 }
 
+#ifdef RESTART
+void SeedIO(int tstatus, const char file_name[]) 
+// read/wrire initial seeds for omprng
+{
+   const char *_proc_=__func__;    // "MCStatus()"; 
+
+   int NSEED = 6;
+   ios::openmode mode;
+
+   switch (tstatus)
+   {
+      case IOWrite: mode = ios::out; break;
+      case IORead : mode = ios::in;  break;
+      default     :
+      nrerror (_proc_,IO_ERR_WMODE); break;      
+   } 
+
+   //fstream fid(file_name,mode);
+   fstream fid(file_name,mode | ios::binary);
+
+   if (!fid.good())
+   _io_error(_proc_,IO_ERR_FOPEN,file_name);
+
+   io_setout(fid);  //added by Hui Li
+
+   streamsize size;         
+   switch (tstatus)
+   {
+      case IOWrite: 
+         size=sizeof(double)*NSEED;
+         fid.write((char *)&size,sizeof(streamsize));
+         fid.write((char *)mySeedOMP,size);
+         break;
+      case IORead:
+         fid.read((char *)&size,sizeof(streamsize));
+         fid.read((char *)mySeedOMP,size);
+         break;
+      default :  
+         nrerror (_proc_,IO_ERR_WMODE);
+         break;      
+   } 
+  
+   fid.close();
+}
+#endif
 void TablesIO(int tstatus, const char file_name[]) 
 // read/wrire permutation tables 
 {
