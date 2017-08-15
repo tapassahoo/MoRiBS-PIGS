@@ -158,6 +158,8 @@ extern "C" void vinit_();
 
 int main(int argc, char *argv[])
 {
+   	randomseed(); //set seed according to clock
+//Tapas added
 #ifdef SWAPTOUNSWAP
 srand( time(NULL) );
 #endif
@@ -336,9 +338,7 @@ ParamsPotential();
       	ConfigIO(IOWrite,FCONFIG);
       	TablesIO(IOWrite,FTABLES);
       	RandomIO(IOWrite,FRANDOM);
-#ifdef RESTART
 		SeedIO(IOWrite,FSEED);
-#endif
 
       	if (WORM)
       	QWormsIO(IOWrite,FQWORMS);
@@ -354,6 +354,7 @@ ParamsPotential();
    		ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
    		TablesIO(IORead,FTABLES);  // load permutation tables
    		RandomIO(IORead,FRANDOM);  // load rnd streams 
+		SeedIO(IORead,FSEED);
       	string fname = MCFileName;
       	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 	}
@@ -431,6 +432,7 @@ ParamsPotential();
 // MPI BLOCK 1 in MASTER done
 */
 
+
     InitMCEstims();
    	InitTotalAverage();      // DUMP 
    	double sumsCount = 0.0;  // counter for accum sums
@@ -477,8 +479,8 @@ ParamsPotential();
    	cout<<"NThreads="<<NThreads<<" chunksize="<<chunksize<<endl;
 
    	printf("OpenMP version: %d\n", _OPENMP);
-   	randomseed(); //set seed according to clock
-	// RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+   	//randomseed(); //set seed according to clock
+	//RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 
    	long int blockCount = MCStartBlock;  
    	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
@@ -489,9 +491,9 @@ ParamsPotential();
        	long int passCount = 0;        // BEGIN NEW MC PASS
        	long int passTotal = 0;        // total number of Moves = passCount*time 
 
+       	//for (int time=0; time<1; time++)
        	while (passCount++ < NumberOfMCPasses) 
-       	//for (int time=0; time<NumbTimes; time++)
-       	for (int time=0; time<1; time++)
+       	for (int time=0; time<NumbTimes; time++)
        	{
         	passTotal++;  
 
@@ -523,7 +525,9 @@ ParamsPotential();
            		}
         	} 
        		else
-		    PIMCPass(type,time);
+			{
+		    	PIMCPass(type,time);
+			}
 #ifdef INSTANT
 			totalStep++;
 #ifdef IOWRITE
@@ -639,10 +643,14 @@ ParamsPotential();
 
 		MCStartBlock = blockCount; 
 
-		IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
-		IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
-		IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
-		IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+		if (blockCount%1000 == 0)
+		{
+			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
+			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
+			IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
+			IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+			IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
+		}
       
 		string fname = MCFileName;// + IO_EXT_XYZ;
 		IOxyzAng(IOWrite,fname.c_str());  // test output of initial config

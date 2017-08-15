@@ -30,9 +30,9 @@ molecule            = "HF"
 #molecule            = "H2"                                                   
 molecule_rot        = "HF"                                                   
 
-numbblocks	        = 400000
-numbmolecules       = 4
-numbpass            = 2000
+numbblocks	        = 100000
+numbmolecules       = 2
+numbpass            = 200
 tau                 = 0.005
 
 Rpt                 = 10.05
@@ -48,7 +48,7 @@ loopStart           = 2
 loopEnd             = 51
 skip                = 2
 
-preskip             = 10000
+preskip             = 00000
 postskip            = 0
 particleA           = int(numbmolecules/2)
 
@@ -57,7 +57,7 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
 
-extra_file_name     = "-Passes"+str(numbpass)#+"-Exact"
+extra_file_name     = "-Passes"+str(numbpass)+"-NumTimes"
 #extra_file_name     = ""
 
 if (TypeCal == "PIGS"):

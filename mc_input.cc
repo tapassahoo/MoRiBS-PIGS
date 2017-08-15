@@ -10,6 +10,7 @@
 #include "mc_utils.h"
 #include "mc_poten.h"
 #include "mc_qworm.h"
+#include "rngstream.h"
 
 //----- INPUT PARAMETERS----------------------------
 
@@ -622,51 +623,50 @@ void ConfigIO(int tstatus, const char file_name[])
    fid.close();
 }
 
-#ifdef RESTART
 void SeedIO(int tstatus, const char file_name[]) 
 // read/wrire initial seeds for omprng
 {
-   const char *_proc_=__func__;    // "MCStatus()"; 
+   	const char *_proc_=__func__;    // "MCStatus()"; 
 
-   int NSEED = 6;
-   ios::openmode mode;
+   	int NSEED = 6;
+   	ios::openmode mode;
 
-   switch (tstatus)
-   {
-      case IOWrite: mode = ios::out; break;
-      case IORead : mode = ios::in;  break;
-      default     :
-      nrerror (_proc_,IO_ERR_WMODE); break;      
-   } 
+   	switch (tstatus)
+   	{
+      	case IOWrite: mode = ios::out; break;
+      	case IORead : mode = ios::in;  break;
+      	default     :
+      	nrerror (_proc_,IO_ERR_WMODE); break;      
+   	} 
 
-   //fstream fid(file_name,mode);
-   fstream fid(file_name,mode | ios::binary);
+   	//fstream fid(file_name,mode);
+   	fstream fid(file_name,mode | ios::binary);
 
-   if (!fid.good())
-   _io_error(_proc_,IO_ERR_FOPEN,file_name);
+   	if (!fid.good())
+   	_io_error(_proc_,IO_ERR_FOPEN,file_name);
 
-   io_setout(fid);  //added by Hui Li
+   	io_setout(fid);  //added by Hui Li
 
-   streamsize size;         
-   switch (tstatus)
-   {
-      case IOWrite: 
-         size=sizeof(double)*NSEED;
-         fid.write((char *)&size,sizeof(streamsize));
-         fid.write((char *)mySeedOMP,size);
-         break;
-      case IORead:
-         fid.read((char *)&size,sizeof(streamsize));
-         fid.read((char *)mySeedOMP,size);
-         break;
-      default :  
-         nrerror (_proc_,IO_ERR_WMODE);
-         break;      
-   } 
+   	streamsize size;         
+   	switch (tstatus)
+   	{
+      	case IOWrite: 
+        	size=sizeof(double)*NSEED;
+         	fid.write((char *)&size,sizeof(streamsize));
+         	fid.write((char *)RngStream::nextSeed,size);
+         	break;
+      	case IORead:
+        	fid.read((char *)&size,sizeof(streamsize));
+       		fid.read((char *)RngStream::nextSeed,size);
+         	break;
+      	default :  
+         	nrerror (_proc_,IO_ERR_WMODE);
+         	break;      
+   	} 
   
    fid.close();
 }
-#endif
+
 void TablesIO(int tstatus, const char file_name[]) 
 // read/wrire permutation tables 
 {

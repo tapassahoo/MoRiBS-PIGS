@@ -16,7 +16,7 @@ import support
 #                                                                              |
 #===============================================================================
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
 NameOfPartition     = "ntapas"
@@ -35,10 +35,10 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 50000
+numbblocks	        = 400000
 numbmolecules       = 2
-numbpass            = 2000
-beta     	        = 0.1
+numbpass            = 100
+beta     	        = 0.2
 
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
@@ -50,10 +50,10 @@ RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
 loopStart           = 8
-loopEnd             = 51
+loopEnd             = 61
 skip                = 2
 
-preskip             = 10000
+preskip             = 0
 postskip            = 0
 
 particleA           = int(numbmolecules/2)
@@ -61,7 +61,7 @@ ENT_TYPE = "SWAPTOUNSWAP"
 #ENT_TYPE = "SWAP"
 #ENT_TYPE = "BROKENPATH"
 #ENT_TYPE = "REGULARPATH"
-extra_file_name     = "-Passes"+str(numbpass)
+extra_file_name     = "-Passes"+str(numbpass)+"-NumTimes"
 #extra_file_name     = ""
 
 if (TypeCal == "PIGS"):
@@ -83,9 +83,9 @@ var                 = "tau"                                                     
 
 src_path            = os.getcwd()
 if (NameOfServer == "graham"):
-    dest_path           = "/scratch/tapas/linear_rotors/"
+    dest_path       = "/scratch/tapas/linear_rotors/"
 else:
-    dest_path           = "/work/tapas/linear_rotors/"
+    dest_path       = "/work/tapas/linear_rotors/"
 run_file            = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"     
 
 if status   == "submission":
@@ -107,8 +107,8 @@ if (molecule_rot == "H2"):
 	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
 
 if (molecule_rot == "HF"):
-	step           	= [0.7,2.0,2.0,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.3]  #PIMC beta = 0.05KINV
-	step           	= [0.7,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.8,1.7,1.6,1.6,1.5,1.5,1.4,1.4,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.4,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.3]  
+	#step           	= [0.7,2.0,2.0,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.3]  #PIMC beta = 0.05KINV
+	step           	= [0.7,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS
 	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  
 					# 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
@@ -182,7 +182,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 8
+	loopStart       = 20
 
 # Loop over jobs
 #list_nb = [8,16,32,64,96,128]
