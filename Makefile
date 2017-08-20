@@ -15,7 +15,7 @@ CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DPIGSROTORS -DPIGSROTORS
 #-DCAGEPOT
 
 # CFLAGS for Finite Temperature Calculations 
-#CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DLINEARROTORS -DLINEARROTORSIO -DGETR -DTYPE1 -DCHAINCONFIG
+#CFLAGS =-I./sprng/include -I/usr/local/include -DUNITS -DLINEARROTORS -DLINEARROTORSIO -DGETR -DTYPE1 -DCHAINCONFIG -DMOVECOM
 #-DINSTANT -DPIMCINSTANT -DIOFILES -DCAGEPOT
 
 #Below is the LDFLAGS Toby Zeng use on nlogn

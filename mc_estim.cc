@@ -634,13 +634,10 @@ double GetPotEnergyPIGS(void)
                 	if (phi<0.0) phi += 2.0*M_PI;
 
                 	//Dihedral angle calculation is completed here
-                	double r1 = 1.42;// bond length in bohr
+                	double r1 = 0.74;// bond length in Angstrom
+					r1 /= BOHRRADIUS;
                 	double r2 = r1;// bond length in bohr
-#ifdef GETR
-                	double rd = Distance/BOHRRADIUS;
-#else
                 	double rd = r/BOHRRADIUS;
-#endif
                 	double potl;
                 	vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
                 	spot += potl*CMRECIP2KL;
@@ -757,13 +754,10 @@ double GetPotEnergy_Densities(void)
                     	if (phi<0.0) phi += 2.0*M_PI;
 
                     	//Dihedral angle calculation is completed here
-                    	double r1 = 1.42;// bond length in bohr
+                		double r1 = 0.74;// bond length in Angstrom
+						r1 /= BOHRRADIUS;
                     	double r2 = r1;// bond length in bohr
-#ifdef GETR
-                    	double rd = Distance/BOHRRADIUS;
-#else
                     	double rd = r/BOHRRADIUS;
-#endif
                     	double potl;
                     	vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
                     	spot_pair += potl*CMRECIP2KL;
@@ -1081,13 +1075,10 @@ double GetTotalEnergy(void)
                     	if (phi<0.0) phi += 2.0*M_PI;
 
                     	//Dihedral angle calculation is completed here
-                    	double r1 = 1.42;// bond length in bohr
+                		double r1 = 0.74;// bond length in Angstrom
+						r1 /= BOHRRADIUS;
                     	double r2 = r1;// bond length in bohr
-#ifdef GETR
-                    	double rd = Distance/BOHRRADIUS;
-#else
                     	double rd = r/BOHRRADIUS;
-#endif
                     	double potl;
                     	vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
                     	spot_pair += potl*CMRECIP2KL;
@@ -1800,64 +1791,64 @@ double GetPotEnergy(void)
 double GetKinEnergy(void)
 {
 #ifdef DEBUG_PIMC
-   const char *_proc_=__func__; //  GetKinEnergy() 
+	const char *_proc_=__func__; //  GetKinEnergy() 
 #ifdef DEBUG_WORM 
-   if (Worm.exists)
-   nrerror(_proc_," Only for Z-configurations");
+   	if (Worm.exists)
+   	nrerror(_proc_," Only for Z-configurations");
 #endif
 #endif
 
-   int    numb  = 0;       // atom number counter, grand canonical
-   double r2avr = 0.0;     // <r^2> 
+   	int    numb  = 0;       // atom number counter, grand canonical
+   	double r2avr = 0.0;     // <r^2> 
 
-   for (int atom=0;atom<NumbAtoms;atom++)
-   {  
-      numb ++;            // grand canonical only
+   	for (int atom=0;atom<NumbAtoms;atom++)
+   	{  
+      	numb ++;            // grand canonical only
  
-      int type    = MCType[atom];
-      int offset0 = NumbTimes*atom;
-      int offset1;    
+      	int type    = MCType[atom];
+      	int offset0 = NumbTimes*atom;
+      	int offset1;    
       
-      int gatom   = MCAtom[type].offset/NumbTimes;   
+      	int gatom   = MCAtom[type].offset/NumbTimes;   
 
-      double sum = 0.0;
+      	double sum = 0.0;
  
-      #pragma omp parallel for reduction(+: sum)
-      for (int it=0;it<NumbTimes;it++) 
-      {
-          int t0  = offset0 + it;
+      	#pragma omp parallel for reduction(+: sum)
+      	for (int it=0;it<NumbTimes;it++) 
+      	{
+          	int t0  = offset0 + it;
         
-          offset1 = offset0;
-          if ((MCAtom[type].stat ==  BOSE) && ((it+1) == NumbTimes))          
-          offset1 = NumbTimes*(gatom + PIndex[atom-gatom]);
+          	offset1 = offset0;
+          	if ((MCAtom[type].stat ==  BOSE) && ((it+1) == NumbTimes))          
+          	offset1 = NumbTimes*(gatom + PIndex[atom-gatom]);
 
-	  int t1  = offset1 + (it+1) % NumbTimes; // = offset1
+	  		int t1  = offset1 + (it+1) % NumbTimes; // = offset1
 
-          for (int dim=0;dim<NDIM;dim++)
-	  {
-             double dr = MCCoords[dim][t0] - MCCoords[dim][t1];
+          	for (int dim=0;dim<NDIM;dim++)
+	  		{
+             	double dr = MCCoords[dim][t0] - MCCoords[dim][t1];
 
-             if (MINIMAGE)
-             dr  -= (BoxSize*rint(dr/BoxSize));
+             	if (MINIMAGE)
+             	dr  -= (BoxSize*rint(dr/BoxSize));
 
-             sum += (dr*dr);
-          }    
-       } // END loop over time slices
+             	sum += (dr*dr);
+          	}    
+       	} // END loop over time slices
 
-       r2avr += (sum/(4.0*MCBeta*MCAtom[type].lambda)); 
+       	r2avr += (sum/(4.0*MCBeta*MCAtom[type].lambda)); 
 
-   }    // END loop over atoms
+   	}    // END loop over atoms
 
 #ifdef DEBUG_PIMC
-   if (numb != NumbAtoms)   // should be removed for grand canonical calculations            
-   nrerror(_proc_,"Wrong number of atoms");
+   	if (numb != NumbAtoms)   // should be removed for grand canonical calculations            
+   	nrerror(_proc_,"Wrong number of atoms");
 #endif
 
-// r2avr /= (double)numb;
+// 	r2avr /= (double)numb;
 
-   double kin = (double)NumbTimes*Temperature*(0.5*(double)(NDIM*numb) - r2avr);
+   	double kin = (double)NumbTimes*Temperature*(0.5*(double)(NDIM*numb) - r2avr);
 
-   return kin;
+   	return kin;
 }
 
 double GetRotEnergy(void)

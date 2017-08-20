@@ -163,10 +163,8 @@ int main(int argc, char *argv[])
 #ifdef SWAPTOUNSWAP
 srand( time(NULL) );
 #endif
-#ifdef H2IOWRITE
 #ifdef LINEARROTORS
    vinit_();
-#endif
 #endif
 
 //int numprocs, rank, namelen;
@@ -766,7 +764,7 @@ void MCGetAverage(void)
 
 #ifndef ENTANGLEMENT
     double skin       = 0.;
-#ifdef IOWRITE
+#ifdef MOVECOM
 	skin              = GetKinEnergy();           // kin energy
 	_bkin            += skin;                     // block average for kin energy
 	_kin_total       += skin;                     // accumulated average 
@@ -1110,8 +1108,13 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 #ifndef IOWRITE
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+#ifdef MOVECOM
+	fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // potential anergy 2
+#endif
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
+#ifndef MOVECOM
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+#endif
 	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
 	fid << setw(IO_WIDTH) << _brot1*Units.energy/avergCount << BLANK;    // rot energy 5  
 #else
@@ -1218,8 +1221,13 @@ void SaveSumEnergy (double acount, double numb)  // global average
  
 #ifndef IOWRITE
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
+#ifdef MOVECOM
+	_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
+#endif
 	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+#ifndef MOVECOM
 	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
+#endif
 	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
 	_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
 #else

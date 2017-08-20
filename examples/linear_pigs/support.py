@@ -51,13 +51,17 @@ def bconstant(molecule_rot):
 	'''
 	This function calculates rotational Bconstant for linear rotor
 	'''
+	'''
 	autocminverse  = 2.1947463137e+5
 	energyj0       = -36117.5942855
 	energyj1       = -35999.1009407
 	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
+	'''
 	if (molecule_rot == "HF"):
 		#bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
 		bconst	   = 20.561                      # in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12, page 1464, year 1967
+	if (molecule_rot == "H2"):
+		bconst	   = 60.853
 	return bconst
 
 def replace(string_old, string_new, file1, file2):
@@ -315,7 +319,7 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,dipolemoment,particleA):
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,dipolemoment,particleA):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
@@ -410,7 +414,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, skip, step, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition, status_cagepot):
+def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, step, level, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition, status_cagepot, iStep):
 	if RUNDIR != "scratch":
 		os.chdir(dest_path)
 		call(["rm", "-rf", folder_run])
@@ -428,10 +432,9 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 		os.chdir(dest_dir)
 
 	argument1     = Rpt
-	level         = levels(numbbeads)
-	istep         = int(i/skip)
-	step1         = step[istep]
-	modify_input(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level,step1,dipolemoment,particleA)
+	level1        = level[iStep]
+	step1         = step[iStep]
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,dipolemoment,particleA)
 	if status_rhomat == "Yes":
 		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
 

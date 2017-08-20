@@ -48,7 +48,7 @@ loopStart           = 2
 loopEnd             = 51
 skip                = 2
 
-preskip             = 00000
+preskip             = 50000
 postskip            = 0
 particleA           = int(numbmolecules/2)
 

@@ -19,26 +19,27 @@ status              = "submission"
 status              = "analysis"                                            
 
 NameOfServer        = "nlogn"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 
 #NameOfServer        = "graham"
-#TypeCal             = 'PIMC'
+TypeCal             = 'PIMC'
 #TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+#TypeCal             = 'ENT'
 
 #molecule            = "HFC60"                                                  
-molecule            = "HF"                                                      
-#molecule            = "H2"                                                    
-molecule_rot        = "HF"
+#molecule            = "HF"                                                      
+molecule            = "H2"                                                    
+molecule_rot        = "H2"
 
 #print 5/(support.bconstant(molecule_rot)/0.695)
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 
-numbblocks	        = 100000
-numbmolecules       = 6
-numbpass            = 100
-beta     	        = 0.2
+numbblocks	        = 1000
+numbmolecules       = 4
+numbpass            = 200
+t=0.37
+beta     	        = 1.0/0.37
 
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
@@ -53,7 +54,7 @@ loopStart           = 8
 loopEnd             = 61
 skip                = 2
 
-preskip             = 1000
+preskip             = 100
 postskip            = 0
 
 particleA           = int(numbmolecules/2)
@@ -69,8 +70,12 @@ if (TypeCal == "PIGS"):
 	file1_name     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 if (TypeCal == "PIMC"):
-	file1_name      = "PIMC-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
-	file1_name     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	if molecule_rot == "H2":
+		file1_name      = "PIMC-Rpt"+str(Rpt)+"Angstrom-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
+		file1_name     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
+	else:
+		file1_name      = "PIMC-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
+		file1_name     += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-e0vsbeads" 
 
 if (TypeCal == "ENT"):
 	file1_name      = "Entanglement-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-beta"+str(beta)+"Kinv-Blocks"+str(numbblocks)
@@ -102,19 +107,13 @@ temperature         = 1.0/beta
 
 #==================================== MCStep ===================================# 
 if (molecule_rot == "H2"):
-	#step           = [1.5,3.0,3.0,3.0,3.0,2.6,2.3,2.5,2.02] #temp 10K             #change param6
-	#step           = [1.5,3.0,3.0,2.5,1.5,1.0,0.7,2.5,2.02] #temp 50K             #change param6
-	step            = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
-	level           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+	step            = [1.2,1.2,1.8,2.0,1.5,2.0,2.0,2.0,2.0] 
+	level           = [0,0,0,0,0,0]
 
 if (molecule_rot == "HF"):
-	#step          	= [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
-	#step          	= [2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  # beads 41 to 61
-	step           	= [1.6,1.6,1.6]  # beads 57 to 61
+	#step           	= [0.7,2.0,2.0,1.5,1.5,1.5,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.3]  #PIMC beta = 0.05KINV
+	step           	= [0.7,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.9,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS
-	#step           = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  
-					# 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
-	level           = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 #===============================================================================
 #                                                                              |
@@ -152,13 +151,22 @@ if status == "analysis":
 		call(["rm", SaveEnergy, SaveAngDOFS])
 	
 	if (TypeCal == "PIMC"):
-		file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
-		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output            += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+		if (molecule_rot == "H2"):
+			file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
+			file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-Blocks"+str(numbblocks)
+			file_output            += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 
-		file_output_angularDOF  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
-		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+			file_output_angularDOF  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
+			file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-Blocks"+str(numbblocks)
+			file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+		else:
+			file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
+			file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+			file_output            += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
+
+			file_output_angularDOF  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
+			file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
+			file_output_angularDOF += extra_file_name+"-System"+str(numbmolecules)+str(molecule)+"-preskip"+str(preskip)+"-postskip"+str(postskip)+".txt"
 
 		SaveEnergy              = src_path+"/ResultsOfPIMC/"+file_output
 		SaveAngDOFS             = src_path+"/ResultsOfPIMC/"+file_output_angularDOF
@@ -187,13 +195,11 @@ if (TypeCal == "ENT"):
 	numbmolecules  *= 2
 	loopStart       = 20
 
-# Loop over jobs
-#list_nb = [8,16,32,64,96,128]
-#skip    = 2
-#for i in list_nb:
-
 iStep = 0
-for i in range(loopStart, loopEnd, skip):                                                
+# Loop over jobs
+list_nb = [4,8,16,32]
+for i in list_nb:
+#for i in range(loopStart, loopEnd, skip):                                                
 
 	if (TypeCal == 'PIMC'):
 		if ((i%2) == 0):
@@ -229,7 +235,6 @@ for i in range(loopStart, loopEnd, skip):
 			numbbeads    = value
 			folder_run   = file1_name+str(numbbeads)+file2_name
 			dest_dir     = dest_path + folder_run 
-			print(dest_dir)
 
 			if status   == "submission":
 				support.Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, step, level, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition, status_cagepot, iStep)
