@@ -40,15 +40,11 @@ int     NUMB_MOLCTYPES = 0;  // total number of molecules types
 int     NDIM;
 double  Temperature;
 
-#ifdef GETR
 double Distance;
-#endif
 double DipoleMoment;
 double DipoleMomentAU2;
 double RR;
-#ifdef BIPARTITION
 int NumbParticle;
-#endif
 
 double  Density;
 double  BoxSize;
@@ -376,26 +372,40 @@ void MCInit(void)  // only undimensional parameters in this function
   // BoxSize  =  pow((double)NumbAtoms/Density,1.0/(double)NDIM); 
   // define a box size based on number of atoms only (molecules excluded)
   
-  BoxSize  =  pow((double)(NUMB_ATOMS+NUMB_MOLCS)/Density,1.0/(double)NDIM);
+	BoxSize  =  pow((double)(NUMB_ATOMS+NUMB_MOLCS)/Density,1.0/(double)NDIM);
 
-  MCBeta   =  1.0/Temperature;
-#ifndef PIGSROTORS
-  MCTau    =  MCBeta/(double)NumbTimes;
-#else
-  MCTau    =  MCBeta/((double)NumbTimes-1.0);
+  	MCBeta   =  1.0/Temperature;
+#ifdef PIMCTYPE
+  	MCTau    =  MCBeta/(double)NumbTimes;
+#endif
+//
+#ifdef PIGSTYPE
+  	MCTau    =  MCBeta/((double)NumbTimes-1.0);
+#endif
+//
+#ifdef PIGSENTTYPE
+  	MCTau    =  MCBeta/((double)NumbTimes-1.0);
 #endif
 
-  if (ROTATION)
-#ifndef PIGSROTORS
-    MCRotTau =  MCBeta/(double)NumbRotTimes;
-#else
-    MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
+  	if (ROTATION)
+	{
+#ifdef PIMCTYPE
+    	MCRotTau =  MCBeta/(double)NumbRotTimes;
 #endif
+//
+#ifdef PIGSTYPE
+    	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
+#endif
+//
+#ifdef PIGSENTTYPE
+    	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
+#endif
+	}
 
   RotRatio  = 1;  // div_t quot - it's important for the area estimator
   // even without rotations
 
-  if (ROTATION)
+  	if (ROTATION)
     {
       RotRatio = NumbTimes / NumbRotTimes;  // div_t quot
       int rt   = NumbTimes % NumbRotTimes;  // div_t rem

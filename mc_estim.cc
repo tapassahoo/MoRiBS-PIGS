@@ -113,12 +113,11 @@ extern "C" void rsline_(double *X_Rot,double *p0,double *tau,double *rho,double 
 extern "C" void vspher_(double *r,double *v);
 
 extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eulang_1, double *Eulang_2);
-#ifdef LINEARROTORS
 //vh2h2 ---> potential H2-H2: added by Tapas Sahoo
+
 extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *t1, double *t2, double *phi, double *potl);
 extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
 extern "C" double plgndr(int l, int m, double x);
-#endif
 #ifdef MOLECULEINCAGE
 //Pot of H2O-C60 one cage
 extern "C" void calengy_(double *com_1, double *Eulang_1, double *E_H2OC60);
@@ -555,7 +554,6 @@ double GetPotEnergyPIGS(void)
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbRotTimes - 1)/2);
 	double spot;
-#ifdef LINEARROTORS
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
 		double Eulang0[NDIM], Eulang1[NDIM];
@@ -648,14 +646,11 @@ double GetPotEnergyPIGS(void)
     }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
-#ifdef GETR
         int offset0 = 0;
         int t0  = offset0 + it;
         double E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
-#endif
     }
-#endif
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
@@ -688,7 +683,6 @@ double GetPotEnergy_Densities(void)
 	// double dr[NDIM];
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
-#ifdef LINEARROTORS
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         spot = 0.0;
@@ -781,7 +775,6 @@ double GetPotEnergy_Densities(void)
     }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
-#ifdef GETR
         spot = 0.0;
         double dm   = DipoleMoment/AuToDebye;
         double dm2  = dm*dm;
@@ -797,11 +790,12 @@ double GetPotEnergy_Densities(void)
 
             double E12 = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
             spot_pair  = E12*AuToKelvin;
+#ifdef POTZERO
+			spot_pair = 0.0;
+#endif
         }
       	spot += spot_pair;
-#endif
     }
-#endif
 #ifdef IOWRITE
 	if ( MCAtom[IMTYPE].numb > 1)
     {
@@ -1006,7 +1000,6 @@ double GetTotalEnergy(void)
 {
     string stype = MCAtom[IMTYPE].type;
 	double spot;
-#ifdef LINEARROTORS
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         spot = 0.0;
@@ -1113,7 +1106,6 @@ double GetTotalEnergy(void)
             spot   += E12*AuToKelvin;
         }
     }
-#endif
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
@@ -1378,7 +1370,6 @@ double *GetProdUvec12()
     return ProdUvec12;
 }
 
-#ifdef LINEARROTORS
 double GetPhi(void)
 {
     const char *_proc_=__func__;
@@ -1398,14 +1389,12 @@ double GetPhi(void)
         int t0      = offset0 + it;
         int t1      = offset1 + it;
 
-#ifdef GETR
 		MCCoords[0][t0] = 0.0;
 		MCCoords[1][t0] = 0.0;
 		MCCoords[2][t0] = 0.0;
 		MCCoords[0][t1] = 0.0;
 		MCCoords[1][t1] = 0.0;
 		MCCoords[2][t1] = Distance;
-#endif
         double dr2  = 0.0;
         for (int id = 0; id < NDIM; id++)
         {
@@ -1451,10 +1440,8 @@ double GetPhi(void)
     }     // LOOP OVER ATOM PAIRS
     return phi;
 }
-#endif
 
 
-#ifdef ENTANGLEMENT
 double GetPotEnergyEntanglement(int atom0, int atom1)
 {
 	const char *_proc_=__func__;
@@ -1599,7 +1586,6 @@ double GetEstimDM(void)
     double estimDM = dens*potEstimDM;
     return estimDM;
 }
-#endif
 
 double GetPotEnergy(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc

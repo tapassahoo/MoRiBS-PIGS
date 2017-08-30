@@ -61,13 +61,9 @@ const char IO_MCSKIP_AVERG[]   = "MCSKIP_AVERG";
 const char STATUS_STARTBLOCK[] = "STARTBLOCK";
 
 //--------------------------------------------------
-#ifdef GETR
 const char IO_DISTANCE[]       = "DISTANCE";
-#endif
 const char IO_DIPOLEMOMENT[]   = "DIPOLEMOMENT";
-#ifdef BIPARTITION
 const char IO_NUMBPARTICLE[]       = "NUMBPARTICLE";
-#endif
 
 string MasterDir;
 string OutputDir;
@@ -332,20 +328,16 @@ void IOReadParams(const char in_file[],int & mc_status)
         	inf >> MCSKIP_AVERG;
      	} 
      	else
-#ifdef GETR
      	if (params==IO_DISTANCE)
      	{
         	inf >> Distance;
      	} 
      	else
-#endif
-#ifdef BIPARTITION
      	if (params==IO_NUMBPARTICLE)
      	{
         	inf >> NumbParticle;
      	} 
      	else
-#endif
      	if (params==IO_DIPOLEMOMENT)
      	{
         	inf >> DipoleMoment;
@@ -491,9 +483,7 @@ void IOReadParams(const char in_file[],int & mc_status)
    cout << "Number of steps to skip to save ACCEPT RATIO" << BLANK << MCSKIP_RATIO << endl;
    cout << "Number of steps to skip to save ACCUML AVERG" << BLANK << MCSKIP_TOTAL << endl;
    cout << "Number of steps to skip to evaluate AVERAGES" << BLANK << MCSKIP_AVERG << endl;
-#ifdef GETR
    cout << "Intermolecular distance" << BLANK << Distance << endl;
-#endif
    cout << "Dipole Moment " << BLANK << DipoleMoment << endl;
 
    cout << endl;

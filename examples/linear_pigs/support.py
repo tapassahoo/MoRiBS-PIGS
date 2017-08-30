@@ -47,7 +47,7 @@ def dropzeros(number):
     # e.g 22000 --> Decimal('2.2E+4')
     return mynum.__trunc__() if not mynum % 1 else float(mynum)
 
-def bconstant(molecule_rot):
+def GetBconst(molecule_rot):
 	'''
 	This function calculates rotational Bconstant for linear rotor
 	'''
@@ -117,34 +117,54 @@ def inputstr(numbbeads,tau,temperature):
 	output ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
 	return output
 
-def GetAverageEnergy(numbbeads,tau,dest_dir,preskip,postskip):
+def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_pot, col_tot, col_rot, col_rot1 = genfromtxt(dest_dir+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
-	print(len(col_tot))
+	print(final_dir_in_work)
+	if (TypeCal == "PIMC"):
+		col_block, col_kin, col_rot, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+		print(len(col_tot))
 	
-	mean_pot      = np.mean(col_pot)
-	mean_tot      = np.mean(col_tot)
-	mean_rot      = np.mean(col_rot)
-	mean_rot1     = np.mean(col_rot1)
+		mean_kin      = np.mean(col_kin)
+		mean_rot      = np.mean(col_rot)
+		mean_pot      = np.mean(col_pot)
+		mean_tot      = np.mean(col_tot)
 
-	error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
-	error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
-	error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
-	error_rot1    = np.std(col_rot1,ddof=1)/sqrt(len(col_rot1))
+		error_kin     = np.std(col_kin,ddof=1)/sqrt(len(col_kin))
+		error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
+		error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
+		error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
 
-	output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, tau, mean_pot, mean_tot, mean_rot, mean_rot1, error_pot, error_tot, error_rot, error_rot1)
-	output  += "\n"
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_kin, mean_rot, mean_pot, mean_tot, error_kin, error_rot, error_pot, error_tot)
+		output  += "\n"
+
+	if (TypeCal == "PIGS"):
+		col_block, col_rot, col_rot1, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+		print(len(col_tot))
+	
+		mean_rot      = np.mean(col_rot)
+		mean_rot1     = np.mean(col_rot1)
+		mean_pot      = np.mean(col_pot)
+		mean_tot      = np.mean(col_tot)
+
+		error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
+		error_rot1    = np.std(col_rot1,ddof=1)/sqrt(len(col_rot1))
+		error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
+		error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
+
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_rot, mean_rot1, mean_pot, mean_tot, error_rot, error_rot1, error_pot, error_tot)
+		output  += "\n"
 	return output
 
-def GetAverageOrientation(numbbeads,tau,dest_dir,preskip,postskip):
+def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip):
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_compx, col_compy, col_compz = genfromtxt(dest_dir+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+	print(final_dir_in_work)
+	col_block, col_costheta, col_compx, col_compy, col_compz = genfromtxt(final_dir_in_work+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 	'''
-	fd             = open(dest_dir+'/results/pigs_instant.dof', 'rb')
+	fd             = open(final_dir_in_work+'/results/pigs_instant.dof', 'rb')
 	shape          = (-1,5) 
 	dataBin        = np.fromfile(file=fd, count = -1, dtype=np.float64).reshape(shape)
 	col_block      = dataBin[:,0]
@@ -174,11 +194,11 @@ def GetAverageOrientation(numbbeads,tau,dest_dir,preskip,postskip):
 	error_abscompy = np.std(col_abscompy,ddof=1)/sqrt(len(col_abscompy))
 	error_abscompz = np.std(col_abscompz,ddof=1)/sqrt(len(col_abscompz))
 
-	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, tau, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz)
+	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz)
 	output  += "\n"
 	return output
 
-def fmtAverageEnergy(status,variable):
+def fmtAverageEnergy(TypeCal,status,variable):
 	'''
 	This function gives us the output 
 	'''
@@ -189,7 +209,10 @@ def fmtAverageEnergy(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Potential', 'Avg. Total', 'Avg. rotational', 'Avg. (E - V)', 'Error of Potential', 'Error of Total', 'Error of Rotational', 'Error of (E - V)')
+		if (TypeCal == "PIMC"):
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Translational', 'Avg. rotational', 'Avg. Potential', 'Avg. Total', 'Error of Translational', 'Error of Rotational', 'Error of Potential', 'Error of Total')
+		if (TypeCal == "PIGS"):
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
 		output    +="\n"
 		output    +="#"
 		output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('', (str(unit)), 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)')
@@ -222,12 +245,13 @@ def fmtAverageOrientation(status,variable):
 
 	return output
 
-def GetAverageEntropy(numbbeads,tau,dest_dir,preskip,postskip,ENT_TYPE):
+def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_TYPE):
 	'''
 	This function gives us the output 
 	'''
+	print(final_dir_in_work)
 	if ENT_TYPE == "SWAPTOUNSWAP":
-		col_block, col_nm, col_dm = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 		print(len(col_block))
 	
 		mean_nm      = np.mean(col_nm)
@@ -240,11 +264,11 @@ def GetAverageEntropy(numbbeads,tau,dest_dir,preskip,postskip,ENT_TYPE):
 		error_Tr     = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 
-		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, tau, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
 		output  += "\n"
 
 	if ENT_TYPE == 'BROKENPATH':
-		col_block, col_nm, col_dm = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 		print(len(col_nm))
 	
 		mean_nm      = np.mean(col_nm)
@@ -255,11 +279,11 @@ def GetAverageEntropy(numbbeads,tau,dest_dir,preskip,postskip,ENT_TYPE):
 		error_dm     = jackknife(mean_dm,col_dm)
 		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 
-		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, tau, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
 		output  += "\n"
 
 	if ENT_TYPE == "SWAP":
-		col_block, col_nm, col_dm, col_TrInv = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
+		col_block, col_nm, col_dm, col_TrInv = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		print(len(col_block))
 	
 		mean_nm      = np.mean(col_nm)
@@ -273,11 +297,11 @@ def GetAverageEntropy(numbbeads,tau,dest_dir,preskip,postskip,ENT_TYPE):
 		error_Tr     = jackknife(mean_TrInv,col_TrInv)
 		error_EN     = 0 #Write the proper equation
 
-		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, tau, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
 		output  += "\n"
 
 	if ENT_TYPE == "REGULARPATH":
-		col_block, col_nm, col_dm, col_Tr = genfromtxt(dest_dir+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
+		col_block, col_nm, col_dm, col_Tr = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		print(len(col_Tr))
 	
 		mean_nm      = np.mean(col_nm)
@@ -290,7 +314,7 @@ def GetAverageEntropy(numbbeads,tau,dest_dir,preskip,postskip,ENT_TYPE):
 		error_Tr     = jackknife(mean_Tr,col_Tr)
 		error_EN     = error_Tr/mean_Tr
 
-		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, tau, mean_nm, mean_dm, mean_Tr, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_Tr, mean_EN, error_nm, error_dm, error_Tr, error_EN)
 		output  += "\n"
 
 	return output
@@ -319,7 +343,7 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,dipolemoment,particleA):
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
@@ -331,12 +355,13 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 	replace("molecule_input", str(molecule_rot), "qmc6.input", "qmc7.input")
 	replace("level_input", str(level), "qmc7.input", "qmc8.input")
 	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
-	replace("dipolemoment_input", str(dipolemoment), "qmc9.input", "qmc10.input")
-	replace("numbpass_input", str(numbpass), "qmc10.input", "qmc11.input")
+	replace("dstep_tr_input", str(step_trans), "qmc9.input", "qmc10.input")
+	replace("dipolemoment_input", str(dipolemoment), "qmc10.input", "qmc11.input")
+	replace("numbpass_input", str(numbpass), "qmc11.input", "qmc12.input")
 	#mcskip = numbbeads*numbpass
 	mcskip = numbpass
-	replace("mskip_input", str(mcskip), "qmc11.input", "qmc12.input")
-	replace("numbparticle_input", str(particleA), "qmc12.input", "qmc.input")
+	replace("mskip_input", str(mcskip), "qmc12.input", "qmc13.input")
+	replace("numbparticle_input", str(particleA), "qmc13.input", "qmc.input")
 	call(["rm", "qmc2.input"])
 	call(["rm", "qmc3.input"])
 	call(["rm", "qmc4.input"])
@@ -348,6 +373,7 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 	call(["rm", "qmc10.input"])
 	call(["rm", "qmc11.input"])
 	call(["rm", "qmc12.input"])
+	call(["rm", "qmc13.input"])
 
 
 def rotmat(TypeCal,molecule,temperature,numbbeads):
@@ -360,7 +386,7 @@ def rotmat(TypeCal,molecule,temperature,numbbeads):
 		numbbeads1		= numbbeads
 	else:
 		numbbeads1		= numbbeads - 1
-	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(bconstant(molecule))+" 15000 -1"
+	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
@@ -374,7 +400,7 @@ def cagepot():
 	file_cagepot    = "hfc60.pot"
 	call(["mv", "cagepot.out", file_cagepot])
 
-def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dest_pimc):
+def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc):
 	'''
 	This function creats jobstring for #PBS script
 	'''
@@ -386,11 +412,11 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 	omp_thread     = str(thread)
 	output_dir     = run_dir+"/results"
 	temperature1   = "%5.3f" % temperature
-	file_rotdens   = dest_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	logpath        = final_dir+"/"
 
-	input_file     = dest_pimc+"/qmc"+file_name+str(value)+".input"
-	exe_file       = dest_pimc+"/pimc"
+	input_file     = dir_run_input_pimc+"/qmc"+file_name+str(value)+".input"
+	exe_file       = dir_run_input_pimc+"/pimc"
 	qmcinp         = "qmc"+file_name+str(value)+".input"
 
 	job_string     = """#!/bin/bash
@@ -414,67 +440,61 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_dir, Rpt, numbbeads, i, step, level, temperature,numbblocks,numbpass,molecule_rot,numbmolecules,dipolemoment, status_rhomat, TypeCal, argument2, final_path, dest_pimc, RUNIN, particleA, NameOfServer, NameOfPartition, status_cagepot, iStep):
-	if RUNDIR != "scratch":
-		os.chdir(dest_path)
-		call(["rm", "-rf", folder_run])
-		call(["mkdir", folder_run])
-		call(["mkdir", "-p", folder_run+"/results"])
-		os.chdir(src_path)
-
-		# copy files to running folder
-		call(["cp", run_file, dest_dir])
-
-		src_file      = src_path + "/qmc_run.input"
-		call(["cp", src_file, dest_dir])
-
-		# Write submit file for the current cycle
-		os.chdir(dest_dir)
-
+def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, status_rhomat, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
-	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,dipolemoment,particleA)
+	step1_trans   = step_trans[iStep]
+
+	os.chdir(dir_output)
+	if (os.path.isdir(folder_run) == True):
+		os.chdir(src_dir)
+		return
+
+	os.chdir(src_dir)
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA)
 	if status_rhomat == "Yes":
 		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
+
+		#call(["rm", "-rf", folder_run])
+	folder_run_path = dir_run_job + folder_run 
+	print(folder_run_path)
+
+	input_file    = "qmcbeads"+str(i)+".input"
+	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
+	temperature1    = "%5.3f" % temperature
+	file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	call(["mv", file_rotdens, dir_run_input_pimc])
 
 	#job submission
 	if (TypeCal == 'PIGS'):
 		fname         = 'job-pigs-'+str(i)+'-for-'+folder_run
+		argument2     = "pigs"+str(numbmolecules)+"b"
 	if (TypeCal == 'PIMC'):
 		fname         = 'job-pimc-'+str(i)+'-for-'+folder_run
+		argument2     = "pimc"+str(numbmolecules)+"b"
 	if (TypeCal == 'ENT'):
 		fname         = 'job-ent-'+str(i)+'-for-'+folder_run
+		argument2       = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
+
 	fwrite        = open(fname, 'w')
+	final_dir_in_work = dir_output + folder_run
 
 	if RUNDIR == "scratch":
-		os.chdir(final_path)
-		call(["rm", "-rf", folder_run])
-		os.chdir(src_path)
-		final_dir     = final_path + folder_run 
-
-		#mv some files to pimc folder in /work
-		input_file    = "qmc"+argument2+str(i)+".input"
-		call(["mv", "qmc.input", dest_pimc+"/"+input_file])
-		temperature1    = "%5.3f" % temperature
-		file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
-		call(["mv", file_rotdens, dest_pimc])
-
 		if RUNIN == "CPU":
-			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc, src_path))
+			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir))
 		else:
-			fwrite.write(jobstring_scratch_sbatch(argument2,i,numbmolecules, dest_dir, molecule_rot, temperature, numbbeads, final_dir, dest_pimc, NameOfServer))
+			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc))
 	else: 
-		fwrite.write(support.jobstring(argument2,numbbeads,numbmolecules))
-			
+		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc))
 
 	fwrite.close()
-	call(["mv", fname, dest_pimc])
-	os.chdir(dest_pimc)
+	call(["mv", fname, dir_run_input_pimc])
+	os.chdir(dir_run_input_pimc)
 
 	if (RUNIN == "CPU"):
 		call(["chmod", "755", fname])
-		#command_pimc_run = "./"+fname + ">"+ dest_dir+"/outpimc"+str(i)+" & "
+		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
 		command_pimc_run = "./"+fname + ">outpimc"+str(i)+" & "
 		print(command_pimc_run)
 		system(command_pimc_run)
@@ -484,90 +504,20 @@ def Submission(status, RUNDIR, dest_path, folder_run, src_path, run_file, dest_d
 			call(["sbatch", "-p", "tapas", fname])
 		else:
 			call(["sbatch", fname])
-		
 
-	if RUNDIR != "scratch":
-		os.chdir(src_path)
+	os.chdir(src_dir)
 
-	os.chdir(src_path)
-
-def FileOutput(status, TypeCal, var, beta, Rpt, dipolemoment, numbblocks, numbmolecules, molecule, trunc,ENT_TYPE):
-	if (TypeCal == "PIGS"):
-		file_output             = "Energy-vs-"+str(var)+"-fixed-"
-		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output            += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-
-		file_output_angularDOF  = "AngularDOF-vs-"+str(var)+"-fixed-"
-		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-	
-		file_output_angularDOF1  = "AngularDOF-vs-"+str(var)+"-fixed-"
-		file_output_angularDOF1 += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
-	
-		call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
-	
-	
-	if (TypeCal == "PIMC"):
-		file_output             = "PIMC-Energy-vs-"+str(var)+"-fixed-"
-		file_output            += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output            += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-
-		file_output_angularDOF  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
-		file_output_angularDOF += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-
-		file_output_angularDOF1  = "PIMC-AngularDOF-vs-"+str(var)+"-fixed-"
-		file_output_angularDOF1 += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output_angularDOF1 += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+"-for-zdir.txt"
-
-		call(["rm", file_output, file_output_angularDOF, file_output_angularDOF1])
-
-	
-	if (TypeCal == "ENT"):
-		file_output      = "Entropy-vs-"+str(var)+"-fixed-"
-		file_output     += "beta"+str(beta)+"Kinv-Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-Blocks"+str(numbblocks)
-		file_output     += "-System"+str(numbmolecules)+str(molecule)+"-trunc"+str(trunc)+".txt"
-		call(["rm", file_output])
-	
-	
-	if (TypeCal == "ENT"):
-		fanalyze             = open(file_output, "a")
-		fanalyze.write(fmt_entropy(status,var,ENT_TYPE))
-	else:
-		fanalyze             = open(file_output, "a")           
-		fanalyze.write(fmt_energy(status,var))
-		fanalyze_angularDOF  = open(file_output_angularDOF, "a")           
-		fanalyze_angularDOF.write(fmt_angle(status,var))
-		fanalyze_angularDOF1  = open(file_output_angularDOF1, "a")           
-
-
-def FileClose(TypeCal):
-	fanalyze.close()
-	if (TypeCal != "ENT"):
-		fanalyze_angularDOF.close()
-		fanalyze_angularDOF1.close()
-	call(["cat",file_output])
-'''
-	print
-	print
-	call(["cat",file_output_angularDOF])
-	print
-	print
-	call(["cat",file_output_angularDOF1])
-'''
-
-def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dest_pimc, src_path):
+def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc, src_dir):
 	'''
 	This function creats jobstring for #PBS script
 	'''
 	omp_thread     = str(thread)
 	output_dir     = run_dir+"/results"
 	temperature1   = "%5.3f" % temperature
-	file_rotdens   = dest_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 
-	input_file     = dest_pimc+"/qmc"+file_name+str(value)+".input"
-	exe_file       = dest_pimc+"/pimc"
+	input_file     = dir_run_input_pimc+"/qmc"+file_name+str(value)+".input"
+	exe_file       = dir_run_input_pimc+"/pimc"
 	qmcinp         = "qmc"+file_name+str(value)+".input"
 
 	job_string     = """#!/bin/bash
@@ -582,38 +532,36 @@ cp %s qmc.input
 cp %s %s
 ./pimc 
 mv %s /work/tapas/linear_rotors
-""" % (omp_thread, run_dir, output_dir, src_path, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+""" % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def jobstring_scratch_sbatch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dest_pimc, NameOfServer):
+def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc):
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
 	if (thread > 24):
 		thread = 24
-	job_name       = str(file_name)+str(value)
-	walltime       = "07-00:00"
+	job_name       = file_name+str(value)
+	walltime       = "20-00:00"
 	omp_thread     = str(thread)
-	output_dir     = run_dir+"/results"
+	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
-	file_rotdens   = dest_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
-	logpath        = dest_pimc+"/"+job_name
+	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	logpath        = dir_run_input_pimc+"/"+job_name
 
-	input_file     = dest_pimc+"/qmc"+file_name+str(value)+".input"
-	exe_file       = dest_pimc+"/pimc"
-	qmcinp         = "qmc"+file_name+str(value)+".input"
-	cagepot_file   = dest_pimc+"/hfc60.pot"
-	if (NameOfServer == "nlogn"):
-		CommandForMove = "mv "+str(run_dir)+" /work/tapas/linear_rotors"
-	if (NameOfServer == "graham"):
+	input_file     = dir_run_input_pimc+"/qmcbeads"+str(value)+".input"
+	exe_file       = dir_run_input_pimc+"/pimc"
+	qmcinp         = "qmcbeads"+str(value)+".input"
+	cagepot_file   = dir_run_input_pimc+"/hfc60.pot"
+	if (RUNDIR == "scratch"):
+		CommandForMove = "mv "+str(folder_run_path)+" /work/tapas/linear_rotors"
+	if (RUNDIR == "work"):
 		CommandForMove = " "
 
 	job_string     = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
 #SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -628,5 +576,277 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 ./pimc 
 %s
-""" % (job_name, logpath, walltime, omp_thread, omp_thread, run_dir, output_dir, cagepot_file, run_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, CommandForMove)
+""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_file, folder_run_path, input_file, folder_run_path, file_rotdens, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForMove)
 	return job_string
+
+def GetRotEnergy(molecule,jrot):
+	Energy = GetBconst(molecule)*jrot*(jrot+1.0)
+	return Energy
+
+def GetAvgRotEnergy(molecule,beta):
+	CMRECIP2KL = 1.4387672
+	Zsum = 0.0
+	Nsum = 0.0
+	for jrot in range(0,10000,1):
+		BoltzmannProb = exp(-beta*GetRotEnergy(molecule,jrot)*CMRECIP2KL)
+		if (BoltzmannProb > 10e-16):
+			Zsum += (2*jrot+1.0)*BoltzmannProb
+			Nsum += (2*jrot+1.0)*GetRotEnergy(molecule,jrot)*BoltzmannProb
+		else:
+			break
+	AvgEnergy = Nsum/Zsum
+	return AvgEnergy
+
+def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra):
+	#add                     = "-NumTimes"
+	add                     = ""
+	if (TypeCal == "ENT"):
+		add1                = "-ParticleA"+str(particleA)
+		add2                = "-"
+	else:
+		add1                = ""
+		add2                = ""
+
+	mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
+
+	if (TypeCal == "PIGS"):
+		frontName           = "PIGS-"
+	if (TypeCal == "PIMC"):
+		frontName           = "PIMC-"
+	if (TypeCal == "ENT"):
+		frontName           = "ENT-"
+
+	frontName              += extra
+
+	if (molecule_rot == "HF"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+	if (molecule_rot == "H2"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
+
+	if (TypeCal == "ENT"):
+				file1_name += ENT_TYPE
+	
+	
+	return file1_name
+
+class GetFileNameAnalysis:
+	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+		self.TypeCal      = TypeCal1
+		self.molecule_rot = molecule_rot1
+		self.TransMove    = TransMove1
+		self.RotMove      = RotMove1
+		self.variableName = variableName1
+		self.Rpt          = Rpt1
+		self.dipolemoment = dipolemoment1
+		self.parameter    = parameter1
+		self.parameterName= parameterName1
+		self.numbblocks   = numbblocks1
+		self.numbpass     = numbpass1
+		self.numbmolecules= numbmolecules1
+		self.molecule     = molecule1
+		self.ENT_TYPE     = ENT_TYPE1
+		self.preskip      = preskip1
+		self.postskip     = postskip1
+		self.extra        = extra1
+		self.src_dir      = src_dir1
+		self.particleA    = particleA1
+
+		if (self.TypeCal == "ENT"):
+			add1                = "-ParticleA"+str(self.particleA)
+		else:
+			add1                = ""
+
+		mainFileName      = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileName     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+		
+		if ((self.TypeCal == "PIGS") or (self.TypeCal == "PIMC")):
+			frontName             = self.TypeCal+"-"+self.extra
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Energy-"
+					file_output2  = frontName+"correlation-function-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-function-"
+	
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-vs-"
+	
+			self.SaveEnergy            = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName+".txt"
+			self.SaveCorrFunc          = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName+".txt"
+			call(["rm", self.SaveEnergy, self.SaveCorrFunc])
+
+		if (self.TypeCal == "ENT"):
+			frontName             = "ENT-"
+			frontName            += self.extra
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+
+			self.SaveEntropy           = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE+".txt"
+			call(["rm", self.SaveEntropy])
+
+class GetFileNamePlot:
+	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+		self.TypeCal      = TypeCal1
+		self.molecule_rot = molecule_rot1
+		self.TransMove    = TransMove1
+		self.RotMove      = RotMove1
+		self.variableName = variableName1
+		self.Rpt          = Rpt1
+		self.dipolemoment = dipolemoment1
+		self.parameter    = parameter1
+		self.parameterName= parameterName1
+		self.numbblocks   = numbblocks1
+		self.numbpass     = numbpass1
+		self.numbmolecules= numbmolecules1
+		self.molecule     = molecule1
+		self.ENT_TYPE     = ENT_TYPE1
+		self.preskip      = preskip1
+		self.postskip     = postskip1
+		self.extra        = extra1
+		self.src_dir      = src_dir1
+		self.particleA    = particleA1
+
+		if (self.TypeCal == "ENT"):
+			add1                = "-ParticleA"+str(self.particleA)
+		else:
+			add1                = ""
+
+		mainFileName      = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileName     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+		
+		if ((self.TypeCal == "PIGS") or (self.TypeCal == "PIMC")):
+			frontName             = self.TypeCal+"-"+self.extra
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Energy-"
+					file_output2  = frontName+"correlation-function-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-function-"
+	
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-vs-"
+	
+			self.SaveEnergy            = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName
+			self.SaveCorrFunc          = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName
+
+		if (self.TypeCal == "ENT"):
+			frontName             = "ENT-"
+			frontName            += self.extra
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+
+			self.SaveEntropy           = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE
+
+def check(string,SavedFile):
+	datafile = file(SavedFile)
+	found = False #this isn't really necessary
+	for line in datafile:
+		if string in line:
+			found = True
+			break
+
+	return found
+
+def FileCheck(TypeCal,list_nb,variableName,SavedFile):
+	for i in list_nb:
+		if (TypeCal == "PIMC"):
+			if ((i%2) == 0):
+				bead = i
+			else:
+				bead = i+1
+			'''
+			if (variableName == "tau"):
+				tau          = beta/value
+				variable     = tau
+			if (variableName == "beta"):
+				beta         = tau*value
+				variable     = beta
+			'''
+		else:
+			if ((i%2) != 0):
+				bead = i
+			else:
+				bead = i+1
+			'''
+			if (variableName == "tau"):
+				tau          = beta/(value-1)
+				variable     = tau
+			if (variableName == "beta"):
+				beta         = tau*(value-1)
+				variable     = beta
+			'''
+
+		string = str(bead)
+		if check(string,SavedFile):
+			print("true")
+			return
+
+	if check(string,SavedFile) == False:
+		call(["rm", SavedFile])
