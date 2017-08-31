@@ -16,7 +16,8 @@ import FigureGenerator
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "beta"
+#variableName        = "beta"
+variableName        = "tau"
 #
 TransMove           = "No"
 RotMove             = "Yes"
@@ -30,8 +31,8 @@ molecule            = "HF"
 #molecule            = "H2"                                                    
 molecule_rot        = "HF"
 #
-numbblocks	        = 4
-numbmolecules       = 2
+numbblocks	        = 400000
+numbmolecules       = 4
 numbpass            = 100
 #
 Rpt                 = 10.05
@@ -63,8 +64,12 @@ if (variableName == "beta"):
 #==================================Plotting====================================#
 FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA)
 if (TypeCal == "ENT"):
-	FileToBePlot = FilePlotName.SaveEntropy+".txt"
-	FilePlot     = FilePlotName.SaveEntropy+".pdf"
-FigureGenerator.Figure(FileToBePlot,FilePlot,TypeCal,variableName)
+	ExactValueFile    = "ResultsOfPIGSENT/ExactValue-Entropy-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-Dmitri.txt"
+	NumberOfMolecules, ExactEntropy = np.loadtxt(ExactValueFile, usecols=(0, 1), unpack=True)
+	index = numbmolecules/2 - 1
+	ExactEntropyValue = ExactEntropy[index]
+	FileToBePlot   	  = FilePlotName.SaveEntropy+".txt"
+	FilePlot          = FilePlotName.SaveEntropy+".pdf"
+	FigureGenerator.FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactEntropyValue,numbmolecules,molecule,Rpt,dipolemoment)
 exit()
 #==================================End Plotting====================================#

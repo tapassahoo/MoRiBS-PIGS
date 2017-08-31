@@ -602,7 +602,9 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 	add                     = ""
 	if (TypeCal == "ENT"):
 		add1                = "-ParticleA"+str(particleA)
+		#add1                = ""
 		add2                = "-"
+		#add2                = ""
 	else:
 		add1                = ""
 		add2                = ""
@@ -626,6 +628,45 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 			frontName      += "RotDOFs-"
 			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+	if (molecule_rot == "H2"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
+
+	if (TypeCal == "ENT"):
+				file1_name += ENT_TYPE
+	
+	
+	return file1_name
+def GetFileNameSubmission1(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra):
+	if (TypeCal == "ENT"):
+		add1                = "-ParticleA"+str(particleA)
+		add2                = "-"
+	else:
+		add1                = ""
+		add2                = ""
+
+	mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
+
+	if (TypeCal == "PIGS"):
+		frontName           = "PIGS-"
+	if (TypeCal == "PIMC"):
+		frontName           = "PIMC-"
+	if (TypeCal == "ENT"):
+		frontName           = "ENT-"
+
+	frontName              += extra
+
+	if (molecule_rot == "HF"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 	if (molecule_rot == "H2"):
 		if (TransMove == "Yes" and RotMove == "Yes"):
 			frontName      += "TransAndRotDOFs-"
@@ -664,6 +705,7 @@ class GetFileNameAnalysis:
 
 		if (self.TypeCal == "ENT"):
 			add1                = "-ParticleA"+str(self.particleA)
+			#add1                = ""
 		else:
 			add1                = ""
 
@@ -746,7 +788,7 @@ class GetFileNamePlot:
 		self.particleA    = particleA1
 
 		if (self.TypeCal == "ENT"):
-			add1                = "-ParticleA"+str(self.particleA)
+			add1                = "-ParticleA"+str(self.particleA) #vs beta
 		else:
 			add1                = ""
 
@@ -850,3 +892,22 @@ def FileCheck(TypeCal,list_nb,variableName,SavedFile):
 
 	if check(string,SavedFile) == False:
 		call(["rm", SavedFile])
+
+
+class GetUnitConverter:
+	def __init__(self):
+		self.BOHRRADIUS = 0.5291772108;      # angstrom
+		self.HARTREE2JL = 4.359748e-18;    	# hartree to joule  conversion factor
+		self.HARTREE2KL = 3.157732e+05;    	# hartree to Kelvin conversion factor
+		self.CMRECIP2KL = 1.4387672;       	# cm^-1 to Kelvin conversion factor
+		self.MHZ2RCM    = 3.335640952e-5;  	# MHz to cm^-1 conversion factor
+
+		self.AuToDebye     = 1.0/0.39343;
+		self.AuToCmInverse = 219474.63137;
+		self.AuToKelvin    = 315777.0;
+		self.KCalperMolToCmInverse = 349.75509;
+
+		self.HBAR  = 1.05457266; 			#  (10^-34 Js)     Planck constant
+		self.AMU   = 1.6605402;  			#  (10^-27 kg)     atomic mass unit
+		self.K_B   = 1.380658;   			#  (10^-23 JK^-1)  Boltzmann constant
+		self.WNO2K = 0.6950356; 				# conversion from CM-1 to K

@@ -3800,7 +3800,6 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
         	potential += - DipoleMoment0[i]*DipoleMoment1[j]*(3.0*R12[i]*R12[j] - R2*delta[jj])/R5;
 		}
 	}
-
     double PotReturn = potential*AuToKelvin;
 #ifdef POTZERO
 	PotReturn = 0.0;

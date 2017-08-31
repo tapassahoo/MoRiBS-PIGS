@@ -15,7 +15,7 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "beta"
+variableName        = "tau"
 #
 TransMove           = "No"
 RotMove             = "Yes"
@@ -40,7 +40,7 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 4
+numbblocks	        = 400000
 numbmolecules       = 2
 numbpass            = 100
 #
@@ -54,10 +54,10 @@ RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
 loopStart           = 8
-loopEnd             = 21
+loopEnd             = 61
 skip                = 2
 
-preskip             = 10
+preskip             = 50000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -109,7 +109,6 @@ if (variableName == "beta"):
 
 #==================================Generating files for submission================#
 file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra_file_name)
-
 if status   == "submission":
 	if (RUNDIR == "scratch") or (NameOfServer == "graham"):
 		dir_run_job = "/scratch/tapas/linear_rotors/" 
@@ -261,3 +260,19 @@ if status == "analysis":
 			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 		except:
 			pass
+#=================================================================================#
+#
+#           for file rename
+##
+#file1_name1 = support.GetFileNameSubmission1(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra_file_name)
+##================================================================================#
+#
+		'''
+		filetobemv = "/work/tapas/linear_rotors/"+file1_name+str(numbbeads)
+		filemv = "/work/tapas/linear_rotors/"+file1_name1+str(numbbeads)
+		print(filetobemv)
+		print(filemv)
+		call(["mv", filetobemv, filemv])
+		'''
+#
+
