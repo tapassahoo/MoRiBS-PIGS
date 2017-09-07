@@ -962,23 +962,20 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	int particleA2Min = particleA1Max + 1;
    	int particleA2Max = particleA2Min + NumbParticle - 1;
 
-	if ((Distribution == "unSwap") || (Distribution == "Swap"))
+	if (it1 == 0 || it1 == (NumbRotTimes - 1))
 	{
-       	if (it1 == 0 || it1 == (NumbRotTimes - 1))
-       	{
-           	if (it1 == 0)
-           	{	
-               	dens_old = SRotDens(p1, type);
-           	}
-           	else
-           	{
-               	dens_old = SRotDens(p0, type);
-           	}
-       	}
-       	else
-       	{
-           	dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-       	}
+		if (it1 == 0)
+		{	
+			dens_old = SRotDens(p1, type);
+		}
+		else
+		{
+			dens_old = SRotDens(p0, type);
+		}
+	}
+	else
+	{
+		dens_old = SRotDens(p0,type)*SRotDens(p1,type);
 	}
 	if (Distribution == "Swap")
 	{
@@ -1036,7 +1033,6 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
            	}
        	}
 	}
-
 //
    	if (fabs(dens_old)<RZERO) dens_old = 0.0;
 #ifndef NEGATIVEDENSITY
@@ -1069,23 +1065,20 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
    	double dens_new;
 
-	if ((Distribution == "unSwap") || (Distribution == "Swap"))
-    {
-       	if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
-       	{
-          	if (it1 == 0)
-           	{
-               	dens_new = SRotDens(p1, type);
-           	}
-           	else
-           	{
-               	dens_new = SRotDens(p0, type);
-           	}
-       	}
-       	else
-       	{
-           	dens_new = SRotDens(p0,type)*SRotDens(p1,type);
-       	}
+	if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
+	{
+		if (it1 == 0)
+		{
+			dens_new = SRotDens(p1, type);
+		}
+		else
+		{
+			dens_new = SRotDens(p0, type);
+		}
+	}
+	else
+	{
+		dens_new = SRotDens(p0,type)*SRotDens(p1,type);
 	}
 	if (Distribution == "Swap")
     {
@@ -1181,7 +1174,6 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 		for (int id=0;id<NDIM;id++)
     		MCCosine[id][t1] = newcoords[id][t1];
 	}
-
 }
 
 //double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)   

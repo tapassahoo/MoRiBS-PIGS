@@ -33,6 +33,8 @@ void MCWormAverageReset(void);
 
 double avergCount;   // # of calls of get_estim inside a block
 double totalCount;   // sum avergCount   
+double sumsCount;
+double totalStep;
 
 void PIMCPass(int,int);
 
@@ -419,8 +421,6 @@ ParamsPotential();
 
     InitMCEstims();
    	InitTotalAverage();      // DUMP 
-   	double sumsCount = 0.0;  // counter for accum sums
-   	double totalStep = 0.0;
    
    	ResetMCCounts();
    	ResetQWCounts();
@@ -652,7 +652,7 @@ ParamsPotential();
 
 		MCStartBlock = blockCount; 
 
-		if (blockCount%50000 == 0)
+		if (blockCount%1000 == 0)
 		{
 			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
@@ -1952,6 +1952,8 @@ void InitTotalAverage(void)  // DUMP
 	const char *_proc_=__func__;    
 
 	totalCount = 0.0;  // need to save in the status file 
+   	sumsCount = 0.0;  // counter for accum sums
+   	totalStep = 0.0;
 
 	_kin_total = 0.0;   // need a function to reset all global average
 	_pot_total = 0.0;
