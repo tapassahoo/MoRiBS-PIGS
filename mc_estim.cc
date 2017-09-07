@@ -3736,24 +3736,12 @@ void CrossProduct(double *v, double *w, double *cross)
 
 double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang1, int it)
 {
-	double DipoleMomentInAU = DipoleMoment/AuToDebye; // DipoleMoment in Debye
-	double dm[NDIM];
-	dm[0] = 0.0;
-	dm[1] = 0.0;
-	dm[2] = DipoleMomentInAU;
-
 	int offset0 = NumbRotTimes*atom0;
 	int offset1 = NumbRotTimes*atom1;
    	int t0 = offset0 + it;
    	int t1 = offset1 + it;
 
-	double RotMat0[NDIM*NDIM];
-	for (int i = 0; i < (NDIM*NDIM); i++) RotMat0[i] = 0.0;
-	UnitVectors(Eulang0, RotMat0);
-
-	double RotMat1[NDIM*NDIM];
-	for (int i = 0; i < (NDIM*NDIM); i++) RotMat1[i] = 0.0;
-	UnitVectors(Eulang1, RotMat1);
+	double DipoleMomentInAU = DipoleMoment/AuToDebye; // DipoleMoment in Debye
 
 	double R12[NDIM];
 	double dr2 = 0.0;
@@ -3766,6 +3754,28 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 		R12[id] /= BOHRRADIUS;
         dr2     += (R12[id]*R12[id]);
 	}
+
+	double RCOM = sqrt(dr2);	
+	double R2   = RCOM*RCOM*RCOM;
+	double R5   = R2*R2*RCOM;
+
+#ifdef SHORTFORM
+	double R3         = R2*RCOM; 
+    double PreFactor  = DipoleMomentInAU*DipoleMomentInAU/R3;
+    double potential = PreFactor*(sin(Eulang0[CTH])*sin(Eulang1[CTH])*cos(Eulang0[PHI] - Eulang1[PHI]) - 2.0*cos(Eulang0[CTH])*cos(Eulang1[CTH]));
+#else
+	double dm[NDIM];
+	dm[0] = 0.0;
+	dm[1] = 0.0;
+	dm[2] = DipoleMomentInAU;
+
+	double RotMat0[NDIM*NDIM];
+	for (int i = 0; i < (NDIM*NDIM); i++) RotMat0[i] = 0.0;
+	UnitVectors(Eulang0, RotMat0);
+
+	double RotMat1[NDIM*NDIM];
+	for (int i = 0; i < (NDIM*NDIM); i++) RotMat1[i] = 0.0;
+	UnitVectors(Eulang1, RotMat1);
 
 	double delta[NDIM*NDIM];
     for (int i = 0; i < NDIM; i++)
@@ -3787,10 +3797,6 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 		}
 	}
 
-	double RCOM = sqrt(dr2);	
-	double R2   = RCOM*RCOM;
-	double R5   = R2*R2*RCOM;
-
 	double potential = 0.0;
 	for (int i = 0; i < NDIM; i++)
 	{
@@ -3800,6 +3806,7 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
         	potential += - DipoleMoment0[i]*DipoleMoment1[j]*(3.0*R12[i]*R12[j] - R2*delta[jj])/R5;
 		}
 	}
+#endif
     double PotReturn = potential*AuToKelvin;
 #ifdef POTZERO
 	PotReturn = 0.0;
