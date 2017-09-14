@@ -15,13 +15,13 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "tau"
+variableName        = "beta"
 #
 TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
@@ -53,11 +53,11 @@ status_cagepot      = "No"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-loopStart           = 8
-loopEnd             = 61
+loopStart           = 2
+loopEnd             = 41
 skip                = 2
 
-preskip             = 50000
+preskip             = 0
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -86,7 +86,7 @@ if (variableName == "tau"):
 		step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
 		#step       = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
 		#step       = [2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  # beads 41 to 61
-		step        = [1.6,1.6,1.6]  # beads 57 to 61
+		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6]  # beads 57 to 61
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS
 		#step       = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  
 					# 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
@@ -104,7 +104,7 @@ if (variableName == "beta"):
 
 	if (molecule_rot == "HF"):
 		step_trans  = [0.3 for i in range(1000)]
-		step        = [1.6 for i in range(1000)]  
+		step        = [2.0 for i in range(1000)]  
 		level       = [1   for i in range(1000)]
 
 #==================================Generating files for submission================#
@@ -152,9 +152,14 @@ if status == "analysis":
 		fanalyzeEntropy.write(support.fmtAverageEntropy(status,variableName,ENT_TYPE))
 	if ((TypeCal == "PIMC") or (TypeCal == "PIGS")):
 		fanalyzeEnergy       = open(FileAnalysis.SaveEnergy, "a")           
-		fanalyzeEnergy.write(support.fmtAverageEnergy(status,variableName))
-		fanalyzeCorrFunc     = open(FileAnalysis.SaveCorrFunc, "a")           
-		fanalyzeCorrFunc.write(support.fmtAverageOrientation(status,variableName))
+		fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal,status,variableName))
+		fanalyzeCorr         = open(FileAnalysis.SaveCorr, "a")           
+		fanalyzeCorr.write(support.fmtAverageOrientation(status,variableName))
+		fanalyzeTotalCorr    = open(FileAnalysis.SaveTotalCorr, "a")           
+		fanalyzeXCorr        = open(FileAnalysis.SaveXCorr, "a")           
+		fanalyzeYCorr        = open(FileAnalysis.SaveYCorr, "a")           
+		fanalyzeZCorr        = open(FileAnalysis.SaveZCorr, "a")           
+		fanalyzeXYCorr       = open(FileAnalysis.SaveXYCorr, "a")           
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
@@ -195,8 +200,13 @@ for i in list_nb:
 				if (TypeCal == "ENT"):
 					fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_TYPE))
 				else:
-					fanalyzeEnergy.write(support.GetAverageEnergy(numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeCorrFunc.write(GetAverageOrientation(support.numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeCorr.write(GetAverageOrientation(support.numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 			except:
 				pass
 	else:
@@ -227,8 +237,13 @@ for i in list_nb:
 				if (TypeCal == "ENT"):
 					fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_TYPE))
 				else:
-					fanalyzeEnergy.write(support.GetAverageEnergy(numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeCorrFunc.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 			except:
 				pass
 	iStep = iStep + 1
@@ -247,14 +262,19 @@ if status == "analysis":
 
 	if (TypeCal == "PIGS" or TypeCal == "PIMC"):
 		fanalyzeEnergy.close()
-		fanalyzeCorrFunc.close()
+		fanalyzeCorr.close()
+		fanalyzeTotalCorr.close()
+		fanalyzeXCorr.close()
+		fanalyzeYCorr.close()
+		fanalyzeZCorr.close()
+		fanalyzeXYCorr.close()
 		call(["cat",FileAnalysis.SaveEnergy])
 		print("")
 		print("")
 		#call(["cat",FileAnalysis.SaveAngDOFS])
 #=========================File Checking===============================#
 		SavedFile = FileAnalysis.SaveEnergy
-		SavedFile = FileAnalysis.SaveCorrFunc
+		SavedFile = FileAnalysis.SaveCorr
 		try:
 			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)

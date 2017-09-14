@@ -23,7 +23,7 @@ double GetPotEnergy_Densities(void);
 double GetPotEnergyPIGS(void);
 double GetPotEnergyCage(const double *);
 double GetTotalEnergy(void);
-void GetDipoleCorrelation(double *);
+void GetDipoleCorrelation(double *, double *, double *, double *, double *);
 void GetCosTheta(double &, double *);
 double GetPhi();
 double GetPotEnergy(void);

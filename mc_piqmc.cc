@@ -702,7 +702,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
    	double phi  = MCAngles[PHI][t1];
 	double EulangOld[NDIM], EulangNew[NDIM];
 	EulangOld[PHI] = phi;
-	EulangOld[CTH] = acos(cost);
+	EulangOld[CTH] = acos(MCAngles[CTH][t1]);
 	EulangOld[CHI] = 0.0;
 
    	cost += (step*(rand1-0.5));
@@ -892,6 +892,122 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
     		MCCosine[id][t1] = newcoords[id][t1];
 	}
 
+}
+
+double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)   
+{
+	int type0   =  MCType[atom0];
+	double spot;
+
+    double weight;
+	weight = 1.0;
+    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
+
+	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
+	{
+	    int offset0 =  atom0*NumbRotTimes;
+        int t0  = offset0 + it;
+
+        spot = 0.0;
+        for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+        if (atom1 != atom0)                    
+        {
+            int offset1 = atom1*NumbRotTimes;
+            int t1  = offset1 + it;
+
+	        string stype = MCAtom[type0].type;
+			/*
+			if (stype == H2)
+	        {
+				double cosine[NDIM][NumbAtoms*NumbRotTimes];
+				cosine[0][t0] = sin(Eulang0[CTH])*cos(Eulang0[PHI]);
+				cosine[1][t0] = sin(Eulang0[CTH])*sin(Eulang0[PHI]);
+				cosine[2][t0] = cos(Eulang0[CTH]);
+                double s1 = 0.0;
+                double s2 = 0.0;
+                double dr2 = 0.0;
+				double dr[NDIM];
+
+                for (int id=0;id<NDIM;id++)
+                {
+                    dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+                    dr2    += (dr[id]*dr[id]);
+                    double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*cosine[id][t0];
+                    double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][t1];
+                    s1 += cst1;
+                    s2 += cst2;
+                }
+                double r = sqrt(dr2);
+                double th1 = acos(s1/r);
+                double th2 = acos(s2/r);
+
+                double b1[NDIM];
+                double b2[NDIM];
+                double b3[NDIM];
+                for (int id=0;id<NDIM;id++)
+                {
+                    b1[id] = cosine[id][t0];
+                    b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
+                    b3[id] = MCCosine[id][t1];
+                }
+                VectorNormalisation(b1);
+                VectorNormalisation(b2);
+                VectorNormalisation(b3);
+
+                //Calculation of dihedral angle 
+                double n1[NDIM];
+                double n2[NDIM];
+                double mm[NDIM];
+
+                CrossProduct(b2, b1, n1);
+                CrossProduct(b2, b3, n2);
+                CrossProduct(b2, n2, mm);
+
+                double xx = DotProduct(n1, n2);
+                double yy = DotProduct(n1, mm);
+
+                double phi = atan2(yy, xx);
+                if (phi<0.0) phi += 2.0*M_PI;
+
+                //Dihedral angle calculation is completed here
+                double r1 = 0.74;// bond length in Angstrom
+				r1 /= BOHRRADIUS;
+                double r2 = r1;// bond length in bohr
+                double rd = r/BOHRRADIUS;
+                double potl;
+                vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
+                spot += weight*potl*CMRECIP2KL;
+			}  //stype
+			*/
+
+		    if (stype == HF )
+            {
+				double Eulang1[NDIM];
+				Eulang1[PHI] = MCAngles[PHI][t1];
+        		Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+        		Eulang1[CHI] = 0.0;
+        		spot += weight*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+            }  //stype
+        } //loop over atom1 (molecules)
+    }
+
+	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+	{
+        double E12 = -2.0*DipoleMomentAU2*cos(Eulang0[CTH])/(RR*RR*RR);
+        spot        = weight*E12*AuToKelvin;
+    }
+    double spot_cage;
+#ifdef CAGEPOT
+    double cost = cos(Eulang0[CTH]);
+    double phi = Eulang0[PHI];
+    if (phi < 0.0) phi = 2.0*M_PI + phi;
+    phi = fmod(phi,2.0*M_PI);
+    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
+#else
+    spot_cage = 0.0;
+#endif
+	double spotReturn = (spot + spot_cage);
+    return spotReturn;
 }
 
 void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp, string Distribution)
@@ -3999,120 +4115,6 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 #ifdef POTZERO
 		spot       = 0.0;
 #endif
-    }
-    double spot_cage;
-#ifdef CAGEPOT
-    double cost = cos(Eulang0[CTH]);
-    double phi = Eulang0[PHI];
-    if (phi < 0.0) phi = 2.0*M_PI + phi;
-    phi = fmod(phi,2.0*M_PI);
-    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
-#else
-    spot_cage = 0.0;
-#endif
-	double spotReturn = (spot + spot_cage);
-    return spotReturn;
-}
-
-double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)   
-{
-	int type0   =  MCType[atom0];
-	double spot;
-
-    double weight;
-	weight = 1.0;
-    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
-
-	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
-	{
-	    int offset0 =  atom0*NumbRotTimes;
-        int t0  = offset0 + it;
-		double cosine[NDIM][NumbAtoms*NumbRotTimes];
-		cosine[0][t0] = sin(Eulang0[CTH])*cos(Eulang0[PHI]);
-		cosine[1][t0] = sin(Eulang0[CTH])*sin(Eulang0[PHI]);
-		cosine[2][t0] = cos(Eulang0[CTH]);
-
-        spot = 0.0;
-        for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
-        if (atom1 != atom0)                    
-        {
-            int offset1 = atom1*NumbRotTimes;
-            int t1  = offset1 + it;
-
-	        string stype = MCAtom[type0].type;
-			if (stype == H2)
-	        {
-                double s1 = 0.0;
-                double s2 = 0.0;
-                double dr2 = 0.0;
-				double dr[NDIM];
-
-                for (int id=0;id<NDIM;id++)
-                {
-                    dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
-                    dr2    += (dr[id]*dr[id]);
-                    double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*cosine[id][t0];
-                    double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][t1];
-                    s1 += cst1;
-                    s2 += cst2;
-                }
-                double r = sqrt(dr2);
-                double th1 = acos(s1/r);
-                double th2 = acos(s2/r);
-
-                double b1[NDIM];
-                double b2[NDIM];
-                double b3[NDIM];
-                for (int id=0;id<NDIM;id++)
-                {
-                    b1[id] = cosine[id][t0];
-                    b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
-                    b3[id] = MCCosine[id][t1];
-                }
-                VectorNormalisation(b1);
-                VectorNormalisation(b2);
-                VectorNormalisation(b3);
-
-                //Calculation of dihedral angle 
-                double n1[NDIM];
-                double n2[NDIM];
-                double mm[NDIM];
-
-                CrossProduct(b2, b1, n1);
-                CrossProduct(b2, b3, n2);
-                CrossProduct(b2, n2, mm);
-
-                double xx = DotProduct(n1, n2);
-                double yy = DotProduct(n1, mm);
-
-                double phi = atan2(yy, xx);
-                if (phi<0.0) phi += 2.0*M_PI;
-
-                //Dihedral angle calculation is completed here
-                double r1 = 0.74;// bond length in Angstrom
-				r1 /= BOHRRADIUS;
-                double r2 = r1;// bond length in bohr
-                double rd = r/BOHRRADIUS;
-                double potl;
-                vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-                spot += weight*potl*CMRECIP2KL;
-			}  //stype
-
-		    if (stype == HF )
-            {
-				double Eulang1[NDIM];
-				Eulang1[PHI] = MCAngles[PHI][t1];
-        		Eulang1[CTH] = acos(MCAngles[CTH][t1]);
-        		Eulang1[CHI] = 0.0;
-        		spot += weight*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
-            }  //stype
-        } //loop over atom1 (molecules)
-    }
-
-	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
-	{
-        double E12 = -2.0*DipoleMomentAU2*cos(Eulang0[CTH])/(RR*RR*RR);
-        spot        = weight*E12*AuToKelvin;
     }
     double spot_cage;
 #ifdef CAGEPOT

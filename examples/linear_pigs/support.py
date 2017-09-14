@@ -161,7 +161,6 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 	'''
 	This function gives us the output 
 	'''
-	print(final_dir_in_work)
 	col_block, col_costheta, col_compx, col_compy, col_compz = genfromtxt(final_dir_in_work+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 	'''
 	fd             = open(final_dir_in_work+'/results/pigs_instant.dof', 'rb')
@@ -196,6 +195,40 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 
 	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz)
 	output  += "\n"
+	return output
+
+def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip):
+	'''
+	This function gives us the output 
+	'''
+	ndim              = numbmolecules*(numbmolecules-1)/2
+	output            = '{0:10d}{1:15.5f}'.format(numbbeads, variable)
+
+	if (CORRELATION == "TotalCorr"):
+		loopStart     = 1
+
+	if (CORRELATION == "XCorr"):
+		loopStart     = ndim+1
+
+	if (CORRELATION == "YCorr"):
+		loopStart     = 2*ndim+1
+
+	if (CORRELATION == "ZCorr"):
+		loopStart     = 3*ndim+1
+
+	if (CORRELATION == "XYCorr"):
+		loopStart     = 4*ndim+1
+
+	for i in range(ndim):
+		col           = loopStart+i
+		print(col)
+		comp          = genfromtxt(final_dir_in_work+"/results/pigsDipole.corr",unpack=True, usecols=[col], skip_header=preskip, skip_footer=postskip)
+
+		mean_comp  = np.mean(comp)
+		error_comp = np.std(comp,ddof=1)/sqrt(len(comp))
+		output 		 += '     '+str(mean_comp)+'     '+str(error_comp)
+
+	output  		 += "\n"
 	return output
 
 def fmtAverageEnergy(TypeCal,status,variable):
@@ -719,27 +752,55 @@ class GetFileNameAnalysis:
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Energy-"
-					file_output2  = frontName+"correlation-function-"
+					file_output2  = frontName+"correlation-"
+					file_output3  = frontName+"total-correlation-function-"
+					file_output4  = frontName+"X-component-correlation-function-"
+					file_output5  = frontName+"Y-component-correlation-function-"
+					file_output6  = frontName+"Z-component-correlation-function-"
+					file_output7  = frontName+"XandY-component-correlation-function-"
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-function-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
 	
 			if (self.molecule_rot == "HF"):
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-"
+					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-vs-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+
 	
-			self.SaveEnergy            = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName+".txt"
-			self.SaveCorrFunc          = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName+".txt"
-			call(["rm", self.SaveEnergy, self.SaveCorrFunc])
+			self.SaveEnergy       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName+".txt"
+			self.SaveCorr         = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName+".txt"
+			self.SaveTotalCorr    = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output3+mainFileName+".txt"
+			self.SaveXCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output4+mainFileName+".txt"
+			self.SaveYCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output5+mainFileName+".txt"
+			self.SaveZCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output6+mainFileName+".txt"
+			self.SaveXYCorr       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output7+mainFileName+".txt"
+			call(["rm", self.SaveEnergy, self.SaveCorr])
+			call(["rm", self.SaveTotalCorr, self.SaveXCorr, self.SaveYCorr, self.SaveZCorr, self.SaveXYCorr])
 
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"
@@ -802,26 +863,55 @@ class GetFileNamePlot:
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Energy-"
-					file_output2  = frontName+"correlation-function-"
+					file_output2  = frontName+"correlation-"
+					file_output3  = frontName+"total-correlation-function-"
+					file_output4  = frontName+"X-component-correlation-function-"
+					file_output5  = frontName+"Y-component-correlation-function-"
+					file_output6  = frontName+"Z-component-correlation-function-"
+					file_output7  = frontName+"XandY-component-correlation-function-"
+
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-function-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
+	
 	
 			if (self.molecule_rot == "HF"):
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-"
+					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-function-vs-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+
 	
-			self.SaveEnergy            = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName
-			self.SaveCorrFunc          = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName
+			self.SaveEnergy       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName
+			self.SaveCorr         = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName
+			self.SaveTotalCorr    = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output3+mainFileName
+			self.SaveXCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output4+mainFileName
+			self.SaveYCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output5+mainFileName
+			self.SaveZCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output6+mainFileName
+			self.SaveXYCorr       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output7+mainFileName
 
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"

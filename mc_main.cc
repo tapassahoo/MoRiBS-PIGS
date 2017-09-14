@@ -73,8 +73,16 @@ double _costheta_total;
 double _ucompx_total;
 double _ucompy_total;
 double _ucompz_total;
-vector<double> _cdipole;
-vector<double> _cdipole_total;
+vector<double> _cdipoleXYZ;
+vector<double> _cdipoleX;
+vector<double> _cdipoleY;
+vector<double> _cdipoleZ;
+vector<double> _cdipoleXY;
+vector<double> _cdipoleXYZ_total;
+vector<double> _cdipoleX_total;
+vector<double> _cdipoleY_total;
+vector<double> _cdipoleZ_total;
+vector<double> _cdipoleXY_total;
 //
 double _bnm;
 double _bdm;
@@ -539,7 +547,7 @@ ParamsPotential();
                		{
                 		if (!Worm.exists)
                 		{
-                			MCGetAverage();
+                			//MCGetAverage();
 	                        //prtper_(PIndex,&MCAtom[BSTYPE].numb,&blockCount);
 
                    			// print the instantaneous xyz and prl info for the closed path
@@ -717,6 +725,7 @@ void PIMCPass(int type,int time)
         MCRotations3D(type);
 }
 
+/*
 void MCResetBlockAverage(void) 
 {
 #ifdef SWAPTOUNSWAP
@@ -739,10 +748,16 @@ void MCResetBlockAverage(void)
 	_ucompy     = 0.0;
 	_ucompz     = 0.0;
 #ifdef DDCORR
-	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
-	for (int idp = 0; idp < NDIMDP; idp++) 
-	{
-		_cdipole.push_back(0.0);
+    for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+    {
+        for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+        {
+			_cdipoleXYZ.push_back(0.0);
+			_cdipoleX.push_back(0.0);
+			_cdipoleY.push_back(0.0);
+			_cdipoleZ.push_back(0.0);
+			_cdipoleXY.push_back(0.0);
+		}
 	}
 #endif
 #ifdef PIGSENTTYPE
@@ -767,6 +782,7 @@ void MCResetBlockAverage(void)
 	PrintZrfl   = 1;
 
 }
+*/
 
 #ifdef PIMCTYPE
 void MCResetBlockAveragePIMC(void) 
@@ -816,9 +832,19 @@ void MCResetBlockAveragePIGS(void)
 	_ucompz     = 0.0;
 #ifdef DDCORR
 	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
-	for (int idp = 0; idp < NDIMDP; idp++) 
+    _cdipoleXYZ.resize(NDIMDP);
+    _cdipoleX.resize(NDIMDP);
+    _cdipoleY.resize(NDIMDP);
+    _cdipoleZ.resize(NDIMDP);
+  	_cdipoleXY.resize(NDIMDP);
+	
+	for (int idp = 0; idp < NDIMDP; idp++)
 	{
-		_cdipole.push_back(0.0);
+        _cdipoleXYZ[idp] = 0.0;
+        _cdipoleX[idp] = 0.0;
+        _cdipoleY[idp] = 0.0;
+        _cdipoleZ[idp] = 0.0;
+    	_cdipoleXY[idp] = 0.0;
 	}
 #endif
 	_bkin        = 0.0;
@@ -865,6 +891,7 @@ void MCResetBlockAveragePIGSENT(void)
 }
 #endif
 
+/*
 void MCGetAverage(void) 
 {
 	avergCount       += 1.0;
@@ -898,7 +925,6 @@ void MCGetAverage(void)
 	//_dbpot         += dspot;                    // block average for pot energy differencies added by Hui Li
 	//_dpot_total    += dspot;                    //added by Hui Li
 
-/* new addition */
 #ifdef PIGSROTORS
 	double cosTheta   = 0.0;
 	double compxyz[NDIM];
@@ -924,14 +950,35 @@ void MCGetAverage(void)
 
 #ifdef DDCORR
 	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
-    double DipoleCorr[NDIMDP];
-	for (int idp = 0; idp < NDIMDP; idp++) DipoleCorr[idp] = 0.0;
-	GetDipoleCorrelation(DipoleCorr);
+    double DipoleCorrXYZ[NDIMDP];
+    double DipoleCorrX[NDIMDP];
+    double DipoleCorrY[NDIMDP];
+    double DipoleCorrZ[NDIMDP];
+    double DipoleCorrXY[NDIMDP];
 
 	for (int idp = 0; idp < NDIMDP; idp++)
 	{
-		_cdipole[idp] += DipoleCorr[idp];
-		_cdipole_total[idp] += DipoleCorr[idp];
+		DipoleCorrXYZ[idp] = 0.0;
+		DipoleCorrX[idp]   = 0.0;
+		DipoleCorrY[idp]   = 0.0;
+		DipoleCorrZ[idp]   = 0.0;
+		DipoleCorrXY[idp]  = 0.0;
+	}
+
+	GetDipoleCorrelation(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
+
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{
+		_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
+		_cdipoleX[idp]   += DipoleCorrX[idp];
+		_cdipoleY[idp]   += DipoleCorrY[idp];
+		_cdipoleZ[idp]   += DipoleCorrZ[idp];
+		_cdipoleXY[idp]  += DipoleCorrXY[idp];
+		_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
+		_cdipoleX_total[idp]   += DipoleCorrX[idp];
+		_cdipoleY_total[idp]   += DipoleCorrY[idp];
+		_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
+		_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
 	}
 #endif
 #endif
@@ -956,10 +1003,8 @@ void MCGetAverage(void)
 	_trOfDensitySq_total += snm/sdm;
 #endif
 #endif
-/* new addition */
 
 	//rotational degrees of freedom
-	/* reactive */
 #ifndef ENTANGLEMENT
 	double srot;
 	if (ROTATION)
@@ -1111,6 +1156,7 @@ void MCGetAverage(void)
         RotSymConfig();
     }
 }
+*/
 
 #ifdef PIGSENTTYPE
 void MCGetAveragePIGSENT(void) 
@@ -1227,14 +1273,35 @@ void MCGetAveragePIGS(void)
 
 #ifdef DDCORR
 	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
-    double DipoleCorr[NDIMDP];
-	for (int idp = 0; idp < NDIMDP; idp++) DipoleCorr[idp] = 0.0;
-	GetDipoleCorrelation(DipoleCorr);
+    double DipoleCorrXYZ[NDIMDP];
+    double DipoleCorrX[NDIMDP];
+    double DipoleCorrY[NDIMDP];
+    double DipoleCorrZ[NDIMDP];
+    double DipoleCorrXY[NDIMDP];
 
 	for (int idp = 0; idp < NDIMDP; idp++)
 	{
-		_cdipole[idp] += DipoleCorr[idp];
-		_cdipole_total[idp] += DipoleCorr[idp];
+		DipoleCorrXYZ[idp] = 0.0;
+		DipoleCorrX[idp]   = 0.0;
+		DipoleCorrY[idp]   = 0.0;
+		DipoleCorrZ[idp]   = 0.0;
+		DipoleCorrXY[idp]  = 0.0;
+	}
+
+	GetDipoleCorrelation(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
+
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{
+		_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
+		_cdipoleX[idp]   += DipoleCorrX[idp];
+		_cdipoleY[idp]   += DipoleCorrY[idp];
+		_cdipoleZ[idp]   += DipoleCorrZ[idp];
+		_cdipoleXY[idp]  += DipoleCorrXY[idp];
+		_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
+		_cdipoleX_total[idp]   += DipoleCorrX[idp];
+		_cdipoleY_total[idp]   += DipoleCorrY[idp];
+		_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
+		_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
 	}
 #endif
 	double srot;
@@ -1702,7 +1769,23 @@ void SaveDipoleCorr(const char fname [], double acount, long int blocknumb)
 	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
 	for (int idp = 0; idp < NDIMDP; idp++)
 	{ 
-    	fid << setw(IO_WIDTH) << _cdipole[idp]/acount << BLANK;
+    	fid << setw(IO_WIDTH) << _cdipoleXYZ[idp]/avergCount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	fid << setw(IO_WIDTH) << _cdipoleX[idp]/avergCount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	fid << setw(IO_WIDTH) << _cdipoleY[idp]/avergCount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	fid << setw(IO_WIDTH) << _cdipoleZ[idp]/avergCount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	fid << setw(IO_WIDTH) << _cdipoleXY[idp]/avergCount << BLANK;
 	}
     fid << endl;
     fid.close();
@@ -1822,7 +1905,23 @@ void SaveSumDipoleCorr(double acount, double numb)
 	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
 	for (int idp = 0; idp < NDIMDP; idp++)
 	{ 
-    	_fdc << setw(IO_WIDTH) << _cdipole_total[idp]/acount << BLANK;
+    	_fdc << setw(IO_WIDTH) << _cdipoleXYZ_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleX_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleY_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleZ_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleXY_total[idp]/acount << BLANK;
 	}
     _fdc << endl;
 }
@@ -1963,9 +2062,19 @@ void InitTotalAverage(void)  // DUMP
 	_ucompy_total  = 0.0;
 	_ucompz_total  = 0.0;
 	int NDIMDP = NumbAtoms*(NumbAtoms-1)/2;
+    _cdipoleXYZ_total.resize(NDIMDP);
+    _cdipoleX_total.resize(NDIMDP);
+    _cdipoleY_total.resize(NDIMDP);
+    _cdipoleZ_total.resize(NDIMDP);
+  	_cdipoleXY_total.resize(NDIMDP);
+	
 	for (int idp = 0; idp < NDIMDP; idp++)
 	{
-		 _cdipole_total.push_back(0.0);
+		 _cdipoleXYZ_total[idp] = 0.0;
+		 _cdipoleX_total[idp] = 0.0;
+		 _cdipoleY_total[idp] = 0.0;
+		 _cdipoleZ_total[idp] = 0.0;
+		 _cdipoleXY_total[idp] = 0.0;
 	}
     _nm_total  = 0.0;
     _dm_total  = 0.0;
@@ -2031,7 +2140,6 @@ void InitTotalAverage(void)  // DUMP
     _io_error(_proc_,IO_ERR_FOPEN,fangular.c_str());
 
 //
-#ifdef IOFILES
     string fdipolecorr;
 
     fdipolecorr  = MCFileName + IO_SUM;
@@ -2045,7 +2153,6 @@ void InitTotalAverage(void)  // DUMP
 
     if (!_fdc.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fdipolecorr.c_str());
-#endif
 
 //
 #ifdef IOFILES

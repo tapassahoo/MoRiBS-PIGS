@@ -16,23 +16,23 @@ import FigureGenerator
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-#variableName        = "beta"
-variableName        = "tau"
+variableName        = "beta"
+#variableName        = "tau"
 #
 TransMove           = "No"
 RotMove             = "Yes"
 #
 #TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
 #molecule            = "H2"                                                    
 molecule_rot        = "HF"
 #
-numbblocks	        = 400000
-numbmolecules       = 4
+numbblocks	        = 100000
+numbmolecules       = 6
 numbpass            = 100
 #
 Rpt                 = 10.05
@@ -63,6 +63,7 @@ if (variableName == "beta"):
 
 #==================================Plotting====================================#
 FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA)
+
 if (TypeCal == "ENT"):
 	ExactValueFile    = "ResultsOfPIGSENT/ExactValue-Entropy-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-Dmitri.txt"
 	NumberOfMolecules, ExactEntropy = np.loadtxt(ExactValueFile, usecols=(0, 1), unpack=True)
@@ -71,5 +72,37 @@ if (TypeCal == "ENT"):
 	FileToBePlot   	  = FilePlotName.SaveEntropy+".txt"
 	FilePlot          = FilePlotName.SaveEntropy+".pdf"
 	FigureGenerator.FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactEntropyValue,numbmolecules,molecule,Rpt,dipolemoment)
+
+if (TypeCal == "PIGS"):
+	TypeCorr          = "Total"
+	if (TypeCorr == "Total"):
+		FileToBePlot   	  = "ResultsOfPIGS/totalcorr.txt"
+		FilePlot          = FilePlotName.SaveTotalCorr+".pdf"
+		call(["rm", FilePlot])
+		FigureGenerator.FigurePIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	TypeCorr          = "XCorr"
+	if (TypeCorr == "XCorr"):
+		FileToBePlot   	  = "ResultsOfPIGS/xcorr.txt"
+		FilePlot          = FilePlotName.SaveXCorr+".pdf"
+		call(["rm", FilePlot])
+		FigureGenerator.FigurePIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	TypeCorr          = "YCorr"
+	if (TypeCorr == "YCorr"):
+		FileToBePlot   	  = "ResultsOfPIGS/ycorr.txt"
+		FilePlot          = FilePlotName.SaveYCorr+".pdf"
+		call(["rm", FilePlot])
+		FigureGenerator.FigurePIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	TypeCorr          = "ZCorr"
+	if (TypeCorr == "ZCorr"):
+		FileToBePlot   	  = "ResultsOfPIGS/zcorr.txt"
+		FilePlot          = FilePlotName.SaveZCorr+".pdf"
+		call(["rm", FilePlot])
+		FigureGenerator.FigurePIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	TypeCorr          = "XYCorr"
+	if (TypeCorr == "XYCorr"):
+		FileToBePlot   	  = "ResultsOfPIGS/xycorr.txt"
+		FilePlot          = FilePlotName.SaveXYCorr+".pdf"
+		call(["rm", FilePlot])
+		FigureGenerator.FigurePIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 exit()
 #==================================End Plotting====================================#

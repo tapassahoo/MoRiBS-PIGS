@@ -1258,34 +1258,47 @@ void GetCosTheta(double &cosTheta, double *compxyz)
 	compxyz[2] = scompxyz[2]/NumbAtoms;
 }
 
-void GetDipoleCorrelation(double *DipoleCorr)
+void GetDipoleCorrelation(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
 
     int it = (NumbRotTimes - 1)/2;
 	if(MCAtom[IMTYPE].numb > 1)
 	{
+        double totalCorr, xCorr, yCorr, zCorr, xyCorr;
+
 		int ii = 0;
-    	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    	for (int atom0 = 0; atom0 < (NumbAtoms - 1); atom0++)
         {    
-    	    for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+    	    for (int atom1 = (atom0 + 1); atom1 < NumbAtoms; atom1++)
     	    {
-				if (atom0 != atom1)
+            	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            	int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+
+       	    	int t0      = offset0 + it;
+            	int t1      = offset1 + it;
+
+               	totalCorr   = 0.0;
+				xyCorr      = 0.0;
+               	for (int id = 0; id < NDIM; id++)
+               	{    
+           	    	totalCorr += MCCosine[id][t0]*MCCosine[id][t1];
+               	}
+
+               	xCorr   = MCCosine[0][t0]*MCCosine[0][t1];
+               	yCorr   = MCCosine[1][t0]*MCCosine[1][t1];
+               	zCorr   = MCCosine[2][t0]*MCCosine[2][t1];
+
+               	for (int id = 0; id < (NDIM-1); id++)
 				{
-        	    	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-        	    	int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
-
-       		    	int t0      = offset0 + it;
-        	    	int t1      = offset1 + it;
-
-                	double cst  = 0.0;
-           	    	for (int id = 0; id < NDIM; id++)
-           	    	{    
-               	    	cst    += MCCosine[id][t0]*MCCosine[id][t1];
-           	    	}
-           	    	DipoleCorr[ii] = cst;
-					ii++;
+           	    	xyCorr += MCCosine[id][t0]*MCCosine[id][t1];
 				}
+               	DipoleCorrXYZ[ii] = totalCorr;
+               	DipoleCorrX[ii]   = xCorr;
+               	DipoleCorrY[ii]   = yCorr;
+               	DipoleCorrZ[ii]   = zCorr;
+               	DipoleCorrXY[ii]  = xyCorr;
+				ii++;
     		}
 		}
 	}
@@ -3756,7 +3769,7 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 	}
 
 	double RCOM = sqrt(dr2);	
-	double R2   = RCOM*RCOM*RCOM;
+	double R2   = RCOM*RCOM;
 	double R5   = R2*R2*RCOM;
 
 #ifdef SHORTFORM
