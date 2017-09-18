@@ -21,11 +21,11 @@ TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 #
 #TypeCal             = 'PIMC'
 #TypeCal             = 'PIGS'
@@ -40,9 +40,9 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 400000
+numbblocks	        = 50000
 numbmolecules       = 2
-numbpass            = 100
+numbpass            = 200
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
@@ -57,7 +57,7 @@ loopStart           = 2
 loopEnd             = 41
 skip                = 2
 
-preskip             = 0
+preskip             = 10000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -163,7 +163,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 4
+	loopStart       = 5
 
 # Loop over jobs
 #list_nb = [8,16,32,64,96,128]
@@ -273,10 +273,20 @@ if status == "analysis":
 		print("")
 		#call(["cat",FileAnalysis.SaveAngDOFS])
 #=========================File Checking===============================#
-		SavedFile = FileAnalysis.SaveEnergy
-		SavedFile = FileAnalysis.SaveCorr
 		try:
+			SavedFile = FileAnalysis.SaveEnergy
 			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveTotalCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveXCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveYCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveZCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveXYCorr
 			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 		except:
 			pass
