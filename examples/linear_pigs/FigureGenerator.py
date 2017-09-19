@@ -9,6 +9,7 @@ import itertools
 from scipy.optimize import curve_fit
 from subprocess import call
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.ticker import ScalarFormatter
 
 class Specification:
 	def __init__(self):
@@ -72,7 +73,7 @@ def	FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactValue,nu
 	call(["open", outfile])
 	#plt.show()
 
-def	FigurePIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
+def	FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
 	outfile = FilePlot
 	fig = plt.figure(figsize=(6, 4), dpi=200)
 
@@ -128,3 +129,89 @@ def	FigurePIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecul
 
 	call(["open", outfile])
 	#plt.show()
+
+def	FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
+	outfile = FilePlot
+	fig = plt.figure(figsize=(4, 8), dpi=200)
+
+	font=12
+	valTau, valRotEnergy, valPotEnergy, valTotalEnergy, errorRotEnergy, errorPotEnergy, errorTotalEnergy = genfromtxt(FileToBePlot, unpack=True, usecols=[1, 3, 4, 5, 7, 8, 9])
+
+	plt.subplot(3, 1, 1)
+	plt.xlim(0.003,0.00505)
+	YLabel = "Rotational"
+	PlotEnergyPIGS(font, valTau,valRotEnergy,errorRotEnergy,variableName,YLabel)
+	ymin, ymax = plt.ylim()
+	xmin, xmax = plt.xlim()
+	PlotLabelEnergyPIGS(font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+
+	plt.subplot(3, 1, 2)
+	plt.xlim(0.003,0.00505)
+	YLabel = "Potential"
+	PlotEnergyPIGS(font, valTau,valPotEnergy,errorPotEnergy,variableName,YLabel)
+
+	plt.subplot(3, 1, 3)
+	plt.xlim(0.003,0.00505)
+	YLabel = "Total"
+	PlotEnergyPIGS(font, valTau,valTotalEnergy,errorTotalEnergy,variableName,YLabel)
+
+	plt.subplots_adjust(top=0.95, bottom=0.10, left=0.25, right=0.95, hspace=0.30, wspace=1.0)
+	#plt.legend(bbox_to_anchor=(0.70, 0.70), loc=2, borderaxespad=0.)
+	plt.savefig(outfile, dpi = 200, format = 'pdf')
+
+	call(["open", outfile])
+	#plt.show()
+
+def PlotLabelEnergyPIGS(font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
+	midpointy = 0.5*(ymax-ymin)
+	deltay = midpointy*0.15
+	midpointx = 0.5*(xmax-xmin)
+	deltax = midpointx*0.15
+	textpositionx = xmin+midpointx-0.25*midpointx
+	textpositiony = ymin+midpointy
+
+	if (variableName == "beta"):
+		plt.text(textpositionx, textpositiony+0*deltay, 'Parameters:', fontsize=10)
+		plt.text(textpositionx, textpositiony-1*deltay, r'$\mathrm{N} =$'+str(numbmolecules)+" "+molecule, fontsize=10)
+		plt.text(textpositionx, textpositiony-2*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=10)
+		plt.text(textpositionx, textpositiony-3*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=10)
+		plt.text(textpositionx, textpositiony-4*deltay, r'$\mathrm{\tau} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=10)
+		plt.text(textpositionx, textpositiony-5*deltay, r'$\mathrm{i} = 1$', fontsize=10)
+
+	if (variableName == "tau"):
+		plt.text(textpositionx, textpositiony+5*deltay, 'Parameters:', fontsize=10)
+		plt.text(textpositionx, textpositiony+4*deltay, r'$\mathrm{N} =$'+str(numbmolecules)+" "+molecule, fontsize=10)
+		plt.text(textpositionx, textpositiony+3*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=10)
+		plt.text(textpositionx, textpositiony+2*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=10)
+		plt.text(textpositionx, textpositiony+1*deltay, r'$\mathrm{\beta} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=10)
+		plt.text(textpositionx, textpositiony+0*deltay, r'$\mathrm{i} = 1$', fontsize=10)
+	
+
+def PlotEnergyPIGS(font,val1,val2,val3,variableName,YLabel):
+	#plt.grid(True)
+	if (variableName == "tau"):
+		plt.xlabel(r'$\mathrm{\tau \ \  Kelvin^{-1}}$', fontsize = font)
+	if (variableName == "beta"):
+		plt.xlabel(r'$\mathrm{\beta \ \  Kelvin^{-1}}$', fontsize = font)
+		
+	if (YLabel == "Total"):
+		plt.ylabel(r'$\mathrm{E_{0}}$ (Kelvin)', fontsize = font)
+		if (variableName == "tau"):
+			plotfitting(val1, val2, val3)
+	if (YLabel == "Potential"):
+		plt.ylabel(r'$\mathrm{V_{0}}$ (Kelvin)', fontsize = font)
+
+	if (YLabel == "Rotational"):
+		plt.ylabel(r'$\mathrm{K_{0}^{Rot}}$ (Kelvin)', fontsize = font)
+
+	plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=1)
+	plt.legend(loc='upper right', shadow=True, fontsize = 8)
+
+
+def fitFunc(var, a, b):
+	return a + b*var*var
+
+def plotfitting(val1, val2, val3):
+	markersize_fig = 10
+	fitParams, fitCovariances = curve_fit(fitFunc, val1, val2, sigma = val3)
+	plt.plot(val1, fitFunc(val1, fitParams[0], fitParams[1]), linestyle = '-.', color = 'r', marker = 'v', label = 'Fit', lw = 1)

@@ -9,6 +9,19 @@ import numpy as np
 from numpy import *
 import math
 
+def makeexecutionfile(src_dir,TypeCal):
+	execution_file_dir  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/"
+	os.chdir(execution_file_dir)
+	call(["make", "clean"])
+	if (TypeCal == "PIGS"):
+		call(["cp", "Makefile-PIGS", "Makefile"])
+	if (TypeCal == "PIGSENT"):
+		call(["cp", "Makefile-PIGSENT", "Makefile"])
+	if (TypeCal == "PIMC"):
+		call(["cp", "Makefile-PIMC", "Makefile"])
+	call(["make"])
+	os.chdir(src_dir)
+
 def compile_rotmat():
 	path_enter_linden = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/"
 	os.chdir(path_enter_linden)

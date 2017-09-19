@@ -25,7 +25,7 @@ status              = "analysis"
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
-NameOfPartition     = "tapas"
+NameOfPartition     = "ntapas"
 #
 #TypeCal             = 'PIMC'
 #TypeCal             = 'PIGS'
@@ -42,7 +42,7 @@ molecule_rot        = "HF"
 #
 numbblocks	        = 50000
 numbmolecules       = 2
-numbpass            = 200
+numbpass            = 100
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
@@ -57,7 +57,7 @@ loopStart           = 2
 loopEnd             = 41
 skip                = 2
 
-preskip             = 10000
+preskip             = 0
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -83,10 +83,10 @@ if (variableName == "tau"):
 		level       = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 	if (molecule_rot == "HF"):
-		step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
+		step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3]
 		#step       = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
 		#step       = [2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  # beads 41 to 61
-		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6]  # beads 57 to 61
+		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.2,1.2,1.2,1.2,1.2]  # beads 57 to 61
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS
 		#step       = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  
 					# 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
@@ -110,12 +110,14 @@ if (variableName == "beta"):
 #==================================Generating files for submission================#
 file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra_file_name)
 if status   == "submission":
+
 	if (RUNDIR == "scratch") or (NameOfServer == "graham"):
 		dir_run_job = "/scratch/tapas/linear_rotors/" 
 	else:	
 		dir_run_job     = "/work/tapas/linear_rotors/"
+
 	execution_file      = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/pimc"     
-			
+	support.makeexecutionfile(src_dir,TypeCal)
 
 if (NameOfServer == "graham"):
 	dir_output      = "/scratch/tapas/linear_rotors/"     
