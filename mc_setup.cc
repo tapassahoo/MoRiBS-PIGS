@@ -643,7 +643,7 @@ void initChain_config(double **pos)
     }
 
 	int NumbAtoms1;
-#ifdef PIGSENT
+#ifdef PIGSENTTYPE
     NumbAtoms1 = NumbAtoms/2;
 #else
 	NumbAtoms1 = NumbAtoms;
@@ -666,7 +666,7 @@ void initChain_config(double **pos)
 		shift[1] += Distance*sin(LatticeTheta)*sin(LatticePhi);
 		shift[2] += Distance*cos(LatticeTheta);
     }
-#ifdef PIGSENT
+#ifdef PIGSENTTYPE
     for (int id = 0; id < NDIM; id++)
     {
 	    shift[id] = 0.0;
