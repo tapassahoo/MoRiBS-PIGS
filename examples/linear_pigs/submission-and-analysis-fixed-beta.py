@@ -15,13 +15,13 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "tau"
+variableName        = "beta"
 #
 TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
@@ -53,11 +53,11 @@ status_cagepot      = "No"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-loopStart           = 2
+loopStart           = 41
 loopEnd             = 81
 skip                = 2
 
-preskip             = 0
+preskip             = 00000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -165,7 +165,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 41
+	loopStart       = 5
 
 # Loop over jobs
 #list_nb = [8,16,32,64,96,128]

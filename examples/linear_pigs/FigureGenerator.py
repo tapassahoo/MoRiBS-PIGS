@@ -138,7 +138,7 @@ def	FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,
 	valTau, valRotEnergy, valPotEnergy, valTotalEnergy, errorRotEnergy, errorPotEnergy, errorTotalEnergy = genfromtxt(FileToBePlot, unpack=True, usecols=[1, 3, 4, 5, 7, 8, 9])
 
 	plt.subplot(3, 1, 1)
-	plt.xlim(0.003,0.00505)
+	plt.xlim(0.002,0.00505)
 	YLabel = "Rotational"
 	PlotEnergyPIGS(font, valTau,valRotEnergy,errorRotEnergy,variableName,YLabel)
 	ymin, ymax = plt.ylim()
@@ -146,12 +146,12 @@ def	FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,
 	PlotLabelEnergyPIGS(font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 
 	plt.subplot(3, 1, 2)
-	plt.xlim(0.003,0.00505)
+	plt.xlim(0.002,0.00505)
 	YLabel = "Potential"
 	PlotEnergyPIGS(font, valTau,valPotEnergy,errorPotEnergy,variableName,YLabel)
 
 	plt.subplot(3, 1, 3)
-	plt.xlim(0.003,0.00505)
+	plt.xlim(0.002,0.00505)
 	YLabel = "Total"
 	PlotEnergyPIGS(font, valTau,valTotalEnergy,errorTotalEnergy,variableName,YLabel)
 
@@ -159,7 +159,8 @@ def	FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,
 	#plt.legend(bbox_to_anchor=(0.70, 0.70), loc=2, borderaxespad=0.)
 	plt.savefig(outfile, dpi = 200, format = 'pdf')
 
-	call(["open", outfile])
+	#call(["open", outfile])
+	call(["okular", outfile])
 	#plt.show()
 
 def PlotLabelEnergyPIGS(font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
@@ -206,6 +207,9 @@ def PlotEnergyPIGS(font,val1,val2,val3,variableName,YLabel):
 
 	plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=1)
 	plt.legend(loc='upper right', shadow=True, fontsize = 8)
+	x = [0.002, 0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005]
+	labels = ['0.002', ' ', '0.003', '', '0.004', ' ', '0.005']
+	plt.xticks(x, labels, rotation='horizontal')
 
 
 def fitFunc(var, a, b):

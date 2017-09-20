@@ -32,13 +32,13 @@ molecule            = "HF"
 molecule_rot        = "HF"
 #
 numbblocks	        = 100000
-numbmolecules       = 6
-numbpass            = 100
+numbmolecules       = 2
+numbpass            = 50
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
 
-preskip             = 10000
+preskip             = 1000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
