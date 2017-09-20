@@ -643,7 +643,7 @@ void initChain_config(double **pos)
     }
 
 	int NumbAtoms1;
-#ifdef ENTANGLEMENT
+#ifdef PIGSENT
     NumbAtoms1 = NumbAtoms/2;
 #else
 	NumbAtoms1 = NumbAtoms;
@@ -666,7 +666,7 @@ void initChain_config(double **pos)
 		shift[1] += Distance*sin(LatticeTheta)*sin(LatticePhi);
 		shift[2] += Distance*cos(LatticeTheta);
     }
-#ifdef ENTANGLEMENT
+#ifdef PIGSENT
     for (int id = 0; id < NDIM; id++)
     {
 	    shift[id] = 0.0;

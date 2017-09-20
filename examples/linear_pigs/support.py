@@ -15,7 +15,7 @@ def makeexecutionfile(src_dir,TypeCal):
 	call(["make", "clean"])
 	if (TypeCal == "PIGS"):
 		call(["cp", "Makefile-PIGS", "Makefile"])
-	if (TypeCal == "PIGSENT"):
+	if (TypeCal == "ENT"):
 		call(["cp", "Makefile-PIGSENT", "Makefile"])
 	if (TypeCal == "PIMC"):
 		call(["cp", "Makefile-PIMC", "Makefile"])

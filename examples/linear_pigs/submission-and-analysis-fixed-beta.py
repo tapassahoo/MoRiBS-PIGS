@@ -15,13 +15,13 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "beta"
+variableName        = "tau"
 #
 TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
@@ -42,7 +42,7 @@ molecule_rot        = "HF"
 #
 numbblocks	        = 50000
 numbmolecules       = 2
-numbpass            = 100
+numbpass            = 200
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
@@ -54,7 +54,7 @@ RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
 loopStart           = 2
-loopEnd             = 41
+loopEnd             = 81
 skip                = 2
 
 preskip             = 0
@@ -165,7 +165,7 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 5
+	loopStart       = 41
 
 # Loop over jobs
 #list_nb = [8,16,32,64,96,128]
