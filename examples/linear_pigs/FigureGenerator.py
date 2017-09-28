@@ -76,22 +76,43 @@ def	FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactValue,nu
 	#call(["okular", outfile])
 	#plt.show()
 
-def	FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
+def	FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint):
 	outfile = FilePlot
 	fig = plt.figure(figsize=(6, 4), dpi=200)
 
 	font=18
-	val1, val2, val3 = genfromtxt(FileToBePlot, unpack=True, usecols=[0, 1, 2], skip_footer = 10)
-
-	plt.errorbar(val1, val2, yerr=val3, color = 'b', ls = '-', label = 'PIGS', linewidth=1)
+	datacorr = genfromtxt(FileToBePlot)
+	FuncCorr = np.zeros((numbmolecules,numbmolecules))
+	ErrorFuncCorr = np.zeros((numbmolecules,numbmolecules))
+	ii = 0
+	for i in range(numbmolecules-1):
+		for j in range((i+1),numbmolecules):
+			nc = 2+(2*ii)
+			nec = nc+1 
+			FuncCorr[i,j] = datacorr[nc]
+			FuncCorr[j,i] = FuncCorr[i,j]
+			ErrorFuncCorr[i,j] = datacorr[nec]
+			ErrorFuncCorr[j,i] = ErrorFuncCorr[i,j]
+			ii = ii+1
+	val1 = np.arange(numbmolecules)
+	val2 = np.zeros(numbmolecules)
+	val3 = np.zeros(numbmolecules)
+	for j in range(numbmolecules):
+		if (j != RefPoint):
+			val2[j] = FuncCorr[RefPoint:(RefPoint+1),j]
+			val3[j] = ErrorFuncCorr[RefPoint:(RefPoint+1),j]
+	
+	plt.errorbar(val1[RefPoint+1:], val2[RefPoint+1:], yerr=val3[RefPoint+1:], color = 'b', ls = '-', label = 'PIGS', linewidth=1)
+	print(val1[RefPoint+1:])
 
 	plt.grid(True)
-	plt.xlim(1.98, 6.02)
+	#plt.xlim(1.98, 6.02)
 
 	ymin, ymax = plt.ylim()
 	midpointy = 0.5*(ymax-ymin)
 	deltay = midpointy*0.15
 	xmin, xmax = plt.xlim()
+	plt.xlim(xmin-0.1,xmax+0.1)
 	midpointx = 0.5*(xmax-xmin)
 	deltax = midpointx*0.15
 	textpositionx = xmin+midpointx-0.25*midpointx
@@ -104,7 +125,7 @@ def	FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,
 		plt.text(textpositionx, textpositiony-2*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=10)
 		plt.text(textpositionx, textpositiony-3*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=10)
 		plt.text(textpositionx, textpositiony-4*deltay, r'$\mathrm{\tau} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=10)
-		plt.text(textpositionx, textpositiony-5*deltay, r'$\mathrm{i} = 1$', fontsize=10)
+		plt.text(textpositionx, textpositiony-5*deltay, r'$\mathrm{i} = $' + str(RefPoint), fontsize=10)
 
 	if (variableName == "tau"):
 		plt.xlabel(r'$\mathrm{\tau \ \  Kelvin^{-1}}$', fontsize = font)
@@ -113,7 +134,7 @@ def	FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,
 		plt.text(textpositionx, textpositiony+3*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=10)
 		plt.text(textpositionx, textpositiony+2*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=10)
 		plt.text(textpositionx, textpositiony+1*deltay, r'$\mathrm{\beta} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=10)
-		plt.text(textpositionx, textpositiony+0*deltay, r'$\mathrm{i} = 1$', fontsize=10)
+		plt.text(textpositionx, textpositiony+0*deltay, r'$\mathrm{i} = $' + str(RefPoint), fontsize=10)
 	
 	if (TypeCorr == "Total"):
 		plt.ylabel(r'$\mathrm{C_{ij}}$', fontsize = font)

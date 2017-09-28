@@ -29,8 +29,8 @@ TypeCal             = 'PIGS'
 #TypeCal             = 'ENT'
 #
 #TypePlot            = "Energy"
-TypePlot            = "ChemPot"
-#TypePlot            = "CorrFunc"
+#TypePlot            = "ChemPot"
+TypePlot            = "CorrFunc"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
@@ -38,13 +38,13 @@ molecule            = "HF"
 molecule_rot        = "HF"
 #
 numbblocks	        = 100000
-numbmolecules       = 2
+numbmolecules       = 8
 numbpass            = 100
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
 
-preskip             = 10000
+preskip             = 0
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -81,36 +81,37 @@ if (TypeCal == "ENT"):
 
 if (TypeCal == "PIGS"):
 	if (TypePlot == "CorrFunc"):
+		RefPoint          = 0
 		TypeCorr          = "Total"
 		if (TypeCorr == "Total"):
-			FileToBePlot   	  = "ResultsOfPIGS/totalcorr.txt"
+			FileToBePlot   	  = FilePlotName.SaveTotalCorr+".txt"
 			FilePlot          = FilePlotName.SaveTotalCorr+".pdf"
 			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
 		TypeCorr          = "XCorr"
 		if (TypeCorr == "XCorr"):
-			FileToBePlot   	  = "ResultsOfPIGS/xcorr.txt"
+			FileToBePlot   	  = FilePlotName.SaveXCorr+".txt"
 			FilePlot          = FilePlotName.SaveXCorr+".pdf"
 			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
 		TypeCorr          = "YCorr"
 		if (TypeCorr == "YCorr"):
-			FileToBePlot   	  = "ResultsOfPIGS/ycorr.txt"
+			FileToBePlot   	  = FilePlotName.SaveYCorr+".txt"
 			FilePlot          = FilePlotName.SaveYCorr+".pdf"
 			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
 		TypeCorr          = "ZCorr"
 		if (TypeCorr == "ZCorr"):
-			FileToBePlot   	  = "ResultsOfPIGS/zcorr.txt"
+			FileToBePlot   	  = FilePlotName.SaveZCorr+".txt"
 			FilePlot          = FilePlotName.SaveZCorr+".pdf"
 			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
 		TypeCorr          = "XYCorr"
 		if (TypeCorr == "XYCorr"):
-			FileToBePlot   	  = "ResultsOfPIGS/xycorr.txt"
+			FileToBePlot   	  = FilePlotName.SaveXYCorr+".txt"
 			FilePlot          = FilePlotName.SaveXYCorr+".pdf"
 			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
 
 #End plotting ---correlation
 
@@ -118,6 +119,7 @@ if (TypeCal == "PIGS"):
 		FileToBePlot   	  = FilePlotName.SaveEnergy+".txt"
 		FilePlot          = FilePlotName.SaveEnergy+".pdf"
 		call(["rm", FilePlot])
+		RefPoint          = 0
 		FigureGenerator.FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 
 #End plotting ---energy
