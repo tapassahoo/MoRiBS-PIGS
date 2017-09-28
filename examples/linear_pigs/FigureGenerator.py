@@ -256,22 +256,14 @@ def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, varia
 	ntot   = np.array(dd)
 	nerrtot= np.array(ee)
 			
-	TypePlot1 = 3
-#=======================
-	if (TypePlot1 == 1):
-		outfile = "PIGS-Results-Energy-vs-NumberOfRotors.pdf"
-	if (TypePlot1 == 2):
-		outfile = "PIGS-Results-EnergyOverNumberOfRotors-vs-NumberOfRotors.pdf"
-	if (TypePlot1 == 3):
-		outfile = "PIGS-Results-ChemicalPotential-vs-NumberOfRotors.pdf"
-#=======================
+	FilePlot = FilePlotName.SaveChemPot+".pdf"
+	outfile  = FilePlot
 
 	fig = plt.figure(figsize=(6, 4), dpi=200)
 
-#=======================
-	font=18
+	TypePlot1 = 3
+	font=12
 	#plt.grid(True)
-	plt.xlim(1.90,8.10)
 	plt.xlabel('N')
 
 	if (TypePlot1 == 1):
@@ -311,6 +303,5 @@ def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, varia
 	plt.subplots_adjust(top=0.95, bottom=0.15, left=0.20, right=0.98, hspace=0.6, wspace=1.0)
 	plt.legend(bbox_to_anchor=(0.60, 0.98), loc=2, borderaxespad=0.)
 	plt.savefig(outfile, dpi = 200, format = 'pdf')
-	#call(["open", outfile])
-	call(["okular", outfile])
-	#plt.show()
+	call(["open", outfile])
+	#call(["okular", outfile])

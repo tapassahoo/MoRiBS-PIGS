@@ -589,7 +589,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread = 4
 	#thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "20-00:00"
+	walltime       = "40-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -883,6 +883,7 @@ class GetFileNamePlot:
 					file_output5  = frontName+"Y-component-correlation-function-"
 					file_output6  = frontName+"Z-component-correlation-function-"
 					file_output7  = frontName+"XandY-component-correlation-function-"
+					file_output8  = frontName+"Chemical-Potential-"
 
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
@@ -894,6 +895,7 @@ class GetFileNamePlot:
 					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
 					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
 					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
+					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Chemical-Potential-"
 	
 	
 			if (self.molecule_rot == "HF"):
@@ -906,6 +908,7 @@ class GetFileNamePlot:
 					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
 					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
 					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+					file_output8  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Chemical-Potential-"
 
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
@@ -917,6 +920,7 @@ class GetFileNamePlot:
 					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
 					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
 					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Chemical-Potential-"
 
 	
 			self.SaveEnergy       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName
@@ -926,6 +930,9 @@ class GetFileNamePlot:
 			self.SaveYCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output5+mainFileName
 			self.SaveZCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output6+mainFileName
 			self.SaveXYCorr       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output7+mainFileName
+			mainFileNameCP        = "vs-number-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+			mainFileNameCP       += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+			self.SaveChemPot      = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output8+mainFileNameCP
 
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"

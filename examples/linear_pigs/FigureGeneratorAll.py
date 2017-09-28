@@ -44,7 +44,7 @@ numbpass            = 100
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
 
-preskip             = 0
+preskip             = 10000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -124,3 +124,5 @@ if (TypeCal == "PIGS"):
 
 	if (TypePlot == "ChemPot"):
 		FigureGenerator.FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA)
+
+#End plotting ---Chemical Potential

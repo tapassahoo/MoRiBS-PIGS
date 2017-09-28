@@ -21,11 +21,11 @@ TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
-NameOfPartition     = "tapas"
+NameOfPartition     = "ntapas"
 #
 #TypeCal             = 'PIMC'
 TypeCal             = 'PIGS'
@@ -40,7 +40,7 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 10
+numbblocks	        = 100000
 numbmolecules       = 2
 numbpass            = 100
 #
