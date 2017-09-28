@@ -15,21 +15,21 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "beta"
+variableName        = "tau"
 #
 TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 #
 #TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
@@ -40,9 +40,9 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 50000
+numbblocks	        = 10
 numbmolecules       = 2
-numbpass            = 200
+numbpass            = 100
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
@@ -53,11 +53,11 @@ status_cagepot      = "No"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-loopStart           = 41
-loopEnd             = 81
+loopStart           = 20
+loopEnd             = 52
 skip                = 2
 
-preskip             = 00000
+preskip             = 0
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -71,7 +71,7 @@ extra_file_name     = ""
 src_dir             = os.getcwd()
 if (variableName == "tau"):
 	parameterName   = "beta"
-	beta            = 0.2
+	beta            = 0.1
 	parameter       = beta
 	temperature     = 1.0/beta   
 #==================================== MCStep ===================================# 
@@ -86,7 +86,8 @@ if (variableName == "tau"):
 		step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3]
 		#step       = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
 		#step       = [2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  # beads 41 to 61
-		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.2,1.2,1.2,1.2,1.2]  # beads 57 to 61
+		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 57 to 61
+		#step        = [1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 57 to 61
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS
 		#step       = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  
 					# 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
@@ -165,7 +166,10 @@ if status == "analysis":
 
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
-	loopStart       = 5
+	if (variableName == "tau"):
+		loopStart       = 40
+	if (variableName == "beta"):
+		loopStart       = 80
 
 # Loop over jobs
 #list_nb = [8,16,32,64,96,128]

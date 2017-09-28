@@ -10,6 +10,8 @@ from scipy.optimize import curve_fit
 from subprocess import call
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import ScalarFormatter
+import support
+import os
 
 class Specification:
 	def __init__(self):
@@ -71,6 +73,7 @@ def	FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactValue,nu
 	plt.savefig(outfile, dpi = 200, format = 'pdf')
 
 	call(["open", outfile])
+	#call(["okular", outfile])
 	#plt.show()
 
 def	FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
@@ -127,6 +130,7 @@ def	FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,
 	plt.legend(bbox_to_anchor=(0.70, 0.70), loc=2, borderaxespad=0.)
 	plt.savefig(outfile, dpi = 200, format = 'pdf')
 
+	#call(["okular", outfile])
 	call(["open", outfile])
 	#plt.show()
 
@@ -138,7 +142,6 @@ def	FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,
 	valTau, valRotEnergy, valPotEnergy, valTotalEnergy, errorRotEnergy, errorPotEnergy, errorTotalEnergy = genfromtxt(FileToBePlot, unpack=True, usecols=[1, 3, 4, 5, 7, 8, 9])
 
 	plt.subplot(3, 1, 1)
-	plt.xlim(0.002,0.00505)
 	YLabel = "Rotational"
 	PlotEnergyPIGS(font, valTau,valRotEnergy,errorRotEnergy,variableName,YLabel)
 	ymin, ymax = plt.ylim()
@@ -146,12 +149,10 @@ def	FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,
 	PlotLabelEnergyPIGS(font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 
 	plt.subplot(3, 1, 2)
-	plt.xlim(0.002,0.00505)
 	YLabel = "Potential"
 	PlotEnergyPIGS(font, valTau,valPotEnergy,errorPotEnergy,variableName,YLabel)
 
 	plt.subplot(3, 1, 3)
-	plt.xlim(0.002,0.00505)
 	YLabel = "Total"
 	PlotEnergyPIGS(font, valTau,valTotalEnergy,errorTotalEnergy,variableName,YLabel)
 
@@ -159,8 +160,8 @@ def	FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,
 	#plt.legend(bbox_to_anchor=(0.70, 0.70), loc=2, borderaxespad=0.)
 	plt.savefig(outfile, dpi = 200, format = 'pdf')
 
-	#call(["open", outfile])
-	call(["okular", outfile])
+	call(["open", outfile])
+	#call(["okular", outfile])
 	#plt.show()
 
 def PlotLabelEnergyPIGS(font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
@@ -207,9 +208,11 @@ def PlotEnergyPIGS(font,val1,val2,val3,variableName,YLabel):
 
 	plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=1)
 	plt.legend(loc='upper right', shadow=True, fontsize = 8)
-	x = [0.002, 0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005]
-	labels = ['0.002', ' ', '0.003', '', '0.004', ' ', '0.005']
-	plt.xticks(x, labels, rotation='horizontal')
+	if (variableName == "tau"):
+		plt.xlim(0.000,0.00505)
+		x = [0.000, 0.0005, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005]
+		labels = ['0.000', '', '0.001', '', '0.002', ' ', '0.003', '', '0.004', ' ', '0.005']
+		plt.xticks(x, labels, rotation='horizontal')
 
 
 def fitFunc(var, a, b):
@@ -217,5 +220,97 @@ def fitFunc(var, a, b):
 
 def plotfitting(val1, val2, val3):
 	markersize_fig = 10
+	xdata = np.linspace(0, 0.006, 10000)
 	fitParams, fitCovariances = curve_fit(fitFunc, val1, val2, sigma = val3)
-	plt.plot(val1, fitFunc(val1, fitParams[0], fitParams[1]), linestyle = '-.', color = 'r', marker = 'v', label = 'Fit', lw = 1)
+	plt.plot(xdata, fitFunc(xdata, fitParams[0], fitParams[1]), linestyle = '-', color = 'r', label = 'Fit', lw = 2)
+
+def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA):
+	aa=[]
+	bb=[]
+	cc=[]
+	dd=[]
+	ee=[]
+	for i in range(2,20):
+		numbmolecules = i
+		aa.append(numbmolecules)
+		nparticle = np.array(aa)
+		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA)
+		FileToBePlot   	  = FilePlotName.SaveEnergy+".txt"
+		if os.path.isfile(FileToBePlot):
+			col_beads, col_tau, col_tot, err_col_tot = loadtxt(FileToBePlot,unpack=True, usecols=[0,1,5,9])
+			if (col_beads.size == 1):
+				bb.append(col_beads)
+				cc.append(col_tau)
+				dd.append(col_tot)
+				ee.append(err_col_tot)
+			else:
+				for j in range(0,col_beads.size):
+					if (col_beads[j] == 61):
+						bb.append(col_beads[j])
+						cc.append(col_tau[j])
+						dd.append(col_tot[j])
+						ee.append(err_col_tot[j])
+
+	nbeads = np.array(bb)
+	ntau   = np.array(cc)
+	ntot   = np.array(dd)
+	nerrtot= np.array(ee)
+			
+	TypePlot1 = 3
+#=======================
+	if (TypePlot1 == 1):
+		outfile = "PIGS-Results-Energy-vs-NumberOfRotors.pdf"
+	if (TypePlot1 == 2):
+		outfile = "PIGS-Results-EnergyOverNumberOfRotors-vs-NumberOfRotors.pdf"
+	if (TypePlot1 == 3):
+		outfile = "PIGS-Results-ChemicalPotential-vs-NumberOfRotors.pdf"
+#=======================
+
+	fig = plt.figure(figsize=(6, 4), dpi=200)
+
+#=======================
+	font=18
+	#plt.grid(True)
+	plt.xlim(1.90,8.10)
+	plt.xlabel('N')
+
+	if (TypePlot1 == 1):
+		plt.ylabel(r'$\mathrm{\langle E_{0} \rangle (Kelvin)}$', fontsize = font)
+	if (TypePlot1 == 2):
+		plt.ylabel(r'$\mathrm{\langle E_{0} \rangle/N \ (Kelvin)}$', fontsize = font)
+	if (TypePlot1 == 3):
+		plt.ylabel(r'$\mathrm{\mu \ (Kelvin)}$', fontsize = font)
+
+	plt.xlabel(r'$\mathrm{N}$', fontsize = font)
+
+	if (TypePlot1 == 1):
+		NumbRotors1  = nparticle
+		TotalEnergy1 = ntot
+		Error1       = nerrtot
+
+	if (TypePlot1 == 2):
+		NumbRotors1  = nparticle
+		TotalEnergy1 = ntot/nparticle
+		Error1       = nerrtot/nparticle
+
+	if (TypePlot1 == 3):
+		mu1 = []
+		errormu1 = []
+		num1 = []
+    	for i in range(1,len(nbeads)):
+        	ii = i-1
+        	mu1.append(ntot[i] - ntot[ii])
+        	num1.append(nparticle[i])
+        	errormu1.append(sqrt(nerrtot[i]*nerrtot[i]+nerrtot[ii]*nerrtot[ii]))
+
+		NumbRotors1  = num1
+		TotalEnergy1 = mu1
+		Error1       = errormu1
+
+	plt.errorbar(NumbRotors1, TotalEnergy1, yerr=Error1, color = 'b', ls = '-', label = 'PIGS-Fit', linewidth=2)
+	plt.subplots_adjust(top=0.95, bottom=0.15, left=0.20, right=0.98, hspace=0.6, wspace=1.0)
+	plt.legend(bbox_to_anchor=(0.60, 0.98), loc=2, borderaxespad=0.)
+	plt.savefig(outfile, dpi = 200, format = 'pdf')
+	#call(["open", outfile])
+	call(["okular", outfile])
+	#plt.show()
