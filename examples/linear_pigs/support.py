@@ -404,8 +404,8 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 	replace("dstep_tr_input", str(step_trans), "qmc9.input", "qmc10.input")
 	replace("dipolemoment_input", str(dipolemoment), "qmc10.input", "qmc11.input")
 	replace("numbpass_input", str(numbpass), "qmc11.input", "qmc12.input")
-	#mcskip = numbbeads*numbpass
-	mcskip = numbpass
+	mcskip = numbbeads*numbpass
+	#mcskip = numbpass
 	replace("mskip_input", str(mcskip), "qmc12.input", "qmc13.input")
 	replace("numbparticle_input", str(particleA), "qmc13.input", "qmc.input")
 	call(["rm", "qmc2.input"])

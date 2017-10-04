@@ -2247,22 +2247,6 @@ void bin_1Ddensity(double r,int dtype)
    }
 }
 
-/*
-#ifdef LINEARROTORS
-void bin_1DdensityCost(double cost)
-{
-   int bin_cost = (int)floor((cost-_min_cost)/_delta_cost);
-
-   if ((bin_cost<MC_BINSCOST) && (bin_cost>=0))
-   {
-     _gr1D[dtype][bin_r] += 1.0;
-     _gr1D_sum[dtype][bin_r] += 1.0;
-   }
-}
-#endif
-*/
-
-
 void SaveGraSum(const char fname [], double acount)
 // accumulate sum for inter-atomic distribution.  should be similar to the pair distribution in SaveDensities1D
 {

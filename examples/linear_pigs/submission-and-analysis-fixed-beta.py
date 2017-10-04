@@ -15,7 +15,7 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "tau"
+variableName        = "beta"
 #
 TransMove           = "No"
 RotMove             = "Yes"
@@ -42,10 +42,10 @@ molecule_rot        = "HF"
 #
 numbblocks	        = 100000
 numbmolecules       = 2
-numbpass            = 100
+numbpass            = 200
 #
 Rpt                 = 10.05
-dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 0.45 #1.826        #J. Chern. Phys. 73(5), 2319 (1980).
 
 status_rhomat       = "Yes"                                                 
 status_cagepot      = "No"                                                      
@@ -53,9 +53,9 @@ status_cagepot      = "No"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-loopStart           = 20
-loopEnd             = 52
-skip                = 2
+loopStart           = 40
+loopEnd             = 102
+skip                = 5
 
 preskip             = 0
 postskip            = 0
@@ -66,12 +66,13 @@ ENT_TYPE 			= "SWAPTOUNSWAP"
 #ENT_TYPE 			= "REGULARPATH"
 particleA           = int(numbmolecules/2)
 
+#extra_file_name     = "end-step-value-"
 extra_file_name     = ""
 
 src_dir             = os.getcwd()
 if (variableName == "tau"):
 	parameterName   = "beta"
-	beta            = 0.1
+	beta            = 0.2
 	parameter       = beta
 	temperature     = 1.0/beta   
 #==================================== MCStep ===================================# 
@@ -86,8 +87,9 @@ if (variableName == "tau"):
 		step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3]
 		#step       = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
 		#step       = [2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  # beads 41 to 61
-		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 57 to 61
-		#step        = [1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 57 to 61
+		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.1
+		#step        = [1.0,0.9,0.8,0.7,0.7]  # beads 61, 71, 81, 91, 101 HF
+		#step        = [0.9, 0.9]  # beads 101 HF
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS
 		#step       = [0.7, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0]  
 					# 2 HF beta 0.2 K-1 #change param6 for 10 Angstrom PIMC
@@ -172,8 +174,10 @@ if (TypeCal == "ENT"):
 		loopStart       = 80
 
 # Loop over jobs
-#list_nb = [8,16,32,64,96,128]
-list_nb  = [i for i in range(loopStart, loopEnd, skip)]
+if (variableName == "beta"):
+	list_nb = [2,4,10,14,20,24,30,34,40]
+if (variableName == "tau"):
+	list_nb  = [i for i in range(loopStart, loopEnd, skip)]
 
 iStep = 0
 for i in list_nb:                                                

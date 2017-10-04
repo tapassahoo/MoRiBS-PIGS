@@ -28,9 +28,9 @@ RotMove             = "Yes"
 TypeCal             = 'PIGS'
 #TypeCal             = 'ENT'
 #
-#TypePlot            = "Energy"
-#TypePlot            = "ChemPot"
-TypePlot            = "CorrFunc"
+TypePlot            = "Energy"
+TypePlot            = "ChemPot"
+#TypePlot            = "CorrFunc"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
@@ -38,7 +38,7 @@ molecule            = "HF"
 molecule_rot        = "HF"
 #
 numbblocks	        = 100000
-numbmolecules       = 8
+numbmolecules       = 2
 numbpass            = 100
 #
 Rpt                 = 10.05

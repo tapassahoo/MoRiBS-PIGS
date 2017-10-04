@@ -251,7 +251,7 @@ def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, varia
 	cc=[]
 	dd=[]
 	ee=[]
-	for i in range(2,20):
+	for i in range(2,12):
 		numbmolecules = i
 		aa.append(numbmolecules)
 		nparticle = np.array(aa)
@@ -320,7 +320,11 @@ def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, varia
 		TotalEnergy1 = mu1
 		Error1       = errormu1
 
-	plt.errorbar(NumbRotors1, TotalEnergy1, yerr=Error1, color = 'b', ls = '-', label = 'PIGS-Fit', linewidth=2)
+	srcfile2         = "ResultsOfPIGS/chemical_potential_unscreened.dat"
+	data2            = loadtxt(srcfile2,unpack=True, usecols=[0,1])
+	xdata, ydata = data2
+	plt.plot(xdata, ydata, linestyle = '--', color = 'r', label = 'Dmitri', lw = 2)
+	plt.errorbar(NumbRotors1, TotalEnergy1, yerr=Error1, color = 'b', ls = '-', label = 'PIGS', linewidth=2)
 	plt.subplots_adjust(top=0.95, bottom=0.15, left=0.20, right=0.98, hspace=0.6, wspace=1.0)
 	plt.legend(bbox_to_anchor=(0.60, 0.98), loc=2, borderaxespad=0.)
 	plt.savefig(outfile, dpi = 200, format = 'pdf')
