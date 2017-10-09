@@ -102,34 +102,35 @@ void InitPotentials(void)
 
   	for (int atype=0;atype<NumbTypes;atype++)
 	{
-   		if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)) 
-   		{
-			if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)))
-  			nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
-
-			if ((MCAtom[atype].molecule == 2) && ((MCAtom[atype].numb  > NumbRotLim) || (MCAtom[atype].numb  < 0)) )
-  			nrerror(_proc_,"Weird # of non-linear rotors"); // check # of non-linear rotors
-
-			if (MCAtom[atype].molecule == 1)
-  			init_pot2D(atype);
-	//  	init_dpot2D(atype);   //revised by Hui Li
-			if(MCAtom[atype].molecule == 3)
-	  		init_pot2D(atype);
-	//  	init_dpot2D(atype);   //revised by Hui Li
-
-
-			if(MCAtom[atype].molecule == 2 && NumbTypes > 1)
-	  		{
-	   			init_pot3D(atype);
-	    	// 	potred_(vtable);
-	  		}
-
-    	}
-   		else                                                  // atoms
+		if (MCAtom[atype].fpot != PotentialRead)
 		{
-#ifdef IOWRITE
-      	init_pot1D(atype);
-#endif
+   			if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)) 
+   			{
+				if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)))
+  				nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
+
+				if ((MCAtom[atype].molecule == 2) && ((MCAtom[atype].numb  > NumbRotLim) || (MCAtom[atype].numb  < 0)) )
+  				nrerror(_proc_,"Weird # of non-linear rotors"); // check # of non-linear rotors
+
+				if (MCAtom[atype].molecule == 1)
+  				init_pot2D(atype);
+	//  		init_dpot2D(atype);   //revised by Hui Li
+				if(MCAtom[atype].molecule == 3)
+	  			init_pot2D(atype);
+	//  		init_dpot2D(atype);   //revised by Hui Li
+
+
+				if(MCAtom[atype].molecule == 2 && NumbTypes > 1)
+	  			{
+	   				init_pot3D(atype);
+	    		// 	potred_(vtable);
+	  			}
+
+    		}
+   			else                                                  // atoms
+			{
+      			init_pot1D(atype);
+			}
 		}
 
 #ifdef CAGEPOT
@@ -137,7 +138,6 @@ void InitPotentials(void)
 		{
   			init_pot2D(atype);
 		}
-		
 #endif
 	}
 }
@@ -487,6 +487,7 @@ void init_pot1D(int atype)
     nrerror(_proc_,"Unknown model of interaction");
 
     string fname    =  (MCAtom[atype].fpot + fextn);   // file name
+	cout<<"TAPAS mc_poten.cc"<<fname<<endl;
     
     int size        =  get_filesize(fname.c_str());  
 

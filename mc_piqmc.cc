@@ -296,6 +296,108 @@ void MCBisectionMove(int type, int time)  // multilevel Metropolis
   	}  // END loop over time slices/atoms
 }
 
+void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
+{
+	int numb = MCAtom[type].numb;
+
+   	double mclambda = MCAtom[type].lambda;    
+   	int    mclevels = MCAtom[type].levels;  // number of levels
+   	int    seg_size = MCAtom[type].mlsegm;  // segmen size  
+
+   	for (int atom=0;atom<numb;atom++)         // one atom to move only
+   	{
+
+      	int offset = MCAtom[type].offset + NumbTimes*atom;
+      	int gatom  = offset/NumbTimes;
+
+// initialize the end points
+
+      	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
+      	for (int id=0;id<NDIM;id++)             
+      	{	  
+         	newcoords[id][offset + time] = MCCoords[id][offset + time];
+         	newcoords[id][offset + pit]  = MCCoords[id][offset + pit];
+      	}
+
+      	double bnorm = 1.0/(mclambda*MCTau);  // variance for gaussian sampling 
+
+      	bool Accepted; 
+
+      	int t0,t1,t2;
+
+      	double pot0 = 0.0;  // potential, current  level
+      	double pot1 = 0.0;  // potential, previous level
+       	
+      	for (int level=0;level<mclevels;level++) // loop over bisection levels
+      	{	                                                          
+         	int level_seg_size = (int)pow(2.0,(mclevels-level));
+
+         	double bkin_norm = bnorm/(double) level_seg_size;
+         	double bpot_norm = MCTau*(double)(level_seg_size/2);
+	   
+         	pot1 = pot0;   // swap level potentials
+         	pot0 = 0.0;
+	   
+         	t2 = 0;
+         	do             // loop over middle points
+         	{
+            	t0 =  t2;                   // left point
+            	t2 =  t0 + level_seg_size;  // right point	
+            	t1 = (t0 + t2)/2;           // middle point
+
+            	int pt0 = (time + t0) % NumbTimes;	
+            	int pt1 = (time + t1) % NumbTimes;	
+            	int pt2 = (time + t2) % NumbTimes;	
+
+//  change the offset if exchange
+ 
+            	for (int id=0;id<NDIM;id++)
+            	{  	   
+               		newcoords[id][offset+pt1]  = 0.5*(newcoords[id][offset+pt0]+newcoords[id][offset+pt2]);
+               		newcoords[id][offset+pt1] += gauss(bkin_norm);
+            	} 
+//---------------------------- the end point approximation    
+
+            	pot0 += (PotEnergy(gatom,newcoords,pt1) - PotEnergy(gatom,MCCoords,pt1));
+  
+            	if (t0!=0)                // skip the contributions of the end points
+            	pot0 += (PotEnergy(gatom,newcoords,pt0) - PotEnergy(gatom,MCCoords,pt0));
+         	}   	      
+         	while (t2<seg_size);        // end the loop over middle points 
+
+// inefficient version
+
+         	double deltav = (pot0-2.0*pot1);  // rho(0,1;tau) 
+         	deltav *= bpot_norm;
+ 
+         	Accepted = false;
+       
+         	if (deltav<0.0)               Accepted = true;
+         	else if (exp(-deltav)>rnd3()) Accepted = true;
+
+         	if (!Accepted) break;
+
+     	}  // END loop over levels        
+
+     	MCTotal[type][MCMULTI] += 1.0;
+     
+     	if (Accepted)     
+     	{
+         	MCAccep[type][MCMULTI] += 1.0;
+ 
+         	for (int id=0;id<NDIM;id++)                // save new coordinates
+         	for (int it=time;it<=(time+seg_size);it++)    
+         	{  
+            	int pit = it % NumbTimes;                // periodicity in time 	       	
+            	MCCoords[id][offset+pit] = newcoords[id][offset+pit];
+         	}                                                           
+      	}	     
+//-----------------------------------------------------------------------  
+//      END bisection 
+//-----------------------------------------------------------------------
+  	}  // END loop over time slices/atoms
+}
+
 void MCBisectionMoveExchange(int type, int time0)  // multilevel Metropolis
 {
    int numb = MCAtom[type].numb;

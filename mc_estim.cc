@@ -65,6 +65,21 @@ void bin_3Ddensity(double,double,double,int);
 double ** _rcf;       
 double ** _rcf_sum;
 
+#ifdef ROTCORR
+const int MAXNATOMS = 20;
+const int MAXROTBEADS = 256;
+double ** _rcfx;
+double ** _rcfx_sum;
+double ** _rcfy;
+double ** _rcfy_sum;
+double  _rcfijx[MAXNATOMS][MAXNATOMS][NUMB_RCF][MAXROTBEADS];
+double  _rcfijx_sum[MAXNATOMS][MAXNATOMS][NUMB_RCF][MAXROTBEADS];
+double  _rcfijy[MAXNATOMS][MAXNATOMS][NUMB_RCF][MAXROTBEADS];
+double  _rcfijy_sum[MAXNATOMS][MAXNATOMS][NUMB_RCF][MAXROTBEADS];
+double  _rcfijz[MAXNATOMS][MAXNATOMS][NUMB_RCF][MAXROTBEADS];
+double  _rcfijz_sum[MAXNATOMS][MAXNATOMS][NUMB_RCF][MAXROTBEADS];
+#endif
+
 void rcf_malloc(void);
 void rcf_init  (void);
 void rcf_mfree (void);
@@ -433,12 +448,24 @@ void rcf_malloc(void)
 {
   _rcf     = doubleMatrix(NUMB_RCF,NumbRotTimes);
   _rcf_sum = doubleMatrix(NUMB_RCF,NumbRotTimes);
+#ifdef ROTCORR
+  _rcfx     = doubleMatrix(NUMB_RCF,NumbRotTimes);
+  _rcfx_sum = doubleMatrix(NUMB_RCF,NumbRotTimes);
+  _rcfy     = doubleMatrix(NUMB_RCF,NumbRotTimes);
+  _rcfy_sum = doubleMatrix(NUMB_RCF,NumbRotTimes);
+#endif
 }
 
 void rcf_mfree(void)
 {
    free_doubleMatrix(_rcf);
    free_doubleMatrix(_rcf_sum);
+#ifdef ROTCORR
+   free_doubleMatrix(_rcfx);
+   free_doubleMatrix(_rcfx_sum);
+   free_doubleMatrix(_rcfy);
+   free_doubleMatrix(_rcfy_sum);
+#endif
 }
 
 void rcf_reset(int mode)
@@ -451,13 +478,43 @@ void rcf_reset(int mode)
 #endif 
 
    	for (int ip=0;ip<NUMB_RCF; ip++) 
-   	for (int it=0;it<NumbRotTimes;it++)
-   	{ 
-      	_rcf    [ip][it] = 0.0;  // block average
+	{
+   		for (int it=0;it<NumbRotTimes;it++)
+   		{ 
+      		_rcf[ip][it]  = 0.0;  // block average
+#ifdef ROTCORR
+      		_rcfx[ip][it] = 0.0;  // block average
+      		_rcfy[ip][it] = 0.0;  // block average
+   			for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+			{ 
+   				for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+    			{
+      				_rcfijx[atom0][atom1][ip][it] = 0.0;
+      				_rcfijy[atom0][atom1][ip][it] = 0.0;
+      				_rcfijz[atom0][atom1][ip][it] = 0.0;
+    			}
+			}
+#endif
 
-       	if (mode == MC_TOTAL)   // total average
-      	_rcf_sum[ip][it] = 0.0;
-    }
+       		if (mode == MC_TOTAL)   // total average
+			{
+      			_rcf_sum[ip][it] = 0.0;
+#ifdef ROTCORR
+     			_rcfx_sum[ip][it] = 0.0;
+       			_rcfy_sum[ip][it] = 0.0;
+   				for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+				{
+   			    	for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+    				{
+      					_rcfijx_sum[atom0][atom1][ip][it] = 0.0;
+      					_rcfijy_sum[atom0][atom1][ip][it] = 0.0;
+      					_rcfijz_sum[atom0][atom1][ip][it] = 0.0;
+    				}
+				}
+#endif
+       		}
+    	}
+	}
 }
 /*
 //added by Hui Li
@@ -2058,46 +2115,188 @@ double GetRotE3D(void)
 }
 
 /* reactive */
-void GetRCF(void)
-//
-//  rotational correlation function
-//
+void GetRCF(void) // rotational correlation function //
 {
-   int type = IMTYPE; 
+	int type = IMTYPE; 
+	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+	{
+   		int offset0 = MCAtom[type].offset + (NumbTimes*atom0);
 
-   int offset = MCAtom[type].offset; // the same offset for rot and trans coordinates
- 
+		for (int it0 = 0; it0 < NumbRotTimes; it0++)
+		{
+			int t0 = offset0 +  it0;
+
+			for (int itc = 0; itc < NumbRotTimes; itc++)  
+			{
+				int tc = offset0 + (it0 + itc) % NumbRotTimes;
+
+				double p0  = 0.0;
+
+				for (int id = 0; id < NDIM; id++)
+				{
+					p0  += (MCCosine[id][t0]*MCCosine[id][tc]);
+				}
+				_rcf     [0][itc]  += p0;   // block average
+				_rcf_sum [0][itc]  += p0;   // total average
+
+				for (int in = 1; in < NUMB_RCF; in++)       // rcf[0][] should be the same as rcf[1][]
+				{
+					double pleg = 1.0;
+
+					//if (p0<PLONE)
+					//pleg = gsl_sf_legendre_Pl(in,p0); // inefficient
+					_rcf     [in][itc] += pleg;
+					_rcf_sum [in][itc] += pleg;
+				}
+			} // END offsets
+		}    // END average over the time origin
+
+#ifdef ROTCORR
+		for (int it0 = 0; it0 < NumbRotTimes; it0++)
+		{
+			int t0 = offset0 +  it0;
+
+			for (int itc = 0; itc < NumbRotTimes; itc++)  
+			{
+				int tc = offset0 + (it0 + itc) % NumbRotTimes;
+
+				double p0x = 0.0;
+				double p0y = 0.0;
+
+				for (int id = 0; id < NDIM; id++)
+				{
+					p0x += (MCCosinex[id][t0]*MCCosinex[id][tc]);
+					p0y += (MCCosiney[id][t0]*MCCosiney[id][tc]);
+				}
+				_rcfijx[atom0][atom0][0][itc]     +=p0x;
+				_rcfijx_sum[atom0][atom0][0][itc] +=p0x;
+				_rcfijy[atom0][atom0][0][itc]     +=p0y;
+				_rcfijy_sum[atom0][atom0][0][itc] +=p0y;
+				_rcfijz[atom0][atom0][0][itc]     +=p0;
+				_rcfijz_sum[atom0][atom0][0][itc] +=p0;
+				_rcfx     [0][itc] += p0x;   // block average x
+				_rcfx_sum [0][itc] += p0x;   // total average x
+				_rcfy     [0][itc] += p0y;   // block average y
+				_rcfy_sum [0][itc] += p0y;   // total average y
+
+				for (int in = 1; in < NUMB_RCF; in++)       // rcf[0][] should be the same as rcf[1][]
+				{
+					double pleg = 1.0;
+
+					//if (p0<PLONE)
+					//pleg = gsl_sf_legendre_Pl(in,p0); // inefficient
+
+					_rcfijx[atom0][atom0][in][itc]     +=pleg;
+					_rcfijx_sum[atom0][atom0][in][itc] +=pleg;
+					_rcfijy[atom0][atom0][in][itc]     +=pleg;
+					_rcfijy_sum[atom0][atom0][in][itc] +=pleg;
+					_rcfijz[atom0][atom0][in][itc]     +=pleg;
+					_rcfijz_sum[atom0][atom0][in][itc] +=pleg;
+
+					_rcfx     [in][itc] += pleg;
+					_rcfx_sum [in][itc] += pleg;
+					_rcfy     [in][itc] += pleg;
+					_rcfy_sum [in][itc] += pleg;
+				}
+			} // END offsets
+		}    // END average over the time origin
+#endif
+
+//I J RCF
+#ifdef ROTCORR
+		for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+		{
+			int offset1 = (NumbTimes*atom1);
+
+			for (int it0 = 0; it0 < NumbRotTimes; it0++)
+			{
+				int t0 = offset0 + it0;
+   				int t1 = offset1 + it0;
+
+   				for (int itc = 0; itc < NumbRotTimes; itc++)  // offsets
+   				{
+       				int tc = offset0 + (it0 + itc) % NumbRotTimes;
+       				int tc1= offset1 + (it0 + itc) % NumbRotTimes;
+
+          			double p0ijz = 0.0;
+          			double p0ijx = 0.0;
+          			double p0ijy = 0.0;
+
+          			for (int id=0;id<NDIM;id++)
+          			{
+          				p0ijz += (MCCosine[id][t0]*MCCosine[id][tc1]);
+          				p0ijx += (MCCosinex[id][t0]*MCCosinex[id][tc1]);
+          				p0ijy += (MCCosiney[id][t0]*MCCosiney[id][tc1]);
+          			}
+         			_rcfijz     [atom0][atom1][0][itc] += p0ijz;   // block average z
+         			_rcfijz_sum [atom0][atom1][0][itc] += p0ijz;   // total average z
+         			_rcfijx     [atom0][atom1][0][itc] += p0ijx;   // block average x
+         			_rcfijx_sum [atom0][atom1][0][itc] += p0ijx;   // total average x
+         			_rcfijy     [atom0][atom1][0][itc] += p0ijy;   // block average y
+         			_rcfijy_sum [atom0][atom1][0][itc] += p0ijy;   // total average y
+         			_rcfijz     [atom1][atom0][0][itc] += p0ijz;   // block average z
+         			_rcfijz_sum [atom1][atom0][0][itc] += p0ijz;   // total average z
+         			_rcfijx     [atom1][atom0][0][itc] += p0ijx;   // block average x
+         			_rcfijx_sum [atom1][atom0][0][itc] += p0ijx;   // total average x
+         			_rcfijy     [atom1][atom0][0][itc] += p0ijy;   // block average y
+         			_rcfijy_sum [atom1][atom0][0][itc] += p0ijy;   // total average y
+
+          			for (int in	= 1;in < NUMB_RCF; in++)       // rcf[0][] should be the same as rcf[1][]
+          			{
+              			double pleg = 1.0;
+
+             			_rcfijz     [atom0][atom1][in][itc] += pleg;
+             			_rcfijz_sum [atom0][atom1][in][itc] += pleg;
+             			_rcfijx     [atom0][atom1][in][itc] += pleg;
+             			_rcfijx_sum [atom0][atom1][in][itc] += pleg;
+             			_rcfijy     [atom0][atom1][in][itc] += pleg;
+             			_rcfijy_sum [atom0][atom1][in][itc] += pleg;
+             			_rcfijz     [atom1][atom0][in][itc] += pleg;
+             			_rcfijz_sum [atom1][atom0][in][itc] += pleg;
+             			_rcfijx     [atom1][atom0][in][itc] += pleg;
+             			_rcfijx_sum [atom1][atom0][in][itc] += pleg;
+             			_rcfijy     [atom1][atom0][in][itc] += pleg;
+						_rcfijy_sum [atom1][atom0][in][itc] += pleg;
+
+					}
+				} // END offsets
+			}    // END average over the time origin
+		}//END loop aver atom1
+#endif
+	}//END loop over atom0
+#ifdef IOWRITE
    int atom  = 0;                    // only one molecular impurtiy
    offset   = NumbTimes*atom;
    int gatom = offset/NumbTimes;
 
-   for (int it0=0;it0<NumbRotTimes;it0++)    
-   {
-      int t0 = offset +  it0;
+	for (int it0=0;it0<NumbRotTimes;it0++)    
+	{
+      	int t0 = offset +  it0;
 
-      for (int itc=0;itc<NumbRotTimes;itc++)  // offsets
-      {	
-          int tc = offset + (it0 + itc) % NumbRotTimes;
+      	for (int itc=0;itc<NumbRotTimes;itc++)  // offsets
+      	{	
+          	int tc = offset + (it0 + itc) % NumbRotTimes;
 
-          double p0 = 0.0;
-          for (int id=0;id<NDIM;id++)
-          p0 += (MCCosine[id][t0]*MCCosine[id][tc]);
+          	double p0 = 0.0;
+          	for (int id=0;id<NDIM;id++)
+          	p0 += (MCCosine[id][t0]*MCCosine[id][tc]);
 
-         _rcf     [0][itc] += p0;   // block average
-         _rcf_sum [0][itc] += p0;   // total average  
+         	_rcf     [0][itc] += p0;   // block average
+         	_rcf_sum [0][itc] += p0;   // total average  
 
-	  for (int in=1;in<NUMB_RCF;in++)       // rcf[0][] should be the same as rcf[1][]
-          {
-              double pleg = 1.0;
+	  		for (int in=1;in<NUMB_RCF;in++)       // rcf[0][] should be the same as rcf[1][]
+          	{
+              	double pleg = 1.0;
  
-	      if (p0<PLONE)
-//	      pleg = gsl_sf_legendre_Pl(in,p0); // inefficient 	  
+	      		if (p0<PLONE)
+//	      		pleg = gsl_sf_legendre_Pl(in,p0); // inefficient 	  
 
-             _rcf     [in][itc] += pleg;     
-             _rcf_sum [in][itc] += pleg;     
-	  }
-      } // END offsets	
-   }    // END average over the time origin 
+             	_rcf     [in][itc] += pleg;     
+             	_rcf_sum [in][itc] += pleg;     
+	  		}
+      	} // END offsets	
+   	}    // END average over the time origin 
+#endif
 }
 
 void SaveRCF(const char fname [], double acount, int mode)
@@ -2107,50 +2306,216 @@ void SaveRCF(const char fname [], double acount, int mode)
 //  mode:  MC_BLOCK - block averages
 //
 {
-  fstream fid;
-  string  frcf;
-
-  frcf  = fname;
-
-  if (mode == MC_TOTAL)    // accumulated averages
-  frcf += IO_SUM; 
-
-  frcf += IO_EXT_RCF;
-
-  fid.open(frcf.c_str(),ios::out); io_setout(fid);
-
-  double norm = acount*(double)NumbRotTimes;
-
-  double ** rcf_save;
-
-  rcf_save = _rcf;
-  if (mode == MC_TOTAL)    // accumulated averages
-  rcf_save = _rcf_sum;
-
-  for (int it=0;it<=NumbRotTimes;it++)    // save <n(tau)n(0)>
-  {	  
-     fid << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK; 
-     fid << setw(IO_WIDTH) << rcf_save[0][it % NumbRotTimes]/norm << BLANK;
+	fstream fid;
+	string  frcf;
  
-     fid << endl;
-  }
+	frcf  = fname;
+	if (mode == MC_TOTAL)    // accumulated averages
+   	{
+    	frcf  += IO_SUM;
+   	}
+	frcf  += IO_EXT_RCF;
 
-  fid << endl;  // gnuplot index : at list two blank lines
-  fid << endl;
-  fid << COMMENTS << endl;
+  	double norm = acount*(double)NumbRotTimes;
+  	double ** rcf_save;
+	rcf_save  = _rcf;
 
-  for (int it=0;it<=NumbRotTimes;it++)              // save <Pl(nn)>
-  {	  
-     fid << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK; 
+  	if (mode == MC_TOTAL)    // accumulated averages
+    {
+     	rcf_save  = _rcf_sum;
+    }
+
+    fid.open(frcf.c_str(),ios::out); io_setout(fid);
+    for (int it = 0; it < NumbRotTimes; it++)    // save <n(tau)n(0)>
+    {
+        fid << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK;
+        fid << setw(IO_WIDTH) << rcf_save[0][it % NumbRotTimes]/norm << BLANK;
+        fid << endl;
+
+    }
+    fid << endl;  // gnuplot index : at list two blank lines
+    fid << endl;
+    fid << COMMENTS << endl;
+
+    for (int it = 0; it < NumbRotTimes; it++)              // save <Pl(nn)>
+    {
+        fid << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK;
+
+        for (int ip = 1; ip < NUMB_RCF; ip++)
+		{
+        	fid << setw(IO_WIDTH) << rcf_save[ip][it % NumbRotTimes]/norm << BLANK;
+		}
+
+        fid << endl;
+    }
+    fid.close();
+
+#ifdef ROTCORR
+	fstream fidx, fidy;
+	string  frcfx, frcfy;
  
-     for (int ip=1;ip<NUMB_RCF;ip++) 
-     fid << setw(IO_WIDTH) << rcf_save[ip][it % NumbRotTimes]/norm << BLANK; 
-    
-     fid << endl; 
-  }
+	frcfx = fname;
+  	frcfy = fname;
+	frcfx += IO_x;
+	frcfy += IO_y;
 
-  fid.close();
+	if (mode == MC_TOTAL)    // accumulated averages
+   	{
+    	frcfx += IO_SUM;  
+    	frcfy += IO_SUM;
+   	}
+  	frcfx += IO_EXT_RCF;
+  	frcfy += IO_EXT_RCF;  
+
+  	double ** rcfx_save;
+  	double ** rcfy_save;
+
+  	rcfx_save = _rcfx;
+  	rcfy_save = _rcfy;
+
+  	if (mode == MC_TOTAL)    // accumulated averages
+    {
+     	rcfx_save = _rcfx_sum;
+     	rcfy_save = _rcfy_sum;
+    }
+
+    fidx.open(frcfx.c_str(),ios::out); io_setout(fidx);
+    fidy.open(frcfy.c_str(),ios::out); io_setout(fidy);
+
+    for (int it = 0; it < NumbRotTimes; it++)    // save <n(tau)n(0)>
+    {
+        fidx << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK;
+        fidx << setw(IO_WIDTH) << rcfx_save[0][it % NumbRotTimes]/norm << BLANK;
+        fidx << endl;
+
+        fidy << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK;
+        fidy << setw(IO_WIDTH) << rcfy_save[0][it % NumbRotTimes]/norm << BLANK;
+        fidy << endl;
+    }
+    fidx << endl;  // gnuplot index : at list two blank lines
+    fidx << endl;
+    fidx << COMMENTS << endl;
+
+    fidy << endl;  // gnuplot index : at list two blank lines
+    fidy << endl;
+    fidy << COMMENTS << endl;
+
+    for (int it = 0; it < NumbRotTimes; it++)              // save <Pl(nn)>
+    {
+        fidx << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK;
+        fidy << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK;
+
+        for (int ip = 1; ip < NUMB_RCF; ip++)
+		{
+        	fidx << setw(IO_WIDTH) << rcfx_save[ip][it % NumbRotTimes]/norm << BLANK;
+        	fidy << setw(IO_WIDTH) << rcfy_save[ip][it % NumbRotTimes]/norm << BLANK;
+		}
+
+        fidx << endl;
+        fidy << endl;
+    }
+    fidx.close();
+    fidy.close();
+#endif
+
+#ifdef IOWRITE
+	string frcf0x,frcf0y,frcf0z
+	ofstream fid0x,fid0y,fid0z
+	const char fnamex [] = "_ITACF_X";
+	const char fnamey [] = "_ITACF_Y";
+	const char fnamez [] = "_ITACF_Z";
+	frcf0x =MCFileName + fnamex;
+	frcf0y =MCFileName + fnamey;
+	frcf0z =MCFileName + fnamez;
+
+	if (mode == MC_TOTAL)    // accumulated averages
+   	{
+  		frcf0x += IO_SUM;
+  		frcf0y += IO_SUM;
+  		frcf0z += IO_SUM;
+   	}
+  	fid0x.open(frcf0x.c_str(),ios::app);  
+  	fid0y.open(frcf0y.c_str(),ios::app);
+  	fid0z.open(frcf0z.c_str(),ios::app);
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+	{
+    	for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+     	{
+     		fid0x << atom0 << BLANK << atom1 <<BLANK;
+     		fid0y << atom0 << BLANK << atom1 <<BLANK;
+     		fid0z << atom0 << BLANK << atom1 <<BLANK;
+     		for (int it = 0; it < NumbRotTimes; it++) 
+     		{
+     			fid0x << _rcfijx[atom0][atom1][0][it % NumbRotTimes]/norm<<BLANK;
+     			fid0y << _rcfijy[atom0][atom1][0][it % NumbRotTimes]/norm<<BLANK;
+     			fid0z << _rcfijz[atom0][atom1][0][it % NumbRotTimes]/norm<<BLANK;
+     		} 
+		}
+	}
+    fid0x << endl;
+    fid0y << endl;
+    fid0z << endl;
+  
+  	fid0x.close();
+  	fid0y.close();
+  	fid0z.close();
+#endif
 }
+/* reactive */
+
+#ifdef IOWRITE
+void SaveRCF(const char fname [], double acount, int mode)
+//  save rotational correlation functions
+//  
+//  mode:  MC_TOTAL - accumulated averages
+//  mode:  MC_BLOCK - block averages
+//
+{
+	fstream fid;
+  	string  frcf;
+
+  	frcf  = fname;
+
+  	if (mode == MC_TOTAL)    // accumulated averages
+  	frcf += IO_SUM; 
+
+  	frcf += IO_EXT_RCF;
+
+  	fid.open(frcf.c_str(),ios::out); io_setout(fid);
+
+  	double norm = acount*(double)NumbRotTimes;
+
+  	double ** rcf_save;
+
+  	rcf_save = _rcf;
+  	if (mode == MC_TOTAL)    // accumulated averages
+  	rcf_save = _rcf_sum;
+
+  	for (int it=0;it<=NumbRotTimes;it++)    // save <n(tau)n(0)>
+  	{	  
+     	fid << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK; 
+     	fid << setw(IO_WIDTH) << rcf_save[0][it % NumbRotTimes]/norm << BLANK;
+ 
+     	fid << endl;
+  	}
+
+  	fid << endl;  // gnuplot index : at list two blank lines
+  	fid << endl;
+  	fid << COMMENTS << endl;
+
+  	for (int it=0;it<=NumbRotTimes;it++)              // save <Pl(nn)>
+  	{	  
+     	fid << setw(IO_WIDTH) << (double)it*MCRotTau << BLANK; 
+ 
+     	for (int ip=1;ip<NUMB_RCF;ip++) 
+     	fid << setw(IO_WIDTH) << rcf_save[ip][it % NumbRotTimes]/norm << BLANK; 
+    
+     	fid << endl; 
+  	}
+
+  	fid.close();
+}
+#endif
 /* reactive */
 
 double GetConfPoten_Densities(void)

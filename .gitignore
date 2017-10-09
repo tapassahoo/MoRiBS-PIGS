@@ -88,3 +88,5 @@ eigen-values-of-two-rotors-new/*out
 !eigen-values-of-two-rotors-new/
 examples/linear_pigs/test*
 examples/linear_pigs/*.pyc
+
+/examples/nonlinear-molecule/*

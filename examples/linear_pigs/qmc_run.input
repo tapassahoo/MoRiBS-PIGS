@@ -24,7 +24,7 @@ TEMPERATURE   temperature_input       #  Kelvin, for a PIGS simulation, this set
 #ATOM  He4  3   BOSE    0.15     4    helium   PRIMITIVE    #    
 # with buck and PRIMTIVE above, the potentional filename should be  buck.pot with values in Angstroms and Kelvin
 #ATOM      H2  5   BOSE     0.14     3    parah2   PRIMITIVE     #    
-LINEARROTORS  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   hfc60    PRIMITIVE   #  
+LINEARROTORS  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   nopot    PRIMITIVE   #  
 #PLANAR  H2 1   BOLTZMANN    0.08  3   h2n2ogr    PRIMITIVE   #  
 # comment molecule above for pure clusters
 

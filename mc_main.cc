@@ -651,9 +651,9 @@ ParamsPotential();
 				// SaveRhoThetaChi(MCFileName.c_str(),totalCount,MC_TOTAL); // we don't need 2d angular distribution comparison now
            	}
 
+#endif
 			if (ROTATION)                  // DUMP  accumulated average
 				SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
-#endif
 		}
 
 		//  CHECKPOINT: save status, rnd streams and configs ------
@@ -1333,9 +1333,7 @@ void MCGetAveragePIGS(void)
 		_rotsq_total += ErotSQ;
 
 //Tapas commented out
-#ifdef IOWRITE
 	     GetRCF(); 
-#endif
 	}
 
 #ifdef IOWRITE
@@ -1496,9 +1494,7 @@ void MCGetAveragePIMC(void)
 		_rotsq_total += ErotSQ;
 
 //Tapas commented out
-#ifdef IOWRITE
 	     GetRCF(); 
-#endif
 
 	}
 
@@ -1658,7 +1654,9 @@ void MCSaveBlockAverages(long int blocknumb)
     }
 
 	if (ROTATION) 
-    SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
+	{
+    	SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
+	}
 #endif
 
 //

@@ -64,6 +64,7 @@ const char STATUS_STARTBLOCK[] = "STARTBLOCK";
 const char IO_DISTANCE[]       = "DISTANCE";
 const char IO_DIPOLEMOMENT[]   = "DIPOLEMOMENT";
 const char IO_NUMBPARTICLE[]       = "NUMBPARTICLE";
+string PotentialRead = "nopot";
 
 string MasterDir;
 string OutputDir;
@@ -170,20 +171,18 @@ void IOReadParams(const char in_file[],int & mc_status)
 
         	inf>>MCAtom[type].mcstep;        // [4]
         	inf>>MCAtom[type].levels;        // [5]
-#ifdef CAGEPOT
         	inf>>MCAtom[type].fpot;          // [6]
 
-        	string smod;                     // model of interaction 
-        	int    pmod; 
-        	inf>>smod;                       // [7]
+       		string smod;                     // model of interaction 
+       		int    pmod; 
+       		inf>>smod;                       // [7]
 
-        	if      (smod == PMODEL[PRIMITIVE]) pmod = PRIMITIVE; 
-        	else if (smod == PMODEL[EFFECTIVE]) pmod = EFFECTIVE; 
-        	else 
-        	nrerror(_proc_,"Unknown model of interaction");
+       		if      (smod == PMODEL[PRIMITIVE]) pmod = PRIMITIVE; 
+       		else if (smod == PMODEL[EFFECTIVE]) pmod = EFFECTIVE; 
+       		else 
+       		nrerror(_proc_,"Unknown model of interaction");
 
-        	MCAtom[type].pmod = pmod;
-#endif
+       		MCAtom[type].pmod = pmod;
 
 // ------- set atom/molecule flag ------------------------- 
 

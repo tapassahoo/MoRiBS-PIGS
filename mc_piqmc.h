@@ -3,6 +3,7 @@
 
 void MCMolecularMove(int);
 void MCBisectionMove(int,int);
+void MCBisectionMovePIGS(int,int);
 void MCRotationsMove(int);
 void MCRotLinStep(int,int,int,int,double,double,double,double,double &,double &);
 void MCRotLinStepPIMC(int,int,int,int,double,double,double,double,double &,double &);

@@ -15,13 +15,13 @@ import support
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "beta"
+variableName        = "tau"
 #
 TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
@@ -40,12 +40,12 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 100000
+numbblocks	        = 100
 numbmolecules       = 2
-numbpass            = 200
+numbpass            = 100
 #
 Rpt                 = 10.05
-dipolemoment        = 0.45 #1.826        #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 0.45        #J. Chern. Phys. 73(5), 2319 (1980).
 
 status_rhomat       = "Yes"                                                 
 status_cagepot      = "No"                                                      
@@ -87,7 +87,7 @@ if (variableName == "tau"):
 		step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3]
 		#step       = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  
 		#step       = [2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  # beads 41 to 61
-		step        = [1.7,1.7,1.6,1.6,1.6,1.6,1.6,1.5,1.5,1.5,1.4,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.1
+		step        = [1.7,1.6,1.6,1.6,1.5,1.4,1.4,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.1
 		#step        = [1.0,0.9,0.8,0.7,0.7]  # beads 61, 71, 81, 91, 101 HF
 		#step        = [0.9, 0.9]  # beads 101 HF
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS

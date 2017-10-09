@@ -24,6 +24,7 @@ extern string OutputDir;
 extern string FNPrefix;
 
 extern string MCFileName;                // OutputDir+FNPrefix 
+extern string PotentialRead;
  
 //----IO errors----------------------------------------------
 
@@ -90,6 +91,8 @@ const char IO_EXT_SFFSUP3D []    = ".sffs3d";   // area estimators for non-linea
 const char FPERMU []    = "permutation.tab";   // permutation table
 
 const char IO_SUM [] = "_sum";          // file name postfix for accum averages
+const char IO_x [] = "_x";          // file name postfix for accum averages
+const char IO_y [] = "_y";          // file name postfix for accum averages
 
 #endif  //mc_input.h
 
