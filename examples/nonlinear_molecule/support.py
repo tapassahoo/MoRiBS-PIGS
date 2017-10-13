@@ -1,0 +1,1024 @@
+#!/usr/bin/python
+ 
+import time
+from subprocess import call
+from os import system
+import os
+import decimal
+import numpy as np
+from numpy import *
+import math
+
+def makeexecutionfile(src_dir,TypeCal):
+	execution_file_dir  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/"
+	os.chdir(execution_file_dir)
+	call(["make", "clean"])
+	if (TypeCal == "PIGS"):
+		call(["cp", "Makefile-PIGS", "Makefile"])
+	if (TypeCal == "ENT"):
+		call(["cp", "Makefile-PIGSENT", "Makefile"])
+	if (TypeCal == "PIMC"):
+		call(["cp", "Makefile-PIMC", "Makefile"])
+	call(["make"])
+	os.chdir(src_dir)
+
+def compile_rotmat():
+	path_enter_linden = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/"
+	os.chdir(path_enter_linden)
+	call(["make", "clean"])
+	call(["make"])
+	path_exit_linden  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+	os.chdir(path_exit_linden)
+
+def compile_cagepot():
+	path_enter_cagepot = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/tabulated_potential/"
+	os.chdir(path_enter_cagepot)
+	call(["make", "clean"])
+	call(["make"])
+	path_exit_cagepot  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+	os.chdir(path_exit_cagepot)
+
+def jackknife(mean,data):
+	ai            = [((np.sum(data) - data[j])/(len(data) - 1.0)) for j in range(len(data))]
+	deviation     = ai - mean
+	devsq         = np.multiply(deviation,deviation)
+	error         = sqrt(np.sum(devsq)*(len(data)-1.0)/len(data))
+	return error
+
+def levels(number):
+	for j in range (10):
+		jj=pow(2,j)
+
+		if jj <= (number-1):
+			level = j
+		else:
+			break
+	return level
+
+def dropzeros(number):
+    mynum          = decimal.Decimal(number).normalize()
+    # e.g 22000 --> Decimal('2.2E+4')
+    return mynum.__trunc__() if not mynum % 1 else float(mynum)
+
+def GetBconst(molecule_rot):
+	'''
+	This function calculates rotational Bconstant for linear rotor
+	'''
+	'''
+	autocminverse  = 2.1947463137e+5
+	energyj0       = -36117.5942855
+	energyj1       = -35999.1009407
+	bconst         = 0.5*(energyj1-energyj0)     # in cm^-1
+	'''
+	if (molecule_rot == "HF"):
+		#bconst	   = 20.9561                     # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
+		bconst	   = 20.561                      # in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12, page 1464, year 1967
+	if (molecule_rot == "H2"):
+		bconst	   = 60.853
+	return bconst
+
+def replace(string_old, string_new, file1, file2):
+	'''
+	This function replaces old string by new string
+	'''
+	f1             = open(file1, 'r')
+	f2             = open(file2, 'w')
+	for line in f1:
+		f2.write(line.replace(string_old, string_new))
+	f1.close()
+	f2.close()
+
+def beads(tau,beta):
+	'''
+	This function determins number of beads
+	'''
+	numbbeads1     =beta/tau+1
+	numbbeads2     = int(round(numbbeads1,0))
+	if (numbbeads2 % 2 == 0):
+		numbbeads2 = numbbeads2 + 1
+	return numbbeads2
+
+def jobstring(file_name,value,thread):
+	'''
+	This function creats jobstring for #PBS script
+	'''
+	job_name       = "job_"+str(file_name)+str(value)
+	walltime       = "200:00:00"
+	processors     = "nodes=1:ppn="+str(thread)
+	command_pimc_run = "./pimc"
+	omp_thread     = str(thread)
+
+	job_string     = """#!/bin/bash
+#PBS -N %s
+#PBS -l walltime=%s
+##PBS -q medium
+#PBS -l %s
+#PBS -o %s.out
+#PBS -e %s.err
+export OMP_NUM_THREADS=%s
+cd $PBS_O_WORKDIR
+%s""" % (job_name, walltime, processors, job_name, job_name, omp_thread, command_pimc_run)
+	return job_string
+
+def inputstr(numbbeads,tau,temperature):
+	'''
+	This function gives us the exact values of the agruments
+	'''
+	argu1          = "%7d"   % numbbeads
+	argu2          = "%20.15f" % tau
+	argu3          = "%7.5f" % temperature
+	output ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
+	return output
+
+def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip):
+	'''
+	This function gives us the output 
+	'''
+	print(final_dir_in_work)
+	if (TypeCal == "PIMC"):
+		col_block, col_kin, col_rot, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+		print(len(col_tot))
+	
+		mean_kin      = np.mean(col_kin)
+		mean_rot      = np.mean(col_rot)
+		mean_pot      = np.mean(col_pot)
+		mean_tot      = np.mean(col_tot)
+
+		error_kin     = np.std(col_kin,ddof=1)/sqrt(len(col_kin))
+		error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
+		error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
+		error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
+
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_kin, mean_rot, mean_pot, mean_tot, error_kin, error_rot, error_pot, error_tot)
+		output  += "\n"
+
+	if (TypeCal == "PIGS"):
+		col_block, col_rot, col_rot1, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+		print(len(col_tot))
+	
+		mean_rot      = np.mean(col_rot)
+		mean_rot1     = np.mean(col_rot1)
+		mean_pot      = np.mean(col_pot)
+		mean_tot      = np.mean(col_tot)
+
+		error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
+		error_rot1    = np.std(col_rot1,ddof=1)/sqrt(len(col_rot1))
+		error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
+		error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
+
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_rot, mean_rot1, mean_pot, mean_tot, error_rot, error_rot1, error_pot, error_tot)
+		output  += "\n"
+	return output
+
+def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip):
+	'''
+	This function gives us the output 
+	'''
+	col_block, col_costheta, col_compx, col_compy, col_compz = genfromtxt(final_dir_in_work+"/results/pigs.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+	'''
+	fd             = open(final_dir_in_work+'/results/pigs_instant.dof', 'rb')
+	shape          = (-1,5) 
+	dataBin        = np.fromfile(file=fd, count = -1, dtype=np.float64).reshape(shape)
+	col_block      = dataBin[:,0]
+	col_costheta   = dataBin[:,1]
+	col_compx      = dataBin[:,2]
+	col_compy      = dataBin[:,3]
+	col_compz      = dataBin[:,4]
+	'''
+
+	mean_costheta  = np.mean(col_costheta)
+	mean_compx     = np.mean(col_compx)
+	mean_compy     = np.mean(col_compy)
+	mean_compz     = np.mean(col_compz)
+
+	error_costheta = np.std(col_costheta,ddof=1)/sqrt(len(col_costheta))
+	error_compx    = np.std(col_compx,ddof=1)/sqrt(len(col_compx))
+	error_compy    = np.std(col_compy,ddof=1)/sqrt(len(col_compy))
+	error_compz    = np.std(col_compz,ddof=1)/sqrt(len(col_compz))
+
+	col_abscompx   = np.fabs(col_compx)
+	col_abscompy   = np.fabs(col_compy)
+	col_abscompz   = np.fabs(col_compz)
+	mean_abscompx  = np.mean(col_abscompx)
+	mean_abscompy  = np.mean(col_abscompy)
+	mean_abscompz  = np.mean(col_abscompz)
+	error_abscompx = np.std(col_abscompx,ddof=1)/sqrt(len(col_abscompx))
+	error_abscompy = np.std(col_abscompy,ddof=1)/sqrt(len(col_abscompy))
+	error_abscompz = np.std(col_abscompz,ddof=1)/sqrt(len(col_abscompz))
+
+	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz)
+	output  += "\n"
+	return output
+
+def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip):
+	'''
+	This function gives us the output 
+	'''
+	ndim              = numbmolecules*(numbmolecules-1)/2
+	output            = '{0:10d}{1:15.5f}'.format(numbbeads, variable)
+
+	if (CORRELATION == "TotalCorr"):
+		loopStart     = 1
+
+	if (CORRELATION == "XCorr"):
+		loopStart     = ndim+1
+
+	if (CORRELATION == "YCorr"):
+		loopStart     = 2*ndim+1
+
+	if (CORRELATION == "ZCorr"):
+		loopStart     = 3*ndim+1
+
+	if (CORRELATION == "XYCorr"):
+		loopStart     = 4*ndim+1
+
+	for i in range(ndim):
+		col           = loopStart+i
+		print(col)
+		comp          = genfromtxt(final_dir_in_work+"/results/pigsDipole.corr",unpack=True, usecols=[col], skip_header=preskip, skip_footer=postskip)
+
+		mean_comp  = np.mean(comp)
+		error_comp = np.std(comp,ddof=1)/sqrt(len(comp))
+		output 		 += '     '+str(mean_comp)+'     '+str(error_comp)
+
+	output  		 += "\n"
+	return output
+
+def fmtAverageEnergy(TypeCal,status,variable):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output     ="#"
+		if (TypeCal == "PIMC"):
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Translational', 'Avg. rotational', 'Avg. Potential', 'Avg. Total', 'Error of Translational', 'Error of Rotational', 'Error of Potential', 'Error of Total')
+		if (TypeCal == "PIGS"):
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
+		output    +="\n"
+		output    +="#"
+		output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('', (str(unit)), 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)', 'Energy (K)')
+		output    +="\n"
+		output    += '{0:=<200}'.format('#')
+		output    +="\n"
+		return output
+
+def fmtAverageOrientation(status,variable):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output     ="#"
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('Beads', variable, '<sum of ei.ej>', '< compx >', '< compy >', '< compz >', '< abscompx >', '< abscompy >', '< abscompz >', 'Error: ei.ej', 'Error: compx', 'Error: compy', 'Error: compz', 'Error: abscompx', 'Error: abscompy', 'Error: abscompz')
+		output    +="\n"
+		output    +="#"
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
+		output    +="\n"
+		output    +="#"
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
+		output    +="\n"
+		output    += '{0:=<250}'.format('#')
+		output    +="\n"
+
+	return output
+
+def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_TYPE):
+	'''
+	This function gives us the output 
+	'''
+	print(final_dir_in_work)
+	if ENT_TYPE == "SWAPTOUNSWAP":
+		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+		print(len(col_block))
+	
+		mean_nm      = np.mean(col_nm)
+		mean_dm      = np.mean(col_dm)
+		purity       = mean_nm/mean_dm
+		mean_EN      = -log(purity)
+
+		error_nm     = np.std(col_nm,ddof=1)/sqrt(len(col_block)) 
+		error_dm     = np.std(col_dm,ddof=1)/sqrt(len(col_block))
+		error_Tr     = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  += "\n"
+
+	if ENT_TYPE == 'BROKENPATH':
+		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+		print(len(col_nm))
+	
+		mean_nm      = np.mean(col_nm)
+		mean_dm      = np.mean(col_dm)
+		mean_EN      = -log(mean_nm/mean_dm)
+
+		error_nm     = jackknife(mean_nm,col_nm)
+		error_dm     = jackknife(mean_dm,col_dm)
+		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
+		output  += "\n"
+
+	if ENT_TYPE == "SWAP":
+		col_block, col_nm, col_dm, col_TrInv = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
+		print(len(col_block))
+	
+		mean_nm      = np.mean(col_nm)
+		mean_dm      = np.mean(col_dm)
+		mean_TrInv   = np.mean(col_TrInv)
+		purity       = 1/mean_TrInv
+		mean_EN      = -log(purity)
+
+		error_nm     = jackknife(mean_nm,col_nm)
+		error_dm     = jackknife(mean_dm,col_dm)
+		error_Tr     = jackknife(mean_TrInv,col_TrInv)
+		error_EN     = 0 #Write the proper equation
+
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  += "\n"
+
+	if ENT_TYPE == "REGULARPATH":
+		col_block, col_nm, col_dm, col_Tr = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
+		print(len(col_Tr))
+	
+		mean_nm      = np.mean(col_nm)
+		mean_dm      = np.mean(col_dm)
+		mean_Tr      = np.mean(col_Tr)
+		mean_EN      = -log(mean_Tr)
+
+		error_nm     = jackknife(mean_nm,col_nm)
+		error_dm     = jackknife(mean_dm,col_dm)
+		error_Tr     = jackknife(mean_Tr,col_Tr)
+		error_EN     = error_Tr/mean_Tr
+
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_Tr, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  += "\n"
+
+	return output
+
+def fmtAverageEntropy(status,variable,ENT_TYPE):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output     ="#"
+		if ENT_TYPE == 'SWAPTOUNSWAP':
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Purity', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Purity', 'Error of Entropy')
+		if ENT_TYPE == 'BROKENPATH':
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Entropy')
+		if ENT_TYPE == 'SWAP':
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Purity', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Purity', 'Error of Entropy')
+		if ENT_TYPE == 'REGULARPATH':
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable+'  (1/K)', '<Nm>', '<Dm>', 'Purity', 'Avg. Entropy', 'Error of Nm', 'Error of Dm', 'Error of Purity', 'Error of Entropy')
+		output    +="\n"
+		output    += '{0:=<205}'.format('#')
+		output    +="\n"
+		return output
+
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA):
+	'''
+	This function modifies parameters in qmc_run.input
+	'''
+	replace("temperature_input", str(temperature), "qmc_run.input", "qmc2.input")
+	replace("numbbeads_input", str(numbbeads), "qmc2.input", "qmc3.input")
+	replace("numbblocks_input", str(numbblocks), "qmc3.input", "qmc4.input")
+	replace("numbmolecules_input", str(numbmolecules), "qmc4.input", "qmc5.input")
+	replace("distance_input", str(distance), "qmc5.input", "qmc6.input")
+	replace("molecule_input", str(molecule_rot), "qmc6.input", "qmc7.input")
+	replace("level_input", str(level), "qmc7.input", "qmc8.input")
+	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
+	replace("dstep_tr_input", str(step_trans), "qmc9.input", "qmc10.input")
+	replace("dipolemoment_input", str(dipolemoment), "qmc10.input", "qmc11.input")
+	replace("numbpass_input", str(numbpass), "qmc11.input", "qmc12.input")
+	mcskip = numbbeads*numbpass
+	#mcskip = numbpass
+	replace("mskip_input", str(mcskip), "qmc12.input", "qmc13.input")
+	replace("numbparticle_input", str(particleA), "qmc13.input", "qmc.input")
+	call(["rm", "qmc2.input"])
+	call(["rm", "qmc3.input"])
+	call(["rm", "qmc4.input"])
+	call(["rm", "qmc5.input"])
+	call(["rm", "qmc6.input"])
+	call(["rm", "qmc7.input"])
+	call(["rm", "qmc8.input"])
+	call(["rm", "qmc9.input"])
+	call(["rm", "qmc10.input"])
+	call(["rm", "qmc11.input"])
+	call(["rm", "qmc12.input"])
+	call(["rm", "qmc13.input"])
+
+
+def rotmat(TypeCal,molecule,temperature,numbbeads):
+	'''
+	This function generates rotational density matrix - linden.dat
+	'''
+	#temperature1    = dropzeros(temperature)
+	temperature1    = "%5.3f" % temperature
+	if (TypeCal == 'PIMC'):
+		numbbeads1		= numbbeads
+	else:
+		numbbeads1		= numbbeads - 1
+	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
+	system(command_linden_run)
+	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	call(["mv", "linden.out", file_rotdens])
+
+def cagepot():
+	'''
+	This function generates tabulated potential - cagepot.dat
+	'''
+	command_cagepot_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/tabulated_potential/hfc60.x 100 360"
+	system(command_cagepot_run)
+	file_cagepot    = "hfc60.pot"
+	call(["mv", "cagepot.out", file_cagepot])
+
+def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc):
+	'''
+	This function creats jobstring for #PBS script
+	'''
+	if (thread > 16):
+		thread = 16
+	job_name       = "job_"+str(file_name)+str(value)
+	walltime       = "200:00:00"
+	processors     = "nodes=1:ppn="+str(thread)
+	omp_thread     = str(thread)
+	output_dir     = run_dir+"/results"
+	temperature1   = "%5.3f" % temperature
+	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	logpath        = final_dir+"/"
+
+	input_file     = dir_run_input_pimc+"/qmc"+file_name+str(value)+".input"
+	exe_file       = dir_run_input_pimc+"/pimc"
+	qmcinp         = "qmc"+file_name+str(value)+".input"
+
+	job_string     = """#!/bin/bash
+#PBS -N %s
+#PBS -l walltime=%s
+##PBS -q medium
+#PBS -l %s
+#PBS -o %s%s.out
+#PBS -e %s%s.err
+export OMP_NUM_THREADS=%s
+rm -rf %s
+mkdir -p %s
+cd $PBS_O_WORKDIR
+mv %s %s
+mv %s %s 
+cd %s
+cp %s qmc.input
+cp %s %s
+./pimc
+mv %s /work/tapas/nonlinear-molecule
+""" % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+	return job_string
+
+def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, status_rhomat, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep):
+	argument1     = Rpt
+	level1        = level[iStep]
+	step1         = step[iStep]
+	step1_trans   = step_trans[iStep]
+
+	os.chdir(dir_output)
+	if (os.path.isdir(folder_run) == True):
+		os.chdir(src_dir)
+		return
+
+	os.chdir(src_dir)
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA)
+	if status_rhomat == "Yes":
+		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
+
+		#call(["rm", "-rf", folder_run])
+	folder_run_path = dir_run_job + folder_run 
+	print(folder_run_path)
+
+	input_file    = "qmcbeads"+str(i)+".input"
+	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
+	temperature1    = "%5.3f" % temperature
+	file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	call(["mv", file_rotdens, dir_run_input_pimc])
+
+	#job submission
+	if (TypeCal == 'PIGS'):
+		fname         = 'job-pigs-'+str(i)+'-for-'+folder_run
+		argument2     = "pigs"+str(numbmolecules)+"b"
+	if (TypeCal == 'PIMC'):
+		fname         = 'job-pimc-'+str(i)+'-for-'+folder_run
+		argument2     = "pimc"+str(numbmolecules)+"b"
+	if (TypeCal == 'ENT'):
+		fname         = 'job-ent-'+str(i)+'-for-'+folder_run
+		argument2       = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
+
+	fwrite        = open(fname, 'w')
+	final_dir_in_work = dir_output + folder_run
+
+	if RUNDIR == "scratch":
+		if RUNIN == "CPU":
+			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir))
+		else:
+			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc))
+	else: 
+		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc))
+
+	fwrite.close()
+	call(["mv", fname, dir_run_input_pimc])
+	os.chdir(dir_run_input_pimc)
+
+	if (RUNIN == "CPU"):
+		call(["chmod", "755", fname])
+		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
+		command_pimc_run = "./"+fname + ">outpimc"+str(i)+" & "
+		print(command_pimc_run)
+		system(command_pimc_run)
+	else:
+		#call(["qsub", fname])
+		if (NameOfPartition == 'tapas'):
+			call(["sbatch", "-p", "tapas", fname])
+		else:
+			call(["sbatch", fname])
+
+	os.chdir(src_dir)
+
+def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc, src_dir):
+	'''
+	This function creats jobstring for #PBS script
+	'''
+	omp_thread     = str(thread)
+	output_dir     = run_dir+"/results"
+	temperature1   = "%5.3f" % temperature
+	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+
+	input_file     = dir_run_input_pimc+"/qmc"+file_name+str(value)+".input"
+	exe_file       = dir_run_input_pimc+"/pimc"
+	qmcinp         = "qmc"+file_name+str(value)+".input"
+
+	job_string     = """#!/bin/bash
+export OMP_NUM_THREADS=%s
+rm -rf %s
+mkdir -p %s
+cd %s
+mv %s %s
+mv %s %s 
+cd %s
+cp %s qmc.input
+cp %s %s
+./pimc 
+mv %s /work/tapas/nonlinear-molecule
+""" % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+	return job_string
+
+def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc):
+	'''
+	This function creats jobstring for #SBATCH script
+	'''
+	if (thread > 4):
+		thread = 4
+	#thread         = 1
+	job_name       = file_name+str(value)
+	walltime       = "40-00:00"
+	omp_thread     = str(thread)
+	output_dir     = folder_run_path+"/results"
+	temperature1   = "%5.3f" % temperature
+	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+	logpath        = dir_run_input_pimc+"/"+job_name
+
+	input_file     = dir_run_input_pimc+"/qmcbeads"+str(value)+".input"
+	exe_file       = dir_run_input_pimc+"/pimc"
+	qmcinp         = "qmcbeads"+str(value)+".input"
+	cagepot_file   = dir_run_input_pimc+"/hfc60.pot"
+	if (RUNDIR == "scratch"):
+		CommandForMove = "mv "+str(folder_run_path)+" /work/tapas/nonlinear-molecule"
+	if (RUNDIR == "work"):
+		CommandForMove = " "
+
+	job_string     = """#!/bin/bash
+#SBATCH --job-name=%s
+#SBATCH --output=%s.out
+#SBATCH --time=%s
+#SBATCH --mem-per-cpu=1200mb
+#SBATCH --cpus-per-task=%s
+export OMP_NUM_THREADS=%s
+rm -rf %s
+mkdir -p %s
+cp %s %s
+mv %s %s
+mv %s %s
+cd %s
+cp %s qmc.input
+cp %s %s
+####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
+./pimc 
+%s
+""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_file, folder_run_path, input_file, folder_run_path, file_rotdens, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForMove)
+	return job_string
+
+def GetRotEnergy(molecule,jrot):
+	Energy = GetBconst(molecule)*jrot*(jrot+1.0)
+	return Energy
+
+def GetAvgRotEnergy(molecule,beta):
+	CMRECIP2KL = 1.4387672
+	Zsum = 0.0
+	Nsum = 0.0
+	for jrot in range(0,10000,1):
+		BoltzmannProb = exp(-beta*GetRotEnergy(molecule,jrot)*CMRECIP2KL)
+		if (BoltzmannProb > 10e-16):
+			Zsum += (2*jrot+1.0)*BoltzmannProb
+			Nsum += (2*jrot+1.0)*GetRotEnergy(molecule,jrot)*BoltzmannProb
+		else:
+			break
+	AvgEnergy = Nsum/Zsum
+	return AvgEnergy
+
+def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra):
+	#add                     = "-NumTimes"
+	add                     = ""
+	if (TypeCal == "ENT"):
+		add1                = "-ParticleA"+str(particleA)
+		#add1                = ""
+		add2                = "-"
+		#add2                = ""
+	else:
+		add1                = ""
+		add2                = ""
+
+	mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
+
+	if (TypeCal == "PIGS"):
+		frontName           = "PIGS-"
+	if (TypeCal == "PIMC"):
+		frontName           = "PIMC-"
+	if (TypeCal == "ENT"):
+		frontName           = "ENT-"
+
+	frontName              += extra
+
+	if (molecule_rot == "HF"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+	if (molecule_rot == "H2"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
+
+	if (TypeCal == "ENT"):
+				file1_name += ENT_TYPE
+	
+	
+	return file1_name
+def GetFileNameSubmission1(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra):
+	if (TypeCal == "ENT"):
+		add1                = "-ParticleA"+str(particleA)
+		add2                = "-"
+	else:
+		add1                = ""
+		add2                = ""
+
+	mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
+
+	if (TypeCal == "PIGS"):
+		frontName           = "PIGS-"
+	if (TypeCal == "PIMC"):
+		frontName           = "PIMC-"
+	if (TypeCal == "ENT"):
+		frontName           = "ENT-"
+
+	frontName              += extra
+
+	if (molecule_rot == "HF"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+	if (molecule_rot == "H2"):
+		if (TransMove == "Yes" and RotMove == "Yes"):
+			frontName      += "TransAndRotDOFs-"
+			file1_name      = frontName+mainFileName
+		if (TransMove != "Yes" and RotMove == "Yes"):
+			frontName      += "RotDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
+
+	if (TypeCal == "ENT"):
+				file1_name += ENT_TYPE
+	
+	
+	return file1_name
+
+class GetFileNameAnalysis:
+	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+		self.TypeCal      = TypeCal1
+		self.molecule_rot = molecule_rot1
+		self.TransMove    = TransMove1
+		self.RotMove      = RotMove1
+		self.variableName = variableName1
+		self.Rpt          = Rpt1
+		self.dipolemoment = dipolemoment1
+		self.parameter    = parameter1
+		self.parameterName= parameterName1
+		self.numbblocks   = numbblocks1
+		self.numbpass     = numbpass1
+		self.numbmolecules= numbmolecules1
+		self.molecule     = molecule1
+		self.ENT_TYPE     = ENT_TYPE1
+		self.preskip      = preskip1
+		self.postskip     = postskip1
+		self.extra        = extra1
+		self.src_dir      = src_dir1
+		self.particleA    = particleA1
+
+		if (self.TypeCal == "ENT"):
+			add1                = "-ParticleA"+str(self.particleA)
+			#add1                = ""
+		else:
+			add1                = ""
+
+		mainFileName      = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileName     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+		
+		if ((self.TypeCal == "PIGS") or (self.TypeCal == "PIMC")):
+			frontName             = self.TypeCal+"-"+self.extra
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Energy-"
+					file_output2  = frontName+"correlation-"
+					file_output3  = frontName+"total-correlation-function-"
+					file_output4  = frontName+"X-component-correlation-function-"
+					file_output5  = frontName+"Y-component-correlation-function-"
+					file_output6  = frontName+"Z-component-correlation-function-"
+					file_output7  = frontName+"XandY-component-correlation-function-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
+	
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+
+	
+			self.SaveEnergy       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName+".txt"
+			self.SaveCorr         = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName+".txt"
+			self.SaveTotalCorr    = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output3+mainFileName+".txt"
+			self.SaveXCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output4+mainFileName+".txt"
+			self.SaveYCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output5+mainFileName+".txt"
+			self.SaveZCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output6+mainFileName+".txt"
+			self.SaveXYCorr       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output7+mainFileName+".txt"
+			call(["rm", self.SaveEnergy, self.SaveCorr])
+			call(["rm", self.SaveTotalCorr, self.SaveXCorr, self.SaveYCorr, self.SaveZCorr, self.SaveXYCorr])
+
+		if (self.TypeCal == "ENT"):
+			frontName             = "ENT-"
+			frontName            += self.extra
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+
+			self.SaveEntropy           = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE+".txt"
+			call(["rm", self.SaveEntropy])
+
+class GetFileNamePlot:
+	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+		self.TypeCal      = TypeCal1
+		self.molecule_rot = molecule_rot1
+		self.TransMove    = TransMove1
+		self.RotMove      = RotMove1
+		self.variableName = variableName1
+		self.Rpt          = Rpt1
+		self.dipolemoment = dipolemoment1
+		self.parameter    = parameter1
+		self.parameterName= parameterName1
+		self.numbblocks   = numbblocks1
+		self.numbpass     = numbpass1
+		self.numbmolecules= numbmolecules1
+		self.molecule     = molecule1
+		self.ENT_TYPE     = ENT_TYPE1
+		self.preskip      = preskip1
+		self.postskip     = postskip1
+		self.extra        = extra1
+		self.src_dir      = src_dir1
+		self.particleA    = particleA1
+
+		if (self.TypeCal == "ENT"):
+			add1                = "-ParticleA"+str(self.particleA) #vs beta
+		else:
+			add1                = ""
+
+		mainFileName      = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileName     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+		
+		if ((self.TypeCal == "PIGS") or (self.TypeCal == "PIMC")):
+			frontName             = self.TypeCal+"-"+self.extra
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Energy-"
+					file_output2  = frontName+"correlation-"
+					file_output3  = frontName+"total-correlation-function-"
+					file_output4  = frontName+"X-component-correlation-function-"
+					file_output5  = frontName+"Y-component-correlation-function-"
+					file_output6  = frontName+"Z-component-correlation-function-"
+					file_output7  = frontName+"XandY-component-correlation-function-"
+					file_output8  = frontName+"Chemical-Potential-"
+
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
+					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Chemical-Potential-"
+	
+	
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+					file_output8  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Chemical-Potential-"
+
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Chemical-Potential-"
+
+	
+			self.SaveEnergy       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName
+			self.SaveCorr         = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName
+			self.SaveTotalCorr    = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output3+mainFileName
+			self.SaveXCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output4+mainFileName
+			self.SaveYCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output5+mainFileName
+			self.SaveZCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output6+mainFileName
+			self.SaveXYCorr       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output7+mainFileName
+			mainFileNameCP        = "vs-number-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+			mainFileNameCP       += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+			self.SaveChemPot      = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output8+mainFileNameCP
+
+		if (self.TypeCal == "ENT"):
+			frontName             = "ENT-"
+			frontName            += self.extra
+			if (self.molecule_rot == "HF"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+
+			if (self.molecule_rot == "H2"):
+				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+					frontName += "TransAndRotDOFs-"
+					file_output1  = frontName+"Entropy-"
+
+				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+					frontName += "RotDOFs-"
+					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+
+			self.SaveEntropy           = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE
+
+def check(string,SavedFile):
+	datafile = file(SavedFile)
+	found = False #this isn't really necessary
+	for line in datafile:
+		if string in line:
+			found = True
+			break
+
+	return found
+
+def FileCheck(TypeCal,list_nb,variableName,SavedFile):
+	for i in list_nb:
+		if (TypeCal == "PIMC"):
+			if ((i%2) == 0):
+				bead = i
+			else:
+				bead = i+1
+			'''
+			if (variableName == "tau"):
+				tau          = beta/value
+				variable     = tau
+			if (variableName == "beta"):
+				beta         = tau*value
+				variable     = beta
+			'''
+		else:
+			if ((i%2) != 0):
+				bead = i
+			else:
+				bead = i+1
+			'''
+			if (variableName == "tau"):
+				tau          = beta/(value-1)
+				variable     = tau
+			if (variableName == "beta"):
+				beta         = tau*(value-1)
+				variable     = beta
+			'''
+
+		string = str(bead)
+		if check(string,SavedFile):
+			print("true")
+			return
+
+	if check(string,SavedFile) == False:
+		call(["rm", SavedFile])
+
+
+class GetUnitConverter:
+	def __init__(self):
+		self.BOHRRADIUS = 0.5291772108;      # angstrom
+		self.HARTREE2JL = 4.359748e-18;    	# hartree to joule  conversion factor
+		self.HARTREE2KL = 3.157732e+05;    	# hartree to Kelvin conversion factor
+		self.CMRECIP2KL = 1.4387672;       	# cm^-1 to Kelvin conversion factor
+		self.MHZ2RCM    = 3.335640952e-5;  	# MHz to cm^-1 conversion factor
+
+		self.AuToDebye     = 1.0/0.39343;
+		self.AuToCmInverse = 219474.63137;
+		self.AuToKelvin    = 315777.0;
+		self.KCalperMolToCmInverse = 349.75509;
+
+		self.HBAR  = 1.05457266; 			#  (10^-34 Js)     Planck constant
+		self.AMU   = 1.6605402;  			#  (10^-27 kg)     atomic mass unit
+		self.K_B   = 1.380658;   			#  (10^-23 JK^-1)  Boltzmann constant
+		self.WNO2K = 0.6950356; 				# conversion from CM-1 to K

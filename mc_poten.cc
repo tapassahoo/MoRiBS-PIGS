@@ -487,7 +487,6 @@ void init_pot1D(int atype)
     nrerror(_proc_,"Unknown model of interaction");
 
     string fname    =  (MCAtom[atype].fpot + fextn);   // file name
-	cout<<"TAPAS mc_poten.cc"<<fname<<endl;
     
     int size        =  get_filesize(fname.c_str());  
 
