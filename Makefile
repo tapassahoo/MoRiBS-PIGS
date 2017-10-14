@@ -4,13 +4,13 @@
 options= -Ofast -fopenmp
 
 # CFLAGS for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DLINUX -DBLAS -DGAUSSIANMOVE -DTYPE1 -DCHAINCONFIG -DDDCORR -DPIGSTYPE
+#CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DDDCORR -DPIGSTYPE
 #-DPROPOSED
 #-DCAGEPOT
 #-DIOFILES #-DINSTANT -DBINARY 
 
 # CFLAGS for ENTANGLEMENT
-#CFLAGS =-I./sprng/include -I/usr/local/include -DCHAINCONFIG -DMODIFYSROTDENS -DSWAPTOUNSWAP -DPIGSENTTYPE 
+CFLAGS =-I./sprng/include -I/usr/local/include -DCHAINCONFIG -DMODIFYSROTDENS -DSWAPTOUNSWAP -DPIGSENTTYPE -DPIGSENTBOTH -DDDCORR -DTYPE1
 #-DSHORTFORM
 #-DENTWRITE
 #-DCAGEPOT
@@ -24,7 +24,7 @@ CFLAGS =-I./sprng/include -I/usr/local/include -DLINUX -DBLAS -DGAUSSIANMOVE -DT
 #LDFLAGS=-L/home/pnroy/Dev/lib64/ -lm -L./sprng/lib -llcg -L/home/pnroy/Dev/lib64/ -lgfortran  -L/opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
 #below is the LDFLAGS with minimum flags
 #LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran -lblas -llapack
-LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran -lblas -llapack -L/usr/local/lib
+LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran 
  
 #-------------------------------------------------------------------------
 #  Compilers
@@ -40,7 +40,7 @@ FC=gfortran
 #-------------------------------------------------------------------------
 # objects for QMC
  
-pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_tip4p_gg.o omprng.o rngstream.o vh2h2.o h2oc60.o plgndr.o matvec.o ran1.o four1.o prod.o inter.o cmdstuff.o
+pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_tip4p_gg.o omprng.o rngstream.o vh2h2.o h2oc60.o plgndr.o 
  
 #----------------------------------------- PIMC --------------------------
 
@@ -53,7 +53,7 @@ mc_main.o:		mc_main.cc mc_confg.h mc_input.h mc_setup.h mc_randg.h mc_utils.h mc
 mc_input.o:        	mc_input.cc mc_input.h	mc_confg.h mc_setup.h mc_utils.h mc_const.h
 			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
 
-mc_setup.o:        	mc_setup.cc mc_setup.h mc_confg.h mc_utils.h mc_const.h cmdstuff.h
+mc_setup.o:        	mc_setup.cc mc_setup.h mc_confg.h mc_utils.h mc_const.h
 			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
 
 mc_randg.o:        	mc_randg.cc mc_randg.h mc_input.h mc_confg.h mc_utils.h mc_const.h 
@@ -79,15 +79,6 @@ omprng.o:               omprng.cc omprng.h
 
 rngstream.o: 		rngstream.cc rngstream.h
 			$(CC) -c -fopenmp -lgomp rngstream.cc
-
-matvec.o:        	matvec.cc matvec.h 
-			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
-
-cmdstuff.o:        	cmdstuff.cc cmdstuff.h 
-			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
-
-inter.o:        	inter.cc inter.h 
-			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
 
 .PHONY: clean
 			

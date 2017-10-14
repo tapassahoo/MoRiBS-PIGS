@@ -608,6 +608,12 @@ double GetPotEnergyPIGS(void)
 	nrerror(_proc_," Only for Z-configurations");
 #endif
 
+#ifdef PIGSENTBOTH
+	int atomStart = NumbAtoms/2;
+#else
+	int atomStart = 0;
+#endif
+
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbRotTimes - 1)/2);
 	double spot;
@@ -616,7 +622,7 @@ double GetPotEnergyPIGS(void)
 		double Eulang0[NDIM], Eulang1[NDIM];
 
         spot = 0.0;
-        for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
+        for (int atom0=atomStart;atom0<(NumbAtoms-1);atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
            	int t0 = offset0 + it;
@@ -711,7 +717,7 @@ double GetPotEnergyPIGS(void)
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
-    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    for (int atom0 = atomStart; atom0 < NumbAtoms; atom0++)
 	{
         int offset0 = NumbTimes*atom0;
         int t0 = offset0 + it;
@@ -1055,12 +1061,18 @@ double GetPotEnergy_Densities(void)
 
 double GetTotalEnergy(void)
 {
+#ifdef PIGSENTBOTH
+	int atomStart = NumbAtoms/2;
+#else
+	int atomStart = 0;
+#endif
+
     string stype = MCAtom[IMTYPE].type;
 	double spot;
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         spot = 0.0;
-        for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
+        for (int atom0=atomStart;atom0<(NumbAtoms-1);atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
 
@@ -1166,7 +1178,7 @@ double GetTotalEnergy(void)
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
-    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    for (int atom0 = atomStart; atom0 < NumbAtoms; atom0++)
     {
         int offset0 = NumbTimes*atom0;
 
@@ -1191,11 +1203,17 @@ double GetTotalEnergy(void)
 
 double GetRotEnergyPIGS(void)
 {
+#ifdef PIGSENTBOTH
+	int atomStart = NumbAtoms/2;
+#else
+	int atomStart = 0;
+#endif
+
     double srot = 0.0;
     int type  = IMTYPE;
     double nslice = (((double)NumbRotTimes) - 1.0);
 
-    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    for (int atom0 = atomStart; atom0 < NumbAtoms; atom0++)
     {
         int offset0 = NumbTimes*atom0;
 
@@ -1239,6 +1257,12 @@ void GetCosTheta(double &cosTheta, double *compxyz)
     // if user passed in a null pointer for array, bail out early!
     if (!compxyz)
         return;
+#ifdef PIGSENTBOTH
+	int atomStart = NumbAtoms/2;
+#else
+	int atomStart = 0;
+#endif
+
 
     int it = (NumbRotTimes - 1)/2;
 
@@ -1248,7 +1272,7 @@ void GetCosTheta(double &cosTheta, double *compxyz)
 	if(MCAtom[IMTYPE].numb > 1)
 	{
         scosTheta    = 0.0;
-    	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+    	for (int atom0 = atomStart; atom0 < (NumbAtoms-1); atom0++)
         {    
     	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
     	    {
@@ -1271,7 +1295,7 @@ void GetCosTheta(double &cosTheta, double *compxyz)
 		scompxyz[1] = 0.0;
 		scompxyz[2] = 0.0;
 
-    	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    	for (int atom0 = atomStart; atom0 < NumbAtoms; atom0++)
         {    
             int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
        		int t0      = offset0 + it;
@@ -1318,6 +1342,11 @@ void GetCosTheta(double &cosTheta, double *compxyz)
 void GetDipoleCorrelation(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
+#ifdef PIGSENTBOTH
+	int atomStart = NumbAtoms/2;
+#else
+	int atomStart = 0;
+#endif
 
     int it = (NumbRotTimes - 1)/2;
 	if(MCAtom[IMTYPE].numb > 1)
@@ -1325,7 +1354,7 @@ void GetDipoleCorrelation(double *DipoleCorrXYZ, double *DipoleCorrX, double *Di
         double totalCorr, xCorr, yCorr, zCorr, xyCorr;
 
 		int ii = 0;
-    	for (int atom0 = 0; atom0 < (NumbAtoms - 1); atom0++)
+    	for (int atom0 = atomStart; atom0 < (NumbAtoms - 1); atom0++)
         {    
     	    for (int atom1 = (atom0 + 1); atom1 < NumbAtoms; atom1++)
     	    {
