@@ -21,11 +21,11 @@ TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-status              = "analysis"                                            
+#status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
-NameOfPartition     = "tapas"
+NameOfPartition     = "ntapas"
 #
 #TypeCal             = "PIMC"
 #TypeCal             = "PIGS"
@@ -40,12 +40,12 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 10000
-numbmolecules       = 2
-numbpass            = 100
+numbblocks	        = 50000
+numbmolecules       = 4
+numbpass            = 200
 #
 Rpt                 = 10.05
-dipolemoment        = 0.45        #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
 
 status_rhomat       = "Yes"                                                 
 status_cagepot      = "No"                                                      
@@ -55,7 +55,7 @@ RUNIN               = "nCPU"
 
 loopStart           = 40
 loopEnd             = 102
-skip                = 10
+skip                = 20
 
 preskip             = 0
 postskip            = 0
@@ -89,6 +89,7 @@ if (variableName == "tau"):
 		#step       = [2.0,2.0,2.0,1.8,1.8,1.8,1.6,1.6,1.6,1.6,1.4,1.4,1.8,1.7,1.6,1.5,1.5,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4]  # beads 41 to 61
 		step        = [1.7,1.6,1.6,1.6,1.5,1.4,1.4,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.1
 		step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.1
+		step        = [1.7,1.5,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.1
 		#step        = [1.0,0.9,0.8,0.7,0.7]  # beads 61, 71, 81, 91, 101 HF
 		#step        = [0.9, 0.9]  # beads 101 HF
 					# 2 HF beta 0.1 K-1 #change param6 for 10.05 Angstrom and Dipole Moment 1.86 Debye PIGS

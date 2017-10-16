@@ -173,6 +173,7 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 	if (TypeCal == "ENT"):
 		col_block, col_rot, col_rot1, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 	
+		print(len(col_tot))
 		mean_rot      = np.mean(col_rot)
 		mean_rot1     = np.mean(col_rot1)
 		mean_pot      = np.mean(col_pot)
@@ -275,6 +276,8 @@ def fmtAverageEnergy(TypeCal,status,variable):
 		if (TypeCal == "PIMC"):
 			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Translational', 'Avg. rotational', 'Avg. Potential', 'Avg. Total', 'Error of Translational', 'Error of Rotational', 'Error of Potential', 'Error of Total')
 		if (TypeCal == "PIGS"):
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
+		if (TypeCal == "ENT"):
 			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
 		output    +="\n"
 		output    +="#"

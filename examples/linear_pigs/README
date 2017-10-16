@@ -29,3 +29,24 @@ beta convergence:
 
 tau convergence:
 1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks200000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+
+2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+3. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System4HF-ParticleA2-e0vsbeads-SWAPTOUNSWAPPIMC/
+4. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System6HF-ParticleA3-e0vsbeads-SWAPTOUNSWAPPIMC/
+5. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System8HF-ParticleA4-e0vsbeads-SWAPTOUNSWAPPIMC/
+6. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System10HF-ParticleA5-e0vsbeads-SWAPTOUNSWAPPIMC/
+
+For unscreened dipole:
+
+beta convergence:
+1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-tau0.005Kinv-Blocks200000-Passes100-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
+2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-tau0.005Kinv-Blocks200000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ PARTIALLY
+
+tau convergence:
+1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks200000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+
+2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+3. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System4HF-ParticleA2-e0vsbeads-SWAPTOUNSWAPPIMC/
+4. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System6HF-ParticleA3-e0vsbeads-SWAPTOUNSWAPPIMC/
+5. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System8HF-ParticleA4-e0vsbeads-SWAPTOUNSWAPPIMC/
+6. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System10HF-ParticleA5-e0vsbeads-SWAPTOUNSWAPPIMC/
