@@ -104,6 +104,53 @@ void MCMolecularMove(int type)
   	}   
 }
 
+#ifdef GAUSSIANMOVE
+void MCMolecularMoveGauss(int type)
+{
+	int numb = MCAtom[type].numb;  
+
+	GetRandomCoords();
+  	for (int atom = 0; atom < numb; atom++)
+  	{
+    	int offset = MCAtom[type].offset + NumbTimes*atom;
+    	int gatom  = offset/NumbTimes;
+
+    	for (int id = 0; id < NDIM; id++)	  // MOVE
+    	{
+    		#pragma omp parallel for
+    		for (int it = 0; it < NumbTimes; it++)
+    		{ 
+       			newcoords[id][offset+it]  =  gausscoords[id][offset+it];
+    		}
+    	}
+
+    	double deltav = 0.0;         // ACCEPT/REJECT
+    
+    	deltav += (PotEnergy(gatom,newcoords)-PotEnergy(gatom,MCCoords));
+
+    	bool Accepted = false;
+
+    	if (deltav<0.0)             Accepted = true;
+    	else if
+    	(exp(-deltav*MCTau)>rnd2()) Accepted = true;
+
+    	MCTotal[type][MCMOLEC] += 1.0;  
+      
+    	if (Accepted)
+    	{
+       		MCAccep[type][MCMOLEC] += 1.0; 
+
+       		for (int id = 0; id < NDIM; id++)       // save accepted configuration	
+       		{
+       			#pragma omp parallel for
+       			for (int it = 0; it < NumbTimes; it++)
+       			MCCoords[id][offset+it] = newcoords[id][offset+it];
+       		}
+    	}	     
+  	}   
+}
+#endif
+
 void MCMolecularMoveExchange(int type)
 // particular atom type
 {

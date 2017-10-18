@@ -2,6 +2,9 @@
 #include "mc_utils.h"
 #include "mc_confg.h"
 #include "mc_const.h"
+#include "rngstream.h"
+#include "omprng.h"
+#include <cstdlib>
 
 #include <math.h>
 
@@ -141,6 +144,14 @@ double *  erotsq;     // rotational energy square estimator for non-linear rotor
 
 int       InitMCCoords; // integer flag for read in MCCoords;
 
+#ifdef GAUSSIANMOVE
+double ** gausscoords;
+int size_Gauss = NumbAtoms*NumbTimes*NDIM;
+double * AMat;
+double * Eigen;
+double * ygauss;
+#endif
+
 //----------------------------------------------------------
 #ifdef CHAINCONFIG
 void initChain_config(double **);
@@ -180,6 +191,12 @@ void MCMemAlloc(void)  // allocate  memmory
 	costProposed = new double [NCOST*NPHI];
 	phiProposed  = new double [NCOST*NPHI];
 #endif
+#ifdef GAUSSIANMOVE
+  	gausscoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
+	AMat    = new double [size_Gauss*size_Gauss];
+	Eigen   = new double [size_Gauss];
+	ygauss  = new double [size_Gauss];
+#endif
 }
 
 void MCMemFree(void)  //  free memory
@@ -205,6 +222,12 @@ void MCMemFree(void)  //  free memory
   	free_doubleMatrix(tempcoords); 
 	delete [] costProposed;
 	delete [] phiProposed;
+#endif
+#ifdef GAUSSIANMOVE
+  	free_doubleMatrix(gausscoords); 
+	delete [] AMat;
+	delete [] Eigen;
+	delete [] ygauss;
 #endif
 }
 
@@ -729,3 +752,197 @@ void ParamsPotential(void)
 	DipoleMomentAU2  = DipoleMomentAU*DipoleMomentAU;
 	RR   = Distance/BOHRRADIUS;
 }
+
+//Tapas implemented the below section//
+#ifdef GAUSSIANMOVE
+void ProposedMCCoords()
+{
+	int atype = 0;
+	double FrequencyHO     = 78.6; //in cm-1
+
+	double FrequencyANGINV = FrequencyHO*pow(10,-8);
+	double massCMINV       = MCAtom[atype].mass*AuToCmInverse/1822.88848325;
+	double massANGINV      = massCMINV*pow(10,-8);
+	double FrequencyK      = FrequencyHO*CMRECIP2KL; //in Kelvin
+
+    double prefacGauss1    =   massANGINV*FrequencyANGINV;
+    double prefacGauss2    = 2.0*sinh(FrequencyK*MCTau);
+    double prefacGauss3    = cosh(FrequencyK*MCTau);
+
+    double afacGauss       = prefacGauss1*prefacGauss3/prefacGauss2;
+    double bfacGauss       = -prefacGauss1/prefacGauss2;
+	
+//Tridiagonal Matrix formation; starts
+	size_Gauss      = NumbAtoms*NumbTimes*NDIM;
+
+	int atom0, it0, id0;
+	int atom1, it1, id1;
+	int ii0, jj0, kk0, ll0, mm0, llm1,llp1,mmm1,mmp1;
+	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
+	{
+		for (it0 = 0; it0 < NumbTimes; it0++)
+		{
+			ii0 = it0 + atom0*NumbTimes;
+			for (id0 = 0; id0 < NDIM; id0++)
+			{
+				jj0 = id0 + ii0*NDIM;
+				for (atom1 = 0; atom1 < NumbAtoms; atom1++)
+				{
+					kk0 = atom1 + jj0*NumbAtoms;
+					for (it1 = 0; it1 < NumbTimes; it1++)
+					{
+						ll0 = it1 + kk0*NumbTimes;
+						for (id1 = 0; id1 < NDIM; id1++)
+						{
+							mm0 = id1 + ll0*NDIM;
+							AMat[mm0] = 0.0;
+						}
+					}
+				}
+			}
+        }
+    }
+	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
+	{
+		for (it0 = 0; it0 < NumbTimes; it0++)
+		{
+			ii0 = it0 + atom0*NumbTimes;
+			for (id0 = 0; id0 < NDIM; id0++)
+			{
+				jj0 = id0 + ii0*NDIM;
+				for (atom1 = 0; atom1 < NumbAtoms; atom1++)
+				{
+					kk0 = atom1 + jj0*NumbAtoms;
+					for (it1 = 0; it1 < NumbTimes; it1++)
+					{
+						if (it1 == it0)
+						{
+							ll0 = it1 + kk0*NumbTimes;
+							llm1 = (it1 - 1) + kk0*NumbAtoms;
+							llp1 = (it1 + 1) + kk0*NumbAtoms;
+							for (id1 = 0; id1 < NDIM; id1++)
+							{
+								mm0 = id1 + ll0*NDIM;
+								mmm1 = id1 + llm1*NDIM;
+								mmp1 = id1 + llp1*NDIM;
+                				if ((it1+1) < NumbTimes)
+                				{
+                    				AMat[mmp1] = bfacGauss;
+                				}
+               					AMat[mm0]   = afacGauss;
+                				if ((it1-1) >= 0)
+                				{
+                    				AMat[mmm1] = bfacGauss;
+                				}
+							}
+						}
+					}
+				}
+			}
+        }
+    }
+	for (jj0 = 0; jj0 < size_Gauss; jj0++)
+	{
+		Eigen[jj0] = 0.0;
+	}
+	diag(AMat, Eigen, size_Gauss);
+}
+
+void GetRandomCoords()
+{
+	int atom0, it0, id0;
+	int atom1, it1, id1;
+	int ii0, jj0, kk0, ll0, mm0, ii1, jj1;
+
+	double sum;
+
+	RngStream Rng[1];
+	double mu =0.0;
+	double sigma;
+
+	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
+   	{
+    	for (it0 = 0; it0 < NumbTimes; it0++)
+    	{
+            ii0 = it0 + atom0*NumbAtoms;
+            for (id0 = 0; id0 < NDIM; id0++)
+            {
+                jj0 = id0 + ii0*NDIM;
+				sigma = Eigen[jj0];
+				ygauss[jj0] = rnorm(Rng, mu, sigma);
+			}
+		}
+	}
+
+    for (atom0 = 0; atom0 < NumbAtoms; atom0++)
+    {
+    	for (it0 = 0; it0 < NumbTimes; it0++)
+    	{
+            ii0 = it0 + atom0*NumbTimes;
+            for (id0 = 0; id0 < NDIM; id0++)
+            {
+                jj0 = id0 + ii0*NDIM;
+				sum = 0.0;
+                for (atom1 = 0; atom1 < NumbAtoms; atom1++)
+                {
+					kk0 = atom1 + jj0*NumbAtoms;
+                    for (it1 = 0; it1 < NumbTimes; it1++)
+                    {
+						ll0 = it1 + kk0*NumbTimes;
+                        ii1 = it1 + atom1*NumbTimes;
+                        for (id1 = 0; id1 < NDIM; id1++)
+                        {
+							mm0 = id1 + ll0*NDIM;
+                            jj1 = id1 + ii1*NDIM;
+							sum += AMat[mm0]*ygauss[jj1];
+                        }
+                    }
+                }
+				gausscoords[id0][ii0] = sum;
+            }
+        }
+    }
+}
+
+void diag(double *a, double *w, int N)
+{
+    /* Locals */
+	int LDA = N;
+    int n = N, lda = LDA, info, lwork;
+    double wkopt;
+    double *work;
+    /* Local arrays */
+    /* Query and allocate the optimal workspace */
+    lwork = -1;
+    char u1[] = "Vectors";
+    char u2[] = "Upper";
+    dsyev_( u1, u2, &n, a, &lda, w, &wkopt, &lwork, &info );
+    lwork = (int)wkopt;
+    work = new double[lwork];
+    /* Solve eigenproblem */
+    dsyev_( u1, u2, &n, a, &lda, w, work, &lwork, &info );
+    /* Check for convergence */
+    if( info > 0 )
+    {
+        cout<<"The algorithm failed to compute eigenvalues."<<endl;
+        exit( 1 );
+    }
+    /* Free workspace */
+    delete [] work;
+} /* End of DSYEV Example */
+
+/* Auxiliary routine: printing a matrix */
+void print_matrix( char *desc, int m, int n, double* a, int lda )
+{
+    int i, j;
+    cout<<desc<<endl;
+    for( i = 0; i < m; i++ )
+    {
+        for( j = 0; j < n; j++ )
+        {
+            cout<<a[i+j*lda]<<"  ";
+        }
+        cout<<endl;
+    }
+}
+#endif

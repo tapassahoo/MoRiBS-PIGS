@@ -208,6 +208,9 @@ srand( time(NULL) );
 proposedGrid();
 #endif
 ParamsPotential();
+#ifdef GAUSSIANMOVE
+	ProposedMCCoords();
+#endif
 
 	if (WORM)
 	MCWormInit();
@@ -716,10 +719,14 @@ void PIMCPass(int type,int time)
 {
   // skip solvent and translation moves for rotations only
 #ifdef MOVECOM
+#ifdef GAUSSIANMOVE
+	MCMolecularMoveGauss(type);
+#else
    if (time == 0)
    MCMolecularMove(type);        
 // move the solvent particles
    MCBisectionMove(type,time);
+#endif
 #endif
 
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 1)  // rotational degrees of freedom
@@ -2022,6 +2029,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
    cout << "PASS:"  << setw(w) << pass  << BLANK;
    cout << "STEP:"  << setw(w) << step  << BLANK;
 
+#ifdef MOVECOM
    for (int type=0;type<NumbTypes;type++)
    if (WORM && (type == Worm.type))
    {
@@ -2068,6 +2076,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
       cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
       cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
    }
+#endif
 
    if (ROTATION)
    {

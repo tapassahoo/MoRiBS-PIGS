@@ -18,15 +18,15 @@ from matplotlib.backends.backend_pdf import PdfPages
 #   Change the parameters as you requied.                                      |
 #                                                                              |
 #===============================================================================
-variableName        = "tau"
-#variableName        = "beta"
+#variableName        = "tau"
+variableName        = "beta"
 #
 TransMove           = "No"
 RotMove             = "Yes"
 #
 #TypeCal             = 'PIMC'
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 #
 TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
@@ -37,14 +37,14 @@ molecule            = "HF"
 #molecule            = "H2"                                                    
 molecule_rot        = "HF"
 #
-numbblocks	        = 200000
+numbblocks	        = 50000
 numbmolecules       = 2
 numbpass            = 200
 #
 Rpt                 = 10.05
-dipolemoment        = 0.45 #1.826        #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
 
-preskip             = 0
+preskip             = 10000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
