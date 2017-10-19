@@ -1312,8 +1312,17 @@ double GetTotalEnergy(void)
 		{
             int t0  = offset0 + it;
 
+#ifndef GAUSSIANMOVE
             E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
             spot   += E12*AuToKelvin;
+#else
+			double spot3d = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{
+            	spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0]/(BOHRRADIUS*BOHRRADIUS);
+			}
+            spot   += spot3d;
+#endif
         }
     }
 

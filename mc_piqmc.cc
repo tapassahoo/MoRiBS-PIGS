@@ -126,7 +126,9 @@ void MCMolecularMoveGauss(int type)
 
     	double deltav = 0.0;         // ACCEPT/REJECT
     
+#ifndef POTZERO
     	deltav += (PotEnergy(gatom,newcoords)-PotEnergy(gatom,MCCoords));
+#endif
 
     	bool Accepted = false;
 

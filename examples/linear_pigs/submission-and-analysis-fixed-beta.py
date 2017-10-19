@@ -28,8 +28,8 @@ NameOfServer        = "nlogn"
 NameOfPartition     = "ntapas"
 #
 #TypeCal             = "PIMC"
-TypeCal             = "PIGS"
-#TypeCal             = "ENT"
+#TypeCal             = "PIGS"
+TypeCal             = "ENT"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
@@ -40,8 +40,8 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 200000
-numbmolecules       = 3
+numbblocks	        = 50000
+numbmolecules       = 4
 numbpass            = 200
 #
 Rpt                 = 10.05
@@ -72,7 +72,7 @@ extra_file_name     = ""
 src_dir             = os.getcwd()
 if (variableName == "tau"):
 	parameterName   = "beta"
-	beta            = 0.2
+	beta            = 0.1
 	parameter       = beta
 	temperature     = 1.0/beta   
 #==================================== MCStep ===================================# 

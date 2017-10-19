@@ -2069,12 +2069,16 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
    else
    {
       double ratio_molec = MCAccep[type][MCMOLEC]/MCTotal[type][MCMOLEC];
+#ifndef GAUSSIANMOVE
       double ratio_multi = MCAccep[type][MCMULTI]/MCTotal[type][MCMULTI];
+#endif
  
       cout<<setw(w)<<MCAtom[type].type<<BLANK; // atom type
 
       cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
+#ifndef GAUSSIANMOVE
       cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
+#endif
    }
 #endif
 

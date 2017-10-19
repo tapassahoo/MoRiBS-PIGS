@@ -146,10 +146,9 @@ int       InitMCCoords; // integer flag for read in MCCoords;
 
 #ifdef GAUSSIANMOVE
 double ** gausscoords;
-int size_Gauss = NumbAtoms*NumbTimes*NDIM;
+int size_Gauss;
 double * AMat;
 double * Eigen;
-double * ygauss;
 #endif
 
 //----------------------------------------------------------
@@ -193,9 +192,8 @@ void MCMemAlloc(void)  // allocate  memmory
 #endif
 #ifdef GAUSSIANMOVE
   	gausscoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
-	AMat    = new double [size_Gauss*size_Gauss];
-	Eigen   = new double [size_Gauss];
-	ygauss  = new double [size_Gauss];
+	AMat    = new double [NumbAtoms*NumbTimes*NDIM*NumbAtoms*NumbTimes*NDIM];
+	Eigen   = new double [NumbAtoms*NumbTimes*NDIM];
 #endif
 }
 
@@ -227,7 +225,6 @@ void MCMemFree(void)  //  free memory
   	free_doubleMatrix(gausscoords); 
 	delete [] AMat;
 	delete [] Eigen;
-	delete [] ygauss;
 #endif
 }
 
@@ -758,6 +755,7 @@ void ParamsPotential(void)
 void ProposedMCCoords()
 {
 	int atype = 0;
+#ifdef IOWRITE
 	double FrequencyHO     = 78.6; //in cm-1
 
 	double FrequencyANGINV = FrequencyHO*pow(10,-8);
@@ -765,82 +763,102 @@ void ProposedMCCoords()
 	double massANGINV      = massCMINV*pow(10,-8);
 	double FrequencyK      = FrequencyHO*CMRECIP2KL; //in Kelvin
 
-    double prefacGauss1    =   massANGINV*FrequencyANGINV;
+    double prefacGauss1    = massANGINV*FrequencyANGINV;
     double prefacGauss2    = 2.0*sinh(FrequencyK*MCTau);
     double prefacGauss3    = cosh(FrequencyK*MCTau);
+#endif
+	double FrequencyK      = 1.0*AuToKelvin;
+    double prefacGauss1    = 1.0; // in Atomic Unit;
+    double prefacGauss2    = 2.0*tanh(FrequencyK*MCTau);
+    double prefacGauss3    = 2.0*sinh(FrequencyK*MCTau);
 
-    double afacGauss       = prefacGauss1*prefacGauss3/prefacGauss2;
-    double bfacGauss       = -prefacGauss1/prefacGauss2;
+    double afacGauss       = prefacGauss1/prefacGauss2;
+    double bfacGauss       = -prefacGauss1/prefacGauss3;
+	cout<<"afacGauss = "<<afacGauss<<" bfacGauss = "<<bfacGauss<<endl;
 	
 //Tridiagonal Matrix formation; starts
-	size_Gauss      = NumbAtoms*NumbTimes*NDIM;
 
 	int atom0, it0, id0;
 	int atom1, it1, id1;
-	int ii0, jj0, kk0, ll0, mm0, llm1,llp1,mmm1,mmp1;
+	int ii0, jj0, kk0;
+	int ii1, jj1, jjp1, jjm1, kkm1, kkp1;
+
+	size_Gauss = NumbAtoms*NumbTimes*NDIM;
 	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
 	{
-		for (it0 = 0; it0 < NumbTimes; it0++)
+		for (id0 = 0; id0 < NDIM; id0++)
 		{
-			ii0 = it0 + atom0*NumbTimes;
-			for (id0 = 0; id0 < NDIM; id0++)
+			ii0 = id0 + atom0*NDIM;
+			for (it0 = 0; it0 < NumbTimes; it0++)
 			{
-				jj0 = id0 + ii0*NDIM;
+				jj0 = it0 + ii0*NumbTimes;
 				for (atom1 = 0; atom1 < NumbAtoms; atom1++)
 				{
-					kk0 = atom1 + jj0*NumbAtoms;
-					for (it1 = 0; it1 < NumbTimes; it1++)
+					for (id1 = 0; id1 < NDIM; id1++)
 					{
-						ll0 = it1 + kk0*NumbTimes;
-						for (id1 = 0; id1 < NDIM; id1++)
+						ii1 = id1 + atom1*NDIM;
+						for (it1 = 0; it1 < NumbTimes; it1++)
 						{
-							mm0 = id1 + ll0*NDIM;
-							AMat[mm0] = 0.0;
+							jj1 = it1 + ii1*NumbTimes;
+							kk0 = jj1 + jj0*size_Gauss;
+							AMat[kk0] = 0.0;
 						}
 					}
 				}
 			}
-        }
-    }
+		}
+	}
 	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
 	{
-		for (it0 = 0; it0 < NumbTimes; it0++)
+		for (id0 = 0; id0 < NDIM; id0++)
 		{
-			ii0 = it0 + atom0*NumbTimes;
-			for (id0 = 0; id0 < NDIM; id0++)
+			ii0 = id0 + atom0*NDIM;
+			for (it0 = 0; it0 < NumbTimes; it0++)
 			{
-				jj0 = id0 + ii0*NDIM;
+				jj0 = it0 + ii0*NumbTimes;
 				for (atom1 = 0; atom1 < NumbAtoms; atom1++)
 				{
-					kk0 = atom1 + jj0*NumbAtoms;
-					for (it1 = 0; it1 < NumbTimes; it1++)
+					for (id1 = 0; id1 < NDIM; id1++)
 					{
-						if (it1 == it0)
+						ii1 = id1 + atom1*NDIM;
+						for (it1 = 0; it1 < NumbTimes; it1++)
 						{
-							ll0 = it1 + kk0*NumbTimes;
-							llm1 = (it1 - 1) + kk0*NumbAtoms;
-							llp1 = (it1 + 1) + kk0*NumbAtoms;
-							for (id1 = 0; id1 < NDIM; id1++)
+							jj1 = it1 + ii1*NumbTimes;
+							kk0 = jj1 + jj0*size_Gauss;
+							if ((it1 == it0) && (id1 == id0) && (atom1 == atom0)) 
 							{
-								mm0 = id1 + ll0*NDIM;
-								mmm1 = id1 + llm1*NDIM;
-								mmp1 = id1 + llp1*NDIM;
-                				if ((it1+1) < NumbTimes)
-                				{
-                    				AMat[mmp1] = bfacGauss;
-                				}
-               					AMat[mm0]   = afacGauss;
-                				if ((it1-1) >= 0)
-                				{
-                    				AMat[mmm1] = bfacGauss;
-                				}
+								jjm1 = (it1 - 1) + ii1*NumbTimes;
+								jjp1 = (it1 + 1) + ii1*NumbTimes;
+								kkm1 = jjm1 + jj0*size_Gauss;
+								kkp1 = jjp1 + jj0*size_Gauss;
+								if ((it1+1) < NumbTimes)
+   								{
+									AMat[kkp1]      = bfacGauss;
+   								}
+								AMat[kk0]           = afacGauss;
+   								if ((it1-1) >= 0)
+   								{
+									AMat[kkm1] 		= bfacGauss;
+   								}
 							}
 						}
 					}
 				}
 			}
-        }
-    }
+		}
+	}
+#ifdef IOWRITE
+	for (int i = 0; i < size_Gauss; i++)
+	{
+		for (int j = 0; j < size_Gauss; j++)
+		{
+			int ij = j+i*size_Gauss;
+			cout<< AMat[ij]<<"  ";
+		}
+		cout<<endl;
+	}
+	exit(0);
+#endif
 	for (jj0 = 0; jj0 < size_Gauss; jj0++)
 	{
 		Eigen[jj0] = 0.0;
@@ -860,14 +878,17 @@ void GetRandomCoords()
 	double mu =0.0;
 	double sigma;
 
+	double * ygauss;
+	ygauss  = new double [size_Gauss];
+
 	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
    	{
-    	for (it0 = 0; it0 < NumbTimes; it0++)
-    	{
-            ii0 = it0 + atom0*NumbAtoms;
-            for (id0 = 0; id0 < NDIM; id0++)
-            {
-                jj0 = id0 + ii0*NDIM;
+        for (id0 = 0; id0 < NDIM; id0++)
+        {
+			ii0 = id0 + atom0*NDIM;
+    		for (it0 = 0; it0 < NumbTimes; it0++)
+    		{
+				jj0 = it0 + ii0*NumbTimes;
 				sigma = Eigen[jj0];
 				ygauss[jj0] = rnorm(Rng, mu, sigma);
 			}
@@ -876,62 +897,57 @@ void GetRandomCoords()
 
     for (atom0 = 0; atom0 < NumbAtoms; atom0++)
     {
-    	for (it0 = 0; it0 < NumbTimes; it0++)
-    	{
-            ii0 = it0 + atom0*NumbTimes;
-            for (id0 = 0; id0 < NDIM; id0++)
-            {
-                jj0 = id0 + ii0*NDIM;
+        for (id0 = 0; id0 < NDIM; id0++)
+        {
+			ii0 = id0 + atom0*NDIM;
+    		for (it0 = 0; it0 < NumbTimes; it0++)
+    		{
+				jj0 = it0 + ii0*NumbTimes;
+				ll0 = it0 + atom0*NumbTimes;
+
 				sum = 0.0;
                 for (atom1 = 0; atom1 < NumbAtoms; atom1++)
                 {
-					kk0 = atom1 + jj0*NumbAtoms;
-                    for (it1 = 0; it1 < NumbTimes; it1++)
+                    for (id1 = 0; id1 < NDIM; id1++)
                     {
-						ll0 = it1 + kk0*NumbTimes;
-                        ii1 = it1 + atom1*NumbTimes;
-                        for (id1 = 0; id1 < NDIM; id1++)
-                        {
-							mm0 = id1 + ll0*NDIM;
-                            jj1 = id1 + ii1*NDIM;
-							sum += AMat[mm0]*ygauss[jj1];
+						ii1 = id1 + atom1*NDIM;
+                    	for (it1 = 0; it1 < NumbTimes; it1++)
+                    	{
+							jj1 = it1 + ii1*NumbTimes;
+							kk0 = jj1 + jj0*size_Gauss;
+							sum += AMat[kk0]*ygauss[jj1];
                         }
                     }
                 }
-				gausscoords[id0][ii0] = sum;
+				gausscoords[id0][ll0]  = sum;
+				gausscoords[id0][ll0] *= BOHRRADIUS;
             }
         }
     }
+	delete [] ygauss;
 }
 
 void diag(double *a, double *w, int N)
 {
-    /* Locals */
 	int LDA = N;
     int n = N, lda = LDA, info, lwork;
     double wkopt;
     double *work;
-    /* Local arrays */
-    /* Query and allocate the optimal workspace */
     lwork = -1;
     char u1[] = "Vectors";
     char u2[] = "Upper";
     dsyev_( u1, u2, &n, a, &lda, w, &wkopt, &lwork, &info );
     lwork = (int)wkopt;
     work = new double[lwork];
-    /* Solve eigenproblem */
     dsyev_( u1, u2, &n, a, &lda, w, work, &lwork, &info );
-    /* Check for convergence */
     if( info > 0 )
     {
         cout<<"The algorithm failed to compute eigenvalues."<<endl;
         exit( 1 );
     }
-    /* Free workspace */
     delete [] work;
-} /* End of DSYEV Example */
+} 
 
-/* Auxiliary routine: printing a matrix */
 void print_matrix( char *desc, int m, int n, double* a, int lda )
 {
     int i, j;

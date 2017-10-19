@@ -695,6 +695,9 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 			frontName      += "RotDOFs-"
 			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+		if (TransMove == "Yes" and RotMove != "Yes"):
+			frontName      += "TransDOFs-"
+			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 	if (molecule_rot == "H2"):
 		if (TransMove == "Yes" and RotMove == "Yes"):
 			frontName      += "TransAndRotDOFs-"
