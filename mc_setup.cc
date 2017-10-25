@@ -5,6 +5,7 @@
 #include "rngstream.h"
 #include "omprng.h"
 #include <cstdlib>
+#include <omp.h>
 
 #include <math.h>
 
@@ -192,8 +193,8 @@ void MCMemAlloc(void)  // allocate  memmory
 #endif
 #ifdef GAUSSIANMOVE
   	gausscoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
-	AMat    = new double [NumbAtoms*NumbTimes*NDIM*NumbAtoms*NumbTimes*NDIM];
-	Eigen   = new double [NumbAtoms*NumbTimes*NDIM];
+	AMat    = new double [NumbTimes*NumbTimes];
+	Eigen   = new double [NumbTimes];
 #endif
 }
 
@@ -778,153 +779,106 @@ void ProposedMCCoords()
 	
 //Tridiagonal Matrix formation; starts
 
-	int atom0, it0, id0;
-	int atom1, it1, id1;
-	int ii0, jj0, kk0;
-	int ii1, jj1, jjp1, jjm1, kkm1, kkp1;
+	int it0, it1, ii0, iip1, iim1;
 
-	size_Gauss = NumbAtoms*NumbTimes*NDIM;
-	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
+	for (it0 = 0; it0 < NumbTimes; it0++)
 	{
-		for (id0 = 0; id0 < NDIM; id0++)
+		for (it1 = 0; it1 < NumbTimes; it1++)
 		{
-			ii0 = id0 + atom0*NDIM;
-			for (it0 = 0; it0 < NumbTimes; it0++)
+			ii0 = it1 + it0*NumbTimes;
+			AMat[ii0] = 0.0;
+		}
+	}
+
+	for (it0 = 0; it0 < NumbTimes; it0++)
+	{
+		for (it1 = 0; it1 < NumbTimes; it1++)
+		{
+			if (it1 == it0)
 			{
-				jj0 = it0 + ii0*NumbTimes;
-				for (atom1 = 0; atom1 < NumbAtoms; atom1++)
+				ii0  = it1 + it0*NumbTimes;
+				iip1 = (it1+1) + it0*NumbTimes;
+				iim1 = (it1-1) + it0*NumbTimes;
+				if ((it1+1) < NumbTimes)
+   				{
+					AMat[iip1]      = bfacGauss;
+   				}
+				if ((it1 == 0) || (it1 == (NumbTimes-1)))
 				{
-					for (id1 = 0; id1 < NDIM; id1++)
-					{
-						ii1 = id1 + atom1*NDIM;
-						for (it1 = 0; it1 < NumbTimes; it1++)
-						{
-							jj1 = it1 + ii1*NumbTimes;
-							kk0 = jj1 + jj0*size_Gauss;
-							AMat[kk0] = 0.0;
-						}
-					}
+					AMat[ii0]       = afacGauss;
 				}
+				else
+				{
+					AMat[ii0]       = 2.0*afacGauss;
+				}
+   				if ((it1-1) >= 0)
+   				{
+					AMat[iim1] 		= bfacGauss;
+   				}
 			}
 		}
 	}
-	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
+	for (it0 = 0; it0 < NumbTimes; it0++)
 	{
-		for (id0 = 0; id0 < NDIM; id0++)
+		for (it1 = 0; it1 < NumbTimes; it1++)
 		{
-			ii0 = id0 + atom0*NDIM;
-			for (it0 = 0; it0 < NumbTimes; it0++)
-			{
-				jj0 = it0 + ii0*NumbTimes;
-				for (atom1 = 0; atom1 < NumbAtoms; atom1++)
-				{
-					for (id1 = 0; id1 < NDIM; id1++)
-					{
-						ii1 = id1 + atom1*NDIM;
-						for (it1 = 0; it1 < NumbTimes; it1++)
-						{
-							jj1 = it1 + ii1*NumbTimes;
-							kk0 = jj1 + jj0*size_Gauss;
-							if ((it1 == it0) && (id1 == id0) && (atom1 == atom0)) 
-							{
-								jjm1 = (it1 - 1) + ii1*NumbTimes;
-								jjp1 = (it1 + 1) + ii1*NumbTimes;
-								kkm1 = jjm1 + jj0*size_Gauss;
-								kkp1 = jjp1 + jj0*size_Gauss;
-								if ((it1+1) < NumbTimes)
-   								{
-									AMat[kkp1]      = bfacGauss;
-   								}
-								AMat[kk0]           = afacGauss;
-   								if ((it1-1) >= 0)
-   								{
-									AMat[kkm1] 		= bfacGauss;
-   								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-#ifdef IOWRITE
-	for (int i = 0; i < size_Gauss; i++)
-	{
-		for (int j = 0; j < size_Gauss; j++)
-		{
-			int ij = j+i*size_Gauss;
-			cout<< AMat[ij]<<"  ";
+			int ii0 = it1 + it0*NumbTimes;
+			cout<< AMat[ii0]<<"  ";
 		}
 		cout<<endl;
 	}
-	exit(0);
-#endif
-	for (jj0 = 0; jj0 < size_Gauss; jj0++)
+	for (it0 = 0; it0 < NumbTimes; it0++)
 	{
-		Eigen[jj0] = 0.0;
+		Eigen[it0] = 0.0;
 	}
-	diag(AMat, Eigen, size_Gauss);
+	diag(AMat, Eigen, NumbTimes);
+	for (it0 = 0; it0 < NumbTimes; it0++)
+    {
+      	cout<<Eigen[it0]<<"   ";
+    }
 }
 
 void GetRandomCoords()
 {
-	int atom0, it0, id0;
-	int atom1, it1, id1;
-	int ii0, jj0, kk0, ll0, mm0, ii1, jj1;
+	int atom0, it0, it1, id0, ii0, t0;
 
 	double sum;
 
-	RngStream Rng[1];
+	//RngStream Rng[1];
+   	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 	double mu =0.0;
 	double sigma;
 
-	double * ygauss;
-	ygauss  = new double [size_Gauss];
+	//double * ygauss;
+	double ygauss[NumbTimes];
 
 	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
-   	{
-        for (id0 = 0; id0 < NDIM; id0++)
-        {
-			ii0 = id0 + atom0*NDIM;
-    		for (it0 = 0; it0 < NumbTimes; it0++)
-    		{
-				jj0 = it0 + ii0*NumbTimes;
-				sigma = Eigen[jj0];
-				ygauss[jj0] = rnorm(Rng, mu, sigma);
+	{
+		for (id0 = 0; id0 < NDIM; id0++)
+		{
+			for (it0 = 0; it0 < NumbTimes; it0++)
+			{
+				sum = 0.0;
+				//ygauss  = new double [NumbTimes];
+   				for (it1 = 0; it1 < NumbTimes; it1++)
+   				{
+					if (Eigen[it1] < 0.0) 
+					{
+						cout << "Eigen values must be positive"<<endl;
+						exit(0);
+					}
+					sigma = sqrt(1.0/(2.0*Eigen[it1]));
+					ygauss[it1] = rnorm(Rng, mu, sigma);
+
+					ii0 = it1 + it0*NumbTimes;
+					sum += AMat[ii0]*ygauss[it1];
+   				}
+				//delete [] ygauss;
+				t0 = it0 + atom0*NumbTimes;
+				gausscoords[id0][t0]  = sum*BOHRRADIUS;
 			}
 		}
-	}
-
-    for (atom0 = 0; atom0 < NumbAtoms; atom0++)
-    {
-        for (id0 = 0; id0 < NDIM; id0++)
-        {
-			ii0 = id0 + atom0*NDIM;
-    		for (it0 = 0; it0 < NumbTimes; it0++)
-    		{
-				jj0 = it0 + ii0*NumbTimes;
-				ll0 = it0 + atom0*NumbTimes;
-
-				sum = 0.0;
-                for (atom1 = 0; atom1 < NumbAtoms; atom1++)
-                {
-                    for (id1 = 0; id1 < NDIM; id1++)
-                    {
-						ii1 = id1 + atom1*NDIM;
-                    	for (it1 = 0; it1 < NumbTimes; it1++)
-                    	{
-							jj1 = it1 + ii1*NumbTimes;
-							kk0 = jj1 + jj0*size_Gauss;
-							sum += AMat[kk0]*ygauss[jj1];
-                        }
-                    }
-                }
-				gausscoords[id0][ll0]  = sum;
-				gausscoords[id0][ll0] *= BOHRRADIUS;
-            }
-        }
     }
-	delete [] ygauss;
 }
 
 void diag(double *a, double *w, int N)

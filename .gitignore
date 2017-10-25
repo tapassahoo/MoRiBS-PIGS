@@ -22,6 +22,11 @@ Makefile-TEST
 /linear_prop/qpr.x
 /linear_prop/linden.out
 /linear_prop/linden-original.f
+examples/linear_pigs/FigureGenerator.pyc
+/examples/linear_pigs/MakeHistogram.py
+/examples/linear_pigs/hist-test
+/examples/linear_pigs/hist-test.pdf
+/examples/linear_pigs/supporttest.py
 /examples/linear_pigs/results/
 /examples/linear_pigs/yw001.*
 /examples/linear_pigs/PIGS-Results*

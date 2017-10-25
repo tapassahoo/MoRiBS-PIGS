@@ -117,39 +117,34 @@ void MCMolecularMoveGauss(int type)
 
     	for (int id = 0; id < NDIM; id++)	  // MOVE
     	{
-    		#pragma omp parallel for
+    		//#pragma omp parallel for
     		for (int it = 0; it < NumbTimes; it++)
     		{ 
        			newcoords[id][offset+it]  =  gausscoords[id][offset+it];
-    		}
-    	}
 
-    	double deltav = 0.0;         // ACCEPT/REJECT
+    			double deltav = 0.0;         // ACCEPT/REJECT
     
 #ifndef POTZERO
-    	deltav += (PotEnergy(gatom,newcoords)-PotEnergy(gatom,MCCoords));
+    			deltav += (PotEnergy(gatom,newcoords)-PotEnergy(gatom,MCCoords));
 #endif
 
-    	bool Accepted = false;
+    			bool Accepted = false;
 
-    	if (deltav<0.0)             Accepted = true;
-    	else if
-    	(exp(-deltav*MCTau)>rnd2()) Accepted = true;
+    			if (deltav<0.0)             Accepted = true;
+    			else if
+    			(exp(-deltav*MCTau)>rnd2()) Accepted = true;
 
-    	MCTotal[type][MCMOLEC] += 1.0;  
+    			MCTotal[type][MCMOLEC] += 1.0;  
       
-    	if (Accepted)
-    	{
-       		MCAccep[type][MCMOLEC] += 1.0; 
+    			if (Accepted)
+    			{
+       				MCAccep[type][MCMOLEC] += 1.0; 
 
-       		for (int id = 0; id < NDIM; id++)       // save accepted configuration	
-       		{
-       			#pragma omp parallel for
-       			for (int it = 0; it < NumbTimes; it++)
-       			MCCoords[id][offset+it] = newcoords[id][offset+it];
+       				MCCoords[id][offset+it] = newcoords[id][offset+it];
+				}
        		}
-    	}	     
-  	}   
+    	}
+  	}
 }
 #endif
 

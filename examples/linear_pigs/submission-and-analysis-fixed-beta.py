@@ -25,7 +25,7 @@ status              = "analysis"
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 #
 #TypeCal             = "PIMC"
 #TypeCal             = "PIGS"
@@ -41,11 +41,12 @@ molecule_rot        = "HF"
 #exit()
 #
 numbblocks	        = 50000
-numbmolecules       = 4
+numbmolecules       = 2
 numbpass            = 200
 #
 Rpt                 = 10.05
-dipolemoment        = 0.45      #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.826  #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.0*dipolemoment
 
 status_rhomat       = "Yes"                                                 
 status_cagepot      = "No"                                                      
@@ -55,7 +56,7 @@ RUNIN               = "nCPU"
 
 loopStart           = 40
 loopEnd             = 102
-skip                = 2
+skip                = 5
 
 preskip             = 0
 postskip            = 0
@@ -72,7 +73,7 @@ extra_file_name     = ""
 src_dir             = os.getcwd()
 if (variableName == "tau"):
 	parameterName   = "beta"
-	beta            = 0.1
+	beta            = 0.2
 	parameter       = beta
 	temperature     = 1.0/beta   
 #==================================== MCStep ===================================# 
@@ -85,11 +86,13 @@ if (variableName == "tau"):
 
 	if (molecule_rot == "HF"):
 		step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3]
-		step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21,25,31,35,41,45,51 for beta 0.1
+		#step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21,25,31,35,41,45,51 for beta 0.1
+		#step        = [1.7,1.4,1.1,1.0,0.9]  # beads 21, 31, 41, 51 for beta 0.1
 		#step        = [1.7,1.6,1.6,1.6,1.5,1.4,1.4,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.2
+		step        = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.2
 		#step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 41,51,61,71,81,91,101 forbeta 0.2
 		#step        = [1.7,1.5,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 2
-		step        = [1.0,0.9,0.8,0.7,0.7]  # beads 41, 61, 81, 101 HF
+		#step        = [1.0,0.9,0.8,0.7,0.7]  # beads 41, 61, 81, 101 HF
 		level       = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 if (variableName == "beta"):
@@ -176,7 +179,7 @@ if status == "analysis":
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
 	if (variableName == "tau"):
-		loopStart       = 20
+		loopStart       = 10
 	if (variableName == "beta"):
 		loopStart       = 80
 

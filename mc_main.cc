@@ -542,6 +542,7 @@ ParamsPotential();
 #ifdef IOWRITE
             SaveInstantEnergy (); 
 #endif
+			if (blockCount > 9000)
 		    SaveInstantAngularDOF(totalStep);
 #endif
 
@@ -644,10 +645,13 @@ ParamsPotential();
 		{
    			MCSaveBlockAverages(blockCount);
 
-#ifdef IOWRITE
 			// save accumulated interatomic distribution
+#ifdef NEWDENSITY
+			if (blockCount > 600)
 			SaveGraSum(MCFileName.c_str(),totalCount);
+#endif
 
+#ifdef IOWRITE
 			if(IMPURITY && MCAtom[IMTYPE].molecule == 1)
 	    	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
@@ -1054,6 +1058,9 @@ void MCGetAveragePIGS(void)
 	avergCount       += 1.0;
 	totalCount       += 1.0;  
 
+#ifdef NEWDENSITY
+	GetDensities();
+#endif
 	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
@@ -1763,6 +1770,7 @@ void SaveInstantAngularDOF(long int numb)
     delete[] scostheta;
 #endif
 
+#ifdef IOWRITE
 #ifdef PIGSTYPE
 #ifdef BINARY
 	double instArray[5];
@@ -1790,6 +1798,17 @@ void SaveInstantAngularDOF(long int numb)
    	_fangins << setw(IO_WIDTH) << compxyz[2] << BLANK;
 #endif 
 #endif 
+#endif 
+#ifdef NEWDENSITY
+   	_fangins << setw(IO_WIDTH) << numb << BLANK;
+	int it = (NumbTimes - 1)/2;
+	int atom0 = 0;
+	int t0 = it + atom0*NumbTimes;
+	for (int id = 0; id < NDIM; id++)
+	{
+   		_fangins << setw(IO_WIDTH) << MCCoords[0][t0]/BOHRRADIUS<< BLANK;
+	}
+#endif
 
 #ifndef BINARY
     _fangins << endl;
@@ -1944,7 +1963,7 @@ void InitTotalAverage(void)  // DUMP
     _io_error(_proc_,IO_ERR_FOPEN,fdipolecorr.c_str());
 
 //
-#ifdef IOFILES
+#ifdef INSTANT
     string fangularins;
 
     fangularins  = MCFileName + "_instant";

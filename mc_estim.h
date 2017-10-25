@@ -92,4 +92,7 @@ double GetPotEnergyPIGSENT(void);
 double GetTotalEnergyPIGSENT(void);
 void GetDipoleCorrelationPIGSENT(double *, double *, double *, double *, double *);
 void GetCosThetaPIGSENT(double &, double *);
+#ifdef NEWDENSITY
+void GetDensities(void);
+#endif
 #endif  // mc_estim.h

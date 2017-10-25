@@ -26,8 +26,13 @@ const int MC_BINSR = 300;       // number of bins for radius original value=500
 const int MC_BINST = 50;       // number of bins for theta original value=100
 const int MC_BINSC = 100;       // number of bins for chi, added by Toby original value=200
 
+#ifndef NEWDENSITY
 const double MIN_RADIUS = 0.0;  // [AA], min radius for radial distribution functions 
 const double MAX_RADIUS = 15.0; // [AA], max radius for radial distribution functions original value=25
+#else
+const double MIN_RADIUS = -5.0;  // [AA], min radius for radial distribution functions 
+const double MAX_RADIUS = 5.0; // [AA], max radius for radial distribution functions original value=25
+#endif
 
 double _delta_radius;           // \delta r for density distributions    
 double _delta_theta;            // \delta\theta density distributions 
@@ -268,7 +273,11 @@ void densities_init(void)
 // if ((NUMB_MOLCTYPES>0) && (NUMB_MOLCS!=1))
 // nrerror(_proc_,"Only one molecular impurity");
 
+#ifndef NEWDENSITY
    NUMB_DENS1D = NUMB_ATOMTYPES;  //# atom-atom densities [no cross-distributions]
+#else
+   NUMB_DENS1D = NDIM;  //# atom-atom densities [no cross-distributions]
+#endif
 
    if (IMPURITY && (MCAtom[IMTYPE].molecule == 1))                          
      NUMB_DENS2D = NUMB_ATOMTYPES;  //# molecule-atoms distributions 
@@ -711,8 +720,17 @@ double GetPotEnergyPIGS(void)
     {
         int offset0 = 0;
         int t0  = offset0 + it;
+#ifndef GAUSSIANMOVE
         double E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
+#else
+        double spot3d = 0.0;
+        for (int id = 0; id < NDIM; id++)
+        {
+            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0]/(BOHRRADIUS*BOHRRADIUS);
+        }
+        spot   = spot3d;
+#endif
     }
 
     double spot_cage = 0.0;
@@ -1199,6 +1217,25 @@ double GetPotEnergy_Densities(void)
 	double spotReturn = spot + spot_cage;
 	return (spot/(double)NumbTimes);
 }
+
+#ifdef NEWDENSITY
+void GetDensities(void)
+{
+	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+
+    if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+    {
+		int atom0 = 0;
+		int it = (NumbTimes - 1)/2;
+		int t0 = it + atom0*NumbTimes;
+		for (int id=0;id<NDIM;id++)
+		{
+			double r = MCCoords[id][t0]/BOHRRADIUS;
+           	bin_1Ddensity (r,id);    // densities 
+		}
+	}
+}
+#endif
 
 double GetTotalEnergy(void)
 {
@@ -3085,7 +3122,11 @@ void SaveGraSum(const char fname [], double acount)
 
   fid.open(fdens.c_str(),ios::out); io_setout(fid);
 
+#ifndef NEWDENSITY
   double norma = _delta_radius*acount*(double)(NumbTimes);
+#else
+  double norma = _delta_radius*acount;
+#endif
 
   double r;
 
@@ -3102,7 +3143,11 @@ void SaveGraSum(const char fname [], double acount)
 //      double nfact = norma*(double)(MCAtom[id].numb*(MCAtom[id].numb-1));
 //      the following scaling is to let the gra_sum to be normalized to one by integrating over dr, without any jacobian factor
 //      norma = norma * (MCAtom[id].numb*(MCAtom[id].numb-1))/2.0;
+#ifndef NEWDENSITY
         fid <<setw(IO_WIDTH)<<_gr1D_sum[id][ir]/(norma*(MCAtom[id].numb*(MCAtom[id].numb-1))/2.0)<<BLANK;   // gra_sum
+#else
+        fid <<setw(IO_WIDTH)<<_gr1D_sum[id][ir]/norma<<BLANK;   // gra_sum
+#endif
      }
 
      fid<<endl;
@@ -3127,8 +3172,12 @@ void SaveDensities1D(const char fname [], double acount)
 
   double volume = pow(BoxSize,(double)NDIM);     // 3D only  
 
+#ifndef NEWDENSITY
   double norm0  = 2.0*M_PI*_delta_radius*acount  // normalization factor for 
                 *(double)(NumbTimes)/volume;     // radial distribution functions 
+#else
+  double norm0 = _delta_radius*acount;
+#endif
 
   double r,r2;
 
@@ -3144,7 +3193,11 @@ void SaveDensities1D(const char fname [], double acount)
      for (int id=0;id<NUMB_DENS1D;id++)
      { 
         double nfact = norm0*(double)(MCAtom[id].numb*(MCAtom[id].numb-1));
+#ifndef NEWDENSITY
         fid <<setw(IO_WIDTH)<<_gr1D[id][ir]/(r2*nfact)<<BLANK;   // gra
+#else
+        fid <<setw(IO_WIDTH)<<_gr1D[id][ir]/norm0<<BLANK;   // gra
+#endif
      } 
 
      fid<<endl;
