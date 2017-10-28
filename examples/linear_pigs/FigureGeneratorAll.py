@@ -43,6 +43,7 @@ numbpass            = 200
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.0*dipolemoment
 
 preskip             = 0
 postskip            = 0
@@ -76,6 +77,20 @@ if (TypeCal == "ENT"):
 		NumberOfMolecules, ExactEntropy = np.loadtxt(ExactValueFile, usecols=(0, 1), unpack=True)
 		index = numbmolecules/2 - 1
 		ExactEntropyValue = ExactEntropy[index]
+		ExactEntropyValue = 
+
+		'''
+		#julia run
+		RFactor = support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
+		print(RFactor)
+		srcCodePath = "/home/tapas/DipoleChain.jl-master/examples/diagonalization.jl"
+		print(srcCodePath)
+		commandRun            = "julia "+srcCodePath+" -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 10 --A-start "+str(particleA)+" --A-size "+str(particleA)
+		print(commandRun)
+		call([commandRun])
+		exit()
+		'''
+
 		FileToBePlot   	  = FilePlotName.SaveEntropy+".txt"
 		FilePlot          = FilePlotName.SaveEntropy+".pdf"
 		call(["rm", FilePlot])
@@ -128,7 +143,7 @@ if (TypeCal == "PIGS"):
 		FilePlot          = FilePlotName.SaveEnergy+".pdf"
 		call(["rm", FilePlot])
 		RefPoint          = 0
-		FigureGenerator.FigureEnergyPIGS(FileToBePlot,FilePlot,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+		FigureGenerator.FigureEnergyPIGS(TypeCal,FileToBePlot,FilePlot,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 
 #End plotting ---energy
 

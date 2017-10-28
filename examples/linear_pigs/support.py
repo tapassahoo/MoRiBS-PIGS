@@ -302,9 +302,9 @@ def fmtAverageOrientation(status,variable):
 		output    +="\n"
 		output    +="#"
 		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
-		output    +="\n"
-		output    +="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
+		#output    +="\n"
+		#output    +="#"
+		#output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
 		output    +="\n"
 		output    += '{0:=<250}'.format('#')
 		output    +="\n"
@@ -514,6 +514,8 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 
 	os.chdir(dir_output)
 	if (os.path.isdir(folder_run) == True):
+		printingMessage = "Remove "+str(dir_output)+str(folder_run)
+		print(printingMessage)
 		os.chdir(src_dir)
 		return
 
@@ -927,6 +929,7 @@ class GetFileNamePlot:
 			add1                = ""
 
 		mainFileName      = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileNameDMRG  = mainFileName+"-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1
 		mainFileName     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 		
 		if ((self.TypeCal == "PIGS") or (self.TypeCal == "PIMC")):
@@ -1014,7 +1017,8 @@ class GetFileNamePlot:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
 
-			self.SaveEntropy           = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE
+			self.SaveEntropy      = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE
+			self.SaveEntropyDMRG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DMRG"
 
 def check(string,SavedFile):
 	datafile = file(SavedFile)
@@ -1081,3 +1085,17 @@ class GetUnitConverter:
 		self.AMU   = 1.6605402;  			#  (10^-27 kg)     atomic mass unit
 		self.K_B   = 1.380658;   			#  (10^-23 JK^-1)  Boltzmann constant
 		self.WNO2K = 0.6950356; 				# conversion from CM-1 to K
+
+
+
+def GetrAndgFactor(molecule, RCOM, DipoleMoment):
+	Units          = GetUnitConverter()
+	BConstant      = GetBconst(molecule)  # in wavenumber
+	DipoleMomentAU = DipoleMoment/Units.AuToDebye
+	RCOMAU         = RCOM/Units.BOHRRADIUS
+	BConstantAU    = BConstant/Units.AuToCmInverse
+	rFactor        = RCOMAU/((DipoleMomentAU*DipoleMomentAU/BConstantAU)**(1.0/3.0))
+	gFactor        = (DipoleMomentAU*DipoleMomentAU)/(RCOMAU*RCOMAU*RCOMAU*BConstantAU)
+	printingmessage   = " DipoleMoment = "+str(DipoleMoment)+" gFactor = " + str(gFactor)+ " rFactor = "+str(rFactor)
+	print(printingmessage)
+	return rFactor

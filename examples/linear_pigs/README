@@ -24,14 +24,14 @@ For ENT:
 For screened dipole:
 ===================
 
-beta convergence:
+beta convergence (tau 0.005):
+
 1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-tau0.005Kinv-Blocks200000-Passes100-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-tau0.005Kinv-Blocks200000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 3. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-tau0.005Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 
-tau convergence:
+tau convergence (beta 0.2):
 
-beta 0.2:
 1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks200000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ PARTIALLY
 
 2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
@@ -40,7 +40,8 @@ beta 0.2:
 5. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System8HF-ParticleA4-e0vsbeads-SWAPTOUNSWAPPIMC/
 6. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.2Kinv-Blocks50000-Passes200-System10HF-ParticleA5-e0vsbeads-SWAPTOUNSWAPPIMC/
 
-beta 0.1:
+tau convergence (beta 0.1):
+
 1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.1Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.1Kinv-Blocks50000-Passes200-System4HF-ParticleA2-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 3. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment0.45Debye-beta0.1Kinv-Blocks50000-Passes200-System6HF-ParticleA3-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE A
@@ -50,21 +51,37 @@ beta 0.1:
 For unscreened dipole:
 =====================
 
-beta convergence:
+beta convergence (tau 0.005):
+
 1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-tau0.005Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 
-tau convergence:
+tau convergence (beta 0.2):
 
-beta 0.2:
 1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System4HF-ParticleA2-e0vsbeads-SWAPTOUNSWAPPIMC/
 3. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System6HF-ParticleA3-e0vsbeads-SWAPTOUNSWAPPIMC/
 4. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System8HF-ParticleA4-e0vsbeads-SWAPTOUNSWAPPIMC/
 5. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System10HF-ParticleA5-e0vsbeads-SWAPTOUNSWAPPIMC/
 
-beta 0.1: 
+tau convergence (beta 0.1):
+
 1. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 2. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System4HF-ParticleA2-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
 3. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System6HF-ParticleA3-e0vsbeads-SWAPTOUNSWAPPIMC/
 4. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System8HF-ParticleA4-e0vsbeads-SWAPTOUNSWAPPIMC/
 5. ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-beta0.2Kinv-Blocks50000-Passes200-System10HF-ParticleA5-e0vsbeads-SWAPTOUNSWAPPIMC/
+
+
+For various gFactor:
+=====================
+
+tau convergence (beta = 0.2):
+
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment3.652Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/ COMPLETE
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment4.0Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment3.5Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment3.0Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment2.5Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment2.0Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.5Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/
+ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.0Debye-beta0.2Kinv-Blocks50000-Passes200-System2HF-ParticleA1-e0vsbeads-SWAPTOUNSWAPPIMC/

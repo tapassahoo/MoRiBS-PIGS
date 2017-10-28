@@ -21,7 +21,7 @@ TransMove           = "No"
 RotMove             = "Yes"
 #
 status              = "submission"                                            
-#status              = "analysis"                                            
+status              = "analysis"                                            
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
@@ -45,8 +45,10 @@ numbmolecules       = 2
 numbpass            = 200
 #
 Rpt                 = 10.05
-dipolemoment        = 1.826  #J. Chern. Phys. 73(5), 2319 (1980).
-dipolemoment        = 2.0*dipolemoment
+dipolemoment        = 4.0 #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.0*dipolemoment
+support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
+#exit()
 
 status_rhomat       = "Yes"                                                 
 status_cagepot      = "No"                                                      
@@ -55,7 +57,7 @@ RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
 loopStart           = 40
-loopEnd             = 36
+loopEnd             = 102
 skip                = 10
 
 preskip             = 0
@@ -89,7 +91,7 @@ if (variableName == "tau"):
 		#step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21,25,31,35,41,45,51 for beta 0.1
 		#step        = [1.7,1.4,1.1,1.0,0.9]  # beads 21, 31, 41, 51 for beta 0.1
 		#step        = [1.7,1.6,1.6,1.6,1.5,1.4,1.4,1.3,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.2
-		step        = [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.2
+		step        = [2.0,2.0,1.8,1.6,1.5,1.4,1.2,1.0,1.0,1.0,2.0,2.0,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21 to 51 beta 0.2
 		#step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 41,51,61,71,81,91,101 forbeta 0.2
 		#step        = [1.7,1.5,1.3,1.2,1.2,1.2,1.2,1.2,1.2,1.1,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 2
 		#step        = [1.0,0.9,0.8,0.7,0.7]  # beads 41, 61, 81, 101 HF
@@ -222,7 +224,7 @@ for i in list_nb:
 			final_dir_in_work = dir_output+folder_run
 			try:
 				fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
-				fanalyzeCorr.write(GetAverageOrientation(support.numbbeads,variable,final_dir_in_work,preskip,postskip))
+				fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
 				fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 				fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 				fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
