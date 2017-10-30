@@ -1220,9 +1220,6 @@ void MCGetAveragePIMC(void)
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
 
-	double stotal     = skin + spot;
-	_btotal          += stotal;                   // kin+pot
-	_total           += stotal;
 
 	double srot;
 	if (ROTATION)
@@ -1256,6 +1253,10 @@ void MCGetAveragePIMC(void)
 	     GetRCF(); 
 
 	}
+
+	double stotal     = skin + srot + spot;
+	_btotal          += stotal;                   // kin+pot
+	_total           += stotal;
 
 #ifdef IOWRITE
 // accumulate terms for Cv
