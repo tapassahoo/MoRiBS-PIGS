@@ -609,6 +609,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	if (thread > 4):
 		thread     = thread/2
+	print("thread = "+str(thread))
 	job_name       = file_name+str(value)
 	walltime       = "40-00:00"
 	omp_thread     = str(thread)
@@ -902,12 +903,13 @@ class GetFileNameAnalysis:
 			call(["rm", self.SaveTotalCorr, self.SaveXCorr, self.SaveYCorr, self.SaveZCorr, self.SaveXYCorr])
 
 class GetFileNamePlot:
-	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1, var1):
 		self.TypeCal      = TypeCal1
 		self.molecule_rot = molecule_rot1
 		self.TransMove    = TransMove1
 		self.RotMove      = RotMove1
 		self.variableName = variableName1
+		self.var          = var1
 		self.Rpt          = Rpt1
 		self.dipolemoment = dipolemoment1
 		self.parameter    = parameter1
@@ -929,7 +931,6 @@ class GetFileNamePlot:
 			add1                = ""
 
 		mainFileName      = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
-		mainFileNameDMRG  = mainFileName+"-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1
 		mainFileName     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 		
 		if ((self.TypeCal == "PIGS") or (self.TypeCal == "PIMC")):
@@ -1003,22 +1004,36 @@ class GetFileNamePlot:
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+					file_output2  = frontName+"Entropy-"
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
 
 			if (self.molecule_rot == "H2"):
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Entropy-"
+					file_output2  = frontName+"Entropy-"
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
 
 			self.SaveEntropy      = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE
+			mainFileNameDMRG  	  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
+			mainFileNameDMRG     += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
 			self.SaveEntropyDMRG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DMRG"
+			self.SaveEntropyDIAG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DIAG"
+			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DIAG"
+			mainFileNameGFAC      = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
+			mainFileNameGFAC     += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameGFAC+"-"+self.ENT_TYPE
+			mainFileNameRFAC      = "vs-RFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
+			mainFileNameRFAC     += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+			self.SaveEntropyRFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameRFAC+"-"+self.ENT_TYPE
 
 def check(string,SavedFile):
 	datafile = file(SavedFile)
@@ -1099,3 +1114,28 @@ def GetrAndgFactor(molecule, RCOM, DipoleMoment):
 	printingmessage   = " DipoleMoment = "+str(DipoleMoment)+" gFactor = " + str(gFactor)+ " rFactor = "+str(rFactor)
 	print(printingmessage)
 	return rFactor
+
+def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal):
+	if (TypeCal == "ENT"):
+		FileToBeSavedDIAG = FilePlotName.SaveEntropyDIAG+".txt"
+		FileToBeSavedDMRG = FilePlotName.SaveEntropyDMRG+".txt"
+
+		commandRunDIAG    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 2 --A-start 1"+" --A-size "+str(particleA)
+		call(["rm", "outputDIAG.txt"])
+		system(commandRunDIAG)
+		call(["mv", "outputDIAG.txt", FileToBeSavedDIAG])
+
+		if (numbmolecules <= 4):
+			call(["rm", "outputDMRG.txt"])
+
+			for numbbeads in loop:
+				print(numbbeads)
+				RFactor      = GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
+				if (variableName == "beta"):
+					parameterR    = parameter*BConstantK
+					commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 4 --tau "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
+				if (variableName == "tau"):
+					parameterR    = parameter*BConstantK
+					commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 4 --beta "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
+				system(commandRun)
+			call(["mv", "outputDMRG.txt", FileToBeSavedDMRG])

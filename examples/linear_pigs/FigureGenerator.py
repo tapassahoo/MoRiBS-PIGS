@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from numpy import *
+import numpy as np
 import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -23,63 +24,186 @@ class Specification:
 		self.marker2              = itertools.cycle(('o', 'v', '^', '<', '>', 's', '8', 'p'))
 		self.line2                = itertools.cycle(('--','-','-.',':'))
 
-def	FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactValue,numbmolecules,molecule,Rpt,dipolemoment):
-	outfile = FilePlot
-	fig = plt.figure(figsize=(8, 4), dpi=200)
+def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
 
-	font=15
+	fig        = plt.figure(figsize=(8, 4), dpi=200)
+	font       = 15
+	fontlegend = font/2.0
 	plt.grid(True)
-	#x      = Specification()
 	#rc('axes', linewidth=1)
 
-	beta1, purity1, entropy1, err_purity1, err_entropy1 = loadtxt(FileToBePlot,unpack=True, usecols=[1, 4, 5, 8, 9])
-	if (variableName == "beta"):
-		beta2, entropy2                                 = loadtxt(ExactValue,unpack=True, usecols=[0,2])
+	preskip    = 0
+	postskip   = 0
 
-	plt.subplot(1,2, 1)
-	if (variableName == "beta"):
-		plotEntropyENT(beta1, entropy1, err_entropy1, variableName, beta2, entropy2, font)
-	if (variableName == "tau"):
-		plotEntropyENT(beta1, entropy1, err_entropy1, variableName, beta1, ExactValue, font)
-	plt.ylabel(r'$\mathrm{S_{2}}$', fontsize = font)
-	ymin, ymax = plt.ylim()
-	xmin, xmax = plt.xlim()
-	Text1 = "(a)"
-	Text2 = ""
-	PlotLabel(Text1, Text2,font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	if (((TypePlot == "RFACTOR") or (TypePlot == "GFACTOR")) and variableName == "tau"):
+		var = beadsRef
+		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
+		if (TypePlot == "RFACTOR"):
+			FilePlot         = FilePlotName.SaveEntropyRFAC+".pdf"
+		if (TypePlot == "GFACTOR"):
+			FilePlot         = FilePlotName.SaveEntropyGFAC+".pdf"
+		outfile          = FilePlot
+		print(outfile)
+		call(["rm", FilePlot])
+		DList = [1.0+0.5*i for i in range(7)]
+		
+		RFactorPlot      = np.zeros(len(DList))
+		entropy1Plot     = np.zeros(len(DList))
+		purity1Plot      = np.zeros(len(DList))
+		err_entropy1Plot = np.zeros(len(DList))
+		err_purity1Plot  = np.zeros(len(DList))
+		entropy2Plot     = np.zeros(len(DList))
+		entropy3Plot     = np.zeros(len(DList))
+		iii = 0
+		for dipolemoment in DList:
+			FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+			FileToBePlot   	  = FilePlotName.SaveEntropy+".txt"
+			FileToBePlotDMRG  = FilePlotName.SaveEntropyDMRG+".txt"
+			FileToBePlotDIAG  = FilePlotName.SaveEntropyDIAG+".txt"
+	
+			beads1, var1, purity1, entropy1, err_purity1, err_entropy1 = genfromtxt(FileToBePlot,unpack=True, usecols=[0, 1, 4, 5, 8, 9], skip_header=preskip, skip_footer=postskip)
+			beads2, entropy2                                	       = genfromtxt(FileToBePlotDMRG,unpack=True, usecols=[0,2], skip_header=preskip, skip_footer=postskip)
+			RFactor, entropy3                                          = loadtxt(FileToBePlotDIAG,unpack=True, usecols=[0, 2])
+			
+			if (TypePlot == "GFACTOR"):
+				RFactorPlot[iii] = 1.0/(RFactor*RFactor*RFactor)
+			if (TypePlot == "RFACTOR"):
+				RFactorPlot[iii] = RFactor
+			entropy3Plot[iii] = entropy3
 
-	plt.subplot(1, 2, 2)
-	if (variableName == "beta"):
-		entropy2 = exp(-entropy2)
-		plotEntropyENT(beta1, purity1, err_purity1, variableName, beta2, entropy2, font)
-	if (variableName == "tau"):
-		ExactValue = exp(-ExactValue)
-		plotEntropyENT(beta1, purity1, err_purity1, variableName, beta1, ExactValue, font)
-	plt.ylabel(r'$\mathrm{\langle P_{A} \rangle}$', fontsize = font)
-	ymin, ymax = plt.ylim()
-	xmin, xmax = plt.xlim()
-	Text1 = "(b)"
-	Text2 = ""
-	PlotLabel(Text1, Text2,font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			ii = 0
+			for i in beads1:
+				indexi =int(i+0.5)
+				beads = indexi
+				if beads == beadsRef:
+					entropy1Plot[iii]     = entropy1[ii]
+					err_entropy1Plot[iii] = err_entropy1[ii]
+					purity1Plot[iii]      = purity1[ii]
+					err_purity1Plot[iii]  = err_purity1[ii]
+					entropy2Plot[iii]     = entropy2[ii]
+				ii += 1
+			iii += 1
+	
+		plt.subplot(1,2, 1)
+		plotEntropyENT1(RFactorPlot, entropy1Plot, err_entropy1Plot, variableName, RFactorPlot, entropy2Plot, entropy3Plot, font, TypePlot)
+		plt.ylabel(r'$\mathrm{S_{2}}$', fontsize = font)
+		ymin, ymax = plt.ylim()
+		xmin, xmax = plt.xlim()
+		Text1 = "(a)"
+		Text2 = ""
+		if Text1:
+			PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	
+		plt.subplot(1, 2, 2)
+		print(entropy2Plot)
+		purity2Plot = np.exp(-entropy2Plot)
+		purity3Plot = np.exp(-entropy3Plot)
+		plotEntropyENT1(RFactorPlot, purity1Plot, err_purity1Plot, variableName, RFactorPlot, purity2Plot, purity3Plot, font, TypePlot)
+		plt.ylabel(r'$\mathrm{\langle P_{A} \rangle}$', fontsize = font)
+		ymin, ymax = plt.ylim()
+		xmin, xmax = plt.xlim()
+		Text1 = "(b)"
+		Text2 = ""
+		if Text1:
+			PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	
+		plt.subplots_adjust(top=0.95, bottom=0.20, left=0.1, right=0.95, hspace=0.0, wspace=0.4)
+		plt.legend(bbox_to_anchor=(0.53, 0.95), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
+		plt.savefig(outfile, dpi = 200, format = 'pdf')
+	
+		#call(["open", outfile])
+		call(["okular", outfile])
+		#plt.show()
 
-	plt.subplots_adjust(top=0.95, bottom=0.20, left=0.1, right=0.95, hspace=0.0, wspace=0.4)
-	fontlegend = font/2.0
-	plt.legend(bbox_to_anchor=(0.53, 0.95), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
-	plt.savefig(outfile, dpi = 200, format = 'pdf')
+	if (TypePlot == "S2"):
+		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+		FileToBePlot   	  = FilePlotName.SaveEntropy+".txt"
+		FileToBePlotDMRG  = FilePlotName.SaveEntropyDMRG+".txt"
+		FileToBePlotDIAG  = FilePlotName.SaveEntropyDIAG+".txt"
+		FilePlot          = FilePlotName.SaveEntropy+".pdf"
+		outfile    = FilePlot
+		call(["rm", FilePlot])
+	
+		var2       = 0.0
+		entropy2   = [0.0, 0.0]
+		entropy3   = 0.0
+		var1, purity1, entropy1, err_purity1, err_entropy1 = genfromtxt(FileToBePlot,unpack=True, usecols=[1, 4, 5, 8, 9], skip_header=preskip, skip_footer=postskip)
+		if (numbmolecules <= 4):
+			beads, entropy2                                = genfromtxt(FileToBePlotDMRG,unpack=True, usecols=[0,2], skip_header=preskip, skip_footer=postskip)
+			if (variableName == "tau"):
+				var2 = parameter/(beads-1.0)
+		
+			if (variableName == "beta"):
+				var2 = parameter*(beads-1.0)
+	
+		if (numbmolecules <= 6):
+			RFactor, entropy3                              = loadtxt(FileToBePlotDIAG,unpack=True, usecols=[0, 2])
+			print(RFactor)
+	
+		plt.subplot(1,2, 1)
+		plotEntropyENT(var1, entropy1, err_entropy1, variableName, var2, entropy2, entropy3, font)
+		plt.ylabel(r'$\mathrm{S_{2}}$', fontsize = font)
+		ymin, ymax = plt.ylim()
+		xmin, xmax = plt.xlim()
+		Text1 = "(a)"
+		Text2 = ""
+		PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+		plt.legend(bbox_to_anchor=(0.13, 0.95), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
+	
+		plt.subplot(1, 2, 2)
+		if entropy2[0] == 0.0:
+			purity2 = [0.0,0.0]
+			purity3 = 0.0
+		else:
+			purity2 = exp(-entropy2)
+			purity3 = exp(-entropy3)
+		plotEntropyENT(var1, purity1, err_purity1, variableName, var2, purity2, purity3, font)
+		plt.ylabel(r'$\mathrm{\langle P_{A} \rangle}$', fontsize = font)
+		ymin, ymax = plt.ylim()
+		xmin, xmax = plt.xlim()
+		Text1 = "(b)"
+		Text2 = ""
+		PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	
+		plt.subplots_adjust(top=0.95, bottom=0.20, left=0.1, right=0.95, hspace=0.0, wspace=0.4)
+		plt.legend(bbox_to_anchor=(0.53, 0.95), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
+		plt.savefig(outfile, dpi = 200, format = 'pdf')
+	
+		call(["open", outfile])
+		#call(["okular", outfile])
+		#plt.show()
 
-	call(["open", outfile])
-	#call(["okular", outfile])
-	#plt.show()
 
-def plotEntropyENT(var, val, err_val, variableName, var1, val1, font):
+def plotEntropyENT1(var, val, err_val, variableName, var1, val1, val2, font, TypePlot):
 	#plt.xlim(0,0.201)
-	plt.errorbar(var, val, yerr=err_val, color = 'blue', ls = '-', label = 'PIGS', linewidth=1)
-	if (variableName == "beta"):
-		plt.plot(var1, val1, color = 'green', ls = '--', label = 'Diagonalization', linewidth=2)
+	plt.errorbar(var, val, yerr=err_val, color = 'blue', ls = '-', label = 'PIGS', linewidth=2)
+	plt.plot(var, val1, color = 'green', ls = '--', label = 'DMRG', marker = "o", linewidth=2)
+	plt.plot(var, val2, color = 'black', ls = '-.', label = 'Diagonalization', marker = "v", linewidth=2)
+
+	ymin, ymax = plt.ylim()
+	midpointy = 0.5*(ymax-ymin)
+	deltay = midpointy*0.15
+	xmin, xmax = plt.xlim()
+	midpointx = 0.5*(xmax-xmin)
+	deltax = midpointx*0.15
+	textpositionx = xmin+midpointx-0.25*midpointx
+	textpositiony = ymin+midpointy
+
+	if (TypePlot == "RFACTOR"):
+		plt.xlabel(r'$\mathrm{R}$', fontsize = font)
+	if (TypePlot == "GFACTOR"):
+		plt.xlabel(r'$\mathrm{g}$', fontsize = font)
+
+def plotEntropyENT(var, val, err_val, variableName, var1, val1, val2, font):
+	#plt.xlim(0,0.201)
+	plt.errorbar(var, val, yerr=err_val, color = 'blue', ls = '-', label = 'PIGS', linewidth=2)
+	if (val1[0] != 0.0):
+		plt.plot(var1, val1, color = 'green', ls = '--', label = 'DMRG', marker = "o", linewidth=2)
 
 	if (variableName == "tau"):
 		plt.xlim(0,)
-		plt.axhline(y=val1, color='black', lw = 2.0, linestyle='--', label = 'Diagonalization')
+		if (val2 != 0.0):
+			plt.axhline(y=val2, color='black', lw = 3.0, linestyle='--', label = 'Diagonalization')
 
 	ymin, ymax = plt.ylim()
 	midpointy = 0.5*(ymax-ymin)
@@ -218,18 +342,18 @@ def PlotLabel(Text1, Text2, font,xmin,xmax,ymin,ymax,variableName,parameter,numb
 		plt.text(textpositionx-(4.5*deltax), textpositiony+(5.5*deltay), Text1, fontsize=font)
 
 	if (variableName == "beta" and Text2):
-			plt.text(textpositionx, textpositiony+0*deltay, 'Parameters:', fontsize=10)
-			plt.text(textpositionx, textpositiony-1*deltay, r'$\mathrm{N} =$'+str(numbmolecules)+" "+molecule, fontsize=10)
-			plt.text(textpositionx, textpositiony-2*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=10)
-			plt.text(textpositionx, textpositiony-3*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=10)
-			plt.text(textpositionx, textpositiony-4*deltay, r'$\mathrm{\tau} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=10)
+		plt.text(textpositionx, textpositiony+0*deltay, 'Parameters:', fontsize=font)
+		plt.text(textpositionx, textpositiony-1*deltay, r'$\mathrm{N} =$'+str(numbmolecules)+" "+molecule, fontsize=font)
+		plt.text(textpositionx, textpositiony-2*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=font)
+		plt.text(textpositionx, textpositiony-3*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=font)
+		plt.text(textpositionx, textpositiony-4*deltay, r'$\mathrm{\tau} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=font)
 
 	if (variableName == "tau" and Text2):
-			plt.text(textpositionx, textpositiony+5*deltay, 'Parameters:', fontsize=10)
-			plt.text(textpositionx, textpositiony+4*deltay, r'$\mathrm{N} =$'+str(numbmolecules)+" "+molecule, fontsize=10)
-			plt.text(textpositionx, textpositiony+3*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=10)
-			plt.text(textpositionx, textpositiony+2*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=10)
-			plt.text(textpositionx, textpositiony+1*deltay, r'$\mathrm{\beta} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=10)
+		plt.text(textpositionx-(3.5*deltax), textpositiony+2*deltay, r'$\mathrm{\mu} =$'+str(dipolemoment)+"Debye", fontsize=font)
+		#plt.text(textpositionx, textpositiony+5*deltay, 'Parameters:', fontsize=font)
+		#plt.text(textpositionx, textpositiony+4*deltay, r'$\mathrm{N} =$'+str(numbmolecules)+" "+molecule, fontsize=font)
+		#plt.text(textpositionx, textpositiony+3*deltay, r'$\mathrm{R} =$'+str(Rpt)+r'$\mathrm{\AA}$', fontsize=font)
+		#plt.text(textpositionx, textpositiony+1*deltay, r'$\mathrm{\beta} =$' +str(parameter) +' '+"K"+r'$^{-1}$', fontsize=font)
 	
 
 def PlotEnergyPIGS(font,val1,val2,val3,variableName,YLabel):

@@ -31,6 +31,8 @@ TypeCal             = 'ENT'
 TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
 #TypePlot            = "CorrFunc"
+TypePlot            = "S2"
+#TypePlot            = "GFACTOR"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
@@ -42,10 +44,10 @@ numbmolecules       = 2
 numbpass            = 200
 #
 Rpt                 = 10.05
-dipolemoment        = 1.826        #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 3.5 #1.826      #J. Chern. Phys. 73(5), 2319 (1980).
 dipolemoment        = 1.0*dipolemoment
 
-preskip             = 0
+preskip             = 1000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -69,38 +71,13 @@ if (variableName == "beta"):
 	parameter       = tau
 
 #==================================Plotting====================================#
-FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA)
-
 if (TypeCal == "ENT"):
-	if (variableName == "tau"):
-		ExactValueFile    = "ResultsOfPIGSENT/ExactValue-Entropy-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-Dmitri.txt"
-		NumberOfMolecules, ExactEntropy = np.loadtxt(ExactValueFile, usecols=(0, 1), unpack=True)
-		index = numbmolecules/2 - 1
-		ExactEntropyValue = ExactEntropy[index]
-		ExactEntropyValue = 
+	beadsRef = 61
+	FigureGenerator.FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA,TypePlot, beadsRef)
 
-		'''
-		#julia run
-		RFactor = support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
-		print(RFactor)
-		srcCodePath = "/home/tapas/DipoleChain.jl-master/examples/diagonalization.jl"
-		print(srcCodePath)
-		commandRun            = "julia "+srcCodePath+" -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 10 --A-start "+str(particleA)+" --A-size "+str(particleA)
-		print(commandRun)
-		call([commandRun])
-		exit()
-		'''
+'''
+FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
 
-		FileToBePlot   	  = FilePlotName.SaveEntropy+".txt"
-		FilePlot          = FilePlotName.SaveEntropy+".pdf"
-		call(["rm", FilePlot])
-		FigureGenerator.FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactEntropyValue,numbmolecules,molecule,Rpt,dipolemoment)
-	if (variableName == "beta"):
-		ExactValueFile    = "ResultsOfPIGSENT/ENT-RotDOFs-Rpt10.05Angstrom-DipoleMoment1.826Debye-Entropy-vs-beta-fixed-tau0.005Kinv-System2HF-ParticleA1-by-Dmitri.txt"
-		FileToBePlot   	  = FilePlotName.SaveEntropy+".txt"
-		FilePlot          = FilePlotName.SaveEntropy+".pdf"
-		call(["rm", FilePlot])
-		FigureGenerator.FigureENT(FileToBePlot,FilePlot,TypeCal,variableName,parameter,ExactValueFile,numbmolecules,molecule,Rpt,dipolemoment)
 
 if (TypeCal == "PIGS"):
 	if (TypePlot == "CorrFunc"):
@@ -151,3 +128,4 @@ if (TypeCal == "PIGS"):
 		FigureGenerator.FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA)
 
 #End plotting ---Chemical Potential
+'''
