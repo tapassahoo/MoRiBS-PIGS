@@ -301,7 +301,7 @@ def fmtAverageOrientation(status,variable):
 		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('Beads', variable, '<sum of ei.ej>', '< compx >', '< compy >', '< compz >', '< abscompx >', '< abscompy >', '< abscompz >', 'Error: ei.ej', 'Error: compx', 'Error: compy', 'Error: compz', 'Error: abscompx', 'Error: abscompy', 'Error: abscompz')
 		output    +="\n"
 		output    +="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('', (str(unit)), '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)', '(Radian)')
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '', '', '', '', '', '', '')
 		#output    +="\n"
 		#output    +="#"
 		#output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
@@ -514,6 +514,11 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 
 	os.chdir(dir_output)
 	if (os.path.isdir(folder_run) == True):
+		print("")
+		print("")
+		print("Error message")
+		print("")
+		print("")
 		printingMessage = "Remove "+str(dir_output)+str(folder_run)
 		print(printingMessage)
 		os.chdir(src_dir)
@@ -608,7 +613,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	This function creats jobstring for #SBATCH script
 	'''
 	if (thread > 4):
-		thread     = thread/2
+		thread     = 4#thread/2
 	print("thread = "+str(thread))
 	job_name       = file_name+str(value)
 	walltime       = "40-00:00"
@@ -996,6 +1001,10 @@ class GetFileNamePlot:
 			mainFileNameCP        = "vs-number-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 			mainFileNameCP       += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 			self.SaveChemPot      = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output8+mainFileNameCP
+			mainFileNameDMRG  	  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
+			mainFileNameDMRG     += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
+			self.SaveEnergyDMRG   = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileNameDMRG+"-DMRG"
+			self.SaveEnergyDIAG   = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileNameDMRG+"-DIAG"
 
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"
@@ -1005,35 +1014,43 @@ class GetFileNamePlot:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
 					file_output2  = frontName+"Entropy-"
+					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
 
 			if (self.molecule_rot == "H2"):
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Entropy-"
 					file_output2  = frontName+"Entropy-"
+					file_output3  = frontName+"Energy-"
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
 
 			self.SaveEntropy      = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE
+			self.SaveEnergy       = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileName+"-"+self.ENT_TYPE
+
 			mainFileNameDMRG  	  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
 			mainFileNameDMRG     += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
 			self.SaveEntropyDMRG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DMRG"
 			self.SaveEntropyDIAG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DIAG"
 			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DIAG"
 			mainFileNameGFAC      = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
-			mainFileNameGFAC     += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+			mainFileNameGFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameGFAC+"-"+self.ENT_TYPE
+			self.SaveEnergyGFAC   = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameGFAC+"-"+self.ENT_TYPE
 			mainFileNameRFAC      = "vs-RFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
-			mainFileNameRFAC     += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+			mainFileNameRFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 			self.SaveEntropyRFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameRFAC+"-"+self.ENT_TYPE
+			self.SaveEnergyRFAC   = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameRFAC+"-"+self.ENT_TYPE
 
 def check(string,SavedFile):
 	datafile = file(SavedFile)
@@ -1119,23 +1136,29 @@ def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 	if (TypeCal == "ENT"):
 		FileToBeSavedDIAG = FilePlotName.SaveEntropyDIAG+".txt"
 		FileToBeSavedDMRG = FilePlotName.SaveEntropyDMRG+".txt"
+	if (TypeCal == "PIGS"):
+		FileToBeSavedDIAG = FilePlotName.SaveEnergyDIAG+".txt"
+		FileToBeSavedDMRG = FilePlotName.SaveEnergyDMRG+".txt"
 
-		commandRunDIAG    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 2 --A-start 1"+" --A-size "+str(particleA)
-		call(["rm", "outputDIAG.txt"])
-		system(commandRunDIAG)
-		call(["mv", "outputDIAG.txt", FileToBeSavedDIAG])
+	commandRunDIAG    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 8 --l-total-max 8 --A-start 1"+" --A-size "+str(particleA)
+	call(["rm", "outputDIAG.txt"])
+	system(commandRunDIAG)
+	call(["mv", "outputDIAG.txt", FileToBeSavedDIAG])
+	if (numbmolecules >6):
+		print("It is not computing Matrix multiplication stuffs")
+		return
 
-		if (numbmolecules <= 4):
-			call(["rm", "outputDMRG.txt"])
+	if (numbmolecules <= 4):
+		call(["rm", "outputDMRG.txt"])
 
-			for numbbeads in loop:
-				print(numbbeads)
-				RFactor      = GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
-				if (variableName == "beta"):
-					parameterR    = parameter*BConstantK
-					commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 4 --tau "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
-				if (variableName == "tau"):
-					parameterR    = parameter*BConstantK
-					commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 4 --beta "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
-				system(commandRun)
-			call(["mv", "outputDMRG.txt", FileToBeSavedDMRG])
+		for numbbeads in loop:
+			print(numbbeads)
+			RFactor      = GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
+			if (variableName == "beta"):
+				parameterR    = parameter*BConstantK
+				commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 6 --tau "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
+			if (variableName == "tau"):
+				parameterR    = parameter*BConstantK
+				commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 6 --beta "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
+			system(commandRun)
+		call(["mv", "outputDMRG.txt", FileToBeSavedDMRG])

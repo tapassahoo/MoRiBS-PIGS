@@ -25,11 +25,11 @@ status              = "analysis"
 #
 NameOfServer        = "nlogn"
 #NameOfServer        = "graham"
-NameOfPartition     = "ntapas"
+NameOfPartition     = "tapas"
 #
-#TypeCal             = "PIMC"
+TypeCal             = "PIMC"
 #TypeCal             = "PIGS"
-TypeCal             = "ENT"
+#TypeCal             = "ENT"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
@@ -40,12 +40,12 @@ molecule_rot        = "HF"
 #print 7/(support.bconstant(molecule_rot)/0.695)
 #exit()
 #
-numbblocks	        = 20000
+numbblocks	        = 10
 numbmolecules       = 2
-numbpass            = 200
+numbpass            = 20
 #
 Rpt                 = 10.05
-dipolemoment        = 9.0 #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.826 #J. Chern. Phys. 73(5), 2319 (1980).
 dipolemoment        = 1.0*dipolemoment
 support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
 #exit()
@@ -56,8 +56,8 @@ status_cagepot      = "No"
 RUNDIR              = "scratch"
 RUNIN               = "nCPU"
 
-loopStart           = 40
-loopEnd             = 102
+loopStart           = 10
+loopEnd             = 22
 skip                = 5
 
 preskip             = 0
@@ -91,7 +91,8 @@ if (variableName == "tau"):
 		#step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0,1.0,1.0,0.9,0.9]  # beads 21,25,31,35,41,45,51 for beta 0.1
 		#step        = [1.7,1.4,1.1,1.0,0.9]  # beads 21, 31, 41, 51 for beta 0.1
 		#step        = [2.0,2.0,2.0,1.6,1.5,1.4,1.2,1.0,1.0,1.0]  # beads i+1 for i in range(10,100,10) beta =0.2
-		step        = [1.4, 1.0]  # beads 91,101 for beta 0.2
+		step        = [2.0, 2.0, 1.4, 1.2]  # beads 21, 41, 61, 81 for beta 0.2
+		#step        = [1.0, 1.0, 1.0, 1.0]  # beads 21, 41, 61, 81 for beta 0.2
 		level       = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 if (variableName == "beta"):
@@ -151,6 +152,13 @@ if status == "submission":
 if status == "analysis":
 	FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA)
 	
+	if (preskip >= numbblocks):
+		print("")
+		print("Number of Blocks = "+str(numbblocks))
+		print("Number of preskip= "+str(preskip))
+		print("Error message: Number of preskip data must be less than Number of Blocks")
+		print("")
+		exit()
 	if (TypeCal == "ENT"):
 		fanalyzeEntropy      = open(FileAnalysis.SaveEntropy, "a")
 		fanalyzeEntropy.write(support.fmtAverageEntropy(status,variableName,ENT_TYPE))
@@ -178,7 +186,7 @@ if status == "analysis":
 if (TypeCal == "ENT"):
 	numbmolecules  *= 2
 	if (variableName == "tau"):
-		loopStart       = 10
+		loopStart       = 20
 	if (variableName == "beta"):
 		loopStart       = 60
 
@@ -197,10 +205,10 @@ for i in list_nb:
 
 	if (TypeCal == 'PIMC'):
 
-		if ((i%2) == 0):
-			value    = i
+		if i % 2 == 0:
+			value = i
 		else:
-			vaule    = i+1
+			value = i+1
 
 		if (variableName == "beta"):
 			beta     = tau*value
@@ -319,6 +327,12 @@ if status == "analysis":
 		fanalyzeZCorr.close()
 		fanalyzeXYCorr.close()
 		call(["cat",FileAnalysis.SaveEnergy])
+		print("")
+		print("")
+		call(["cat",FileAnalysis.SaveCorr])
+		print("")
+		print("")
+		call(["cat",FileAnalysis.SaveTotalCorr])
 #=========================File Checking===============================#
 		try:
 			SavedFile = FileAnalysis.SaveEnergy
