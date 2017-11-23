@@ -30,17 +30,17 @@ TypeCal             = 'ENT'
 #
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
-#TypePlot            = "CorrFunc"
+TypePlot            = "CorrFunc"
 #TypePlot            = "S2"
-TypePlot            = "GFACTOR"
+#TypePlot            = "GFACTOR"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
 #molecule            = "H2"                                                    
 molecule_rot        = "HF"
 #
-numbblocks	        = 50000
-numbmolecules       = 2
+numbblocks	        = 20000
+numbmolecules       = 4
 numbpass            = 200
 #
 Rpt                 = 10.05
@@ -75,51 +75,20 @@ if (TypeCal == "ENT"):
 	beadsRef = 61
 	FigureGenerator.FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA,TypePlot, beadsRef)
 
-if (TypeCal == "PIGS"):
+
+if (TypePlot == "CorrFunc"):
 	beadsRef = 61
-	FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
-	if (TypePlot == "CorrFunc"):
-		RefPoint          = 0
-		TypeCorr          = "Total"
-		if (TypeCorr == "Total"):
-			FileToBePlot   	  = FilePlotName.SaveTotalCorr+".txt"
-			FilePlot          = FilePlotName.SaveTotalCorr+".pdf"
-			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
-		TypeCorr          = "XCorr"
-		if (TypeCorr == "XCorr"):
-			FileToBePlot   	  = FilePlotName.SaveXCorr+".txt"
-			FilePlot          = FilePlotName.SaveXCorr+".pdf"
-			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
-		TypeCorr          = "YCorr"
-		if (TypeCorr == "YCorr"):
-			FileToBePlot   	  = FilePlotName.SaveYCorr+".txt"
-			FilePlot          = FilePlotName.SaveYCorr+".pdf"
-			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
-		TypeCorr          = "ZCorr"
-		if (TypeCorr == "ZCorr"):
-			FileToBePlot   	  = FilePlotName.SaveZCorr+".txt"
-			FilePlot          = FilePlotName.SaveZCorr+".pdf"
-			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
-		TypeCorr          = "XYCorr"
-		if (TypeCorr == "XYCorr"):
-			FileToBePlot   	  = FilePlotName.SaveXYCorr+".txt"
-			FilePlot          = FilePlotName.SaveXYCorr+".pdf"
-			call(["rm", FilePlot])
-			FigureGenerator.FigureCorrelationPIGS(FileToBePlot,FilePlot,TypeCorr,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment,RefPoint)
+	RefPoint = 0
+	FigureGenerator.FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef, RefPoint)
 
-#End plotting ---correlation
 
-	if (TypePlot == "Energy"):
-		FigureGenerator.FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, TypePlot, beadsRef)
+if (TypePlot == "Energy"):
+	FigureGenerator.FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, TypePlot, beadsRef)
 
 #End plotting ---energy
 
-	if (TypePlot == "ChemPot"):
-		beadsRef = 61
-		FigureGenerator.FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
+if (TypePlot == "ChemPot"):
+	beadsRef = 61
+	FigureGenerator.FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
 
 #End plotting ---Chemical Potential

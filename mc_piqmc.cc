@@ -647,8 +647,18 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
     //double rand4 = (double)rand() / ((double)RAND_MAX + 1);
     double rand4 = runif(Rng);
     MCSwap(rand4, Distribution);
-    if (Distribution == "Swap") MCAccepSwap += 1;
-    else MCAccepUnSwap += 1;
+    if (Distribution == "Swap") 
+	{
+		MCAccepSwap += 1;
+		iSwap = 1;
+		iUnSwap = 0;
+	}
+    else
+	{
+		MCAccepUnSwap += 1;
+		iSwap = 0;
+		iUnSwap = 1;
+	}
 #endif
 }
 

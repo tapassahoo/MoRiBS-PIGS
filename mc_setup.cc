@@ -768,7 +768,7 @@ void ProposedMCCoords()
     double prefacGauss2    = 2.0*sinh(FrequencyK*MCTau);
     double prefacGauss3    = cosh(FrequencyK*MCTau);
 #endif
-	double FrequencyK      = 1.0*AuToKelvin;
+	double FrequencyK      = 0.001*AuToKelvin;
     double prefacGauss1    = 1.0; // in Atomic Unit;
     double prefacGauss2    = 2.0*tanh(FrequencyK*MCTau);
     double prefacGauss3    = 2.0*sinh(FrequencyK*MCTau);
@@ -849,7 +849,6 @@ void GetRandomCoords()
 	double mu =0.0;
 	double sigma;
 
-	//double * ygauss;
 	double ygauss[NumbTimes];
 
 	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
@@ -859,7 +858,6 @@ void GetRandomCoords()
 			for (it0 = 0; it0 < NumbTimes; it0++)
 			{
 				sum = 0.0;
-				//ygauss  = new double [NumbTimes];
    				for (it1 = 0; it1 < NumbTimes; it1++)
    				{
 					if (Eigen[it1] < 0.0) 
@@ -873,7 +871,6 @@ void GetRandomCoords()
 					ii0 = it1 + it0*NumbTimes;
 					sum += AMat[ii0]*ygauss[it1];
    				}
-				//delete [] ygauss;
 				t0 = it0 + atom0*NumbTimes;
 				gausscoords[id0][t0]  = sum*BOHRRADIUS;
 			}

@@ -1918,6 +1918,7 @@ void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)
 	compxyz[2] = scompxyz_sector[2]/NumbAtoms;
 }
 
+#ifdef DDCORR
 void GetDipoleCorrelationPIMC(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
@@ -1974,7 +1975,9 @@ void GetDipoleCorrelationPIMC(double *DipoleCorrXYZ, double *DipoleCorrX, double
 		}
 	}
 }
+#endif
 
+#ifdef DDCORR
 void GetDipoleCorrelationPIGS(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
@@ -1985,9 +1988,9 @@ void GetDipoleCorrelationPIGS(double *DipoleCorrXYZ, double *DipoleCorrX, double
         double totalCorr, xCorr, yCorr, zCorr, xyCorr;
 
 		int ii = 0;
-    	for (int atom0 = 0; atom0 < (NumbAtoms - 1); atom0++)
+    	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
         {    
-    	    for (int atom1 = (atom0 + 1); atom1 < NumbAtoms; atom1++)
+    	    for (int atom1 = atom0; atom1 < NumbAtoms; atom1++)
     	    {
             	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
             	int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
@@ -2020,7 +2023,9 @@ void GetDipoleCorrelationPIGS(double *DipoleCorrXYZ, double *DipoleCorrX, double
 		}
 	}
 }
+#endif
 
+#ifdef DDCORR
 void GetDipoleCorrelationPIGSENT(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
@@ -2044,9 +2049,9 @@ void GetDipoleCorrelationPIGSENT(double *DipoleCorrXYZ, double *DipoleCorrX, dou
 			}
 
 			int ii = 0;
-    		for (int atom0 = atomStart; atom0 < (atomEnd - 1); atom0++)
+    		for (int atom0 = atomStart; atom0 < atomEnd; atom0++)
         	{    
-    	    	for (int atom1 = (atom0 + 1); atom1 < atomEnd; atom1++)
+    	    	for (int atom1 = atom0; atom1 < atomEnd; atom1++)
     	    	{
             		int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
             		int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
@@ -2080,6 +2085,7 @@ void GetDipoleCorrelationPIGSENT(double *DipoleCorrXYZ, double *DipoleCorrX, dou
 		}
 	}
 }
+#endif
 
 double *GetPhiEntanglement()
 {

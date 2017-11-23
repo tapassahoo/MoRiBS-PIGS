@@ -232,7 +232,7 @@ def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir
 	'''
 	This function gives us the output 
 	'''
-	ndim              = numbmolecules*(numbmolecules-1)/2
+	ndim              = numbmolecules*(numbmolecules+1)/2
 	output            = '{0:10d}{1:15.5f}'.format(numbbeads, variable)
 
 	if (CORRELATION == "TotalCorr"):
@@ -613,7 +613,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	This function creats jobstring for #SBATCH script
 	'''
 	if (thread > 4):
-		thread     = 4#thread/2
+		thread     = thread/2
 	print("thread = "+str(thread))
 	job_name       = file_name+str(value)
 	walltime       = "40-00:00"
@@ -648,7 +648,7 @@ cd %s
 cp %s qmc.input
 cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
-./pimc 
+time ./pimc 
 %s
 """ % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_file, folder_run_path, input_file, folder_run_path, file_rotdens, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForMove)
 	return job_string
@@ -990,7 +990,7 @@ class GetFileNamePlot:
 					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Chemical-Potential-"
 
-	
+##	
 			self.SaveEnergy       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName
 			self.SaveCorr         = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName
 			self.SaveTotalCorr    = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output3+mainFileName
@@ -998,13 +998,17 @@ class GetFileNamePlot:
 			self.SaveYCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output5+mainFileName
 			self.SaveZCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output6+mainFileName
 			self.SaveXYCorr       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output7+mainFileName
+##
 			mainFileNameCP        = "vs-number-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 			mainFileNameCP       += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 			self.SaveChemPot      = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output8+mainFileNameCP
-			mainFileNameDMRG  	  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
-			mainFileNameDMRG     += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
-			self.SaveEnergyDMRG   = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileNameDMRG+"-DMRG"
-			self.SaveEnergyDIAG   = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileNameDMRG+"-DIAG"
+##
+			mainFileNameMM 		  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
+			mainFileNameMM       += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
+			self.SaveEnergyMM     = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileNameMM+"-MM"
+##
+			self.SaveEnergyDIAG   = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileNameMM+"-DIAG"
+##
 
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"
@@ -1013,44 +1017,82 @@ class GetFileNamePlot:
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
-					file_output2  = frontName+"Entropy-"
-					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output3  = frontName+"Entropy-"
+					file_output4  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output8  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output9  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
-					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
+					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
+					file_output9  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 
 			if (self.molecule_rot == "H2"):
 				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Entropy-"
-					file_output2  = frontName+"Entropy-"
-					file_output3  = frontName+"Energy-"
+					file_output2  = frontName+"Energy-"
+					file_output3  = frontName+"Entropy-"
+					file_output4  = frontName+"correlation-"
+					file_output5  = frontName+"total-correlation-function-"
+					file_output6  = frontName+"X-component-correlation-function-"
+					file_output7  = frontName+"Y-component-correlation-function-"
+					file_output8  = frontName+"Z-component-correlation-function-"
+					file_output9  = frontName+"XandY-component-correlation-function-"
 
 				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
-					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
+					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
+					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
+					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
+					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-total-correlation-function-"
+					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-X-component-correlation-function-"
+					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
+					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
+					file_output9  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
 
+###
 			self.SaveEntropy      = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE
-			self.SaveEnergy       = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileName+"-"+self.ENT_TYPE
-
-			mainFileNameDMRG  	  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
-			mainFileNameDMRG     += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
-			self.SaveEntropyDMRG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DMRG"
-			self.SaveEntropyDIAG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DIAG"
-			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameDMRG+"-"+self.ENT_TYPE+"-DIAG"
+			self.SaveEnergy       = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileName+"-"+self.ENT_TYPE
+###
+			mainFileNameCONV      = "vs-beta-and-tau-Blocks"+str(self.numbblocks)
+			mainFileNameCONV     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+			self.SaveEntropyCONV  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameCONV+"-"+self.ENT_TYPE
+###
+			mainFileNameMM  	  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
+			mainFileNameMM       += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
+			self.SaveEntropyMM    = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameMM+"-"+self.ENT_TYPE+"-MM"
+###
+			self.SaveEntropyDIAG  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameMM+"-"+self.ENT_TYPE+"-DIAG"
+###
 			mainFileNameGFAC      = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 			mainFileNameGFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
-			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameGFAC+"-"+self.ENT_TYPE
-			self.SaveEnergyGFAC   = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameGFAC+"-"+self.ENT_TYPE
+			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameGFAC+"-"+self.ENT_TYPE
+			self.SaveEnergyGFAC   = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameGFAC+"-"+self.ENT_TYPE
+###
 			mainFileNameRFAC      = "vs-RFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 			mainFileNameRFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
-			self.SaveEntropyRFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameRFAC+"-"+self.ENT_TYPE
-			self.SaveEnergyRFAC   = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameRFAC+"-"+self.ENT_TYPE
+			self.SaveEntropyRFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameRFAC+"-"+self.ENT_TYPE
+			self.SaveEnergyRFAC   = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameRFAC+"-"+self.ENT_TYPE
+###
+			self.SaveCorr         = self.src_dir+"/ResultsOfPIGSENT/"+file_output4+mainFileName+"-"+self.ENT_TYPE
+			self.SaveTotalCorr    = self.src_dir+"/ResultsOfPIGSENT/"+file_output5+mainFileName+"-"+self.ENT_TYPE
+			self.SaveXCorr        = self.src_dir+"/ResultsOfPIGSENT/"+file_output6+mainFileName+"-"+self.ENT_TYPE
+			self.SaveYCorr        = self.src_dir+"/ResultsOfPIGSENT/"+file_output7+mainFileName+"-"+self.ENT_TYPE
+			self.SaveZCorr        = self.src_dir+"/ResultsOfPIGSENT/"+file_output8+mainFileName+"-"+self.ENT_TYPE
+			self.SaveXYCorr       = self.src_dir+"/ResultsOfPIGSENT/"+file_output9+mainFileName+"-"+self.ENT_TYPE
 
 def check(string,SavedFile):
 	datafile = file(SavedFile)
@@ -1130,15 +1172,16 @@ def GetrAndgFactor(molecule, RCOM, DipoleMoment):
 	gFactor        = (DipoleMomentAU*DipoleMomentAU)/(RCOMAU*RCOMAU*RCOMAU*BConstantAU)
 	printingmessage   = " DipoleMoment = "+str(DipoleMoment)+" gFactor = " + str(gFactor)+ " rFactor = "+str(rFactor)
 	print(printingmessage)
-	return rFactor
+	returnList = [rFactor, gFactor]
+	return returnList
 
 def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal):
 	if (TypeCal == "ENT"):
 		FileToBeSavedDIAG = FilePlotName.SaveEntropyDIAG+".txt"
-		FileToBeSavedDMRG = FilePlotName.SaveEntropyDMRG+".txt"
+		FileToBeSavedMM = FilePlotName.SaveEntropyMM+".txt"
 	if (TypeCal == "PIGS"):
 		FileToBeSavedDIAG = FilePlotName.SaveEnergyDIAG+".txt"
-		FileToBeSavedDMRG = FilePlotName.SaveEnergyDMRG+".txt"
+		FileToBeSavedMM = FilePlotName.SaveEnergyMM+".txt"
 
 	commandRunDIAG    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 8 --l-total-max 8 --A-start 1"+" --A-size "+str(particleA)
 	call(["rm", "outputDIAG.txt"])
@@ -1149,7 +1192,7 @@ def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 		return
 
 	if (numbmolecules <= 4):
-		call(["rm", "outputDMRG.txt"])
+		call(["rm", "outputMM.txt"])
 
 		for numbbeads in loop:
 			print(numbbeads)
@@ -1161,4 +1204,4 @@ def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 				parameterR    = parameter*BConstantK
 				commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 6 --beta "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
 			system(commandRun)
-		call(["mv", "outputDMRG.txt", FileToBeSavedDMRG])
+		call(["mv", "outputMM.txt", FileToBeSavedMM])

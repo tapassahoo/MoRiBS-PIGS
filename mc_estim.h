@@ -24,8 +24,11 @@ double GetPotEnergy_Densities(void);
 double GetPotEnergyPIGS(void);
 double GetPotEnergyCage(const double *);
 double GetTotalEnergy(void);
+#ifdef DDCORR
 void GetDipoleCorrelationPIMC(double *, double *, double *, double *, double *);
+void GetDipoleCorrelationPIGSENT(double *, double *, double *, double *, double *);
 void GetDipoleCorrelationPIGS(double *, double *, double *, double *, double *);
+#endif
 void GetCosTheta(double &, double *);
 void GetCosThetaPIMC(double &, double *);
 double GetPhi();
@@ -93,7 +96,6 @@ double PotFunc(int , int , const double *, const double *, int );
 
 double GetPotEnergyPIGSENT(void);
 double GetTotalEnergyPIGSENT(void);
-void GetDipoleCorrelationPIGSENT(double *, double *, double *, double *, double *);
 void GetCosThetaPIGSENT(double &, double *);
 #ifdef HISTOGRAM
 void GetDensities(void);
