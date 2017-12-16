@@ -9,14 +9,39 @@ import numpy as np
 from numpy import *
 import math
 
-def makeexecutionfile(src_dir,TypeCal):
+def errorpropagation(mean, data):
+	ndim   = len(data)
+	error = np.std(data,ddof=0)/sqrt(ndim)
+	return error
+	
+def maxError_byBining(mean, data, workingNdim):
+	error    = np.zeros(workingNdim)
+	i        = 0
+	error[0] = errorpropagation(mean, data)
+	for i in range(1,workingNdim):
+		ndim         = len(data)/2
+		data1        = np.zeros(ndim)
+
+		for j in range(ndim):
+			data1[j] = 0.5*(data[2*j]+data[2*j+1])
+
+		data         = data1
+		error[i]     = errorpropagation(mean,data)
+	return np.max(error)
+
+def makeexecutionfile(src_dir,TypeCal,ENT_TYPE):
 	execution_file_dir  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/"
 	os.chdir(execution_file_dir)
 	call(["make", "clean"])
 	if (TypeCal == "PIGS"):
 		call(["cp", "Makefile-PIGS", "Makefile"])
 	if (TypeCal == "ENT"):
-		call(["cp", "Makefile-PIGSENT", "Makefile"])
+		if (ENT_TYPE == "SWAPTOUNSWAP"):
+			call(["cp", "Makefile-PIGSENT", "Makefile"])
+		if (ENT_TYPE == "BROKENPATH"):
+			call(["cp", "Makefile-PIGSENTBROKENPATH", "Makefile"])
+		if (ENT_TYPE == "SWAP"):
+			call(["cp", "Makefile-PIGSENTSWAP", "Makefile"])
 	if (TypeCal == "PIMC"):
 		call(["cp", "Makefile-PIMC", "Makefile"])
 	call(["make"])
@@ -139,15 +164,23 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		col_block, col_kin, col_rot, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 		print(len(col_tot))
 	
+		workingNdim   = int(math.log(len(col_tot))/math.log(2))
+		trunc         = len(col_tot)-2**workingNdim
+	
+		col_kin       = col_kin[trunc:]
+		col_rot       = col_rot[trunc:]
+		col_pot       = col_pot[trunc:]
+		col_tot       = col_tot[trunc:]
+
 		mean_kin      = np.mean(col_kin)
 		mean_rot      = np.mean(col_rot)
 		mean_pot      = np.mean(col_pot)
 		mean_tot      = np.mean(col_tot)
 
-		error_kin     = np.std(col_kin,ddof=1)/sqrt(len(col_kin))
-		error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
-		error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
-		error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
+		error_kin     = maxError_byBining(mean_kin, col_kin, workingNdim-6)
+		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
+		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
+		error_tot     = maxError_byBining(mean_tot, col_tot, workingNdim-6)
 
 		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_kin, mean_rot, mean_pot, mean_tot, error_kin, error_rot, error_pot, error_tot)
 		output  += "\n"
@@ -157,32 +190,47 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		col_block, col_rot, col_rot1, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 		print(len(col_tot))
 	
+		workingNdim   = int(math.log(len(col_tot))/math.log(2))
+		trunc         = len(col_tot)-2**workingNdim
+	
+		col_rot       = col_rot[trunc:]
+		col_rot1      = col_rot1[trunc:]
+		col_pot       = col_pot[trunc:]
+		col_tot       = col_tot[trunc:]
+
 		mean_rot      = np.mean(col_rot)
 		mean_rot1     = np.mean(col_rot1)
 		mean_pot      = np.mean(col_pot)
 		mean_tot      = np.mean(col_tot)
 
-		error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
-		error_rot1    = np.std(col_rot1,ddof=1)/sqrt(len(col_rot1))
-		error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
-		error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
+		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
+		error_rot1    = maxError_byBining(mean_rot1, col_rot1, workingNdim-6)
+		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
+		error_tot     = maxError_byBining(mean_tot, col_tot, workingNdim-6)
 
 		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_rot, mean_rot1, mean_pot, mean_tot, error_rot, error_rot1, error_pot, error_tot)
 		output  += "\n"
 
 	if (TypeCal == "ENT"):
 		col_block, col_rot, col_rot1, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+
+		workingNdim   = int(math.log(len(col_tot))/math.log(2))
+		trunc         = len(col_tot)-2**workingNdim
 	
-		print(len(col_tot))
+		col_rot       = col_rot[trunc:]
+		col_rot1      = col_rot1[trunc:]
+		col_pot       = col_pot[trunc:]
+		col_tot       = col_tot[trunc:]
+
 		mean_rot      = np.mean(col_rot)
 		mean_rot1     = np.mean(col_rot1)
 		mean_pot      = np.mean(col_pot)
 		mean_tot      = np.mean(col_tot)
 
-		error_rot     = np.std(col_rot,ddof=1)/sqrt(len(col_rot))
-		error_rot1    = np.std(col_rot1,ddof=1)/sqrt(len(col_rot1))
-		error_pot     = np.std(col_pot,ddof=1)/sqrt(len(col_pot))
-		error_tot     = np.std(col_tot,ddof=1)/sqrt(len(col_tot))
+		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
+		error_rot1    = maxError_byBining(mean_rot1, col_rot1, workingNdim-6)
+		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
+		error_tot     = maxError_byBining(mean_tot, col_tot, workingNdim-6)
 
 		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_rot, mean_rot1, mean_pot, mean_tot, error_rot, error_rot1, error_pot, error_tot)
 		output  += "\n"
@@ -203,28 +251,45 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 	col_compy      = dataBin[:,3]
 	col_compz      = dataBin[:,4]
 	'''
+	workingNdim   = int(math.log(len(col_block))/math.log(2))
+	trunc         = len(col_block)-2**workingNdim
+	
+	col_costheta  = col_costheta[trunc:]
+	col_compx     = col_compx[trunc:]
+	col_compy     = col_compy[trunc:]
+	col_compz     = col_compz[trunc:]
 
 	mean_costheta  = np.mean(col_costheta)
 	mean_compx     = np.mean(col_compx)
 	mean_compy     = np.mean(col_compy)
 	mean_compz     = np.mean(col_compz)
 
-	error_costheta = np.std(col_costheta,ddof=1)/sqrt(len(col_costheta))
-	error_compx    = np.std(col_compx,ddof=1)/sqrt(len(col_compx))
-	error_compy    = np.std(col_compy,ddof=1)/sqrt(len(col_compy))
-	error_compz    = np.std(col_compz,ddof=1)/sqrt(len(col_compz))
+	error_costheta = maxError_byBining(mean_costheta, col_costheta, workingNdim-6)
+	error_compx    = maxError_byBining(mean_compx, col_compx, workingNdim-6)
+	error_compy    = maxError_byBining(mean_compy, col_compy, workingNdim-6)
+	error_compz    = maxError_byBining(mean_compz, col_compz, workingNdim-6)
 
-	col_abscompx   = np.fabs(col_compx)
-	col_abscompy   = np.fabs(col_compy)
-	col_abscompz   = np.fabs(col_compz)
+	col_abscompx   = np.absolute(col_compx)
+	col_abscompy   = np.absolute(col_compy)
+	col_abscompz   = np.absolute(col_compz)
 	mean_abscompx  = np.mean(col_abscompx)
 	mean_abscompy  = np.mean(col_abscompy)
 	mean_abscompz  = np.mean(col_abscompz)
-	error_abscompx = np.std(col_abscompx,ddof=1)/sqrt(len(col_abscompx))
-	error_abscompy = np.std(col_abscompy,ddof=1)/sqrt(len(col_abscompy))
-	error_abscompz = np.std(col_abscompz,ddof=1)/sqrt(len(col_abscompz))
+	error_abscompx = error_compx
+	error_abscompy = error_compy
+	error_abscompz = error_compz
 
-	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz)
+	col_sqcompx   = np.square(col_compx)
+	col_sqcompy   = np.square(col_compy)
+	col_sqcompz   = np.square(col_compz)
+	mean_sqcompx  = np.mean(col_sqcompx)
+	mean_sqcompy  = np.mean(col_sqcompy)
+	mean_sqcompz  = np.mean(col_sqcompz)
+	error_sqcompx = 2.0*mean_compx*error_compx
+	error_sqcompy = 2.0*mean_compy*error_compy
+	error_sqcompz = 2.0*mean_compz*error_compz
+
+	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}{16:15.5f}{17:15.5f}{18:15.5f}{19:15.5f}{20:15.5f}{21:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, mean_sqcompx, mean_sqcompy, mean_sqcompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz, error_sqcompx, error_sqcompy, error_sqcompz)
 	output  += "\n"
 	return output
 
@@ -255,8 +320,13 @@ def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir
 		print(col)
 		comp          = genfromtxt(final_dir_in_work+"/results/pigsDipole.corr",unpack=True, usecols=[col], skip_header=preskip, skip_footer=postskip)
 
+		workingNdim   = int(math.log(len(comp))/math.log(2))
+		trunc         = len(comp)-2**workingNdim
+	
+		comp          = comp[trunc:]
+
 		mean_comp  = np.mean(comp)
-		error_comp = np.std(comp,ddof=1)/sqrt(len(comp))
+		error_comp = maxError_byBining(mean_comp, comp, workingNdim-6)
 		output 		 += '     '+str(mean_comp)+'     '+str(error_comp)
 
 	output  		 += "\n"
@@ -298,10 +368,10 @@ def fmtAverageOrientation(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('Beads', variable, '<sum of ei.ej>', '< compx >', '< compy >', '< compz >', '< abscompx >', '< abscompy >', '< abscompz >', 'Error: ei.ej', 'Error: compx', 'Error: compy', 'Error: compz', 'Error: abscompx', 'Error: abscompy', 'Error: abscompz')
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}'.format('Beads', variable, '<sum of ei.ej>', '< x >', '< y >', '< z >', '< |x| >', '< |y| >', '< |z| >', '< x^2 >', '< y^2 >', '< z^2 >', 'Error')
 		output    +="\n"
 		output    +="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '', '', '', '', '', '', '')
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '', '', '', '')
 		#output    +="\n"
 		#output    +="#"
 		#output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
@@ -318,31 +388,37 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_
 	print(final_dir_in_work)
 	if ENT_TYPE == "SWAPTOUNSWAP":
 		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
-		print(len(col_block))
+		workingNdim  = int(math.log(len(col_nm))/math.log(2))
+		trunc        = len(col_nm)-2**workingNdim
 	
+		col_nm       = col_nm[trunc:]
+		col_dm       = col_dm[trunc:]
 		mean_nm      = np.mean(col_nm)
 		mean_dm      = np.mean(col_dm)
 		purity       = mean_nm/mean_dm
 		mean_EN      = -log(purity)
 
-		error_nm     = np.std(col_nm,ddof=1)/sqrt(len(col_block)) 
-		error_dm     = np.std(col_dm,ddof=1)/sqrt(len(col_block))
-		error_Tr     = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+		error_nm     = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
+		error_dm     = maxError_byBining(mean_dm, col_dm, workingNdim-6)
+		error_purity = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 
-		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
 		output  += "\n"
 
 	if ENT_TYPE == 'BROKENPATH':
 		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
-		print(len(col_nm))
+		workingNdim  = int(math.log(len(col_nm))/math.log(2))
+		trunc        = len(col_nm)-2**workingNdim
 	
+		col_nm       = col_nm[trunc:]
+		col_dm       = col_dm[trunc:]
 		mean_nm      = np.mean(col_nm)
 		mean_dm      = np.mean(col_dm)
 		mean_EN      = -log(mean_nm/mean_dm)
 
-		error_nm     = jackknife(mean_nm,col_nm)
-		error_dm     = jackknife(mean_dm,col_dm)
+		error_nm     = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
+		error_dm     = maxError_byBining(mean_dm, col_dm, workingNdim-6)
 		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 
 		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
@@ -350,37 +426,44 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_
 
 	if ENT_TYPE == "SWAP":
 		col_block, col_nm, col_dm, col_TrInv = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
-		print(len(col_block))
+		workingNdim  = int(math.log(len(col_nm))/math.log(2))
+		trunc        = len(col_nm)-2**workingNdim
 	
+		col_nm       = col_nm[trunc:]
+		col_dm       = col_dm[trunc:]
 		mean_nm      = np.mean(col_nm)
 		mean_dm      = np.mean(col_dm)
 		mean_TrInv   = np.mean(col_TrInv)
-		purity       = 1/mean_TrInv
+		purity       = 1.0/mean_TrInv
 		mean_EN      = -log(purity)
 
-		error_nm     = jackknife(mean_nm,col_nm)
-		error_dm     = jackknife(mean_dm,col_dm)
-		error_Tr     = jackknife(mean_TrInv,col_TrInv)
-		error_EN     = 0 #Write the proper equation
+		error_nm     = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
+		error_dm     = maxError_byBining(mean_dm, col_dm, workingNdim-6)
+		error_TrInv  = np.std(col_TrInv,ddof=1)/sqrt(len(col_block))
+		error_purity = abs(1.0/(mean_TrInv*mean_TrInv))*error_TrInv
+		error_EN     = abs(1.0/mean_TrInv)*error_TrInv #Write the proper equation
 
-		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
 		output  += "\n"
 
-	if ENT_TYPE == "REGULARPATH":
+	if ENT_TYPE == "UNSWAP":
 		col_block, col_nm, col_dm, col_Tr = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
-		print(len(col_Tr))
+		workingNdim  = int(math.log(len(col_nm))/math.log(2))
+		trunc        = len(col_nm)-2**workingNdim
 	
+		col_nm       = col_nm[trunc:]
+		col_dm       = col_dm[trunc:]
 		mean_nm      = np.mean(col_nm)
 		mean_dm      = np.mean(col_dm)
-		mean_Tr      = np.mean(col_Tr)
+		mean_purity  = np.mean(col_Tr)
 		mean_EN      = -log(mean_Tr)
 
-		error_nm     = jackknife(mean_nm,col_nm)
-		error_dm     = jackknife(mean_dm,col_dm)
-		error_Tr     = jackknife(mean_Tr,col_Tr)
-		error_EN     = error_Tr/mean_Tr
+		error_nm     = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
+		error_dm     = maxError_byBining(mean_dm, col_dm, workingNdim-6)
+		error_purity = np.std(col_Tr,ddof=1)/sqrt(len(col_block))
+		error_EN     = abs(1.0/mean_TrInv)*error_TrInv #Write the proper equation
 
-		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_Tr, mean_EN, error_nm, error_dm, error_Tr, error_EN)
+		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
 		output  += "\n"
 
 	return output
@@ -612,8 +695,8 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (thread > 4):
-		thread     = thread/2
+	#if (thread > 4):
+	#	thread     = 4
 	print("thread = "+str(thread))
 	job_name       = file_name+str(value)
 	walltime       = "40-00:00"
@@ -695,29 +778,29 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 	frontName              += extra
 
 	if (molecule_rot == "HF"):
-		if (TransMove == "Yes" and RotMove == "Yes"):
+		if TransMove and RotMove:
 			frontName      += "TransAndRotDOFs-"
 			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-		if (TransMove != "Yes" and RotMove == "Yes"):
+		if not TransMove and RotMove:
 			frontName      += "RotDOFs-"
 			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-		if (TransMove == "Yes" and RotMove != "Yes"):
+		if TransMove and not RotMove:
 			frontName      += "TransDOFs-"
 			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 	if (molecule_rot == "H2"):
-		if (TransMove == "Yes" and RotMove == "Yes"):
+		if TransMove and RotMove:
 			frontName      += "TransAndRotDOFs-"
 			file1_name      = frontName+mainFileName
-		if (TransMove != "Yes" and RotMove == "Yes"):
+		if not TransMove and RotMove:
 			frontName      += "RotDOFs-"
 			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
 
 	if (TypeCal == "ENT"):
 				file1_name += ENT_TYPE
 	
-	
 	return file1_name
+
 def GetFileNameSubmission1(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra):
 	if (TypeCal == "ENT"):
 		add1                = "-ParticleA"+str(particleA)
@@ -793,7 +876,7 @@ class GetFileNameAnalysis:
 			frontName             = self.TypeCal+"-"+self.extra
 
 			if (self.molecule_rot == "H2"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Energy-"
 					file_output2  = frontName+"correlation-"
@@ -803,7 +886,7 @@ class GetFileNameAnalysis:
 					file_output6  = frontName+"Z-component-correlation-function-"
 					file_output7  = frontName+"XandY-component-correlation-function-"
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
@@ -814,7 +897,7 @@ class GetFileNameAnalysis:
 					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
 	
 			if (self.molecule_rot == "HF"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
 					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
@@ -825,7 +908,7 @@ class GetFileNameAnalysis:
 					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
@@ -850,7 +933,7 @@ class GetFileNameAnalysis:
 			frontName             = "ENT-"
 			frontName            += self.extra
 			if (self.molecule_rot == "HF"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
 					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
@@ -861,7 +944,7 @@ class GetFileNameAnalysis:
 					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
 					file_output8  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
@@ -873,7 +956,7 @@ class GetFileNameAnalysis:
 					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 
 			if (self.molecule_rot == "H2"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Entropy-"
 					file_output2  = frontName+"Energy-"
@@ -884,7 +967,7 @@ class GetFileNameAnalysis:
 					file_output7  = frontName+"Z-component-correlation-function-"
 					file_output8  = frontName+"XandY-component-correlation-function-"
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
@@ -1082,6 +1165,8 @@ class GetFileNamePlot:
 			self.SaveEntropyGFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameGFAC+"-"+self.ENT_TYPE
 			self.SaveEnergyGFAC   = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileNameGFAC+"-"+self.ENT_TYPE
 ###
+			self.SaveEntropyCOMBO = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameGFAC+"-COMBINE"
+###
 			mainFileNameRFAC      = "vs-RFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 			mainFileNameRFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 			self.SaveEntropyRFAC  = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileNameRFAC+"-"+self.ENT_TYPE
@@ -1191,6 +1276,7 @@ def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 		print("It is not computing Matrix multiplication stuffs")
 		return
 
+	'''
 	if (numbmolecules <= 4):
 		call(["rm", "outputMM.txt"])
 
@@ -1205,3 +1291,15 @@ def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 				commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 6 --beta "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
 			system(commandRun)
 		call(["mv", "outputMM.txt", FileToBeSavedMM])
+	'''
+
+def GetPairDensity(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal):
+	FileToBeSavedDensity = FilePlotName+".txt"
+	for numbbeads in loop:
+		print(numbbeads)
+		parameterR    = parameter*BConstantK
+		commandRun    = "julia "+srcCodePath+"pair_density.jl -R "+str(RFactor)+" --l-max 2 --l-total-max 2 --tau "+str(parameterR)
+		print(commandRun)
+		call(["rm", "outputDensity.txt"])
+		system(commandRun)
+		call(["mv", "outputDensity.txt", FileToBeSavedDensity])

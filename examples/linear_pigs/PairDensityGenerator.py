@@ -59,7 +59,7 @@ if (variableName == "tau"):
 	parameter       = beta
 	temperature     = 1.0/beta   
 	#loop = [i*10+1 for i in range(1,12)]
-	loop = [41,51,61,71,81,91,101]
+	loop = [41]
 
 if (variableName == "beta"):
 	parameterName   = "tau"
@@ -78,10 +78,11 @@ BConstantK          = BConstant*Units.CMRECIP2KL
 beadsRef = 61 # here we don't need it but it is needed to pass it into FilePlotName to keep the same arguments
 #DList = [1.0+0.25*i for i in range(13)]
 #DList += [4.5, 5.0, 6.0, 7.0]
-DList  = [5.5]
+DList  = [1.826]
 
 for dipolemoment in DList:
 	RFactorList         = support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
 	RFactor             = RFactorList[0]
-	FilePlotName        = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
-	support.GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal)
+	#FilePlotName        = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
+	FilePlotName        = "testdensity"
+	support.GetPairDensity(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal)

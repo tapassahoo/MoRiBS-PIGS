@@ -25,26 +25,27 @@ TransMove           = "No"
 RotMove             = "Yes"
 #
 #TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 #
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
-TypePlot            = "CorrFunc"
+#TypePlot            = "CorrFunc"
 #TypePlot            = "S2"
-#TypePlot            = "GFACTOR"
+TypePlot            = "GFACTOR"
+#TypePlot            = "COMBINE"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
 #molecule            = "H2"                                                    
 molecule_rot        = "HF"
 #
-numbblocks	        = 20000
-numbmolecules       = 4
-numbpass            = 200
+numbblocks	        = 50000
+numbmolecules       = 2
+numbpass            = 50
 #
 Rpt                 = 10.05
-dipolemoment        = 1.826      #J. Chern. Phys. 73(5), 2319 (1980).
+dipolemoment        = 1.826      #J. Chem. Phys. 73(5), 2319 (1980).
 dipolemoment        = 1.0*dipolemoment
 
 preskip             = 1000
@@ -75,10 +76,14 @@ if (TypeCal == "ENT"):
 	beadsRef = 61
 	FigureGenerator.FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA,TypePlot, beadsRef)
 
+if (TypeCal == "ENT" and TypePlot == "COMBINE"):
+	beadsRef = 101
+	FigureGenerator.FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA,TypePlot, beadsRef)
+
 
 if (TypePlot == "CorrFunc"):
-	beadsRef = 61
-	RefPoint = 0
+	beadsRef = 101
+	RefPoint = [0]
 	FigureGenerator.FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef, RefPoint)
 
 
@@ -92,3 +97,6 @@ if (TypePlot == "ChemPot"):
 	FigureGenerator.FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
 
 #End plotting ---Chemical Potential
+if (TypeCal == "PIGS" and TypePlot == "GFACTOR"):
+	beadsRef = 101
+	FigureGenerator.FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA,TypePlot, beadsRef)

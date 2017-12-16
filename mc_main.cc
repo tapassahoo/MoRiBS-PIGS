@@ -148,14 +148,12 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 //----------- subroutine that performs some initialization work for vh2h2.f-----
 
 extern "C" void vinit_();
-#ifdef SWAPTOUNSWAP
 string Distribution = "unSwap";
 double MCAccepSwap;
 double MCAccepUnSwap;
 int iSwap;
 int iUnSwap;
 void SaveInstantSwap(double, double, long int);                 // accumulated average
-#endif
 #ifdef PROPOSED
 int iChooseOld = 0;
 int iChooseNew;
@@ -553,7 +551,9 @@ ParamsPotential();
 			if (blockCount > (NumberOfMCBlocks - 10))
 			{
 		    	SaveInstantAngularDOF(totalStep);
+#ifdef SWAPTOUNSWAP
 	    		SaveInstantSwap(iUnSwap, iSwap, totalStep);
+#endif
 			}
 #endif
 
@@ -931,7 +931,7 @@ void MCGetAveragePIGSENT(void)
 	_trOfDensitySq   += sdm/snm;
 	_trOfDensitySq_total += sdm/snm;
 #endif
-#ifdef REGULARPATH
+#ifdef UNSWAP
 	_trOfDensitySq   += snm/sdm;
 	_trOfDensitySq_total += snm/sdm;
 #endif
@@ -1109,7 +1109,7 @@ void MCGetAveragePIGS(void)
 	compxyz[1] = 0.0;
 	compxyz[2] = 0.0;
 
-	GetCosTheta(cosTheta, compxyz);
+	GetCosThetaPIGS(cosTheta, compxyz);
 	double scostheta  = cosTheta;
 	double scompx     = compxyz[0];
 	double scompy     = compxyz[1];
@@ -1536,6 +1536,7 @@ void MCSaveBlockAverages(long int blocknumb)
 
 }
 
+#ifdef PIGSENTTYPE
 void MCSaveBlockAveragesPIGSENT(long int blocknumb) 
 {
   	const char *_proc_=__func__;    //   MCSaveBlockAverages()
@@ -1554,6 +1555,7 @@ void MCSaveBlockAveragesPIGSENT(long int blocknumb)
 #endif
     SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
 }
+#endif
 
 void SaveEnergy (const char fname [], double acount, long int blocknumb)
 {
@@ -1842,25 +1844,17 @@ void SaveInstantAngularDOF(long int numb)
     const char *_proc_=__func__;
 
 #ifdef PIGSENTTYPE
-	double cosTheta   = 0.0;
-	double compxyz[NDIM];
-	compxyz[0] = 0.0;
-	compxyz[1] = 0.0;
-	compxyz[2] = 0.0;
+	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+   	{
+   		for (int it = ((NumbRotTimes - 1)/2-1); it <= ((NumbRotTimes-1)/2); it++) 
+		{
+        	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            int t0      = offset0 + it;
 
-	GetCosThetaPIGSENT(cosTheta, compxyz); //Centroid distribution
-   	_fangins << setw(IO_WIDTH) << numb << BLANK;
-   	_fangins << setw(IO_WIDTH) << cosTheta << BLANK;
-   	_fangins << setw(IO_WIDTH) << compxyz[0] << BLANK;
-   	_fangins << setw(IO_WIDTH) << compxyz[1] << BLANK;
-   	_fangins << setw(IO_WIDTH) << compxyz[2] << BLANK;
-//
-    double snm        = GetEstimNM();
-    double sdm        = GetEstimDM();
-    _fangins << setw(IO_WIDTH) << snm << BLANK;
-    _fangins << setw(IO_WIDTH) << sdm << BLANK;
-    _fangins << setw(IO_WIDTH) << snm/sdm << BLANK;
-    _fangins << endl;
+			_fangins << setw(IO_WIDTH) << MCCosine[2][t0] << BLANK;
+        }
+    }
+	_fangins << endl;
 #endif
 //
 #ifdef PIMCTYPE
@@ -1900,13 +1894,14 @@ void SaveInstantAngularDOF(long int numb)
 	instArray[0] = numb;
 	double cosTheta   = 0.0;
 	double compxyz[NDIM];
-	GetCosTheta(cosTheta, compxyz);
+	GetCosThetaPIGS(cosTheta, compxyz);
 	instArray[1] = cosTheta;
 	instArray[2] = compxyz[0];
 	instArray[3] = compxyz[1];
 	instArray[4] = compxyz[2];
 	_fangins.write((char*)instArray, 5*sizeof(double));
 #else
+#ifndef GAUSSIANMOVE
    	_fangins << setw(IO_WIDTH) << numb << BLANK;
 	double cosTheta   = 0.0;
 	double compxyz[NDIM];
@@ -1914,34 +1909,44 @@ void SaveInstantAngularDOF(long int numb)
 	compxyz[1] = 0.0;
 	compxyz[2] = 0.0;
 
-	GetCosTheta(cosTheta, compxyz);
+	GetCosThetaPIGS(cosTheta, compxyz);
    	_fangins << setw(IO_WIDTH) << cosTheta << BLANK;
    	_fangins << setw(IO_WIDTH) << compxyz[0] << BLANK;
    	_fangins << setw(IO_WIDTH) << compxyz[1] << BLANK;
    	_fangins << setw(IO_WIDTH) << compxyz[2] << BLANK;
     _fangins << endl;
-#endif 
-#endif 
-
-#ifdef NEWDENSITY
+#else
    	_fangins << setw(IO_WIDTH) << numb << BLANK;
 	int it = (NumbTimes - 1)/2;
 	int atom0 = 0;
 	int t0 = it + atom0*NumbTimes;
 	for (int id = 0; id < NDIM; id++)
 	{
-   		_fangins << setw(IO_WIDTH) << MCCoords[id][t0]/BOHRRADIUS<< BLANK;
+   		_fangins << setw(IO_WIDTH) << MCCoords[id][t0]<< BLANK;
 	}
 	for (int id = 0; id < NDIM; id++)
 	{
-   		_fangins << setw(IO_WIDTH) << MCCoords[id][0]/BOHRRADIUS<< BLANK;
+   		_fangins << setw(IO_WIDTH) << MCCoords[id][0]<< BLANK;
 	}
 	for (int id = 0; id < NDIM; id++)
 	{
-   		_fangins << setw(IO_WIDTH) << MCCoords[id][NumbTimes-1]/BOHRRADIUS<< BLANK;
+   		_fangins << setw(IO_WIDTH) << MCCoords[id][NumbTimes-1]<< BLANK;
 	}
-    _fangins << endl;
+   	_fangins << endl;
+	/*
+	for (int it = 0; it < NumbTimes; it++)
+	{
+		for (int id = 0; id < NDIM; id++)
+		{
+   			_fangins << setw(IO_WIDTH) << MCCoords[id][it]<< BLANK;
+		}
+    	_fangins << endl;
+	}
+	*/
 #endif
+#endif 
+#endif 
+
 }
 
 void SaveInstantEnergy()

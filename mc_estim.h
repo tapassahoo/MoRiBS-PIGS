@@ -29,7 +29,7 @@ void GetDipoleCorrelationPIMC(double *, double *, double *, double *, double *);
 void GetDipoleCorrelationPIGSENT(double *, double *, double *, double *, double *);
 void GetDipoleCorrelationPIGS(double *, double *, double *, double *, double *);
 #endif
-void GetCosTheta(double &, double *);
+void GetCosThetaPIGS(double &, double *);
 void GetCosThetaPIMC(double &, double *);
 double GetPhi();
 double GetPotEnergy(void);

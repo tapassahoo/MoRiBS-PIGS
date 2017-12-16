@@ -756,25 +756,16 @@ void ParamsPotential(void)
 void ProposedMCCoords()
 {
 	int atype = 0;
-#ifdef IOWRITE
+	double convert         = 1.66054*2.998*pow(10,-3)/1.0546;
 	double FrequencyHO     = 78.6; //in cm-1
-
-	double FrequencyANGINV = FrequencyHO*pow(10,-8);
-	double massCMINV       = MCAtom[atype].mass*AuToCmInverse/1822.88848325;
-	double massANGINV      = massCMINV*pow(10,-8);
 	double FrequencyK      = FrequencyHO*CMRECIP2KL; //in Kelvin
 
-    double prefacGauss1    = massANGINV*FrequencyANGINV;
-    double prefacGauss2    = 2.0*sinh(FrequencyK*MCTau);
-    double prefacGauss3    = cosh(FrequencyK*MCTau);
-#endif
-	double FrequencyK      = 0.001*AuToKelvin;
-    double prefacGauss1    = 1.0; // in Atomic Unit;
-    double prefacGauss2    = 2.0*tanh(FrequencyK*MCTau);
-    double prefacGauss3    = 2.0*sinh(FrequencyK*MCTau);
+    double prefacGauss1    = 0.5*MCAtom[atype].mass*FrequencyHO*convert;
+	double prefacGauss2    = tanh(FrequencyK*MCTau);
+    double prefacGauss3    = sinh(FrequencyK*MCTau);
 
     double afacGauss       = prefacGauss1/prefacGauss2;
-    double bfacGauss       = -prefacGauss1/prefacGauss3;
+    double bfacGauss       = prefacGauss1/prefacGauss3;
 	cout<<"afacGauss = "<<afacGauss<<" bfacGauss = "<<bfacGauss<<endl;
 	
 //Tridiagonal Matrix formation; starts
@@ -801,7 +792,7 @@ void ProposedMCCoords()
 				iim1 = (it1-1) + it0*NumbTimes;
 				if ((it1+1) < NumbTimes)
    				{
-					AMat[iip1]      = bfacGauss;
+					AMat[iip1]      = -bfacGauss;
    				}
 				if ((it1 == 0) || (it1 == (NumbTimes-1)))
 				{
@@ -813,7 +804,7 @@ void ProposedMCCoords()
 				}
    				if ((it1-1) >= 0)
    				{
-					AMat[iim1] 		= bfacGauss;
+					AMat[iim1] 		= -bfacGauss;
    				}
 			}
 		}
@@ -849,8 +840,6 @@ void GetRandomCoords()
 	double mu =0.0;
 	double sigma;
 
-	double ygauss[NumbTimes];
-
 	for (atom0 = 0; atom0 < NumbAtoms; atom0++)
 	{
 		for (id0 = 0; id0 < NDIM; id0++)
@@ -866,13 +855,12 @@ void GetRandomCoords()
 						exit(0);
 					}
 					sigma = sqrt(1.0/(2.0*Eigen[it1]));
-					ygauss[it1] = rnorm(Rng, mu, sigma);
 
-					ii0 = it1 + it0*NumbTimes;
-					sum += AMat[ii0]*ygauss[it1];
+					ii0 = it0 + it1*NumbTimes;
+					sum += AMat[ii0]*rnorm(Rng, mu, sigma);
    				}
 				t0 = it0 + atom0*NumbTimes;
-				gausscoords[id0][t0]  = sum*BOHRRADIUS;
+				gausscoords[id0][t0]  = sum;//*BOHRRADIUS;
 			}
 		}
     }

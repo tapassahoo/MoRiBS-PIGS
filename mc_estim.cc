@@ -645,7 +645,7 @@ double GetPotEnergy_Diff(void)
 
 double GetPotEnergyPIGS(void)
 {
-	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+	const char *_proc_=__func__; 
 
 #ifdef DEBUG_WORM
 	if (Worm.exists)
@@ -762,7 +762,7 @@ double GetPotEnergyPIGS(void)
         double spot3d = 0.0;
         for (int id = 0; id < NDIM; id++)
         {
-            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0]/(BOHRRADIUS*BOHRRADIUS);
+            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
         }
         spot   = spot3d;
 #endif
@@ -788,7 +788,7 @@ double GetPotEnergyPIGS(void)
 
 double GetPotEnergyPIGSENT(void)
 {
-	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+	const char *_proc_=__func__; 
 
 #ifdef DEBUG_WORM
 	if (Worm.exists)
@@ -1250,7 +1250,7 @@ double GetPotEnergy_Densities(void)
     }
 #endif
 	double spotReturn = spot + spot_cage;
-	return (spot/(double)NumbTimes);
+	return (spotReturn/(double)NumbTimes);
 }
 
 #ifdef HISTOGRAM
@@ -1427,7 +1427,7 @@ double GetTotalEnergy(void)
 			double spot3d = 0.0;
 			for (int id = 0; id < NDIM; id++)
 			{
-            	spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0]/(BOHRRADIUS*BOHRRADIUS);
+            	spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
 			}
             spot   += spot3d;
 #endif
@@ -1748,7 +1748,7 @@ void GetCosThetaPIMC(double &cosTheta, double *compxyz)
     compxyz[2] = scompxyz[2]/(NumbAtoms*NumbRotTimes);
 }
 
-void GetCosTheta(double &cosTheta, double *compxyz)
+void GetCosThetaPIGS(double &cosTheta, double *compxyz)
 {
     const char *_proc_=__func__; 
 
