@@ -756,11 +756,18 @@ void ParamsPotential(void)
 void ProposedMCCoords()
 {
 	int atype = 0;
+/*
 	double convert         = 1.66054*2.998*pow(10,-3)/1.0546;
 	double FrequencyHO     = 78.6; //in cm-1
 	double FrequencyK      = FrequencyHO*CMRECIP2KL; //in Kelvin
 
     double prefacGauss1    = 0.5*MCAtom[atype].mass*FrequencyHO*convert;
+	double prefacGauss2    = tanh(FrequencyK*MCTau);
+    double prefacGauss3    = sinh(FrequencyK*MCTau);
+*/
+	double FrequencyK      = AuToKelvin;
+
+    double prefacGauss1    = 0.5;
 	double prefacGauss2    = tanh(FrequencyK*MCTau);
     double prefacGauss3    = sinh(FrequencyK*MCTau);
 

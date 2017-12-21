@@ -33,7 +33,7 @@ LINEARROTORS  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input 
 # parameters for rotational degrees of freedom of molecules, one line per molecule
 #         [type]  [MC steps for orient df]  [Number of time slices for rotations]
 
-ROTATION   molecule_input    dstep_input   numbbeads_input 
+#ROTATION   molecule_input    dstep_input   numbbeads_input 
 
 # parameters for the worm algorithm (C is redefined) 
 #        [type]  [C]   [~m should be < NUMBEROFSLICES > 1]

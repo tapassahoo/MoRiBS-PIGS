@@ -1089,10 +1089,6 @@ void MCGetAveragePIGS(void)
 	avergCount       += 1.0;
 	totalCount       += 1.0;  
 
-#ifdef NEWDENSITY
-	//GetDensities();
-	//GetDensitiesEndBeads();
-#endif
 	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
@@ -1933,16 +1929,6 @@ void SaveInstantAngularDOF(long int numb)
    		_fangins << setw(IO_WIDTH) << MCCoords[id][NumbTimes-1]<< BLANK;
 	}
    	_fangins << endl;
-	/*
-	for (int it = 0; it < NumbTimes; it++)
-	{
-		for (int id = 0; id < NDIM; id++)
-		{
-   			_fangins << setw(IO_WIDTH) << MCCoords[id][it]<< BLANK;
-		}
-    	_fangins << endl;
-	}
-	*/
 #endif
 #endif 
 #endif 
@@ -2245,15 +2231,13 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
    }
    else
    {
-      double ratio_molec = MCAccep[type][MCMOLEC]/MCTotal[type][MCMOLEC];
 #ifndef GAUSSIANMOVE
+      double ratio_molec = MCAccep[type][MCMOLEC]/MCTotal[type][MCMOLEC];
       double ratio_multi = MCAccep[type][MCMULTI]/MCTotal[type][MCMULTI];
-#endif
  
       cout<<setw(w)<<MCAtom[type].type<<BLANK; // atom type
 
       cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
-#ifndef GAUSSIANMOVE
       cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
 #endif
    }

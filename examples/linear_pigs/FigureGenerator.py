@@ -132,12 +132,16 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				'''
 				if ((numbmolecules == 4) and (dipolemoment ==4.0)):
 					beadsRef = 61
+					beadsRef1 = 81
 				elif ((numbmolecules == 6) and (dipolemoment == 3.25)):
 					beadsRef = 21
+					beadsRef1 = 81
 				else:
 					beadsRef = 81
+					beadsRef1 = 81
 				if (numbmolecules == 2):
 					beadsRef = 101
+					beadsRef1 = beadsRef
 	
 				if ((numbmolecules == 8) and (dipolemoment > 2.5)):
 					entropy1Plot[iii]     = entropy1
@@ -154,25 +158,33 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 						beads = indexi
 						if beads == beadsRef:
 							entropy1Plot[iii]     = entropy1[ii]
-							err_entropy1Plot[iii] = err_entropy1[ii]
+							#err_entropy1Plot[iii] = err_entropy1[beadsRef1]
 							purity1Plot[iii]      = purity1[ii]
 							err_purity1Plot[iii]  = err_purity1[ii]
 		
 							energy1Plot[iii]     = energy1[ii]
 							err_energy1Plot[iii] = err_energy1[ii]
 						ii += 1
+					ii1 = 0
+					for i in beads1:
+						indexi =int(i+0.5)
+						beads = indexi
+						if beads == beadsRef1:
+							err_entropy1Plot[iii] = err_entropy1[ii1]
+		
+						ii1 += 1
 				iii += 1
 		
 			print("S2:  PIGS ")
 			print(entropy1Plot)
 			#print("S2:  MM ")
 			#print(entropy2Plot)
-			print("S2:  DIAG ")
+			print("S2:  ED ")
 			print(entropy3Plot)
 #
 			'''
 			plotEntropyENT1(numbmolecules,RFactorPlot, energy1Plot, err_energy1Plot, variableName, RFactorPlot, energy2Plot, energy3Plot, font, TypePlot)
-			plt.ylabel(r'$\mathrm{\langle E_{0} \rangle \ \  (Kelvin^{-1}})$', fontsize = font)
+			plt.ylabel(r'$\mathrm{\langle E_{0} \rangle \ \  (K^{-1}})$', fontsize = font)
 			ymin, ymax = plt.ylim()
 			xmin, xmax = plt.xlim()
 			Text1 = ""
@@ -376,7 +388,7 @@ def	FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 			labelList  = ['Swap - Unswap','Broken Path']
 
 			if (ENT_TYPE == "SWAPTOUNSWAP"):
-				plt.plot(RFactorPlot, entropy2Plot, color = 'black', ls = '-', linewidth=1,  marker = 'o', markersize = 12, label = 'DIAG')
+				plt.plot(RFactorPlot, entropy2Plot, color = 'black', ls = '-', linewidth=1,  marker = 'o', markersize = 12, label = 'ED')
 			plt.errorbar(RFactorPlot, entropy1Plot, yerr=err_entropy1Plot, color = colorList[labelIndex], ls = lsList[labelIndex], linewidth=1,  marker = markerList[labelIndex], markersize = 10, label = labelList[labelIndex])
 
 			labelIndex += 1
@@ -411,19 +423,19 @@ def plotEntropyENT1(numbmolecules,var, val, err_val, variableName, var1, val1, v
 	#plt.xlim(0,0.201)
 	if (numbmolecules == 2):
 		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "o", markersize = 8, label = 'PIGS: 2 HF')
-		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "o", markersize = 10, label = 'DIAG: 2 HF')
-		#plt.plot(var, val2, color = 'black', ls = '-', linewidth=3, marker = "o", markersize = 12, label = 'DIAG: 2 HF')
+		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "o", markersize = 10, label = 'ED: 2 HF')
+		#plt.plot(var, val2, color = 'black', ls = '-', linewidth=3, marker = "o", markersize = 12, label = 'ED: 2 HF')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "o", markersize = 10, label = 'DMRG: 2 HF')
 		#plt.plot(var, val1, linestyle = 'None', color = 'mediumpurple', marker = "o", markersize = 10, label = 'MM: 2 HF')
 
 	if (numbmolecules == 4):
 		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "s", markersize = 8, label = 'PIGS: 4 HF')
-		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "s", markersize = 10, label = 'DIAG: 4 HF')
+		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "s", markersize = 10, label = 'ED: 4 HF')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "s", markersize = 8, label = 'DMRG: 4 HF')
 
 	if (numbmolecules == 6):
 		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "v", markersize = 8, label = 'PIGS: 6 HF')
-		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'DIAG: 6 HF')
+		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'ED: 6 HF')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "8", markersize = 7, label = 'DMRG: 6 HF')
 
 	ymin, ymax = plt.ylim()
@@ -451,7 +463,7 @@ def plotEntropyENT(var, val, err_val, variableName, var1, val1, val2, font,fontl
 		label_xtics = [0.00]
 		plt.xlim(0,0.0201)
 		if (val2 != 0.0):
-			plt.axhline(y=val2, color='black', lw = 2.0, linestyle='-', label = 'DIAG')
+			plt.axhline(y=val2, color='black', lw = 2.0, linestyle='-', label = 'ED')
 		x = [0.00, 0.005, 0.01, 0.015, 0.02]
 		labels = ['0.0', '0.005', '0.01', '0.015', '0.02']
 		plt.xticks(x, labels, fontsize=fontlegend, rotation=0)
@@ -473,9 +485,9 @@ def plotEntropyENT(var, val, err_val, variableName, var1, val1, val2, font,fontl
 
 
 	if (variableName == "beta"):
-		plt.xlabel(r'$\mathrm{\beta \ \  (Kelvin^{-1}})$', fontsize = font)
+		plt.xlabel(r'$\mathrm{\beta \ \  (K^{-1}})$', fontsize = font)
 	if (variableName == "tau"):
-		plt.xlabel(r'$\mathrm{\tau \ \  (Kelvin^{-1}})$', fontsize = font)
+		plt.xlabel(r'$\mathrm{\tau \ \  (K^{-1}})$', fontsize = font)
 
 def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef, RefPointList):
 
@@ -500,13 +512,13 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 			FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
 			if TypeCorr    == "TotalCorr":
 				FileToBePlot   	  = FilePlotName.SaveTotalCorr+".txt"
-				FilePlot          = FilePlotName.SaveTotalCorr+"-ithRotor"+str(RefPointList[0])+".pdf"
+				FilePlot          = FilePlotName.SaveTotalCorr+"-ithRotor"+str(RefPointList[0])+".eps"
 			elif TypeCorr  == "ZCorr":
 				FileToBePlot   	  = FilePlotName.SaveZCorr+".txt"
-				FilePlot          = FilePlotName.SaveZCorr+"-ithRotor"+str(RefPointList[0])+".pdf"
+				FilePlot          = FilePlotName.SaveZCorr+"-ithRotor"+str(RefPointList[0])+".eps"
 			elif TypeCorr  == "XYCorr":
 				FileToBePlot   	  = FilePlotName.SaveXYCorr+".txt"
-				FilePlot          = FilePlotName.SaveXYCorr+"-ithRotor"+str(RefPointList[0])+".pdf"
+				FilePlot          = FilePlotName.SaveXYCorr+"-ithRotor"+str(RefPointList[0])+".eps"
 			print(FilePlot)
 			call(["rm", FilePlot])
 			datacorr      = genfromtxt(FileToBePlot)
@@ -547,7 +559,8 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 					val3[j] = ErrorFuncCorr[RefPoint,j]
 		
 				value       = "%4.3f" % val2[0]
-				plt.errorbar(val1[1:], val2[1:], yerr=val3[1:], color = colorList[iRef], ls = lsList[iRef], linewidth=3, marker = markerList[iRef], markersize = 20)  #excluding selfcorrelation
+				#plt.errorbar(val1[1:], val2[1:], yerr=val3[1:], color = colorList[iRef], ls = lsList[iRef], linewidth=3, marker = markerList[iRef], markersize = 20)  #excluding selfcorrelation
+				plt.errorbar(val1, val2, yerr=val3, color = colorList[iRef], ls = lsList[iRef], linewidth=3, marker = markerList[iRef], markersize = 20)  #excluding selfcorrelation
 
 				ymin, ymax  = plt.ylim()
 				midpointy   = 0.5*(ymax-ymin)
@@ -559,19 +572,40 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 				textpositionx = xmin+midpointx-0.25*midpointx
 				textpositiony = ymin+midpointy
 
+				Text1 = TextLabel[iTextLabel]
+				Text2 = str(arg)
 				if (TypeCorr == "TotalCorr"):
 					plt.ylabel(r'$\mathrm{C_{'+str(RefPoint+1)+',j}}$', fontsize = font)
 					#plt.ylabel(r'$\mathrm{C_{i,j}}$', fontsize = font)
-					plt.text(textpositionx-4*deltax, textpositiony-4*deltay, r'$\mathrm{C_{'+str(RefPoint+1)+',1}}$ = '+str(value), fontsize=fontlegend)
+					#plt.text(textpositionx-2*deltax, textpositiony-6*deltay, r'$\mathrm{C_{'+str(RefPoint+1)+',1}}$ = '+str(value), fontsize=fontlegend)
+					if Text1:
+						plt.text(textpositionx-(4.75*deltax), textpositiony+(5.5*deltay), Text1, fontsize=fontlegend)
+
+					if Text2:
+						plt.text(textpositionx+(4.7*deltax), textpositiony+5*deltay, r'$\mathrm{g} =$'+Text2, fontsize=fontlegend)
+		
 				if (TypeCorr == "ZCorr"):
 					plt.ylabel(r'$\mathrm{C^{\parallel}_{'+str(RefPoint+1)+',j}}$', fontsize = font)
 					#plt.ylabel(r'$\mathrm{C^{\parallel}_{i,j}}$', fontsize = font)
-					plt.text(textpositionx-4*deltax, textpositiony-4*deltay,  r'$\mathrm{C^{\parallel}_{'+str(RefPoint+1)+',1}}$ = '+str(value), fontsize=fontlegend)
+					#plt.text(textpositionx-2*deltax, textpositiony-6*deltay,  r'$\mathrm{C^{\parallel}_{'+str(RefPoint+1)+',1}}$ = '+str(value), fontsize=fontlegend)
+					if Text1:
+						plt.text(textpositionx-(4.75*deltax), textpositiony+(5.5*deltay), Text1, fontsize=fontlegend)
+
+					if Text2:
+						plt.text(textpositionx+(4.7*deltax), textpositiony+5*deltay, r'$\mathrm{g} =$'+Text2, fontsize=fontlegend)
+		
 				if (TypeCorr == "XYCorr"):
 					plt.ylabel(r'$\mathrm{C^{\bot}_{'+str(RefPoint+1)+',j}}$', fontsize = font)
 					#plt.ylabel(r'$\mathrm{C^{\bot}_{i,j}}$', fontsize = font)
-					plt.text(textpositionx-4*deltax, textpositiony-4*deltay, r'$\mathrm{C^{\bot}_{'+str(RefPoint+1)+',1}}$ = '+str(value), fontsize=fontlegend)
+					plt.axhline(y=0.0, color='black', lw = 3.0, linestyle='--')
+					#plt.text(textpositionx-2*deltax, textpositiony-6*deltay, r'$\mathrm{C^{\bot}_{'+str(RefPoint+1)+',1}}$ = '+str(value), fontsize=fontlegend)
+					if Text1:
+						plt.text(textpositionx-(4.75*deltax), textpositiony+(5.5*deltay), Text1, fontsize=fontlegend)
 
+					if Text2:
+						#plt.text(textpositionx+(4.7*deltax), textpositiony+3.0*deltay, r'$\mathrm{g} =$'+Text2, fontsize=fontlegend)
+						plt.text(textpositionx+(4.7*deltax), textpositiony+5*deltay, r'$\mathrm{g} =$'+Text2, fontsize=fontlegend)
+		
 
 				iRef += 1
 
@@ -579,10 +613,12 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 
 			plt.xlabel(r'$\mathrm{j}$', fontsize = font)
 	
+			'''
 			Text1 = TextLabel[iTextLabel]
 			Text2 = str(arg)
 			if Text1:
 				PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			'''
 		
 			iTextLabel += 1
 
@@ -591,10 +627,10 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 			#plt.subplots_adjust(top=0.96, bottom=0.23, left=0.31, right=0.95, hspace=0.6, wspace=1.0)
 			plt.subplots_adjust(top=0.96, bottom=0.23, left=0.30, right=0.95, hspace=0.6, wspace=1.0)
 			#plt.legend(bbox_to_anchor=(0.58, 0.99), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
-			plt.savefig(FilePlot, dpi = 200, format = 'pdf')
+			plt.savefig(FilePlot, dpi = 200, format = 'eps')
 
-			call(["okular", FilePlot])
-			#call(["open", FilePlot])
+			#call(["okular", FilePlot])
+			call(["open", FilePlot])
 			#plt.show()
 
 def	FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
@@ -695,12 +731,12 @@ def PlotLabel(Text1, Text2, font,xmin,xmax,ymin,ymax,variableName,parameter,numb
 def PlotEnergyPIGS(font,val1,val2,val3,variableName,YLabel,var2,energy2,energy3):
 	#plt.grid(True)
 	if (variableName == "tau"):
-		plt.xlabel(r'$\mathrm{\tau \ \  (Kelvin^{-1}})$', fontsize = font)
+		plt.xlabel(r'$\mathrm{\tau \ \  (K^{-1}})$', fontsize = font)
 	if (variableName == "beta"):
-		plt.xlabel(r'$\mathrm{\beta \ \  (Kelvin^{-1}})$', fontsize = font)
+		plt.xlabel(r'$\mathrm{\beta \ \  (K^{-1}})$', fontsize = font)
 		
 	if (YLabel == "Total"):
-		plt.ylabel(r'$\mathrm{E_{0}}$ (Kelvin)', fontsize = font)
+		plt.ylabel(r'$\mathrm{E_{0}}$ (K)', fontsize = font)
 		if (variableName == "tau"):
 			plotfitting(val1, val2, val3)
 			plt.errorbar(val1, val2, yerr = val3, color = 'blue', ls = '-', label = 'PIGS', linewidth=2)
@@ -711,12 +747,12 @@ def PlotEnergyPIGS(font,val1,val2,val3,variableName,YLabel,var2,energy2,energy3)
 			plt.xlim(0,0.201)
 			plt.plot(var2, energy2, color = 'green', ls = '--', label = 'Matrix Multiplication', marker = "o", linewidth=2)
 	if (YLabel == "Potential"):
-		plt.ylabel(r'$\mathrm{V_{0}}$ (Kelvin)', fontsize = font)
+		plt.ylabel(r'$\mathrm{V_{0}}$ (K)', fontsize = font)
 		plt.xlim(0,0.201)
 		plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=2)
 
 	if (YLabel == "Rotational"):
-		plt.ylabel(r'$\mathrm{K_{0}^{Rot}}$ (Kelvin)', fontsize = font)
+		plt.ylabel(r'$\mathrm{K_{0}^{Rot}}$ (K)', fontsize = font)
 		plt.xlim(0,0.201)
 		plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=1)
 
@@ -781,11 +817,11 @@ def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, varia
 	plt.xlabel('N')
 
 	if (TypePlot1 == 1):
-		plt.ylabel(r'$\mathrm{\langle E_{0} \rangle (Kelvin)}$', fontsize = font)
+		plt.ylabel(r'$\mathrm{\langle E_{0} \rangle (K)}$', fontsize = font)
 	if (TypePlot1 == 2):
-		plt.ylabel(r'$\mathrm{\langle E_{0} \rangle/N \ (Kelvin)}$', fontsize = font)
+		plt.ylabel(r'$\mathrm{\langle E_{0} \rangle/N \ (K)}$', fontsize = font)
 	if (TypePlot1 == 3):
-		plt.ylabel(r'$\mathrm{\mu \ (Kelvin)}$', fontsize = font)
+		plt.ylabel(r'$\mathrm{\mu \ (K)}$', fontsize = font)
 
 	plt.xlabel(r'$\mathrm{N}$', fontsize = font)
 
@@ -867,10 +903,9 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 		iLabel = 0
 		for numbmolecules in nn:
 			if (numbmolecules == 2):
-				DList  = [1.0+0.5*i for i in range(7)]
-				DList  += [4.5, 5.0, 5.5, 6.0]
+				DList  = [1.0+0.5*i for i in range(15)]
 			if (numbmolecules == 4):
-				DList  = [1.0+0.5*i for i in range(7)]
+				DList  = [1.0+0.5*i for i in range(11)]
 			if (numbmolecules == 6):
 				DList  = [1.0+0.5*i for i in range(6)]
 		
@@ -884,7 +919,7 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 				RFactor = RFactorList[0]
 				FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
 				FileToBePlotCorr = FilePlotName.SaveCorr+".txt"
-				beads1, var1, Corr, err_Corr = genfromtxt(FileToBePlotCorr,unpack=True, usecols=[0, 1, 8, 15], skip_header=preskip, skip_footer=postskip)
+				beads1, var1, Corr, err_Corr = genfromtxt(FileToBePlotCorr,unpack=True, usecols=[0, 1, 11, 21], skip_header=preskip, skip_footer=postskip)
 				if (TypePlot == "GFACTOR"):
 					RFactorPlot[iii] = 1.0/(RFactor*RFactor*RFactor)
 				if (TypePlot == "RFACTOR"):
@@ -935,6 +970,6 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 		plt.legend(bbox_to_anchor=(0.78, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
 		plt.savefig(outfile, dpi = 200, format = 'pdf')
 
-		call(["open", outfile])
-		#call(["okular", outfile])
+		#call(["open", outfile])
+		call(["okular", outfile])
 		#plt.show()

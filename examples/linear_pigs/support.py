@@ -787,7 +787,7 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 		if TransMove and not RotMove:
 			frontName      += "TransDOFs-"
-			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
+			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
 	if (molecule_rot == "H2"):
 		if TransMove and RotMove:
 			frontName      += "TransAndRotDOFs-"
@@ -795,6 +795,9 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 		if not TransMove and RotMove:
 			frontName      += "RotDOFs-"
 			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
+		if TransMove and not RotMove:
+			frontName      += "TransDOFs-"
+			file1_name      = frontName+mainFileName
 
 	if (TypeCal == "ENT"):
 				file1_name += ENT_TYPE
@@ -1025,7 +1028,7 @@ class GetFileNamePlot:
 			frontName             = self.TypeCal+"-"+self.extra
 
 			if (self.molecule_rot == "H2"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Energy-"
 					file_output2  = frontName+"correlation-"
@@ -1037,7 +1040,7 @@ class GetFileNamePlot:
 					file_output8  = frontName+"Chemical-Potential-"
 
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
@@ -1050,7 +1053,7 @@ class GetFileNamePlot:
 	
 	
 			if (self.molecule_rot == "HF"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
 					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
@@ -1062,7 +1065,7 @@ class GetFileNamePlot:
 					file_output8  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Chemical-Potential-"
 
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
@@ -1097,7 +1100,7 @@ class GetFileNamePlot:
 			frontName             = "ENT-"
 			frontName            += self.extra
 			if (self.molecule_rot == "HF"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
 					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
@@ -1109,7 +1112,7 @@ class GetFileNamePlot:
 					file_output8  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
 					file_output9  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
@@ -1122,7 +1125,7 @@ class GetFileNamePlot:
 					file_output9  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
 
 			if (self.molecule_rot == "H2"):
-				if (self.TransMove == "Yes" and self.RotMove == "Yes"):
+				if self.TransMove and self.RotMove:
 					frontName += "TransAndRotDOFs-"
 					file_output1  = frontName+"Entropy-"
 					file_output2  = frontName+"Energy-"
@@ -1134,7 +1137,7 @@ class GetFileNamePlot:
 					file_output8  = frontName+"Z-component-correlation-function-"
 					file_output9  = frontName+"XandY-component-correlation-function-"
 
-				if (self.TransMove != "Yes" and self.RotMove == "Yes"):
+				if not self.TransMove and self.RotMove:
 					frontName += "RotDOFs-"
 					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
 					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"

@@ -652,12 +652,6 @@ double GetPotEnergyPIGS(void)
 	nrerror(_proc_," Only for Z-configurations");
 #endif
 
-#ifdef PIGSENTBOTH
-	int atomStart = NumbAtoms/2;
-#else
-	int atomStart = 0;
-#endif
-
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbRotTimes - 1)/2);
 	double spot;
@@ -666,7 +660,7 @@ double GetPotEnergyPIGS(void)
 		double Eulang0[NDIM], Eulang1[NDIM];
 
         spot = 0.0;
-        for (int atom0=atomStart;atom0<(NumbAtoms-1);atom0++)
+        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
            	int t0 = offset0 + it;
@@ -754,11 +748,12 @@ double GetPotEnergyPIGS(void)
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         int offset0 = 0;
-        int t0  = offset0 + it;
 #ifndef GAUSSIANMOVE
+        int t0  = offset0 + it;
         double E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
 #else
+        int t0  = offset0 + (NumbTimes-1)/2;
         double spot3d = 0.0;
         for (int id = 0; id < NDIM; id++)
         {
@@ -1310,18 +1305,12 @@ void GetDensitiesEndBeads(void)
 
 double GetTotalEnergy(void)
 {
-#ifdef PIGSENTBOTH
-	int atomStart = NumbAtoms/2;
-#else
-	int atomStart = 0;
-#endif
-
     string stype = MCAtom[IMTYPE].type;
 	double spot;
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         spot = 0.0;
-        for (int atom0=atomStart;atom0<(NumbAtoms-1);atom0++)
+        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
 
@@ -1436,7 +1425,7 @@ double GetTotalEnergy(void)
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
-    for (int atom0 = atomStart; atom0 < NumbAtoms; atom0++)
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
     {
         int offset0 = NumbTimes*atom0;
 
@@ -1755,13 +1744,6 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
     // if user passed in a null pointer for array, bail out early!
     if (!compxyz)
         return;
-#ifdef PIGSENTBOTH
-	int atomStart = NumbAtoms/2;
-#else
-	int atomStart = 0;
-#endif
-
-
     int it = (NumbRotTimes - 1)/2;
 
 	double scosTheta;
@@ -1770,7 +1752,7 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
 	if(MCAtom[IMTYPE].numb > 1)
 	{
         scosTheta    = 0.0;
-    	for (int atom0 = atomStart; atom0 < (NumbAtoms-1); atom0++)
+    	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
         {    
     	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
     	    {
@@ -1789,18 +1771,17 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
     		}     // LOOP OVER ATOM PAIRS
 		}
 
-		scompxyz[0] = 0.0;
-		scompxyz[1] = 0.0;
-		scompxyz[2] = 0.0;
+		for (int id = 0; id<NDIM; id++)
+		{
+			double sum = 0.0;
+    		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+        	{    
+           		int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+       			int t0      = offset0 + it;
 
-    	for (int atom0 = atomStart; atom0 < NumbAtoms; atom0++)
-        {    
-            int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-       		int t0      = offset0 + it;
-
-			scompxyz[0] += MCCosine[0][t0];
-			scompxyz[1] += MCCosine[1][t0];
-			scompxyz[2] += MCCosine[2][t0];
+				sum += MCCosine[id][t0];
+			}
+			scompxyz[id] = sum;
 		}
 	}
 	if(MCAtom[IMTYPE].numb == 1)
@@ -1832,9 +1813,10 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
 	}
 
 	cosTheta = scosTheta;
-	compxyz[0] = scompxyz[0]/NumbAtoms;
-	compxyz[1] = scompxyz[1]/NumbAtoms;
-	compxyz[2] = scompxyz[2]/NumbAtoms;
+	for (int id = 0; id < NDIM; id++)
+	{
+		compxyz[id] = scompxyz[id]/NumbAtoms;
+	}
 }
 
 void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)

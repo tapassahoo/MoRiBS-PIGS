@@ -21,8 +21,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 variableName        = "tau"
 #variableName        = "beta"
 #
-TransMove           = "No"
-RotMove             = "Yes"
+TransMove           = False
+RotMove             = True
 #
 #TypeCal             = 'PIMC'
 TypeCal             = 'PIGS'
@@ -30,9 +30,9 @@ TypeCal             = 'PIGS'
 #
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
-#TypePlot            = "CorrFunc"
+TypePlot            = "CorrFunc"
 #TypePlot            = "S2"
-TypePlot            = "GFACTOR"
+#TypePlot            = "GFACTOR"
 #TypePlot            = "COMBINE"
 #
 #molecule            = "HFC60"                                                  
@@ -40,15 +40,15 @@ molecule            = "HF"
 #molecule            = "H2"                                                    
 molecule_rot        = "HF"
 #
-numbblocks	        = 50000
-numbmolecules       = 2
+numbblocks	        = 20000
+numbmolecules       = 7
 numbpass            = 50
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826      #J. Chem. Phys. 73(5), 2319 (1980).
 dipolemoment        = 1.0*dipolemoment
 
-preskip             = 1000
+preskip             = 0
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
@@ -83,7 +83,7 @@ if (TypeCal == "ENT" and TypePlot == "COMBINE"):
 
 if (TypePlot == "CorrFunc"):
 	beadsRef = 101
-	RefPoint = [0]
+	RefPoint = [3]
 	FigureGenerator.FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef, RefPoint)
 
 
