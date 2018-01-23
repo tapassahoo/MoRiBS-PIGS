@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='It is a script file, written in Py
 parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye. It is a float.")
 parser.add_argument("-R", "--Rpt", type=float, help="Inter molecular spacing. It is a float.")
 parser.add_argument("variable", help="Name of a variable: either beta or tau. It must be a string.", choices =["tau","beta"])
-parser.add_argument("cal", help="Type of calculation - it is a string: a) PIMC - Finite Temperature calculation by Path Integral Monte Carlo b) PIGS - Ground State Path Integral c) ENT - Entanglement by replica algorithm based on PIGS.", choices = ["PIMC", "PIGS", "ENT"])
+parser.add_argument("cal", help="Type of calculation - it is a string: a) PIGS - Ground State Path Integral b) ENT - Entanglement by replica algorithm based on PIGS. As the script computes only ground state properties, PIMC is not allowed here.", choices = ["PIGS", "ENT"])
 parser.add_argument("--scal", help="subtype of calculations - must be defined as a string in case of ENT.", default = "SWAPTOUNSWAP", choices = ["SWAPTOUNSWAP", "BROKENPATH"])
 parser.add_argument("-N", help="Number of Molecules. It must be an integer.", type = int)
 parser.add_argument("--MOVECOM", action="store_true", help="allows translational motions of molecules or particles.")

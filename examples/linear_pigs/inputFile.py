@@ -10,9 +10,9 @@ from numpy import *
 import math
 
 def Getbeads(TypeCal, variableName):
-	loopStart           = 20
-	loopEnd             = 142
-	skip                = 20
+	loopStart           = 5
+	loopEnd             = 12
+	skip                = 5
 	if (variableName == "beta"):
 		if (TypeCal == "ENT"):
 			list_nb = [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,44]
@@ -40,7 +40,8 @@ class GetStepAndLevel:
 				#step        = [1.7,1.4,1.1,1.0,0.9]  # beads 21, 31, 41, 51 for beta 0.1
 				#step        = [2.0,2.0,2.0,1.6,1.5,1.4,1.2,1.0,1.0,1.0]  # beads i+1 for i in range(10,100,10) beta =0.2
 				#self.step        = [2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8]  # beads 21, 41, 61, 81, 101, 121, 141 for beta 0.2 for -d 1.0 to 5.0
-				self.step        = [1.4, 1.4, 1.2, 1.0, 0.8, 0.7, 0.7]  # beads 21, 41, 61, 81, 101, 121, 141 for beta 0.2 for -d 5.5 to 8.0
+				#self.step        = [1.4, 1.4, 1.2, 1.0, 0.8, 0.7, 0.7]  # beads 21, 41, 61, 81, 101, 121, 141 for beta 0.2 for -d 5.5 to 8.0
+				self.step        = [1.8, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, 1.2, 1.2, 1.2]  # beads 21, 41, 61, 81, 101, 121, 141 for beta 0.1 for -d 5.5 to 8.0
 				self.level       = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 		if self.variableName == "beta":

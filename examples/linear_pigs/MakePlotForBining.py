@@ -14,6 +14,12 @@ from matplotlib.ticker import ScalarFormatter
 import support
 import os
 from pylab import *
+import matplotlib.axes
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
 
 def errorpropagation(mean, data):
 	ndim   = len(data)
@@ -45,30 +51,28 @@ mean_nm      = np.mean(col_nm)
 mean_dm      = np.mean(col_dm)
 mean_EN      = -log(mean_nm/mean_dm)
 
-error_nm     = maxError_byBining(mean_nm, col_nm, workingNdim-6)
-error_dm     = maxError_byBining(mean_dm, col_dm, workingNdim-6)
+error_nm     = maxError_byBining(mean_nm, col_nm, workingNdim-7)
+error_dm     = maxError_byBining(mean_dm, col_dm, workingNdim-7)
 error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
 
 ####
-fig        = plt.figure(figsize=(8, 4), dpi=200)
+fig        = plt.figure(figsize=(8, 6), dpi=200)
 plt.grid(True)
 
-font       = 20
+font       = 28
 fontlegend = font/2.0
-FilePlot   = "FigAppendix1.pdf"
+FilePlot   = "FigAppendix1.png"
 outfile    = FilePlot
 call(["rm", FilePlot])
 #
 var = [i for i in range(len(error_EN))]
 plt.plot(var, error_EN, color = 'blue', ls = '-', linewidth=2, marker = "o", markersize = 10)
-plt.ylabel(r'$\mathrm{\Delta^{(l)}}$', fontsize = font)
-plt.xlabel(r'$\mathrm{Binning \ \ level \ \ l }$', fontsize = font)
-#plt.xlim(0,80000)
-#ymin, ymax = plt.ylim()
-#xmin, xmax = plt.xlim()
-#PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
-plt.subplots_adjust(top=0.95, bottom=0.20, left=0.13, right=0.95, hspace=0.0, wspace=0.4)
+plt.ylabel(r'$\Delta^{(l)}$', fontsize = font)
+plt.xlabel(r'$\mathrm{Binning \ \ level \ \ }$'+r'$l$', fontsize = font)
+plt.xticks(fontsize=font, rotation=0)
+plt.yticks(fontsize=font, rotation=0)
+plt.subplots_adjust(top=0.95, bottom=0.18, left=0.23, right=0.95, hspace=0.0, wspace=0.4)
 plt.legend(bbox_to_anchor=(0.73, 0.85), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
-plt.savefig(outfile, dpi = 200, format = 'pdf')
+plt.savefig(outfile, dpi = 200, format = 'png')
 #call(["open", outfile])
 call(["okular", outfile])

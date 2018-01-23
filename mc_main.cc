@@ -164,6 +164,10 @@ int iChoose;
 
 int main(int argc, char *argv[])
 {
+#ifdef PAIRDENSITY
+	readPairDensity();
+	exit(11);
+#endif
    	randomseed(); //set seed according to clock
 //Tapas added
 #ifdef SWAPTOUNSWAP
@@ -244,7 +248,7 @@ ParamsPotential();
 //--------------------------------------------------------
 //    	generate tables - potentals, configurations etc, status
 
-//    	MCStartBlock = 0; 
+	   	MCStartBlock = 0; 
 //    	SEED for head CPU
       	SEED = 985456376;
       	RandomInit(MPIrank,MPIsize);

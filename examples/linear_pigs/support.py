@@ -29,8 +29,8 @@ def maxError_byBining(mean, data, workingNdim):
 		error[i]     = errorpropagation(mean,data)
 	return np.max(error)
 
-def makeexecutionfile(src_dir,TypeCal,ENT_TYPE):
-	execution_file_dir  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/"
+def makeexecutionfile(src_dir,TypeCal,ENT_TYPE, source_dir_exe):
+	execution_file_dir  = source_dir_exe
 	os.chdir(execution_file_dir)
 	call(["make", "clean"])
 	if (TypeCal == "PIGS"):
@@ -47,20 +47,20 @@ def makeexecutionfile(src_dir,TypeCal,ENT_TYPE):
 	call(["make"])
 	os.chdir(src_dir)
 
-def compile_rotmat():
-	path_enter_linden = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/"
+def compile_rotmat(source_dir_exe, input_dir):
+	path_enter_linden = source_dir_exe+"linear_prop/"
 	os.chdir(path_enter_linden)
 	call(["make", "clean"])
 	call(["make"])
-	path_exit_linden  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+	path_exit_linden  = source_dir_exe+input_dir
 	os.chdir(path_exit_linden)
 
-def compile_cagepot():
-	path_enter_cagepot = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/tabulated_potential/"
+def compile_cagepot(source_dir_exe, input_dir):
+	path_enter_cagepot = source_dir_exe+"tabulated_potential/"
 	os.chdir(path_enter_cagepot)
 	call(["make", "clean"])
 	call(["make"])
-	path_exit_cagepot  = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/linear_pigs/"
+	path_exit_cagepot  = source_dir_exe+input_dir
 	os.chdir(path_exit_cagepot)
 
 def jackknife(mean,data):
@@ -492,13 +492,16 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA):
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
 	replace("temperature_input", str(temperature), "qmc_run.input", "qmc2.input")
 	replace("numbbeads_input", str(numbbeads), "qmc2.input", "qmc3.input")
-	replace("numbblocks_input", str(numbblocks), "qmc3.input", "qmc4.input")
+	if Restart1:
+		replace("numbblocks_input", str(numbblocks_Restart1), "qmc3.input", "qmc4.input")
+	else:
+		replace("numbblocks_input", str(numbblocks), "qmc3.input", "qmc4.input")
 	replace("numbmolecules_input", str(numbmolecules), "qmc4.input", "qmc5.input")
 	replace("distance_input", str(distance), "qmc5.input", "qmc6.input")
 	replace("molecule_input", str(molecule_rot), "qmc6.input", "qmc7.input")
@@ -510,7 +513,11 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 	mcskip = numbbeads*numbpass
 	#mcskip = numbpass
 	replace("mskip_input", str(mcskip), "qmc12.input", "qmc13.input")
-	replace("numbparticle_input", str(particleA), "qmc13.input", "qmc.input")
+	replace("numbparticle_input", str(particleA), "qmc13.input", "qmc14.input")
+	if Restart1:
+		replace("job_input", "RESTART", "qmc14.input", "qmc.input")
+	else:
+		replace("job_input", "START", "qmc14.input", "qmc.input")
 	call(["rm", "qmc2.input"])
 	call(["rm", "qmc3.input"])
 	call(["rm", "qmc4.input"])
@@ -523,9 +530,10 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 	call(["rm", "qmc11.input"])
 	call(["rm", "qmc12.input"])
 	call(["rm", "qmc13.input"])
+	call(["rm", "qmc14.input"])
 
 
-def rotmat(TypeCal,molecule,temperature,numbbeads):
+def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
 	'''
 	This function generates rotational density matrix - linden.dat
 	'''
@@ -535,16 +543,36 @@ def rotmat(TypeCal,molecule,temperature,numbbeads):
 		numbbeads1		= numbbeads
 	else:
 		numbbeads1		= numbbeads - 1
-	command_linden_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
+	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
 
-def cagepot():
+def GetTwoBodyDensity(Rpt, DipoleMoment, numbbeads, lmax, ltotalmax, tau, molecule):
+	'''
+	This function generates pair density of two body Hamiltonian
+	command_line = "python script_PairDensityGenerator.py -d 1.0 -R 10.05 -P 20 -l-max 2 tau HF 0.2"
+	system(command_line)
+	'''
+	srcCodePath         = "/home/tapas/DipoleChain.jl-master/examples/"
+	Units               = GetUnitConverter()
+	BConstant           = GetBconst(molecule)  # in wavenumber
+	BConstantK          = BConstant*Units.CMRECIP2KL
+	################################################################################
+	RFactorList         = GetrAndgFactor(molecule, Rpt, DipoleMoment)
+	RFactor             = RFactorList[0]
+	tau    		        = tau*BConstantK
+	if ltotalmax == 0:
+		commandRun    		= "julia "+srcCodePath+"pair_density.jl -R "+str(RFactor)+" --l-max "+str(lmax)+" --tau "+str(tau)
+	else:
+		commandRun    		= "julia "+srcCodePath+"pair_density.jl -R "+str(RFactor)+" --l-max "+str(lmax)+" --l-total-max "+str(ltotalmax)+" --tau "+str(tau)
+	system(commandRun)
+
+def cagepot(source_dir_exe):
 	'''
 	This function generates tabulated potential - cagepot.dat
 	'''
-	command_cagepot_run = "/home/tapas/Moribs-pigs/MoRiBS-PIMC/tabulated_potential/hfc60.x 100 360"
+	command_cagepot_run = source_dir_exe+"tabulated_potential/hfc60.x 100 360"
 	system(command_cagepot_run)
 	file_cagepot    = "hfc60.pot"
 	call(["mv", "cagepot.out", file_cagepot])
@@ -589,38 +617,63 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, status_rhomat, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep):
+def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, status_rhomat, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
 	step1_trans   = step_trans[iStep]
+	final_dir_in_work = dir_output + folder_run
 
-	os.chdir(dir_output)
-	if (os.path.isdir(folder_run) == True):
-		print("")
-		print("")
-		print("Error message")
-		print("")
-		print("")
-		printingMessage = "Remove "+str(dir_output)+str(folder_run)
-		print(printingMessage)
+	if not Restart1:
+		os.chdir(dir_output)
+		if (os.path.isdir(folder_run) == True):
+			print("")
+			print("")
+			print("Error message")
+			print("")
+			print("")
+			printingMessage = "Remove "+str(dir_output)+str(folder_run)
+			print(printingMessage)
+			os.chdir(src_dir)
+			return
+
 		os.chdir(src_dir)
-		return
+		if status_rhomat == "Yes":
+			rotmat(TypeCal,molecule_rot,temperature,numbbeads,source_dir_exe)
 
-	os.chdir(src_dir)
-	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA)
-	if status_rhomat == "Yes":
-		rotmat(TypeCal,molecule_rot,temperature,numbbeads)
+			#call(["rm", "-rf", folder_run])
+		temperature1    = "%5.3f" % temperature
+		file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+		call(["mv", file_rotdens, dir_run_input_pimc])
 
-		#call(["rm", "-rf", folder_run])
-	folder_run_path = dir_run_job + folder_run 
-	print(folder_run_path)
+	else:
+		os.chdir(dir_output)
+		if (os.path.isdir(folder_run) == False):
+			print("")
+			print("")
+			print("Error message")
+			print("")
+			print("")
+			printingMessage = str(dir_output)+str(folder_run)+" directory is absent."
+			print(printingMessage)
+			os.chdir(src_dir)
+			return
+
+		path = final_dir_in_work+"/results"
+		print(path)
+		files = os.listdir(path)
+
+		for file in files:
+			os.rename(os.path.join(path, file), os.path.join(path,file+'.old'))
+
+		os.chdir(src_dir)
+
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1)
 
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
-	temperature1    = "%5.3f" % temperature
-	file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
-	call(["mv", file_rotdens, dir_run_input_pimc])
+	folder_run_path = dir_run_job + folder_run 
+	print(folder_run_path)
 
 	#job submission
 	if (TypeCal == 'PIGS'):
@@ -634,15 +687,14 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 		argument2       = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
 
 	fwrite        = open(fname, 'w')
-	final_dir_in_work = dir_output + folder_run
 
 	if RUNDIR == "scratch":
 		if RUNIN == "CPU":
-			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir))
+			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir, Restart1, dir_run_job))
 		else:
-			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc))
+			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job))
 	else: 
-		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc))
+		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job))
 
 	fwrite.close()
 	call(["mv", fname, dir_run_input_pimc])
@@ -663,7 +715,7 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 
 	os.chdir(src_dir)
 
-def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc, src_dir):
+def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc, src_dir, Restart1, dir_run_job):
 	'''
 	This function creats jobstring for #PBS script
 	'''
@@ -691,7 +743,7 @@ mv %s /work/tapas/linear_rotors
 """ % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc):
+def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job):
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
@@ -711,9 +763,15 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	qmcinp         = "qmcbeads"+str(value)+".input"
 	cagepot_file   = dir_run_input_pimc+"/hfc60.pot"
 	if (RUNDIR == "scratch"):
-		CommandForMove = "mv "+str(folder_run_path)+" /work/tapas/linear_rotors"
+		CommandForMove = "mv "+str(folder_run_path)+" /work/"+user_name+"/"+out_dir
 	if (RUNDIR == "work"):
 		CommandForMove = " "
+	if not PPA1:
+		CommandForPPA = "#"
+	else:
+		CommandForPPA = ""
+	file_PPA       = dir_run_input_pimc+"/PairDensity.txt"
+
 
 	job_string     = """#!/bin/bash
 #SBATCH --job-name=%s
@@ -730,11 +788,32 @@ mv %s %s
 cd %s
 cp %s qmc.input
 cp %s %s
+%s cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_file, folder_run_path, input_file, folder_run_path, file_rotdens, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForMove)
-	return job_string
+""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_file, folder_run_path, input_file, folder_run_path, file_rotdens, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+
+	job_string_restart = """#!/bin/bash
+#SBATCH --job-name=%s
+#SBATCH --output=%s.out
+#SBATCH --time=%s
+#SBATCH --mem-per-cpu=1200mb
+#SBATCH --cpus-per-task=%s
+export OMP_NUM_THREADS=%s
+mv %s %s
+mv %s %s
+cd %s
+cp %s qmc.input
+####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
+time ./pimc 
+%s
+""" % (job_name, logpath, walltime, omp_thread, omp_thread,final_dir_in_work, dir_run_job, input_file, folder_run_path, folder_run_path, qmcinp, CommandForMove)
+
+	if Restart1:
+		return job_string_restart
+	else:
+		return job_string
 
 def GetRotEnergy(molecule,jrot):
 	Energy = GetBconst(molecule)*jrot*(jrot+1.0)

@@ -18,7 +18,7 @@ plt.title('Gaussian colored noise')
 # this is an inset axes over the main axes
 a = plt.axes([.65, .6, .2, .2], facecolor='y')
 n, bins, patches = plt.hist(s, 400, normed=1)
-plt.title('Probability')
+plt.title(r'$\mathregular{\tau}$')
 plt.xticks([])
 plt.yticks([])
 

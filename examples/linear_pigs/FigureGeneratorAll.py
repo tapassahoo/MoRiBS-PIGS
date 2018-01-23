@@ -25,14 +25,14 @@ TransMove           = False
 RotMove             = True
 #
 #TypeCal             = 'PIMC'
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 #
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
-TypePlot            = "CorrFunc"
+#TypePlot            = "CorrFunc"
 #TypePlot            = "S2"
-#TypePlot            = "GFACTOR"
+TypePlot            = "GFACTOR"
 #TypePlot            = "COMBINE"
 #
 #molecule            = "HFC60"                                                  
@@ -40,15 +40,15 @@ molecule            = "HF"
 #molecule            = "H2"                                                    
 molecule_rot        = "HF"
 #
-numbblocks	        = 20000
-numbmolecules       = 7
-numbpass            = 50
+numbblocks	        = 50000
+numbmolecules       = 2
+numbpass            = 200
 #
 Rpt                 = 10.05
 dipolemoment        = 1.826      #J. Chem. Phys. 73(5), 2319 (1980).
 dipolemoment        = 1.0*dipolemoment
 
-preskip             = 0
+preskip             = 1000
 postskip            = 0
 
 ENT_TYPE 			= "SWAPTOUNSWAP"
