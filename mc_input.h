@@ -11,6 +11,14 @@ const char FINPUT[]="qmc.input";   // input params file
 //enum IOStatus {IORead=0,IOWrite=1}; // not portable ?
 const int IORead  = 0;
 const int IOWrite = 1; 
+extern long int totalStep;
+extern double totalCount;
+extern double sumsCount;
+extern double _total;
+extern double _kin_total;
+extern double _pot_total;
+extern double _rot_total;
+extern double _rot_total1;
 
 void IOReadParams (const char [],int &);  
 void StatusIO(int, const char []);       // save/restore status of simulation

@@ -36,9 +36,9 @@ double avergCount;   // # of calls of get_estim inside a block
 double avergCountENT;   // # of calls of get_estim inside a block
 double totalCountENT;
 #endif
-double totalCount;   // sum avergCount   
-double sumsCount;
-double totalStep;
+//double totalCount;   // sum avergCount   
+//double sumsCount;
+//long int totalStep;
 
 void PIMCPass(int,int);
 
@@ -67,9 +67,9 @@ double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
 
 double _dpot_total;  // potential energy differences, global average  added by Hui Li
-double _pot_total;  // kinetic   energy, global average
-double _kin_total;  // potential energy, global average 
-double _total;  // potential energy, global average 
+//double _pot_total;  // kinetic   energy, global average
+//double _kin_total;  // potential energy, global average 
+//double _total;  // potential energy, global average 
 double _bcostheta;
 double _ucompx;
 double _ucompy;
@@ -98,8 +98,8 @@ double _trOfDensitySq_total;
 
 double _brot;       // rotational kin energy, block average
 double _brot1;       // rotational kin energy, block average
-double _rot_total;  // rotational kin energy, global average
-double _rot_total1;  // rotational kin energy, global average
+//double _rot_total;  // rotational kin energy, global average
+//double _rot_total1;  // rotational kin energy, global average
 double _brotsq;     // rotational energy square, block average
 double _rotsq_total; // rotational energy square, global average
 double _Cv_total;    // heat capacity, global average
@@ -357,6 +357,7 @@ ParamsPotential();
 
    	MCWormAverageReset();      // debug worm
 
+   	InitTotalAverage();      // DUMP 
 // --- RESTART/START NEW RUN ----------------------------
 
    	if (restart) // new run, generate new status, rnd() streams and config files     
@@ -445,7 +446,7 @@ ParamsPotential();
 
 
     InitMCEstims();
-   	InitTotalAverage();      // DUMP 
+   	//InitTotalAverage();      // DUMP 
    
    	ResetMCCounts();
    	ResetQWCounts();

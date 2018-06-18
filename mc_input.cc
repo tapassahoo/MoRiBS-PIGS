@@ -14,6 +14,14 @@
 
 //----- INPUT PARAMETERS----------------------------
 
+long int totalStep;
+double sumsCount;
+double totalCount;
+double _total;
+double _pot_total;
+double _rot_total;
+double _rot_total1;
+double _kin_total;
 // FILE NAMES
 
 const char IO_MASTERDIR[]      = "MASTERDIR";               
@@ -541,12 +549,28 @@ void StatusIO(int tstatus, const char file_name[])
    {
       case IOWrite: 
          fid<<STATUS_STARTBLOCK<<" "<<MCStartBlock<<endl;
+         fid<<totalStep<<endl;
+         fid<<sumsCount<<endl;
+         fid<<totalCount<<endl;
+         fid<<_total<<endl;
+         fid<<_kin_total<<endl;
+         fid<<_pot_total<<endl;
+         fid<<_rot_total<<endl;
+         fid<<_rot_total1<<endl;
          break;
       case IORead: 
          while (fid>>status)
          {  
             if (status==STATUS_STARTBLOCK)
             fid>>MCStartBlock;
+            fid>>totalStep;
+            fid>>sumsCount;
+            fid>>totalCount;
+            fid>>_total;
+            fid>>_kin_total;
+            fid>>_pot_total;
+            fid>>_rot_total;
+            fid>>_rot_total1;
  
             getline(fid,status,'\n');  // skip comments 
          }

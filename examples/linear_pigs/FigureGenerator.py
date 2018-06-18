@@ -3,11 +3,11 @@ import numpy as np
 from numpy import *
 import numpy as np
 import matplotlib
-matplotlib.use('pdf')
+matplotlib.use('ps')
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from subprocess import call
-from matplotlib.backends.backend_pdf import PdfPages
+#from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import ScalarFormatter
 import support
 import os
@@ -28,17 +28,17 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 	if (((TypePlot == "RFACTOR") or (TypePlot == "GFACTOR")) and variableName == "tau"):
 		font = 28
 		fontlegend = font/2
-		fig        = plt.figure(figsize=(8, 6), dpi=200)
+		fig        = plt.figure(figsize=(8, 6), dpi = 1000)
 		plt.grid(True)
 
 		var = beadsRef
 		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
 		if (TypePlot == "RFACTOR"):
-			FilePlotEntropy  = FilePlotName.SaveEntropyRFAC+".png"
-			FilePlotEnergy   = FilePlotName.SaveEnergyRFAC+".png"
+			FilePlotEntropy  = FilePlotName.SaveEntropyRFAC+".ps"
+			FilePlotEnergy   = FilePlotName.SaveEnergyRFAC+".ps"
 		if (TypePlot == "GFACTOR"):
-			FilePlotEntropy  = FilePlotName.SaveEntropyGFAC+".png"
-			FilePlotEnergy   = FilePlotName.SaveEnergyGFAC+".png"
+			FilePlotEntropy  = FilePlotName.SaveEntropyGFAC+".ps"
+			FilePlotEnergy   = FilePlotName.SaveEnergyGFAC+".ps"
 		outfileEntropy       = FilePlotEntropy
 		outfileEnergy        = FilePlotEnergy
 		call(["rm", FilePlotEntropy])
@@ -65,7 +65,7 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				DList  = [1.0+0.5*i for i in range(7)]
 				numbblocks = 20000
 			if (numbmolecules == 6):
-				DList  = [1.0+0.25*i for i in range(11)]
+				DList  = [1.0+0.25*i for i in range(10)]
 				numbblocks = 20000
 		
 			RFactorPlot      = np.zeros(len(DList))
@@ -100,6 +100,7 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				FileToBePlotEntropy = FilePlotName.SaveEntropy+".txt"
 				FileToBePlotEnergy  = FilePlotName.SaveEnergy+".txt"
 				FileToBePlotDIAG    = FilePlotName.SaveEntropyDIAG+".txt"
+				print(FileToBePlotEntropy)
 				#if (numbmolecules <= 2):
 					#FileToBePlotMM    = FilePlotName.SaveEntropyMM+".txt"
 					#beads2, energy2, entropy2                      	       = genfromtxt(FileToBePlotMM,unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
@@ -141,6 +142,9 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				if (numbmolecules == 2):
 					beadsRef = 101
 					beadsRef1 = beadsRef
+				if ((numbmolecules == 2) and (dipolemoment == 6.0)):
+					beadsRef = 41
+					beadsRef1 = 41
 	
 				if ((numbmolecules == 8) and (dipolemoment > 2.5)):
 					entropy1Plot[iii]     = entropy1
@@ -192,7 +196,7 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 			plt.subplots_adjust(top=0.95, bottom=0.20, left=0.1, right=0.95, hspace=0.0, wspace=0.4)
 			plt.legend(bbox_to_anchor=(0.73, 0.95), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
-			plt.savefig(outfileEnergy, dpi = 200, format = 'png')
+			plt.savefig(outfileEnergy, dpi = 1000, format = 'ps')
 			call(["open", outfileEnergy])
 			'''
 #
@@ -227,10 +231,10 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 
 		plt.subplots_adjust(top=0.95, bottom=0.15, left=0.15, right=0.98, hspace=0.0, wspace=0.4)
 		plt.legend(bbox_to_anchor=(0.68, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
-		plt.savefig(outfileEntropy, dpi = 200, format = 'png')
+		plt.savefig(outfileEntropy, dpi = 1000, format = 'ps')
 
-		#call(["open", outfileEntropy])
-		call(["okular", outfileEntropy])
+		call(["open", outfileEntropy])
+		#call(["okular", outfileEntropy])
 		#plt.show()
 
 	if (TypePlot == "S2"):
@@ -250,7 +254,7 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				parameter     = 0.2
 				postskip      = 0
 ##
-			fig        = plt.figure(figsize=(8, 6), dpi=200)
+			fig        = plt.figure(figsize=(8, 6), dpi = 1000)
 			plt.grid(True)
 ##	
 			FilePlotName      = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
@@ -261,7 +265,7 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 			print(FileToBePlotMM)
 			print(FileToBePlotDIAG)
 ##
-			FilePlot     = FilePlotName.SaveEntropy+".png"
+			FilePlot     = FilePlotName.SaveEntropy+".ps"
 			outfile      = FilePlot
 			call(["rm", FilePlot])
 			print(FilePlot)
@@ -304,10 +308,10 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 			plt.legend(bbox_to_anchor=(0.70, 0.50), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
 			plt.subplots_adjust(top=0.95, bottom=0.18, left=0.18, right=0.95, hspace=0.0, wspace=0.2)
 	
-			plt.savefig(outfile, dpi = 200, format = 'png')
+			plt.savefig(outfile, dpi = 1000, format = 'ps')
 	
-			#call(["open", outfile])
-			call(["okular", outfile])
+			call(["open", outfile])
+			#call(["okular", outfile])
 			#plt.show()
 
 def	FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
@@ -317,29 +321,28 @@ def	FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 	postskip   = 0
 
 	if (variableName == "tau"):
-		fig        = plt.figure(figsize=(8, 6), dpi=200)
+		fig        = plt.figure(figsize=(8, 6), dpi = 1000)
 		plt.grid(True)
 
 		var = beadsRef
 		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
-		FilePlotEntropy  = FilePlotName.SaveEntropyCOMBO+".png"
+		FilePlotEntropy  = FilePlotName.SaveEntropyCOMBO+".ps"
 		outfileEntropy   = FilePlotEntropy
-		print(outfileEntropy)
 		call(["rm", FilePlotEntropy])
+		print(outfileEntropy)
 #
 		DList  = [1.0+0.5*i for i in range(7)]
 		DList += [4.5, 5.0, 5.5, 6.0]
-		#DList = [5.0, 5.5, 6.0]
 		labelIndex = 0
 		TypeList = ["SWAPTOUNSWAP", "BROKENPATH"]
 		for ENT_TYPE in TypeList:
+			beadsRef1 = beadsRef
 			if (ENT_TYPE == "SWAPTOUNSWAP"):
 				numbblocks = 50000
 				postskip1   = 30000
 			if (ENT_TYPE == "BROKENPATH"):
 				numbblocks = 20000
 				postskip1   = 0
-		
 		
 			RFactorPlot      = np.zeros(len(DList))
 			entropy1Plot     = np.zeros(len(DList))
@@ -352,12 +355,13 @@ def	FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 				if (dipolemoment > 4.0):
 					numbblocks = 20000
 					postskip1   = 0
-				FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+					if ((ENT_TYPE == "SWAPTOUNSWAP") and (dipolemoment == 6.0)):
+						beadsRef1 = 41
+						
+				FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef1)
 				FileToBePlotEntropy = FilePlotName.SaveEntropy+".txt"
 			
 				if (ENT_TYPE == "SWAPTOUNSWAP"):
-					#if (dipolemoment == 6.0):
-					#	beadsRef = 61
 					FileToBePlotDIAG    = FilePlotName.SaveEntropyDIAG+".txt"
 					beads1, var1, purity1, entropy1, err_purity1, err_entropy1 = genfromtxt(FileToBePlotEntropy,unpack=True, usecols=[0, 1, 4, 5, 8, 9], skip_header=preskip, skip_footer=postskip)
 					entropyDIAG                                                = loadtxt(FileToBePlotDIAG,unpack=True, usecols=[2])
@@ -369,7 +373,7 @@ def	FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 				for i in beads1:
 					indexi =int(i+0.5)
 					beads = indexi
-					if beads == beadsRef:
+					if beads == beadsRef1:
 						entropy1Plot[iii]     = entropy1[ii]
 						entropy2Plot[iii]     = entropyDIAG
 						err_entropy1Plot[iii] = err_entropy1[ii]
@@ -414,28 +418,28 @@ def	FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 		'''
 		plt.subplots_adjust(top=0.95, bottom=0.16, left=0.15, right=0.98, hspace=0.0, wspace=0.4)
 		plt.legend(bbox_to_anchor=(0.40, 0.45), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
-		plt.savefig(outfileEntropy, dpi = 200, format = 'png')
+		plt.savefig(outfileEntropy, dpi = 1000, format = 'ps')
 
-		#call(["open", outfileEntropy])
-		call(["okular", outfileEntropy])
+		call(["open", outfileEntropy])
+		#call(["okular", outfileEntropy])
 
 def plotEntropyENT1(numbmolecules,var, val, err_val, variableName, var1, val1, val2, DMRGdatagFac, DMRGdataPlot, font, TypePlot):
 	#plt.xlim(0,0.201)
 	if (numbmolecules == 2):
-		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "o", markersize = 8, label = 'PIGS: 2 HF')
-		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "o", markersize = 10, label = 'ED: 2 HF')
+		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "o", markersize = 8, label = 'PIGS: N=2')
+		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "o", markersize = 10, label = 'ED: N=2')
 		#plt.plot(var, val2, color = 'black', ls = '-', linewidth=3, marker = "o", markersize = 12, label = 'ED: 2 HF')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "o", markersize = 10, label = 'DMRG: 2 HF')
 		#plt.plot(var, val1, linestyle = 'None', color = 'mediumpurple', marker = "o", markersize = 10, label = 'MM: 2 HF')
 
 	if (numbmolecules == 4):
-		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "s", markersize = 8, label = 'PIGS: 4 HF')
-		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "s", markersize = 10, label = 'ED: 4 HF')
+		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "s", markersize = 8, label = 'PIGS: N=4')
+		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "s", markersize = 10, label = 'ED: N=4')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "s", markersize = 8, label = 'DMRG: 4 HF')
 
 	if (numbmolecules == 6):
-		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "v", markersize = 8, label = 'PIGS: 6 HF')
-		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'ED: 6 HF')
+		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "v", markersize = 8, label = 'PIGS: N=6')
+		plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'ED: N=6')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "8", markersize = 7, label = 'DMRG: 6 HF')
 
 	ymin, ymax = plt.ylim()
@@ -463,13 +467,14 @@ def plotEntropyENT(var, val, err_val, variableName, var1, val1, val2, font,fontl
 
 	if (variableName == "tau"):
 		label_xtics = [0.00]
-		plt.xlim(0,0.0201)
+		plt.xlim(0,0.0205)
 		if (val2 != 0.0):
 			plt.axhline(y=val2, color='black', lw = 2.0, linestyle='-', label = 'ED')
 		x = [0.00, 0.005, 0.01, 0.015, 0.02]
 		labels = [r'$0.0$', r'$0.005$', r'$0.01$', r'$0.015$', r'$0.02$']
 		plt.xticks(x, labels, fontsize=fontlegend, rotation=0)
 	else:
+		plt.xlim(0.018,0.12)
 		plt.xticks(fontsize=fontlegend, rotation=0)
 
 	ymin, ymax = plt.ylim()
@@ -523,13 +528,13 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 			FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
 			if TypeCorr    == "TotalCorr":
 				FileToBePlot   	  = FilePlotName.SaveTotalCorr+".txt"
-				FilePlot          = FilePlotName.SaveTotalCorr+"-ithRotor"+str(RefPointList[0])+".png"
+				FilePlot          = FilePlotName.SaveTotalCorr+"-ithRotor"+str(RefPointList[0])+".ps"
 			elif TypeCorr  == "ZCorr":
 				FileToBePlot   	  = FilePlotName.SaveZCorr+".txt"
-				FilePlot          = FilePlotName.SaveZCorr+"-ithRotor"+str(RefPointList[0])+".png"
+				FilePlot          = FilePlotName.SaveZCorr+"-ithRotor"+str(RefPointList[0])+".ps"
 			elif TypeCorr  == "XYCorr":
 				FileToBePlot   	  = FilePlotName.SaveXYCorr+".txt"
-				FilePlot          = FilePlotName.SaveXYCorr+"-ithRotor"+str(RefPointList[0])+".png"
+				FilePlot          = FilePlotName.SaveXYCorr+"-ithRotor"+str(RefPointList[0])+".ps"
 			print(FilePlot)
 			call(["rm", FilePlot])
 			datacorr      = genfromtxt(FileToBePlot)
@@ -559,7 +564,7 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 						FuncCorr[j,i] = FuncCorr[i,j]
 						ErrorFuncCorr[j,i] = ErrorFuncCorr[i,j]
 					ii = ii+1
-			fig = plt.figure(figsize=(8, 6), dpi=200)
+			fig = plt.figure(figsize=(8, 6), dpi = 1000)
 			iRef = 0
 			for RefPoint in RefPointList:
 				val1 = np.arange(1,numbmolecules+1)
@@ -638,16 +643,16 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 			plt.subplots_adjust(top=0.96, bottom=0.23, left=0.30, right=0.95, hspace=0.6, wspace=1.0)
 			#plt.subplots_adjust(top=0.96, bottom=0.18, left=0.22, right=0.95, hspace=0.6, wspace=1.0)
 			#plt.legend(bbox_to_anchor=(0.58, 0.99), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
-			plt.savefig(FilePlot, dpi = 200, format = 'png')
+			plt.savefig(FilePlot, dpi = 1000, format = 'ps')
 
-			call(["okular", FilePlot])
-			#call(["open", FilePlot])
+			#call(["okular", FilePlot])
+			call(["open", FilePlot])
 			#plt.show()
 
 def	FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
 	FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
 
-	FilePlotEnergy      = FilePlotName.SaveEnergy+".png"
+	FilePlotEnergy      = FilePlotName.SaveEnergy+".ps"
 	outfileEnergy       = FilePlotEnergy
 	print(outfileEnergy)
 	call(["rm", FilePlotEnergy])
@@ -675,7 +680,7 @@ def	FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 	if (variableName == "beta"):
 		var2 = parameter*(beads2-1.0)
 	
-	fig        = plt.figure(figsize=(8, 4), dpi=200)
+	fig        = plt.figure(figsize=(8, 4), dpi = 1000)
 	plt.grid(True)
 	font       = 20
 	fontlegend = font/2.0
@@ -702,7 +707,7 @@ def	FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 	plt.legend(bbox_to_anchor=(0.33, 0.55), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
 
 	plt.subplots_adjust(top=0.95, bottom=0.20, left=0.15, right=0.95, hspace=0.0, wspace=0.4)
-	plt.savefig(outfileEnergy, dpi = 200, format = 'png')
+	plt.savefig(outfileEnergy, dpi = 1000, format = 'ps')
 
 	call(["open", outfileEnergy])
 	#call(["okular", outfileEnergy])
@@ -816,10 +821,10 @@ def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, varia
 	ntot   = np.array(dd)
 	nerrtot= np.array(ee)
 			
-	FilePlot = FilePlotName.SaveChemPot+".png"
+	FilePlot = FilePlotName.SaveChemPot+".ps"
 	outfile  = FilePlot
 
-	fig = plt.figure(figsize=(6, 4), dpi=200)
+	fig = plt.figure(figsize=(6, 4), dpi = 1000)
 
 	TypePlot1 = 3
 	font=20
@@ -885,7 +890,7 @@ def FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, varia
 	plt.errorbar(NumbRotors1, TotalEnergy1, yerr=Error1, color = 'b', ls = '-', label = 'PIGS', linewidth=2)
 	plt.subplots_adjust(top=0.95, bottom=0.15, left=0.20, right=0.98, hspace=0.6, wspace=1.0)
 	plt.legend(bbox_to_anchor=(0.40, 0.98), loc=2, borderaxespad=0.)
-	plt.savefig(outfile, dpi = 200, format = 'png')
+	plt.savefig(outfile, dpi = 1000, format = 'ps')
 	call(["open", outfile])
 	#call(["okular", outfile])
 
@@ -897,12 +902,12 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 	print("TAPASS")
 
 	if (((TypePlot == "RFACTOR") or (TypePlot == "GFACTOR")) and variableName == "tau"):
-		fig        = plt.figure(figsize=(8, 4), dpi=200)
+		fig        = plt.figure(figsize=(8, 4), dpi = 1000)
 		plt.grid(True)
 
 		var = beadsRef
 		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
-		FilePlotCorr = FilePlotName.SaveCorr+".png"
+		FilePlotCorr = FilePlotName.SaveCorr+".ps"
 		outfile      = FilePlotCorr
 		call(["rm", FilePlotCorr])
 #
@@ -979,8 +984,8 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 
 		plt.subplots_adjust(top=0.95, bottom=0.15, left=0.09, right=0.98, hspace=0.0, wspace=0.4)
 		plt.legend(bbox_to_anchor=(0.78, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
-		plt.savefig(outfile, dpi = 200, format = 'png')
+		plt.savefig(outfile, dpi = 1000, format = 'ps')
 
-		#call(["open", outfile])
-		call(["okular", outfile])
+		call(["open", outfile])
+		#call(["okular", outfile])
 		#plt.show()

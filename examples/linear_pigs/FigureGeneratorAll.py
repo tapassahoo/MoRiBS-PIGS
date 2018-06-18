@@ -72,7 +72,7 @@ if (variableName == "beta"):
 	parameter       = tau
 
 #==================================Plotting====================================#
-if (TypeCal == "ENT"):
+if (TypeCal == "ENT" and TypePlot == "GFACTOR" or TypePlot == "S2"):
 	beadsRef = 61
 	FigureGenerator.FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA,TypePlot, beadsRef)
 

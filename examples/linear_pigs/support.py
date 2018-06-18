@@ -19,7 +19,7 @@ def maxError_byBining(mean, data, workingNdim):
 	i        = 0
 	error[0] = errorpropagation(mean, data)
 	for i in range(1,workingNdim):
-		ndim         = len(data)/2
+		ndim         = int(len(data)/2)
 		data1        = np.zeros(ndim)
 
 		for j in range(ndim):
@@ -297,7 +297,7 @@ def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir
 	'''
 	This function gives us the output 
 	'''
-	ndim              = numbmolecules*(numbmolecules+1)/2
+	ndim              = int(numbmolecules*(numbmolecules+1)/2)
 	output            = '{0:10d}{1:15.5f}'.format(numbbeads, variable)
 
 	if (CORRELATION == "TotalCorr"):
@@ -390,6 +390,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_
 		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
 		trunc        = len(col_nm)-2**workingNdim
+		print(workingNdim)
 	
 		col_nm       = col_nm[trunc:]
 		col_dm       = col_dm[trunc:]
@@ -659,12 +660,14 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 			os.chdir(src_dir)
 			return
 
+		'''
 		path = final_dir_in_work+"/results"
 		print(path)
 		files = os.listdir(path)
 
 		for file in files:
-			os.rename(os.path.join(path, file), os.path.join(path,file+'.old'))
+			os.rename(os.path.join(path, file), os.path.join(path,file+'_sub1'))
+		'''
 
 		os.chdir(src_dir)
 
