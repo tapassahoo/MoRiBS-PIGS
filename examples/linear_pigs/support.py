@@ -165,7 +165,7 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		print(len(col_tot))
 	
 		workingNdim   = int(math.log(len(col_tot))/math.log(2))
-		trunc         = len(col_tot)-2**workingNdim
+		trunc         = int(len(col_tot)-2**workingNdim)
 	
 		col_kin       = col_kin[trunc:]
 		col_rot       = col_rot[trunc:]
@@ -191,7 +191,7 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		print(len(col_tot))
 	
 		workingNdim   = int(math.log(len(col_tot))/math.log(2))
-		trunc         = len(col_tot)-2**workingNdim
+		trunc         = int(len(col_tot)-2**workingNdim)
 	
 		col_rot       = col_rot[trunc:]
 		col_rot1      = col_rot1[trunc:]
@@ -215,7 +215,7 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		col_block, col_rot, col_rot1, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/pigs.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
 
 		workingNdim   = int(math.log(len(col_tot))/math.log(2))
-		trunc         = len(col_tot)-2**workingNdim
+		trunc         = int(len(col_tot)-2**workingNdim)
 	
 		col_rot       = col_rot[trunc:]
 		col_rot1      = col_rot1[trunc:]
@@ -252,7 +252,7 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 	col_compz      = dataBin[:,4]
 	'''
 	workingNdim   = int(math.log(len(col_block))/math.log(2))
-	trunc         = len(col_block)-2**workingNdim
+	trunc         = int(len(col_block)-2**workingNdim)
 	
 	col_costheta  = col_costheta[trunc:]
 	col_compx     = col_compx[trunc:]
@@ -321,7 +321,7 @@ def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir
 		comp          = genfromtxt(final_dir_in_work+"/results/pigsDipole.corr",unpack=True, usecols=[col], skip_header=preskip, skip_footer=postskip)
 
 		workingNdim   = int(math.log(len(comp))/math.log(2))
-		trunc         = len(comp)-2**workingNdim
+		trunc         = int(len(comp)-2**workingNdim)
 	
 		comp          = comp[trunc:]
 
@@ -389,7 +389,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_
 	if ENT_TYPE == "SWAPTOUNSWAP":
 		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
-		trunc        = len(col_nm)-2**workingNdim
+		trunc        = int(len(col_nm)-2**workingNdim)
 		print(workingNdim)
 	
 		col_nm       = col_nm[trunc:]
@@ -410,7 +410,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_
 	if ENT_TYPE == 'BROKENPATH':
 		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
-		trunc        = len(col_nm)-2**workingNdim
+		trunc        = int(len(col_nm)-2**workingNdim)
 	
 		col_nm       = col_nm[trunc:]
 		col_dm       = col_dm[trunc:]
@@ -428,7 +428,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_
 	if ENT_TYPE == "SWAP":
 		col_block, col_nm, col_dm, col_TrInv = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
-		trunc        = len(col_nm)-2**workingNdim
+		trunc        = int(len(col_nm)-2**workingNdim)
 	
 		col_nm       = col_nm[trunc:]
 		col_dm       = col_dm[trunc:]
@@ -450,7 +450,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_
 	if ENT_TYPE == "UNSWAP":
 		col_block, col_nm, col_dm, col_Tr = genfromtxt(final_dir_in_work+"/results/pigs.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
-		trunc        = len(col_nm)-2**workingNdim
+		trunc        = int(len(col_nm)-2**workingNdim)
 	
 		col_nm       = col_nm[trunc:]
 		col_dm       = col_dm[trunc:]
