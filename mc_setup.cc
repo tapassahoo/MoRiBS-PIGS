@@ -371,33 +371,33 @@ void MCInitParams(void)
 
 void MCInit(void)  // only undimensional parameters in this function 
 {
-  const char *_proc_=__func__;    // "MCInit()";
+	const char *_proc_=__func__;    // "MCInit()";
 
-  //  INITIALIZE MC TABLES ---------------------------------------
+	//  INITIALIZE MC TABLES ---------------------------------------
 
-  int natom = 0;    // map atom number into atom type
-  for (int type=0;type<NumbTypes;type++)
-    for (int atom=0;atom<MCAtom[type].numb;atom++)
-      {
-	MCType[natom] = type;
-	natom ++;
-      }
+	int natom = 0;    // map atom number into atom type
+	for (int type = 0; type < NumbTypes; type++)
+	for (int atom = 0; atom < MCAtom[type].numb; atom++)
+	{
+		MCType[natom] = type;
+		natom++;
+	}
 
-  for (int atom=0;atom<NumbAtoms;atom++)
-    { 
-      PIndex[atom] = atom;
-      RIndex[atom] = atom;
-    }
-  // ------------------------------------------------------------
+	for (int atom = 0; atom < NumbAtoms;a tom++)
+	{ 
+		PIndex[atom] = atom;
+		RIndex[atom] = atom;
+	}
+	// ------------------------------------------------------------
 
-  // BoxSize  =  pow((double)NumbAtoms/Density,1.0/(double)NDIM); 
-  // define a box size based on number of atoms only (molecules excluded)
+	// BoxSize  =  pow((double)NumbAtoms/Density,1.0/(double)NDIM); 
+	// define a box size based on number of atoms only (molecules excluded)
   
 	BoxSize  =  pow((double)(NUMB_ATOMS+NUMB_MOLCS)/Density,1.0/(double)NDIM);
 
-  	MCBeta   =  1.0/Temperature;
+	MCBeta   =  1.0/Temperature;
 #ifdef PIMCTYPE
-  	MCTau    =  MCBeta/(double)NumbTimes;
+	MCTau    =  MCBeta/(double)NumbTimes;
 #endif
 //
 #ifdef PIGSTYPE
@@ -423,56 +423,56 @@ void MCInit(void)  // only undimensional parameters in this function
 #endif
 	}
 
-  RotRatio  = 1;  // div_t quot - it's important for the area estimator
-  // even without rotations
+	RotRatio  = 1;  // div_t quot - it's important for the area estimator
+	// even without rotations
 
-  	if (ROTATION)
-    {
-      RotRatio = NumbTimes / NumbRotTimes;  // div_t quot
-      int rt   = NumbTimes % NumbRotTimes;  // div_t rem
+	if (ROTATION)
+	{
+		RotRatio = NumbTimes/NumbRotTimes;  // div_t quot
+		int rt   = NumbTimes%NumbRotTimes;  // div_t rem
 #ifndef ROTS_TEST
-      if (rt)
-	nrerror (_proc_,"NumbTimes is not proportional to NumbRotTimes");
+		if (rt)
+		nrerror (_proc_,"NumbTimes is not proportional to NumbRotTimes");
 #endif
-    }
+	}
 
-  for (int type=0;type<NumbTypes;type++)  
-    {
-      MCAtom[type].twave2 = 4.0*MCAtom[type].lambda * MCTau;   // thermal wavelength squared
-      MCAtom[type].mlsegm = (int)pow(2.0,MCAtom[type].levels); // segmen size for multilevel
+	for (int type=0;type<NumbTypes;type++)  
+	{
+		MCAtom[type].twave2 = 4.0*MCAtom[type].lambda * MCTau;   // thermal wavelength squared
+		MCAtom[type].mlsegm = (int)pow(2.0,MCAtom[type].levels); // segmen size for multilevel
       
-      if (MCAtom[type].mlsegm >= NumbTimes)
-	nrerror (_proc_,"Segment size is larger then a number of time slices");
-    } 
-
-  int bcount = 0;  // number of bosons' types
-  int fcount = 0;  // number of fermions' types
-  int icount = 0;  // number of molecules (impurities)
-
-  BOSONS   = false;
-  FERMIONS = false;
-
-  for (int type=0;type<NumbTypes;type++)
-    {
-      if (MCAtom[type].stat == BOSE)
-	{
-	  BOSONS = true;
-	  BSTYPE = type;
-	  bcount ++;  
+		if (MCAtom[type].mlsegm >= NumbTimes)
+		nrerror (_proc_,"Segment size is larger then a number of time slices");
 	} 
 
-      if (MCAtom[type].stat == FERMI)
-	{
-	  FERMIONS = true;
-	  FERMTYPE = type;
-	  fcount ++;  
-	} 
+	int bcount = 0;  // number of bosons' types
+	int fcount = 0;  // number of fermions' types
+	int icount = 0;  // number of molecules (impurities)
 
-      if ((MCAtom[type].molecule == 1)||(MCAtom[type].molecule == 2)||(MCAtom[type].molecule == 3)||(MCAtom[type].molecule == 4))//Modified by Tapas Sahoo
+	BOSONS   = false;
+	FERMIONS = false;
+
+	for (int type=0;type<NumbTypes;type++)
 	{
-	  IMTYPE = type;
-	  icount ++;  
-	} 
+		if (MCAtom[type].stat == BOSE)
+		{
+			BOSONS = true;
+			BSTYPE = type;
+			bcount ++;  
+		} 
+
+		if (MCAtom[type].stat == FERMI)
+		{
+			FERMIONS = true;
+			FERMTYPE = type;
+			fcount ++;  
+		} 
+
+		if ((MCAtom[type].molecule == 1)||(MCAtom[type].molecule == 2)||(MCAtom[type].molecule == 3)||(MCAtom[type].molecule == 4))//Modified by Tapas Sahoo
+		{
+			IMTYPE = type;
+			icount ++;  
+		} 
     }
 
   if (bcount>1)
@@ -493,10 +493,12 @@ void MCInit(void)  // only undimensional parameters in this function
   //   if (!WORM && BOSONS)
   //   nrerror (_proc_,"BE statistics: worm algorithm only");
 
-  /*#ifndef HOSC_TEST 
-    if (BOSONS && (IMTYPE < 0))  // need to define the reference axes for the area
-    nrerror (_proc_,"Define the impurity type for the area estimator");
-    #endif */
+/*
+#ifndef HOSC_TEST 
+	if (BOSONS && (IMTYPE < 0))  // need to define the reference axes for the area
+	nrerror (_proc_,"Define the impurity type for the area estimator");
+#endif 
+*/
 }
 
 void MCConfigInit(void)

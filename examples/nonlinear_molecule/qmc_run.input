@@ -7,7 +7,7 @@
 
 MASTERDIR        ./
 OUTPUTDIR        ./results/
-FILENAMEPREFIX   pigs
+FILENAMEPREFIX   output
 
 #-------  SYSTEM -----------
 
