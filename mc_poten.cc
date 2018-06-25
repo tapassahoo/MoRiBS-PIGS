@@ -131,6 +131,7 @@ void InitPotentials(void)
 			{
       			init_pot1D(atype);
 			}
+			cout<<"TS POT"<<endl;
 		}
 
 #ifdef CAGEPOT
@@ -535,7 +536,8 @@ void init_rot3D(int type)
    string  fname = MCAtom[type].type;
 
    stringstream time; time << NumbRotTimes;                  // number of time slices 
-   stringstream temp; temp << Temperature*Units.temperature; // temperature
+   //stringstream temp; temp << Temperature*Units.temperature; // temperature
+    stringstream temp; temp << std::fixed << std::setprecision(3)<<Temperature*Units.temperature; // temperature
 
    fname += ("_T" + temp.str() + "t" + time.str());
 

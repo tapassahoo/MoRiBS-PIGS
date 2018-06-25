@@ -26,6 +26,7 @@ extern int     IROTSYM;        // whether to rotate the dopants by their body-fi
 extern int     NFOLD_ROT;           // foldness of rotational symmetry of the dopant
 
 extern bool    ROTATION;     // set to 1 to account for the rotational degrees of freedom
+extern bool    TRANSLATION;  // set to 1 to account for the translation degrees of freedom
 
 extern bool    FERMIONS;     // true if there're fermions in the system
 extern int     FERMTYPE;     // atom type for fermions

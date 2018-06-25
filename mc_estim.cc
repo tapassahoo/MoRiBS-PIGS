@@ -1025,6 +1025,37 @@ double GetPotEnergy_Densities(void)
         	}// loop over atoms (molecules)
         }// loop over atoms (molecules)
     }
+//
+	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) )
+	{
+        spot = 0.0;
+        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+		{
+           	int offset0 = NumbTimes*atom0;
+        	for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+        	{
+            	int offset1 = NumbTimes*atom1;
+
+		    	double spot_pair = 0.0;
+#pragma omp parallel for reduction(+: spot_pair)
+		    	for (int it = 0; it < NumbTimes; it++) 	    
+		    	{  
+                	int t0 = offset0 + it;
+                	int t1 = offset1 + it;
+
+					double Eulang0[NDIM], Eulang1[NDIM];
+   					Eulang0[PHI] = MCAngles[PHI][t0];
+   					Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+            		Eulang0[CHI] = MCAngles[CHI][t0];
+   					Eulang1[PHI] = MCAngles[PHI][t1];
+   					Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+            		Eulang1[CHI] = MCAngles[CHI][t1];
+                	spot_pair += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+            	}
+            	spot += spot_pair;
+        	}// loop over atoms (molecules)
+        }// loop over atoms (molecules)
+    }
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         spot = 0.0;

@@ -189,24 +189,24 @@ srand( time(NULL) );
 
  
 //-------------------------
-   MPIsize = 1;            // this is for InitRandom()          
-   MPIrank = MPI_MASTER;   // this is for InitRandom()          
+	MPIsize = 1;            // this is for InitRandom()          
+	MPIrank = MPI_MASTER;   // this is for InitRandom()          
 //-----------------------------
 
-   int restart = 0;
-   IOReadParams(FINPUT,restart); // read input parameters 
+	int restart = 0;
+	IOReadParams(FINPUT,restart); // read input parameters 
 // get the number of rotational steps treated by worker CPUs
 // chunksize = NumbRotTimes / numprocs;
 
 // pass numprocs to NProcs, which is a global variable
 // NProcs = numprocs;
 
-   MCInitParams();               // set system dependent parameters
-   MCSetUnits(); 
-   MCMemAlloc();
+	MCInitParams();               // set system dependent parameters
+	MCSetUnits(); 
+	MCMemAlloc();
 
-   MemAllocMCCounts();
-   MemAllocQWCounts();
+	MemAllocMCCounts();
+	MemAllocQWCounts();
 
 //head CPU comes in after memory declaration.
 //if ( rank == MPI_MASTER ){// in the master cpu section
@@ -287,8 +287,8 @@ ParamsPotential();
 					cout<<"atom0 "<<atom0<<" atom1 "<<atom1<<" RCOM "<<r<<endl;
 				}
 			}
-			cout<<"  "<<endl;
 		}
+/*
     	cout<<"  "<<endl;
     	cout<<"  "<<endl;
     	for (int it=0;it<NumbAtoms*NumbTimes;it++)
@@ -298,6 +298,7 @@ ParamsPotential();
             	cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
         	}
     	}	 
+*/
 //    	read in initial MCCoords and MCAngles
       	if(InitMCCoords)
       	{
@@ -1245,9 +1246,10 @@ void MCGetAveragePIMC(void)
 #endif
 
     double skin       = 0.;
-#ifdef MOVECOM
-	skin              = GetKinEnergy();           // kin energy
-#endif
+	if(TRANSLATION)
+	{
+		skin              = GetKinEnergy();           // kin energy
+	}
 	_bkin            += skin;                     // block average for kin energy
 	_kin_total       += skin;                     // accumulated average 
 
@@ -1325,7 +1327,7 @@ void MCGetAveragePIMC(void)
 			srot      = GetRotPlanarEnergy();     // kin energy
 		}
 
-		if(MCAtom[IMTYPE].molecule == 3)
+		if(MCAtom[IMTYPE].molecule == 2)
 		{
 			srot          = GetRotE3D();
 		}
@@ -1340,7 +1342,6 @@ void MCGetAveragePIMC(void)
 		_brotsq      += ErotSQ;
 		_rotsq_total += ErotSQ;
 
-//Tapas commented out
 	     GetRCF(); 
 
 	}

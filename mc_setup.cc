@@ -28,6 +28,7 @@ int     IROTSYM  = 0;        // whether to rotate the dopants by their body-fixe
 int     NFOLD_ROT;           // foldness of rotational symmetry of the dopant
 
 bool    ROTATION = false;    // set to 1 to account for the rotational degrees of freedom
+bool    TRANSLATION = false;    // set to 1 to account for the translational degrees of freedom
 
 bool    BOSONS   = false;    // true if there're bosons in the system
 int     BSTYPE   = -1;       // atom type for bosons
@@ -383,7 +384,7 @@ void MCInit(void)  // only undimensional parameters in this function
 		natom++;
 	}
 
-	for (int atom = 0; atom < NumbAtoms;a tom++)
+	for (int atom = 0; atom < NumbAtoms; atom++)
 	{ 
 		PIndex[atom] = atom;
 		RIndex[atom] = atom;
@@ -436,13 +437,16 @@ void MCInit(void)  // only undimensional parameters in this function
 #endif
 	}
 
-	for (int type=0;type<NumbTypes;type++)  
+	if (TRANSLATION)
 	{
-		MCAtom[type].twave2 = 4.0*MCAtom[type].lambda * MCTau;   // thermal wavelength squared
-		MCAtom[type].mlsegm = (int)pow(2.0,MCAtom[type].levels); // segmen size for multilevel
+		for (int type=0;type<NumbTypes;type++)  
+		{
+			MCAtom[type].twave2 = 4.0*MCAtom[type].lambda * MCTau;   // thermal wavelength squared
+			MCAtom[type].mlsegm = (int)pow(2.0,MCAtom[type].levels); // segmen size for multilevel
       
-		if (MCAtom[type].mlsegm >= NumbTimes)
-		nrerror (_proc_,"Segment size is larger then a number of time slices");
+			if (MCAtom[type].mlsegm >= NumbTimes)
+			nrerror (_proc_,"Segment size is larger then a number of time slices");
+		}
 	} 
 
 	int bcount = 0;  // number of bosons' types

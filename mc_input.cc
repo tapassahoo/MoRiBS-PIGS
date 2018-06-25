@@ -71,7 +71,8 @@ const char STATUS_STARTBLOCK[] = "STARTBLOCK";
 //--------------------------------------------------
 const char IO_DISTANCE[]       = "DISTANCE";
 const char IO_DIPOLEMOMENT[]   = "DIPOLEMOMENT";
-const char IO_NUMBPARTICLE[]       = "NUMBPARTICLE";
+const char IO_NUMBPARTICLE[]   = "NUMBPARTICLE";
+const char IO_TRANSLATION[]    = "TRANSLATION";
 string PotentialRead = "nopot";
 
 string MasterDir;
@@ -81,45 +82,46 @@ string FNPrefix;
 string MCFileName;     // mc output file name (no extension)
  
 void IOReadParams(const char in_file[],int & mc_status)
-//   mc_status =  0 - new run, 1 - restart  
 {
-   const char *_proc_=__func__;    // "MCReadInput()"; 
+//   mc_status =  0 - new run, 1 - restart  
+	const char *_proc_=__func__;    // "MCReadInput()"; 
 
 //-- Open file with input parameters ----------------
 
-   ifstream inf(in_file,ios::in);
-   if (!inf.good())
-   _io_error(_proc_,IO_ERR_FOPEN,in_file);
+	ifstream inf(in_file,ios::in);
+	if (!inf.good())
+	_io_error(_proc_,IO_ERR_FOPEN,in_file);
 
 //-- Read input parameters --------------------------
 
-   int numb   = 0;         // total number of particles in the system
-   int type   = 0;         // total number of atom types
+	int numb   = 0;         // total number of particles in the system
+	int type   = 0;         // total number of atom types
 
-   IMPURITY = false;
-   WORM     = false;
-   MINIMAGE = false;
+	IMPURITY = false;
+	WORM     = false;
+	MINIMAGE = false;
 
-   ROTATION = false;
+	ROTATION = false;
+	TRANSLATION = false;
 
-   NUMB_ATOMS = 0;         // number of atoms     (structureless particles)
-   NUMB_MOLCS = 0;         // number of molecules (rotational degrees of freedom)
+	NUMB_ATOMS = 0;         // number of atoms     (structureless particles)
+	NUMB_MOLCS = 0;         // number of molecules (rotational degrees of freedom)
 
-   NUMB_ATOMTYPES = 0;     // number of atoms types
-   NUMB_MOLCTYPES = 0;     // number of molecules types
+	NUMB_ATOMTYPES = 0;     // number of atoms types
+	NUMB_MOLCTYPES = 0;     // number of molecules types
 
-   mc_status  = 0;         // 0 - new run, 1 - restart  
+	mc_status  = 0;         // 0 - new run, 1 - restart  
 
-   int _wtypes = 0;        // number of atom's types to apply the worm algorithm
-   int _rtypes = 0;        // number of molecule's types to sample rot degrees of freedom
+	int _wtypes = 0;        // number of atom's types to apply the worm algorithm
+	int _rtypes = 0;        // number of molecule's types to sample rot degrees of freedom
 
-   double  _rot_step;      // step for sampling the rotational degrees of freedom
-   string _srot_type;      // the molecule type to sample the rotational degrees of freedom
-   string _srot_dens;      // the file name with the rotational density matrix
+	double  _rot_step;      // step for sampling the rotational degrees of freedom
+	string _srot_type;      // the molecule type to sample the rotational degrees of freedom
+	string _srot_dens;      // the file name with the rotational density matrix
 
-   InitMCCoords = 0;
+	InitMCCoords = 0;
 
-   MCStartBlock = 0;
+	MCStartBlock = 0;
    
 	string params;
   	while (inf>>params)
@@ -153,6 +155,11 @@ void IOReadParams(const char in_file[],int & mc_status)
      	{ 
         	inf>>Density;
      	}
+     	else 
+     	if (params==IO_TRANSLATION)
+     	{
+			TRANSLATION = true;
+		}
      	else 
        	if ((params==IO_ATOM)||(params==IO_MOLECULE)||(params==IO_LINEARROTORS)||(params==IO_NONLINEAR)||(params==IO_PLANAR))
      	{
