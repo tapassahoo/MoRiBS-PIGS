@@ -1,0 +1,74 @@
+Here are few instructions that will help a user to modify script files before submitting jobs in queue. Path of the directory for the source files in nlogn server is: /home/tapas/Moribs-pigs/MoRiBS-PIMC. User should copy it to his/her machine. PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction. 
+
+In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PIGS are the makefiles that a user needs to compile the source codes for finite temperature (PIMC) and ground state (PIGS) canculations, respectively. To compile the source codes, first copy Makefile-PIMC of Makefile-PIGS to Makefile and use the following command:
+                               make clean
+                               make
+
+But the user does not need to compile the source codes manually if he/she submits jobs by script files. The script files are in dir: /home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/scripts). There arethree python scripts: 
+
+A. script_submission_analysis_MoRiBS.py 
+B. support.py 
+C. inputFile.py
+
+The user are suggested to make the following modifications in the scripts before running MoRiBs successfully:
+
+#------------------------------------------------------------------------#
+
+A. In script_submission_analysis_MoRiBS.py
+
+1. If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
+
+2. As computation of rotational density matrix for linear rotors is not time consuming, the user could use "status_rhomat = "Yes"" flag that generates rotational density matrix files instantly during submitting the jobs in queue. On the other hand, the user is advised to generate the density matrices for non linear molecules before he/she submit the jobs by the scripts. For this case, the user should use "status_rhomat = "No"". 
+
+3. If the user wish to include cage potential, he/she should use "status_cagepot = "Yes", otherwise, "status_cagepot = "No". 
+
+4. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used 
+		user_name           = "tapas"                   
+		source_dir          = "Moribs-pigs/MoRiBS-PIMC/" 
+		out_dir             = "nonlinear-molecule/"
+		input_dir           = "examples/nonlinear-molecule/"
+but the user may change these as  
+		user_name           = "user_name" excluding "/"
+		source_dir          = "MoRiBS-PIMC/" 
+		out_dir             = "PIMC-H2O/"
+		input_dir           = "INPUT/"
+		
+4. Create the out_dir directory /work/user_name/PIMC-H2O/ in case of "NameOfServer = "nlogn"" or /scratch/user_name/PIMC-H2O/ for the "NameOfServer = "graham"". Here PIMC-H2O/ is the out_dir. The script file will move all the running directories (jobs) from /scratch/user_name/out_dir/ to /work/user_name/out_dir/ or /scratch/user_name/PIMC-H2O/ for /scratch/user_name/PIMC-H2O/ or the "NameOfServer = "graham"", respectively.
+
+5. input_dir - The user must create it inside the source_dir. It is important to note that the rotational density matrices for non linear molecules, qmc_run.input, script_submission_analysis_MoRiBS.py, support.py, inputFile.py must be stored in the input_dir. 
+
+#------------------------------------------------------------------------#
+
+B. In support.py
+1. Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
+
+#------------------------------------------------------------------------#
+C. In inputFile.py
+
+1. Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
+
+2. Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.   
+#------------------------------------------------------------------------#
+
+Now the script files are ready to submit your jobs. To know the command line arguments, just type the following command in terminal
+
+python script_submission_analysis_MoRiBS.py -h
+
+Examples of command line arguments to submit the jobs are given below:
+
+				python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE tau submission PIMC H2O H2O 0.0333333333"
+
+After submitting the jobs, the user can check the acceptance ratio and other general outputs in pimc/pigs+(number of beards).out file stored in /work/user_name/out_dir/jobs_name+"PIMC" or /scratch/user_name/out_dir/jobs_name+"PIMC" directory instantaneously. Final output files will be saved in /work/user_name/out_dir/ or /scratch/user_name/out_dir/ directory when the submitted job is finisted.
+
+#------------------------------------------------------------------------#
+To analyze the output data -
+1. create ResultsOfPIMC or ResultsOfPIGS directory in the input_dir for finite temperature or ground state calculations, respectively, and then run the following commands as an example -
+
+				python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE --preskip 10000 tau analysis PIMC H2O H2O 0.0333333333"
+
+2. Final output files will be saved in ResultsOfPIMC or ResultsOfPIGS directory.
+
+#---------------------Best of Luck---------------------------------------#
+
+N.B.: Don't hesitate to email to the developer if you face any problem to submit your jobs or analyze the output files by the scripts.
+Email: tapascuchem@gmail.com

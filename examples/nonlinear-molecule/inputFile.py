@@ -10,6 +10,11 @@ from numpy import *
 import math
 
 def Getbeads(TypeCal, variableName):
+	'''
+	#User needs to change only list_nb - list of beads.
+	list_nb = [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,44]
+	#User does not change the below lines. Either delete of commented out the following lines.
+	'''
 	loopStart           = 40
 	loopEnd             = 120
 	skip                = 20
@@ -25,8 +30,17 @@ def Getbeads(TypeCal, variableName):
 
 class GetStepAndLevel:
 	def __init__(self, molecule_rot1, variableName1):
+		'''
+		#User needs to change only below three lines. Size of each list must be equal or greater than the size of list of list_nb defined in Getbeads().
+		self.step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
+		self.step        = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K            #change param6
+		self.level       = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+		#User does not change the below lines. Either delete of commented out the following lines.
+		'''
 		self.molecule_rot = molecule_rot1
 		self.variableName = variableName1
+
+
 		if self.variableName == "tau":
 			if (self.molecule_rot == "H2"):
 				self.step_trans  = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
