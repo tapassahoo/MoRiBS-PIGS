@@ -110,5 +110,6 @@ examples/linear_pigs/*.pyc
 /examples/nonlinear-molecule/*.rho
 /examples/nonlinear-molecule/*.tab
 /examples/nonlinear-molecule/*.pot
+/examples/nonlinear-molecule/*instant*
 /examples/nonlinear-molecule/*/
 !/examples/nonlinear-molecule/
