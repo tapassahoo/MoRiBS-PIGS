@@ -1,5 +1,7 @@
 // LIMITATION :  only one atom type and one molecule type at this point
-
+#include <vector>
+#include <stdlib.h>
+#include <algorithm>
 #include "mc_input.h"
 #include "mc_confg.h"
 #include "mc_const.h"
@@ -566,6 +568,7 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
    	double rand1,rand2,rand3;
 	int offset, gatom;
 
+#ifndef CLUSTERMOVE
 #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,offset,gatom)
 	for (int itrot=0;itrot<NumbRotTimes;itrot += 2)
 	{
@@ -630,6 +633,95 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
+#endif
+
+#ifdef CLUSTERMOVE
+	vector<int> cluster;
+	vector<int> buffer;
+	cluster.reserve(NumbRotTimes);
+	buffer.reserve(NumbRotTimes);
+	int atom0 = rand() % MCAtom[type].numb;
+	int itrot = rand() % NumbRotTimes;
+	cluster.push_back(itrot);
+	buffer.push_back(itrot);
+
+	offset = MCAtom[type].offset+(NumbRotTimes*atom0);  
+	gatom  = offset/NumbRotTimes;    
+	rand1=runif(Rng);
+	rand2=runif(Rng);
+	rand3=runif(Rng);
+		
+   	int t0 = offset + itrot;
+   	double cost, phi;
+   	cost += (step*(rand1-0.5));
+   	phi  += (step*(rand2-0.5));
+
+   	if (cost> 1.0) cost =  2.0 - cost;
+   	if (cost<-1.0) cost = -2.0 - cost;
+	if (abs(cost) > 2.0) 
+	{
+        cout<<"Upper or lower limit of cost is excided " << cost<<endl;
+		exit(0);
+	}
+	double sint = sqrt(1.0 - cost*cost);
+
+   	double randomVector[NDIM];
+	randomVector[0] = sint*cos(phi);
+   	randomVector[1] = sint*sin(phi);
+   	randomVector[2] = cost;
+
+	vector<int> itrotCluster;
+	itrotCluster.reserve(2);
+	
+	int popid=0;
+	while (!buffer.empty())
+	{
+		if (itrot == 0 || itrot == (NumbRotTimes - 1))
+		{
+			if (itrot == 0) itrotCluster.push_back(itrot+1);
+			else itrotCluster.push_back(itrot-1);
+		}
+		else 
+		{
+			itrotCluster.push_back(itrot-1);
+			itrotCluster.push_back(itrot+1);
+		}
+
+		buffer.erase(buffer.begin()+popid);
+		popid++
+		for (const auto &itrot1: itrotCluster)
+		{
+			for (int &iCheck: cluster)
+			{
+				if(iCheck != itrot1)
+				{
+					MCRotLinStepPIGSCLUSTER(itrot,offset,gatom,type,rand3,MCRotChunkTot,MCRotChunkAcp,itrot1);
+
+					if (itrot1 != 0) 
+					{
+						cluster.push_back(irot1);
+						buffer.push_back(irot1);
+					}
+				}
+			}
+		}
+		itrotCluster.erase(itrotCluster.begin(),itrotCluster.end());
+	}
+
+	MCTotal[type][MCROTAT] += MCRotChunkTot;
+	MCAccep[type][MCROTAT] += MCRotChunkAcp;
+
+	for (int iCluster=0; iCluster<cluster.size(); iCluster++)
+	{
+		for (int id=0;id<NDIM;id++)
+		{
+        	MCCosine[id][t0]=MCCosine[id][t0]-2.0*DotProduct(MCCosine, randomVector)*randomVector[id];
+		}
+	}
+	
+	cluster.erase (cluster.begin(),cluster.end());
+	buffer.erase (buffer.begin(),buffer.end());
+#endif
 
 #ifdef SWAPTOUNSWAP
     //double rand4 = (double)rand() / ((double)RAND_MAX + 1);
@@ -1036,6 +1128,91 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
     		MCCosine[id][t1] = newcoords[id][t1];
 	}
 
+}
+
+void MCRotLinStepPIGSCLUSTER(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
+{
+   	int t1 = offset + it1;
+
+   	double cost = MCAngles[CTH][t1];
+   	double phi  = MCAngles[PHI][t1];
+
+   	cost += (step*(rand1-0.5));
+   	phi  += (step*(rand2-0.5));
+
+   	if (cost >  1.0)
+   	{
+      	cost = 2.0 - cost;
+   	}
+
+   	if (cost < -1.0)
+   	{
+       	cost = -2.0 - cost;
+   	}
+
+	if (abs(cost) > 2.0) 
+	{
+        cout<<"Upper or lower limit of cost is excided " << cost<<endl;
+		exit(0);
+	}
+
+   	double sint = sqrt(1.0 - cost*cost);
+
+   	newcoords[AXIS_X][t1] = sint*cos(phi);
+   	newcoords[AXIS_Y][t1] = sint*sin(phi);
+   	newcoords[AXIS_Z][t1] = cost;
+
+//----------------------------------------------
+
+	int loopi, loopf;
+
+	if (it1 == 0 || it1 == (NumbRotTimes - 1))
+	{
+		if (it1 == 0)
+		{
+			loopi = it1+1;
+			loopf = it1+1;
+		}
+		else
+		{
+			loopi = it1-1;
+			loopf = it1;
+		}
+	}
+    else
+    {
+		loopi = it1-1;
+		loopf = it1+1;
+    }
+	
+	double p0;
+   	double p1;
+
+	vector <int> iadd;
+	if (!iadd.empty()) iadd.erase (iadd.begin(),iadd.end());
+
+	for (int i = loopi; i <= loopf; i += 2)
+	{
+   		p0 = 0.0;
+   		p1 = 0.0;
+
+ 		int t2 = offset + i;
+   		for (int id=0;id<NDIM;id++)
+   		{
+      		p0 += (newcoords[id][t1]*MCCosine[id][t1]);
+      		p1 += (newcoords[id][t1]*MCCosine[id][t2]);
+		}
+
+		double rd = 0.0;
+		bool Accepted = false;
+		if (rd>1.0)        Accepted = true;
+		else if (rd>rand3) Accepted = true;
+
+		if (Accepted)
+		{
+			iadd.push_back(i);	
+		}
+	}
 }
 
 double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)   

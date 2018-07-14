@@ -508,7 +508,6 @@ void MCInit(void)  // only undimensional parameters in this function
 void MCConfigInit(void)
 {
 	const char *_proc_=__func__;    // "MCConfigInit()";
-
 #ifndef HOSC_TEST
 #ifdef CHAINCONFIG
 	initChain_config(MCCoords); 
@@ -641,6 +640,35 @@ void initLattice_config(double **pos)
 		}
 #endif
 	}    // END loop over types
+#ifdef IOWRITE
+		double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
+		ifstream myfile ("IhRCOMC60.xyz");
+		if (myfile.is_open ())
+		{
+			for(int ii=0;ii<NumbAtoms;ii++)
+            {
+				myfile >> RCOMC60[ii][0]>>RCOMC60[ii][1]>>RCOMC60[ii][2];
+				cout << RCOMC60[ii][0]<< "  "<<RCOMC60[ii][1]<< "  "<<RCOMC60[ii][2]<< endl;
+			}
+			myfile.close();
+		}
+		else
+		{
+			if (NumbAtoms == 1)
+            {
+             for(int id=0;id<NDIM;id++)
+             RCOMC60[0][id]=0.0;
+
+            }
+            else
+            {
+            cout << "ERROR: For Number of Cages > 1, please, provide IhRCOMC60.xyz file with RCOM position of each cage "<<endl;
+            nrerror;
+            exit(0);
+            }
+          }
+
+#endif
 }
 
 void replInitial_config(double **pos)

@@ -61,7 +61,7 @@ plt.grid(True)
 
 font       = 28
 fontlegend = font/2.0
-FilePlot   = "FigAppendix1.png"
+FilePlot   = "FigAppendix1.pdf"
 outfile    = FilePlot
 call(["rm", FilePlot])
 #
@@ -73,6 +73,6 @@ plt.xticks(fontsize=font, rotation=0)
 plt.yticks(fontsize=font, rotation=0)
 plt.subplots_adjust(top=0.95, bottom=0.18, left=0.23, right=0.95, hspace=0.0, wspace=0.4)
 plt.legend(bbox_to_anchor=(0.73, 0.85), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
-plt.savefig(outfile, dpi = 200, format = 'png')
-#call(["open", outfile])
-call(["okular", outfile])
+plt.savefig(outfile, dpi = 200, format = 'pdf')
+call(["open", outfile])
+#call(["okular", outfile])

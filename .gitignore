@@ -1,6 +1,7 @@
 #ignore all object files
 *.o
 #ignore executable
+modify*
 pimc*
 bb*
 fort.*

@@ -248,7 +248,7 @@ ParamsPotential();
 //--------------------------------------------------------
 //    	generate tables - potentals, configurations etc, status
 
-	   	MCStartBlock = 0; 
+	   	MCStartBlock = 0;  // PIMCRESTART //
 //    	SEED for head CPU
       	SEED = 985456376;
       	RandomInit(MPIrank,MPIsize);
@@ -346,11 +346,13 @@ ParamsPotential();
 
 //--------------------------------------------------------
 
+//PIMCRESTART begins here//
       	StatusIO(IOWrite,FSTATUS);
       	ConfigIO(IOWrite,FCONFIG);
       	TablesIO(IOWrite,FTABLES);
       	RandomIO(IOWrite,FRANDOM);
-		SeedIO(IOWrite,FSEED);
+		SeedIO(IOWrite,FSEED); 
+//PIMCRESTART ends here//
 
       	if (WORM)
       	QWormsIO(IOWrite,FQWORMS);
@@ -361,6 +363,7 @@ ParamsPotential();
    	InitTotalAverage();      // DUMP 
 // --- RESTART/START NEW RUN ----------------------------
 
+//PIMCRESTART begins here//
    	if (restart) // new run, generate new status, rnd() streams and config files     
    	{
 		StatusIO(IORead,FSTATUS);  // load MCStartBlock
@@ -371,6 +374,7 @@ ParamsPotential();
       	string fname = MCFileName;
       	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 	}
+//PIMCRESTART ends here//
 
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
     {
@@ -554,7 +558,7 @@ ParamsPotential();
 #ifdef IOWRITE
             SaveInstantEnergy (); 
 #endif
-			if (blockCount > (NumberOfMCBlocks - 10))
+			if (blockCount > (NumberOfMCBlocks - 1000))
 			{
 		    	SaveInstantAngularDOF(totalStep);
 #ifdef SWAPTOUNSWAP
@@ -687,7 +691,9 @@ ParamsPotential();
 #endif
 		}
 
+//PIMCRESTART begins // 
 		//  CHECKPOINT: save status, rnd streams and configs ------
+	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
 
 		MCStartBlock = blockCount; 
 
@@ -702,6 +708,7 @@ ParamsPotential();
       
 		string fname = MCFileName;// + IO_EXT_XYZ;
 		IOxyzAng(IOWrite,fname.c_str());  // test output of initial config
+//PIMCRESTART ends // 
 
        	if (WORM)
        	{
@@ -1882,9 +1889,14 @@ void SaveInstantAngularDOF(long int numb)
         	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
             int t0      = offset0 + it;
 
-			_fangins << setw(IO_WIDTH) << MCCosine[0][t0] << BLANK;
-			_fangins << setw(IO_WIDTH) << MCCosine[1][t0] << BLANK;
-			_fangins << setw(IO_WIDTH) << MCCosine[2][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCCoords[0][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCCoords[1][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCCoords[2][t0] << BLANK;
+
+			_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+
 			_fangins << endl;
         }
     }
