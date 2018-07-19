@@ -26,6 +26,7 @@ extern int     IROTSYM;        // whether to rotate the dopants by their body-fi
 extern int     NFOLD_ROT;           // foldness of rotational symmetry of the dopant
 
 extern bool    ROTATION;     // set to 1 to account for the rotational degrees of freedom
+extern bool    TRANSLATION;  // set to 1 to account for the translation degrees of freedom
 
 extern bool    FERMIONS;     // true if there're fermions in the system
 extern int     FERMTYPE;     // atom type for fermions
@@ -35,15 +36,31 @@ extern int     NUMB_MOLCS;   // total number of molecules
 
 extern int     NUMB_ATOMTYPES; // total number of atoms types 
 extern int     NUMB_MOLCTYPES; // total number of molecules types
+extern string  Distribution;
+extern double  MCAccepSwap;
+extern double  MCAccepUnSwap;
+extern int     iSwap;
+extern int     iUnSwap;
+extern double DipoleMomentAU2;
+extern double RR;
+#ifdef PROPOSED
+extern int iChooseOld;
+extern int iChoose;
+extern int iChooseNew;
+extern int NPHI;
+extern int NCOST;
+void proposedGrid();
+extern double *costProposed;
+extern double *phiProposed;
+extern double dcost;
+extern double dphi;
+#endif
 
 extern int     NDIM;
 extern double  Temperature;
-#ifdef GETR
 extern double  Distance;
-#endif
-#ifdef GETDIPOLE
 extern double DipoleMoment;
-#endif
+extern int     NumbParticle;
 extern double  Density;
 extern double  BoxSize;
 
@@ -117,9 +134,6 @@ extern long int NumberOfEQBlocks;  // number of equilibr blocks
 const int SizeRotDen=181*361*361;
 const int SizePotTab=501*181*181;
 
-#ifdef MOLECULEINCAGE
-extern int  MOLECINCAGE;
-#endif
 //------------- MPI PARAMETERS ----------------------------
 extern int NProcs; // the number of processors as a global variable
 extern int chunksize;  // the size of a chunk of rotational time slices treated by MPI
@@ -164,9 +178,8 @@ extern int NThreads; // the number of threads as a global variable
 extern int MCSKIP_RATIO;     //  to save information regarding the accept ratio
 extern int MCSKIP_TOTAL;     //  to save accumulated average
 extern int MCSKIP_AVERG;     //  to evaluate averages
-#ifdef PIGSROTORSIO
 extern int DISTANCE;     //  to evaluate averages
-#endif
+extern int NUMBPARTICLE;     //  to evaluate averages
 
 // MC move types
 const int MCMAXMOVES = 3;   // Max number of different types of MC moves
@@ -199,6 +212,9 @@ extern double ** RCOMC60;     //store the read in MCCoords
 //extern double ** TZMAT; // a temporary matrix for testing data structure
 
 extern double ** newcoords;  // buffer for new coordinates
+#ifdef PROPOSED
+extern double ** tempcoords;  // buffer for new coordinates
+#endif
 extern int     * atom_list;  // buffer for atom labels
 
 extern double *  rhoprp;     // rotatinal propagator for non-linear rotor
@@ -238,5 +254,14 @@ void MCInit(void);
 void MCConfigInit(void);
 
 void MCSetUnits_HO_TEST(void);
+void ParamsPotential(void);
 
+#ifdef GAUSSIANMOVE
+void ProposedMCCoords();
+void GetRandomCoords();
+extern "C" void dsyev_( char* jobz, char* uplo, int* n, double* a, int* lda, double* w, double* work, int* lwork, int* info );
+void print_matrix( char *desc, int m, int n, double* a, int lda );
+void diag(double *a, double *w, int N);
+extern double ** gausscoords;  // buffer for new coordinates
+#endif
 #endif  //MM_setup.h

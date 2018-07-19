@@ -11,10 +11,19 @@ const char FINPUT[]="qmc.input";   // input params file
 //enum IOStatus {IORead=0,IOWrite=1}; // not portable ?
 const int IORead  = 0;
 const int IOWrite = 1; 
+extern long int totalStep;
+extern double totalCount;
+extern double sumsCount;
+extern double _total;
+extern double _kin_total;
+extern double _pot_total;
+extern double _rot_total;
+extern double _rot_total1;
 
 void IOReadParams (const char [],int &);  
 void StatusIO(int, const char []);       // save/restore status of simulation
 void ConfigIO(int, const char []);       // save/restore init configuration
+void SeedIO(int, const char []);       // save/restore init seeds for omrng
 void TablesIO(int, const char []);       // save/restore permutation tables
 void QWormsIO(int, const char []);       // save/restore status of the worm
 
@@ -23,6 +32,7 @@ extern string OutputDir;
 extern string FNPrefix;
 
 extern string MCFileName;                // OutputDir+FNPrefix 
+extern string PotentialRead;
  
 //----IO errors----------------------------------------------
 
@@ -67,6 +77,7 @@ const char IO_EXT_DMP[] = ".dump"; // extra extension for data dumps
 // ----------- ESTIMATORS ------------------------
 
 const char IO_EXT_GRA []    = ".gra";   // radial  pair distribution
+const char IO_EXT_GXYZ []    = ".gxyz";   // radial  pair distribution
 const char IO_EXT_GRI []    = ".gri";   // radial  density around impurity
 const char IO_EXT_GRT []    = ".grt";   // theta angular density around impurity
 const char IO_EXT_GRC []    = ".grc";   // chi angular density around impurity
@@ -89,6 +100,8 @@ const char IO_EXT_SFFSUP3D []    = ".sffs3d";   // area estimators for non-linea
 const char FPERMU []    = "permutation.tab";   // permutation table
 
 const char IO_SUM [] = "_sum";          // file name postfix for accum averages
+const char IO_x [] = "_x";          // file name postfix for accum averages
+const char IO_y [] = "_y";          // file name postfix for accum averages
 
 #endif  //mc_input.h
 

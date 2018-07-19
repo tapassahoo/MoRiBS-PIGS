@@ -40,12 +40,18 @@ double    _ddelta_c [MAX_NUMBER_INTER]; //  delat cost for 2D potential
 double ** _poten2D [MAX_NUMBER_INTER]; // tabulated 2D potentials
 double *  _rgrid2D [MAX_NUMBER_INTER]; // r    grid points for 2D
 double *  _cgrid2D [MAX_NUMBER_INTER]; // cost grid points for 2D
+//Tapas added below the line
+double *  _pgrid2D [MAX_NUMBER_INTER]; // phi grid points for 2D
 
 int       _rsize2D [MAX_NUMBER_INTER]; // number of r   grid points  for 2D potential
 int       _csize2D [MAX_NUMBER_INTER]; // number of cost grid points for 2D potential
+//Tapas added below the line
+int       _psize2D [MAX_NUMBER_INTER]; // number of phi grid points for 2D potential
 
 double    _delta_r [MAX_NUMBER_INTER]; //  delta r    for 2D potential
 double    _delta_c [MAX_NUMBER_INTER]; //  delat cost for 2D potential
+//Tapas added below the line
+double    _delta_p [MAX_NUMBER_INTER]; //  delat phi for 2D potential
 
 // Non-linear rotor, 3D potential
 double * vtable ;//= new double [SizePotTab];            //  3D potential table added by Toby
@@ -92,76 +98,100 @@ void init_pot3D(int atype);
 
 void InitPotentials(void)
 {
-  const char *_proc_=__func__;    // "InitPotentials"; 
+  	const char *_proc_=__func__;    // "InitPotentials"; 
 
-  for (int atype=0;atype<NumbTypes;atype++)
-    if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3))                            // molecules
-      {
-	if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)) )
-	  nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
+  	for (int atype=0;atype<NumbTypes;atype++)
+	{
+		if (MCAtom[atype].fpot != PotentialRead)
+		{
+   			if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)) 
+   			{
+				if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)))
+  				nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
 
-	if ((MCAtom[atype].molecule == 2) && ((MCAtom[atype].numb  > NumbRotLim) || (MCAtom[atype].numb  < 0)) )
-	  nrerror(_proc_,"Weird # of non-linear rotors"); // check # of non-linear rotors
+				if ((MCAtom[atype].molecule == 2) && ((MCAtom[atype].numb  > NumbRotLim) || (MCAtom[atype].numb  < 0)) )
+  				nrerror(_proc_,"Weird # of non-linear rotors"); // check # of non-linear rotors
 
-	if(MCAtom[atype].molecule == 1)
-	  init_pot2D(atype);
-	//      init_dpot2D(atype);   //revised by Hui Li
-	if(MCAtom[atype].molecule == 3)
-	  init_pot2D(atype);
-	//      init_dpot2D(atype);   //revised by Hui Li
+				if (MCAtom[atype].molecule == 1)
+  				init_pot2D(atype);
+	//  		init_dpot2D(atype);   //revised by Hui Li
+				if(MCAtom[atype].molecule == 3)
+	  			init_pot2D(atype);
+	//  		init_dpot2D(atype);   //revised by Hui Li
 
 
-	if(MCAtom[atype].molecule == 2 && NumbTypes > 1)
-	  {
-	    init_pot3D(atype);
-	    //    potred_(vtable);
-	  }
+				if(MCAtom[atype].molecule == 2 && NumbTypes > 1)
+	  			{
+	   				init_pot3D(atype);
+	    		// 	potred_(vtable);
+	  			}
 
-      }
-    else                                                  // atoms
-      init_pot1D(atype);
+    		}
+   			else                                                  // atoms
+			{
+      			init_pot1D(atype);
+			}
+			cout<<"TS POT"<<endl;
+		}
+
+#ifdef CAGEPOT
+   		if (MCAtom[atype].molecule == 4) 
+		{
+  			init_pot2D(atype);
+		}
+#endif
+	}
 }
 
 void DonePotentials(void)
 {
-
-  for (int atype=0;atype<NumbTypes;atype++)
+  	for (int atype=0;atype<NumbTypes;atype++)
     if (MCAtom[atype].molecule == 1)              // molecules
-      {
-	delete [] _rgrid2D[atype];
-	delete [] _cgrid2D[atype];
+    {
+		delete [] _rgrid2D[atype];
+		delete [] _cgrid2D[atype];
  
 	//       delete [] _drgrid2D[atype];     //add by Hui Li  
 	//       delete [] _dcgrid2D[atype];     //add by Hui Li
 
     
-	free_doubleMatrix(_poten2D[atype]);  // atoms 
+		free_doubleMatrix(_poten2D[atype]);  // atoms 
 
 	//       free_doubleMatrix(_dpoten2D[atype]);  // atoms revised by Hui Li 
-      }
+    }
     else if (MCAtom[atype].molecule == 3)              // molecules
-      {
-	delete [] _rgrid2D[atype];
-	delete [] _cgrid2D[atype];
+    {
+		delete [] _rgrid2D[atype];
+		delete [] _cgrid2D[atype];
  
 	//       delete [] _drgrid2D[atype];     //add by Hui Li  
 	//       delete [] _dcgrid2D[atype];     //add by Hui Li
 
     
-	free_doubleMatrix(_poten2D[atype]);  // atoms 
+		free_doubleMatrix(_poten2D[atype]);  // atoms 
 
 	//       free_doubleMatrix(_dpoten2D[atype]);  // atoms revised by Hui Li 
-      }
+    }
+    else if (MCAtom[atype].molecule == 4)              // molecules
+    {
+#ifdef CAGEPOT
+		delete [] _cgrid2D[atype];
+		delete [] _pgrid2D[atype];
+ 
+		free_doubleMatrix(_poten2D[atype]);  // atoms 
+
+#endif
+    }
     else if (MCAtom[atype].molecule == 2)
-      {
-	delete [] vtable;
-      }
+    {
+		delete [] vtable;
+    }
     else
-      { 
-	delete [] _pgrid1D[atype];
-	delete [] _poten1D[atype];
-	delete [] _pderiv2[atype];  
-      }
+    { 
+		delete [] _pgrid1D[atype];
+		delete [] _poten1D[atype];
+		delete [] _pderiv2[atype];  
+    }
 }
 
 void InitRotDensity(void)
@@ -353,6 +383,7 @@ void init_pot2D(int atype)  // read 2D potential from the file
     if (!fid.good())
    _io_error(_proc_,IO_ERR_FOPEN,fname.c_str());
 
+#ifndef CAGEPOT
 //---- read  grid information -------------------------------------
     int rsize;
     int csize;
@@ -396,6 +427,46 @@ void init_pot2D(int atype)  // read 2D potential from the file
     for (int ir=0;ir<rsize;ir++)         
     for (int ic=0;ic<csize;ic++)
    _poten2D[atype][ir][ic] /=  Units.energy; 
+#else
+//---- read  grid information -------------------------------------
+    int csize;
+    int psize;
+
+    fid >> csize;
+    fid >> psize;
+  
+   _csize2D[atype] = csize;
+   _psize2D[atype] = psize;
+    
+    fid >> _delta_c[atype];
+    fid >> _delta_p[atype];
+
+   _cgrid2D[atype] = new double [csize];
+   _pgrid2D[atype] = new double [psize];
+
+   _poten2D[atype] = doubleMatrix(csize,psize);  
+
+    for (int ic=0;ic<csize;ic++)  // load cost grid
+    fid >> _cgrid2D[atype][ic];      
+
+    for (int ip=0;ip<psize;ip++)  // load phi   grid
+    fid >> _pgrid2D[atype][ip];         
+
+    for (int ic=0;ic<csize;ic++)
+    for (int ip=0;ip<psize;ip++)  
+    fid >> _poten2D[atype][ic][ip]; 
+
+    fid.close();
+
+//convert to dimensionless representation 
+
+    psize = _psize2D[atype];
+    csize = _csize2D[atype];
+
+    for (int ic=0;ic<csize;ic++)         
+    for (int ip=0;ip<psize;ip++)
+   _poten2D[atype][ic][ip] /=  Units.energy; 
+#endif
 }
 
 void init_pot1D(int atype)
@@ -465,7 +536,8 @@ void init_rot3D(int type)
    string  fname = MCAtom[type].type;
 
    stringstream time; time << NumbRotTimes;                  // number of time slices 
-   stringstream temp; temp << Temperature*Units.temperature; // temperature
+   //stringstream temp; temp << Temperature*Units.temperature; // temperature
+    stringstream temp; temp << std::fixed << std::setprecision(3)<<Temperature*Units.temperature; // temperature
 
    fname += ("_T" + temp.str() + "t" + time.str());
 
@@ -570,6 +642,8 @@ void init_rotdens(int type)
 
 double SRotDens(double gamma,int type)   // rotational density matrix 
 {
+   double rdens;
+
    int size = _rotsize[type];
 
    if (gamma > _rotgrid[type][size-1])   // replace with extrapolation ?  
@@ -577,7 +651,9 @@ double SRotDens(double gamma,int type)   // rotational density matrix
 
    if (gamma < _rotgrid[type][0])
    { 
-//    return (_rotdens[type][0]);
+#ifdef MODIFYSROTDENS
+      return (_rotdens[type][0]);
+#else
       double rl = _rotgrid [type][0];
       double rr = _rotgrid [type][1];
    
@@ -585,9 +661,9 @@ double SRotDens(double gamma,int type)   // rotational density matrix
       double sbeta  = (_rotdens[type][0]*rr - _rotdens[type][1]*rl)/(rr-rl);
      
       return (salpha*gamma + sbeta);
+#endif
    }
 
-   double rdens;
    splint(_rotgrid[type],_rotdens[type],_rotdens_drv2[type],size,gamma,rdens);
    return rdens;
 }
@@ -597,13 +673,18 @@ double SRotDensDeriv(double gamma,int type) // the derivs of the rotational dens
    int  size = _rotsize[type];
 
    if (gamma > _rotgrid[type][size-1])      // replace with extrapolation ?  
-// return (_rotderv[type][size-1]);
+#ifdef MODIFYSROTDENS
+   return (_rotderv[type][size-1]);
+#else
    return 0.0;
+#endif
 
 
    if (gamma < _rotgrid[type][0])
    { 
-//    return (_rotderv[type][0]);
+#ifdef MODIFYSROTDENS
+      return (_rotderv[type][0]);
+#else
       double rl = _rotgrid [type][0];
       double rr = _rotgrid [type][1];
    
@@ -611,6 +692,7 @@ double SRotDensDeriv(double gamma,int type) // the derivs of the rotational dens
       double sbeta  = (_rotderv[type][0]*rr - _rotderv[type][1]*rl)/(rr-rl);
      
       return (salpha*gamma + sbeta);
+#endif
    }
 
    double rderv;
@@ -751,6 +833,50 @@ double LPot2D(double r, double cost, int type)
    return lpot; 
 }
 
+//Tapas added the following part
+double LPot2DRotDOF(double cost, double phi, int type)
+{
+   double cmin = _cgrid2D[type][0];
+   double pmin = _pgrid2D[type][0];
+
+   int csize   = _csize2D[type];
+   int psize   = _psize2D[type];
+
+   int  ic = (int)floor((cost - cmin)/_delta_c[type]);
+   int  ip = (int)floor((phi  - pmin)/_delta_p[type]);
+
+// CHECK INDEX RANGE  [need to use extrapolation here]
+   if (ic<0) ic = 0;
+   else if (ic>=(csize-1)) ic = (csize - 2); // need to define (ic+1)
+
+   if (ip<0) ip = 0;
+   else if (ip>=(psize-1)) ip = (psize - 2); // need to define (ip+1)
+
+// START linear interpolation --------------
+
+   double ** pot = _poten2D[type];
+
+   double y1 = pot[ic][ip];
+   double y2 = pot[ic+1][ip];
+   double y3 = pot[ic+1][ip+1];
+   double y4 = pot[ic][ip+1];
+
+   double c1 = _cgrid2D[type][ic];
+   double c2 = _cgrid2D[type][ic+1];
+
+   double p1 = _pgrid2D[type][ip];
+   double p2 = _pgrid2D[type][ip+1];
+
+// CHECK possible division by zero
+
+   double dc   = (cost - c1)/(c2-c1);
+   double dp   = (phi - p1)/(p2-p1);
+
+   double lpot = (1.0-dc)*(1.0-dp)*y1 + dc*(1.0-dp)*y2 + dc*dp*y3 + (1.0-dc)*dp*y4;
+
+   return lpot;
+}
+
 int get_filesize(const char fname [])
 // count lines with data in input file
 {	
@@ -886,3 +1012,50 @@ void read_datafile(const char fname[],double *grid,double *data0,double *data1,d
 // nrerror(_proc_,"Wrong size of data file");
    fid.close();
 }
+
+#ifdef PAIRDENSITY
+void readPairDensity(void)
+{
+    ifstream f("PairDensity.txt");
+
+    int size_total, block_numb, size;
+    f >> size_total>>block_numb;
+    f >> size;
+
+    int *basisIndices = new int[4*size];
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < 4; j++) {
+            f >> basisIndices[i*4+j];
+        }
+    }
+
+    double *densityMatrix = new double[size*size];
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            f >> densityMatrix[i*size+j];
+        }
+    }
+
+    f.close();
+
+    cout << "Size TAPAS = "<<size << endl;
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < 4; j++) {
+            cout << basisIndices[i*4+j] << " ";
+        }
+        cout << endl;
+    }
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            cout << densityMatrix[i*size+j] << " ";
+        }
+        cout << endl;
+    }
+
+    delete[] basisIndices;
+    delete[] densityMatrix;
+	exit(1);
+}
+#endif

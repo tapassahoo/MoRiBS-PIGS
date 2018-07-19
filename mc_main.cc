@@ -2,11 +2,13 @@
 //         main()
 //
 
+#include <string>
 #include <stdlib.h>
 //#include <stdlib>
 #include <sstream>
 #include <iomanip>
 #include <math.h>
+#include <vector>
 
 #include "mc_confg.h"
 #include "mc_setup.h"
@@ -25,18 +27,32 @@
 #include "rngstream.h"
 #include "omprng.h"
 
+
 void MCWormAverage(void);
 void MCWormAverageReset(void);
 
 double avergCount;   // # of calls of get_estim inside a block
-double totalCount;   // sum avergCount   
-         
+#ifdef PIGSENTBOTH
+double avergCountENT;   // # of calls of get_estim inside a block
+double totalCountENT;
+#endif
+//double totalCount;   // sum avergCount   
+//double sumsCount;
+//long int totalStep;
+
 void PIMCPass(int,int);
 
 void MCGetAverage(void);
-
 void MCResetBlockAverage(void);
+void MCGetAveragePIMC(void);
+void MCResetBlockAveragePIMC(void);
+void MCGetAveragePIGS(void);
+void MCResetBlockAveragePIGS(void);
+void MCGetAveragePIGSENT(void);
+void MCResetBlockAveragePIGSENT(void);
+
 void MCSaveBlockAverages(long int);
+void MCSaveBlockAveragesPIGSENT(long int);
 
 void MCSaveAcceptRatio(long int,long int,long int);
 
@@ -51,32 +67,39 @@ double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
 
 double _dpot_total;  // potential energy differences, global average  added by Hui Li
-double _pot_total;  // kinetic   energy, global average
-double _kin_total;  // potential energy, global average 
-double _total;  // potential energy, global average 
-#ifdef PIGSROTORS
-double _btheta;
+//double _pot_total;  // kinetic   energy, global average
+//double _kin_total;  // potential energy, global average 
+//double _total;  // potential energy, global average 
 double _bcostheta;
-double _theta_total;
+double _ucompx;
+double _ucompy;
+double _ucompz;
 double _costheta_total;
-#ifdef DIPOLE
-double _btheta1;
-double _bcostheta1;
-double _theta_total1;
-double _costheta_total1;
-double _btheta2;
-double _bcostheta2;
-double _theta_total2;
-double _costheta_total2;
-double _btheta3;
-double _bcostheta3;
-double _theta_total3;
-double _costheta_total3;
-#endif
-#endif
+double _ucompx_total;
+double _ucompy_total;
+double _ucompz_total;
+vector<double> _cdipoleXYZ;
+vector<double> _cdipoleX;
+vector<double> _cdipoleY;
+vector<double> _cdipoleZ;
+vector<double> _cdipoleXY;
+vector<double> _cdipoleXYZ_total;
+vector<double> _cdipoleX_total;
+vector<double> _cdipoleY_total;
+vector<double> _cdipoleZ_total;
+vector<double> _cdipoleXY_total;
+//
+double _bnm;
+double _bdm;
+double _nm_total;
+double _dm_total;
+double _trOfDensitySq;
+double _trOfDensitySq_total;
 
 double _brot;       // rotational kin energy, block average
-double _rot_total;  // rotational kin energy, global average
+double _brot1;       // rotational kin energy, block average
+//double _rot_total;  // rotational kin energy, global average
+//double _rot_total1;  // rotational kin energy, global average
 double _brotsq;     // rotational energy square, block average
 double _rotsq_total; // rotational energy square, global average
 double _Cv_total;    // heat capacity, global average
@@ -87,17 +110,29 @@ double _Cv_rot_total;    // rotational heat capacity, global average
 
 fstream _feng;      // save accumulated energy
 fstream _fang;      // save accumulated energy
+fstream _fdc;      // save accumulated energy
 fstream _fangins;      // save accumulated energy
+fstream _fanginsc;      // save accumulated energy
+fstream _fengins;      // save accumulated energy
+fstream _fentropy;
+fstream _fswap;
 
 //---------------- ESTIMATORS ---------------
 
 void SaveEnergy    (const char [],double,long int); // block average
-#ifdef PIGSROTORS
+void SaveSumEnergy (double,double);                 // accumulated average
+
+void SaveInstantAngularDOF(long int); 
+void SaveInstantEnergy ();                 // accumulated average
+
+#ifdef DDCORR
+void SaveDipoleCorr(const char [],double,long int);
+void SaveSumDipoleCorr(double,double);              // accumulated average
+#endif
 void SaveAngularDOF(const char [],double,long int);
 void SaveSumAngularDOF(double,double);              // accumulated average
-void SaveInstantAngularDOF(double,double); 
-#endif
-void SaveSumEnergy (double,double);                 // accumulated average
+void SaveTrReducedDens(const char [], double , long int );
+void SaveSumTrReducedDens(double , double);
 
 void InitTotalAverage(void);
 void DoneTotalAverage(void);
@@ -112,17 +147,36 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 
 //----------- subroutine that performs some initialization work for vh2h2.f-----
 
-#ifdef LINEARROTORS
 extern "C" void vinit_();
+string Distribution = "unSwap";
+double MCAccepSwap;
+double MCAccepUnSwap;
+int iSwap;
+int iUnSwap;
+void SaveInstantSwap(double, double, long int);                 // accumulated average
+#ifdef PROPOSED
+int iChooseOld = 0;
+int iChooseNew;
+int iChoose;
 #endif
 
 //-------------------------------------------
 
 int main(int argc, char *argv[])
 {
-#ifdef LINEARROTORS
+#ifdef PAIRDENSITY
+	readPairDensity();
+	exit(11);
+#endif
+   	randomseed(); //set seed according to clock
+//Tapas added
+#ifdef SWAPTOUNSWAP
+srand( time(NULL) );
+#endif
+#ifdef POTH2
    vinit_();
 #endif
+
 //int numprocs, rank, namelen;
 //char processor_name[MPI_MAX_PROCESSOR_NAME];
 
@@ -135,260 +189,221 @@ int main(int argc, char *argv[])
 
  
 //-------------------------
-   MPIsize = 1;            // this is for InitRandom()          
-   MPIrank = MPI_MASTER;   // this is for InitRandom()          
+	MPIsize = 1;            // this is for InitRandom()          
+	MPIrank = MPI_MASTER;   // this is for InitRandom()          
 //-----------------------------
 
-   int restart = 0;
-   IOReadParams(FINPUT,restart); // read input parameters 
+	int restart = 0;
+	IOReadParams(FINPUT,restart); // read input parameters 
 // get the number of rotational steps treated by worker CPUs
 // chunksize = NumbRotTimes / numprocs;
 
 // pass numprocs to NProcs, which is a global variable
 // NProcs = numprocs;
 
-   MCInitParams();               // set system dependent parameters
-   MCSetUnits(); 
-   MCMemAlloc();
+	MCInitParams();               // set system dependent parameters
+	MCSetUnits(); 
+	MCMemAlloc();
 
-   MemAllocMCCounts();
-   MemAllocQWCounts();
+	MemAllocMCCounts();
+	MemAllocQWCounts();
 
 //head CPU comes in after memory declaration.
 //if ( rank == MPI_MASTER ){// in the master cpu section
 
 // only internal system of units after this point 
  
-   MCInit();
+	MCInit();
+#ifdef PROPOSED
+proposedGrid();
+#endif
+ParamsPotential();
+#ifdef GAUSSIANMOVE
+	ProposedMCCoords();
+#endif
 
-   if (WORM)
-   MCWormInit();
+	if (WORM)
+	MCWormInit();
 
 // clean the permutation sampling from the last run
-   if (FileExist(FPERMU))
-   _io_error("QMC ->",IO_ERR_FEXST,FPERMU);
+   	if (FileExist(FPERMU))
+   	_io_error("QMC ->",IO_ERR_FEXST,FPERMU);
 
-   if (!restart) // new run, generate new status, rnd() streams and config files     
-   {
+   	if (!restart) // new run, generate new status, rnd() streams and config files     
+   	{
 // check the existence of the old files first
   
-      if (FileExist(FSTATUS))    
-     _io_error("QMC ->",IO_ERR_FEXST,FSTATUS);
+      	if (FileExist(FSTATUS))    
+     	_io_error("QMC ->",IO_ERR_FEXST,FSTATUS);
        
-      if (FileExist(FCONFIG)) 
-     _io_error("QMC ->",IO_ERR_FEXST,FCONFIG);
+      	if (FileExist(FCONFIG)) 
+     	_io_error("QMC ->",IO_ERR_FEXST,FCONFIG);
 
-      if (FileExist(FRANDOM)) 
-     _io_error("QMC ->",IO_ERR_FEXST,FRANDOM);
+      	if (FileExist(FRANDOM)) 
+     	_io_error("QMC ->",IO_ERR_FEXST,FRANDOM);
+
+      	if (FileExist(FSEED)) 
+     	_io_error("QMC ->",IO_ERR_FEXST,FSEED);
 
 //--------------------------------------------------------
-//    generate tables - potentals, configurations etc, status
+//    	generate tables - potentals, configurations etc, status
 
-//    MCStartBlock = 0; 
-//    SEED for head CPU
-      SEED = 985456376;
-      RandomInit(MPIrank,MPIsize);
+	   	MCStartBlock = 0;  // PIMCRESTART //
+//    	SEED for head CPU
+      	SEED = 985456376;
+      	RandomInit(MPIrank,MPIsize);
 
-      MCConfigInit();                // generate initial configurations
-#ifdef IOWRITE
-#ifdef MODIFY
-        double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
-        ifstream myfile ("IhRCOMC60.xyz");
-        if (myfile.is_open ())
-        {
-            for(int ii=0; ii<NumbAtoms; ii++)
-            {
-                myfile >> RCOMC60[ii][0]>>RCOMC60[ii][1]>>RCOMC60[ii][2];
-                cout << RCOMC60[ii][0]<< "  "<<RCOMC60[ii][1]<< "  "<<RCOMC60[ii][2]<< endl;
-            }
-            myfile.close();
-        }
-        else
-        {
-            if (NumbAtoms == 1)
-            {
-                for(int id=0;id<NDIM;id++)
-                RCOMC60[0][id]=0.0;
-            }
-            else
-            {
-                cout << "ERROR: For Number of Cages > 1, please, provide IhRCOMC60.xyz file with RCOM position of each cage "<<endl;
-                nrerror;
-                exit(0);
-            }
-        }
-        int ii = -1;
-        for (int i=0;i<NumbAtoms;i++)
-        for (int it=0;it<NumbTimes;it++)
-        {
-            ii +=1;
-            for (int id=0;id<NDIM;id++)
-            RCOMC60temp[ii][id]=RCOMC60[i][id];
-        }
+    	MCConfigInit();                // generate initial configurations
+    	for (int it=0;it<NumbAtoms*NumbTimes;it++)
+    	{
+        	for (int id=0;id<NDIM;id++)
+        	{
+            	cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
+        	}
+    	} 
+    	cout<<"  "<<endl;
+    	cout<<"  "<<endl;
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+		{
+        	int offset0 = NumbTimes*atom0;
+			for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+			{
+				if (atom0 != atom1)
+				{
+            		int offset1 = NumbTimes*atom1;
 
-        for (int it=0;it<NumbAtoms*NumbTimes;it++)
-        {
-            for(int id=0;id<NDIM;id++)
-            {
-                MCCoords[id][it]=RCOMC60temp[it][id];
-                cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
-            }
-        } //loop over number of cages
-#endif
-#endif
-#ifdef MOLECULEINCAGE
-	if (MOLECINCAGE)
-    {
-    	double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
-        ifstream myfile ("IhRCOMC60.xyz");
-        if (myfile.is_open ())
-        {
-        	for(int ii=0; ii<NumbAtoms; ii++)
-            {
-          		myfile >> RCOMC60[ii][0]>>RCOMC60[ii][1]>>RCOMC60[ii][2];
-          		cout << RCOMC60[ii][0]<< "  "<<RCOMC60[ii][1]<< "  "<<RCOMC60[ii][2]<< endl;
-            }
-          	myfile.close();
-        }
-        else
-        {
-        	if (NumbAtoms == 1)
-            {
+            		int it = ((NumbRotTimes - 1)/2);
+            		int t0 = offset0 + it;
+            		int t1 = offset1 + it;
+
+            		double dr;
+            		double dr2 = 0.0;
+            		for (int id=0;id<NDIM;id++)
+            		{
+                		dr   = (MCCoords[id][t0] - MCCoords[id][t1]);
+                		dr2 += (dr*dr);
+            		}
+            		double r = sqrt(dr2);
+					cout<<"atom0 "<<atom0<<" atom1 "<<atom1<<" RCOM "<<r<<endl;
+				}
+			}
+		}
+/*
+    	cout<<"  "<<endl;
+    	cout<<"  "<<endl;
+    	for (int it=0;it<NumbAtoms*NumbTimes;it++)
+    	{
+        	for (int id=0;id<NDIM;id++)
+        	{
+            	cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
+        	}
+    	}	 
+*/
+//    	read in initial MCCoords and MCAngles
+      	if(InitMCCoords)
+      	{
+         	cout<<"read in MCCoords and MCAngles from xyz.init file"<<endl;
+         	int ntotal=NumbAtoms*NumbTimes;
+         	int iperm,nboson;
+         	nboson=0;
+         	if(BOSONS)
+         	{
+            	nboson=MCAtom[BSTYPE].numb;
+         	}
+//       	initconf_(MCCooInit,MCAngInit,&ntotal,&MCAtom[BSTYPE].numb,PIndex,RIndex);
+         	initconf_(MCCooInit,MCAngInit,&ntotal,&nboson,PIndex,RIndex);
+         	if(BOSONS)
+         	{
+            	cout<<"read PIndex: "<<" ";
+            	for(int id=0;id<MCAtom[BSTYPE].numb;id++)
+            	cout<<PIndex[id]<<" ";
+
+            	cout<<endl;
+
+            	cout<<"read RIndex: "<<" ";
+            	for(int id=0;id<MCAtom[BSTYPE].numb;id++)
+            	cout<<RIndex[id]<<" ";
+
+            	cout<<endl;
+         	}
+
+         	for (int it=0;it<NumbAtoms*NumbTimes;it++)
+         	{
             	for(int id=0;id<NDIM;id++)
-            	RCOMC60[0][id]=0.0;
-            }
-            else
-            {
-            	cout << "ERROR: For Number of Cages > 1, please, provide IhRCOMC60.xyz file with RCOM position of each cage "<<endl;
-            	nrerror;
-            	exit(0);
-            }
-        }
-        int ii = -1;
-        for (int i=0;i<NumbAtoms;i++)
-        for (int it=0;it<NumbTimes;it++)
-        {
-        	ii +=1;
-          	for (int id=0;id<NDIM;id++)
-          	RCOMC60temp[ii][id]=RCOMC60[i][id];
-        }
+            	{
+               		MCCoords[id][it]=MCCooInit[it*NDIM+id];
+               		MCAngles[id][it]=MCAngInit[it*NDIM+id];
+            	}
+         	}
+      	}
+		delete [] MCCooInit;
+		delete [] MCAngInit;
 
-        for (int it=0;it<NumbAtoms*NumbTimes;it++)
-        {
-        	for(int id=0;id<NDIM;id++)
-            {
-            	MCCoords[id][it]=RCOMC60temp[it][id];
-            	MCAngles[id][it]=0.0;
-              	cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
-            }
-       	} //loop over number of cages
-	}//endif MOLECINCAGE
-#endif
-
-//    read in initial MCCoords and MCAngles
-      if(InitMCCoords)
-      {
-         cout<<"read in MCCoords and MCAngles from xyz.init file"<<endl;
-         int ntotal=NumbAtoms*NumbTimes;
-         int iperm,nboson;
-         nboson=0;
-         if(BOSONS)
-         {
-            nboson=MCAtom[BSTYPE].numb;
-         }
-//       initconf_(MCCooInit,MCAngInit,&ntotal,&MCAtom[BSTYPE].numb,PIndex,RIndex);
-         initconf_(MCCooInit,MCAngInit,&ntotal,&nboson,PIndex,RIndex);
-         if(BOSONS)
-         {
-            cout<<"read PIndex: "<<" ";
-            for(int id=0;id<MCAtom[BSTYPE].numb;id++)
-            cout<<PIndex[id]<<" ";
-
-            cout<<endl;
-
-            cout<<"read RIndex: "<<" ";
-            for(int id=0;id<MCAtom[BSTYPE].numb;id++)
-            cout<<RIndex[id]<<" ";
-
-            cout<<endl;
-         }
-
-         for (int it=0;it<NumbAtoms*NumbTimes;it++)
-         {
-            for(int id=0;id<NDIM;id++)
-            {
-               MCCoords[id][it]=MCCooInit[it*NDIM+id];
-               MCAngles[id][it]=MCAngInit[it*NDIM+id];
-            }
-
-//          put into MCCosine
-            double phi  = MCAngles[PHI][it];
-            double cost = MCAngles[CTH][it];
-            double sint = sqrt(1.0 - cost*cost);
-            double chi  = MCAngles[CHI][it];
-#ifdef MOLECULEINCAGE
-            double chi  = MCAngles[CHI][it];
-#endif
-
-            MCCosine[AXIS_X][it] = sint*cos(phi);
-            MCCosine[AXIS_Y][it] = sint*sin(phi);
-            MCCosine[AXIS_Z][it] = cost;
-
-#ifdef MOLECULEINCAGE
-            MCCosinex[AXIS_X][it] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
-            MCCosinex[AXIS_Y][it] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
-            MCCosinex[AXIS_Z][it] = -sint*cos(chi);
-
-            MCCosiney[AXIS_X][it] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
-            MCCosiney[AXIS_Y][it] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
-            MCCosiney[AXIS_Z][it] = sint*sin(chi);
-#endif
-
-         }
-      }
-
-//    string fname = MCFileName + IO_EXT_XYZ;
-//    IOxyz(IOWrite,fname.c_str());  // test output of initial config
-      string fname = MCFileName;
-      IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
+    	//string fname = MCFileName + IO_EXT_XYZ;
+    	//IOxyz(IOWrite,fname.c_str());  // test output of initial config
+      	string fname = MCFileName;
+      	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 
 //--------------------------------------------------------
 
-      StatusIO(IOWrite,FSTATUS);
-      ConfigIO(IOWrite,FCONFIG);
-      TablesIO(IOWrite,FTABLES);
-      RandomIO(IOWrite,FRANDOM);
+//PIMCRESTART begins here//
+      	StatusIO(IOWrite,FSTATUS);
+      	ConfigIO(IOWrite,FCONFIG);
+      	TablesIO(IOWrite,FTABLES);
+      	RandomIO(IOWrite,FRANDOM);
+		SeedIO(IOWrite,FSEED); 
+//PIMCRESTART ends here//
 
-      if (WORM)
-      QWormsIO(IOWrite,FQWORMS);
-   }
+      	if (WORM)
+      	QWormsIO(IOWrite,FQWORMS);
+   	}
 
-   MCWormAverageReset();      // debug worm
+   	MCWormAverageReset();      // debug worm
 
+   	InitTotalAverage();      // DUMP 
 // --- RESTART/START NEW RUN ----------------------------
 
-   StatusIO(IORead,FSTATUS);  // load MCStartBlock
-   ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
-   TablesIO(IORead,FTABLES);  // load permutation tables
-   RandomIO(IORead,FRANDOM);  // load rnd streams 
+//PIMCRESTART begins here//
+   	if (restart) // new run, generate new status, rnd() streams and config files     
+   	{
+		StatusIO(IORead,FSTATUS);  // load MCStartBlock
+   		ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
+   		TablesIO(IORead,FTABLES);  // load permutation tables
+   		RandomIO(IORead,FRANDOM);  // load rnd streams 
+		SeedIO(IORead,FSEED);
+      	string fname = MCFileName;
+      	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
+	}
+//PIMCRESTART ends here//
 
-   if (WORM)
-   QWormsIO(IORead,FQWORMS);
+    for (int it=0;it<NumbAtoms*NumbTimes;it++)
+    {
+
+        double phi  = MCAngles[PHI][it];
+        double cost = MCAngles[CTH][it];
+        double sint = sqrt(1.0 - cost*cost);
+        double chi  = MCAngles[CHI][it];
+
+        MCCosine[AXIS_X][it] = sint*cos(phi);
+        MCCosine[AXIS_Y][it] = sint*sin(phi);
+        MCCosine[AXIS_Z][it] = cost;
+    }
+
+   	if (WORM)
+   	QWormsIO(IORead,FQWORMS);
 
 // BEGIN loop over blocks ------------------------
 
-#ifndef PIGSROTORS
-   InitPotentials();
-#endif
+   	InitPotentials();
 
-   if (ROTATION)
-     InitRotDensity();
+   	if (ROTATION)
+    	InitRotDensity();
 
-   if((IREFLX == 1 || IREFLY == 1 || IREFLZ == 1) && MCAtom[IMTYPE].molecule != 2)
-   {
-      cout<<IREFLX<<" "<<IREFLY<<" "<<IREFLZ<<" "<<MCAtom[IMTYPE].molecule<<endl;
-      nrerror("main","SYMMETRIZATION IS ONLY IMPLEMENTED FOR TOPS");
-   }
+   	if((IREFLX == 1 || IREFLY == 1 || IREFLZ == 1) && MCAtom[IMTYPE].molecule != 2)
+   	{
+      	cout<<IREFLX<<" "<<IREFLY<<" "<<IREFLZ<<" "<<MCAtom[IMTYPE].molecule<<endl;
+      	nrerror("main","SYMMETRIZATION IS ONLY IMPLEMENTED FOR TOPS");
+   	}
 // MPI BLOCK 1 in MASTER start
 // send run information to all the worker CPUs
 /*
@@ -434,22 +449,22 @@ int main(int argc, char *argv[])
 // MPI BLOCK 1 in MASTER done
 */
 
-   InitMCEstims();
-   InitTotalAverage();      // DUMP 
-   double sumsCount = 0.0;  // counter for accum sums
+
+    InitMCEstims();
+   	//InitTotalAverage();      // DUMP 
    
-   ResetMCCounts();
-   ResetQWCounts();
+   	ResetMCCounts();
+   	ResetQWCounts();
 
 /*
-// try openmp for loop
-   int chunksize,nthrds;
-   #pragma omp parallel
-   {
-   int tid=omp_get_thread_num();
-   nthrds=omp_get_num_threads();
-   chunksize=NumbRotTimes/nthrds;
-   cout<<"chunksize="<<chunksize<<endl;
+// 	try openmp for loop
+   	int chunksize,nthrds;
+   	#pragma omp parallel
+   	{
+   	int tid=omp_get_thread_num();
+   	nthrds=omp_get_num_threads();
+   	chunksize=NumbRotTimes/nthrds;
+   	cout<<"chunksize="<<chunksize<<endl;
    int itini=chunksize*tid;
    int itfnl=itini+chunksize;
 // #pragma omp for
@@ -479,18 +494,29 @@ int main(int argc, char *argv[])
    	cout<<"NThreads="<<NThreads<<" chunksize="<<chunksize<<endl;
 
    	printf("OpenMP version: %d\n", _OPENMP);
-   	randomseed(); //set seed according to clock
-	// RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+   	//randomseed(); //set seed according to clock
+	//RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 
    	long int blockCount = MCStartBlock;  
-   	while (blockCount<NumberOfMCBlocks+MCStartBlock) // START NEW BLOCK      
+   	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
    	{      
     	blockCount++; 
-       	MCResetBlockAverage();
+#ifdef PIMCTYPE
+       	MCResetBlockAveragePIMC();
+#endif
+//
+#ifdef PIGSTYPE
+       	MCResetBlockAveragePIGS();
+#endif
+//
+#ifdef PIGSENTTYPE
+       	MCResetBlockAveragePIGSENT();
+#endif
      
        	long int passCount = 0;        // BEGIN NEW MC PASS
        	long int passTotal = 0;        // total number of Moves = passCount*time 
 
+       	//for (int time=0; time<1; time++)
        	while (passCount++ < NumberOfMCPasses) 
        	for (int time=0; time<NumbTimes; time++)
        	{
@@ -524,7 +550,22 @@ int main(int argc, char *argv[])
            		}
         	} 
        		else
-   			PIMCPass(type,time);
+			{
+		    	PIMCPass(type,time);
+			}
+#ifdef INSTANT
+			totalStep++;
+#ifdef IOWRITE
+            SaveInstantEnergy (); 
+#endif
+			if (blockCount > (NumberOfMCBlocks - 1000))
+			{
+		    	SaveInstantAngularDOF(totalStep);
+#ifdef SWAPTOUNSWAP
+	    		SaveInstantSwap(iUnSwap, iSwap, totalStep);
+#endif
+			}
+#endif
 
    			if (blockCount>NumberOfEQBlocks)        // skip equilibration steps
    			{
@@ -535,7 +576,7 @@ int main(int argc, char *argv[])
                		{
                 		if (!Worm.exists)
                 		{
-                			MCGetAverage();
+                			//MCGetAverage();
 	                        //prtper_(PIndex,&MCAtom[BSTYPE].numb,&blockCount);
 
                    			// print the instantaneous xyz and prl info for the closed path
@@ -556,19 +597,34 @@ int main(int argc, char *argv[])
                 	}	   
                 	else
                  	{
+#ifdef IOWRITE
                     	MCGetAverage();
+#endif
+//
+#ifdef PIMCTYPE
+                    	MCGetAveragePIMC();
+#endif
+//
+#ifdef PIGSTYPE
+                    	MCGetAveragePIGS();
+#endif
+//
+#ifdef PIGSENTTYPE
+                    	MCGetAveragePIGSENT();
+#endif
+//
 					    //omp_set_num_threads(1);
 					    //MCGetAverage();
 					    //omp_set_num_threads(NThreads);
                         //print the instantaneous xyz and prl info for the closed path
                     	if(PrintXYZprl)
                     	{
+#ifdef IOWRITE
                     		stringstream bc;                // convert block # to string
                     		bc.width(IO_BLOCKNUMB_WIDTH);
                     		bc.fill('0');
                     		bc<<blockCount;
                     		string fname = MCFileName + bc.str();  // file name prefix including block #
-#ifndef PIGSROTORSIO
                     		IOxyzAng(IOWrite,fname.c_str());
 #endif
                     		PrintXYZprl = 0;
@@ -581,10 +637,11 @@ int main(int argc, char *argv[])
               	if (passTotal % MCSKIP_TOTAL == 0 && avergCount)  
               	{
                		sumsCount += 1.0;                 
+#ifdef PIGSENTTYPE
+               		SaveSumEnergy (totalCountENT,sumsCount);
+                    SaveSumTrReducedDens(totalCount, sumsCount);
+#else
                		SaveSumEnergy (totalCount,sumsCount);
-#ifdef PIGSROTORSIO
-					SaveSumAngularDOF(totalCount, sumsCount);
-					SaveInstantAngularDOF(totalCount, sumsCount);
 #endif
             	}
 			}  
@@ -597,19 +654,27 @@ int main(int argc, char *argv[])
 
 		if (blockCount>NumberOfEQBlocks && avergCount)   // skip equilibration steps
 		{
+#ifdef PIGSENTTYPE
+   			MCSaveBlockAveragesPIGSENT(blockCount);
+#else
    			MCSaveBlockAverages(blockCount);
-
-#ifndef PIGSROTORSIO
+#endif
 			// save accumulated interatomic distribution
-			SaveGraSum(MCFileName.c_str(),totalCount);
 
+#ifdef HISTOGRAM
+			if (blockCount > 1500)
+			SaveGxyzSum(MCFileName.c_str(),totalCount);
+#endif
+#ifdef NEWDENSITY
+			if (blockCount > 600)
+			SaveGraSum(MCFileName.c_str(),totalCount);
+#endif
+
+#ifdef IOWRITE
 			if(IMPURITY && MCAtom[IMTYPE].molecule == 1)
 	    	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
 	   		if(IMPURITY && MCAtom[IMTYPE].molecule == 3)
-	     	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
-
-	   		if(IMPURITY && MCAtom[IMTYPE].molecule == 4)
 	     	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
            	if(IMPURITY && MCAtom[IMTYPE].molecule == 2)
@@ -619,22 +684,31 @@ int main(int argc, char *argv[])
 				// SaveRhoThetaChi(MCFileName.c_str(),totalCount,MC_TOTAL); // we don't need 2d angular distribution comparison now
            	}
 
+#endif
+#ifdef PIMCTYPE
 			if (ROTATION)                  // DUMP  accumulated average
 				SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
 #endif
 		}
 
+//PIMCRESTART begins // 
 		//  CHECKPOINT: save status, rnd streams and configs ------
+	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
 
-		// MCStartBlock = blockCount; 
+		MCStartBlock = blockCount; 
 
-		IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
-		IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
-		IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
-		IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+		if (blockCount%1000 == 0)
+		{
+			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
+			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
+			IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
+			IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+			IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
+		}
       
-		string fname = MCFileName + IO_EXT_XYZ;
-		IOxyz(IOWrite,fname.c_str());  // test output of initial config
+		string fname = MCFileName;// + IO_EXT_XYZ;
+		IOxyzAng(IOWrite,fname.c_str());  // test output of initial config
+//PIMCRESTART ends // 
 
        	if (WORM)
        	{
@@ -669,13 +743,16 @@ int main(int argc, char *argv[])
 
 void PIMCPass(int type,int time)
 {
-
   // skip solvent and translation moves for rotations only
-#ifndef PIGSROTORS
+#ifdef MOVECOM
+#ifdef GAUSSIANMOVE
+	MCMolecularMoveGauss(type);
+#else
    if (time == 0)
    MCMolecularMove(type);        
 // move the solvent particles
    MCBisectionMove(type,time);
+#endif
 #endif
 
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 1)  // rotational degrees of freedom
@@ -684,20 +761,12 @@ void PIMCPass(int type,int time)
     	MCRotationsMove(type);
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
     	MCRotations3D(type);
-#ifdef LINEARROTORS
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
     	MCRotationsMove(type);
-#endif
-#ifdef MOLECULEINCAGE
-	if (MOLECINCAGE)
-    {
-   		if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
-     		MCRotations3D(type);
-	}
-#endif
 }
 
-void MCResetBlockAverage(void) 
+#ifdef PIMCTYPE
+void MCResetBlockAveragePIMC(void) 
 {
 	avergCount = 0.0;
 
@@ -709,18 +778,6 @@ void MCResetBlockAverage(void)
 	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
 	_btotal    = 0.0;
-#ifdef PIGSROTORS
-	_btheta    = 0.0;
-	_bcostheta = 0.0;
-#ifdef DIPOLE
-	_btheta1   = 0.0;
-	_bcostheta1= 0.0;
-	_btheta2   = 0.0;
-	_bcostheta2= 0.0;
-	_btheta3   = 0.0;
-	_bcostheta3= 0.0;
-#endif
-#endif
 	_bkin        = 0.0;
 
 	_brot        = 0.0;
@@ -734,154 +791,406 @@ void MCResetBlockAverage(void)
 	PrintYrfl   = 1;
 	PrintXrfl   = 1;
 	PrintZrfl   = 1;
+#ifdef DDCORR
+	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+    _cdipoleXYZ.resize(NDIMDP);
+    _cdipoleX.resize(NDIMDP);
+    _cdipoleY.resize(NDIMDP);
+    _cdipoleZ.resize(NDIMDP);
+  	_cdipoleXY.resize(NDIMDP);
+	
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{
+        _cdipoleXYZ[idp] = 0.0;
+        _cdipoleX[idp] = 0.0;
+        _cdipoleY[idp] = 0.0;
+        _cdipoleZ[idp] = 0.0;
+    	_cdipoleXY[idp] = 0.0;
+	}
+#endif
+	_bcostheta = 0.0;
+	_ucompx     = 0.0;
+	_ucompy     = 0.0;
+	_ucompz     = 0.0;
+}
+#endif
+
+#ifdef PIGSTYPE
+void MCResetBlockAveragePIGS(void) 
+{
+	avergCount = 0.0;
+
+	ResetMCEstims();
+
+	ResetMCCounts();
+	ResetQWCounts();
+
+	_dbpot     = 0.0;  //added by Hui Li
+	_bpot      = 0.0;
+	_btotal    = 0.0;
+	_bcostheta = 0.0;
+	_ucompx     = 0.0;
+	_ucompy     = 0.0;
+	_ucompz     = 0.0;
+#ifdef DDCORR
+	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+    _cdipoleXYZ.resize(NDIMDP);
+    _cdipoleX.resize(NDIMDP);
+    _cdipoleY.resize(NDIMDP);
+    _cdipoleZ.resize(NDIMDP);
+  	_cdipoleXY.resize(NDIMDP);
+	
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{
+        _cdipoleXYZ[idp] = 0.0;
+        _cdipoleX[idp] = 0.0;
+        _cdipoleY[idp] = 0.0;
+        _cdipoleZ[idp] = 0.0;
+    	_cdipoleXY[idp] = 0.0;
+	}
+#endif
+	_bkin        = 0.0;
+
+	_brot        = 0.0;
+	_brot1        = 0.0;
+	_brotsq      = 0.0;
+	_bCv         = 0.0;
+	_bCv_trans   = 0.0;
+	_bCv_rot     = 0.0;
+
+	PrintXYZprl = 1;
+
+	PrintYrfl   = 1;
+	PrintXrfl   = 1;
+	PrintZrfl   = 1;
 
 }
+#endif
 
-void MCGetAverage(void) 
+#ifdef PIGSENTTYPE
+void MCResetBlockAveragePIGSENT(void) 
+{
+#ifdef SWAPTOUNSWAP
+    MCAccepSwap = 0.0;
+    MCAccepUnSwap = 0.0;
+#endif
+	avergCount = 0.0;
+
+	ResetMCEstims();
+	ResetMCCounts();
+	ResetQWCounts();
+
+    _bnm       = 0.0;
+    _bdm       = 0.0;
+	_trOfDensitySq = 0.0;
+
+#ifdef PIGSENTBOTH
+	avergCountENT = 0.0;
+    _dbpot     = 0.0;  //added by Hui Li
+    _bpot      = 0.0;
+    _btotal    = 0.0;
+    _bcostheta = 0.0;
+    _ucompx     = 0.0;
+    _ucompy     = 0.0;
+    _ucompz     = 0.0;
+#ifdef DDCORR
+	int NumbAtoms1 = NumbAtoms/2;
+	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
+    _cdipoleXYZ.resize(NDIMDP);
+    _cdipoleX.resize(NDIMDP);
+    _cdipoleY.resize(NDIMDP);
+    _cdipoleZ.resize(NDIMDP);
+    _cdipoleXY.resize(NDIMDP);
+
+    for (int idp = 0; idp < NDIMDP; idp++)
+    {
+        _cdipoleXYZ[idp] = 0.0;
+        _cdipoleX[idp] = 0.0;
+        _cdipoleY[idp] = 0.0;
+        _cdipoleZ[idp] = 0.0;
+        _cdipoleXY[idp] = 0.0;
+    }
+#endif
+    _bkin        = 0.0;
+
+    _brot        = 0.0;
+    _brot1        = 0.0;
+#endif
+	PrintXYZprl = 1;
+	PrintYrfl   = 1;
+	PrintXrfl   = 1;
+	PrintZrfl   = 1;
+}
+#endif
+
+#ifdef PIGSENTTYPE
+void MCGetAveragePIGSENT(void) 
 {
 	avergCount       += 1.0;
 	totalCount       += 1.0;  
 
-    double skin       = 0.;
-#ifndef PIGSROTORS
-	skin       = GetKinEnergy();           // kin energy
-	_bkin            += skin;                     // block average for kin energy
-	_kin_total       += skin;                     // accumulated average 
+#ifdef SWAPTOUNSWAP
+    double snm        = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
+    double sdm        = MCAccepUnSwap/(MCAccepSwap+MCAccepUnSwap);
+#else
+    double snm        = GetEstimNM();
+    double sdm        = GetEstimDM();
 #endif
-	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
+    _bnm             += snm;
+    _bdm             += sdm;
+    _nm_total        += snm;
+    _dm_total        += sdm;
+#ifdef SWAP
+	_trOfDensitySq   += sdm/snm;
+	_trOfDensitySq_total += sdm/snm;
+#endif
+#ifdef UNSWAP
+	_trOfDensitySq   += snm/sdm;
+	_trOfDensitySq_total += snm/sdm;
+#endif
+#ifdef PIGSENTBOTH
+	if (Distribution == "unSwap")
+	{
+		avergCountENT    += 1.0;
+		totalCountENT    += 1.0;  
+
+		double spot       = GetPotEnergyPIGSENT();//GetPotEnergyPIGS(); // pot energy and density distributions
+		_bpot            += spot;                     // block average for pot energy
+		_pot_total       += spot;
+		double stotal     = GetTotalEnergyPIGSENT();//GetTotalEnergy();         // Total energy
+		_btotal          += stotal;                   // kin+pot
+		_total           += stotal;
+		double srot1      = (stotal - spot);
+		_brot1           += srot1;
+		_rot_total1      += srot1;
+
+		double cosTheta   = 0.0;
+		double compxyz[NDIM];
+		compxyz[0] = 0.0;
+		compxyz[1] = 0.0;
+		compxyz[2] = 0.0;
+
+		GetCosThetaPIGSENT(cosTheta, compxyz);
+		double scostheta  = cosTheta;
+		double scompx     = compxyz[0];
+		double scompy     = compxyz[1];
+		double scompz     = compxyz[2];
+
+		_bcostheta       += scostheta; 
+		_costheta_total  += scostheta;
+
+		_ucompx          += scompx;
+		_ucompy          += scompy;
+		_ucompz          += scompz;
+		_ucompx_total    += scompx;
+		_ucompy_total    += scompy;
+		_ucompz_total    += scompz;
+#ifdef DDCORR
+		int NumbAtoms1 = NumbAtoms/2;
+		int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
+    	double DipoleCorrXYZ[NDIMDP];
+    	double DipoleCorrX[NDIMDP];
+    	double DipoleCorrY[NDIMDP];
+    	double DipoleCorrZ[NDIMDP];
+    	double DipoleCorrXY[NDIMDP];
+
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			DipoleCorrXYZ[idp] = 0.0;
+			DipoleCorrX[idp]   = 0.0;
+			DipoleCorrY[idp]   = 0.0;
+			DipoleCorrZ[idp]   = 0.0;
+			DipoleCorrXY[idp]  = 0.0;
+		}
+
+		GetDipoleCorrelationPIGSENT(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
+
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
+			_cdipoleX[idp]   += DipoleCorrX[idp];
+			_cdipoleY[idp]   += DipoleCorrY[idp];
+			_cdipoleZ[idp]   += DipoleCorrZ[idp];
+			_cdipoleXY[idp]  += DipoleCorrXY[idp];
+			_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
+			_cdipoleX_total[idp]   += DipoleCorrX[idp];
+			_cdipoleY_total[idp]   += DipoleCorrY[idp];
+			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
+			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
+		}
+#endif
+		double srot;
+		if (ROTATION)
+		{
+			if(MCAtom[IMTYPE].molecule == 1)
+			{
+				srot      = GetRotEnergy();           // kin energy
+			}
+
+			if(MCAtom[IMTYPE].molecule == 3)
+			{
+				srot      = GetRotPlanarEnergy();     // kin energy
+			}
+
+			if(MCAtom[IMTYPE].molecule == 3)
+			{
+				srot          = GetRotE3D();
+			}
+        
+			if(MCAtom[IMTYPE].molecule == 4)
+			{
+				srot      = GetRotEnergyPIGS();           // kin energy
+			}
+			_brot        += srot;
+			_rot_total   += srot;
+		}
+	}
+#endif
+//  reflect for MF molecule
+	if(IREFLY == 1)
+	{
+    	double rndrfl=rnd7();
+        if(rndrfl < 0.5)
+        {
+        	Reflect_MF_XZ();
+        }
+//      else
+//      {
+//      	cout<<"Not in Reflect_MF_XZ"<<endl;
+//      }
+	}
+
+    if(IREFLX == 1)
+    {
+    	double rndrfl=rnd7();
+        if(rndrfl < 0.5)
+        {
+        	Reflect_MF_YZ();
+        }
+//      else
+//      {
+//          cout<<"Not in Reflect_MF_YZ"<<endl;
+//      }
+    }
+
+    if(IREFLZ == 1)
+    {
+        double rndrfl=rnd7();
+        if(rndrfl < 0.5)
+        {
+            Reflect_MF_XY();
+        }
+//      else
+//      {
+//          cout<<"Not in Reflect_MF_XY"<<endl;
+//      }
+    }
+
+    if(IROTSYM == 1)
+    {
+        double rndrot=rnd7();
+
+        if(rndrot < 0.5)
+        RotSymConfig();
+    }
+}
+#endif
+
+#ifdef PIGSTYPE
+void MCGetAveragePIGS(void) 
+{
+	avergCount       += 1.0;
+	totalCount       += 1.0;  
+
+	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
 	double stotal     = GetTotalEnergy();         // Total energy
 	_btotal          += stotal;                   // kin+pot
 	_total           += stotal;
-	//double dspot    = GetPotEnergy_Diff();      // pot energy differencies added by Hui Li 
+	double srot1      = (stotal - spot);
+	_brot1           += srot1;
+	_rot_total1      += srot1;
 
-	//_dbpot         += dspot;                    // block average for pot energy differencies added by Hui Li
- 
-	//_dpot_total    += dspot;                    //added by Hui Li
+	double cosTheta   = 0.0;
+	double compxyz[NDIM];
+	compxyz[0] = 0.0;
+	compxyz[1] = 0.0;
+	compxyz[2] = 0.0;
 
-/* new addition */
-#ifdef PIGSROTORS
-    double* scostheta;
-    scostheta = GetCosTheta();
+	GetCosThetaPIGS(cosTheta, compxyz);
+	double scostheta  = cosTheta;
+	double scompx     = compxyz[0];
+	double scompy     = compxyz[1];
+	double scompz     = compxyz[2];
 
-	_bcostheta       += scostheta[0]; 
-	_costheta_total  += scostheta[0];
+	_bcostheta       += scostheta; 
+	_costheta_total  += scostheta;
 
-	double stheta     = acos(scostheta[0]);
-	_btheta          += stheta; 
-	_theta_total     += stheta;
-#ifdef DIPOLE
-	_bcostheta1      += scostheta[1]; 
-	_costheta_total1 += scostheta[1];
+	_ucompx          += scompx;
+	_ucompy          += scompy;
+	_ucompz          += scompz;
+	_ucompx_total    += scompx;
+	_ucompy_total    += scompy;
+	_ucompz_total    += scompz;
 
-	double stheta1    = acos(scostheta[1]);
-	_btheta1         += stheta1; 
-	_theta_total1    += stheta1;
+#ifdef DDCORR
+	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+    double DipoleCorrXYZ[NDIMDP];
+    double DipoleCorrX[NDIMDP];
+    double DipoleCorrY[NDIMDP];
+    double DipoleCorrZ[NDIMDP];
+    double DipoleCorrXY[NDIMDP];
 
-//particle 1
-	_bcostheta2      += scostheta[2]; 
-	_costheta_total2 += scostheta[2];
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{
+		DipoleCorrXYZ[idp] = 0.0;
+		DipoleCorrX[idp]   = 0.0;
+		DipoleCorrY[idp]   = 0.0;
+		DipoleCorrZ[idp]   = 0.0;
+		DipoleCorrXY[idp]  = 0.0;
+	}
 
-	double stheta2    = acos(scostheta[2]);
-	_btheta2         += stheta2; 
-	_theta_total2    += stheta2;
+	GetDipoleCorrelationPIGS(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
 
-//particle 2
-	_bcostheta3      += scostheta[3]; 
-	_costheta_total3 += scostheta[3];
-
-	double stheta3    = acos(scostheta[3]);
-	_btheta3         += stheta3; 
-	_theta_total3    += stheta3;
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{
+		_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
+		_cdipoleX[idp]   += DipoleCorrX[idp];
+		_cdipoleY[idp]   += DipoleCorrY[idp];
+		_cdipoleZ[idp]   += DipoleCorrZ[idp];
+		_cdipoleXY[idp]  += DipoleCorrXY[idp];
+		_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
+		_cdipoleX_total[idp]   += DipoleCorrX[idp];
+		_cdipoleY_total[idp]   += DipoleCorrY[idp];
+		_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
+		_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
+	}
 #endif
-    delete[] scostheta;
-    
-#endif
-/* new addition */
-
-	//rotational degrees of freedom
-	/* reactive */
-		double srot;
+	double srot;
 	if (ROTATION)
 	{
-
 		if(MCAtom[IMTYPE].molecule == 1)
+		{
 			srot      = GetRotEnergy();           // kin energy
-		else
+		}
+
 		if(MCAtom[IMTYPE].molecule == 3)
+		{
 			srot      = GetRotPlanarEnergy();     // kin energy
-		else
-		srot          = GetRotE3D();
+		}
+
+		if(MCAtom[IMTYPE].molecule == 3)
+		{
+			srot          = GetRotE3D();
+		}
         
-#ifdef LINEARROTORS
 		if(MCAtom[IMTYPE].molecule == 4)
+		{
 			srot      = GetRotEnergyPIGS();           // kin energy
-#endif
+		}
 		_brot        += srot;
 		_rot_total   += srot;
-
-		_brotsq      += ErotSQ;
-		_rotsq_total += ErotSQ;
-
-       GetRCF(); 
-	}
-
-// accumulate terms for Cv
-   double sCv;
-   sCv = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
-         -((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)
-         + (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin) + Erot_termSQ - ErotSQ;
-
-   _bCv += sCv;
-   _Cv_total += sCv;
-
-// accumulate terms for translational Cv
-   double sCv_trans;
-   double sCv_trans_1=-((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin);
-   double sCv_trans_2=(2.0/MCBeta)*0.5*(double)(NDIM*NumbAtoms)/MCTau - skin;
-   sCv_trans = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
-         -((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)
-         + (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin);
-
-   _bCv_trans += sCv_trans;
-   _Cv_trans_total += sCv_trans;
-   _Cv_trans_1_total += sCv_trans_1;
-   _Cv_trans_2_total += sCv_trans_2;
-
-// accumulate terms for rotational Cv
-   double sCv_rot;
-   sCv_rot = -srot*srot + Erot_termSQ - ErotSQ;
-
-   _bCv_rot += sCv_rot;
-   _Cv_rot_total += sCv_rot;
-
-/* reactive */
-// check whether there're bosons in the system
-
-	if (BOSONS) 
-	{
-		GetExchangeLength();
-		GetPermutation();
-	}
-
-#ifdef DEBUG_PIMC
-	if (NDIM !=3) 
-		nrerror("MCGetAverage()","Area estimators for 3D case only"); 
-#endif
-	if (BOSONS and MCAtom[IMTYPE].molecule == 1) 
-	GetAreaEstimators();
-
-	if (BOSONS)
-	{
-		int iframe = 0;
-		GetAreaEstim3D(iframe);
-	}
-
-	if ((BOSONS and MCAtom[IMTYPE].molecule == 2) && ISPHER == 0) 
-	{
-		int iframe = 1;
-		GetAreaEstim3D(iframe);
 	}
 
 //  reflect for MF molecule
@@ -931,8 +1240,230 @@ void MCGetAverage(void)
         if(rndrot < 0.5)
         RotSymConfig();
     }
-
 }
+#endif
+
+#ifdef PIMCTYPE
+void MCGetAveragePIMC(void) 
+{
+	avergCount       += 1.0;
+	totalCount       += 1.0;  
+#ifdef HISTOGRAM
+	GetDensities();
+#endif
+
+    double skin       = 0.;
+	if(TRANSLATION)
+	{
+		skin              = GetKinEnergy();           // kin energy
+	}
+	_bkin            += skin;                     // block average for kin energy
+	_kin_total       += skin;                     // accumulated average 
+
+	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
+	_bpot            += spot;                     // block average for pot energy
+	_pot_total       += spot;
+
+
+    double cosTheta   = 0.0;
+    double compxyz[NDIM];
+    compxyz[0] = 0.0;
+    compxyz[1] = 0.0;
+    compxyz[2] = 0.0;
+
+    GetCosThetaPIMC(cosTheta, compxyz);
+    double scostheta  = cosTheta;
+    double scompx     = compxyz[0];
+    double scompy     = compxyz[1];
+    double scompz     = compxyz[2];
+
+    _bcostheta       += scostheta;
+    _costheta_total  += scostheta;
+
+    _ucompx          += scompx;
+    _ucompy          += scompy;
+    _ucompz          += scompz;
+    _ucompx_total    += scompx;
+    _ucompy_total    += scompy;
+    _ucompz_total    += scompz;
+
+#ifdef DDCORR
+	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+    double DipoleCorrXYZ[NDIMDP];
+    double DipoleCorrX[NDIMDP];
+    double DipoleCorrY[NDIMDP];
+    double DipoleCorrZ[NDIMDP];
+    double DipoleCorrXY[NDIMDP];
+
+    for (int idp = 0; idp < NDIMDP; idp++)
+    {
+        DipoleCorrXYZ[idp] = 0.0;
+        DipoleCorrX[idp]   = 0.0;
+        DipoleCorrY[idp]   = 0.0;
+        DipoleCorrZ[idp]   = 0.0;
+        DipoleCorrXY[idp]  = 0.0;
+    }
+
+    GetDipoleCorrelationPIMC(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
+
+    for (int idp = 0; idp < NDIMDP; idp++)
+    {
+        _cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
+        _cdipoleX[idp]   += DipoleCorrX[idp];
+        _cdipoleY[idp]   += DipoleCorrY[idp];
+        _cdipoleZ[idp]   += DipoleCorrZ[idp];
+        _cdipoleXY[idp]  += DipoleCorrXY[idp];
+        _cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
+        _cdipoleX_total[idp]   += DipoleCorrX[idp];
+        _cdipoleY_total[idp]   += DipoleCorrY[idp];
+        _cdipoleZ_total[idp]   += DipoleCorrZ[idp];
+        _cdipoleXY_total[idp]  += DipoleCorrXY[idp];
+    }
+#endif
+
+	double srot;
+	if (ROTATION)
+	{
+		if(MCAtom[IMTYPE].molecule == 1)
+		{
+			srot      = GetRotEnergy();           // kin energy
+		}
+
+		if(MCAtom[IMTYPE].molecule == 3)
+		{
+			srot      = GetRotPlanarEnergy();     // kin energy
+		}
+
+		if(MCAtom[IMTYPE].molecule == 2)
+		{
+			srot          = GetRotE3D();
+		}
+        
+		if(MCAtom[IMTYPE].molecule == 4)
+		{
+			srot      = GetRotPlanarEnergy();     // kin energy
+		}
+		_brot        += srot;
+		_rot_total   += srot;
+
+		_brotsq      += ErotSQ;
+		_rotsq_total += ErotSQ;
+
+	     GetRCF(); 
+
+	}
+
+	double stotal     = skin + srot + spot;
+	_btotal          += stotal;                   // kin+pot
+	_total           += stotal;
+
+#ifdef IOWRITE
+// accumulate terms for Cv
+   double sCv;
+   sCv = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
+         -((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)
+         + (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin) + Erot_termSQ - ErotSQ;
+
+   _bCv += sCv;
+   _Cv_total += sCv;
+
+// accumulate terms for translational Cv
+   double sCv_trans;
+   double sCv_trans_1=-((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin);
+   double sCv_trans_2=(2.0/MCBeta)*0.5*(double)(NDIM*NumbAtoms)/MCTau - skin;
+   sCv_trans = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
+         -((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)
+         + (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin);
+
+   _bCv_trans += sCv_trans;
+   _Cv_trans_total += sCv_trans;
+   _Cv_trans_1_total += sCv_trans_1;
+   _Cv_trans_2_total += sCv_trans_2;
+
+// accumulate terms for rotational Cv
+   double sCv_rot;
+   sCv_rot = -srot*srot + Erot_termSQ - ErotSQ;
+
+   _bCv_rot += sCv_rot;
+   _Cv_rot_total += sCv_rot;
+
+// check whether there're bosons in the system
+
+	if (BOSONS) 
+	{
+		GetExchangeLength();
+		GetPermutation();
+	}
+
+#ifdef DEBUG_PIMC
+	if (NDIM !=3) 
+		nrerror("MCGetAverage()","Area estimators for 3D case only"); 
+#endif
+	if (BOSONS and MCAtom[IMTYPE].molecule == 1) 
+	GetAreaEstimators();
+
+	if (BOSONS)
+	{
+		int iframe = 0;
+		GetAreaEstim3D(iframe);
+	}
+
+	if ((BOSONS and MCAtom[IMTYPE].molecule == 2) && ISPHER == 0) 
+	{
+		int iframe = 1;
+		GetAreaEstim3D(iframe);
+	}
+#endif
+
+//  reflect for MF molecule
+	if(IREFLY == 1)
+	{
+    	double rndrfl=rnd7();
+        if(rndrfl < 0.5)
+        {
+        	Reflect_MF_XZ();
+        }
+//      else
+//      {
+//      	cout<<"Not in Reflect_MF_XZ"<<endl;
+//      }
+	}
+
+    if(IREFLX == 1)
+    {
+    	double rndrfl=rnd7();
+        if(rndrfl < 0.5)
+        {
+        	Reflect_MF_YZ();
+        }
+//      else
+//      {
+//          cout<<"Not in Reflect_MF_YZ"<<endl;
+//      }
+    }
+
+    if(IREFLZ == 1)
+    {
+        double rndrfl=rnd7();
+        if(rndrfl < 0.5)
+        {
+            Reflect_MF_XY();
+        }
+//      else
+//      {
+//          cout<<"Not in Reflect_MF_XY"<<endl;
+//      }
+    }
+
+    if(IROTSYM == 1)
+    {
+        double rndrot=rnd7();
+
+        if(rndrot < 0.5)
+        RotSymConfig();
+    }
+}
+#endif
 
 void MCWormAverageReset(void)
 {
@@ -944,59 +1475,55 @@ void MCWormAverage(void)
 
 void MCSaveBlockAverages(long int blocknumb) 
 {
-  const char *_proc_=__func__;    //   MCSaveBlockAverages()
+  	const char *_proc_=__func__;    //   MCSaveBlockAverages()
 
-  stringstream bc;                // convert block # to string
-  bc.width(IO_BLOCKNUMB_WIDTH); 
-  bc.fill('0');
-  bc<<blocknumb;
+  	stringstream bc;                // convert block # to string
+  	bc.width(IO_BLOCKNUMB_WIDTH); 
+  	bc.fill('0');
+  	bc<<blocknumb;
 
-  string fname = MCFileName + bc.str();  // file name prefix including block #
+  	string fname = MCFileName + bc.str();  // file name prefix including block #
 
-  //-----------------------------------------------------------------
-  // densities
+  	//-----------------------------------------------------------------
+  	// densities
 
-  // toby temporarily by-pass the density save for the non-linear rotor
-  if( IMPURITY && MCAtom[IMTYPE].molecule == 1)
+  	// toby temporarily by-pass the density save for the non-linear rotor
+#ifdef IOWRITE 
+  	if( IMPURITY && MCAtom[IMTYPE].molecule == 1)
     {
-      SaveDensities1D    (fname.c_str(),avergCount);       
-      SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
+      	SaveDensities1D    (fname.c_str(),avergCount);       
+      	SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
     }
     if( IMPURITY && MCAtom[IMTYPE].molecule == 3)
     {
-      SaveDensities1D    (fname.c_str(),avergCount);       
-      SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
+      	SaveDensities1D    (fname.c_str(),avergCount);       
+      	SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
     }
-#ifndef PIGSROTORSIO
-    if( IMPURITY && MCAtom[IMTYPE].molecule == 4)
+  	if( IMPURITY && MCAtom[IMTYPE].molecule == 2)
     {
-      SaveDensities1D    (fname.c_str(),avergCount);       
-      SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
+      	SaveDensities1D    (fname.c_str(),avergCount);
+
+      	SaveRho1D          (fname.c_str(),avergCount,MC_BLOCK);
+
+      	// SaveDensities3D    (fname.c_str(),avergCount,MC_BLOCK); // this step takes lots of space. temporarily turnned off
+
+      	SaveRhoThetaChi    (fname.c_str(),avergCount,MC_BLOCK);
+
+      	// IOxyzAng(IOWrite,fname.c_str());
     }
-  if( IMPURITY && MCAtom[IMTYPE].molecule == 2)
-    {
-      SaveDensities1D    (fname.c_str(),avergCount);
 
-      SaveRho1D          (fname.c_str(),avergCount,MC_BLOCK);
-
-      // SaveDensities3D    (fname.c_str(),avergCount,MC_BLOCK); // this step takes lots of space. temporarily turnned off
-
-      SaveRhoThetaChi    (fname.c_str(),avergCount,MC_BLOCK);
-
-      // IOxyzAng(IOWrite,fname.c_str());
-    }
-#endif
-
-#ifndef PIGSROTORSIO
 	if (ROTATION) 
-    SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
+	{
+    	SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
+	}
 #endif
-
-	SaveEnergy         (MCFileName.c_str(),avergCount,blocknumb);
-#ifdef PIGSROTORSIO
+	SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
 	SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
+#ifdef DDCORR
+	SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
 
+#ifdef IOWRITE
 	if (BOSONS) 
     SaveExchangeLength (MCFileName.c_str(),avergCount,blocknumb);
 
@@ -1014,8 +1541,30 @@ void MCSaveBlockAverages(long int blocknumb)
     	int iframe = 1;
       	SaveAreaEstim3D (MCFileName.c_str(),avergCount,blocknumb,iframe);
     }
+#endif
 
 }
+
+#ifdef PIGSENTTYPE
+void MCSaveBlockAveragesPIGSENT(long int blocknumb) 
+{
+  	const char *_proc_=__func__;    //   MCSaveBlockAverages()
+
+  	stringstream bc;                // convert block # to string
+  	bc.width(IO_BLOCKNUMB_WIDTH); 
+  	bc.fill('0');
+  	bc<<blocknumb;
+
+  	string fname = MCFileName + bc.str();  // file name prefix including block #
+
+	SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
+	SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
+#ifdef DDCORR
+	SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
+#endif
+    SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
+}
+#endif
 
 void SaveEnergy (const char fname [], double acount, long int blocknumb)
 {
@@ -1032,12 +1581,37 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 	if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
-#ifdef PIGSROTORSIO
+#ifdef PIMCTYPE
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+	fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // potential anergy 2
+	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
 	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
 	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+	fid << endl;
+#endif
+//
+#ifdef PIGSTYPE
+	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
 	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
-#else
+	fid << setw(IO_WIDTH) << _brot1*Units.energy/avergCount << BLANK;    // rot energy 5  
+	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
+	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+	fid << endl;
+#endif
+//
+#ifdef PIGSENTBOTH
+	if (acount != 0.0)
+	{
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+		fid << setw(IO_WIDTH) << _brot*Units.energy/acount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _brot1*Units.energy/acount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/acount << BLANK;    // potential anergy 2
+		fid << setw(IO_WIDTH) << _btotal*Units.energy/acount << BLANK;  //total energy including rot energy 
+	    fid << endl;
+	}
+#endif
+//
+#ifdef IOWRITE
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
     fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // kinetic energy 2
     fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 3
@@ -1051,12 +1625,63 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH) << _bCv/avergCount << BLANK; // heat capacity
     fid << setw(IO_WIDTH) << _bCv_trans/avergCount << BLANK; // translational heat capacity
     fid << setw(IO_WIDTH) << _bCv_rot/avergCount << BLANK; // rotational heat capacity
-#endif
     fid << endl;
+#endif
     fid.close();
 }
 
-#ifdef PIGSROTORS
+#ifdef DDCORR
+void SaveDipoleCorr(const char fname [], double acount, long int blocknumb)
+{
+    const char *_proc_=__func__;    
+
+    fstream fid;
+    string fenergy;
+
+    fenergy  = fname;
+    fenergy += "Dipole.corr";
+
+    fid.open(fenergy.c_str(),ios::app | ios::out);
+    io_setout(fid);
+
+    if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
+	
+	if (acount != 0)
+	{
+   		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
+#ifdef PIGSENTBOTH
+		int NumbAtoms1 = NumbAtoms/2;
+#else
+		int NumbAtoms1 = NumbAtoms;
+#endif
+		int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
+
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{ 
+    		fid << setw(IO_WIDTH) << _cdipoleXYZ[idp]/acount<< BLANK;
+		}
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{ 
+    		fid << setw(IO_WIDTH) << _cdipoleX[idp]/acount<< BLANK;
+		}
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{ 
+    		fid << setw(IO_WIDTH) << _cdipoleY[idp]/acount<<BLANK;
+		}
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{ 
+    		fid << setw(IO_WIDTH) << _cdipoleZ[idp]/acount<< BLANK;
+		}
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{ 
+    		fid << setw(IO_WIDTH) << _cdipoleXY[idp]/acount<< BLANK;
+		}
+    	fid << endl;
+	}
+    fid.close();
+}
+#endif
+
 void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
 {
     const char *_proc_=__func__;    
@@ -1072,32 +1697,70 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
 
     if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
-    fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
-    fid << setw(IO_WIDTH) << _bcostheta/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta/avergCount << BLANK;
-#ifdef DIPOLE
-    fid << setw(IO_WIDTH) << _bcostheta1/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta1/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _bcostheta2/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta2/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _bcostheta3/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _btheta3/avergCount << BLANK;
-#endif
+	if (acount != 0)
+	{
+        fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
+        fid << setw(IO_WIDTH) << _bcostheta/acount << BLANK;
+        fid << setw(IO_WIDTH) << _ucompx/acount << BLANK;
+        fid << setw(IO_WIDTH) << _ucompy/acount << BLANK;
+        fid << setw(IO_WIDTH) << _ucompz/acount << BLANK;
+        fid << endl;
+	}
+    fid.close();
+}
+
+void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
+{
+    const char *_proc_=__func__;
+
+    fstream fid;
+    string fenergy;
+
+    fenergy  = fname;
+    fenergy += ".rden";
+
+    fid.open(fenergy.c_str(),ios::app | ios::out);
+    io_setout(fid);
+
+    if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
+
+    fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;
+    fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
+    fid << setw(IO_WIDTH) << _trOfDensitySq/avergCount << BLANK;
     fid << endl;
     fid.close();
 }
-#endif
 
 void SaveSumEnergy (double acount, double numb)  // global average
 {
 	const char *_proc_=__func__;    //  SaveSumEnergy()
  
-#ifdef PIGSROTORS
+#ifdef PIMCTYPE
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
+	_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
+	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
 	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
 	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
+#endif
+//
+#ifdef PIGSTYPE
+	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
 	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
-#else
+	_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
+	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
+#endif
+//
+#ifdef PIGSENTBOTH
+	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
+	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
+	_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
+	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
+#endif
+//
+#ifdef IOWRITE
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
 	_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
 	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
@@ -1136,81 +1799,254 @@ void SaveSumEnergy (double acount, double numb)  // global average
 	_feng << endl;
 }
 
-#ifdef PIGSROTORS
+#ifdef DDCORR
+void SaveSumDipoleCorr(double acount, double numb)
+{
+    const char *_proc_=__func__;
+
+    _fdc << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
+#ifdef PIGSENTBOTH
+	int NumbAtoms1 = NumbAtoms/2;
+#else
+	int NumbAtoms1 = NumbAtoms;
+#endif
+	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
+
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleXYZ_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleX_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleY_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleZ_total[idp]/acount << BLANK;
+	}
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{ 
+    	_fdc << setw(IO_WIDTH) << _cdipoleXY_total[idp]/acount << BLANK;
+	}
+    _fdc << endl;
+}
+#endif
+
 void SaveSumAngularDOF(double acount, double numb)
 {
     const char *_proc_=__func__;
 
     _fang << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
     _fang << setw(IO_WIDTH) << _costheta_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total/acount << BLANK;
-#ifdef DIPOLE
-    _fang << setw(IO_WIDTH) << _costheta_total1/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total1/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _costheta_total2/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total2/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _costheta_total3/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _theta_total3/acount << BLANK;
-#endif
-
+    _fang << setw(IO_WIDTH) << _ucompx_total/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _ucompy_total/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _ucompz_total/acount << BLANK;
     _fang << endl;
 }
 
-void SaveInstantAngularDOF(double acount, double numb)
+void SaveInstantAngularDOF(long int numb)
 {
     const char *_proc_=__func__;
 
-    double* scostheta;
-    scostheta = GetCosTheta();
-    double stheta     = acos(scostheta[0]);
+#ifdef PIGSENTTYPE
+	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+   	{
+   		for (int it = ((NumbRotTimes - 1)/2-1); it <= ((NumbRotTimes-1)/2); it++) 
+		{
+        	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            int t0      = offset0 + it;
 
-    _fangins << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-    _fangins << setw(IO_WIDTH) << scostheta[0] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta << BLANK;
-#ifdef DIPOLE
-    double stheta1    = acos(scostheta[1]);
-    _fangins << setw(IO_WIDTH) << scostheta[1] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta1 << BLANK;
-
-//particle 1
-	double stheta2    = acos(scostheta[2]);
-    _fangins << setw(IO_WIDTH) << scostheta[2] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta2 << BLANK;
-//particle 2
-	double stheta3    = acos(scostheta[3]);
-    _fangins << setw(IO_WIDTH) << scostheta[3] << BLANK;
-    _fangins << setw(IO_WIDTH) << stheta3 << BLANK;
+			_fangins << setw(IO_WIDTH) << MCCosine[2][t0] << BLANK;
+        }
+    }
+	_fangins << endl;
 #endif
+//
+#ifdef PIMCTYPE
+   	_fanginsc << setw(IO_WIDTH) << numb << BLANK;
+	double cosTheta   = 0.0;
+	double compxyz[NDIM];
+	compxyz[0] = 0.0;
+	compxyz[1] = 0.0;
+	compxyz[2] = 0.0;
+
+	GetCosThetaPIMC(cosTheta, compxyz); //Centroid distribution
+   	_fanginsc << setw(IO_WIDTH) << cosTheta << BLANK;
+   	_fanginsc << setw(IO_WIDTH) << compxyz[0] << BLANK;
+   	_fanginsc << setw(IO_WIDTH) << compxyz[1] << BLANK;
+   	_fanginsc << setw(IO_WIDTH) << compxyz[2] << BLANK;
+    _fanginsc << endl;
+//
+   	//_fangins << setw(IO_WIDTH) << numb << BLANK;
+	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+   	{
+   		for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+		{
+        	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            int t0      = offset0 + it;
+
+			_fangins << setw(IO_WIDTH) << MCCoords[0][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCCoords[1][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCCoords[2][t0] << BLANK;
+
+			_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+			_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+
+			_fangins << endl;
+        }
+    }
+#endif
+
+#ifdef PIGSTYPE
+#ifdef BINARY
+	double instArray[5];
+	instArray[0] = numb;
+	double cosTheta   = 0.0;
+	double compxyz[NDIM];
+	GetCosThetaPIGS(cosTheta, compxyz);
+	instArray[1] = cosTheta;
+	instArray[2] = compxyz[0];
+	instArray[3] = compxyz[1];
+	instArray[4] = compxyz[2];
+	_fangins.write((char*)instArray, 5*sizeof(double));
+#else
+#ifndef GAUSSIANMOVE
+   	_fangins << setw(IO_WIDTH) << numb << BLANK;
+	double cosTheta   = 0.0;
+	double compxyz[NDIM];
+	compxyz[0] = 0.0;
+	compxyz[1] = 0.0;
+	compxyz[2] = 0.0;
+
+	GetCosThetaPIGS(cosTheta, compxyz);
+   	_fangins << setw(IO_WIDTH) << cosTheta << BLANK;
+   	_fangins << setw(IO_WIDTH) << compxyz[0] << BLANK;
+   	_fangins << setw(IO_WIDTH) << compxyz[1] << BLANK;
+   	_fangins << setw(IO_WIDTH) << compxyz[2] << BLANK;
     _fangins << endl;
-    delete[] scostheta;
+#else
+   	_fangins << setw(IO_WIDTH) << numb << BLANK;
+	int it = (NumbTimes - 1)/2;
+	int atom0 = 0;
+	int t0 = it + atom0*NumbTimes;
+	for (int id = 0; id < NDIM; id++)
+	{
+   		_fangins << setw(IO_WIDTH) << MCCoords[id][t0]<< BLANK;
+	}
+	for (int id = 0; id < NDIM; id++)
+	{
+   		_fangins << setw(IO_WIDTH) << MCCoords[id][0]<< BLANK;
+	}
+	for (int id = 0; id < NDIM; id++)
+	{
+   		_fangins << setw(IO_WIDTH) << MCCoords[id][NumbTimes-1]<< BLANK;
+	}
+   	_fangins << endl;
+#endif
+#endif 
+#endif 
+
+}
+
+void SaveInstantEnergy()
+{
+    const char *_proc_=__func__;
+
+    double srotinst, spotinst, stotalinst;
+    if (MCAtom[IMTYPE].molecule == 4)
+    {
+#ifdef PIGSTYPE
+    srotinst   = GetRotEnergyPIGS();
+	spotinst   = GetPotEnergyPIGS(); 
+	stotalinst = GetTotalEnergy();
+#endif
+//
+#ifdef PIMCTYPE
+    srotinst   = GetRotPlanarEnergy(); 
+	spotinst   = GetPotEnergy_Densities(); 
+    stotalinst = 0.0;
+#endif
+    }
+    _fengins << setw(IO_WIDTH) << spotinst << BLANK;
+    _fengins << setw(IO_WIDTH) << stotalinst << BLANK;
+    _fengins << setw(IO_WIDTH) << srotinst << BLANK;
+    _fengins << endl;
+}
+
+#ifdef SWAPTOUNSWAP
+void SaveInstantSwap(double numbSwap, double numbUnSwap, long int numb)
+{
+    const char *_proc_=__func__;
+
+    _fswap << setw(IO_WIDTH) << numb << BLANK;
+    _fswap << setw(IO_WIDTH) << numbUnSwap << BLANK;
+    _fswap << setw(IO_WIDTH) << numbSwap << BLANK;
+    _fswap << endl;
 }
 #endif
 
+void SaveSumTrReducedDens(double acount, double numb)
+{
+    const char *_proc_=__func__;
+
+    _fentropy << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
+    _fentropy << setw(IO_WIDTH) << _nm_total/acount << BLANK;
+    _fentropy << setw(IO_WIDTH) << _dm_total/acount << BLANK;
+    _fentropy << setw(IO_WIDTH) << _trOfDensitySq_total/acount << BLANK;
+    _fentropy << endl;
+}
 
 void InitTotalAverage(void)  // DUMP
 {
 	const char *_proc_=__func__;    
 
 	totalCount = 0.0;  // need to save in the status file 
+#ifdef PIGSENTBOTH
+	totalCountENT = 0.0;  // need to save in the status file 
+#endif
+   	sumsCount = 0.0;  // counter for accum sums
+   	totalStep = 0.0;
 
 	_kin_total = 0.0;   // need a function to reset all global average
 	_pot_total = 0.0;
 	_total = 0.0;
-#ifdef PIGSROTORS
-	_theta_total = 0.0;
-	_costheta_total = 0.0;
-#ifdef DIPOLE
-	_theta_total1 = 0.0;
-	_costheta_total1 = 0.0;
-	_theta_total2 = 0.0;
-	_costheta_total2 = 0.0;
-	_theta_total3 = 0.0;
-	_costheta_total3 = 0.0;
+	_costheta_total= 0.0;
+	_ucompx_total  = 0.0;
+	_ucompy_total  = 0.0;
+	_ucompz_total  = 0.0;
+#ifdef PIGSENTBOTH
+	int NumbAtoms1 = NumbAtoms/2;
+#else
+	int NumbAtoms1 = NumbAtoms;
 #endif
-#endif
+	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
+
+    _cdipoleXYZ_total.resize(NDIMDP);
+    _cdipoleX_total.resize(NDIMDP);
+    _cdipoleY_total.resize(NDIMDP);
+    _cdipoleZ_total.resize(NDIMDP);
+  	_cdipoleXY_total.resize(NDIMDP);
+	
+	for (int idp = 0; idp < NDIMDP; idp++)
+	{
+		 _cdipoleXYZ_total[idp] = 0.0;
+		 _cdipoleX_total[idp] = 0.0;
+		 _cdipoleY_total[idp] = 0.0;
+		 _cdipoleZ_total[idp] = 0.0;
+		 _cdipoleXY_total[idp] = 0.0;
+	}
+    _nm_total  = 0.0;
+    _dm_total  = 0.0;
+    _trOfDensitySq_total = 0.0;
 	_dpot_total = 0.0;  //added by Hui Li
 
 	_rot_total = 0.0;
+	_rot_total1 = 0.0;
 	_rotsq_total = 0.0;
 	_Cv_total = 0.0;
 	_Cv_trans_total = 0.0;
@@ -1220,7 +2056,8 @@ void InitTotalAverage(void)  // DUMP
 
 	// open files for output
 	// ENERGY
-
+//
+#ifndef PIGSENTTYPE
 	string fenergy;
 
 	fenergy  = MCFileName + IO_SUM; 
@@ -1234,9 +2071,7 @@ void InitTotalAverage(void)  // DUMP
 
 	if (!_feng.is_open())
 	_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
-
-
-#ifdef PIGSROTORSIO
+//
 
     string fangular;
 
@@ -1252,8 +2087,46 @@ void InitTotalAverage(void)  // DUMP
     if (!_fang.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fangular.c_str());
 
+//
+#ifdef DDCORR
+    string fdipolecorr;
 
+    fdipolecorr  = MCFileName + IO_SUM;
+    fdipolecorr += "Dipole.corr";
 
+    if (FileExist(fdipolecorr.c_str()))   // backup the output of previous simulations 
+    IOFileBackUp(fdipolecorr.c_str());
+
+    _fdc.open(fdipolecorr.c_str(), ios::out);
+    io_setout(_fdc);
+
+    if (!_fdc.is_open())
+    _io_error(_proc_,IO_ERR_FOPEN,fdipolecorr.c_str());
+#endif
+#endif
+
+//
+#ifdef INSTANT
+#ifdef PIMCTYPE
+    string fangularinsc;
+
+    fangularinsc  = MCFileName + "_instant_centroid";
+    fangularinsc += ".dof";
+
+    if (FileExist(fangularinsc.c_str()))   // backup the output of previous simulations 
+    IOFileBackUp(fangularinsc.c_str());
+
+#ifdef BINARY
+    _fanginsc.open(fangularinsc.c_str(), ios::out | ios::binary);
+#else
+    _fanginsc.open(fangularinsc.c_str(), ios::out);
+#endif
+    io_setout(_fanginsc);
+
+    if (!_fanginsc.is_open())
+    _io_error(_proc_,IO_ERR_FOPEN,fangularinsc.c_str());
+#endif
+//
     string fangularins;
 
     fangularins  = MCFileName + "_instant";
@@ -1262,13 +2135,65 @@ void InitTotalAverage(void)  // DUMP
     if (FileExist(fangularins.c_str()))   // backup the output of previous simulations 
     IOFileBackUp(fangularins.c_str());
 
+#ifdef BINARY
+    _fangins.open(fangularins.c_str(), ios::out | ios::binary);
+#else
     _fangins.open(fangularins.c_str(), ios::out);
+#endif
     io_setout(_fangins);
 
     if (!_fangins.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fangularins.c_str());
 #endif
 
+#ifdef IOFILES
+    string fenergyins;
+
+    fenergyins  = MCFileName + "_instant";
+    fenergyins += ".eng";
+
+    if (FileExist(fenergyins.c_str()))   // backup the output of previous simulations
+    IOFileBackUp(fenergyins.c_str());
+
+    _fengins.open(fenergyins.c_str(), ios::out);
+    io_setout(_fengins);
+
+    if (!_fengins.is_open())
+    _io_error(_proc_,IO_ERR_FOPEN,fenergyins.c_str());
+#endif
+
+#ifdef PIGSENTTYPE
+    string fentropy;
+
+    fentropy  = MCFileName + IO_SUM;
+    fentropy += ".rden";
+
+    if (FileExist(fentropy.c_str()))   // backup the output of previous simulations 
+    IOFileBackUp(fentropy.c_str());
+
+    _fentropy.open(fentropy.c_str(), ios::out);
+    io_setout(_fentropy);
+
+    if (!_fentropy.is_open())
+    _io_error(_proc_,IO_ERR_FOPEN,fentropy.c_str());
+
+
+#ifdef INSTANT
+    string fswapins;
+
+    fswapins  = MCFileName + "SwapUnSwapRatio";
+    fswapins += ".inst";
+
+    if (FileExist(fswapins.c_str()))   // backup the output of previous simulations
+    IOFileBackUp(fswapins.c_str());
+
+    _fswap.open(fswapins.c_str(), ios::out);
+    io_setout(_fswap);
+
+    if (!_fswap.is_open())
+    _io_error(_proc_,IO_ERR_FOPEN,fswapins.c_str());
+#endif
+#endif
 }
 
 void DoneTotalAverage(void)
@@ -1285,6 +2210,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
    cout << "PASS:"  << setw(w) << pass  << BLANK;
    cout << "STEP:"  << setw(w) << step  << BLANK;
 
+#ifdef MOVECOM
    for (int type=0;type<NumbTypes;type++)
    if (WORM && (type == Worm.type))
    {
@@ -1323,6 +2249,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
    }
    else
    {
+#ifndef GAUSSIANMOVE
       double ratio_molec = MCAccep[type][MCMOLEC]/MCTotal[type][MCMOLEC];
       double ratio_multi = MCAccep[type][MCMULTI]/MCTotal[type][MCMULTI];
  
@@ -1330,7 +2257,9 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 
       cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
       cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
+#endif
    }
+#endif
 
    if (ROTATION)
    {

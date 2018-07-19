@@ -15,6 +15,7 @@ double SRotDensEsqrt(double gamma ,int atype); // the 2nd derivs of the rotation
 
 double   SPot1D(double,int);        // spline interpolation for 1D potentials
 double   LPot2D(double,double,int); // linear interpolation for 2D potentials
+double   LPot2DRotDOF(double, double, int);
 double   DLPot2D(double,double,int); // linear interpolation for 2D potential differences added by Hui Li
  
 // ---------  MODELS OF INTERACTION ---------------
@@ -40,5 +41,8 @@ extern double   Rvmax; // maximum radius for 3D potential extrapolation
 extern double   Rvmin; // minimum radius for 3D potential extrapolation
 extern double   Rvstep; // radial increment for 3D potential extrapolation
 
+#ifdef PAIRDENSITY
+void readPairDensity();
+#endif
 //--------------------------------------------------
 #endif  // mc_poten.h
