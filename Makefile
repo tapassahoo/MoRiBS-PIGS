@@ -4,7 +4,8 @@
 options= -Ofast -fopenmp
 
 # CFLAGS for Finite Temperature Calculations 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DPIMCTYPE -DINSTANT -DEWALDSUM
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DPIMCTYPE -DINSTANT -DCHAINCONFIG
+#-DEWALDSUM
 #-DDDCORR
 #-DPOTH2
 #-DCHAINCONFIG

@@ -92,6 +92,8 @@ preskip             = args.preskip
 postskip            = args.postskip
 if (args.CRYSTAL == True):
 	crystal         = args.CRYSTAL
+else: 
+	crystal         = False
 RotorType           = args.Type
 
 ENT_TYPE 			= args.scal
