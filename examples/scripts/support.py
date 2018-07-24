@@ -138,28 +138,6 @@ def beads(tau,beta):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
-def jobstring(file_name,value,thread):
-	'''
-	This function creats jobstring for #PBS script
-	'''
-	job_name       = "job_"+str(file_name)+str(value)
-	walltime       = "200:00:00"
-	processors     = "nodes=1:ppn="+str(thread)
-	command_pimc_run = "./pimc"
-	omp_thread     = str(thread)
-
-	job_string     = """#!/bin/bash
-#PBS -N %s
-#PBS -l walltime=%s
-##PBS -q medium
-#PBS -l %s
-#PBS -o %s.out
-#PBS -e %s.err
-export OMP_NUM_THREADS=%s
-cd $PBS_O_WORKDIR
-%s""" % (job_name, walltime, processors, job_name, job_name, omp_thread, command_pimc_run)
-	return job_string
-
 def inputstr(numbbeads,tau,temperature):
 	'''
 	This function gives us the exact values of the agruments
@@ -339,6 +317,7 @@ def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir
 
 	for i in range(ndim):
 		col           = loopStart+i
+		print(col)
 		comp          = genfromtxt(final_dir_in_work+"/results/outputDipole.corr",unpack=True, usecols=[col], skip_header=preskip, skip_footer=postskip)
 
 		workingNdim   = int(math.log(len(comp))/math.log(2))
@@ -516,46 +495,82 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1):
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
-	replace("temperature_input", str(temperature), "qmc_run.input", "qmc2.input")
-	replace("numbbeads_input", str(numbbeads), "qmc2.input", "qmc3.input")
+	replace("temperature_input", str(temperature),            "qmc_run.input", "qmc2.input")
+	replace("numbbeads_input", str(numbbeads),                "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
 	if Restart1:
-		replace("numbblocks_input", str(numbblocks_Restart1), "qmc3.input", "qmc4.input")
+		replace("numbblocks_input", str(numbblocks_Restart1), "qmc2.input", "qmc3.input")
 	else:
-		replace("numbblocks_input", str(numbblocks), "qmc3.input", "qmc4.input")
-	replace("numbmolecules_input", str(numbmolecules), "qmc4.input", "qmc5.input")
-	replace("distance_input", str(distance), "qmc5.input", "qmc6.input")
-	replace("molecule_input", str(molecule_rot), "qmc6.input", "qmc7.input")
-	replace("level_input", str(level), "qmc7.input", "qmc8.input")
-	replace("dstep_input", str(step), "qmc8.input", "qmc9.input")
-	replace("dstep_tr_input", str(step_trans), "qmc9.input", "qmc10.input")
-	replace("dipolemoment_input", str(dipolemoment), "qmc10.input", "qmc11.input")
-	replace("numbpass_input", str(numbpass), "qmc11.input", "qmc12.input")
+		replace("numbblocks_input", str(numbblocks),          "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("numbmolecules_input", str(numbmolecules),        "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if (distance >= 0.0):
+		replace("distanceArg_input", "DISTANCE",              "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("distance_input", str(distance),              "qmc2.input", "qmc3.input")
+	else:
+		replace("distanceArg_input", "",                      "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("distance_input", "",                         "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("type_input", RotorType,                          "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("molecule_input", str(molecule_rot),              "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("level_input", str(level),                        "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("dstep_input", str(step),                         "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("dstep_tr_input", str(step_trans),                "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if (dipolemoment >= 0.0):
+		replace("dipolemomentArg_input", "DIPOLEMOMENT",      "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("dipolemoment_input", str(dipolemoment),      "qmc2.input", "qmc3.input")
+	else:
+		replace("dipolemomentArg_input", "",                  "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("dipolemoment_input", "",                     "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("numbpass_input", str(numbpass),                  "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
 	mcskip = numbbeads*numbpass
 	#mcskip = numbpass
-	replace("mskip_input", str(mcskip), "qmc12.input", "qmc13.input")
-	replace("numbparticle_input", str(particleA), "qmc13.input", "qmc14.input")
-	if Restart1:
-		replace("job_input", "RESTART", "qmc14.input", "qmc.input")
-	else:
-		replace("job_input", "START", "qmc14.input", "qmc.input")
-	call(["rm", "qmc2.input"])
-	call(["rm", "qmc3.input"])
-	call(["rm", "qmc4.input"])
-	call(["rm", "qmc5.input"])
-	call(["rm", "qmc6.input"])
-	call(["rm", "qmc7.input"])
-	call(["rm", "qmc8.input"])
-	call(["rm", "qmc9.input"])
-	call(["rm", "qmc10.input"])
-	call(["rm", "qmc11.input"])
-	call(["rm", "qmc12.input"])
-	call(["rm", "qmc13.input"])
-	call(["rm", "qmc14.input"])
+	replace("mskip_input", str(mcskip),                       "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
 
+	replace("numbparticle_input", str(particleA),             "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if (crystal == True):
+		replace("read_input", "READMCCOORDS",                 "qmc2.input", "qmc3.input")
+	else:
+		replace("read_input", "",                             "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+
+	if Restart1:
+		replace("job_input", "RESTART",                       "qmc2.input", "qmc3.input")
+	else:
+		replace("job_input", "START",                         "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+	call(["mv", "qmc2.input", "qmc.input"])
 
 def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
 	'''
@@ -601,7 +616,7 @@ def cagepot(source_dir_exe):
 	file_cagepot    = "hfc60.pot"
 	call(["mv", "cagepot.out", file_cagepot])
 
-def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc):
+def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc,status_cagepot):
 	'''
 	This function creats jobstring for #PBS script
 	'''
@@ -641,7 +656,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, status_rhomat, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1):
+def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
@@ -662,12 +677,12 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 			return
 
 		os.chdir(src_dir)
-		if status_rhomat == "Yes":
+		if (RotorType == "LINEAR"):
 			rotmat(TypeCal,molecule_rot,temperature,numbbeads,source_dir_exe)
 
 			#call(["rm", "-rf", folder_run])
 		temperature1    = "%5.3f" % temperature
-		if (molecule_rot != "H2O"):
+		if (RotorType == "LINEAR"):
 			file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
 		else:
@@ -678,6 +693,8 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 			file_rotdens_esq = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".esq"
 			call(["cp", file_rotdens_esq, dir_run_input_pimc])
 
+		if (crystal == True):
+			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
 	else:
 		os.chdir(dir_output)
 		if (os.path.isdir(folder_run) == False):
@@ -691,18 +708,8 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 			os.chdir(src_dir)
 			return
 
-		'''
-		path = final_dir_in_work+"/results"
-		print(path)
-		files = os.listdir(path)
-
-		for file in files:
-			os.rename(os.path.join(path, file), os.path.join(path,file+'_sub1'))
-		'''
-
 		os.chdir(src_dir)
-
-	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1)
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType)
 
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
@@ -723,11 +730,11 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 
 	if RUNDIR == "scratch":
 		if RUNIN == "CPU":
-			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir, Restart1, dir_run_job))
+			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir, Restart1, dir_run_job,status_cagepot, dir_output))
 		else:
-			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job))
+			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output))
 	else: 
-		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job))
+		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output))
 
 	fwrite.close()
 	call(["mv", fname, dir_run_input_pimc])
@@ -748,7 +755,7 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 
 	os.chdir(src_dir)
 
-def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc, src_dir, Restart1, dir_run_job):
+def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc, src_dir, Restart1, dir_run_job,status_cagepot, dir_output):
 	'''
 	This function creats jobstring for #PBS script
 	'''
@@ -776,14 +783,15 @@ mv %s /work/tapas/linear_rotors
 """ % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job):
+def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output):
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
 	#if (thread > 4):
-	#	thread     = 4
+	#	thread     = 1
+	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "40-00:00"
+	walltime       = "40:00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -793,9 +801,14 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	input_file     = dir_run_input_pimc+"/qmcbeads"+str(value)+".input"
 	exe_file       = dir_run_input_pimc+"/pimc"
 	qmcinp         = "qmcbeads"+str(value)+".input"
-	cagepot_file   = dir_run_input_pimc+"/hfc60.pot"
+	if (status_cagepot == True):
+		cagepot_file   = dir_run_input_pimc+"/hfc60.pot"
+		cagepot_cp     = "cp "+cagepot_file+" "+folder_run_path
+	else:
+		cagepot_cp     = ""
+
 	if (RUNDIR == "scratch"):
-		CommandForMove = "mv "+str(folder_run_path)+" /work/"+user_name+"/"+out_dir
+		CommandForMove = "mv "+folder_run_path+" "+dir_output
 	if (RUNDIR == "work"):
 		CommandForMove = " "
 	if not PPA1:
@@ -832,12 +845,14 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
+#SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
-cp %s %s
+%s
+mv %s %s
 mv %s %s
 mv %s %s
 cd %s
@@ -847,12 +862,13 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_file, folder_run_path, input_file, folder_run_path, file_rotdens, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_cp, input_file, folder_run_path, file_rotdens, folder_run_path, "LatticeConfig.xyz", folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
 
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
+#SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -888,19 +904,20 @@ def GetAvgRotEnergy(molecule,beta):
 	AvgEnergy = Nsum/Zsum
 	return AvgEnergy
 
-def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra):
+def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal):
 	#add                     = "-NumTimes"
 	add                     = ""
 	if (TypeCal == "ENT"):
 		add1                = "-ParticleA"+str(particleA)
-		#add1                = ""
 		add2                = "-"
-		#add2                = ""
 	else:
 		add1                = ""
 		add2                = ""
 
-	mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
+	if (crystal == True):
+		mainFileName        = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(molecule)+add1+"-e0vsbeads"+add2 
+	else:
+		mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
 
 	if (TypeCal == "PIGS"):
 		frontName           = "PIGS-"
@@ -911,81 +928,27 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 
 	frontName              += extra
 
-	if (molecule_rot == "H2O"):
-		if TransMove and RotMove:
-			frontName      += "TransAndRotDOFs-"
-			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-		if not TransMove and RotMove:
-			frontName      += "RotDOFs-"
-			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-		if TransMove and not RotMove:
-			frontName      += "TransDOFs-"
-			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-	if (molecule_rot == "HF"):
-		if TransMove and RotMove:
-			frontName      += "TransAndRotDOFs-"
-			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-		if not TransMove and RotMove:
-			frontName      += "RotDOFs-"
-			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-			#file1_name      = "Entanglement-"+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-		if TransMove and not RotMove:
-			frontName      += "TransDOFs-"
-			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-	if (molecule_rot == "H2"):
-		if TransMove and RotMove:
-			frontName      += "TransAndRotDOFs-"
-			file1_name      = frontName+mainFileName
-		if not TransMove and RotMove:
-			frontName      += "RotDOFs-"
-			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
-		if TransMove and not RotMove:
-			frontName      += "TransDOFs-"
-			file1_name      = frontName+mainFileName
+	if ((TransMove == True) and (RotMove == True)):
+		frontName      += "TransAndRotDOFs-"
+	if ((TransMove == False) and (RotMove == True)):
+		frontName      += "RotDOFs-"
+	if ((TransMove == True) and (RotMove == False)):
+		frontName      += "TransDOFs-"
 
-	if (TypeCal == "ENT"):
-				file1_name += ENT_TYPE
-	
-	return file1_name
 
-def GetFileNameSubmission1(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra):
-	if (TypeCal == "ENT"):
-		add1                = "-ParticleA"+str(particleA)
-		add2                = "-"
+	if (Rpt >= 0.0):
+		FragmentRpt = "Rpt"+str(Rpt)+"Angstrom-"
 	else:
-		add1                = ""
-		add2                = ""
+		FragmentRpt = ""
 
-	mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
+	if (dipolemoment >= 0.0):
+		FragmentDipoleMoment = "DipoleMoment"+str(dipolemoment)+"Debye-"
+	else:
+		FragmentDipoleMoment = ""
 
-	if (TypeCal == "PIGS"):
-		frontName           = "PIGS-"
-	if (TypeCal == "PIMC"):
-		frontName           = "PIMC-"
+	file1_name      = frontName+FragmentRpt+FragmentDipoleMoment+mainFileName
 	if (TypeCal == "ENT"):
-		frontName           = "ENT-"
-
-	frontName              += extra
-
-	if (molecule_rot == "HF"):
-		if (TransMove == "Yes" and RotMove == "Yes"):
-			frontName      += "TransAndRotDOFs-"
-			file1_name      = frontName+"DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-		if (TransMove != "Yes" and RotMove == "Yes"):
-			frontName      += "RotDOFs-"
-			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-DipoleMoment"+str(dipolemoment)+"Debye-"+mainFileName
-	if (molecule_rot == "H2"):
-		if (TransMove == "Yes" and RotMove == "Yes"):
-			frontName      += "TransAndRotDOFs-"
-			file1_name      = frontName+mainFileName
-		if (TransMove != "Yes" and RotMove == "Yes"):
-			frontName      += "RotDOFs-"
-			file1_name      = frontName+"Rpt"+str(Rpt)+"Angstrom-"+mainFileName
-
-	if (TypeCal == "ENT"):
-				file1_name += ENT_TYPE
-	
+		file1_name += ENT_TYPE
 	
 	return file1_name
 

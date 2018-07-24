@@ -4,7 +4,7 @@ In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PI
                                make clean
                                make
 
-But the user does not need to compile the source codes manually if he/she submits jobs by script files. The script files are in dir: /home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/scripts). There arethree python scripts: 
+But the user does not need to compile the source codes manually if he/she submits jobs by script files. The script files are in dir: /home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/nonlinear-molecules). There arethree python scripts: 
 
 A. script_submission_analysis_MoRiBS.py 
 B. support.py 
@@ -33,7 +33,9 @@ but the user may change these as
 		out_dir             = "PIMC-H2O/"
 		input_dir           = "INPUT/"
 		
-4. Create the out_dir directory /work/user_name/PIMC-H2O/ in case of "NameOfServer = "nlogn"" or /scratch/user_name/PIMC-H2O/ for the "NameOfServer = "graham"". Here PIMC-H2O/ is the out_dir. The script file will move all the running directories (jobs) from /scratch/user_name/out_dir/ to /work/user_name/out_dir/ or /scratch/user_name/PIMC-H2O/ for /scratch/user_name/PIMC-H2O/ or the "NameOfServer = "graham"", respectively.
+4. Create the out_dir directory /work/user_name/PIMC-H2O/ in case of "NameOfServer = "nlogn"" or /scratch/user_name/PIMC-H2O/ for the "NameOfServer = "graham"". Here PIMC-H2O/ is the out_dir. The script file will move all the running directories (jobs_name) from /scratch/user_name/out_dir/ to /work/user_name/out_dir/ or /scratch/user_name/PIMC-H2O/ for /scratch/user_name/PIMC-H2O/ or the "NameOfServer = "graham"", respectively.
+
+5. jobs_name is generated automatically by the script files and the user can see it to be printed during submitting the jobs.
 
 5. input_dir - The user must create it inside the source_dir. It is important to note that the rotational density matrices for non linear molecules, qmc_run.input, script_submission_analysis_MoRiBS.py, support.py, inputFile.py must be stored in the input_dir. 
 
@@ -41,6 +43,15 @@ but the user may change these as
 
 B. In support.py
 1. Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
+
+2. In jobstring_sbatch function, adjust thread and walltime format.
+    thread         = Number of thread. In general user can use 4 threads to get speed up.
+    walltime       = "40-00:00" # for Feynman or nlogn server
+    walltime       = "40:00:00" # for graham.computecanada.ca
+
+	In case of feynman, user comment out the below line in the above mentioned function
+    #SBATCH --account=rrg-pnroy
+
 
 #------------------------------------------------------------------------#
 C. In inputFile.py
