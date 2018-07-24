@@ -121,3 +121,5 @@ examples/nonlinear-molecule/support_dora.py
 examples/scripts/submission-script-for-liam/
 
 /examples/scripts/*.pyc
+/examples/*/
+!/examples/scripts
