@@ -1,7 +1,6 @@
 // LIMITATION :  only one atom type and one molecule type at this point
 #include <vector>
 #include <stdlib.h>
-#include <algorithm>    // std::min
 #include "mc_input.h"
 #include "mc_confg.h"
 #include "mc_const.h"
