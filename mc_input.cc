@@ -36,7 +36,7 @@ const char IO_RESTART[]        = "RESTART";
 const char IO_TEMPERATURE[]    = "TEMPERATURE";
 const char IO_ATOM[]           = "ATOM";
 const char IO_MOLECULE[]       = "MOLECULE"; // linear molecule
-const char IO_LINEARROTORS[]   = "LINEARROTORS"; // linear rotors
+const char IO_LINEAR[]   = "LINEAR"; // linear rotors
 // Toby's value
 const char IO_NONLINEAR[]      = "NONLINEAR";
 const char IO_PLANAR[]         = "PLANAR";
@@ -161,7 +161,7 @@ void IOReadParams(const char in_file[],int & mc_status)
 			TRANSLATION = true;
 		}
      	else 
-       	if ((params==IO_ATOM)||(params==IO_MOLECULE)||(params==IO_LINEARROTORS)||(params==IO_NONLINEAR)||(params==IO_PLANAR))
+       	if ((params==IO_ATOM)||(params==IO_MOLECULE)||(params==IO_LINEAR)||(params==IO_NONLINEAR)||(params==IO_PLANAR))
      	{
         	inf>>MCAtom[type].type;          // [1] 
         	inf>>MCAtom[type].numb;          // [2]
@@ -210,7 +210,7 @@ void IOReadParams(const char in_file[],int & mc_status)
 	  		MCAtom[type].molecule = 2;
 			else if (params == IO_PLANAR)
 	  		MCAtom[type].molecule = 3;
-			else if (params == IO_LINEARROTORS) //Added by Tapas Sahoo
+			else if (params == IO_LINEAR) 
 	  		MCAtom[type].molecule = 4;
         	else                        // atom
 	  		if (IMPURITY) nrerror(_proc_,"Molecules should follow atoms in input file");

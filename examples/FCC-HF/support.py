@@ -138,28 +138,6 @@ def beads(tau,beta):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
-def jobstring(file_name,value,thread,status_cagepot):
-	'''
-	This function creats jobstring for #PBS script
-	'''
-	job_name       = "job_"+str(file_name)+str(value)
-	walltime       = "200:00:00"
-	processors     = "nodes=1:ppn="+str(thread)
-	command_pimc_run = "./pimc"
-	omp_thread     = str(thread)
-
-	job_string     = """#!/bin/bash
-#PBS -N %s
-#PBS -l walltime=%s
-##PBS -q medium
-#PBS -l %s
-#PBS -o %s.out
-#PBS -e %s.err
-export OMP_NUM_THREADS=%s
-cd $PBS_O_WORKDIR
-%s""" % (job_name, walltime, processors, job_name, job_name, omp_thread, command_pimc_run)
-	return job_string
-
 def inputstr(numbbeads,tau,temperature):
 	'''
 	This function gives us the exact values of the agruments
@@ -809,8 +787,9 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (thread > 4):
-		thread     = 4
+	#if (thread > 4):
+	#	thread     = 1
+	thread         = 1
 	job_name       = file_name+str(value)
 	walltime       = "40:00:00"
 	omp_thread     = str(thread)
