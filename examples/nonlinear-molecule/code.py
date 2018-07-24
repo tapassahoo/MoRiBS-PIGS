@@ -8,7 +8,8 @@ DList = [1.8548]
 print(DList)
 for DipoleMoment in DList:
 ##For PIMC:
-	command_line = "python script_submission_analysis_MoRiBS.py -d "+str(DipoleMoment)+" -R 6.0 -N 2 -Block 20000 -Pass 50 --ROTMOVE tau submission PIMC H2O H2O 0.02"
+	command_line = "python script_submission_analysis_MoRiBS.py "+" -N 4 -Block 20 -Pass 50 --ROTMOVE --CRYSTAL --Type NONLINEAR -C tau submission PIMC FCC-H2O H2O 0.02"
+	#command_line = "python script_submission_analysis_MoRiBS.py -d "+str(DipoleMoment)+" -R 6.0 -N 4 -Block 20 -Pass 50 --ROTMOVE tau submission PIMC H2O H2O 0.02"
 	#command_line = "python script_submission_analysis_MoRiBS.py -d "+str(DipoleMoment)+" -R 6.0 -N 1 -Block 100000 -Pass 20 --ROTMOVE --preskip 0 tau analysis PIMC H2O H2O 0.02"
 #-------------------------------#
 ##For PIGS:

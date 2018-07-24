@@ -104,4 +104,11 @@ void GetDensities(void);
 void GetDensities(void);
 void GetDensitiesEndBeads(void);
 #endif
+#ifdef EWALDSUM
+double Uself(double *);
+double B_fun(double );
+double C_fun(double );
+double Ureal(int , int , double *, double *, double *);
+double Uk(double *, double *, double *);
+#endif
 #endif  // mc_estim.h

@@ -180,6 +180,10 @@ extern int MCSKIP_TOTAL;     //  to save accumulated average
 extern int MCSKIP_AVERG;     //  to evaluate averages
 extern int DISTANCE;     //  to evaluate averages
 extern int NUMBPARTICLE;     //  to evaluate averages
+#ifdef EWALDSUM
+extern double prefSelf, prefBfun, alpha, alpha2, prefUk1, prefUk2, prefUk3, boxLength;
+extern int KMAX;
+#endif
 
 // MC move types
 const int MCMAXMOVES = 3;   // Max number of different types of MC moves
@@ -196,6 +200,7 @@ extern long int MCStartBlock;
 extern double ** MCCoords;   // translational degrees of freedom
 extern double ** MCCosine;   // orientational cosines
 extern double ** MCAngles;   // cost and phi
+extern double ** DipoleCoords;
 #ifdef MOLECULEINCAGE
 extern double ** MCCosinex;  //orientational cosine for x axis
 extern double ** MCCosiney;  //orientational cosine for y axis
@@ -204,11 +209,6 @@ extern double ** MCCosiney;  //orientational cosine for y axis
 //------------ Initial MCCoords and MCAngles;
 extern double * MCCooInit;   // store the read in MCCoords
 extern double * MCAngInit;   // store the read in MCAngles
-#ifdef MOLECULEINCAGE
-extern double ** RCOMC60;     //store the read in MCCoords
-#endif
-extern double ** RCOMC60;     //store the read in MCCoords
-
 //extern double ** TZMAT; // a temporary matrix for testing data structure
 
 extern double ** newcoords;  // buffer for new coordinates

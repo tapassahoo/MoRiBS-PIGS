@@ -925,7 +925,7 @@ double GetPotEnergyPIGSENT(void)
 double GetPotEnergy_Densities(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc
 {
-	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+	const char *_proc_=__func__; 
 
 #ifdef DEBUG_WORM
 	if (Worm.exists)
@@ -938,11 +938,21 @@ double GetPotEnergy_Densities(void)
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         spot = 0.0;
+#ifndef EWALDSUM
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
+#else
+        for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+		{
+#endif
            	int offset0 = NumbTimes*atom0;
+#ifndef EWALDSUM
         	for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
         	{
+#else
+        	for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+        	{
+#endif
             	int offset1 = NumbTimes*atom1;
 
 		    	double spot_pair = 0.0;
@@ -1282,7 +1292,7 @@ double GetPotEnergy_Densities(void)
 #ifdef HISTOGRAM
 void GetDensities(void)
 {
-	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+	const char *_proc_=__func__; 
 
 	for (int atom0 = 0; atom0<1; atom0++)
 	{
@@ -1301,7 +1311,7 @@ void GetDensities(void)
 #ifdef NEWDENSITY
 void GetDensities(void)
 {
-	const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+	const char *_proc_=__func__; 
 
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
@@ -1318,7 +1328,7 @@ void GetDensities(void)
 
 void GetDensitiesEndBeads(void)
 {
-    const char *_proc_=__func__; //  GetPotEnergy_Densities()
+    const char *_proc_=__func__; 
 
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
@@ -2399,7 +2409,7 @@ double GetEstimDM(void)
 double GetPotEnergy(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc
 {
-   const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+   const char *_proc_=__func__; 
 
 #ifdef DEBUG_WORM
    if (Worm.exists)
@@ -3260,7 +3270,7 @@ void SaveRCF(const char fname [], double acount, int mode)
 double GetConfPoten_Densities(void)
 // should be compatible with ConfPot() from mc_piqmc.cc
 {
-   const char *_proc_=__func__; //  GetPotEnergy_Densities()  
+   const char *_proc_=__func__; 
 
    if (Worm.exists)
    nrerror(_proc_," Only for Z-configurations");
@@ -4901,6 +4911,7 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[2] = w[0] * v[1] - w[1] * v[0];
 }
 
+#ifndef EWALDSUM
 double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang1, int it)
 {
 	int offset0 = NumbRotTimes*atom0;
@@ -4980,6 +4991,142 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 #endif
     return PotReturn;
 }
+#endif
+
+#ifdef EWALDSUM
+double Uself(double *U_moment0)
+{
+    double potSelf=-prefSelf*DotProduct(U_moment0,U_moment0);
+    return potSelf;
+}
+
+double B_fun(double VRijn)
+{
+    double term1=erfc(alpha*VRijn);
+    double term2=(prefBfun*VRijn)*exp(-alpha2*VRijn*VRijn);
+    double BV=(term1+term2)/(pow(VRijn,3));
+    return BV;
+}
+
+double C_fun(double VRijn)
+{
+    double term1=3.0*erfc(alpha*VRijn);
+    double term2=prefBfun*VRijn;
+    double term3=(3.0+2.0*alpha2*VRijn*VRijn)*exp(-alpha2*VRijn*VRijn);
+    double CV=(term1+term2*term3)/pow(VRijn,5);
+    return CV;   
+}
+
+double Ureal(int atom0, int atom1, double *Rij, double *U_moment0, double *U_moment1)
+{
+	double Rijn[NDIM];	
+	double VRijn, term1, term2, term3, term4, term5;
+
+	bool evaluate = true;
+	double sum    = 0.0;
+	for(int nx=-KMAX;nx<=KMAX;nx++)
+	{
+		for (int ny=-KMAX;ny<=KMAX;ny++)
+		{
+			for (int nz=-KMAX;nz<=KMAX;nz++)
+			{
+				if ((atom0 == atom1) && (nx*nx+ny*ny+nz*nz == 0)) evaluate=false;
+				else evaluate = true;
+                        
+				if (evaluate)
+				{
+					Rijn[0]=Rij[0]+(double)(nx*boxLength);
+					Rijn[1]=Rij[1]+(double)(ny*boxLength);
+					Rijn[2]=Rij[2]+(double)(nz*boxLength);
+
+					VRijn     = sqrt(DotProduct(Rijn,Rijn));
+					term1     = DotProduct(U_moment0,U_moment1);
+					term2     = B_fun(VRijn);
+					term3     = DotProduct(U_moment0,Rijn);
+					term4     = DotProduct(U_moment1,Rijn);
+					term5     = C_fun(VRijn);
+					sum      += term1*term2-term3*term4*term5;
+				}
+			}
+		}
+	}
+    double potReal=0.5*sum;
+    return potReal; 
+}
+
+double Uk(double *Rij, double *U_moment0, double *U_moment1)
+{
+	double k[NDIM];
+	double term1, term2, term3;
+	double sum=0.0;
+	for(int nx=-KMAX; nx<=KMAX;nx++)
+	{
+		k[0]=(double)nx;
+		for(int ny=-KMAX; ny<=KMAX;ny++)
+		{
+			k[1]=(double)ny;
+			for (int nz=-KMAX; nz<=KMAX;nz++)
+			{
+				k[2]=(double)nz;
+				if(nx*nx+ny*ny+nz*nz!=0)
+				{
+					term1 = DotProduct(U_moment0,k);
+					term2 = DotProduct(U_moment1,k);
+					term3 = cos(prefUk1*DotProduct(k,Rij));
+					sum  +=(4.0*M_PI/DotProduct(k,k))*exp(-prefUk2*DotProduct(k,k))*term1*term2*term3;
+				}
+			}
+		}
+	}   
+
+    double potRecip=prefUk3*sum;
+    return potRecip;
+}
+
+double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang1, int it)
+{
+    int offset0 = NumbRotTimes*atom0;
+    int offset1 = NumbRotTimes*atom1;
+    int t0 = offset0 + it;
+    int t1 = offset1 + it;
+
+    double R12[NDIM];
+    double DipoleMoment0[NDIM], DipoleMoment1[NDIM];
+    for (int id = 0; id < NDIM; id++)
+    {
+        DipoleMoment0[id] = 0.0;
+        DipoleMoment1[id] = 0.0;
+		R12[id]  = (MCCoords[id][t1] - MCCoords[id][t0]);
+        R12[id] /= BOHRRADIUS;
+    }	
+
+    double RotMat0[NDIM*NDIM];
+    for (int i = 0; i < (NDIM*NDIM); i++) RotMat0[i] = 0.0;
+    UnitVectors(Eulang0, RotMat0);
+
+    double RotMat1[NDIM*NDIM];
+    for (int i = 0; i < (NDIM*NDIM); i++) RotMat1[i] = 0.0;
+    UnitVectors(Eulang1, RotMat1);
+
+    for (int i = 0; i < NDIM; i++)
+    {
+        for (int j = 0; j < NDIM; j++)
+        {
+            int jj = j + i*NDIM;
+            DipoleMoment0[i] += RotMat0[jj]*(DipoleCoords[j][atom0]);
+            DipoleMoment1[i] += RotMat1[jj]*(DipoleCoords[j][atom1]);
+        }
+    }	
+	double potential = Ureal(atom0,atom1,R12,DipoleMoment0,DipoleMoment1)+Uk(R12,DipoleMoment0,DipoleMoment1);
+	if (atom0 == atom1) potential += Uself(DipoleMoment0);
+	
+    double PotReturn = potential*AuToKelvin;
+#ifdef POTZERO
+    RotReturn = 0.0;
+#endif 
+    return PotReturn;
+}    
+#endif
 
 void UnitVectors(const double *Eulang, double *RotMat)
 {

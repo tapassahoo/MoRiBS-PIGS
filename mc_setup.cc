@@ -50,6 +50,10 @@ double DipoleMoment;
 double DipoleMomentAU2;
 double RR;
 int NumbParticle;
+#ifdef EWALDSUM
+double prefSelf, prefBfun, alpha, alpha2, prefUk1, prefUk2, prefUk3, boxLength;
+int    KMAX;
+#endif
 
 double  Density;
 double  BoxSize;
@@ -117,6 +121,7 @@ int NThreads; // the number of threads as a global variable
 double ** MCCoords;   // translational degrees of freedom
 double ** MCCosine;   // orientational cosines
 double ** MCAngles;
+double ** DipoleCoords;   // translational degrees of freedom
 
 #ifdef PROPOSED
 double dcost;
@@ -164,6 +169,7 @@ void MCMemAlloc(void)  // allocate  memmory
 {
   MCCoords  = doubleMatrix (NDIM,NumbAtoms*NumbTimes);  
   newcoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
+  DipoleCoords  = doubleMatrix (NDIM,NumbAtoms);  
 
   // TZMAT = doubleMatrix (NDIM,NDIM);
  
@@ -203,6 +209,7 @@ void MCMemFree(void)  //  free memory
 {
   free_doubleMatrix(MCCoords);  
   free_doubleMatrix(newcoords); 
+  free_doubleMatrix(DipoleCoords);  
 
   free_doubleMatrix(MCCosine); 
   free_doubleMatrix(MCAngles); 
@@ -523,9 +530,6 @@ void MCConfigInit(void)
     		for (int it=0;it<NumbTimes;it++)
 				MCCoords[id][atom*NumbTimes+it] = 0.0;	  
 #endif
-
-	cout<<"initial MCCoords "<<MCCoords[0][0]<<endl;
-
 	for (int it=0;it<(NumbAtoms*NumbTimes);it++)
     {
 		MCAngles[PHI][it] = 0.0;
@@ -548,7 +552,7 @@ void initLattice_config(double **pos)
 // generate a cubic lattice if NumbAtoms = m^3, m - integer	
 // nslices = Number of time slices	
 {
-	cout<<"in initLattice"<<endl;
+	//cout<<"in initLattice"<<endl;
 	const char *_proc_ = __func__;    // "initLattice_config";
 
 	int natoms = 0;                   // number of atoms 
@@ -560,14 +564,14 @@ void initLattice_config(double **pos)
 
 	// ----- INITIAL CONFIGURATION FOR ATOMS ----------------------
 
+#ifdef IOWRITE
 	// box size per particle for atoms only: 
 	double abox = BoxSize/pow((double)natoms,1.0/(double)NDIM); 
 	double shift[NDIM];
 
-	for (int id=0;id<NDIM;id++)
-	shift[id] = 0.5*abox;  
+	for (int id=0; id<NDIM; id++) shift[id] = 0.5*abox;  
     
-	for (int type=0;type<NumbTypes;type++)   // count molecules only
+	for (int type=0; type<NumbTypes; type++)   // count molecules only
     if (MCAtom[type].molecule == 0)
     {
 		int offset = MCAtom[type].offset;         
@@ -624,51 +628,57 @@ void initLattice_config(double **pos)
  
 			shift[0] += abox;
 		}  // END loop over atoms
-#ifdef IOWRITE
-        for (int atom0 = offset; atom0 < maxnum; atom0 += NumbTimes)
-        for (int atom1 = (atom0+NumbTimes); atom1 < maxnum; atom1 += NumbTimes)
-	    {
-	        double dr2;
-  		    double dr[NDIM];
-            for (int id=0;id<NDIM;id++)
-            {
-                dr[id]  = (pos[id][atom0] - pos[id][atom1]);
-                dr2    += (dr[id]*dr[id]);
-            }
-            double r = sqrt(dr2);
-			cout<<"Inter molecular distance "<<atom0 <<"   "<<atom1<< "    "<<r<<endl;  
-		}
-#endif
 	}    // END loop over types
-#ifdef IOWRITE
-		double RCOMC60temp[NumbAtoms*NumbTimes][NDIM];
-		ifstream myfile ("IhRCOMC60.xyz");
-		if (myfile.is_open ())
-		{
-			for(int ii=0;ii<NumbAtoms;ii++)
-            {
-				myfile >> RCOMC60[ii][0]>>RCOMC60[ii][1]>>RCOMC60[ii][2];
-				cout << RCOMC60[ii][0]<< "  "<<RCOMC60[ii][1]<< "  "<<RCOMC60[ii][2]<< endl;
-			}
-			myfile.close();
-		}
-		else
-		{
-			if (NumbAtoms == 1)
-            {
-             for(int id=0;id<NDIM;id++)
-             RCOMC60[0][id]=0.0;
-
-            }
-            else
-            {
-            cout << "ERROR: For Number of Cages > 1, please, provide IhRCOMC60.xyz file with RCOM position of each cage "<<endl;
-            nrerror;
-            exit(0);
-            }
-          }
-
 #endif
+	if (InitMCCoords)
+	{
+		ifstream inputCoords("LatticeConfig.xyz");
+		if (inputCoords.is_open ())
+		{
+			double LatticeCoords[NDIM][NumbAtoms];
+			double DipoleCoords[NDIM][NumbAtoms];
+			for (int type=0; type<NumbTypes; type++)   // count molecules only
+			{
+    			if (MCAtom[type].molecule == 0)
+    			{
+					int offset = MCAtom[type].offset;         
+					int maxnum = offset + MCAtom[type].numb*NumbTimes;         
+      
+					for (int atom=offset; atom<maxnum; atom+=NumbTimes)
+					{
+						int gatom  = atom/NumbTimes;
+						for (int id=0; id<NDIM; id++) 
+						{
+							inputCoords>>LatticeCoords[id][gatom];
+							pos[id][atom] = LatticeCoords[id][gatom];
+						}
+						for (int id=0; id<NDIM; id++) inputCoords>>DipoleCoords[id][gatom];
+					}	
+				}	
+			}
+
+			for (int type=0; type<NumbTypes; type++)   // count molecules only
+			{
+    			if ((MCAtom[type].molecule == 1) || (MCAtom[type].molecule == 2)|| (MCAtom[type].molecule == 3)||(MCAtom[type].molecule == 4 ))
+    			{
+					int offset = MCAtom[type].offset;         
+					int maxnum = offset + MCAtom[type].numb*NumbTimes;         
+      
+					for (int atom=offset; atom<maxnum; atom+=NumbTimes)
+					{
+						int gatom  = atom/NumbTimes;
+						for (int id=0; id<NDIM; id++) 
+						{
+							inputCoords>>LatticeCoords[id][gatom];
+							pos[id][atom] = LatticeCoords[id][gatom];
+						}
+						for (int id=0; id<NDIM; id++) inputCoords>>DipoleCoords[id][gatom];
+					}	
+				}	
+			}
+		} 
+		inputCoords.close();
+	}
 }
 
 void replInitial_config(double **pos)
@@ -780,9 +790,26 @@ void proposedGrid(void)
 #endif
 void ParamsPotential(void)
 {
-	double DipoleMomentAU   = DipoleMoment/AuToDebye;
-	DipoleMomentAU2  = DipoleMomentAU*DipoleMomentAU;
-	RR   = Distance/BOHRRADIUS;
+	if (DipoleMoment)
+	{
+		double DipoleMomentAU   = DipoleMoment/AuToDebye;
+		DipoleMomentAU2= DipoleMomentAU*DipoleMomentAU;
+	}
+	if (Distance) RR   = Distance/BOHRRADIUS;
+#ifdef EWALDSUM
+	boxLength          = 20.0/BOHRRADIUS;
+	double boxLength2  = boxLength*boxLength;
+	double boxLength3  = boxLength2*boxLength;
+	alpha              = 1.0*BOHRRADIUS;
+	alpha2             = alpha*alpha;
+	double alpha3      = alpha2*alpha;
+	prefSelf           = 2.0*alpha3/(3.0*sqrt(M_PI));
+	prefBfun           = 2.0*alpha/sqrt(M_PI);
+	prefUk1            = 2.0*M_PI/boxLength;
+	prefUk2            = pow(M_PI/(alpha*boxLength),2);
+	prefUk3            = 0.5/boxLength3;
+	KMAX               = 20;
+#endif
 }
 
 //Tapas implemented the below section//

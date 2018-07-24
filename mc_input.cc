@@ -497,8 +497,8 @@ void IOReadParams(const char in_file[],int & mc_status)
    cout << "Number of steps to skip to save ACCEPT RATIO" << BLANK << MCSKIP_RATIO << endl;
    cout << "Number of steps to skip to save ACCUML AVERG" << BLANK << MCSKIP_TOTAL << endl;
    cout << "Number of steps to skip to evaluate AVERAGES" << BLANK << MCSKIP_AVERG << endl;
-   cout << "Intermolecular distance" << BLANK << Distance << endl;
-   cout << "Dipole Moment " << BLANK << DipoleMoment << endl;
+	if (Distance) cout << "Intermolecular distance" << BLANK << Distance << endl;
+   if (DipoleMoment) cout << "Dipole Moment " << BLANK << DipoleMoment << endl;
 
    cout << endl;
    cout << endl;

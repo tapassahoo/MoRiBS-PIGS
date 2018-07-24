@@ -3,21 +3,11 @@
 #options= -Ofast -march=native -fopenmp
 options= -Ofast -fopenmp
 
-# CFLAGS for PIGS 
-#CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DDDCORR -DPIGSTYPE
-#-DPROPOSED
-#-DCAGEPOT
-#-DIOFILES #-DINSTANT -DBINARY 
-
-# CFLAGS for ENTANGLEMENT
-#CFLAGS =-I./sprng/include -I/usr/local/include -DCHAINCONFIG -DMODIFYSROTDENS -DSWAPTOUNSWAP -DPIGSENTTYPE 
-#-DSHORTFORM
-#-DENTWRITE
-#-DCAGEPOT
-
 # CFLAGS for Finite Temperature Calculations 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DPIMCTYPE -DINSTANT -DDDCORR
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DPIMCTYPE -DINSTANT -DEWALDSUM
+#-DDDCORR
 #-DPOTH2
+#-DCHAINCONFIG
 #-DINSTANT -DIOFILES -DCAGEPOT
 
 #Below is the LDFLAGS Toby Zeng use on nlogn

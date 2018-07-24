@@ -254,6 +254,7 @@ ParamsPotential();
       	RandomInit(MPIrank,MPIsize);
 
     	MCConfigInit();                // generate initial configurations
+		
     	for (int it=0;it<NumbAtoms*NumbTimes;it++)
     	{
         	for (int id=0;id<NDIM;id++)
@@ -300,6 +301,7 @@ ParamsPotential();
     	}	 
 */
 //    	read in initial MCCoords and MCAngles
+#ifdef IOWRITE
       	if(InitMCCoords)
       	{
          	cout<<"read in MCCoords and MCAngles from xyz.init file"<<endl;
@@ -336,6 +338,7 @@ ParamsPotential();
             	}
          	}
       	}
+#endif
 		delete [] MCCooInit;
 		delete [] MCAngInit;
 
