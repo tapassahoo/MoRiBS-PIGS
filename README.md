@@ -7,6 +7,7 @@ It is important to be noted that PotFunc() function in mc_estim.cc file includes
 First, the author must read README file in MoRiBS-PIGS/ and follow the instructions.
 
 In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PIGS are the makefiles that a user needs to compile the source codes for finite temperature (PIMC) and ground state (PIGS) canculations, respectively. To compile the source codes, first copy Makefile-PIMC of Makefile-PIGS to Makefile and use the following command:
+
                                make clean
                                make
 
@@ -27,9 +28,10 @@ A. In script_submission_analysis_MoRiBS.py
 2. If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
 
 3. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
+
         user_name           = "tapas"
         source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
-        out_dir             = "nonlinear-molecule/"                         #This directory will automatically be created in /work or in /scratch if it does not exits.
+        out_dir             = "nonlinear-molecule/"                         #This directory will automatically be created in /work or in /scratch if it does not exits.      
         input_dir           = "examples/nonlinear-molecule/"                #Where all the input and scripts are
         final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"   #Where all the final results will be stored after analyzing the MoRiBs outputs.
 
