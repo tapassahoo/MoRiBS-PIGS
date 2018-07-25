@@ -20,7 +20,6 @@ C. inputFile.py
 The user are suggested to make the following modifications in the scripts before running MoRiBs successfully:
 
 #------------------------------------------------------------------------#
-
 A. In script_submission_analysis_MoRiBS.py
 
 1. If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
@@ -44,7 +43,6 @@ but the user may change these as
         final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
 
 #------------------------------------------------------------------------#
-
 B. In support.py
 1. Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
 
@@ -64,15 +62,15 @@ C. In inputFile.py
 1. Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
 
 2. Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.
-#------------------------------------------------------------------------#
 
+#------------------------------------------------------------------------#
 Now the script files are ready to submit your jobs. To know the command line arguments, just type the following command in terminal
 
 python script_submission_analysis_MoRiBS.py -h
 
 Examples of command line arguments to submit the jobs are given below:
 
-                python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE tau submission PIMC H2O H2O 0.0333333333"
+        python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE tau submission PIMC H2O H2O 0.0333333333"
 
                 -d       dipole moment value
                 -R       Inter molecular distance
@@ -86,11 +84,11 @@ Read the outputs printed on the screen.
 #------------------------------------------------------------------------#
 To analyze the output data -
 
-                python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE --preskip 10000 tau analysis PIMC H2O H2O 0.0333333333"
+        python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE --preskip 10000 tau analysis PIMC H2O H2O 0.0333333333"
 
 Read the outputs printed on the screen. Final output files will be saved in directory final_results_path.
 
 #---------------------Best of Luck---------------------------------------#
-
 N.B.: Don't hesitate to email to the developer if you face any problem to submit your jobs or analyze the output files by the scripts.
+
 Email: tapascuchem@gmail.com
