@@ -791,7 +791,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	#	thread     = 1
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "40:00:00"
+	walltime       = "40-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -845,7 +845,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-#SBATCH --account=rrg-pnroy
+#####SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -917,7 +917,7 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 	if (crystal == True):
 		mainFileName        = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(molecule)+add1+"-e0vsbeads"+add2 
 	else:
-		mainFileName            = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
+		mainFileName        = parameterName+str(parameter)+"Kinv-Blocks"+str(numbblocks)+"-Passes"+str(numbpass)+add+"-System"+str(numbmolecules)+str(molecule)+add1+"-e0vsbeads"+add2 
 
 	if (TypeCal == "PIGS"):
 		frontName           = "PIGS-"
@@ -976,137 +976,67 @@ class GetFileNameAnalysis:
 		print("#------------------------------------------------------------------------#")
 		print("Final analyzed results are being stored in the below mentioned directory - ")
 
+
 		if (self.TypeCal == "ENT"):
-			add1                = "-ParticleA"+str(self.particleA)
-			#add1                = ""
+			frontName             = "ENT-"+self.extra
+			add1                  = "-ParticleA"+str(self.particleA)
+			add2                  = "-"+self.ENT_TYPE
 		else:
-			add1                = ""
-
-		mainFileName      = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
-		mainFileName     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
-		
-		if ((self.TypeCal == "PIGS") or (self.TypeCal == "PIMC")):
 			frontName             = self.TypeCal+"-"+self.extra
+			add1                  = ""
+			add2                  = ""
 
-			if (self.molecule_rot == "H2"):
-				if self.TransMove and self.RotMove:
-					frontName += "TransAndRotDOFs-"
-					file_output1  = frontName+"Energy-"
-					file_output2  = frontName+"correlation-"
-					file_output3  = frontName+"total-correlation-function-"
-					file_output4  = frontName+"X-component-correlation-function-"
-					file_output5  = frontName+"Y-component-correlation-function-"
-					file_output6  = frontName+"Z-component-correlation-function-"
-					file_output7  = frontName+"XandY-component-correlation-function-"
+		if ((self.TransMove == True) and (self.RotMove == True)):
+			frontName            += "TransAndRotDOFs-"
+		if ((self.TransMove == False) and (self.RotMove == True)):
+			frontName            += "RotDOFs-"
+		if ((self.TransMove == True) and (self.RotMove == False)):
+			frontName            += "TransDOFs-"
 
-				if not self.TransMove and self.RotMove:
-					frontName += "RotDOFs-"
-					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
-					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-total-correlation-function-"
-					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-X-component-correlation-function-"
-					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
-					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
-					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
-	
-			if ((self.molecule_rot == "HF") or (self.molecule_rot == "H2O")):
-				if self.TransMove and self.RotMove:
-					frontName += "TransAndRotDOFs-"
-					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
-					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
-					file_output4  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
-					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
-					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
-					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+		if (self.Rpt >= 0.0):
+			FragmentRpt           = "Rpt"+str(self.Rpt)+"Angstrom-"
+		else:
+			FragmentRpt           = ""
 
+		if (self.dipolemoment >= 0.0):
+			FragmentDipoleMoment  = "DipoleMoment"+str(self.dipolemoment)+"Debye-"
+		else:
+			FragmentDipoleMoment  = ""
 
-				if not self.TransMove and self.RotMove:
-					frontName += "RotDOFs-"
-					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
-					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
-					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
-					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
-					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
-					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+		mainFileName  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileName += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
-	
-			self.SaveEnergy       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output1+mainFileName+".txt"
-			self.SaveCorr         = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output2+mainFileName+".txt"
-			self.SaveTotalCorr    = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output3+mainFileName+".txt"
-			self.SaveXCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output4+mainFileName+".txt"
-			self.SaveYCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output5+mainFileName+".txt"
-			self.SaveZCorr        = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output6+mainFileName+".txt"
-			self.SaveXYCorr       = self.src_dir+"/ResultsOf"+str(self.TypeCal)+"/"+file_output7+mainFileName+".txt"
-			call(["rm", self.SaveEnergy, self.SaveCorr])
-			call(["rm", self.SaveTotalCorr, self.SaveXCorr, self.SaveYCorr, self.SaveZCorr, self.SaveXYCorr])
-			print(self.src_dir+"/ResultsOf"+str(self.TypeCal))
-			print("")
-			print("Final results - Energy vs "+str(self.variableName))
-			print(file_output1+mainFileName+".txt")
+		file_output1  = frontName+FragmentRpt+FragmentDipoleMoment+"Energy-"	
+		file_output2  = frontName+FragmentRpt+FragmentDipoleMoment+"correlation-"
+		file_output3  = frontName+FragmentRpt+FragmentDipoleMoment+"total-correlation-function-"
+		file_output4  = frontName+FragmentRpt+FragmentDipoleMoment+"X-component-correlation-function-"
+		file_output5  = frontName+FragmentRpt+FragmentDipoleMoment+"Y-component-correlation-function-"
+		file_output6  = frontName+FragmentRpt+FragmentDipoleMoment+"Z-component-correlation-function-"
+		file_output7  = frontName+FragmentRpt+FragmentDipoleMoment+"XandY-component-correlation-function-"
+		file_output8  = frontName+FragmentRpt+FragmentDipoleMoment+"Entropy-"
 
-		if (self.TypeCal == "ENT"):
-			frontName             = "ENT-"
-			frontName            += self.extra
-			if (self.molecule_rot == "HF"):
-				if self.TransMove and self.RotMove:
-					frontName += "TransAndRotDOFs-"
-					file_output1  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
-					file_output2  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output3  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
-					file_output4  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
-					file_output5  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
-					file_output6  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
-					file_output7  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
-					file_output8  = frontName+"DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+		self.SaveEnergy       = self.src_dir+file_output1+mainFileName+".txt"
+		self.SaveCorr         = self.src_dir+file_output2+mainFileName+".txt"
+		self.SaveTotalCorr    = self.src_dir+file_output3+mainFileName+".txt"
+		self.SaveXCorr        = self.src_dir+file_output4+mainFileName+".txt"
+		self.SaveYCorr        = self.src_dir+file_output5+mainFileName+".txt"
+		self.SaveZCorr        = self.src_dir+file_output6+mainFileName+".txt"
+		self.SaveXYCorr       = self.src_dir+file_output7+mainFileName+".txt"
+		self.SaveEntropy      = self.src_dir+file_output8+mainFileName+".txt"
 
-				if not self.TransMove and self.RotMove:
-					frontName += "RotDOFs-"
-					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Entropy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Energy-"
-					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-correlation-"
-					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-total-correlation-function-"
-					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-X-component-correlation-function-"
-					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Y-component-correlation-function-"
-					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-Z-component-correlation-function-"
-					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-DipoleMoment"+str(self.dipolemoment)+"Debye-XandY-component-correlation-function-"
+		if os.path.exists(self.SaveEntropy):   os.remove(self.SaveEntropy)
+		if os.path.exists(self.SaveEnergy):    os.remove(self.SaveEnergy)
+		if os.path.exists(self.SaveCorr):      os.remove(self.SaveCorr)
+		if os.path.exists(self.SaveTotalCorr): os.remove(self.SaveTotalCorr)
+		if os.path.exists(self.SaveXCorr):     os.remove(self.SaveXCorr)
+		if os.path.exists(self.SaveYCorr):     os.remove(self.SaveYCorr)
+		if os.path.exists(self.SaveZCorr):     os.remove(self.SaveZCorr)
+		if os.path.exists(self.SaveXYCorr):    os.remove(self.SaveXYCorr)
 
-			if (self.molecule_rot == "H2"):
-				if self.TransMove and self.RotMove:
-					frontName += "TransAndRotDOFs-"
-					file_output1  = frontName+"Entropy-"
-					file_output2  = frontName+"Energy-"
-					file_output3  = frontName+"correlation-"
-					file_output4  = frontName+"total-correlation-function-"
-					file_output5  = frontName+"X-component-correlation-function-"
-					file_output6  = frontName+"Y-component-correlation-function-"
-					file_output7  = frontName+"Z-component-correlation-function-"
-					file_output8  = frontName+"XandY-component-correlation-function-"
-
-				if not self.TransMove and self.RotMove:
-					frontName += "RotDOFs-"
-					file_output1  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Entropy-"
-					file_output2  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Energy-"
-					file_output3  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-correlation-"
-					file_output4  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-total-correlation-function-"
-					file_output5  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-X-component-correlation-function-"
-					file_output6  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Y-component-correlation-function-"
-					file_output7  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-Z-component-correlation-function-"
-					file_output8  = frontName+"Rpt"+str(self.Rpt)+"Angstrom-XandY-component-correlation-function-"
-
-			self.SaveEntropy      = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileName+"-"+self.ENT_TYPE+".txt"
-			call(["rm", self.SaveEntropy])
-			self.SaveEnergy       = self.src_dir+"/ResultsOfPIGSENT/"+file_output2+mainFileName+"-"+self.ENT_TYPE+".txt"
-			self.SaveCorr         = self.src_dir+"/ResultsOfPIGSENT/"+file_output3+mainFileName+"-"+self.ENT_TYPE+".txt"
-			self.SaveTotalCorr    = self.src_dir+"/ResultsOfPIGSENT/"+file_output4+mainFileName+"-"+self.ENT_TYPE+".txt"
-			self.SaveXCorr        = self.src_dir+"/ResultsOfPIGSENT/"+file_output5+mainFileName+"-"+self.ENT_TYPE+".txt"
-			self.SaveYCorr        = self.src_dir+"/ResultsOfPIGSENT/"+file_output6+mainFileName+"-"+self.ENT_TYPE+".txt"
-			self.SaveZCorr        = self.src_dir+"/ResultsOfPIGSENT/"+file_output7+mainFileName+"-"+self.ENT_TYPE+".txt"
-			self.SaveXYCorr       = self.src_dir+"/ResultsOfPIGSENT/"+file_output8+mainFileName+"-"+self.ENT_TYPE+".txt"
-			call(["rm", self.SaveEnergy, self.SaveCorr])
-			call(["rm", self.SaveTotalCorr, self.SaveXCorr, self.SaveYCorr, self.SaveZCorr, self.SaveXYCorr])
-			print(self.src_dir+"/ResultsOf"+str(self.TypeCal))
+		print(self.src_dir)
+		print("")
+		print("Final results - Energy vs "+str(self.variableName))
+		print(file_output1+mainFileName+".txt")
 		print("#------------------------------------------------------------------------#")
 
 class GetFileNamePlot:

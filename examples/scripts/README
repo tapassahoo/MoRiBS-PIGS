@@ -1,10 +1,16 @@
-Here are few instructions that will help a user to modify script files before submitting jobs in queue. Path of the directory for the source files in nlogn server is: /home/tapas/Moribs-pigs/MoRiBS-PIMC. User should copy it to his/her machine. PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction. 
+Here are few instructions that will help a user to modify script files before submitting jobs in queue. The source codes can be downloaded directly from github by typing the following line on the terminal:
+								
+		git clone git@github.com:tapassahoo/MoRiBS-PIGS.git
+
+It is important to be noted that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
+
+First, the author must read README file in MoRiBS-PIGS/ and follow the instructions. 
 
 In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PIGS are the makefiles that a user needs to compile the source codes for finite temperature (PIMC) and ground state (PIGS) canculations, respectively. To compile the source codes, first copy Makefile-PIMC of Makefile-PIGS to Makefile and use the following command:
                                make clean
                                make
 
-But the user does not need to compile the source codes manually if he/she submits jobs by script files. The script files are in dir: /home/tapas/Moribs-pigs/MoRiBS-PIMC/examples/nonlinear-molecules). There arethree python scripts: 
+But the user does not need to compile the source codes manually if the user like to submit jobs by script files. The script files are in dir: MoRiBS-PIGS/examples/scripts). There are three python scripts: 
 
 A. script_submission_analysis_MoRiBS.py 
 B. support.py 
@@ -18,27 +24,22 @@ A. In script_submission_analysis_MoRiBS.py
 
 1. If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
 
-2. As computation of rotational density matrix for linear rotors is not time consuming, the user could use "status_rhomat = "Yes"" flag that generates rotational density matrix files instantly during submitting the jobs in queue. On the other hand, the user is advised to generate the density matrices for non linear molecules before he/she submit the jobs by the scripts. For this case, the user should use "status_rhomat = "No"". 
+2. If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False". 
 
-3. If the user wish to include cage potential, he/she should use "status_cagepot = "Yes", otherwise, "status_cagepot = "No". 
-
-4. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used 
+3. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used 
 		user_name           = "tapas"                   
-		source_dir          = "Moribs-pigs/MoRiBS-PIMC/" 
-		out_dir             = "nonlinear-molecule/"
-		input_dir           = "examples/nonlinear-molecule/"
+		source_dir          = "Moribs-pigs/MoRiBS-PIMC/" 			        #Path of the source directory#
+		out_dir             = "nonlinear-molecule/"      			        #This directory will automatically be created in /work or in /scratch if it does not exits.
+		input_dir           = "examples/nonlinear-molecule/" 		        #Where all the input and scripts are
+		final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/" 	#Where all the final results will be stored after analyzing the MoRiBs outputs.
+
 but the user may change these as  
 		user_name           = "user_name" excluding "/"
 		source_dir          = "MoRiBS-PIMC/" 
 		out_dir             = "PIMC-H2O/"
 		input_dir           = "INPUT/"
+		final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
 		
-4. Create the out_dir directory /work/user_name/PIMC-H2O/ in case of "NameOfServer = "nlogn"" or /scratch/user_name/PIMC-H2O/ for the "NameOfServer = "graham"". Here PIMC-H2O/ is the out_dir. The script file will move all the running directories (jobs_name) from /scratch/user_name/out_dir/ to /work/user_name/out_dir/ or /scratch/user_name/PIMC-H2O/ for /scratch/user_name/PIMC-H2O/ or the "NameOfServer = "graham"", respectively.
-
-5. jobs_name is generated automatically by the script files and the user can see it to be printed during submitting the jobs.
-
-5. input_dir - The user must create it inside the source_dir. It is important to note that the rotational density matrices for non linear molecules, qmc_run.input, script_submission_analysis_MoRiBS.py, support.py, inputFile.py must be stored in the input_dir. 
-
 #------------------------------------------------------------------------#
 
 B. In support.py
@@ -51,7 +52,6 @@ B. In support.py
 
 	In case of feynman, user comment out the below line in the above mentioned function
     #SBATCH --account=rrg-pnroy
-
 
 #------------------------------------------------------------------------#
 C. In inputFile.py
@@ -68,16 +68,22 @@ python script_submission_analysis_MoRiBS.py -h
 Examples of command line arguments to submit the jobs are given below:
 
 				python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE tau submission PIMC H2O H2O 0.0333333333"
+				
+				-d       dipole moment value
+				-R       Inter molecular distance
+				-N       Number of rotors
+				-Block   Number of Blocks
+				-Pass    Number of Pass
+				last value corresponds to the fixed beta value 1/T;
 
-After submitting the jobs, the user can check the acceptance ratio and other general outputs in pimc/pigs+(number of beards).out file stored in /work/user_name/out_dir/jobs_name+"PIMC" or /scratch/user_name/out_dir/jobs_name+"PIMC" directory instantaneously. Final output files will be saved in /work/user_name/out_dir/ or /scratch/user_name/out_dir/ directory when the submitted job is finisted.
+Read the outputs printed on the screen. 
 
 #------------------------------------------------------------------------#
 To analyze the output data -
-1. create ResultsOfPIMC or ResultsOfPIGS directory in the input_dir for finite temperature or ground state calculations, respectively, and then run the following commands as an example -
 
 				python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE --preskip 10000 tau analysis PIMC H2O H2O 0.0333333333"
 
-2. Final output files will be saved in ResultsOfPIMC or ResultsOfPIGS directory.
+Read the outputs printed on the screen. Final output files will be saved in directory final_results_path.
 
 #---------------------Best of Luck---------------------------------------#
 
