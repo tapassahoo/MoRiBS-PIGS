@@ -2,13 +2,13 @@ Here are few instructions that will help a user to modify script files before su
 
         git clone git@github.com:tapassahoo/MoRiBS-PIGS.git
 
+It is important to be noted that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
+
 First, the author must read README file in MoRiBS-PIGS/ and follow the instructions.
 
 In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PIGS are the makefiles that a user needs to compile the source codes for finite temperature (PIMC) and ground state (PIGS) canculations, respectively. To compile the source codes, first copy Makefile-PIMC of Makefile-PIGS to Makefile and use the following command:
                                make clean
                                make
-
-PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction.
 
 But the user does not need to compile the source codes manually if the user like to submit jobs by script files. The script files are in dir: MoRiBS-PIGS/examples/scripts). There are three python scripts:
 
@@ -24,14 +24,12 @@ A. In script_submission_analysis_MoRiBS.py
 
 1. If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
 
-2. As computation of rotational density matrix for linear rotors is not time consuming, the user could use "status_rhomat = "Yes"" flag that generates rotational density matrix files instantly during submitting the jobs in queue. On the other hand, the user is advised to generate the density matrices for non linear molecules before he/she submit the jobs by the scripts. For this case, the user should use "status_rhomat = "No"".
+2. If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
 
-3. If the user wish to include cage potential, he/she should use "status_cagepot = "Yes", otherwise, "status_cagepot = "No".
-
-4. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
+3. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
         user_name           = "tapas"
         source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
-        out_dir             = "nonlinear-molecule/"                         #This directory automatically generated in /work or in /scratch.
+        out_dir             = "nonlinear-molecule/"                         #This directory will automatically be created in /work or in /scratch if it does not exits.
         input_dir           = "examples/nonlinear-molecule/"                #Where all the input and scripts are
         final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"   #Where all the final results will be stored after analyzing the MoRiBs outputs.
 
@@ -40,3 +38,25 @@ but the user may change these as
         source_dir          = "MoRiBS-PIMC/"
         out_dir             = "PIMC-H2O/"
         input_dir           = "INPUT/"
+        final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
+
+#------------------------------------------------------------------------#
+
+B. In support.py
+1. Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
+
+2. In jobstring_sbatch function, adjust thread and walltime format.
+    thread         = Number of thread. In general user can use 4 threads to get speed up.
+    walltime       = "40-00:00" # for Feynman or nlogn server
+    walltime       = "40:00:00" # for graham.computecanada.ca
+
+    In case of feynman, user comment out the below line in the above mentioned function
+    #SBATCH --account=rrg-pnroy
+
+#------------------------------------------------------------------------#
+C. In inputFile.py
+
+1. Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
+
+2. Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.
+#------------------------------------------------------------------------#
