@@ -765,7 +765,11 @@ void PIMCPass(int type,int time)
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
     	MCRotations3D(type);
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
+#ifdef CLUSTERMOVE
+    	MCRotationsMoveCL(type);
+#else
     	MCRotationsMove(type);
+#endif
 }
 
 #ifdef PIMCTYPE
