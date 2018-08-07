@@ -4449,25 +4449,28 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 // computation of interaction potential
 		for (const auto &atom1: antiCluster)
 		{
-			int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
-			int tt1         = offset1 + it1;
+			if (abs(atom0-atom1)>1)
+			{
+				int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
+				int tt1         = offset1 + it1;
 
-			double Eulang0[NDIM], Eulang1[NDIM];
-			Eulang0[PHI] = MCAngles[PHI][t0];
-			Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-			Eulang0[CHI] = MCAngles[CHI][t0];
+				double Eulang0[NDIM], Eulang1[NDIM];
+				Eulang0[PHI] = MCAngles[PHI][t0];
+				Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+				Eulang0[CHI] = MCAngles[CHI][t0];
 
-			Eulang1[PHI] = MCAngles[PHI][tt1];
-			Eulang1[CTH] = acos(MCAngles[CTH][tt1]);
-			Eulang1[CHI] = MCAngles[CHI][tt1];
+				Eulang1[PHI] = MCAngles[PHI][tt1];
+				Eulang1[CTH] = acos(MCAngles[CTH][tt1]);
+				Eulang1[CHI] = MCAngles[CHI][tt1];
 
-			pot_old     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
+				pot_old     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
 
-			Eulang1[PHI] = atan2(newcoords[AXIS_Y][tt1],newcoords[AXIS_X][tt1]);
-			if (Eulang1[PHI] < 0.0) Eulang1[PHI] += 2.0*M_PI;
-			Eulang1[CTH] = acos(newcoords[AXIS_Z][tt1]);
+				Eulang1[PHI] = atan2(newcoords[AXIS_Y][tt1],newcoords[AXIS_X][tt1]);
+				if (Eulang1[PHI] < 0.0) Eulang1[PHI] += 2.0*M_PI;
+				Eulang1[CTH] = acos(newcoords[AXIS_Z][tt1]);
 
-			pot_new     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
+				pot_new     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
+			}
 		}
 	}
 	antiCluster.erase(antiCluster.begin(),antiCluster.end());
@@ -4478,7 +4481,9 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 	if (dens_old>RZERO) rd = dens_new/dens_old;
 	else rd = 1.0;
 
-	rd *= exp(- MCRotTau*(pot_new-pot_old));
+	double pot_diff = pot_new-pot_old;
+	if ((it1 == 0) || (it1 == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
+	rd *= exp(- MCRotTau*pot_diff);
 	bool Accepted = false;
 	if (rd>1.0)        Accepted = true;
 	else if (rd>rand4) Accepted = true;
@@ -4533,6 +4538,7 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,
 	double pot_new = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
 
 	double pot_diff = pot_new-pot_old;
+	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
 	double factor  = -MCRotTau*pot_diff;
 	double linkProb = (factor < 0.0) ? (1.0-exp(factor)) : 0.0;
    	double rand5   = rand();//1.0;//runif(Rng);
