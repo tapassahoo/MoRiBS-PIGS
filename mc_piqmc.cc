@@ -4293,7 +4293,7 @@ void MCRotationsMoveCL(int type) // update all time slices for rotational degree
 	{
 		rand1=runif(Rng);
 		rand2=runif(Rng);
-		rand3=runif(Rng);
+		rand3=intRand(Rng,0,MCAtom[type].numb-1);
 		rand4=runif(Rng);
 		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp);
 	}
@@ -4309,7 +4309,7 @@ void MCRotationsMoveCL(int type) // update all time slices for rotational degree
 	{
  		rand1=runif(Rng);
 		rand2=runif(Rng);
-		rand3=runif(Rng);
+		rand3=intRand(Rng,0,MCAtom[type].numb-1);
 		rand4=runif(Rng);
 		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp);
 	}
@@ -4349,7 +4349,7 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 	antiCluster.reserve(MCAtom[type].numb);
 
 // We add an atom, namely, atom0 randomly to the cluster and to the buffer
-	int atom0 = rand3 % MCAtom[type].numb;
+	int atom0 = rand3;
 	cluster.push_back(atom0);
 	buffer.push_back(atom0);
 
@@ -4361,7 +4361,7 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 
 	double vectorAtom0[NDIM];
 	for (int id=0;id<NDIM;id++) vectorAtom0[id]   = MCCosine[id][t0];
-	for (int id=0;id<NDIM;id++) newcoords[id][t0] = vectorAtom0[id] - 2.0*DotProduct(vectorAtom0, randomVector)*randomVector[id];
+	for (int id=0;id<NDIM;id++) newcoords[id][t0] = MCCosine[id][t0] - 2.0*DotProduct(vectorAtom0, randomVector)*randomVector[id];
 	
 	while (!buffer.empty())
 	{
@@ -4518,7 +4518,7 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,
 	Eulang0[PHI]   = atan2(newcoords[AXIS_Y][t0],newcoords[AXIS_X][t0]);
 	if (Eulang0[PHI] < 0.0) Eulang0[PHI] += 2.0*M_PI;
 	Eulang0[CTH]   = acos(newcoords[AXIS_Z][t0]);
-	Eulang0[CHI]   = 0.0;
+	Eulang0[CHI]   = MCAngles[CHI][t0];
 
 	Eulang1[PHI]   = MCAngles[PHI][t1];
 	Eulang1[CTH]   = acos(MCAngles[CTH][t1]);

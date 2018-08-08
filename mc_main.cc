@@ -1859,6 +1859,7 @@ void SaveInstantAngularDOF(long int numb)
 {
     const char *_proc_=__func__;
 
+/*
 #ifdef PIGSENTTYPE
 	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
    	{
@@ -1937,27 +1938,31 @@ void SaveInstantAngularDOF(long int numb)
    	_fangins << setw(IO_WIDTH) << compxyz[2] << BLANK;
     _fangins << endl;
 #else
+*/
    	_fangins << setw(IO_WIDTH) << numb << BLANK;
-	int it = (NumbTimes - 1)/2;
-	int atom0 = 0;
-	int t0 = it + atom0*NumbTimes;
-	for (int id = 0; id < NDIM; id++)
-	{
-   		_fangins << setw(IO_WIDTH) << MCCoords[id][t0]<< BLANK;
-	}
-	for (int id = 0; id < NDIM; id++)
-	{
-   		_fangins << setw(IO_WIDTH) << MCCoords[id][0]<< BLANK;
-	}
-	for (int id = 0; id < NDIM; id++)
-	{
-   		_fangins << setw(IO_WIDTH) << MCCoords[id][NumbTimes-1]<< BLANK;
-	}
-   	_fangins << endl;
+
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    {
+        int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        for (int it = 0; it < NumbRotTimes; it += ((NumbRotTimes-1)/2)) // Rotational Time slices, P
+        {
+            int t0      = offset0 + it;
+
+            //_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+            //_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+            //_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+
+            _fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+            _fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+            //_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+        }
+    }
+	_fangins << endl;
+/*
 #endif
 #endif 
 #endif 
-
+*/
 }
 
 void SaveInstantEnergy()
