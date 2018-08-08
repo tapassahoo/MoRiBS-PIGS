@@ -4295,7 +4295,7 @@ void MCRotationsMoveCL(int type) // update all time slices for rotational degree
 		rand2=runif(Rng);
 		rand3=intRand(Rng,0,MCAtom[type].numb-1);
 		rand4=runif(Rng);
-		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp);
+		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp,Rng);
 	}
 
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
@@ -4311,14 +4311,14 @@ void MCRotationsMoveCL(int type) // update all time slices for rotational degree
 		rand2=runif(Rng);
 		rand3=intRand(Rng,0,MCAtom[type].numb-1);
 		rand4=runif(Rng);
-		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp);
+		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp,Rng);
 	}
 
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 }
 
-void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,int rand3,double rand4,double &MCRotChunkTot,double &MCRotChunkAcp)
+void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,int rand3,double rand4,double &MCRotChunkTot,double &MCRotChunkAcp, RngStream *Rng)
 {
 // The following block of statements creates 3 dimensional unit random vector 
    	double costRef, phiRef;
@@ -4379,7 +4379,7 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 				{
 					if (iCheck != atom1)
 					{
-						int activation = ClusterGrowth(type,randomVector,atom0,atom1,offset0,it1);
+						int activation = ClusterGrowth(type,randomVector,atom0,atom1,offset0,it1, Rng);
 	
 						if (activation == 1) 
 						{
@@ -4508,7 +4508,7 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 	}
 }
 
-int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,int it)
+int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,int it, RngStream *Rng)
 {
 	int t0         = offset0 + it;
 	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
@@ -4541,7 +4541,7 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,
 	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
 	double factor  = -MCRotTau*pot_diff;
 	double linkProb = (factor < 0.0) ? (1.0-exp(factor)) : 0.0;
-   	double rand5   = rand();//1.0;//runif(Rng);
+   	double rand5   = rand();//runif(Rng);
 	int activation = 0;
 	if (linkProb > rand5) activation = 1;
 	if (activation == 1) for (int id=0;id<NDIM;id++) newcoords[id][t1] = reflectAtom1[id];
