@@ -1,5 +1,7 @@
 #ifndef _MC_PIQMC_H
 #define _MC_PIQMC_H 1
+#include "rngstream.h"
+#include "omprng.h"
 
 void MCMolecularMove(int);
 #ifdef GAUSSIANMOVE
@@ -8,9 +10,12 @@ void MCMolecularMoveGauss(int);
 void MCBisectionMove(int,int);
 void MCBisectionMovePIGS(int,int);
 void MCRotationsMove(int);
+void MCRotationsMoveCL(int);
 void MCRotLinStep(int,int,int,int,double,double,double,double,double &,double &);
 void MCRotLinStepPIMC(int,int,int,int,double,double,double,double,double &,double &);
 void MCRotLinStepPIGS(int,int,int,int,double,double,double,double,double &,double &);
+void MCRotLinStepPIGSCL(int,int,double,double,double,int,double,double &,double &, RngStream *);
+int ClusterGrowth(int,double *,int,int,int,int, RngStream *);
 void MCRotLinStepSwap(int,int,int,int,double,double,double,double,double &,double &, string);
 void MCRotLinStepSwapBroken(int,int,int,int,double,double,double,double,double &,double &);
 void MCSwap(double, string &);

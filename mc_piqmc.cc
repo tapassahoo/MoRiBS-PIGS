@@ -567,7 +567,6 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
    	double rand1,rand2,rand3;
 	int offset, gatom;
 
-#ifndef CLUSTERMOVE
 #pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,offset,gatom)
 	for (int itrot=0;itrot<NumbRotTimes;itrot += 2)
 	{
@@ -632,113 +631,6 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
-#endif
-
-#ifdef CLUSTERMOVE
-	vector<int> cluster;
-	vector<int> buffer;
-	cluster.reserve(NumbRotTimes);
-	buffer.reserve(NumbRotTimes);
-	int atom0 = rand() % MCAtom[type].numb;
-	int itrot = rand() % NumbRotTimes;
-	cluster.push_back(itrot);
-	buffer.push_back(itrot);
-
-	offset = MCAtom[type].offset+(NumbRotTimes*atom0);  
-	gatom  = offset/NumbRotTimes;    
-	rand1=runif(Rng);
-	rand2=runif(Rng);
-	rand3=runif(Rng);
-		
-   	double costRef, phiRef;
-   	costRef = (step*(rand1-0.5));
-   	phiRef  = (step*(rand2-0.5));
-
-   	if (costRef> 1.0) costRef =  2.0 - costRef;
-   	if (costRef<-1.0) costRef = -2.0 - costRef;
-	if (abs(costRef) > 2.0) 
-	{
-        cout<<"Upper or lower limit of costRef is excided " << costRef<<endl;
-		exit(0);
-	}
-	double sintRef = sqrt(1.0 - costRef*costRef);
-
-   	double randomVector[NDIM];
-	randomVector[0] = sintRef*cos(phiRef);
-   	randomVector[1] = sintRef*sin(phiRef);
-   	randomVector[2] = costRef;
-
-	vector<int> itrotCluster;
-	itrotCluster.reserve(2);
-	
-	int popid=0;
-	while (!buffer.empty())
-	{
-		if (itrot == 0 || itrot == (NumbRotTimes - 1))
-		{
-			if (itrot == 0) itrotCluster.push_back(itrot+1);
-			else itrotCluster.push_back(itrot-1);
-		}
-		else 
-		{
-			itrotCluster.push_back(itrot-1);
-			itrotCluster.push_back(itrot+1);
-		}
-
-		bool Accepted = false;
-		buffer.erase(buffer.begin()+popid);
-		popid++
-		for (const auto &itrot1: itrotCluster)
-		{
-			for (int &iCheck: cluster)
-			{
-				if(iCheck != itrot1)
-				{
-					MCRotLinStepPIGSCLUSTER(itrot,offset,gatom,type,rand3,Accepted);
-
-					if (Accepted) 
-					{
-						cluster.push_back(irot1);
-						buffer.push_back(irot1);
-					}
-				}
-			}
-		}
-		itrotCluster.erase(itrotCluster.begin(),itrotCluster.end());
-	}
-
-	int t0,cost,phi;
-	double EulangOld[NDIM], EulangNew[NDIM];
-	double vec[NDIM];
-	double potDiff = 0.0;
-	for (int iCluster=0; iCluster<cluster.size(); iCluster++)
-	{
-   		t0 = offset + iCluster;
-   		cost = MCAngles[CTH][t0];
-   		phi  = MCAngles[PHI][t0];
-		EulangOld[PHI] = phi;
-		EulangOld[CTH] = acos(MCAngles[CTH][t1]);
-		EulangOld[CHI] = 0.0;
-
-		for (int id=0;id<NDIM;id++)  vec[id] = MCCosine[id][t0];
-		for (int id=0;id<NDIM;id++)  MCCosine[id][t0] -= 2.0*DotProduct(MCCosine, randomVector)*randomVector[id];
-		MCAngles[CTH][t0] = MCCosine[AXIS_Z][t0];
-		MCAngles[PHI][t0] = atan(MCCosine[AXIS_Y][t0]/MCCosine[AXIS_X][t0]);
-
-   		cost = MCAngles[CTH][t0];
-   		phi  = MCAngles[PHI][t0];
-		EulangNew[PHI] = phi;
-		EulangNew[CTH] = acos(cost);
-		EulangNew[CHI] = 0.0;
-
-		potDiff += PotRotEnergyPIGS(gatom,EulangNew,iCluster) - PotRotEnergyPIGS(gatom,EulangOld,iCluster)
-	}
-	double rd = exp(- MCTau*potDiff);
-	MCAccep[type][MCROTAT] = min(1,rd);
-
-	cluster.erase (cluster.begin(),cluster.end());
-	buffer.erase (buffer.begin(),buffer.end());
-#endif
 
 #ifdef SWAPTOUNSWAP
     //double rand4 = (double)rand() / ((double)RAND_MAX + 1);
@@ -1146,216 +1038,6 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	}
 
 }
-
-#ifdef CLUSTERMOVE
-void MCRotLinStepPIGSCLUSTER(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
-{
-	int it0 = (it1 - 1);
-	int it2 = (it1 + 1);
-
-   	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
-   	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
-
-   	int t0 = offset + it0;
-   	int t1 = offset + it1;
-   	int t2 = offset + it2;
-
-   	double cost = MCAngles[CTH][t1];
-   	double phi  = MCAngles[PHI][t1];
-	double EulangOld[NDIM], EulangNew[NDIM];
-	EulangOld[PHI] = phi;
-	EulangOld[CTH] = acos(MCAngles[CTH][t1]);
-	EulangOld[CHI] = 0.0;
-
-   	cost += (step*(rand1-0.5));
-   	phi  += (step*(rand2-0.5));
-
-   	if (cost >  1.0)
-   	{
-      	cost = 2.0 - cost;
-   	}
-
-   	if (cost < -1.0)
-   	{
-       	cost = -2.0 - cost;
-   	}
-
-	if (abs(cost) > 2.0) 
-	{
-        cout<<"Upper or lower limit of cost is excided " << cost<<endl;
-		exit(0);
-	}
-
-	EulangNew[PHI] = phi;
-	EulangNew[CTH] = acos(cost);
-	EulangNew[CHI] = 0.0;
-
-   	double sint = sqrt(1.0 - cost*cost);
-
-   	newcoords[AXIS_X][t1] = sint*cos(phi);
-   	newcoords[AXIS_Y][t1] = sint*sin(phi);
-   	newcoords[AXIS_Z][t1] = cost;
-
-//----------------------------------------------
-
-// 	the old density
-
-   	double p0 = 0.0;
-   	double p1 = 0.0;
-
-   	for (int id=0;id<NDIM;id++)
-   	{
-      	p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
-      	p1 += (MCCosine[id][t1]*MCCosine[id][t2]);
-   	}
-
-   	double dens_old;
-   	double rho1,rho2,erot;
-// 	If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
-// 	if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
-
-	if(RotDenType == 0)
-	{
-        if (it1 == 0 || it1 == (NumbRotTimes - 1))
-        {
-            if (it1 == 0)
-            {
-                dens_old = SRotDens(p1, type);
-            }
-            else
-            {
-                dens_old = SRotDens(p0, type);
-            }
-        }
-        else
-        {
-            dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-        }
-	}
-    else if(RotDenType == 1)
-    {
-        rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
-        rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
-        dens_old = rho1+rho2;
-    }
-
-   if (fabs(dens_old)<RZERO) dens_old = 0.0;
-#ifndef NEGATIVEDENSITY
-   if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-   if (dens_old<0.0) dens_old=fabs(dens_old);
-#endif
-
-   double pot_old  = 0.0;
-
-   int itr0 = it1  * RotRatio;     // interval to average over
-   int itr1 = itr0 + RotRatio;     // translational time slices
-
-   	for (int it=itr0;it<itr1;it++)  // average over tr time slices
-	{
-   		//pot_old  += (PotRotEnergyPIGS(gatom,MCCosine,it));
-   		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it));
-	}
-
-// the new density 
-
-   p0 = 0.0;
-   p1 = 0.0;
-
-
-   for (int id=0;id<NDIM;id++)
-   {
-       p0 += (MCCosine[id][t0]*newcoords[id][t1]);
-       p1 += (newcoords[id][t1]*MCCosine[id][t2]);
-   }
-
-   double dens_new;
-
-	if(RotDenType == 0)
-	{
-        if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
-        {
-            if (it1 == 0)
-            {
-                dens_new = SRotDens(p1, type);
-            }
-            else
-            {
-                dens_new = SRotDens(p0, type);
-            }
-        }
-        else
-        {
-            dens_new = SRotDens(p0,type)*SRotDens(p1,type);
-        }
-	}
-	else if(RotDenType == 1)
-	{
-		rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
-		rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
-		dens_new = rho1 + rho2;
-	}
-
-	if (fabs(dens_new)<RZERO) dens_new = 0.0;
-#ifndef NEGATIVEDENSITY
-	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-	if (dens_new<0.0) dens_new=fabs(dens_new);
-#endif
-
-	double pot_new  = 0.0;
-
-	for (int it=itr0;it<itr1;it++)  // average over tr time slices
-	{
-		//pot_new  += (PotRotEnergyPIGS(gatom,newcoords,it));
-		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it));
-	}
-
-	double rd;
-
-	if(RotDenType == 0)
-	{
-		if (dens_old>RZERO)
-			rd = dens_new/dens_old;
-		else rd = 1.0;
-
-		rd *= exp(- MCTau*(pot_new-pot_old));
-	}
-	else if(RotDenType == 1)
-	{
-		rd = dens_new - dens_old - MCTau*(pot_new-pot_old);
-		//rd = exp(rd);
-	}
-
-	bool Accepted = false;
-	if(RotDenType == 0)
-	{
-		if (rd>1.0)         Accepted = true;
-		//else if (rd>rnd7()) Accepted = true;
-		else if (rd>rand3) Accepted = true;
-	}
-	else if (RotDenType == 1)
-	{
-		if (rd > 0.0)   Accepted = true;
-		//else if (rd > log(rnd7())) Accepted = true;
-    	else if (rd > log(rand3)) Accepted = true;
-	}
-
-	MCRotChunkTot += 1.0;
-
-	if (Accepted)
-	{
-		MCRotChunkAcp += 1.0;
-
-		MCAngles[CTH][t1] = cost;
-		MCAngles[PHI][t1] = phi;
-
-		for (int id=0;id<NDIM;id++)
-    		MCCosine[id][t1] = newcoords[id][t1];
-	}
-
-}
-#endif
 
 double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)   
 {
@@ -4587,3 +4269,281 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
     return spotReturn;
 }
 
+void MCRotationsMoveCL(int type) // update all time slices for rotational degrees of freedom
+{
+#ifdef DEBUG_PIMC
+	const char *_proc_=__func__;    //  MCRotationsMoveCL() 
+   	if (type != IMTYPE)
+   	nrerror(_proc_,"Wrong impurity type");
+
+   	if (NDIM != 3)
+   	nrerror(_proc_,"Rotational sampling for 3D systems only");
+#endif
+
+   	double step   = MCAtom[type].rtstep; 
+   	double MCRotChunkTot = 0.0;
+   	double MCRotChunkAcp = 0.0;
+
+   	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+   	double rand1,rand2,rand4;
+   	int rand3;
+
+#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+	for (int itrot=0;itrot<NumbRotTimes;itrot += 2)
+	{
+		rand1=runif(Rng);
+		rand2=runif(Rng);
+		rand3=intRand(Rng,0,MCAtom[type].numb-1);
+		rand4=runif(Rng);
+		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp,Rng);
+	}
+
+	MCTotal[type][MCROTAT] += MCRotChunkTot;
+	MCAccep[type][MCROTAT] += MCRotChunkAcp;
+
+	MCRotChunkTot = 0;
+	MCRotChunkAcp = 0;
+
+#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+	for (int itrot = 1; itrot < NumbRotTimes; itrot += 2)
+	{
+ 		rand1=runif(Rng);
+		rand2=runif(Rng);
+		rand3=intRand(Rng,0,MCAtom[type].numb-1);
+		rand4=runif(Rng);
+		MCRotLinStepPIGSCL(itrot,type,step,rand1,rand2,rand3,rand4,MCRotChunkTot,MCRotChunkAcp,Rng);
+	}
+
+	MCTotal[type][MCROTAT] += MCRotChunkTot;
+	MCAccep[type][MCROTAT] += MCRotChunkAcp;
+}
+
+void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,int rand3,double rand4,double &MCRotChunkTot,double &MCRotChunkAcp, RngStream *Rng)
+{
+// The following block of statements creates 3 dimensional unit random vector 
+   	double costRef, phiRef;
+   	costRef = (step*(rand1-0.5));
+   	phiRef  = (step*(rand2-0.5));
+
+   	if (costRef> 1.0) costRef =  2.0 - costRef;
+   	if (costRef<-1.0) costRef = -2.0 - costRef;
+	if (abs(costRef) > 2.0) 
+	{
+        cout<<"Upper or lower limit of costRef is excided " << costRef<<endl;
+		exit(0);
+	}
+	double sintRef = sqrt(1.0 - costRef*costRef);
+
+   	double randomVector[NDIM];
+	randomVector[AXIS_X] = sintRef*cos(phiRef);
+   	randomVector[AXIS_Y] = sintRef*sin(phiRef);
+   	randomVector[AXIS_Z] = costRef;
+// Random vector creation block ends here
+
+// The following 4 lines create an empty cluster and empty bufferr
+	vector<int> cluster;
+	vector<int> buffer;
+	cluster.reserve(MCAtom[type].numb);
+	buffer.reserve(MCAtom[type].numb);
+	vector<int> antiCluster;
+	antiCluster.reserve(MCAtom[type].numb);
+
+// We add an atom, namely, atom0 randomly to the cluster and to the buffer
+	int atom0 = rand3;
+	cluster.push_back(atom0);
+	buffer.push_back(atom0);
+
+	vector<int> linkCluster;
+	linkCluster.reserve(2);
+
+	int offset0 = MCAtom[type].offset+(NumbRotTimes*atom0);  
+	int t0 = offset0 + it1;
+
+	double vectorAtom0[NDIM];
+	for (int id=0;id<NDIM;id++) vectorAtom0[id]   = MCCosine[id][t0];
+	for (int id=0;id<NDIM;id++) newcoords[id][t0] = MCCosine[id][t0] - 2.0*DotProduct(vectorAtom0, randomVector)*randomVector[id];
+	
+	while (!buffer.empty())
+	{
+		for (const auto &atom0: buffer)
+		{
+			for (int atom1 = (atom0-1); atom1 <= (atom0+1); atom1+=2)
+			{	
+				if ((atom1 >= 0) && (atom1 < MCAtom[type].numb)) linkCluster.push_back(atom1);
+			}
+	
+			buffer.erase(buffer.begin());
+			for (const auto &atom1: linkCluster)
+			{
+				for (const auto &iCheck: cluster)
+				{
+					if (iCheck != atom1)
+					{
+						int activation = ClusterGrowth(type,randomVector,atom0,atom1,offset0,it1, Rng);
+	
+						if (activation == 1) 
+						{
+							cluster.push_back(atom1);
+							buffer.push_back(atom1);
+						}
+					}
+				}
+			}
+			linkCluster.erase(linkCluster.begin(),linkCluster.end());
+		}
+	}
+	
+	for (int iAtom = 0; iAtom < *cluster.begin(); iAtom++)				     antiCluster.push_back(iAtom);
+	for (int iAtom = (*cluster.end()+1); iAtom < MCAtom[type].numb; iAtom++) antiCluster.push_back(iAtom);
+// Computation of Acceptance probability
+	double dens_old = 1.0;
+	double dens_new = 1.0;
+	double pot_old  = 0.0;
+	double pot_new  = 0.0;
+	for (const auto& atom0: cluster)
+	{
+		int offset0 = MCAtom[type].offset+(NumbRotTimes*atom0);  
+		int it0 = (it1 - 1);
+		int it2 = (it1 + 1);
+
+		if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
+		if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+
+		int t0 = offset0 + it0;
+		int t1 = offset0 + it1;
+		int t2 = offset0 + it2;
+
+// Computation of product of old rotational densities over the cluster
+		double p0 = 0.0;
+		double p1 = 0.0;
+		for (int id=0;id<NDIM;id++)
+		{
+			p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+			p1 += (MCCosine[id][t1]*MCCosine[id][t2]);
+		}
+
+		if (it1 == 0 || it1 == (NumbRotTimes - 1))
+		{
+			if (it1 == 0) dens_old *= SRotDens(p1, type);
+			else          dens_old *= SRotDens(p0, type);
+		}
+		else              dens_old *= SRotDens(p0,type)*SRotDens(p1,type);
+
+// Computation of product of new rotational densities over cluster
+		p0 = 0.0;
+		p1 = 0.0;
+		for (int id=0;id<NDIM;id++)
+		{
+			p0 += (MCCosine[id][t0]*newcoords[id][t1]);
+			p1 += (newcoords[id][t1]*MCCosine[id][t2]);
+		}
+
+		if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
+		{
+			if (it1 == 0) dens_new *= SRotDens(p1, type);
+			else          dens_new *= SRotDens(p0, type);
+		}
+		else              dens_new *= SRotDens(p0,type)*SRotDens(p1,type);
+// density computation ends here
+
+// computation of interaction potential
+		for (const auto &atom1: antiCluster)
+		{
+			if (abs(atom0-atom1)>1)
+			{
+				int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
+				int tt1         = offset1 + it1;
+
+				double Eulang0[NDIM], Eulang1[NDIM];
+				Eulang0[PHI] = MCAngles[PHI][t0];
+				Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+				Eulang0[CHI] = MCAngles[CHI][t0];
+
+				Eulang1[PHI] = MCAngles[PHI][tt1];
+				Eulang1[CTH] = acos(MCAngles[CTH][tt1]);
+				Eulang1[CHI] = MCAngles[CHI][tt1];
+
+				pot_old     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
+
+				Eulang1[PHI] = atan2(newcoords[AXIS_Y][tt1],newcoords[AXIS_X][tt1]);
+				if (Eulang1[PHI] < 0.0) Eulang1[PHI] += 2.0*M_PI;
+				Eulang1[CTH] = acos(newcoords[AXIS_Z][tt1]);
+
+				pot_new     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
+			}
+		}
+	}
+	antiCluster.erase(antiCluster.begin(),antiCluster.end());
+
+	if (dens_old<0.0 || dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
+
+	double rd;
+	if (dens_old>RZERO) rd = dens_new/dens_old;
+	else rd = 1.0;
+
+	double pot_diff = pot_new-pot_old;
+	if ((it1 == 0) || (it1 == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
+	rd *= exp(- MCRotTau*pot_diff);
+	bool Accepted = false;
+	if (rd>1.0)        Accepted = true;
+	else if (rd>rand4) Accepted = true;
+
+	MCRotChunkTot += 1.0;
+	if (Accepted)
+	{
+		MCRotChunkAcp += 1.0;
+
+		for (const auto &atom0: cluster)
+		{
+			int offset0       = MCAtom[type].offset+(NumbRotTimes*atom0);  
+			int t0            = offset0 + it1;
+
+			for (int id=0;id<NDIM;id++) MCCosine[id][t0] = newcoords[id][t0];
+
+			MCAngles[PHI][t0] = atan2(MCCosine[AXIS_Y][t0],MCCosine[AXIS_X][t0]);
+			if (MCAngles[PHI][t0] < 0.0) MCAngles[PHI][t0] += 2.0*M_PI;
+			MCAngles[CTH][t0] = MCCosine[AXIS_Z][t0];
+		}
+		cluster.erase(cluster.begin(),cluster.end());
+	}
+}
+
+int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,int it, RngStream *Rng)
+{
+	int t0         = offset0 + it;
+	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
+	int t1         = offset1 + it;
+
+	double Eulang0[NDIM], Eulang1[NDIM];
+	Eulang0[PHI]   = atan2(newcoords[AXIS_Y][t0],newcoords[AXIS_X][t0]);
+	if (Eulang0[PHI] < 0.0) Eulang0[PHI] += 2.0*M_PI;
+	Eulang0[CTH]   = acos(newcoords[AXIS_Z][t0]);
+	Eulang0[CHI]   = MCAngles[CHI][t0];
+
+	Eulang1[PHI]   = MCAngles[PHI][t1];
+	Eulang1[CTH]   = acos(MCAngles[CTH][t1]);
+	Eulang1[CHI]   = MCAngles[CHI][t1];
+
+	double pot_old = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+
+	double vectorAtom1[NDIM];
+	double reflectAtom1[NDIM];
+	for (int id=0;id<NDIM;id++) vectorAtom1[id]  = MCCosine[id][t1];
+	for (int id=0;id<NDIM;id++) reflectAtom1[id] = MCCosine[id][t1] - 2.0*DotProduct(vectorAtom1, randomVector)*randomVector[id];
+
+	Eulang1[PHI]   = atan2(reflectAtom1[AXIS_Y],reflectAtom1[AXIS_X]);
+	if (Eulang1[PHI] < 0.0) Eulang1[PHI] += 2.0*M_PI;
+	Eulang1[CTH]   = acos(reflectAtom1[AXIS_Z]);
+
+	double pot_new = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+
+	double pot_diff = pot_new-pot_old;
+	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
+	double factor  = -MCRotTau*pot_diff;
+	double linkProb = (factor < 0.0) ? (1.0-exp(factor)) : 0.0;
+   	double rand5   = runif(Rng);
+	int activation = 0;
+	if (linkProb > rand5) activation = 1;
+	if (activation == 1) for (int id=0;id<NDIM;id++) newcoords[id][t1] = reflectAtom1[id];
+	return activation;
+}

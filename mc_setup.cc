@@ -636,7 +636,6 @@ void initLattice_config(double **pos)
 		if (inputCoords.is_open ())
 		{
 			double LatticeCoords[NDIM][NumbAtoms];
-			double DipoleCoords[NDIM][NumbAtoms];
 			for (int type=0; type<NumbTypes; type++)   // count molecules only
 			{
     			if (MCAtom[type].molecule == 0)

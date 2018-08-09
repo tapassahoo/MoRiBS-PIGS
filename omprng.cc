@@ -38,6 +38,12 @@ double runif(RngStream* myRng)
 	return(myRng[omp_get_thread_num()].RandU01());
 }
 
+int intRand(RngStream* myRng, int iMin, int iMax) 
+{
+	//generate integer random number between iMin and iMax 
+
+	return(myRng[omp_get_thread_num()].RandInt(iMin, iMax));
+}
 
 double runifab(RngStream* myRng, double a, double b) 
 {
