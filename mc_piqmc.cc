@@ -4541,7 +4541,7 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,
 	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
 	double factor  = -MCRotTau*pot_diff;
 	double linkProb = (factor < 0.0) ? (1.0-exp(factor)) : 0.0;
-   	double rand5   = rand();//runif(Rng);
+   	double rand5   = runif(Rng);
 	int activation = 0;
 	if (linkProb > rand5) activation = 1;
 	if (activation == 1) for (int id=0;id<NDIM;id++) newcoords[id][t1] = reflectAtom1[id];

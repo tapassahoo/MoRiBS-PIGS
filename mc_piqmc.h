@@ -1,6 +1,7 @@
 #ifndef _MC_PIQMC_H
 #define _MC_PIQMC_H 1
 #include "rngstream.h"
+#include "omprng.h"
 
 void MCMolecularMove(int);
 #ifdef GAUSSIANMOVE
