@@ -9,8 +9,8 @@ fort.*
 a.out
 run
 aa.f
-*1.cc
-*2.cc
+*1.*
+*2.*
 test-hfhf.f
 Makefile-TEST
 #ignore
