@@ -4327,7 +4327,7 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 
    	if (costRef> 1.0) costRef =  2.0 - costRef;
    	if (costRef<-1.0) costRef = -2.0 - costRef;
-	if (abs(costRef) > 2.0) 
+	if (abs(costRef) > 1.0) 
 	{
         cout<<"Upper or lower limit of costRef is excided " << costRef<<endl;
 		exit(0);
@@ -4344,17 +4344,13 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 	vector<int> cluster;
 	vector<int> buffer;
 	cluster.reserve(MCAtom[type].numb);
-	buffer.reserve(MCAtom[type].numb);
-	vector<int> antiCluster;
-	antiCluster.reserve(MCAtom[type].numb);
+	buffer.reserve(2);
 
 // We add an atom, namely, atom0 randomly to the cluster and to the buffer
 	int atom0 = rand3;
+	int atom1;
 	cluster.push_back(atom0);
 	buffer.push_back(atom0);
-
-	vector<int> linkCluster;
-	linkCluster.reserve(2);
 
 	int offset0 = MCAtom[type].offset+(NumbRotTimes*atom0);  
 	int t0 = offset0 + it1;
@@ -4362,46 +4358,91 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 	double vectorAtom0[NDIM];
 	for (int id=0;id<NDIM;id++) vectorAtom0[id]   = MCCosine[id][t0];
 	for (int id=0;id<NDIM;id++) newcoords[id][t0] = MCCosine[id][t0] - 2.0*DotProduct(vectorAtom0, randomVector)*randomVector[id];
-	
-	while (!buffer.empty())
+
+	do 
 	{
-		for (const auto &atom0: buffer)
-		{
-			for (int atom1 = (atom0-1); atom1 <= (atom0+1); atom1+=2)
-			{	
-				if ((atom1 >= 0) && (atom1 < MCAtom[type].numb)) linkCluster.push_back(atom1);
-			}
-	
-			buffer.erase(buffer.begin());
-			for (const auto &atom1: linkCluster)
+		/*
+		cout<<"buffer [";
+		for (int i = 0; i < buffer.size(); i++) cout<<buffer[i]<<",";
+		cout<<"]"<<endl;
+		cout<<"cluster [";
+		for (int i = 0; i < cluster.size(); i++) cout<<cluster[i]<<",";
+		cout<<"]"<<endl;
+		*/
+
+		atom0 = buffer[0];
+		buffer.erase(buffer.begin());
+		for (int atom1 = (atom0-1); atom1 <= (atom0+1); atom1+=2)
+		{	
+			if ((atom1 >= 0) && (atom1 < MCAtom[type].numb)) 
 			{
-				for (const auto &iCheck: cluster)
+				bool Attempt = false;
+				for (int iCheck = 0; iCheck < cluster.size(); iCheck++)
 				{
-					if (iCheck != atom1)
+					if (cluster[iCheck] == atom1) 
 					{
-						int activation = ClusterGrowth(type,randomVector,atom0,atom1,offset0,it1, Rng);
+						Attempt = false;
+						break;
+					}
+					else Attempt = true;
+				}
 	
-						if (activation == 1) 
-						{
-							cluster.push_back(atom1);
-							buffer.push_back(atom1);
-						}
+				if (Attempt)
+				{
+					int activation = ClusterGrowth(type,randomVector,atom0,atom1,offset0,it1,Rng);
+					/*
+					cout<<"TAPAS atom0 loop "<<atom0<<endl;
+					cout<<"TAPAS atom1 loop "<<atom1<<endl;
+					cout<<"Tapas activation "<<activation<<endl;
+					*/
+
+					if (activation == 1) 
+					{
+						cluster.push_back(atom1);
+						buffer.push_back(atom1);
 					}
 				}
 			}
-			linkCluster.erase(linkCluster.begin(),linkCluster.end());
+		}
+	}while (!buffer.empty());
+	
+/*
+	cout<<"buffer [";
+	for (int i = 0; i < buffer.size(); i++) cout<<buffer[i]<<",";
+	cout<<"]"<<endl;
+	cout<<"cluster [";
+	for (int i = 0; i < cluster.size(); i++) cout<<cluster[i]<<",";
+	cout<<"]"<<endl;
+*/
+
+	int arrayRotors[MCAtom[type].numb];
+	for (int iAtom0 = 0; iAtom0 < MCAtom[type].numb; iAtom0++) arrayRotors[iAtom0] = iAtom0;
+	int resize = 0;
+	int finalSize;
+	for (int iAtom0 = 0; iAtom0 < cluster.size(); iAtom0++)
+	{
+		atom0 = cluster[iAtom0];
+		++resize;
+		finalSize = MCAtom[type].numb-resize;
+		for (int i = atom0; i < finalSize; i++)
+		{
+			arrayRotors[i]=arrayRotors[i+1];
 		}
 	}
-	
-	for (int iAtom = 0; iAtom < *cluster.begin(); iAtom++)				     antiCluster.push_back(iAtom);
-	for (int iAtom = (*cluster.end()+1); iAtom < MCAtom[type].numb; iAtom++) antiCluster.push_back(iAtom);
+/*
+	cout<<"arrayRotors [";
+	for (int i = 0; i < finalSize; i++) cout<<arrayRotors[i]<<",";
+	cout<<"]"<<endl;
+*/
+
 // Computation of Acceptance probability
 	double dens_old = 1.0;
 	double dens_new = 1.0;
 	double pot_old  = 0.0;
 	double pot_new  = 0.0;
-	for (const auto& atom0: cluster)
+	for (int iAtom0 = 0; iAtom0 < cluster.size(); iAtom0++)
 	{
+		atom0 = cluster[iAtom0];
 		int offset0 = MCAtom[type].offset+(NumbRotTimes*atom0);  
 		int it0 = (it1 - 1);
 		int it2 = (it1 + 1);
@@ -4447,33 +4488,41 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 // density computation ends here
 
 // computation of interaction potential
-		for (const auto &atom1: antiCluster)
+		double Eulang0_old[NDIM], Eulang0_new[NDIM];
+		Eulang0_new[PHI] = atan2(newcoords[AXIS_Y][t0],newcoords[AXIS_X][t0]);
+		if (Eulang0_new[PHI] < 0.0) Eulang0_new[PHI] += 2.0*M_PI;
+		Eulang0_new[CTH] = acos(newcoords[AXIS_Z][t0]);
+		Eulang0_new[CHI] = 0.0;
+
+		if (finalSize != 0)
 		{
-			if (abs(atom0-atom1)>1)
+			Eulang0_old[PHI] = MCAngles[PHI][t0];
+			Eulang0_old[CTH] = acos(MCAngles[CTH][t0]);
+			Eulang0_old[CHI] = MCAngles[CHI][t0];
+			double pot_old1 = 0.0;
+			double pot_new1 = 0.0;
+
+			for (int iAtom1 = 0; iAtom1 < finalSize; iAtom1++)
 			{
-				int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
-				int tt1         = offset1 + it1;
+				atom1 = arrayRotors[iAtom1];
+				if (abs(atom0-atom1)>0)
+				{
+					int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
+					int tt1         = offset1 + it1;
 
-				double Eulang0[NDIM], Eulang1[NDIM];
-				Eulang0[PHI] = MCAngles[PHI][t0];
-				Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-				Eulang0[CHI] = MCAngles[CHI][t0];
+					double Eulang1[NDIM];
+					Eulang1[PHI] = MCAngles[PHI][tt1];
+					Eulang1[CTH] = acos(MCAngles[CTH][tt1]);
+					Eulang1[CHI] = MCAngles[CHI][tt1];
 
-				Eulang1[PHI] = MCAngles[PHI][tt1];
-				Eulang1[CTH] = acos(MCAngles[CTH][tt1]);
-				Eulang1[CHI] = MCAngles[CHI][tt1];
-
-				pot_old     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
-
-				Eulang1[PHI] = atan2(newcoords[AXIS_Y][tt1],newcoords[AXIS_X][tt1]);
-				if (Eulang1[PHI] < 0.0) Eulang1[PHI] += 2.0*M_PI;
-				Eulang1[CTH] = acos(newcoords[AXIS_Z][tt1]);
-
-				pot_new     += PotFunc(atom0, atom1, Eulang0, Eulang1, it1);
+					pot_old1     += PotFunc(atom0, atom1, Eulang0_old, Eulang1, it1);
+					pot_new1     += PotFunc(atom0, atom1, Eulang0_new, Eulang1, it1);
+				}
 			}
+			pot_old+=pot_old1;
+			pot_new+=pot_new1;
 		}
 	}
-	antiCluster.erase(antiCluster.begin(),antiCluster.end());
 
 	if (dens_old<0.0 || dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
 
@@ -4493,22 +4542,23 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 	{
 		MCRotChunkAcp += 1.0;
 
-		for (const auto &atom0: cluster)
+		for (int iAtom0 = 0; iAtom0 < cluster.size(); iAtom0++)
 		{
+			atom0 = cluster[iAtom0];
 			int offset0       = MCAtom[type].offset+(NumbRotTimes*atom0);  
 			int t0            = offset0 + it1;
 
 			for (int id=0;id<NDIM;id++) MCCosine[id][t0] = newcoords[id][t0];
 
-			MCAngles[PHI][t0] = atan2(MCCosine[AXIS_Y][t0],MCCosine[AXIS_X][t0]);
-			if (MCAngles[PHI][t0] < 0.0) MCAngles[PHI][t0] += 2.0*M_PI;
-			MCAngles[CTH][t0] = MCCosine[AXIS_Z][t0];
+           	MCAngles[PHI][t0] = atan2(MCCosine[AXIS_Y][t0],MCCosine[AXIS_X][t0]);
+            if (MCAngles[PHI][t0] < 0.0) MCAngles[PHI][t0] += 2.0*M_PI;
+            MCAngles[CTH][t0] = MCCosine[AXIS_Z][t0];
 		}
 		cluster.erase(cluster.begin(),cluster.end());
 	}
 }
 
-int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,int it, RngStream *Rng)
+int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int offset0,int it,RngStream *Rng)
 {
 	int t0         = offset0 + it;
 	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  

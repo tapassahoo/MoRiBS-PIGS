@@ -99,7 +99,7 @@ RotorType           = args.Type
 ENT_TYPE 			= args.scal
 particleA           = int(numbmolecules/2)
 
-#extra_file_name     = "end-step-value-"
+#extra_file_name     = "thread-4-"
 extra_file_name     = ""
 
 src_dir             = os.getcwd()
@@ -123,9 +123,9 @@ numbblocks_Restart1 = args.NR
 #Request to change
 #User should change the following 5 lines as developer already have explained in the README file.
 user_name           = "tapas"                   
-source_dir          = "Moribs-pigs/MoRiBS-PIMC/" 
-out_dir             = "linear_pigs/"
-input_dir           = "examples/linear_pigs/"
+source_dir          = "MoRiBS-PIGS/" 
+out_dir             = "linear-rotors/"
+input_dir           = "/home/tapas/MoRiBS-Simulations/linear-rotors/"
 final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"
 dir = os.path.dirname(final_results_path)
 if not os.path.exists(dir):
@@ -138,12 +138,12 @@ if status   == "submission":
 
 	if (RUNDIR == "scratch") or (NameOfServer == "graham"):
 		dir_run_job = "/scratch/"+user_name+"/"+out_dir 
+		if (NameOfServer == "graham"):
+			dir = os.path.dirname(dir_run_job)
+			if not os.path.exists(dir):
+				os.makedirs(dir)
 	else:	
 		dir_run_job = "/work/"+user_name+"/"+out_dir
-
-	dir = os.path.dirname(dir_run_job)
-	if not os.path.exists(dir):
-		os.makedirs(dir)
 
 	execution_file  = "/home/"+user_name+"/"+source_dir+"pimc"     
 	if not args.compiler:

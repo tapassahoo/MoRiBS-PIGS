@@ -641,7 +641,9 @@ ParamsPotential();
               	{
                		sumsCount += 1.0;                 
 #ifdef PIGSENTTYPE
+#ifdef PIGSENTBOTH
                		SaveSumEnergy (totalCountENT,sumsCount);
+#endif
                     SaveSumTrReducedDens(totalCount, sumsCount);
 #else
                		SaveSumEnergy (totalCount,sumsCount);
@@ -1564,10 +1566,12 @@ void MCSaveBlockAveragesPIGSENT(long int blocknumb)
 
   	string fname = MCFileName + bc.str();  // file name prefix including block #
 
+#ifdef PIGSENTBOTH
 	SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
 	SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
 #ifdef DDCORR
 	SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
+#endif
 #endif
     SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
 }

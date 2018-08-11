@@ -67,7 +67,7 @@ def compile_rotmat(source_dir_exe, input_dir):
 	os.chdir(path_enter_linden)
 	call(["make", "clean"])
 	call(["make"])
-	path_exit_linden  = source_dir_exe+input_dir
+	path_exit_linden  = input_dir
 	os.chdir(path_exit_linden)
 
 def compile_cagepot(source_dir_exe, input_dir):
@@ -620,8 +620,8 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 	'''
 	This function creats jobstring for #PBS script
 	'''
-	if (thread > 16):
-		thread = 16
+	if (thread > 4):
+		thread = 4
 	job_name       = "job_"+str(file_name)+str(value)
 	walltime       = "200:00:00"
 	processors     = "nodes=1:ppn="+str(thread)
@@ -714,6 +714,8 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
 	folder_run_path = dir_run_job + folder_run 
+	
+	#call(["mkdir", "-p", folder_run_path+"/results"]) # add for graham.computecanada.ca
 
 	#job submission
 	if (TypeCal == 'PIGS'):
@@ -787,11 +789,10 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	#if (thread > 4):
-	#	thread     = 1
-	thread         = 1
+	if (thread > 4):
+		thread     = 4
 	job_name       = file_name+str(value)
-	walltime       = "40-00:00"
+	walltime       = "7-30:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -811,6 +812,8 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		CommandForMove = "mv "+folder_run_path+" "+dir_output
 	if (RUNDIR == "work"):
 		CommandForMove = " "
+	#CommandForMove = " " #for graham
+
 	if not PPA1:
 		CommandForPPA = "#"
 	else:
@@ -845,8 +848,8 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-#####SBATCH --account=rrg-pnroy
-#SBATCH --mem-per-cpu=1200mb
+##SBATCH --account=rrg-pnroy
+#SBATCH --mem-per-cpu=2048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s
@@ -1297,6 +1300,9 @@ class GetUnitConverter:
 
 
 def GetrAndgFactor(molecule, RCOM, DipoleMoment):
+	'''
+	It calculates g and R value 
+	'''
 	Units          = GetUnitConverter()
 	BConstant      = GetBconst(molecule)  # in wavenumber
 	DipoleMomentAU = DipoleMoment/Units.AuToDebye
@@ -1308,6 +1314,18 @@ def GetrAndgFactor(molecule, RCOM, DipoleMoment):
 	print(printingmessage)
 	returnList = [rFactor, gFactor]
 	return returnList
+
+def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
+	'''
+	It extracts dipole moment from a g value - g 
+	'''
+	Units          = GetUnitConverter()
+	BConstant      = GetBconst(molecule)  # in wavenumber
+	RCOMAU         = RCOM/Units.BOHRRADIUS
+	BConstantAU    = BConstant/Units.AuToCmInverse
+	DipoleMomentAU = sqrt(gFactor*RCOMAU*RCOMAU*RCOMAU*BConstantAU)
+	DipoleMoment   = DipoleMomentAU*Units.AuToDebye
+	return DipoleMoment
 
 def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal):
 	if (TypeCal == "ENT"):

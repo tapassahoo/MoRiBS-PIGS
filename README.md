@@ -1,9 +1,100 @@
-# MoRiBS-PIGS
-1. I have added three preprocessors: VPOTTWOLINEARROTORS, VPOTTWOLINEARROTORSIO and GETPOT. 
+Here are few instructions that will help a user to modify script files before submitting jobs in queue. The source codes can be downloaded directly from github by typing the following line on the terminal:
 
-2. Here I have corrected the unit of potential energy (cm-1 to Kelvin) by dividing "potl" in mc_estim.cc and mc_piqmc.cc by "Units.kelvin". I have defined new unit transformer "Units.kelvin" for cm-1 to Kelvin.  In vh2h2.f, unit of potl is cm-1. 
+        git clone git@github.com:tapassahoo/MoRiBS-PIGS.git
 
+It is important to be noted that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
 
-3. GETPOT preprocessor give us to generate potential and total energy as a function "Inter molecular distances". The "Inter molecular distances" is included by qmc.input. 
+First, the author must read README file in MoRiBS-PIGS/ and follow the instructions.
 
-4. For job submission and analyzing output data (pigs.eng), I have written two script files in python: script-for-analysis.py and script-for-job-submission.py.
+In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PIGS are the makefiles that a user needs to compile the source codes for finite temperature (PIMC) and ground state (PIGS) canculations, respectively. To compile the source codes, first copy Makefile-PIMC of Makefile-PIGS to Makefile and use the following command:
+
+                               make clean
+                               make
+
+But the user does not need to compile the source codes manually if the user like to submit jobs by script files. The script files are in dir: MoRiBS-PIGS/examples/scripts). There are three python scripts:
+
+A. script_submission_analysis_MoRiBS.py
+B. support.py
+C. inputFile.py
+
+The user are suggested to make the following modifications in the scripts before running MoRiBs successfully:
+
+#------------------------------------------------------------------------#
+
+A. In script_submission_analysis_MoRiBS.py
+
+1. If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
+
+2. If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
+
+3. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
+
+        user_name           = "tapas"
+        source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
+        out_dir             = "nonlinear-molecule/"                         #This directory will automatically be created in /work or in /scratch if it does not exits.      
+        input_dir           = "examples/nonlinear-molecule/"                #Where all the input and scripts are
+        final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"   #Where all the final results will be stored after analyzing the MoRiBs outputs.
+
+but the user may change these as
+
+        user_name           = "user_name" excluding "/"
+        source_dir          = "MoRiBS-PIMC/"
+        out_dir             = "PIMC-H2O/"
+        input_dir           = "INPUT/"
+        final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
+
+#------------------------------------------------------------------------#
+
+B. In support.py
+1. Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
+
+2. In jobstring_sbatch function, adjust thread and walltime format.
+
+    thread         = Number of thread. In general user can use 4 threads to get speed up.
+    walltime       = "40-00:00" # for Feynman or nlogn server
+    walltime       = "40:00:00" # for graham.computecanada.ca
+
+    In case of feynman, user comment out the below line in the above mentioned function
+    
+    #SBATCH --account=rrg-pnroy
+
+#------------------------------------------------------------------------#
+
+C. In inputFile.py
+
+1. Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
+
+2. Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.
+
+#------------------------------------------------------------------------#
+
+Now the script files are ready to submit your jobs. To know the command line arguments, just type the following command in terminal
+
+python script_submission_analysis_MoRiBS.py -h
+
+Examples of command line arguments to submit the jobs are given below:
+
+        python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE tau submission PIMC H2O H2O 0.0333333333"
+
+                -d       dipole moment value
+                -R       Inter molecular distance
+                -N       Number of rotors
+                -Block   Number of Blocks
+                -Pass    Number of Pass
+                last value corresponds to the fixed beta value 1/T;
+
+Read the outputs printed on the screen.
+
+#------------------------------------------------------------------------#
+
+To analyze the output data -
+
+        python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE --preskip 10000 tau analysis PIMC H2O H2O 0.0333333333"
+
+Read the outputs printed on the screen. Final output files will be saved in directory final_results_path.
+
+#---------------------Best of Luck---------------------------------------#
+
+N.B.: Don't hesitate to email to the developer if you face any problem to submit your jobs or analyze the output files by the scripts.
+
+Email: tapascuchem@gmail.com
