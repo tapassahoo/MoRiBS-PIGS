@@ -4322,8 +4322,10 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 {
 // The following block of statements creates 3 dimensional unit random vector 
    	double costRef, phiRef;
-   	costRef = (step*(rand1-0.5));
-   	phiRef  = (step*(rand2-0.5));
+   	//costRef = (step*(rand1-0.5));
+   	//phiRef  = (step*(rand2-0.5));
+   	costRef = runifab(Rng, -1.0,1.0);
+   	phiRef  = runifab(Rng, 0.0, 2.0*M_PI);
 
    	if (costRef> 1.0) costRef =  2.0 - costRef;
    	if (costRef<-1.0) costRef = -2.0 - costRef;
@@ -4348,7 +4350,6 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 
 // We add an atom, namely, atom0 randomly to the cluster and to the buffer
 	int atom0 = rand3;
-	int atom1;
 	cluster.push_back(atom0);
 	buffer.push_back(atom0);
 
@@ -4504,7 +4505,7 @@ void MCRotLinStepPIGSCL(int it1,int type,double step,double rand1,double rand2,i
 
 			for (int iAtom1 = 0; iAtom1 < finalSize; iAtom1++)
 			{
-				atom1 = arrayRotors[iAtom1];
+				int atom1 = arrayRotors[iAtom1];
 				if (abs(atom0-atom1)>=2)
 				{
 					int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
