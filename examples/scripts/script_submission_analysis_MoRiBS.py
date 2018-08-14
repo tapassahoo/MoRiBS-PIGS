@@ -354,25 +354,22 @@ if status == "analysis":
 		print("")
 		call(["cat",FileAnalysis.SaveEnergy])
 #=========================File Checking===============================#
-		try:
-			SavedFile = FileAnalysis.SaveEntropy
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveEnergy
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveTotalCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveZCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		except:
-			pass
+		SavedFile = FileAnalysis.SaveEntropy
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveEnergy
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveTotalCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveZCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 
 	if (TypeCal == "PIGS" or TypeCal == "PIMC"):
 		fanalyzeEnergy.close()
@@ -390,22 +387,19 @@ if status == "analysis":
 		#print("")
 		#call(["cat",FileAnalysis.SaveTotalCorr])
 #=========================File Checking===============================#
-		try:
-			SavedFile = FileAnalysis.SaveEnergy
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveTotalCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveZCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		except:
-			pass
+		SavedFile = FileAnalysis.SaveEnergy
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveTotalCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveZCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 # END ========
 
