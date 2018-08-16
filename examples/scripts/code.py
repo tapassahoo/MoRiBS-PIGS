@@ -5,8 +5,14 @@ from os import system
 import support
 
 molecule     = "HF"
+nMolecule    = 2
 RCOM         = 10.05
-gFactorList  = [0.2+0.1*i for i in range(9)]
+gFactorList  = [10.25]
+beta         = 0.02
+Erot         = support.GetAvgRotEnergy(molecule,beta)
+print("")
+print("Avg. Rotational Energy of "+str(nMolecule)+" free "+molecule+" is "+str(nMolecule*Erot)+" Kelvin")
+print("")
 for gFactor in gFactorList:
 	DipoleMoment = support.GetDipoleMomentFromGFactor(molecule, RCOM, gFactor)
 	#support.GetrAndgFactor(molecule, RCOM, DipoleMoment)
@@ -15,13 +21,11 @@ for gFactor in gFactorList:
 	print(printMessage)
 	print("")
 	output  = '{:1.4f}'.format(DipoleMoment)
-	print(output)
+	output  = 2.0
 
-	'''
-	command_line = "python script_submission_analysis_MoRiBS.py -d "+str(output)+" -R 10.05 --scal SWAPTOUNSWAP -N 8 -Block 10000 -Pass 200 --ROTMOVE tau submission ENT HF HF 0.2"
+	command_line = "python script_submission_analysis_MoRiBS.py -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 5000 -Pass 20 --ROTMOVE -C tau submission PIMC HF HF "+str(beta)
 	#command_line = "python script_submission_analysis_MoRiBS.py -d "+str(DipoleMoment)+" -R 10.05 --scal SWAPTOUNSWAP -N 2 -Block 200000 -Pass 200 --ROTMOVE --RESTART -NR 400000 tau submission ENT HF HF 0.2"
-	command_line = "python script_submission_analysis_MoRiBS.py -d "+str(output)+" -R 10.05 --scal SWAPTOUNSWAP -N 8 -Block 10000 -Pass 200 --ROTMOVE --preskip 0 tau analysis ENT HF HF 0.2"
+	#command_line = "python script_submission_analysis_MoRiBS.py -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 5000 -Pass 20 --ROTMOVE tau analysis PIMC HF HF "+str(beta)
 	system(command_line)
 #-------------------------------#
 	#command_line = "python script_exact_energy_entropy.py -d "+str(DipoleMoment)+" -R 10.05 -N 4 --ROTMOVE tau PIGS HF HF 0.2"
-	'''

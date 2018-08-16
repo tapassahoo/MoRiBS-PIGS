@@ -1254,3 +1254,21 @@ def GetPairDensity(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 		call(["rm", "outputDensity.txt"])
 		system(commandRun)
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
+
+def GetRotEnergy(molecule,jrot):
+	Energy = GetBconst(molecule)*jrot*(jrot+1.0)
+	return Energy
+
+def GetAvgRotEnergy(molecule,beta):
+	CMRECIP2KL = 1.4387672
+	Zsum = 0.0
+	Nsum = 0.0
+	for jrot in range(0,10000,1):
+		BoltzmannProb = exp(-beta*GetRotEnergy(molecule,jrot)*CMRECIP2KL)
+		if (BoltzmannProb > 10e-16):
+			Zsum += (2*jrot+1.0)*BoltzmannProb
+			Nsum += (2*jrot+1.0)*GetRotEnergy(molecule,jrot)*BoltzmannProb
+		else:
+			break
+	AvgEnergy = Nsum*CMRECIP2KL/Zsum
+	return AvgEnergy

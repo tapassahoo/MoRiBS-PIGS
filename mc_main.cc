@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
 {
 #ifdef PAIRDENSITY
 	readPairDensity();
+	cout<<"TAPAS"<<endl;
 	exit(11);
 #endif
    	randomseed(); //set seed according to clock
@@ -749,16 +750,17 @@ ParamsPotential();
 void PIMCPass(int type,int time)
 {
   // skip solvent and translation moves for rotations only
-#ifdef MOVECOM
+	if(TRANSLATION)
+	{
 #ifdef GAUSSIANMOVE
-	MCMolecularMoveGauss(type);
+		MCMolecularMoveGauss(type);
 #else
-   if (time == 0)
-   MCMolecularMove(type);        
+		if (time == 0)
+		MCMolecularMove(type);        
 // move the solvent particles
-   MCBisectionMove(type,time);
+		MCBisectionMove(type,time);
 #endif
-#endif
+	}
 
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 1)  // rotational degrees of freedom
     	MCRotationsMove(type);
@@ -766,12 +768,14 @@ void PIMCPass(int type,int time)
     	MCRotationsMove(type);
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
     	MCRotations3D(type);
-	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)  // linear rotor rotation added by Tapas Sahoo
+	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)
+	{
 #ifdef CLUSTERMOVE
     	MCRotationsMoveCL(type);
 #else
     	MCRotationsMove(type);
 #endif
+	}
 }
 
 #ifdef PIMCTYPE
@@ -1264,7 +1268,7 @@ void MCGetAveragePIMC(void)
     double skin       = 0.;
 	if(TRANSLATION)
 	{
-		skin              = GetKinEnergy();           // kin energy
+		skin          = GetKinEnergy();           // kin energy
 	}
 	_bkin            += skin;                     // block average for kin energy
 	_kin_total       += skin;                     // accumulated average 
@@ -1274,6 +1278,7 @@ void MCGetAveragePIMC(void)
 	_pot_total       += spot;
 
 
+#ifdef IOWRITE
     double cosTheta   = 0.0;
     double compxyz[NDIM];
     compxyz[0] = 0.0;
@@ -1295,6 +1300,7 @@ void MCGetAveragePIMC(void)
     _ucompx_total    += scompx;
     _ucompy_total    += scompy;
     _ucompz_total    += scompz;
+#endif
 
 #ifdef DDCORR
 	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
@@ -2220,62 +2226,63 @@ void DoneTotalAverage(void)
 
 void MCSaveAcceptRatio(long int step,long int pass,long int block)
 {
-   int w = 8; 
+	int w = 8; 
  
-   cout << "BLOCK:" << setw(w) << block << BLANK;
-   cout << "PASS:"  << setw(w) << pass  << BLANK;
-   cout << "STEP:"  << setw(w) << step  << BLANK;
+	cout << "BLOCK:" << setw(w) << block << BLANK;
+	cout << "PASS:"  << setw(w) << pass  << BLANK;
+	cout << "STEP:"  << setw(w) << step  << BLANK;
 
-#ifdef MOVECOM
-   for (int type=0;type<NumbTypes;type++)
-   if (WORM && (type == Worm.type))
-   {
-      double ratio_open    = QWAccep[0][QW_OPEN] /QWTotal[0][QW_OPEN];
-      double ratio_close   = QWAccep[0][QW_CLOSE]/QWTotal[0][QW_CLOSE];
+	if(TRANSLATION)
+	{
+		for (int type=0;type<NumbTypes;type++)
+		if (WORM && (type == Worm.type))
+		{
+			double ratio_open    = QWAccep[0][QW_OPEN] /QWTotal[0][QW_OPEN];
+			double ratio_close   = QWAccep[0][QW_CLOSE]/QWTotal[0][QW_CLOSE];
 
-      double ratio_advance = QWAccep[0][QW_ADVANCE]/QWTotal[0][QW_ADVANCE];
-      double ratio_recede  = QWAccep[0][QW_RECEDE] /QWTotal[0][QW_RECEDE];
+			double ratio_advance = QWAccep[0][QW_ADVANCE]/QWTotal[0][QW_ADVANCE];
+			double ratio_recede  = QWAccep[0][QW_RECEDE] /QWTotal[0][QW_RECEDE];
 
-      double ratio_swap    = QWAccep[0][QW_SWAP]/QWTotal[0][QW_SWAP];
+			double ratio_swap    = QWAccep[0][QW_SWAP]/QWTotal[0][QW_SWAP];
 
-      cout<<setw(w)<<"open/close";
-      cout<<" [ "; 
-      cout<<QWTotal[0][QW_OPEN]/countQW<<"-"<<QWTotal[0][QW_CLOSE]/countQW; 
-      cout<<" ] "; 
-      cout<<BLANK;                     
+			cout<<setw(w)<<"open/close";
+			cout<<" [ "; 
+			cout<<QWTotal[0][QW_OPEN]/countQW<<"-"<<QWTotal[0][QW_CLOSE]/countQW; 
+			cout<<" ] "; 
+			cout<<BLANK;                     
  
-      cout<<setw(w)<<ratio_open   << BLANK; // accept ratio for "open"   move
-      cout<<setw(w)<<ratio_close  << BLANK; // accept ratio for "close"  move
+			cout<<setw(w)<<ratio_open   << BLANK; // accept ratio for "open"   move
+			cout<<setw(w)<<ratio_close  << BLANK; // accept ratio for "close"  move
 
-      cout<<setw(w)<<"advance/recede";
-      cout<<" [ "; 
-      cout<<QWTotal[0][QW_ADVANCE]/countQW<<"-"<<QWTotal[0][QW_RECEDE]/countQW; 
-      cout<<" ] "; 
-      cout<<BLANK;                     
+			cout<<setw(w)<<"advance/recede";
+			cout<<" [ "; 
+			cout<<QWTotal[0][QW_ADVANCE]/countQW<<"-"<<QWTotal[0][QW_RECEDE]/countQW; 
+			cout<<" ] "; 
+			cout<<BLANK;                     
  
-      cout<<setw(w)<<ratio_advance<< BLANK;  // accept ratio for "advance" move 
-      cout<<setw(w)<<ratio_recede << BLANK;  // accept ratio for "recede"  move
+			cout<<setw(w)<<ratio_advance<< BLANK;  // accept ratio for "advance" move 
+			cout<<setw(w)<<ratio_recede << BLANK;  // accept ratio for "recede"  move
 
-      cout<<setw(w)<<"swap";
-      cout<<" [ "; 
-      cout<<QWTotal[0][QW_SWAP]/countQW; 
-      cout<<" ] "; 
-      cout<<BLANK;                     
-      cout<<setw(w)<<ratio_swap << BLANK;  // accept ratio for "recede"  move
-   }
-   else
-   {
+			cout<<setw(w)<<"swap";
+			cout<<" [ "; 
+			cout<<QWTotal[0][QW_SWAP]/countQW; 
+			cout<<" ] "; 
+			cout<<BLANK;                     
+			cout<<setw(w)<<ratio_swap << BLANK;  // accept ratio for "recede"  move
+		}
+		else
+		{
 #ifndef GAUSSIANMOVE
-      double ratio_molec = MCAccep[type][MCMOLEC]/MCTotal[type][MCMOLEC];
-      double ratio_multi = MCAccep[type][MCMULTI]/MCTotal[type][MCMULTI];
+      		double ratio_molec = MCAccep[type][MCMOLEC]/MCTotal[type][MCMOLEC];
+      		double ratio_multi = MCAccep[type][MCMULTI]/MCTotal[type][MCMULTI];
  
-      cout<<setw(w)<<MCAtom[type].type<<BLANK; // atom type
+      		cout<<setw(w)<<MCAtom[type].type<<BLANK; // atom type
 
-      cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
-      cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
+      		cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
+      		cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
 #endif
-   }
-#endif
+   		}
+	}
 
    if (ROTATION)
    {
