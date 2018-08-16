@@ -10,7 +10,7 @@ from numpy import *
 import math
 
 def error_message(number):
-	if(number<=6):
+	if(number<=1):
 		print("Warning!!!")  
 		print("Increase the number of blocks in your computation!!!")
 		exit(0)

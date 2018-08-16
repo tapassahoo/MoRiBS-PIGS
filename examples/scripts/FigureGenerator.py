@@ -25,6 +25,8 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 	preskip    = 0
 	postskip   = 0
 
+	plotnum    = 2
+
 	BConstant        = support.GetBconst(molecule_rot)  # in wavenumber
 	Units          	 = support.GetUnitConverter()
 	BConstantK       = BConstant*Units.CMRECIP2KL
@@ -38,15 +40,19 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 		var = beadsRef
 		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
 		if (TypePlot == "RFACTOR"):
-			FilePlotEntropy  = FilePlotName.SaveEntropyRFAC+".ps"
+			FilePlotEntropy  = FilePlotName.SaveEntropyRFAC+str(plotnum)+".ps"
 		if (TypePlot == "GFACTOR"):
-			FilePlotEntropy  = FilePlotName.SaveEntropyGFAC+".ps"
+			FilePlotEntropy  = FilePlotName.SaveEntropyGFAC+str(plotnum)+".ps"
 		outfileEntropy       = FilePlotEntropy
 		call(["rm", FilePlotEntropy])
 #
-		plt.axhline(y=log(2.0), color='blue', lw = 2.0, linestyle='-', label = 'ln(2)')
+		if (plotnum != 2):
+			plt.axhline(y=log(2.0), color='blue', lw = 2.0, linestyle='-', label = 'ln(2)')
 #
-		nn = [2,4,6,8,16,32]
+		if (plotnum != 2):
+			nn = [2,4,6]
+		else:
+			nn = [8,16,32]
 		for numbmolecules in nn:
 			particleA = numbmolecules/2
 			if (numbmolecules == 2):
@@ -62,14 +68,21 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				DList  = [1.0+0.25*i for i in range(10)]
 				numbblocks = 20000
 			if (numbmolecules == 8):
-				DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				#DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
 				numbblocks = 20000
+				preskip1   = 5000
+				postskip1  = 10000
 			if (numbmolecules == 16):
-				DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
 				numbblocks = 10000
+				preskip1   = 0
+				postskip1  = 0
 			if (numbmolecules == 32):
-				DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
 				numbblocks = 10000
+				preskip1   = 0
+				postskip1  = 0
 		
 			RFactorPlot      = np.zeros(len(DList))
 			entropy1Plot     = np.zeros(len(DList))
@@ -101,7 +114,8 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 					RFactorPlot[iii] = 1.0/(RFactor*RFactor*RFactor)
 				if (TypePlot == "RFACTOR"):
 					RFactorPlot[iii] = RFactor
-				entropy3Plot[iii] = entropy3
+				if (plotnum != 2):
+					entropy3Plot[iii] = entropy3
 				if ((numbmolecules == 4) and (dipolemoment ==4.0)):
 					beadsRef = 61
 					beadsRef1 = 81
@@ -124,14 +138,14 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 					beadsRef = 41
 					beadsRef1 = beadsRef
 				if (numbmolecules == 16):
-					beadsRef = 21
+					beadsRef = 41
 					beadsRef1 = beadsRef
 				if (numbmolecules == 32):
-					beadsRef = 11
+					beadsRef = 21
 					beadsRef1 = beadsRef
 	
 				#if ((numbmolecules == 8) and (dipolemoment > 2.5)):
-				if (numbmolecules == 32):
+				if (numbmolecules == 64):
 					entropy1Plot[iii]     = entropy1
 					err_entropy1Plot[iii] = err_entropy1
 					purity1Plot[iii]      = purity1
@@ -163,18 +177,22 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 			print(entropy3Plot)
 #
 			plotEntropyENT1(numbmolecules,RFactorPlot, entropy1Plot, err_entropy1Plot, variableName, RFactorPlot, entropy2Plot, entropy3Plot, font, TypePlot)
-			plt.ylabel(r'$S_{2}$', fontsize = font)
-			ymin, ymax = plt.ylim()
+		plt.ylabel(r'$S_{2}$', fontsize = font)
+		ymin, ymax = plt.ylim()
+		if (plotnum != 2):
 			if ymin < 0.0:
 				plt.ylim(0.0,ymax)
-			xmin, xmax = plt.xlim()
-			Text1 = ""
-			Text2 = ""
-			if Text1:
-				PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+		xmin, xmax = plt.xlim()
+		Text1 = "(b)"
+		Text2 = ""
+		if Text1:
+			PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 			
 		plt.subplots_adjust(top=0.95, bottom=0.15, left=0.15, right=0.98, hspace=0.0, wspace=0.4)
-		plt.legend(bbox_to_anchor=(0.68, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+		if (plotnum !=2):
+			plt.legend(bbox_to_anchor=(0.68, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+		else:
+			plt.legend(bbox_to_anchor=(0.88, 0.35), borderaxespad=1., shadow=True, fontsize = fontlegend)
 		plt.savefig(outfileEntropy, dpi = 400, format = 'ps')
 
 		call(["open", outfileEntropy])
@@ -391,12 +409,12 @@ def plotEntropyENT1(numbmolecules,var, val, err_val, variableName, var1, val1, v
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "8", markersize = 7, label = 'DMRG: 6 HF')
 
 	if (numbmolecules == 16):
-		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "8", markersize = 8, label = 'PIGS: N=16')
+		plt.errorbar(var, val, yerr=err_val, color = "blue", ls = '-', linewidth=1,  marker = "8", markersize = 8, label = 'PIGS: N=16')
 		#plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'ED: N=6')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "8", markersize = 7, label = 'DMRG: 6 HF')
 
 	if (numbmolecules == 32):
-		plt.errorbar(var, val, yerr=err_val, color = "red", ls = '-', linewidth=1,  marker = "^", markersize = 8, label = 'PIGS: N=16')
+		plt.errorbar(var, val, yerr=err_val, color = "green", ls = '-', linewidth=1,  marker = "^", markersize = 8, label = 'PIGS: N=32')
 		#plt.plot(var, val2, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'ED: N=6')
 		#plt.plot(DMRGdatagFac, DMRGdataPlot, linestyle = 'None', color = 'darkcyan', marker = "8", markersize = 7, label = 'DMRG: 6 HF')
 
