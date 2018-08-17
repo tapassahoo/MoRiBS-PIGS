@@ -99,7 +99,7 @@ RotorType           = args.Type
 ENT_TYPE 			= args.scal
 particleA           = int(numbmolecules/2)
 
-#extra_file_name     = "end-step-value-"
+#extra_file_name     = "thread-4-"
 extra_file_name     = ""
 
 src_dir             = os.getcwd()
@@ -123,9 +123,9 @@ numbblocks_Restart1 = args.NR
 #Request to change
 #User should change the following 5 lines as developer already have explained in the README file.
 user_name           = "tapas"                   
-source_dir          = "Moribs-pigs/MoRiBS-PIMC/" 
-out_dir             = "linear_pigs/"
-input_dir           = "examples/linear_pigs/"
+source_dir          = "MoRiBS-PIGS/" 
+out_dir             = "cluster_move_testing/"
+input_dir           = "/home/tapas/MoRiBS-Simulations/cluster_move_testing/"
 final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"
 dir = os.path.dirname(final_results_path)
 if not os.path.exists(dir):
@@ -138,12 +138,12 @@ if status   == "submission":
 
 	if (RUNDIR == "scratch") or (NameOfServer == "graham"):
 		dir_run_job = "/scratch/"+user_name+"/"+out_dir 
+		if (NameOfServer == "graham"):
+			dir = os.path.dirname(dir_run_job)
+			if not os.path.exists(dir):
+				os.makedirs(dir)
 	else:	
 		dir_run_job = "/work/"+user_name+"/"+out_dir
-
-	dir = os.path.dirname(dir_run_job)
-	if not os.path.exists(dir):
-		os.makedirs(dir)
 
 	execution_file  = "/home/"+user_name+"/"+source_dir+"pimc"     
 	if not args.compiler:
@@ -354,25 +354,22 @@ if status == "analysis":
 		print("")
 		call(["cat",FileAnalysis.SaveEnergy])
 #=========================File Checking===============================#
-		try:
-			SavedFile = FileAnalysis.SaveEntropy
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveEnergy
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveTotalCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveZCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		except:
-			pass
+		SavedFile = FileAnalysis.SaveEntropy
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveEnergy
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveTotalCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveZCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 
 	if (TypeCal == "PIGS" or TypeCal == "PIMC"):
 		fanalyzeEnergy.close()
@@ -390,22 +387,19 @@ if status == "analysis":
 		#print("")
 		#call(["cat",FileAnalysis.SaveTotalCorr])
 #=========================File Checking===============================#
-		try:
-			SavedFile = FileAnalysis.SaveEnergy
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveTotalCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveZCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-			SavedFile = FileAnalysis.SaveXYCorr
-			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		except:
-			pass
+		SavedFile = FileAnalysis.SaveEnergy
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveTotalCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveZCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+		SavedFile = FileAnalysis.SaveXYCorr
+		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 # END ========
 

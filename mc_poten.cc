@@ -1021,21 +1021,18 @@ void readPairDensity(void)
     int size_total, block_numb, size;
     f >> size_total>>block_numb;
     f >> size;
-
     int *basisIndices = new int[4*size];
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < 4; j++) {
             f >> basisIndices[i*4+j];
         }
     }
-
     double *densityMatrix = new double[size*size];
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             f >> densityMatrix[i*size+j];
         }
     }
-
     f.close();
 
     for (int i = 0; i < size; i++) {
@@ -1054,6 +1051,5 @@ void readPairDensity(void)
 
     delete[] basisIndices;
     delete[] densityMatrix;
-	exit(1);
 }
 #endif
