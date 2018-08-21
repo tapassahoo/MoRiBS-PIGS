@@ -1858,7 +1858,7 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
 	cosTheta = scosTheta/(double)totalTerms;
 	for (int id = 0; id < NDIM; id++)
 	{
-		compxyz[id] = fabs(scompxyz[id]/NumbAtoms);
+		compxyz[id] = fabs(scompxyz[id]/(double)NumbAtoms);
 	}
 }
 
