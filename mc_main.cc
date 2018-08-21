@@ -71,13 +71,24 @@ double _dpot_total;  // potential energy differences, global average  added by H
 //double _kin_total;  // potential energy, global average 
 //double _total;  // potential energy, global average 
 double _bcostheta;
+double _costheta_total;
+#
 double _ucompx;
 double _ucompy;
 double _ucompz;
-double _costheta_total;
+#
+double _abs_ucompx;
+double _abs_ucompy;
+double _abs_ucompz;
+#
 double _ucompx_total;
 double _ucompy_total;
 double _ucompz_total;
+#
+double _abs_ucompx_total;
+double _abs_ucompy_total;
+double _abs_ucompz_total;
+#
 vector<double> _cdipoleXYZ;
 vector<double> _cdipoleX;
 vector<double> _cdipoleY;
@@ -562,7 +573,7 @@ ParamsPotential();
 #ifdef IOWRITE
             SaveInstantEnergy (); 
 #endif
-			if (blockCount > (NumberOfMCBlocks - 1000))
+			if (blockCount > (NumberOfMCBlocks - 10))
 			{
 		    	SaveInstantAngularDOF(totalStep);
 #ifdef SWAPTOUNSWAP
@@ -845,6 +856,9 @@ void MCResetBlockAveragePIGS(void)
 	_ucompx     = 0.0;
 	_ucompy     = 0.0;
 	_ucompz     = 0.0;
+	_abs_ucompx     = 0.0;
+	_abs_ucompy     = 0.0;
+	_abs_ucompz     = 0.0;
 #ifdef DDCORR
 	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
     _cdipoleXYZ.resize(NDIMDP);
@@ -1127,15 +1141,15 @@ void MCGetAveragePIGS(void)
 
 	double cosTheta   = 0.0;
 	double compxyz[NDIM];
-	compxyz[0] = 0.0;
-	compxyz[1] = 0.0;
-	compxyz[2] = 0.0;
-
-	GetCosThetaPIGS(cosTheta, compxyz);
+	double abs_compxyz[NDIM];
+	GetCosThetaPIGS(cosTheta, abs_compxyz, compxyz);
 	double scostheta  = cosTheta;
 	double scompx     = compxyz[0];
 	double scompy     = compxyz[1];
 	double scompz     = compxyz[2];
+	double abs_scompx = abs_compxyz[0];
+	double abs_scompy = abs_compxyz[1];
+	double abs_scompz = abs_compxyz[2];
 
 	_bcostheta       += scostheta; 
 	_costheta_total  += scostheta;
@@ -1146,6 +1160,13 @@ void MCGetAveragePIGS(void)
 	_ucompx_total    += scompx;
 	_ucompy_total    += scompy;
 	_ucompz_total    += scompz;
+
+	_abs_ucompx          += abs_scompx;
+	_abs_ucompy          += abs_scompy;
+	_abs_ucompz          += abs_scompz;
+	_abs_ucompx_total    += abs_scompx;
+	_abs_ucompy_total    += abs_scompy;
+	_abs_ucompz_total    += abs_scompz;
 
 #ifdef DDCORR
 	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
@@ -1721,6 +1742,11 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
         fid << setw(IO_WIDTH) << _ucompx/acount << BLANK;
         fid << setw(IO_WIDTH) << _ucompy/acount << BLANK;
         fid << setw(IO_WIDTH) << _ucompz/acount << BLANK;
+#ifdef PIGSTYPE
+        fid << setw(IO_WIDTH) << _abs_ucompx/acount << BLANK;
+        fid << setw(IO_WIDTH) << _abs_ucompy/acount << BLANK;
+        fid << setw(IO_WIDTH) << _abs_ucompz/acount << BLANK;
+#endif
         fid << endl;
 	}
     fid.close();
@@ -1862,6 +1888,11 @@ void SaveSumAngularDOF(double acount, double numb)
     _fang << setw(IO_WIDTH) << _ucompx_total/acount << BLANK;
     _fang << setw(IO_WIDTH) << _ucompy_total/acount << BLANK;
     _fang << setw(IO_WIDTH) << _ucompz_total/acount << BLANK;
+#ifdef PIGSTYPE
+    _fang << setw(IO_WIDTH) << _abs_ucompx_total/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _abs_ucompy_total/acount << BLANK;
+    _fang << setw(IO_WIDTH) << _abs_ucompz_total/acount << BLANK;
+#endif
     _fang << endl;
 }
 
@@ -2041,6 +2072,9 @@ void InitTotalAverage(void)  // DUMP
 	_ucompx_total  = 0.0;
 	_ucompy_total  = 0.0;
 	_ucompz_total  = 0.0;
+	_abs_ucompx_total  = 0.0;
+	_abs_ucompy_total  = 0.0;
+	_abs_ucompz_total  = 0.0;
 #ifdef PIGSENTBOTH
 	int NumbAtoms1 = NumbAtoms/2;
 #else
@@ -2095,6 +2129,7 @@ void InitTotalAverage(void)  // DUMP
 	_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 //
 
+#ifdef IOWRITE
     string fangular;
 
     fangular  = MCFileName + IO_SUM;
@@ -2110,7 +2145,6 @@ void InitTotalAverage(void)  // DUMP
     _io_error(_proc_,IO_ERR_FOPEN,fangular.c_str());
 
 //
-#ifdef DDCORR
     string fdipolecorr;
 
     fdipolecorr  = MCFileName + IO_SUM;

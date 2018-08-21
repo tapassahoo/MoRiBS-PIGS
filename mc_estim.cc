@@ -1779,7 +1779,7 @@ void GetCosThetaPIMC(double &cosTheta, double *compxyz)
     compxyz[2] = scompxyz[2]/(NumbAtoms*NumbRotTimes);
 }
 
-void GetCosThetaPIGS(double &cosTheta, double *compxyz)
+void GetCosThetaPIGS(double &cosTheta, double *abs_compxyz, double *compxyz)
 {
     const char *_proc_=__func__; 
 
@@ -1858,7 +1858,8 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
 	cosTheta = scosTheta/(double)totalTerms;
 	for (int id = 0; id < NDIM; id++)
 	{
-		compxyz[id] = fabs(scompxyz[id]/(double)NumbAtoms);
+		abs_compxyz[id] = fabs(scompxyz[id]/(double)NumbAtoms);
+		compxyz[id] = scompxyz[id]/(double)NumbAtoms;
 	}
 }
 
