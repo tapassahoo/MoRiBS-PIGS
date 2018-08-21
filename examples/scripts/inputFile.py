@@ -51,7 +51,7 @@ class GetStepAndLevel:
 				# beads 21, 31, 41, 51 for beta 0.1
 				#step        = [2.0,2.0,2.0,1.6,1.5,1.4,1.2,1.0,1.0,1.0]  
 				# beads i+1 for i in range(10,100,10) beta =0.2
-				self.step   = [2.0, 2.0, 2.0, 1.8, 1.5, 2.0]  
+				self.step   = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]  
 				# beads 11, 21, 31, 41 for beta 0.2 for g<1
 				#self.step   = [2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8]  
 				# beads 21, 41, 61, 81, 101, 121, 141 for beta 0.2 for -d 1.0 to 5.0
