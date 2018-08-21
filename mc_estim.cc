@@ -156,6 +156,9 @@ extern "C" void calengy_(double *com_1, double *Eulang_1, double *E_H2OC60);
 //Potential of interaction of two cages with water inside
 extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
 #endif
+#ifdef CAGEPOT
+extern "C" void enHFC60_(double *R, double *EulangL, double *EulangJ, double *EHFC60);
+#endif
 
 void InitMCEstims(void)
 {
@@ -766,7 +769,7 @@ double GetPotEnergyPIGS(void)
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
-    for (int atom0 = atomStart; atom0 < NumbAtoms; atom0++)
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 	{
         int offset0 = NumbTimes*atom0;
         int t0 = offset0 + it;

@@ -4264,7 +4264,7 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
     double phi = Eulang0[PHI];
     if (phi < 0.0) phi = 2.0*M_PI + phi;
     phi = fmod(phi,2.0*M_PI);
-    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
+    spot_cage = LPot2DRotDOF(cost,phi,type0);
 #else
     spot_cage = 0.0;
 #endif
