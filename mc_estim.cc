@@ -15,6 +15,7 @@
 #include "mc_const.h"
 
 #include <omp.h>
+#include <cmath>
 
 // -----  density distributions ----------------------------
 
@@ -1795,9 +1796,9 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
         scosTheta    = 0.0;
     	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
         {    
+            int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
     	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
     	    {
-        	    int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
         	    int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
 
        		    int t0      = offset0 + it;
@@ -1853,10 +1854,11 @@ void GetCosThetaPIGS(double &cosTheta, double *compxyz)
 		scompxyz[2] = MCCosine[2][tm0];
 	}
 
-	cosTheta = scosTheta;
+	int totalTerms  = NumbAtoms*(NumbAtoms-1)/2;
+	cosTheta = scosTheta/(double)totalTerms;
 	for (int id = 0; id < NDIM; id++)
 	{
-		compxyz[id] = scompxyz[id]/NumbAtoms;
+		compxyz[id] = fabs(scompxyz[id]/NumbAtoms);
 	}
 }
 

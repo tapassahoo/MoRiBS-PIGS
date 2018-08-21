@@ -20,6 +20,7 @@
 #include "omprng.h"
 #include <algorithm>
 #include <list>
+#include <cmath>
 
 // counters
 
@@ -4324,10 +4325,10 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 {
 // The following block of statements creates 3 dimensional unit random vector 
    	double costRef, phiRef;
-   	costRef = (step*(rand1-0.5));
-   	phiRef  = (step*(rand2-0.5));
-   	//costRef = runifab(Rng, -1.0,1.0);
-   	//phiRef  = runifab(Rng, 0.0, 2.0*M_PI);
+   	//costRef = (step*(rand1-0.5));
+   	//phiRef  = (step*(rand2-0.5));
+   	costRef = runifab(Rng, -1.0,1.0);
+   	phiRef  = runifab(Rng, 0.0, 2.0*M_PI);
 
    	if (costRef> 1.0) costRef =  2.0 - costRef;
    	if (costRef<-1.0) costRef = -2.0 - costRef;
@@ -4514,7 +4515,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 			for (int iAtom1 = 0; iAtom1 < antiCluster.size(); iAtom1++)
 			{
 				int atomAntiCluster = antiCluster[iAtom1];
-				if (abs(atomCluster - atomAntiCluster)>=1)
+				if (abs(atomCluster - atomAntiCluster)>1)
 				{
 					int offsetAntiCluster = MCAtom[type].offset+(NumbRotTimes*atomAntiCluster);  
 					int tAntiCluster      = offsetAntiCluster + it;
@@ -4621,14 +4622,12 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 	if (Eulang0[PHI] < 0.0) Eulang0[PHI] += 2.0*M_PI;
 	Eulang0[CTH]   = acos(newcoords[AXIS_Z][t0]);
 	Eulang0[CHI]   = 0.0;
-	//cout<<"TAPAS "<<Eulang0[PHI]<<BLANK<<Eulang0[CTH]<<BLANK<<Eulang0[CHI]<<endl;
 
 	Eulang1[PHI]   = MCAngles[PHI][t1];
 	Eulang1[CTH]   = acos(MCAngles[CTH][t1]);
 	Eulang1[CHI]   = MCAngles[CHI][t1];
 
 	double pot_old = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
-	//cout<<"TAPAS "<<Eulang0[PHI]<<BLANK<<Eulang0[CTH]<<BLANK<<Eulang0[CHI]<<endl;
 
 	double vectorAtom1[NDIM];
 	double reflectAtom1[NDIM];
