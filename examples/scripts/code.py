@@ -5,7 +5,7 @@ from os import system
 import support
 
 molecule     = "HF"
-nMolecule    = 24
+nMolecule    = 32
 RCOM         = 10.05
 gFactorList  = [0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]
 beta         = 0.2

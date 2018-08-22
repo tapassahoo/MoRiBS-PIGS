@@ -5011,6 +5011,7 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 }
 #endif
 
+#ifdef CAGEPOT
 double PotFuncCage(const double *Eulang0)
 {
    	double phi = Eulang0[PHI];
@@ -5021,14 +5022,15 @@ double PotFuncCage(const double *Eulang0)
 	double EulangJ[2];
 	EulangL[0] = 79.2;
 	EulangL[1] = 180.0;
-	EulangJ[0] = Eulang0[CTH];
-	EulangJ[1] = phi;
+	EulangJ[0] = Eulang0[CTH]*(180.0/M_PI);
+	EulangJ[1] = phi*(180.0/M_PI);
 	double EHFC60;
 	enhfc60_(&RCage, EulangL, EulangJ, &EHFC60);
    	double spot_cage = EHFC60*KCalperMolToCmInverse*CMRECIP2KL;
    	//spot_cage += LPot2DRotDOF(cost,phi,type0);
 	return spot_cage;
 }
+#endif
 
 #ifdef EWALDSUM
 double Uself(double *U_moment0)
