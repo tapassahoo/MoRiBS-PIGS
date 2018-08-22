@@ -29,7 +29,7 @@ void GetDipoleCorrelationPIMC(double *, double *, double *, double *, double *);
 void GetDipoleCorrelationPIGSENT(double *, double *, double *, double *, double *);
 void GetDipoleCorrelationPIGS(double *, double *, double *, double *, double *);
 #endif
-void GetCosThetaPIGS(double &, double *);
+void GetCosThetaPIGS(double &, double *, double *);
 void GetCosThetaPIMC(double &, double *);
 double GetPhi();
 double GetPotEnergy(void);
@@ -93,6 +93,7 @@ double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
 void UnitVectors(const double *, double *);
 double PotFunc(int , int , const double *, const double *, int );
+double PotFuncCage(const double *);
 
 double GetPotEnergyPIGSENT(void);
 double GetTotalEnergyPIGSENT(void);

@@ -240,7 +240,7 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 	'''
 	This function gives us the output 
 	'''
-	col_block, col_costheta, col_compx, col_compy, col_compz = genfromtxt(final_dir_in_work+"/results/output.dof",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
+	col_block, col_costheta, col_compx, col_compy, col_compz, col_abs_compx, col_abs_compy, col_abs_compz = genfromtxt(final_dir_in_work+"/results/output.dof",unpack=True, usecols=[0,1,2,3,4,5,6,7], skip_header=preskip, skip_footer=postskip)
 	'''
 	fd             = open(final_dir_in_work+'/results/output_instant.dof', 'rb')
 	shape          = (-1,5) 
@@ -263,22 +263,23 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 	mean_compx     = np.mean(col_compx)
 	mean_compy     = np.mean(col_compy)
 	mean_compz     = np.mean(col_compz)
-
 	error_costheta = maxError_byBining(mean_costheta, col_costheta, workingNdim-6)
 	error_compx    = maxError_byBining(mean_compx, col_compx, workingNdim-6)
 	error_compy    = maxError_byBining(mean_compy, col_compy, workingNdim-6)
 	error_compz    = maxError_byBining(mean_compz, col_compz, workingNdim-6)
 
-	col_abscompx   = np.absolute(col_compx)
-	col_abscompy   = np.absolute(col_compy)
-	col_abscompz   = np.absolute(col_compz)
-	mean_abscompx  = np.mean(col_abscompx)
-	mean_abscompy  = np.mean(col_abscompy)
-	mean_abscompz  = np.mean(col_abscompz)
-	error_abscompx = error_compx
-	error_abscompy = error_compy
-	error_abscompz = error_compz
+	col_abs_compx  = col_abs_compx[trunc:]
+	col_abs_compy  = col_abs_compy[trunc:]
+	col_abs_compz  = col_abs_compz[trunc:]
+	mean_abs_compx = np.mean(col_abs_compx)
+	mean_abs_compy = np.mean(col_abs_compy)
+	mean_abs_compz = np.mean(col_abs_compz)
+	error_abs_compx= maxError_byBining(mean_abs_compx, col_abs_compx, workingNdim-6)
+	error_abs_compy= maxError_byBining(mean_abs_compy, col_abs_compy, workingNdim-6)
+	error_abs_compz= maxError_byBining(mean_abs_compz, col_abs_compz, workingNdim-6)
 
+
+	'''
 	col_sqcompx   = np.square(col_compx)
 	col_sqcompy   = np.square(col_compy)
 	col_sqcompz   = np.square(col_compz)
@@ -288,8 +289,9 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 	error_sqcompx = 2.0*mean_compx*error_compx
 	error_sqcompy = 2.0*mean_compy*error_compy
 	error_sqcompz = 2.0*mean_compz*error_compz
+	'''
 
-	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}{16:15.5f}{17:15.5f}{18:15.5f}{19:15.5f}{20:15.5f}{21:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abscompx, mean_abscompy, mean_abscompz, mean_sqcompx, mean_sqcompy, mean_sqcompz, error_costheta, error_compx, error_compy, error_compz, error_abscompx, error_abscompy, error_abscompz, error_sqcompx, error_sqcompy, error_sqcompz)
+	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abs_compx, mean_abs_compy, mean_abs_compz, error_costheta, error_compx, error_compy, error_compz, error_abs_compx, error_abs_compy, error_abs_compz)
 	output  += "\n"
 	return output
 
@@ -368,15 +370,16 @@ def fmtAverageOrientation(status,variable):
 
 	if status == "analysis":
 		output     ="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}'.format('Beads', variable, '<sum of ei.ej>', '< x >', '< y >', '< z >', '< |x| >', '< |y| >', '< |z| >', '< x^2 >', '< y^2 >', '< z^2 >', 'Error')
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('Beads', variable, '<sum of ei.ej>', '< x >', '< y >', '< z >', '< |x| >', '< |y| >', '< |z| >', 'Errors')
 		output    +="\n"
 		output    +="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '', '', '', '')
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '')
 		#output    +="\n"
 		#output    +="#"
 		#output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
 		output    +="\n"
-		output    += '{0:=<250}'.format('#')
+		#output    += '{0:=<250}'.format('#')
+		output    += '{0:=<190}'.format('#')
 		output    +="\n"
 
 	return output
@@ -791,6 +794,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	if (thread > 4):
 		thread     = 4
+	thread         = 1
 	job_name       = file_name+str(value)
 	walltime       = "7-30:00"
 	omp_thread     = str(thread)

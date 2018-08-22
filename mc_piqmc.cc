@@ -20,6 +20,7 @@
 #include "omprng.h"
 #include <algorithm>
 #include <list>
+#include <cmath>
 
 // counters
 
@@ -939,7 +940,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
    		//pot_old  += (PotRotEnergyPIGS(gatom,MCCosine,it));
-   		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it));
+   		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it,type));
 	}
 
 // the new density 
@@ -993,7 +994,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
 		//pot_new  += (PotRotEnergyPIGS(gatom,newcoords,it));
-		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it));
+		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it,type));
 	}
 
 	double rd;
@@ -1041,28 +1042,26 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 }
 
-double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)   
+double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)   
 {
-	int type0   =  MCType[atom0];
-	double spot;
+	int offset0 =  MCAtom[type].offset+NumbRotTimes*atom0;
+	int t0  = offset0 + it;
+
+	double spot = 0.0;
 
     double weight;
 	weight = 1.0;
     if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
 
-	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
+	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb > 1) )
 	{
-	    int offset0 =  atom0*NumbRotTimes;
-        int t0  = offset0 + it;
-
-        spot = 0.0;
         for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
         if (atom1 != atom0)                    
         {
-            int offset1 = atom1*NumbRotTimes;
+            int offset1 = MCAtom[type].offset + NumbRotTimes*atom1;
             int t1  = offset1 + it;
 
-	        string stype = MCAtom[type0].type;
+	        string stype = MCAtom[type].type;
 			/*
 			if (stype == H2)
 	        {
@@ -1138,18 +1137,16 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)
         } //loop over atom1 (molecules)
     }
 
-	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+#ifdef ONSITE
+	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb == 1) )
 	{
         double E12 = -2.0*DipoleMomentAU2*cos(Eulang0[CTH])/(RR*RR*RR);
         spot        = weight*E12*AuToKelvin;
     }
+#endif
     double spot_cage;
 #ifdef CAGEPOT
-    double cost = cos(Eulang0[CTH]);
-    double phi = Eulang0[PHI];
-    if (phi < 0.0) phi = 2.0*M_PI + phi;
-    phi = fmod(phi,2.0*M_PI);
-    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
+    spot_cage = weight*PotFuncCage(Eulang0);
 #else
     spot_cage = 0.0;
 #endif
@@ -4263,7 +4260,7 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
     double phi = Eulang0[PHI];
     if (phi < 0.0) phi = 2.0*M_PI + phi;
     phi = fmod(phi,2.0*M_PI);
-    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
+    spot_cage = LPot2DRotDOF(cost,phi,type0);
 #else
     spot_cage = 0.0;
 #endif
@@ -4324,10 +4321,10 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 {
 // The following block of statements creates 3 dimensional unit random vector 
    	double costRef, phiRef;
-   	costRef = (step*(rand1-0.5));
-   	phiRef  = (step*(rand2-0.5));
-   	//costRef = runifab(Rng, -1.0,1.0);
-   	//phiRef  = runifab(Rng, 0.0, 2.0*M_PI);
+   	//costRef = (step*(rand1-0.5));
+   	//phiRef  = (step*(rand2-0.5));
+   	costRef = runifab(Rng, -1.0,1.0);
+   	phiRef  = runifab(Rng, 0.0, 2.0*M_PI);
 
    	if (costRef> 1.0) costRef =  2.0 - costRef;
    	if (costRef<-1.0) costRef = -2.0 - costRef;
@@ -4514,7 +4511,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 			for (int iAtom1 = 0; iAtom1 < antiCluster.size(); iAtom1++)
 			{
 				int atomAntiCluster = antiCluster[iAtom1];
-				if (abs(atomCluster - atomAntiCluster)>=1)
+				if (abs(atomCluster - atomAntiCluster)>1)
 				{
 					int offsetAntiCluster = MCAtom[type].offset+(NumbRotTimes*atomAntiCluster);  
 					int tAntiCluster      = offsetAntiCluster + it;
@@ -4621,14 +4618,12 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 	if (Eulang0[PHI] < 0.0) Eulang0[PHI] += 2.0*M_PI;
 	Eulang0[CTH]   = acos(newcoords[AXIS_Z][t0]);
 	Eulang0[CHI]   = 0.0;
-	//cout<<"TAPAS "<<Eulang0[PHI]<<BLANK<<Eulang0[CTH]<<BLANK<<Eulang0[CHI]<<endl;
 
 	Eulang1[PHI]   = MCAngles[PHI][t1];
 	Eulang1[CTH]   = acos(MCAngles[CTH][t1]);
 	Eulang1[CHI]   = MCAngles[CHI][t1];
 
 	double pot_old = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
-	//cout<<"TAPAS "<<Eulang0[PHI]<<BLANK<<Eulang0[CTH]<<BLANK<<Eulang0[CHI]<<endl;
 
 	double vectorAtom1[NDIM];
 	double reflectAtom1[NDIM];

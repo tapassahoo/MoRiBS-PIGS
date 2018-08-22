@@ -3,13 +3,11 @@
 #options= -Ofast -march=native -fopenmp
 options= -Ofast -fopenmp
 
-# CFLAGS for Finite Temperature Calculations 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DPIMCTYPE -DINSTANT -DCHAINCONFIG -DSHORTFORM -DCLUSTERMOVE
-#-DEWALDSUM
-#-DDDCORR
-#-DPOTH2
-#-DCHAINCONFIG
-#-DINSTANT -DIOFILES -DCAGEPOT
+# CFLAGS for PIGS 
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DPIGSTYPE -DDDCORR -DINSTANT -DSHORTFORM
+#-DPROPOSED
+#-DCAGEPOT
+#-DIOFILES #-DINSTANT -DBINARY 
 
 #Below is the LDFLAGS Toby Zeng use on nlogn
 #LDFLAGS=-L/home/pnroy/Dev/lib64/ -lm -L./sprng/lib -llcg -L/home/pnroy/Dev/lib64/ -lgfortran  -L/opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
@@ -31,7 +29,7 @@ FC=gfortran
 #-------------------------------------------------------------------------
 # objects for QMC
  
-pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_tip4p_gg.o omprng.o rngstream.o vh2h2.o h2oc60.o plgndr.o 
+pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_tip4p_gg.o omprng.o rngstream.o vh2h2.o h2oc60.o hfc60.o plgndr.o 
  
 #----------------------------------------- PIMC --------------------------
 
