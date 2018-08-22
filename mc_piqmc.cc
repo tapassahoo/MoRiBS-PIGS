@@ -940,7 +940,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
    		//pot_old  += (PotRotEnergyPIGS(gatom,MCCosine,it));
-   		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it));
+   		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it,type));
 	}
 
 // the new density 
@@ -994,7 +994,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
 		//pot_new  += (PotRotEnergyPIGS(gatom,newcoords,it));
-		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it));
+		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it,type));
 	}
 
 	double rd;
@@ -1042,28 +1042,26 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 }
 
-double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)   
+double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)   
 {
-	int type0   =  MCType[atom0];
-	double spot;
+	int offset0 =  MCAtom[type].offset+NumbRotTimes*atom0;
+	int t0  = offset0 + it;
+
+	double spot = 0.0;
 
     double weight;
 	weight = 1.0;
     if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
 
-	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
+	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb > 1) )
 	{
-	    int offset0 =  atom0*NumbRotTimes;
-        int t0  = offset0 + it;
-
-        spot = 0.0;
         for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
         if (atom1 != atom0)                    
         {
-            int offset1 = atom1*NumbRotTimes;
+            int offset1 = MCAtom[type].offset + NumbRotTimes*atom1;
             int t1  = offset1 + it;
 
-	        string stype = MCAtom[type0].type;
+	        string stype = MCAtom[type].type;
 			/*
 			if (stype == H2)
 	        {
@@ -1139,18 +1137,16 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it)
         } //loop over atom1 (molecules)
     }
 
-	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+#ifdef ONSITE
+	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb == 1) )
 	{
         double E12 = -2.0*DipoleMomentAU2*cos(Eulang0[CTH])/(RR*RR*RR);
         spot        = weight*E12*AuToKelvin;
     }
+#endif
     double spot_cage;
 #ifdef CAGEPOT
-    double cost = cos(Eulang0[CTH]);
-    double phi = Eulang0[PHI];
-    if (phi < 0.0) phi = 2.0*M_PI + phi;
-    phi = fmod(phi,2.0*M_PI);
-    spot_cage = weight*LPot2DRotDOF(cost,phi,type0);
+    spot_cage = weight*PotFuncCage(Eulang0);
 #else
     spot_cage = 0.0;
 #endif

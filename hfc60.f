@@ -1,4 +1,4 @@
-      subroutine enHFC60(R,EulangL,EulangJ,EHFC60)
+      subroutine enhfc60(R,EulangL,EulangJ,EHFC60)
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     This routine computes the potential interaction energy
 c     for HF@C60 with rigid HF and C60. C60 is mot moving. 
@@ -109,6 +109,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
        do i=1,n
        EHFC60=EHFC60+x(i)*t(p1(i),p2(i),p(i),mp(i),th,ph,thp,php)
        enddo
+       return
        
       end
 
@@ -143,6 +144,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
          enddo
       enddo
+      return
       end
 
 
@@ -155,6 +157,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       if (M.lt.0) then
          PLMx=PLMx*farity(M)
       endif
+      return
       end
 
       FUNCTION PLM(LIN,MIN,COSTH)

@@ -148,16 +148,17 @@ extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eu
 //vh2h2 ---> potential H2-H2: added by Tapas Sahoo
 
 extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *t1, double *t2, double *phi, double *potl);
-extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
 extern "C" double plgndr(int l, int m, double x);
 #ifdef MOLECULEINCAGE
 //Pot of H2O-C60 one cage
 extern "C" void calengy_(double *com_1, double *Eulang_1, double *E_H2OC60);
 //Potential of interaction of two cages with water inside
-extern "C" void cluster_(double *com_1, double *com_2, double *Eulang_1, double *Eulang_2, double *E_12);
 #endif
 #ifdef CAGEPOT
-extern "C" void enHFC60_(double *R, double *EulangL, double *EulangJ, double *EHFC60);
+extern "C" void enhfc60_(double *RCage, double *EulangL, double *EulangJ, double *EHFC60);
+//extern"C" {
+//void fortfunc_(int *ii, float *ff);
+//}
 #endif
 
 void InitMCEstims(void)
@@ -658,12 +659,11 @@ double GetPotEnergyPIGS(void)
 
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbRotTimes - 1)/2);
-	double spot;
+	double spot = 0.0;
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
 		double Eulang0[NDIM], Eulang1[NDIM];
 
-        spot = 0.0;
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
@@ -689,6 +689,7 @@ double GetPotEnergyPIGS(void)
                 	spot += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
             	} //stype
 
+				/*
             	if (stype == H2)
            		{
                 	double s1 = 0.0;
@@ -745,10 +746,12 @@ double GetPotEnergyPIGS(void)
                 	vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
                 	spot += potl*CMRECIP2KL;
             	} //stype
+				*/
 
         	}// loop over atoms1 
        	}// loop over atoms0 
     }
+#ifdef ONSITE
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         int offset0 = 0;
@@ -766,6 +769,7 @@ double GetPotEnergyPIGS(void)
         spot   = spot3d;
 #endif
     }
+#endif
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
@@ -773,12 +777,14 @@ double GetPotEnergyPIGS(void)
 	{
         int offset0 = NumbTimes*atom0;
         int t0 = offset0 + it;
-    	double cost = MCAngles[CTH][t0];
     	double phi = MCAngles[PHI][t0];
     	if (phi < 0.0) phi = 2.0*M_PI + phi;
     	phi = fmod(phi,2.0*M_PI);
-		int type0   =  MCType[atom0];
-    	spot_cage += LPot2DRotDOF(cost,phi,type0);
+		double Eulang0[NDIM];
+        Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+        Eulang0[PHI] = phi;
+        Eulang0[CHI] = 0.0;
+    	spot_cage += PotFuncCage(Eulang0);
 	}
 #endif
 	double spotReturn = (spot + spot_cage);
@@ -1351,10 +1357,9 @@ void GetDensitiesEndBeads(void)
 double GetTotalEnergy(void)
 {
     string stype = MCAtom[IMTYPE].type;
-	double spot;
+	double spot = 0.0;
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
-        spot = 0.0;
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
@@ -1372,6 +1377,7 @@ double GetTotalEnergy(void)
                 	int tm0=offset0 + it/RotRatio;
                 	int tm1=offset1 + it/RotRatio;
 
+					/*
                 	if (stype == H2)
                 	{
                     	double s1 = 0.0;
@@ -1428,6 +1434,7 @@ double GetTotalEnergy(void)
                     	vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
                     	spot_pair += potl*CMRECIP2KL;
                 	} //stype
+					*/
                 	if (stype == HF)
                 	{
 						double Eulang0[NDIM], Eulang1[NDIM];
@@ -1444,6 +1451,7 @@ double GetTotalEnergy(void)
         	}// loop over atoms (molecules)
         }// loop over atoms (molecules)
     }
+#ifdef ONSITE
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         int offset0 = 0;
@@ -1467,6 +1475,7 @@ double GetTotalEnergy(void)
 #endif
         }
     }
+#endif
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
@@ -1483,8 +1492,11 @@ double GetTotalEnergy(void)
         	double phi = MCAngles[PHI][t0];
         	if (phi < 0.0) phi = 2.0*M_PI + phi;
         	phi = fmod(phi,2.0*M_PI);
-        	int type0   =  MCType[atom0];
-        	spot_beads += LPot2DRotDOF(cost,phi,type0);
+			double Eulang0[NDIM];
+        	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+        	Eulang0[PHI] = phi;
+        	Eulang0[CHI] = 0.0;
+    		spot_beads += PotFuncCage(Eulang0);
 		}
 		spot_cage += spot_beads;
     }
@@ -4998,6 +5010,25 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
     return PotReturn;
 }
 #endif
+
+double PotFuncCage(const double *Eulang0)
+{
+   	double phi = Eulang0[PHI];
+   	if (phi < 0.0) phi = 2.0*M_PI + phi;
+   	phi = fmod(phi,2.0*M_PI);
+	double RCage = 0.11; //Distance between the HF and the COM of C60
+	double EulangL[2];
+	double EulangJ[2];
+	EulangL[0] = 79.2;
+	EulangL[1] = 180.0;
+	EulangJ[0] = Eulang0[CTH];
+	EulangJ[1] = phi;
+	double EHFC60;
+	enhfc60_(&RCage, EulangL, EulangJ, &EHFC60);
+   	double spot_cage = EHFC60*KCalperMolToCmInverse*CMRECIP2KL;
+   	//spot_cage += LPot2DRotDOF(cost,phi,type0);
+	return spot_cage;
+}
 
 #ifdef EWALDSUM
 double Uself(double *U_moment0)

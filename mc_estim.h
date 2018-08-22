@@ -93,6 +93,7 @@ double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
 void UnitVectors(const double *, double *);
 double PotFunc(int , int , const double *, const double *, int );
+double PotFuncCage(const double *);
 
 double GetPotEnergyPIGSENT(void);
 double GetTotalEnergyPIGSENT(void);
