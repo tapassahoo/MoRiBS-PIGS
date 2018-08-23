@@ -8,7 +8,6 @@ void MCMolecularMove(int);
 void MCMolecularMoveGauss(int);
 #endif
 void MCBisectionMove(int,int);
-void MCBisectionMovePIGS(int,int);
 void MCRotationsMove(int);
 void MCRotationsMoveCL(int);
 void MCRotLinStep(int,int,int,int,double,double,double,double,double &,double &);

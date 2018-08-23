@@ -5018,31 +5018,46 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 #ifdef CAGEPOT
 double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 {
-	double coordsZ[NDIM];
-	coordsZ[AXIS_X]=0.0;
-	coordsZ[AXIS_Y]=0.0;
-	coordsZ[AXIS_Z]=1.0;
-	double XYZdotZ = DotProduct(coordsXYZ, coordsZ);
-	double XYZprojXY[NDIM];
-	for (int id = 0; id < NDIM; id++) XYZprojXY[id] = coordsXYZ[id] - XYZdotZ*coordsZ[id];
-	VectorNormalisation(coordsXYZ);
-	VectorNormalisation(XYZprojXY);
-
+	double RCage;
 	double EulangL[2];
-	EulangL[0] = acos(DotProduct(coordsXYZ, coordsZ));
-	EulangL[1] = atan2(coordsXYZ[AXIS_Y], coordsXYZ[AXIS_X]);
-	if (EulangL[1]<0.0) EulangL[1] += 2.0*M_PI;
-//
+	if (TRANSLATION)
+	{
+		double dr2 = 0.0;  		 
+		for (int id=0;id<NDIM;id++) 
+		{
+			dr2 += coordsXYZ[id]*coordsXYZ[id];
+		}
+		RCage = sqrt(dr2);
+		double coordsZ[NDIM];
+		coordsZ[AXIS_X]=0.0;
+		coordsZ[AXIS_Y]=0.0;
+		coordsZ[AXIS_Z]=1.0;
+		double XYZdotZ = DotProduct(coordsXYZ, coordsZ);
+		double XYZprojXY[NDIM];
+		for (int id = 0; id < NDIM; id++) XYZprojXY[id] = coordsXYZ[id] - XYZdotZ*coordsZ[id];
+		VectorNormalisation(coordsXYZ);
+		VectorNormalisation(XYZprojXY);
+
+		EulangL[0] = acos(DotProduct(coordsXYZ, coordsZ))*(180.0/M_PI);
+		double phiL= atan2(coordsXYZ[AXIS_Y], coordsXYZ[AXIS_X]);
+   		if (phiL < 0.0) phiL += 2.0*M_PI;
+   		phiL = fmod(phiL,2.0*M_PI);
+		EulangL[1] = phiL*(180.0/M_PI);
+	}
+	else
+	{
+		RCage = 0.11; //Distance between the HF and the COM of C60
+		EulangL[0] = 79.2;
+		EulangL[1] = 180.0;
+	}
+	double EulangJ[2];
    	double phi = Eulang0[PHI];
    	if (phi < 0.0) phi += 2.0*M_PI;
    	phi = fmod(phi,2.0*M_PI);
-	double RCage = 0.11; //Distance between the HF and the COM of C60
-	double EulangJ[2];
-	EulangL[0] = 79.2;
-	EulangL[1] = 180.0;
 	EulangJ[0] = Eulang0[CTH]*(180.0/M_PI);
 	EulangJ[1] = phi*(180.0/M_PI);
 	double EHFC60;
+
 	enhfc60_(&RCage, EulangL, EulangJ, &EHFC60);
    	double spot_cage = EHFC60*KCalperMolToCmInverse*CMRECIP2KL;
    	//spot_cage += LPot2DRotDOF(cost,phi,type0);
