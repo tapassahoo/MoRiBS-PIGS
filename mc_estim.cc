@@ -784,7 +784,9 @@ double GetPotEnergyPIGS(void)
         Eulang0[CTH] = acos(MCAngles[CTH][t0]);
         Eulang0[PHI] = phi;
         Eulang0[CHI] = 0.0;
-    	spot_cage += PotFuncCage(Eulang0);
+		double coordsXYZ[NDIM];
+		for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
+    	spot_cage += PotFuncCage(coordsXYZ,Eulang0);
 	}
 #endif
 	double spotReturn = (spot + spot_cage);
@@ -1496,7 +1498,9 @@ double GetTotalEnergy(void)
         	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
         	Eulang0[PHI] = phi;
         	Eulang0[CHI] = 0.0;
-    		spot_beads += PotFuncCage(Eulang0);
+			double coordsXYZ[NDIM];
+			for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
+    		spot_beads += PotFuncCage(coordsXYZ,Eulang0);
 		}
 		spot_cage += spot_beads;
     }
@@ -5012,13 +5016,27 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 #endif
 
 #ifdef CAGEPOT
-double PotFuncCage(const double *Eulang0)
+double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 {
+	double coordsZ[NDIM];
+	coordsZ[AXIS_X]=0.0;
+	coordsZ[AXIS_Y]=0.0;
+	coordsZ[AXIS_Z]=1.0;
+	double XYZdotZ = DotProduct(coordsXYZ, coordsZ);
+	double XYZprojXY[NDIM];
+	for (int id = 0; id < NDIM; id++) XYZprojXY[id] = coordsXYZ[id] - XYZdotZ*coordsZ[id];
+	VectorNormalisation(coordsXYZ);
+	VectorNormalisation(XYZprojXY);
+
+	double EulangL[2];
+	EulangL[0] = acos(DotProduct(coordsXYZ, coordsZ));
+	EulangL[1] = atan2(coordsXYZ[AXIS_Y], coordsXYZ[AXIS_X]);
+	if (EulangL[1]<0.0) EulangL[1] += 2.0*M_PI;
+//
    	double phi = Eulang0[PHI];
-   	if (phi < 0.0) phi = 2.0*M_PI + phi;
+   	if (phi < 0.0) phi += 2.0*M_PI;
    	phi = fmod(phi,2.0*M_PI);
 	double RCage = 0.11; //Distance between the HF and the COM of C60
-	double EulangL[2];
 	double EulangJ[2];
 	EulangL[0] = 79.2;
 	EulangL[1] = 180.0;

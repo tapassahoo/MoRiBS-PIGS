@@ -124,7 +124,7 @@ numbblocks_Restart1 = args.NR
 #User should change the following 5 lines as developer already have explained in the README file.
 user_name           = "tapas"                   
 source_dir          = "MoRiBS-PIGS/" 
-out_dir             = "linear-rotors/"
+out_dir             = "NameOfOutputDirectory/"
 input_dir           = "/home/tapas/MoRiBS-PIGS/examples/scripts/"
 final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"
 dir = os.path.dirname(final_results_path)

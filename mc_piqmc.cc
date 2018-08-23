@@ -340,7 +340,8 @@ void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
 
 // initialize the end points
 
-      	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
+      	int pit = (time+seg_size) % (NumbTimes-1);  // periodicity in time 	       	//Tapas modified for PIGS
+		if (pit >1 ) return;                                                        //Tapas modified for PIGS
       	for (int id=0;id<NDIM;id++)             
       	{	  
          	newcoords[id][offset + time] = MCCoords[id][offset + time];
@@ -373,9 +374,9 @@ void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
             	t2 =  t0 + level_seg_size;  // right point	
             	t1 = (t0 + t2)/2;           // middle point
 
-            	int pt0 = (time + t0) % NumbTimes;	
-            	int pt1 = (time + t1) % NumbTimes;	
-            	int pt2 = (time + t2) % NumbTimes;	
+            	int pt0 = (time + t0);// % NumbTimes;	//Tapas modified for PIGS
+            	int pt1 = (time + t1);// % NumbTimes;	//Tapas modified for PIGS
+            	int pt2 = (time + t2);// % NumbTimes;	//Tapas modified for PIGS
 
 //  change the offset if exchange
  
@@ -1146,7 +1147,9 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
 #endif
     double spot_cage;
 #ifdef CAGEPOT
-    spot_cage = weight*PotFuncCage(Eulang0);
+	double coordsXYZ[NDIM];
+	for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
+    spot_cage = weight*PotFuncCage(coordsXYZ,Eulang0);
 #else
     spot_cage = 0.0;
 #endif
@@ -2824,7 +2827,7 @@ double PotEnergy(int atom0, double **pos)
        	#pragma omp parallel for reduction(+: spot_pair)
        	for (int it = 0; it < NumbTimes; it++) 	    
        	{ 
-      		int t0 = offset0 + it;
+			int t0 = offset0 + it;
        		int t1 = offset1 + it;
 
 	        string stype = MCAtom[type0].type;
@@ -3042,6 +3045,28 @@ double PotEnergy(int atom0, double **pos)
        	} 
       	spot += spot_pair;
     } 
+#ifdef CAGEPOT
+   	double spot_beads=0.0;
+
+   	#pragma omp parallel for reduction(+: spot_beads)
+   	for (int it = 0; it < NumbTimes; it++) 	    
+   	{ 
+   		int t0 = offset0 + it;
+
+		double Eulang[NDIM];
+   		Eulang[PHI]=MCAngles[PHI][t0];
+   		Eulang[CTH]=acos(MCAngles[CTH][t0]);
+   		Eulang[CHI]=MCAngles[CHI][t0];
+		double coordsXYZ[NDIM];
+		for (int id = 0; id < NDIM; id++) coordsXYZ[id] = pos[id][t0];
+		double weight = 1.0;
+#ifndef PIMCTYPE
+		if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+   		spot_beads += weight*PotFuncCage(coordsXYZ,Eulang);
+	}
+	spot = spot_beads;
+#endif
     return (spot);
 }
 
@@ -3464,6 +3489,7 @@ double PotEnergy(int atom0, double **pos, int it)
 {
    	int type0   = MCType[atom0];
    	int offset0 = NumbTimes*atom0;
+    int t0 = offset0 + it;
 
    	double dr[NDIM];
    	double spot = 0.0;
@@ -3473,7 +3499,6 @@ double PotEnergy(int atom0, double **pos, int it)
    	{	
      	int type1   = MCType[atom1];
      	int offset1 = NumbTimes*atom1; 
-        int t0 = offset0 + it;
         int t1 = offset1 + it;
 
 	    string stype = MCAtom[type0].type;
@@ -3683,6 +3708,19 @@ double PotEnergy(int atom0, double **pos, int it)
 
 // it shoud be SPot1D(r,type0,type1) or  SPot1D(r,ind) with ind =type0*NumbTypes+type1
      	} // END sum over time slices 	   
+#endif
+#ifdef CAGEPOT
+    double Eulang[NDIM];
+    Eulang[PHI]=MCAngles[PHI][t0];
+    Eulang[CTH]=acos(MCAngles[CTH][t0]);
+    Eulang[CHI]=MCAngles[CHI][t0];
+    double coordsXYZ[NDIM];
+	double weight = 1.0;
+#ifndef PIMCTYPE
+	if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+    for (int id = 0; id < NDIM; id++) coordsXYZ[id] = pos[id][t0];
+    spot = weight*PotFuncCage(coordsXYZ,Eulang);
 #endif
 	}   // END sum over atoms
    	return (spot);
