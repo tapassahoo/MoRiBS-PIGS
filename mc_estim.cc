@@ -771,6 +771,20 @@ double GetPotEnergyPIGS(void)
     }
 #endif
 
+#ifdef HARMONIC
+    if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+    {
+        int offset0 = 0;
+        int t0  = offset0 + (NumbTimes-1)/2;
+        double spot3d = 0.0;
+        for (int id = 0; id < NDIM; id++)
+        {
+            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+        }
+        spot   = spot3d;
+    }
+#endif
+
     double spot_cage = 0.0;
 #ifdef CAGEPOT
     for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
@@ -1475,6 +1489,27 @@ double GetTotalEnergy(void)
 			}
             spot   += spot3d;
 #endif
+        }
+    }
+#endif
+
+#ifdef HARMONIC
+    if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+    {
+        int offset0 = 0;
+
+        spot = 0.0;
+        double E12;
+        for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
+		{
+            int t0  = offset0 + it;
+
+			double spot3d = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{
+            	spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+			}
+            spot   += spot3d;
         }
     }
 #endif

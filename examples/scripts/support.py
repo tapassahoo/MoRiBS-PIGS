@@ -498,12 +498,24 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType):
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
 	replace("temperature_input", str(temperature),            "qmc_run.input", "qmc2.input")
 	replace("numbbeads_input", str(numbbeads),                "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if TransMove:
+		replace("#TRANSLATION", "TRANSLATION", "qmc2.input", "qmc3.input")
+	else:
+		replace("#TRANSLATION", "#TRANSLATION", "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if RotMove:
+		replace("cal_type_input", "ROTATION", "qmc2.input", "qmc3.input")
+	else:
+		replace("cal_type_input", "#ROTATION", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	if Restart1:
@@ -659,7 +671,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
+def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
@@ -712,7 +724,7 @@ def Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file,
 			return
 
 		os.chdir(src_dir)
-	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType)
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove)
 
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])

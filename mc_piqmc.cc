@@ -2946,6 +2946,29 @@ double PotEnergy(int atom0, double **pos)
        	} 
       	spot += spot_pair;
     } 
+
+#ifdef HARMONIC
+   	double spot_beads=0.0;
+
+   	#pragma omp parallel for reduction(+: spot_beads)
+   	for (int it = 0; it < NumbTimes; it++) 	    
+   	{ 
+   		int t0 = offset0 + it;
+
+		double spot3d = 0.0;
+		for (int id = 0; id < NDIM; id++)
+        {
+            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+        }
+		double weight = 1.0;
+#ifndef PIMCTYPE
+		if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+        spot_beads   += weight*spot3d;
+	}
+	spot = spot_beads;
+#endif
+	
 #ifdef CAGEPOT
    	double spot_beads=0.0;
 
@@ -3611,6 +3634,20 @@ double PotEnergy(int atom0, double **pos, int it)
      	} // END sum over time slices 	   
 #endif
 	}   // END sum over atoms
+
+#ifdef HARMONIC
+    double spot3d = 0.0;
+    for (int id = 0; id < NDIM; id++)
+    {
+        spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+    }
+    double weight = 1.0;
+#ifndef PIMCTYPE
+    if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+    spot = weight*spot3d;
+#endif
+
 #ifdef CAGEPOT
     double Eulang[NDIM];
     Eulang[PHI]=MCAngles[PHI][t0];

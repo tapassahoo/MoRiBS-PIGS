@@ -99,8 +99,7 @@ RotorType           = args.Type
 ENT_TYPE 			= args.scal
 particleA           = int(numbmolecules/2)
 
-#extra_file_name     = "thread-4-"
-extra_file_name     = ""
+extra_file_name     = "extraName-"
 
 src_dir             = os.getcwd()
 if (variableName == "tau"):
@@ -263,7 +262,7 @@ for i in list_nb:
 			else:
 				Restart1 = False
 
-			support.Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType)
+			support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType)
 
 		if status == "analysis":
 
@@ -312,7 +311,7 @@ for i in list_nb:
 			else:
 				Restart1 = False
 
-			support.Submission(status, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType)
+			support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType)
 
 		if status == "analysis":
 
