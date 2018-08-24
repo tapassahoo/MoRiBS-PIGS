@@ -99,7 +99,7 @@ RotorType           = args.Type
 ENT_TYPE 			= args.scal
 particleA           = int(numbmolecules/2)
 
-extra_file_name     = "extraName-"
+extra_file_name     = extraName
 
 src_dir             = os.getcwd()
 if (variableName == "tau"):
@@ -329,11 +329,13 @@ for i in list_nb:
 				else:
 					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
+					'''
 					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					'''
 			except:
 				pass
 	iStep = iStep + 1
@@ -381,10 +383,10 @@ if status == "analysis":
 		call(["cat",FileAnalysis.SaveEnergy])
 		print("")
 		print("")
-		#call(["cat",FileAnalysis.SaveCorr])
-		#print("")
-		#print("")
-		#call(["cat",FileAnalysis.SaveTotalCorr])
+		call(["cat",FileAnalysis.SaveCorr])
+		print("")
+		print("")
+		call(["cat",FileAnalysis.SaveTotalCorr])
 #=========================File Checking===============================#
 		SavedFile = FileAnalysis.SaveEnergy
 		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
