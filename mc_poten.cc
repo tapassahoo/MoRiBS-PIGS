@@ -134,14 +134,12 @@ void InitPotentials(void)
 			cout<<"TS POT"<<endl;
 		}
 
-/*
-#ifdef CAGEPOT
+#ifdef CAGEPOTREAD
    		if (MCAtom[atype].molecule == 4) 
 		{
   			init_pot2D(atype);
 		}
 #endif
-*/
 	}
 }
 
@@ -176,7 +174,7 @@ void DonePotentials(void)
     }
     else if (MCAtom[atype].molecule == 4)              // molecules
     {
-#ifdef CAGEPOT
+#ifdef CAGEPOTREAD
 		delete [] _cgrid2D[atype];
 		delete [] _pgrid2D[atype];
  

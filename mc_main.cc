@@ -409,7 +409,7 @@ ParamsPotential();
 
 // BEGIN loop over blocks ------------------------
 
-   	InitPotentials();
+   	InitPotentials(); 
 
    	if (ROTATION)
     	InitRotDensity();
