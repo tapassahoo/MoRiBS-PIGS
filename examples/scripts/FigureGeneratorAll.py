@@ -25,8 +25,8 @@ TransMove           = False
 RotMove             = True
 #
 #TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 #
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
@@ -99,5 +99,17 @@ if (TypePlot == "ChemPot"):
 
 #End plotting ---Chemical Potential
 if (TypeCal == "PIGS" and TypePlot == "GFACTOR"):
-	beadsRef = 101
+	beadsRef   = 41
+	numbblocks = 10000
+	numbpass   = 50
+	preskip    = 5000
+	postskip   = 0
+	FigureGenerator.FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA,TypePlot, beadsRef)
+
+'''
+if (TypeCal == "PIGS" and TypePlot == "GFACTOR"):
+	beadsRef   = 41
+	numbblocks = 10000
+	numbpass   = 50
 	FigureGenerator.FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA,TypePlot, beadsRef)
+'''

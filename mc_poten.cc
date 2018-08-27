@@ -134,12 +134,14 @@ void InitPotentials(void)
 			cout<<"TS POT"<<endl;
 		}
 
+/*
 #ifdef CAGEPOT
    		if (MCAtom[atype].molecule == 4) 
 		{
   			init_pot2D(atype);
 		}
 #endif
+*/
 	}
 }
 

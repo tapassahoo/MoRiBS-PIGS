@@ -760,7 +760,7 @@ double GetPotEnergyPIGS(void)
         double E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
 #else
-        int t0  = offset0 + (NumbTimes-1)/2;
+        int t0  = offset0 + it;
         double spot3d = 0.0;
         for (int id = 0; id < NDIM; id++)
         {
@@ -775,13 +775,13 @@ double GetPotEnergyPIGS(void)
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         int offset0 = 0;
-        int t0  = offset0 + (NumbTimes-1)/2;
+        int t0  = offset0 + it;
         double spot3d = 0.0;
         for (int id = 0; id < NDIM; id++)
         {
-            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0]; //in bohr
         }
-        spot   = spot3d;
+        spot   = spot3d*AuToKelvin;
     }
 #endif
 
@@ -791,12 +791,9 @@ double GetPotEnergyPIGS(void)
 	{
         int offset0 = NumbTimes*atom0;
         int t0 = offset0 + it;
-    	double phi = MCAngles[PHI][t0];
-    	if (phi < 0.0) phi = 2.0*M_PI + phi;
-    	phi = fmod(phi,2.0*M_PI);
 		double Eulang0[NDIM];
         Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-        Eulang0[PHI] = phi;
+        Eulang0[PHI] = MCAngles[PHI][t0];
         Eulang0[CHI] = 0.0;
 		double coordsXYZ[NDIM];
 		for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
@@ -1525,13 +1522,9 @@ double GetTotalEnergy(void)
        	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 		{
         	int t0 = offset0 + it;
-        	double cost = MCAngles[CTH][t0];
-        	double phi = MCAngles[PHI][t0];
-        	if (phi < 0.0) phi = 2.0*M_PI + phi;
-        	phi = fmod(phi,2.0*M_PI);
 			double Eulang0[NDIM];
         	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-        	Eulang0[PHI] = phi;
+        	Eulang0[PHI] = MCAngles[PHI][t0];
         	Eulang0[CHI] = 0.0;
 			double coordsXYZ[NDIM];
 			for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
@@ -5067,11 +5060,7 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 		coordsZ[AXIS_X]=0.0;
 		coordsZ[AXIS_Y]=0.0;
 		coordsZ[AXIS_Z]=1.0;
-		double XYZdotZ = DotProduct(coordsXYZ, coordsZ);
-		double XYZprojXY[NDIM];
-		for (int id = 0; id < NDIM; id++) XYZprojXY[id] = coordsXYZ[id] - XYZdotZ*coordsZ[id];
 		VectorNormalisation(coordsXYZ);
-		VectorNormalisation(XYZprojXY);
 
 		EulangL[0] = acos(DotProduct(coordsXYZ, coordsZ))*(180.0/M_PI);
 		double phiL= atan2(coordsXYZ[AXIS_Y], coordsXYZ[AXIS_X]);
@@ -5081,7 +5070,7 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 	}
 	else
 	{
-		RCage = 0.11; //Distance between the HF and the COM of C60
+		RCage = 0.11; //Distance between the HF and the COM of C60; Unit is in Angstrom
 		EulangL[0] = 79.2;
 		EulangL[1] = 180.0;
 	}

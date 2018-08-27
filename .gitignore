@@ -13,6 +13,7 @@ aa.f
 *2.*
 test-hfhf.f
 Makefile-TEST
+Makefile
 #ignore
 .DS_Store
 ._*

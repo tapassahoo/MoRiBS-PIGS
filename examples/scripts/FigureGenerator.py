@@ -68,20 +68,22 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 				DList  = [1.0+0.25*i for i in range(10)]
 				numbblocks = 20000
 			if (numbmolecules == 8):
-				#DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
-				DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				#DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
 				numbblocks = 20000
-				preskip1   = 5000
+				preskip1   = 8000
 				postskip1  = 10000
 			if (numbmolecules == 16):
-				DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				#DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
 				numbblocks = 10000
-				preskip1   = 0
+				preskip1   = 8000
 				postskip1  = 0
 			if (numbmolecules == 32):
-				DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				#DList  = [1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
+				DList  = [0.9106, 1.1152, 1.2878, 1.4398, 1.5772, 1.7036, 1.8212, 1.9317, 2.0362]
 				numbblocks = 10000
-				preskip1   = 0
+				preskip1   = 6000
 				postskip1  = 0
 		
 			RFactorPlot      = np.zeros(len(DList))
@@ -135,10 +137,10 @@ def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipo
 					beadsRef = 41
 					beadsRef1 = 41
 				if (numbmolecules == 8):
-					beadsRef = 41
+					beadsRef = 21
 					beadsRef1 = beadsRef
 				if (numbmolecules == 16):
-					beadsRef = 41
+					beadsRef = 21
 					beadsRef1 = beadsRef
 				if (numbmolecules == 32):
 					beadsRef = 21
@@ -875,7 +877,6 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 	fontlegend = font/2.0
 	preskip    = 0
 	postskip   = 0
-	print("TAPASS")
 
 	if (((TypePlot == "RFACTOR") or (TypePlot == "GFACTOR")) and variableName == "tau"):
 		fig        = plt.figure(figsize=(8, 4), dpi = 400)
@@ -885,6 +886,8 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
 		FilePlotCorr = FilePlotName.SaveCorr+".ps"
 		outfile      = FilePlotCorr
+		print(outfile)
+		exit(0)
 		call(["rm", FilePlotCorr])
 #
 		colorList  = ['red', 'green', 'blue']
@@ -931,6 +934,109 @@ def	FigureAngleDistribution(TypeCal, molecule_rot, TransMove, RotMove, variableN
 			print(CorrPlot)
 #
 			plt.errorbar(RFactorPlot, CorrPlot, yerr=err_CorrPlot, color = colorList[iLabel], ls = lsList[iLabel], linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelList[iLabel])
+			iLabel += 1
+
+			ymin, ymax = plt.ylim()
+			midpointy = 0.5*(ymax-ymin)
+			deltay = midpointy*0.15
+			xmin, xmax = plt.xlim()
+			midpointx = 0.5*(xmax-xmin)
+			deltax = midpointx*0.15
+			textpositionx = xmin+midpointx-0.25*midpointx
+			textpositiony = ymin+midpointy
+
+			if (TypePlot == "RFACTOR"):
+				plt.xlabel(r'$\mathrm{R}$', fontsize = font)
+			if (TypePlot == "GFACTOR"):
+				plt.xlabel(r'$\mathrm{g}$', fontsize = font)
+			plt.ylabel(r'$\mathrm{z^{2}}$', fontsize = font)
+			ymin, ymax = plt.ylim()
+			if ymin < 0.0:
+				plt.ylim(0.0,ymax)
+			xmin, xmax = plt.xlim()
+			'''
+			Text1 = ""
+			Text2 = ""
+			if Text1:
+				PlotLabel(Text1, Text2,fontlegend,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+			'''
+
+		plt.subplots_adjust(top=0.95, bottom=0.15, left=0.09, right=0.98, hspace=0.0, wspace=0.4)
+		plt.legend(bbox_to_anchor=(0.78, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+		plt.savefig(outfile, dpi = 400, format = 'ps')
+
+		call(["open", outfile])
+		#call(["okular", outfile])
+		#plt.show()
+
+def	FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
+	font       = 20
+	fontlegend = font/2.0
+	preskip    = 0
+	postskip   = 0
+
+	if (((TypePlot == "RFACTOR") or (TypePlot == "GFACTOR")) and variableName == "tau"):
+		fig        = plt.figure(figsize=(8, 4), dpi = 400)
+		plt.grid(True)
+
+		var = beadsRef
+		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
+		FilePlotCorr = FilePlotName.SaveCorrGFAC+".ps"
+		outfile      = FilePlotCorr
+		print("--------------------------------------------------")
+		print("Name of the path and the Figure is given below - ")
+		print(outfile)
+		print("--------------------------------------------------")
+		call(["rm", FilePlotCorr])
+#
+		colorList  = ['red', 'green', 'blue', 'magenta']
+		lsList     = ['-', '--', '-.', '-']
+		markerList = ['o', '^', 'v','s']
+		labelList  = ['N = 16','N = 24', 'N = 32','N=48']
+		nn = [16, 24, 32, 48]
+		iLabel = 0
+		gFactorList  = [0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5]
+		DList=np.zeros(len(gFactorList))
+		ig = 0
+		for gFactor in gFactorList:
+			DipoleMoment = support.GetDipoleMomentFromGFactor(molecule, Rpt, gFactor)
+			output  = '{:1.4f}'.format(DipoleMoment)
+			DList[ig] = output
+			ig = ig+1
+
+		print(DList)
+		for numbmolecules in nn:
+			gFactorPlot  = np.zeros(len(DList))
+			CorrPlot     = np.zeros(len(DList))
+			err_CorrPlot = np.zeros(len(DList))
+
+			iii = 0
+			for dipolemoment in DList:
+				FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+				FileToBePlotCorr = FilePlotName.SaveCorr+".txt"
+				beads1, var1, Corr, err_Corr = genfromtxt(FileToBePlotCorr,unpack=True, usecols=[0, 1, 8, 15], skip_header=preskip, skip_footer=postskip)
+				FactorList = support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
+				if (TypePlot == "GFACTOR"):
+					gFactorPlot[iii] = FactorList[1]
+				if (TypePlot == "RFACTOR"):
+					rFactorPlot[iii] = FactorList[0]
+				if (numbmolecules == 48):
+					beadsRef = 21
+	
+				ii = 0
+				for i in beads1:
+					indexi =int(i+0.5)
+					beads = indexi
+					if beads == beadsRef:
+						CorrPlot[iii]     = Corr[ii]
+						err_CorrPlot[iii] = err_Corr[ii]
+					ii += 1
+				iii += 1
+		
+			print("Corr")
+			print(CorrPlot)
+#
+			plt.errorbar(gFactorPlot, CorrPlot, yerr=err_CorrPlot, color = colorList[iLabel], ls = lsList[iLabel], linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelList[iLabel])
 			iLabel += 1
 
 			ymin, ymax = plt.ylim()

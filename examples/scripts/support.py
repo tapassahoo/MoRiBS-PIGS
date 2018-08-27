@@ -1160,6 +1160,8 @@ class GetFileNamePlot:
 		self.SaveEnergyRFAC   = self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameRFAC
 		self.SaveEnergyDIAG   = self.src_dir+file_output1+mainFileNameMM+add2+"-DIAG"
 		self.SaveEntropyDIAG  = self.src_dir+file_output9+mainFileNameMM+add2+"-DIAG"
+		self.SaveCorrGFAC   = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameGFAC
+		self.SaveCorrRFAC   = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameRFAC
 
 def FileCheck(TypeCal,list_nb,variableName,SavedFile):
 	for i in list_nb:

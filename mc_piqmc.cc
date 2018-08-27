@@ -842,7 +842,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
    		//pot_old  += (PotRotEnergyPIGS(gatom,MCCosine,it));
-   		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it,type));
+   		pot_old  += 0.0;//(PotRotEnergyPIGS(gatom,EulangOld,it,type));
 	}
 
 // the new density 
@@ -896,7 +896,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
 		//pot_new  += (PotRotEnergyPIGS(gatom,newcoords,it));
-		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it,type));
+		pot_new  += 0.0;//(PotRotEnergyPIGS(gatom,EulangNew,it,type));
 	}
 
 	double rd;
@@ -1046,13 +1046,11 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
         spot        = weight*E12*AuToKelvin;
     }
 #endif
-    double spot_cage;
+    double spot_cage = 0.0;
 #ifdef CAGEPOT
 	double coordsXYZ[NDIM];
 	for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
     spot_cage = weight*PotFuncCage(coordsXYZ,Eulang0);
-#else
-    spot_cage = 0.0;
 #endif
 	double spotReturn = (spot + spot_cage);
     return spotReturn;
