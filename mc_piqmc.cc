@@ -842,7 +842,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
    		//pot_old  += (PotRotEnergyPIGS(gatom,MCCosine,it));
-   		pot_old  += 0.0;//(PotRotEnergyPIGS(gatom,EulangOld,it,type));
+   		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it,type));
 	}
 
 // the new density 
@@ -896,7 +896,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
 		//pot_new  += (PotRotEnergyPIGS(gatom,newcoords,it));
-		pot_new  += 0.0;//(PotRotEnergyPIGS(gatom,EulangNew,it,type));
+		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it,type));
 	}
 
 	double rd;
