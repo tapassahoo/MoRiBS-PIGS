@@ -1139,10 +1139,7 @@ class GetFileNamePlot:
 		mainFileNameCONV      = "vs-beta-and-tau-Blocks"+str(self.numbblocks)
 		mainFileNameCONV     += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 		self.SaveChemPot      = self.src_dir+file_output8+mainFileNameCP
-		self.SaveEnergyMM     = self.src_dir+file_output1+mainFileNameMM+"-MM"+add2
-		self.SaveEntropyMM    = self.src_dir+file_output9+mainFileNameMM+"-MM"+add2
 		self.SaveEntropyCONV  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+mainFileNameCONV+"-"+self.ENT_TYPE
-		self.SaveEntropyCOMBO = self.src_dir+file_output3+mainFileNameGFAC+"-COMBINE"
 
 		'''
 #
@@ -1153,6 +1150,8 @@ class GetFileNamePlot:
 		mainFileNameRFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 		mainFileNameMM 		  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
 		mainFileNameMM       += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
+		mainFileNameCOMBO     = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
+		mainFileNameCOMBO    += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 #
 		self.SaveEntropyGFAC  = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFAC
 		self.SaveEntropyRFAC  = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameRFAC
@@ -1160,8 +1159,11 @@ class GetFileNamePlot:
 		self.SaveEnergyRFAC   = self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameRFAC
 		self.SaveEnergyDIAG   = self.src_dir+file_output1+mainFileNameMM+add2+"-DIAG"
 		self.SaveEntropyDIAG  = self.src_dir+file_output9+mainFileNameMM+add2+"-DIAG"
-		self.SaveCorrGFAC   = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameGFAC
-		self.SaveCorrRFAC   = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameRFAC
+		self.SaveCorrGFAC     = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameGFAC
+		self.SaveCorrRFAC     = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameRFAC
+		self.SaveEnergyMM     = self.src_dir+file_output1+mainFileNameMM+add2+"-MM"
+		self.SaveEntropyMM    = self.src_dir+file_output9+mainFileNameMM+add2+"-MM"
+		self.SaveEntropyCOMBO = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameCOMBO+"-COMBINE"
 
 def FileCheck(TypeCal,list_nb,variableName,SavedFile):
 	for i in list_nb:

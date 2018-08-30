@@ -230,19 +230,20 @@ void MCBisectionMove(int type, int time)  // multilevel Metropolis
    	int    mclevels = MCAtom[type].levels;  // number of levels
    	int    seg_size = MCAtom[type].mlsegm;  // segmen size  
 
+// initialize the end points
+#ifndef PIMCTYPE
+   	int pit = (time+seg_size);  // No periodicity in time for PIGS     	//Tapas modified for PIGS
+	if (pit > (NumbTimes-1)) return;                              
+#else
+   	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
+#endif
+
    	for (int atom=0;atom<numb;atom++)         // one atom to move only
    	{
 
       	int offset = MCAtom[type].offset + NumbTimes*atom;
       	int gatom  = offset/NumbTimes;
 
-// initialize the end points
-#ifndef PIMCTYPE
-      	int pit = (time+seg_size);  // No periodicity in time for PIGS     	//Tapas modified for PIGS
-		if (pit > (NumbTimes-1)) break;                              
-#else
-      	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
-#endif
       	for (int id=0;id<NDIM;id++)             
       	{	  
          	newcoords[id][offset + time] = MCCoords[id][offset + time];
@@ -2980,7 +2981,11 @@ double PotEnergy(int atom0, double **pos)
    		Eulang[CTH]=acos(MCAngles[CTH][t0]);
    		Eulang[CHI]=MCAngles[CHI][t0];
 		double coordsXYZ[NDIM];
-		for (int id = 0; id < NDIM; id++) coordsXYZ[id] = pos[id][t0];
+		for (int id = 0; id < NDIM; id++) 
+		{
+			coordsXYZ[id] = pos[id][t0];
+		}
+
 		double weight = 1.0;
 #ifndef PIMCTYPE
 		if (it == 0 || it == (NumbTimes-1)) weight = 0.5;

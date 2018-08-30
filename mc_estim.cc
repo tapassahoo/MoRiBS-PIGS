@@ -5048,6 +5048,7 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 {
 	double RCage;
 	double EulangL[2];
+	double EulangJ[2];
 	if (TRANSLATION)
 	{
 		double dr2 = 0.0;  		 
@@ -5060,7 +5061,10 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 		coordsZ[AXIS_X]=0.0;
 		coordsZ[AXIS_Y]=0.0;
 		coordsZ[AXIS_Z]=1.0;
-		VectorNormalisation(coordsXYZ);
+		if (RCage != 0.0) 
+		{ 
+			VectorNormalisation(coordsXYZ);
+		}
 
 		EulangL[0] = acos(DotProduct(coordsXYZ, coordsZ))*(180.0/M_PI);
 		double phiL= atan2(coordsXYZ[AXIS_Y], coordsXYZ[AXIS_X]);
@@ -5074,14 +5078,18 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 		EulangL[0] = 79.2;
 		EulangL[1] = 180.0;
 	}
-	double EulangJ[2];
+	/*
    	double phi = Eulang0[PHI];
    	if (phi < 0.0) phi += 2.0*M_PI;
    	phi = fmod(phi,2.0*M_PI);
 	EulangJ[0] = Eulang0[CTH]*(180.0/M_PI);
 	EulangJ[1] = phi*(180.0/M_PI);
+	*/
+	EulangJ[0] = 100.8;//Eulang0[CTH]*(180.0/M_PI);
+	EulangJ[1] = 0.0;//phi*(180.0/M_PI);
 	double EHFC60;
 
+	//cout<<"TAPAS"<<BLANK<<RCage<<BLANK<<EulangL[0]<<BLANK<<EulangL[1]<<BLANK<<EulangJ[0]<<BLANK<<EulangJ[1]<<endl;
 	enhfc60_(&RCage, EulangL, EulangJ, &EHFC60);
    	double spot_cage = EHFC60*KCalperMolToCmInverse*CMRECIP2KL;
    	//spot_cage += LPot2DRotDOF(cost,phi,type0);

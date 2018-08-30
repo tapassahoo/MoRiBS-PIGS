@@ -33,3 +33,4 @@ Makefile
 /examples/scripts/code-*.py
 /examples/scripts/._*
 /examples/scripts/*/
+examples/scripts/RenameOfFigures.sh
