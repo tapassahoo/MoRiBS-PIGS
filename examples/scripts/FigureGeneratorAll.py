@@ -23,8 +23,8 @@ TransMove           = False
 RotMove             = True
 #
 #TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 #
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
@@ -50,7 +50,7 @@ ENT_TYPE 			= "SWAPTOUNSWAP"
 extra_file_name     = ""
 
 user_name           = "tapas"
-final_results_path  = "/Volumes/"+user_name+"/ResultsOf"+TypeCal+"/"
+final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"
 if (variableName == "tau"):
 	parameterName   = "beta"
 	beta            = 0.2

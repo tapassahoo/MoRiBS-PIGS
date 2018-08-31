@@ -20,7 +20,7 @@ void MCRotLinStepSwapBroken(int,int,int,int,double,double,double,double,double &
 void MCSwap(double, string &);
 double PotRotEnergyPIMC(int, double *,int );   
 double PotRotEnergyPIGS(int, double *,int , int );   
-double PotRotEnergySwap(int,const double *,int it, string);   
+double PotRotEnergySwap(int,int,const double *,int it, string);   
 double PotRotEnergySwapBroken(int, double *,int it);   
 //double PotRotEnergySwap(int,double **,int it, int );   
 // Toby adds rotation move for nonlinear rotor

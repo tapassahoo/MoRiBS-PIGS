@@ -1056,9 +1056,10 @@ def	FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, va
 
 		plt.xticks(fontsize=font, rotation=0)
 		plt.yticks(fontsize=font, rotation=0)
+		
 		plt.subplots_adjust(top=0.96, bottom=0.15, left=0.14, right=0.95, hspace=0.0, wspace=0.4)
 		plt.legend(bbox_to_anchor=(0.75, 0.55), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
 		plt.savefig(outfile, dpi = 200, format = 'eps')
 
-		call(["open", outfile])
-		#plt.show()
+		#call(["open", outfile])
+		plt.show()

@@ -131,8 +131,6 @@ if not os.path.exists(dir):
 	os.makedirs(dir)
 
 source_dir_exe = "/home/"+user_name+"/"+source_dir
-#==================================Generating files for submission================#
-file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
 if status   == "submission":
 
 	if (RUNDIR == "scratch") or (NameOfServer == "graham"):
@@ -154,6 +152,8 @@ if (NameOfServer == "graham"):
 else:
 	dir_output      = "/work/"+user_name+"/"+out_dir            
 
+#==================================Generating files for submission================#
+file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
 #===============================================================================
 #                                                                              |
 #   compilation of linden.f to generate rotational density matrix - linden.out |

@@ -49,7 +49,7 @@ double Distance;
 double DipoleMoment;
 double DipoleMomentAU2;
 double RR;
-int NumbParticle;
+int RefAtom;
 #ifdef EWALDSUM
 double prefSelf, prefBfun, alpha, alpha2, prefUk1, prefUk2, prefUk3, boxLength;
 int    KMAX;

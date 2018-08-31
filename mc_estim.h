@@ -37,6 +37,7 @@ double GetKinEnergy(void);
 double GetPotEnergy_Entanglement(int atom0, int atom1);
 double GetEstimNM(void);
 double GetEstimDM(void);
+void GetIndex(int , int , int &, int &, int &, int &);
 double *GetCosThetaEntanglement();
 double *GetPhiEntanglement();
 double *GetProdUvec12();
