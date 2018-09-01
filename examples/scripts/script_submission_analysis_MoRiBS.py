@@ -69,7 +69,7 @@ molecule_rot        = args.Rotor
 #exit()
 #
 numbblocks	        = args.Block
-numbmolecules       = args.N
+numbmolecules1      = args.N
 numbpass            = args.Pass
 #
 if(args.Rpt):
@@ -97,7 +97,6 @@ else:
 RotorType           = args.Type
 
 ENT_TYPE 			= args.scal
-particleA           = int(numbmolecules/2)
 
 extra_file_name     = extraName
 
@@ -152,255 +151,266 @@ if (NameOfServer == "graham"):
 else:
 	dir_output      = "/work/"+user_name+"/"+out_dir            
 
-#==================================Generating files for submission================#
-file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
-#===============================================================================
-#                                                                              |
-#   compilation of linden.f to generate rotational density matrix - linden.out |
-#   Yet to be generalized                                                      |
-#                                                                              |
-#===============================================================================
-if status == "submission":
-	if (NameOfServer == "graham"):
-		dir_run_input_pimc = "/scratch/"+user_name+"/"+out_dir+file1_name+"PIMC"
-	else:
-		dir_run_input_pimc = "/work/"+user_name+"/"+out_dir+file1_name+"PIMC"
-
-	if (os.path.isdir(dir_run_input_pimc) == False):
-		call(["rm", "-rf",  dir_run_input_pimc])
-		call(["mkdir", "-p", dir_run_input_pimc])
-
-	if not args.RESTART:
-		call(["cp", execution_file, dir_run_input_pimc])
-
-	if (RotorType == "LINEAR"):
-		if not args.RESTART:
-			support.compile_rotmat(source_dir_exe, input_dir)
-
-	if (status_cagepot == True):
-		if not args.RESTART:
-			support.compile_cagepot(source_dir_exe, input_dir)
-			support.cagepot(source_dir_exe);
-			call(["mv", "hfc60.pot", dir_run_input_pimc])
-
-if status == "analysis":
-	FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
-	
-	if (preskip >= numbblocks):
-		print("")
-		print("Warning!!!!!!!")
-		print("============================================================================")
-		print("Number of Blocks = "+str(numbblocks))
-		print("Number of preskip= "+str(preskip))
-		print("Error message: Number of preskip data must be less than Number of Blocks")
-		print("============================================================================")
-		exit()
-	if (TypeCal == "ENT"):
-		fanalyzeEntropy      = open(FileAnalysis.SaveEntropy, "a")
-		fanalyzeEntropy.write(support.fmtAverageEntropy(status,variableName,ENT_TYPE))
-		fanalyzeEnergy       = open(FileAnalysis.SaveEnergy, "a")           
-		fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal,status,variableName))
-		fanalyzeCorr         = open(FileAnalysis.SaveCorr, "a")           
-		fanalyzeCorr.write(support.fmtAverageOrientation(status,variableName))
-		fanalyzeTotalCorr    = open(FileAnalysis.SaveTotalCorr, "a")           
-		fanalyzeXCorr        = open(FileAnalysis.SaveXCorr, "a")           
-		fanalyzeYCorr        = open(FileAnalysis.SaveYCorr, "a")           
-		fanalyzeZCorr        = open(FileAnalysis.SaveZCorr, "a")           
-		fanalyzeXYCorr       = open(FileAnalysis.SaveXYCorr,"a")           
-
-	if ((TypeCal == "PIMC") or (TypeCal == "PIGS")):
-		fanalyzeEnergy       = open(FileAnalysis.SaveEnergy, "a")           
-		fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal,status,variableName))
-		fanalyzeCorr         = open(FileAnalysis.SaveCorr, "a")           
-		fanalyzeCorr.write(support.fmtAverageOrientation(status,variableName))
-		fanalyzeTotalCorr    = open(FileAnalysis.SaveTotalCorr, "a")           
-		fanalyzeXCorr        = open(FileAnalysis.SaveXCorr, "a")           
-		fanalyzeYCorr        = open(FileAnalysis.SaveYCorr, "a")           
-		fanalyzeZCorr        = open(FileAnalysis.SaveZCorr, "a")           
-		fanalyzeXYCorr       = open(FileAnalysis.SaveXYCorr,"a")           
-
 
 if (TypeCal == "ENT"):
-	numbmolecules  *= 2
+	maxloop = 1#int(numbmolecules1/2)
+else:
+	maxloop = 1
 
-list_nb = inputFile.Getbeads(TypeCal, variableName)
-
-iStep = 0
-for i in list_nb:
-
-	if (TypeCal == 'PIMC'):
-
-		if i % 2 == 0:
-			value    = i
+for particleA in range(1,maxloop+1):
+	#==================================Generating files for submission================#
+	file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
+	#===============================================================================
+	#                                                                              |
+	#   compilation of linden.f to generate rotational density matrix - linden.out |
+	#   Yet to be generalized                                                      |
+	#                                                                              |
+	#===============================================================================
+	if status == "submission":
+		if (NameOfServer == "graham"):
+			dir_run_input_pimc = "/scratch/"+user_name+"/"+out_dir+file1_name+"PIMC"
 		else:
-			value    = i+1
+			dir_run_input_pimc = "/work/"+user_name+"/"+out_dir+file1_name+"PIMC"
 
-		if (variableName == "beta"):
-			beta     = tau*value
-			temperature = 1.0/beta
-			variable = beta
-		if (variableName == "tau"):
-			tau      = beta/value
-			variable = tau
+		if (os.path.isdir(dir_run_input_pimc) == False):
+			call(["rm", "-rf",  dir_run_input_pimc])
+			call(["mkdir", "-p", dir_run_input_pimc])
 
-		numbbeads    = value
-		folder_run   = file1_name+str(numbbeads)
+		if not args.RESTART:
+			call(["cp", execution_file, dir_run_input_pimc])
 
-		if status   == "submission":
+		if (RotorType == "LINEAR"):
+			if not args.RESTART:
+				support.compile_rotmat(source_dir_exe, input_dir)
 
-			if args.PPA:
-				PPA1 = True
-				lmax = args.lmax
-				ltotalmax = args.ltotalmax
-				support.GetTwoBodyDensity(Rpt, dipolemoment, numbbeads, lmax, ltotalmax, tau, molecule_rot)
-				call(["mv", "PairDensity.txt", dir_run_input_pimc])
-			else: 
-				PPA1 = False
+		if (status_cagepot == True):
+			if not args.RESTART:
+				support.compile_cagepot(source_dir_exe, input_dir)
+				support.cagepot(source_dir_exe);
+				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
-			if args.RESTART:
-				Restart1 = True
-			else:
-				Restart1 = False
+	if status == "analysis":
+		FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
+		
+		if (preskip >= numbblocks):
+			print("")
+			print("Warning!!!!!!!")
+			print("============================================================================")
+			print("Number of Blocks = "+str(numbblocks))
+			print("Number of preskip= "+str(preskip))
+			print("Error message: Number of preskip data must be less than Number of Blocks")
+			print("============================================================================")
+			exit()
+		if (TypeCal == "ENT"):
+			fanalyzeEntropy      = open(FileAnalysis.SaveEntropy, "a")
+			fanalyzeEntropy.write(support.fmtAverageEntropy(status,variableName,ENT_TYPE))
+			fanalyzeEnergy       = open(FileAnalysis.SaveEnergy, "a")           
+			fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal,status,variableName))
+			fanalyzeCorr         = open(FileAnalysis.SaveCorr, "a")           
+			fanalyzeCorr.write(support.fmtAverageOrientation(status,variableName))
+			fanalyzeTotalCorr    = open(FileAnalysis.SaveTotalCorr, "a")           
+			fanalyzeXCorr        = open(FileAnalysis.SaveXCorr, "a")           
+			fanalyzeYCorr        = open(FileAnalysis.SaveYCorr, "a")           
+			fanalyzeZCorr        = open(FileAnalysis.SaveZCorr, "a")           
+			fanalyzeXYCorr       = open(FileAnalysis.SaveXYCorr,"a")           
 
-			support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType)
+		if ((TypeCal == "PIMC") or (TypeCal == "PIGS")):
+			fanalyzeEnergy       = open(FileAnalysis.SaveEnergy, "a")           
+			fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal,status,variableName))
+			fanalyzeCorr         = open(FileAnalysis.SaveCorr, "a")           
+			fanalyzeCorr.write(support.fmtAverageOrientation(status,variableName))
+			fanalyzeTotalCorr    = open(FileAnalysis.SaveTotalCorr, "a")           
+			fanalyzeXCorr        = open(FileAnalysis.SaveXCorr, "a")           
+			fanalyzeYCorr        = open(FileAnalysis.SaveYCorr, "a")           
+			fanalyzeZCorr        = open(FileAnalysis.SaveZCorr, "a")           
+			fanalyzeXYCorr       = open(FileAnalysis.SaveXYCorr,"a")           
 
-		if status == "analysis":
 
-			final_dir_in_work = dir_output+folder_run
-			try:
-				fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
-				fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
-				fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-				fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-				fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-				fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-				fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-			except:
-				pass
+	if (TypeCal == "ENT"):
+		numbmolecules  = 2*numbmolecules1
 	else:
+		numbmolecules  = numbmolecules1
 
-		if ((i % 2) != 0):
-			value    = i
-		else:
-			value    = i+1
+	list_nb = inputFile.Getbeads(TypeCal, variableName)
 
-		if (variableName == "beta"):
-			beta     = tau*(value-1)
-			temperature = 1.0/beta
-			variable = beta
-		if (variableName == "tau"):
-			tau      = beta/(value-1)
-			variable = tau
+	iStep = 0
+	for i in list_nb:
 
-		numbbeads    = value
-		folder_run   = file1_name+str(numbbeads)
+		if (TypeCal == 'PIMC'):
 
-		if status   == "submission":
-
-			if args.PPA:
-				PPA1 = True
-				lmax = args.lmax
-				ltotalmax = args.ltotalmax
-				support.GetTwoBodyDensity(Rpt, dipolemoment, numbbeads, lmax, ltotalmax, tau, molecule_rot)
-				call(["mv", "PairDensity.txt", dir_run_input_pimc])
-			else: 
-				PPA1 = False
-
-			if args.RESTART:
-				Restart1 = True
+			if i % 2 == 0:
+				value    = i
 			else:
-				Restart1 = False
+				value    = i+1
 
-			support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType)
+			if (variableName == "beta"):
+				beta     = tau*value
+				temperature = 1.0/beta
+				variable = beta
+			if (variableName == "tau"):
+				tau      = beta/value
+				variable = tau
 
-		if status == "analysis":
+			numbbeads    = value
+			folder_run   = file1_name+str(numbbeads)
 
-			final_dir_in_work = dir_output+folder_run
-			try:
-				if (TypeCal == "ENT"):
-					fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_TYPE))
-					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
+			if status   == "submission":
+
+				if args.PPA:
+					PPA1 = True
+					lmax = args.lmax
+					ltotalmax = args.ltotalmax
+					support.GetTwoBodyDensity(Rpt, dipolemoment, numbbeads, lmax, ltotalmax, tau, molecule_rot)
+					call(["mv", "PairDensity.txt", dir_run_input_pimc])
+				else: 
+					PPA1 = False
+
+				if args.RESTART:
+					Restart1 = True
 				else:
+					Restart1 = False
+
+				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType)
+
+			if status == "analysis":
+
+				final_dir_in_work = dir_output+folder_run
+				try:
 					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
-					'''
 					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					'''
-			except:
-				pass
-	iStep = iStep + 1
+				except:
+					pass
+		else:
 
-if status == "analysis":
-	if (TypeCal == "ENT"):
-		fanalyzeEntropy.close()
-		fanalyzeEnergy.close()
-		fanalyzeCorr.close()
-		fanalyzeTotalCorr.close()
-		fanalyzeXCorr.close()
-		fanalyzeYCorr.close()
-		fanalyzeZCorr.close()
-		fanalyzeXYCorr.close()
-		call(["cat",FileAnalysis.SaveEntropy])
-		print("")
-		print("")
-		call(["cat",FileAnalysis.SaveEnergy])
-#=========================File Checking===============================#
-		SavedFile = FileAnalysis.SaveEntropy
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveEnergy
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveTotalCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveXCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveYCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveZCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveXYCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			if ((i % 2) != 0):
+				value    = i
+			else:
+				value    = i+1
 
-	if (TypeCal == "PIGS" or TypeCal == "PIMC"):
-		fanalyzeEnergy.close()
-		fanalyzeCorr.close()
-		fanalyzeTotalCorr.close()
-		fanalyzeXCorr.close()
-		fanalyzeYCorr.close()
-		fanalyzeZCorr.close()
-		fanalyzeXYCorr.close()
-		call(["cat",FileAnalysis.SaveEnergy])
-		print("")
-		print("")
-		call(["cat",FileAnalysis.SaveCorr])
-		print("")
-		print("")
-		call(["cat",FileAnalysis.SaveTotalCorr])
-#=========================File Checking===============================#
-		SavedFile = FileAnalysis.SaveEnergy
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveTotalCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveXCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveYCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveZCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-		SavedFile = FileAnalysis.SaveXYCorr
-		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
-# END ========
+			if (variableName == "beta"):
+				beta     = tau*(value-1)
+				temperature = 1.0/beta
+				variable = beta
+			if (variableName == "tau"):
+				tau      = beta/(value-1)
+				variable = tau
 
+			numbbeads    = value
+			folder_run   = file1_name+str(numbbeads)
+
+			if status   == "submission":
+
+				if args.PPA:
+					PPA1 = True
+					lmax = args.lmax
+					ltotalmax = args.ltotalmax
+					support.GetTwoBodyDensity(Rpt, dipolemoment, numbbeads, lmax, ltotalmax, tau, molecule_rot)
+					call(["mv", "PairDensity.txt", dir_run_input_pimc])
+				else: 
+					PPA1 = False
+
+				if args.RESTART:
+					Restart1 = True
+				else:
+					Restart1 = False
+
+				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType)
+
+			if status == "analysis":
+
+				final_dir_in_work = dir_output+folder_run
+				try:
+					if (TypeCal == "ENT"):
+						fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,ENT_TYPE))
+						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules/2,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					else:
+						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
+						'''
+						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						'''
+				except:
+					pass
+		iStep = iStep + 1
+
+	if status == "analysis":
+		if (TypeCal == "ENT"):
+			fanalyzeEntropy.close()
+			fanalyzeEnergy.close()
+			fanalyzeCorr.close()
+			fanalyzeTotalCorr.close()
+			fanalyzeXCorr.close()
+			fanalyzeYCorr.close()
+			fanalyzeZCorr.close()
+			fanalyzeXYCorr.close()
+			call(["cat",FileAnalysis.SaveEntropy])
+			print("")
+			print("")
+			#call(["cat",FileAnalysis.SaveEnergy])
+	#=========================File Checking===============================#
+			SavedFile = FileAnalysis.SaveEntropy
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveEnergy
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveTotalCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveXCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveYCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveZCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveXYCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+
+		if (TypeCal == "PIGS" or TypeCal == "PIMC"):
+			fanalyzeEnergy.close()
+			fanalyzeCorr.close()
+			fanalyzeTotalCorr.close()
+			fanalyzeXCorr.close()
+			fanalyzeYCorr.close()
+			fanalyzeZCorr.close()
+			fanalyzeXYCorr.close()
+			call(["cat",FileAnalysis.SaveEnergy])
+			print("")
+			print("")
+			call(["cat",FileAnalysis.SaveCorr])
+			print("")
+			print("")
+			call(["cat",FileAnalysis.SaveTotalCorr])
+	#=========================File Checking===============================#
+			SavedFile = FileAnalysis.SaveEnergy
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveTotalCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveXCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveYCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveZCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+			SavedFile = FileAnalysis.SaveXYCorr
+			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
+	# END ========
+
+if (status == "analysis") and (TypeCal == "ENT"):
+	print("TAPAS")

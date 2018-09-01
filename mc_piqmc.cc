@@ -1106,6 +1106,18 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	newcoords[AXIS_Y][t1] = sint*sin(phi);
    	newcoords[AXIS_Z][t1] = cost;
 
+// Rotors partitioning
+	int particleA1Min = 0;
+	int particleA1Max = 0;
+	int particleA2Min = 0;
+	int particleA2Max = 0;
+	int iRefAtom = RefAtom;
+	if ((Distribution == "unSwap") && (RefAtom >= 2)) 
+	{
+		iRefAtom = RefAtom-1;
+	}
+	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
 // the old density
 
    	double p0 = 0.0;
@@ -1120,42 +1132,28 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	double dens_old;
 // If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
 // if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
-	if ((Distribution == "unSwap") && (RefAtom == 1))
-    {
-		if (it1 == 0 || it1 == (NumbRotTimes - 1))
-		{
-			if (it1 == 0)
-			{	
-				dens_old = SRotDens(p1, type);
-			}
-			else
-			{
-				dens_old = SRotDens(p0, type);
-			}
+	if (it1 == 0 || it1 == (NumbRotTimes - 1))
+	{
+		if (it1 == 0)
+		{	
+			dens_old = SRotDens(p1, type);
 		}
 		else
 		{
-			dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+			dens_old = SRotDens(p0, type);
 		}
 	}
-
-	int particleA1Min = 0;
-	int particleA1Max = 0;
-	int particleA2Min = 0;
-	int particleA2Max = 0;
-	int iRefAtom = RefAtom;
-	if ((Distribution == "unSwap") && (RefAtom > 1)) 
+	else
 	{
-		iRefAtom = RefAtom-1;
+		dens_old = SRotDens(p0,type)*SRotDens(p1,type);
 	}
-	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
-	if ((Distribution == "unSwap") && (RefAtom > 1))
+	if ((Distribution == "unSwap") && (RefAtom >= 2))
 	{
        	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
        	{
        		int gatomSwap = particleA2Max - (gatom - particleA1Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
          	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1182,7 +1180,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
        	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
        	{
            	int gatomSwap = particleA1Max - (gatom - particleA2Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
            	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1212,7 +1210,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
        	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
        	{
        		int gatomSwap = particleA2Max - (gatom - particleA1Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
          	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1239,7 +1237,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
        	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
        	{
            	int gatomSwap = particleA1Max - (gatom - particleA2Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
            	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1266,7 +1264,11 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 //
    	if (fabs(dens_old)<RZERO) dens_old = 0.0;
 #ifndef NEGATIVEDENSITY
-   	if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+   	if (dens_old<0.0 && RotDenType == 0) 
+	{
+		cout<<"dens_old"<<BLANK<<dens_old<<endl;
+		nrerror("Rotational Moves: ","Negative rot density");
+	}
 #else
    	if (dens_old<0.0) dens_old=fabs(dens_old);
 #endif
@@ -1295,31 +1297,28 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
    	double dens_new;
 
-	if ((Distribution == "unSwap") && (RefAtom == 1))
-    {
-		if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
+	if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
+	{
+		if (it1 == 0)
 		{
-			if (it1 == 0)
-			{
-				dens_new = SRotDens(p1, type);
-			}
-			else
-			{
-				dens_new = SRotDens(p0, type);
-			}
+			dens_new = SRotDens(p1, type);
 		}
 		else
 		{
-			dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+			dens_new = SRotDens(p0, type);
 		}
 	}
+	else
+	{
+		dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+	}
 
-	if ((Distribution == "unSwap") && (RefAtom > 1))
+	if ((Distribution == "unSwap") && (RefAtom >= 2))
     {
        	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
        	{
            	int gatomSwap = particleA2Max - (gatom - particleA1Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
            	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1346,7 +1345,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
     	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
    	    {
            	int gatomSwap = particleA1Max - (gatom - particleA2Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
            	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1376,7 +1375,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
        	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
        	{
            	int gatomSwap = particleA2Max - (gatom - particleA1Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
            	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1403,7 +1402,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
     	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
    	    {
            	int gatomSwap = particleA1Max - (gatom - particleA2Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
+           	int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
 
            	if (it1 == (((NumbRotTimes - 1)/2) - 1))
            	{
@@ -1431,7 +1430,11 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 //
 	if (fabs(dens_new)<RZERO) dens_new = 0.0;
 #ifndef NEGATIVEDENSITY
-	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+	if (dens_new<0.0 && RotDenType == 0) 
+	{
+		cout<<"dens_new"<<BLANK<<dens_new<<endl;
+		nrerror("Rotational Moves: ","Negative rot density");
+	}
 #else
 	if (dens_new<0.0) dens_new=fabs(dens_new);
 #endif
@@ -1516,7 +1519,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
                 Eulang1[CHI] = 0.0;
 
 				weight1 = 1.0;
-				if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom > 1))) 
+				if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2))) 
 				{
 					if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
             		{
@@ -1537,7 +1540,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
             }  //stype
         } //loop over atom1 (molecules)
 		spotSwap = 0.0;
-		if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom > 1)))
+		if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2)))
 		{
 			if (it == ((NumbRotTimes - 1)/2))
 			{
