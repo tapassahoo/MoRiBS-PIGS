@@ -14,6 +14,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='It is a script file, written in Python, used to submit jobs in a queue as well as analyze output data files. Note: Module support.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo. User can easily modify module inputFile.py to generate lists of beads (see Getbeads function), step lengths for rotational and translational motions, and levels for Bisection move (see class GetStepAndLevel) as needed.')
 parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye.", default = -1.0)
+parser.add_argument("-g", "--gFactor", type=float, help="It defines interaction strength.", default = -1.0)
 parser.add_argument("-R", "--Rpt", type=float, help="Inter molecular spacing.", default = -1.0)
 parser.add_argument("variable", help="Name of a variable: either beta or tau. It must be a string. Note: for finite temperature computations only the variable tau is needed.", choices =["tau","beta"])
 parser.add_argument("job", help="Type of a job: submission of new jobs or analyzing output files. It must be a string.", choices = ["submission", "analysis"])
@@ -76,6 +77,8 @@ if(args.Rpt):
 	Rpt             	= args.Rpt
 if(args.DipoleMoment):
 	dipolemoment        = args.DipoleMoment
+if(args.gFactor):
+	gfact           = args.gFactor
 #if args.Rpt:
 #	support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
 #exit()
@@ -153,13 +156,13 @@ else:
 
 
 if (TypeCal == "ENT"):
-	maxloop = 1#int(numbmolecules1/2)
+	maxloop = int(numbmolecules1/2)
 else:
 	maxloop = 1
 
 for particleA in range(1,maxloop+1):
 	#==================================Generating files for submission================#
-	file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
+	file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
 	#===============================================================================
 	#                                                                              |
 	#   compilation of linden.f to generate rotational density matrix - linden.out |
@@ -190,7 +193,7 @@ for particleA in range(1,maxloop+1):
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
 	if status == "analysis":
-		FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
+		FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
 		
 		if (preskip >= numbblocks):
 			print("")
@@ -270,7 +273,7 @@ for particleA in range(1,maxloop+1):
 				else:
 					Restart1 = False
 
-				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType)
+				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType)
 
 			if status == "analysis":
 
@@ -319,7 +322,7 @@ for particleA in range(1,maxloop+1):
 				else:
 					Restart1 = False
 
-				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType)
+				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType)
 
 			if status == "analysis":
 

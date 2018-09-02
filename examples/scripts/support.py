@@ -498,7 +498,7 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove):
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
@@ -555,6 +555,17 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 	if (dipolemoment >= 0.0):
 		replace("dipolemomentArg_input", "DIPOLEMOMENT",      "qmc2.input", "qmc3.input")
 		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("dipolemoment_input", str(dipolemoment),      "qmc2.input", "qmc3.input")
+	else:
+		replace("dipolemomentArg_input", "",                  "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("dipolemoment_input", "",                     "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if (gfact >= 0.0):
+		replace("dipolemomentArg_input", "DIPOLEMOMENT",      "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+		dipolemoment = GetDipoleMomentFromGFactor(molecule_rot, distance, gfact)
 		replace("dipolemoment_input", str(dipolemoment),      "qmc2.input", "qmc3.input")
 	else:
 		replace("dipolemomentArg_input", "",                  "qmc2.input", "qmc3.input")
@@ -671,7 +682,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
+def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
@@ -724,7 +735,7 @@ def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_
 			return
 
 		os.chdir(src_dir)
-	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove)
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove)
 
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
@@ -923,7 +934,7 @@ def GetAvgRotEnergy(molecule,beta):
 	AvgEnergy = Nsum/Zsum
 	return AvgEnergy
 
-def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal):
+def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal):
 	#add                     = "-NumTimes"
 	add                     = ""
 	if (TypeCal == "ENT"):
@@ -965,14 +976,19 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, dipole
 	else:
 		FragmentDipoleMoment = ""
 
-	file1_name      = frontName+FragmentRpt+FragmentDipoleMoment+mainFileName
+	if (gfact >= 0.0):
+		FragmentGFactor = "gFactor"+str(gfact)+"-"
+	else:
+		FragmentGFactor = ""
+
+	file1_name      = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+mainFileName
 	if (TypeCal == "ENT"):
 		file1_name += ENT_TYPE
 	
 	return file1_name
 
 class GetFileNameAnalysis:
-	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
 		self.TypeCal      = TypeCal1
 		self.molecule_rot = molecule_rot1
 		self.TransMove    = TransMove1
@@ -980,6 +996,7 @@ class GetFileNameAnalysis:
 		self.variableName = variableName1
 		self.Rpt          = Rpt1
 		self.dipolemoment = dipolemoment1
+		self.gfact        = gfact1
 		self.parameter    = parameter1
 		self.parameterName= parameterName1
 		self.numbblocks   = numbblocks1
@@ -1022,17 +1039,22 @@ class GetFileNameAnalysis:
 		else:
 			FragmentDipoleMoment  = ""
 
+		if (self.gfact >= 0.0):
+			FragmentGFactor       = "gFactor"+str(self.gfact)+"-"
+		else:
+			FragmentGFactor       = ""
+
 		mainFileName  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 		mainFileName += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
-		file_output1  = frontName+FragmentRpt+FragmentDipoleMoment+"Energy-"	
-		file_output2  = frontName+FragmentRpt+FragmentDipoleMoment+"correlation-"
-		file_output3  = frontName+FragmentRpt+FragmentDipoleMoment+"total-correlation-function-"
-		file_output4  = frontName+FragmentRpt+FragmentDipoleMoment+"X-component-correlation-function-"
-		file_output5  = frontName+FragmentRpt+FragmentDipoleMoment+"Y-component-correlation-function-"
-		file_output6  = frontName+FragmentRpt+FragmentDipoleMoment+"Z-component-correlation-function-"
-		file_output7  = frontName+FragmentRpt+FragmentDipoleMoment+"XandY-component-correlation-function-"
-		file_output8  = frontName+FragmentRpt+FragmentDipoleMoment+"Entropy-"
+		file_output1  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Energy-"	
+		file_output2  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"correlation-"
+		file_output3  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"total-correlation-function-"
+		file_output4  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"X-component-correlation-function-"
+		file_output5  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Y-component-correlation-function-"
+		file_output6  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Z-component-correlation-function-"
+		file_output7  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"XandY-component-correlation-function-"
+		file_output8  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Entropy-"
 
 		self.SaveEnergy       = self.src_dir+file_output1+mainFileName+".txt"
 		self.SaveCorr         = self.src_dir+file_output2+mainFileName+".txt"
@@ -1059,7 +1081,7 @@ class GetFileNameAnalysis:
 		print("#------------------------------------------------------------------------#")
 
 class GetFileNamePlot:
-	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1, var1):
+	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1, var1):
 		self.TypeCal      = TypeCal1
 		self.molecule_rot = molecule_rot1
 		self.TransMove    = TransMove1
@@ -1107,18 +1129,23 @@ class GetFileNamePlot:
 		else:
 			FragmentDipoleMoment  = ""
 
+		if (self.gfact >= 0.0):
+			FragmentGFactor       = "gFactor"+str(self.gfact)+"-"
+		else:
+			FragmentGFactor       = ""
+
 		mainFileName  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 		mainFileName += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
-		file_output1  = frontName+FragmentRpt+FragmentDipoleMoment+"Energy-"
-		file_output2  = frontName+FragmentRpt+FragmentDipoleMoment+"correlation-"
-		file_output3  = frontName+FragmentRpt+FragmentDipoleMoment+"total-correlation-function-"
-		file_output4  = frontName+FragmentRpt+FragmentDipoleMoment+"X-component-correlation-function-"
-		file_output5  = frontName+FragmentRpt+FragmentDipoleMoment+"Y-component-correlation-function-"
-		file_output6  = frontName+FragmentRpt+FragmentDipoleMoment+"Z-component-correlation-function-"
-		file_output7  = frontName+FragmentRpt+FragmentDipoleMoment+"XandY-component-correlation-function-"
-		file_output8  = frontName+FragmentRpt+FragmentDipoleMoment+"Chemical-Potential-"
-		file_output9  = frontName+FragmentRpt+FragmentDipoleMoment+"Entropy-"
+		file_output1  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Energy-"
+		file_output2  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"correlation-"
+		file_output3  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"total-correlation-function-"
+		file_output4  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"X-component-correlation-function-"
+		file_output5  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Y-component-correlation-function-"
+		file_output6  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Z-component-correlation-function-"
+		file_output7  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"XandY-component-correlation-function-"
+		file_output8  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Chemical-Potential-"
+		file_output9  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Entropy-"
 
 		self.SaveEnergy       = self.src_dir+file_output1+mainFileName
 		self.SaveCorr         = self.src_dir+file_output2+mainFileName

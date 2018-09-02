@@ -2362,7 +2362,7 @@ double GetEstimNM(void)
 	else
 	{
 	    atom0 = particleA1Min;
-		for (atom1 = (particleA1Min+1); atom1 < particleA1Max; atom1++)
+		for (atom1 = (particleA1Min+1); atom1 <= particleA1Max; atom1++)
 		{
    	    	spot  += GetPotEnergyEntanglement(atom0, atom1);
 		}
@@ -2393,29 +2393,26 @@ double GetEstimNM(void)
    	offset0  = NumbRotTimes*particleA1Min;
    	offset1  = NumbRotTimes*particleA2Max;
 
-	int t1M1, t1M;
-   	t1M1     = offset0 + it0;
-   	t1M      = offset1 + it1;
+	int t0, t1;
+   	t0       = offset0 + it0;
+   	t1       = offset1 + it1;
 
    	double p0;
 	p0       = 0.0;
    	for (int id  = 0;id<NDIM;id++)
    	{
-   		p0  += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+   		p0  += (MCCosine[id][t0]*MCCosine[id][t1]);
    	}
    	double dens1 = SRotDens(p0,type);
 
 	//
-   	offset0  = NumbRotTimes*particleA2Max;
-   	offset1  = NumbRotTimes*particleA1Min;
-
-   	t1M1     = offset0 + it0;
-   	t1M      = offset1 + it1;
+   	t1       = offset0 + it1;
+   	t0       = offset1 + it0;
 
    	p0       = 0.0;
    	for (int id = 0;id<NDIM;id++)
    	{
-   		p0  += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+   		p0  += (MCCosine[id][t0]*MCCosine[id][t1]);
    	}
    	double dens2 = SRotDens(p0,type);
 	//
