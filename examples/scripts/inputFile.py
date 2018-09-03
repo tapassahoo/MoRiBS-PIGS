@@ -20,7 +20,7 @@ def Getbeads(TypeCal, variableName):
 			list_nb = [2,4,10,14,20,24,30,34,40]
 	if (variableName == "tau"):
 		#list_nb  = [i for i in range(loopStart, loopEnd, skip)]
-		list_nb  = [10, 20]
+		list_nb  = [10, 20, 40, 60]
 
 	print(" ")
 	print("====================================== ")
@@ -45,21 +45,7 @@ class GetStepAndLevel:
 
 			if (self.molecule_rot == "HF"):
 				self.step_trans  = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3]
-				#step        = [1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0,1.0,1.0,0.9,0.9]  
-				# beads 21,25,31,35,41,45,51 for beta 0.1
-				#step        = [1.7,1.4,1.1,1.0,0.9]  
-				# beads 21, 31, 41, 51 for beta 0.1
-				#step        = [2.0,2.0,2.0,1.6,1.5,1.4,1.2,1.0,1.0,1.0]  
-				# beads i+1 for i in range(10,100,10) beta =0.2
-				self.step   = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]  
-				#self.step   = [1.5, 1.3, 1.1, 2.0, 2.0, 2.0]  
-				# beads 11, 21, 31, 41 for beta 0.2 for g<1
-				#self.step   = [2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8]  
-				# beads 21, 41, 61, 81, 101, 121, 141 for beta 0.2 for -d 1.0 to 5.0
-				#self.step   = [1.4, 1.4, 1.2, 1.0, 0.8, 0.7, 0.7]  
-				# beads 21, 41, 61, 81, 101, 121, 141 for beta 0.2 for -d 5.5 to 8.0
-				#self.step    = [1.4, 1.2, 1.0, 0.8, 0.7, 0.7]  
-				# beads 41, 61, 81, 101, 121, 141 for beta 0.2 for -d 5.5 to 8.0
+				self.step   = [2.0, 2.0, 1.8, 1.6, 1.4, 1.2]  
 				self.level   = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 		if self.variableName == "beta":

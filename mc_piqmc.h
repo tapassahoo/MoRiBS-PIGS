@@ -64,4 +64,5 @@ double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
 int myRand(double *, double );
 int findCeil(double *, double);
+double GetDensityENT(string, int, int, int, int, int, int, int, int, int, int, int, int, double, double, double **);
 #endif  //mc_pimc.h

@@ -28,7 +28,7 @@ parser.add_argument("--ROTMOVE", action="store_true", help="It allows rotational
 parser.add_argument("--partition", help="allows to submit jobs in a specific cpu. It is a string. User does not need it.", default = "ntapas")
 parser.add_argument("Molecule", help="Name of molecular system. E.g. - H2O, FCC-H2O, H2O@c60")
 parser.add_argument("--PPA", action="store_true", help="Inclussion of Pair Product Approximation. It is in the developing condition.")
-parser.add_argument("-lmax", "--lmax", help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
+parser.add_argument("-lmax", "--lmaxloop,max", help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
 parser.add_argument("-ltotalmax", "--ltotalmax", help="Maximum lmax quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
 parser.add_argument("Rotor", help="Name of rotor. E.g. - HF, H2O. It is needed to save rotational density matrix.")
 parser.add_argument("param", type=float, help="Fixed value of beta or tau.")
@@ -415,5 +415,16 @@ for particleA in range(1,maxloop+1):
 			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 	# END ========
 
+'''
 if (status == "analysis") and (TypeCal == "ENT"):
-	print("TAPAS")
+	print("Final Entropy obtained by employing Ratio Trick")
+	FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
+	
+	fanalyzeEntropyRT = open(FileAnalysis.SaveEntropyRT, "a")
+	fanalyzeEntropyRT.write(support.fmtAverageEntropyRT(status,variableName,ENT_TYPE))
+	fanalyzeEntropyRT.write(support.GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable))
+	fanalyzeEntropyRT.close()
+	call(["cat",FileAnalysis.SaveEntropyRT])
+	print("")
+	print("")
+'''

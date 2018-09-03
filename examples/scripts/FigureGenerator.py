@@ -965,7 +965,8 @@ def	FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, va
 		plt.grid(True)
 
 		var = beadsRef
-		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
+		gFact = -1.0
+		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gFact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
 		FilePlotCorr = FilePlotName.SaveCorrGFAC+".eps"
 		outfile      = FilePlotCorr
 		print("--------------------------------------------------")
@@ -997,7 +998,8 @@ def	FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, va
 
 			iii = 0
 			for dipolemoment in DList:
-				FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+				gFact = -1.0
+				FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gFact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
 				FileToBePlotCorr = FilePlotName.SaveCorr+".txt"
 				if os.path.isfile(FileToBePlotCorr):
 					beads1, var1, Corr, err_Corr = genfromtxt(FileToBePlotCorr,unpack=True, usecols=[0, 1, 8, 15], skip_header=preskip, skip_footer=postskip)
@@ -1008,9 +1010,9 @@ def	FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, va
 						rFactorPlot[iii] = FactorList[0]
 
 					beadsRef1 = beadsRef
-					if ((beadsRef not in Corr) and (np.isscalar(Corr) == False)):
-						beadsRef1 = beads1[-1]
-						print(beadsRef1)
+					#if ((beadsRef not in Corr) and (np.isscalar(Corr) == False)):
+					#	beadsRef1 = beads1[-1]
+					#	print(beadsRef1)
 	
 					if (np.isscalar(Corr) == True):
 						CorrPlot[iii]     = Corr

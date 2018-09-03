@@ -102,7 +102,7 @@ if (TypePlot == "ChemPot"):
 
 #End plotting ---Chemical Potential
 if (TypeCal == "PIGS" and TypePlot == "GFACTOR"):
-	beadsRef   = 41
+	beadsRef   = 21
 	numbblocks = 10000
 	numbmolecules  = 2
 	numbpass   = 50
