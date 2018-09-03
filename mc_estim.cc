@@ -2314,14 +2314,13 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
 {
 	const char *_proc_=__func__;
 
-    int it      = (NumbRotTimes - 1)/2;
+    int it       = (NumbRotTimes - 1)/2;
 
-    int offset0 = NumbRotTimes*atom0;
-    int offset1 = NumbRotTimes*atom1;
-    int t0      = offset0 + it;
-    int t1      = offset1 + it;
+    int offset0  = NumbRotTimes*atom0;
+    int offset1  = NumbRotTimes*atom1;
+    int t0       = offset0 + it;
+    int t1       = offset1 + it;
 
-    double spot;
 	double Eulang0[NDIM], Eulang1[NDIM];
    	Eulang0[PHI] = MCAngles[PHI][t0];
    	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
@@ -2329,7 +2328,7 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
    	Eulang1[PHI] = MCAngles[PHI][t1];
    	Eulang1[CTH] = acos(MCAngles[CTH][t1]);
    	Eulang1[CHI] = 0.0;
-    spot = 0.5*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+    double spot  = 0.5*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
     return spot;
 }
 

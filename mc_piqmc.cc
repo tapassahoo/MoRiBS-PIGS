@@ -539,7 +539,6 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
 #ifdef SWAPTOUNSWAP
-    //double rand4 = (double)rand() / ((double)RAND_MAX + 1);
     double rand4 = runif(Rng);
     MCSwap(rand4, Distribution);
     if (Distribution == "Swap") 
@@ -1428,29 +1427,11 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
 
 void MCSwap(double rand4, string &Distribution)
 {
-
-    double rd;
-
-    if (Distribution == "unSwap")
-    {
-        rd = GetEstimNM()/GetEstimDM();
-    }
-
-    if (Distribution == "Swap")
-    {
-        rd = GetEstimDM()/GetEstimNM();
-    }
-
+    double rd = GetEstimNM()/GetEstimDM();
     bool Accepted = false;
     if (rd>1.0)         Accepted = true;
-    else if (rd>rand4) Accepted = true;
-
-    string DistributionInit = Distribution;
-    if (Accepted)
-    {
-        if (DistributionInit == "unSwap") Distribution = "Swap";
-        if (DistributionInit == "Swap" ) Distribution = "unSwap";
-    }
+    else if (rd>rand4)  Accepted = true;
+    if (Accepted) Distribution = "Swap";
 }
 
 /*
