@@ -193,7 +193,7 @@ for particleA in range(1,maxloop+1):
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
 	if status == "analysis":
-		FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
+		FileAnalysis = support.GetFileNameAnalysis(TypeCal, False, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
 		
 		if (preskip >= numbblocks):
 			print("")
@@ -415,16 +415,6 @@ for particleA in range(1,maxloop+1):
 			support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
 	# END ========
 
-'''
 if (status == "analysis") and (TypeCal == "ENT"):
 	print("Final Entropy obtained by employing Ratio Trick")
-	FileAnalysis = support.GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
-	
-	fanalyzeEntropyRT = open(FileAnalysis.SaveEntropyRT, "a")
-	fanalyzeEntropyRT.write(support.fmtAverageEntropyRT(status,variableName,ENT_TYPE))
-	fanalyzeEntropyRT.write(support.GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable))
-	fanalyzeEntropyRT.close()
-	call(["cat",FileAnalysis.SaveEntropyRT])
-	print("")
-	print("")
-'''
+	support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable)

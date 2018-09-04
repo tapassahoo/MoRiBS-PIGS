@@ -23,8 +23,8 @@ TransMove           = False
 RotMove             = True
 #
 #TypeCal             = 'PIMC'
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 #
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
@@ -63,6 +63,17 @@ if (variableName == "beta"):
 	parameter       = tau
 
 #==================================Plotting====================================#
+if (TypeCal == "ENT" and TypePlot == "GFACTOR"):
+	beadsRef = 21
+	numbblocks	        = 5000
+	numbpass            = 400
+	preskip             = 0
+	postskip            = 0
+
+	extra_file_name     = ""
+	FigureGenerator.FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, beadsRef)
+
+'''
 if (TypeCal == "ENT" and TypePlot == "GFACTOR" or TypePlot == "S2"):
 	beadsRef = 61
 	numbblocks	        = 50000
@@ -110,6 +121,7 @@ if (TypeCal == "PIGS" and TypePlot == "GFACTOR"):
 	postskip   = 0
 	particleA           = int(numbmolecules/2)
 	FigureGenerator.FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA,TypePlot, beadsRef)
+'''
 
 '''
 if (TypeCal == "PIGS" and TypePlot == "GFACTOR"):

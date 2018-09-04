@@ -1065,3 +1065,106 @@ def	FigureAngleDistributionGfactor(TypeCal, molecule_rot, TransMove, RotMove, va
 
 		#call(["open", outfile])
 		plt.show()
+
+def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, TypePlot, beadsRef):
+	font       = 28
+	fontlegend = font/2.0
+
+	font = 28
+	fontlegend = font/2
+	fig        = plt.figure(figsize=(8, 6))
+	plt.grid(True)
+
+	var = beadsRef
+	gfact = 0.0
+	dipolemoment = -1.0
+	numbmolecules = 2
+	particleA = 1
+	FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
+	FilePlotEntropy  = FilePlotName.SaveEntropyGFAC+".eps"
+	outfileEntropy       = FilePlotEntropy
+	call(["rm", FilePlotEntropy])
+#
+	plt.axhline(y=log(2.0), color='blue', lw = 2.0, linestyle='-', label = 'ln(2)')
+#
+	nn = [2]
+	for numbmolecules in nn:
+		
+		if (numbmolecules == 2):
+			gFactorList  = [0.5+0.25*i for i in range(21)]  # 2 HF
+			gFactorList += [5.75+0.25*i for i in range(14)] # 2 HF
+		if (numbmolecules == 4):
+			gFactorList  = [0.5+0.25*i for i in range(15)]   # 4 HF 
+
+		gFactorPlot      = gFactorList
+		entropy1Plot     = np.zeros(len(gFactorList))
+		purity1Plot      = np.zeros(len(gFactorList))
+		err_entropy1Plot = np.zeros(len(gFactorList))
+		err_purity1Plot  = np.zeros(len(gFactorList))
+
+		iii = 0
+		for gFact in gFactorList:
+			FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gFact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+			FileToBePlotEntropy = FilePlotName.SaveEntropyRT+".txt"
+			#FileToBePlotDIAG    = FilePlotName.SaveEntropyDIAG+".txt"
+
+			beads1, var1, purity1, entropy1 = genfromtxt(FileToBePlotEntropy,unpack=True, usecols=[0, 1, 2,3], skip_header=0, skip_footer=0)
+					
+			if (np.isscalar(entropy1) == True):
+				entropy1Plot[iii]     = entropy1
+				purity1Plot[iii]      = purity1
+				err_entropy1Plot[iii] = 0.0
+			else:
+				ii = 0
+				for i in beads1:
+					indexi =int(i+0.5)
+					beads = indexi
+					if beads == beadsRef:
+						entropy1Plot[iii]     = entropy1[ii]
+						purity1Plot[iii]      = purity1[ii]
+						err_entropy1Plot[iii] = 0.0
+	
+					ii += 1
+				iii += 1
+		
+		print("S2:  PIGS "+str(numbmolecules))
+		print(entropy1Plot)
+#
+		plt.plot(gFactorPlot, entropy1Plot, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'ED: N=2')
+
+	ymin, ymax = plt.ylim()
+	midpointy = 0.5*(ymax-ymin)
+	deltay = midpointy*0.15
+	xmin, xmax = plt.xlim()
+	midpointx = 0.5*(xmax-xmin)
+	deltax = midpointx*0.15
+	textpositionx = xmin+midpointx-0.25*midpointx
+	textpositiony = ymin+midpointy
+	plt.xticks(fontsize=font, rotation=0)
+	plt.yticks(fontsize=font, rotation=0)
+
+	if (TypePlot == "RFACTOR"):
+		plt.xlabel(r'$R$', fontsize = font, labelpad=0)
+	if (TypePlot == "GFACTOR"):
+		plt.xlabel(r'$g$', fontsize = font, labelpad=-3)
+
+	ymin, ymax = plt.ylim()
+	xmin, xmax = plt.xlim()
+	plt.ylabel(r'$S_{2}$', fontsize = font)
+	if ymin < 0.0:
+		plt.ylim(0.0,1.001)
+	if xmin < 0.0:
+		plt.xlim(0.0,xmax)
+	plt.xticks(np.arange(0, 9, step=2))
+	plt.yticks(np.arange(0, 0.9, step=0.2))
+	Text1 = "(a)"
+	Text2 = ""
+	if Text1:
+		PlotLabel(Text1, Text2,font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+		
+	plt.subplots_adjust(top=0.97, bottom=0.14, left=0.14, right=0.98, hspace=0.0, wspace=0.0)
+	plt.legend(bbox_to_anchor=(0.68, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+	plt.savefig(outfileEntropy, dpi = 200, format = 'eps')
+
+	#call(["open", outfileEntropy])
+	plt.show()

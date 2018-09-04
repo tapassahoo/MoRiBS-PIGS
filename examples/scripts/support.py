@@ -509,40 +509,34 @@ def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, vari
 		var_combo    = np.zeros((maxloop,ndim_beads),dtype = 'f')
 		purity_combo = np.zeros((maxloop,ndim_beads),dtype = 'f')
 		err_combo    = np.zeros((maxloop,ndim_beads),dtype = 'f')
-		for particleA in range(1,maxloop+1):
-			FileAnalysis = GetFileNameAnalysis(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
+		for partition in range(1,maxloop+1):
+			FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, partition)
 			file_entropy = FileAnalysis.SaveEntropy
-			output       = file_entropy
 			col_beads, col_var, col_purity, col_err = genfromtxt(file_entropy,unpack=True, usecols=[0,1,4,8], skip_header=0, skip_footer=0)
+			'''
 			if (int(len(col_beads)) != ndim_beads):
 				print("Listed beads ")
 				print(col_beads)
 				exit()
-			index = particleA - 1
-			var_combo[i]    = col_var
-			purity_combo[i] = col_purity
-			err_combo[i]    = col_err
+			'''
+			index = partition - 1
+			var_combo[index]    = col_var
+			purity_combo[index] = col_purity
+			err_combo[index]    = col_err
 	
-		for i in range(maxloop):
-			purity     = np.prod(var_combo,axis=0)
-			err_purity = np.prod(var_combo,axis=0)
-			#entropy    = 
-			#purity = np.prod(var_combo,axis=0)
-			'''
-			mean_nm      = np.mean(col_nm)
-			mean_dm      = np.mean(col_dm)
-			purity       = mean_nm/mean_dm
-			mean_EN      = -log(purity)
-			error_purity = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
-			error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
-			'''
+		purity     = np.prod(purity_combo,axis=0)
+		entropy    = -np.log(purity)
+	
+	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads, col_var, purity, entropy]), fmt=['%5d','%10.6f', '%10.6f','%10.6f'])
+	call(["cat",FileAnalysis.SaveEntropyRT])
+	print("")
+	print("")
+	'''
+	for i in range(maxloop):
+		err_purity = abs(purity)*sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+		error_EN     = sqrt((error_dm/mean_dm)*(error_dm/mean_dm) + (error_nm/mean_nm)*(error_nm/mean_nm))
+	'''
 
-
-	#output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}'.format(numbbeads, variable, purity, mean_EN, error_purity, error_EN)
-	#			output  += "\n"
-	output = "TAPAS"
-
-	return output
 
 def fmtAverageEntropyRT(status,variable,ENT_TYPE):
 	'''
@@ -1054,7 +1048,7 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact,
 	return file1_name
 
 class GetFileNameAnalysis:
-	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+	def __init__(self, TypeCal1,TypeCal2, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
 		self.TypeCal      = TypeCal1
 		self.molecule_rot = molecule_rot1
 		self.TransMove    = TransMove1
@@ -1131,28 +1125,28 @@ class GetFileNameAnalysis:
 		self.SaveXYCorr       = self.src_dir+file_output7+mainFileName+".txt"
 		self.SaveEntropy      = self.src_dir+file_output8+mainFileName+".txt"
 
-		if os.path.exists(self.SaveEntropy):   os.remove(self.SaveEntropy)
-		if os.path.exists(self.SaveEnergy):    os.remove(self.SaveEnergy)
-		if os.path.exists(self.SaveCorr):      os.remove(self.SaveCorr)
-		if os.path.exists(self.SaveTotalCorr): os.remove(self.SaveTotalCorr)
-		if os.path.exists(self.SaveXCorr):     os.remove(self.SaveXCorr)
-		if os.path.exists(self.SaveYCorr):     os.remove(self.SaveYCorr)
-		if os.path.exists(self.SaveZCorr):     os.remove(self.SaveZCorr)
-		if os.path.exists(self.SaveXYCorr):    os.remove(self.SaveXYCorr)
+		if (TypeCal2 == False):
+			if os.path.exists(self.SaveEntropy):   os.remove(self.SaveEntropy)
+			if os.path.exists(self.SaveEnergy):    os.remove(self.SaveEnergy)
+			if os.path.exists(self.SaveCorr):      os.remove(self.SaveCorr)
+			if os.path.exists(self.SaveTotalCorr): os.remove(self.SaveTotalCorr)
+			if os.path.exists(self.SaveXCorr):     os.remove(self.SaveXCorr)
+			if os.path.exists(self.SaveYCorr):     os.remove(self.SaveYCorr)
+			if os.path.exists(self.SaveZCorr):     os.remove(self.SaveZCorr)
+			if os.path.exists(self.SaveXYCorr):    os.remove(self.SaveXYCorr)
+
+			if (self.TypeCal != "ENT"):
+				print(self.src_dir)
+				print("")
+				print("Final results - Energy vs "+str(self.variableName))
+				print(file_output1+mainFileName+".txt")
+				print("#------------------------------------------------------------------------#")
 
 		if (self.TypeCal == "ENT"):
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 			mainFileNameRT   += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
 			self.SaveEntropyRT= self.src_dir+file_output8+mainFileNameRT+".txt"
-			if os.path.exists(self.SaveEntropyRT):   os.remove(self.SaveEntropyRT)
-
-		if (self.TypeCal != "ENT"):
-			print(self.src_dir)
-			print("")
-			print("Final results - Energy vs "+str(self.variableName))
-			print(file_output1+mainFileName+".txt")
-			print("#------------------------------------------------------------------------#")
 
 class GetFileNamePlot:
 	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1, var1):
@@ -1266,6 +1260,12 @@ class GetFileNamePlot:
 		self.SaveEnergyMM     = self.src_dir+file_output1+mainFileNameMM+add2+"-MM"
 		self.SaveEntropyMM    = self.src_dir+file_output9+mainFileNameMM+add2+"-MM"
 		self.SaveEntropyCOMBO = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameCOMBO+"-COMBINE"
+
+		if (self.TypeCal == "ENT"):
+			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+			mainFileNameRT   += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
+
+			self.SaveEntropyRT= self.src_dir+file_output9+mainFileNameRT
 
 def FileCheck(TypeCal,list_nb,variableName,SavedFile):
 	for i in list_nb:
@@ -1394,3 +1394,7 @@ def GetAvgRotEnergy(molecule,beta):
 			break
 	AvgEnergy = Nsum*CMRECIP2KL/Zsum
 	return AvgEnergy
+
+def GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable):
+	FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
+	GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable)

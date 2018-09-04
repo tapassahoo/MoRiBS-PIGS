@@ -1427,11 +1427,28 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
 
 void MCSwap(double rand4, string &Distribution)
 {
-    double rd = GetEstimNM()/GetEstimDM();
+    double rd;
+
+    if (Distribution == "unSwap")
+    {
+        rd = GetEstimNM()/GetEstimDM();
+    }
+
+    if (Distribution == "Swap")
+    {
+        rd = GetEstimDM()/GetEstimNM();
+    }
+
     bool Accepted = false;
     if (rd>1.0)         Accepted = true;
-    else if (rd>rand4)  Accepted = true;
-    if (Accepted) Distribution = "Swap";
+    else if (rd>rand4) Accepted = true;
+
+    string DistributionInit = Distribution;
+    if (Accepted)
+    {
+        if (DistributionInit == "unSwap") Distribution = "Swap";
+        if (DistributionInit == "Swap" ) Distribution = "unSwap";
+    }
 }
 
 /*
