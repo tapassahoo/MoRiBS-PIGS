@@ -5117,18 +5117,13 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 		EulangL[0] = 79.2;
 		EulangL[1] = 180.0;
 	}
-	/*
    	double phi = Eulang0[PHI];
    	if (phi < 0.0) phi += 2.0*M_PI;
    	phi = fmod(phi,2.0*M_PI);
 	EulangJ[0] = Eulang0[CTH]*(180.0/M_PI);
 	EulangJ[1] = phi*(180.0/M_PI);
-	*/
-	EulangJ[0] = 100.8;//Eulang0[CTH]*(180.0/M_PI);
-	EulangJ[1] = 0.0;//phi*(180.0/M_PI);
 	double EHFC60;
 
-	//cout<<"TAPAS"<<BLANK<<RCage<<BLANK<<EulangL[0]<<BLANK<<EulangL[1]<<BLANK<<EulangJ[0]<<BLANK<<EulangJ[1]<<endl;
 	enhfc60_(&RCage, EulangL, EulangJ, &EHFC60);
    	double spot_cage = EHFC60*KCalperMolToCmInverse*CMRECIP2KL;
    	//spot_cage += LPot2DRotDOF(cost,phi,type0);
