@@ -60,7 +60,7 @@ extern int     NDIM;
 extern double  Temperature;
 extern double  Distance;
 extern double DipoleMoment;
-extern int     NumbParticle;
+extern int     RefAtom;
 extern double  Density;
 extern double  BoxSize;
 

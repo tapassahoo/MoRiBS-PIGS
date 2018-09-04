@@ -349,7 +349,7 @@ void IOReadParams(const char in_file[],int & mc_status)
      	else
      	if (params==IO_NUMBPARTICLE)
      	{
-        	inf >> NumbParticle;
+        	inf >> RefAtom;
      	} 
      	else
      	if (params==IO_DIPOLEMOMENT)

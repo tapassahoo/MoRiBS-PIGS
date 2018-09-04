@@ -11,4 +11,3 @@ double rchisq(RngStream* myRng, int df);
 double rbeta(RngStream* myRng, double alpha, double beta);
 int intRand(RngStream* myRng, int iMin, int iMax);
 //double gamma(double x);
-

@@ -409,7 +409,7 @@ ParamsPotential();
 
 // BEGIN loop over blocks ------------------------
 
-   	InitPotentials();
+   	InitPotentials(); 
 
    	if (ROTATION)
     	InitRotDensity();
@@ -531,7 +531,6 @@ ParamsPotential();
        	long int passCount = 0;        // BEGIN NEW MC PASS
        	long int passTotal = 0;        // total number of Moves = passCount*time 
 
-       	//for (int time=0; time<1; time++)
        	while (passCount++ < NumberOfMCPasses) 
        	for (int time=0; time<NumbTimes; time++)
        	{

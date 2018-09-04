@@ -230,107 +230,13 @@ void MCBisectionMove(int type, int time)  // multilevel Metropolis
    	int    mclevels = MCAtom[type].levels;  // number of levels
    	int    seg_size = MCAtom[type].mlsegm;  // segmen size  
 
-   	for (int atom=0;atom<numb;atom++)         // one atom to move only
-   	{
-
-      	int offset = MCAtom[type].offset + NumbTimes*atom;
-      	int gatom  = offset/NumbTimes;
-
 // initialize the end points
-
-      	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
-      	for (int id=0;id<NDIM;id++)             
-      	{	  
-         	newcoords[id][offset + time] = MCCoords[id][offset + time];
-         	newcoords[id][offset + pit]  = MCCoords[id][offset + pit];
-      	}
-
-      	double bnorm = 1.0/(mclambda*MCTau);  // variance for gaussian sampling 
-
-      	bool Accepted; 
-
-      	int t0,t1,t2;
-
-      	double pot0 = 0.0;  // potential, current  level
-      	double pot1 = 0.0;  // potential, previous level
-       	
-      	for (int level=0;level<mclevels;level++) // loop over bisection levels
-      	{	                                                          
-         	int level_seg_size = (int)pow(2.0,(mclevels-level));
-
-         	double bkin_norm = bnorm/(double) level_seg_size;
-         	double bpot_norm = MCTau*(double)(level_seg_size/2);
-	   
-         	pot1 = pot0;   // swap level potentials
-         	pot0 = 0.0;
-	   
-         	t2 = 0;
-         	do             // loop over middle points
-         	{
-            	t0 =  t2;                   // left point
-            	t2 =  t0 + level_seg_size;  // right point	
-            	t1 = (t0 + t2)/2;           // middle point
-
-            	int pt0 = (time + t0) % NumbTimes;	
-            	int pt1 = (time + t1) % NumbTimes;	
-            	int pt2 = (time + t2) % NumbTimes;	
-
-//  change the offset if exchange
- 
-            	for (int id=0;id<NDIM;id++)
-            	{  	   
-               		newcoords[id][offset+pt1]  = 0.5*(newcoords[id][offset+pt0]+newcoords[id][offset+pt2]);
-               		newcoords[id][offset+pt1] += gauss(bkin_norm);
-            	} 
-//---------------------------- the end point approximation    
-
-            	pot0 += (PotEnergy(gatom,newcoords,pt1) - PotEnergy(gatom,MCCoords,pt1));
-  
-            	if (t0!=0)                // skip the contributions of the end points
-            	pot0 += (PotEnergy(gatom,newcoords,pt0) - PotEnergy(gatom,MCCoords,pt0));
-         	}   	      
-         	while (t2<seg_size);        // end the loop over middle points 
-
-// inefficient version
-
-         	double deltav = (pot0-2.0*pot1);  // rho(0,1;tau) 
-         	deltav *= bpot_norm;
- 
-         	Accepted = false;
-       
-         	if (deltav<0.0)               Accepted = true;
-         	else if (exp(-deltav)>rnd3()) Accepted = true;
-
-         	if (!Accepted) break;
-
-     	}  // END loop over levels        
-
-     	MCTotal[type][MCMULTI] += 1.0;
-     
-     	if (Accepted)     
-     	{
-         	MCAccep[type][MCMULTI] += 1.0;
- 
-         	for (int id=0;id<NDIM;id++)                // save new coordinates
-         	for (int it=time;it<=(time+seg_size);it++)    
-         	{  
-            	int pit = it % NumbTimes;                // periodicity in time 	       	
-            	MCCoords[id][offset+pit] = newcoords[id][offset+pit];
-         	}                                                           
-      	}	     
-//-----------------------------------------------------------------------  
-//      END bisection 
-//-----------------------------------------------------------------------
-  	}  // END loop over time slices/atoms
-}
-
-void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
-{
-	int numb = MCAtom[type].numb;
-
-   	double mclambda = MCAtom[type].lambda;    
-   	int    mclevels = MCAtom[type].levels;  // number of levels
-   	int    seg_size = MCAtom[type].mlsegm;  // segmen size  
+#ifndef PIMCTYPE
+   	int pit = (time+seg_size);  // No periodicity in time for PIGS     	//Tapas modified for PIGS
+	if (pit > (NumbTimes-1)) return;                              
+#else
+   	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
+#endif
 
    	for (int atom=0;atom<numb;atom++)         // one atom to move only
    	{
@@ -338,9 +244,6 @@ void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
       	int offset = MCAtom[type].offset + NumbTimes*atom;
       	int gatom  = offset/NumbTimes;
 
-// initialize the end points
-
-      	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
       	for (int id=0;id<NDIM;id++)             
       	{	  
          	newcoords[id][offset + time] = MCCoords[id][offset + time];
@@ -636,7 +539,6 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
 #ifdef SWAPTOUNSWAP
-    //double rand4 = (double)rand() / ((double)RAND_MAX + 1);
     double rand4 = runif(Rng);
     MCSwap(rand4, Distribution);
     if (Distribution == "Swap") 
@@ -1144,11 +1046,11 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
         spot        = weight*E12*AuToKelvin;
     }
 #endif
-    double spot_cage;
+    double spot_cage = 0.0;
 #ifdef CAGEPOT
-    spot_cage = weight*PotFuncCage(Eulang0);
-#else
-    spot_cage = 0.0;
+	double coordsXYZ[NDIM];
+	for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
+    spot_cage = weight*PotFuncCage(coordsXYZ,Eulang0);
 #endif
 	double spotReturn = (spot + spot_cage);
     return spotReturn;
@@ -1203,6 +1105,15 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	newcoords[AXIS_Y][t1] = sint*sin(phi);
    	newcoords[AXIS_Z][t1] = cost;
 
+// Rotors partitioning
+	int particleA1Min = 0;
+	int particleA1Max = 0;
+	int particleA2Min = 0;
+	int particleA2Max = 0;
+	int iRefAtom = RefAtom;
+	if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
+	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
 // the old density
 
    	double p0 = 0.0;
@@ -1217,86 +1128,30 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	double dens_old;
 // If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
 // if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
-   	int particleA1Min = (NumbAtoms/2) - NumbParticle;
-   	int particleA1Max = particleA1Min + NumbParticle - 1;
-   	int particleA2Min = particleA1Max + 1;
-   	int particleA2Max = particleA2Min + NumbParticle - 1;
-
 	if (it1 == 0 || it1 == (NumbRotTimes - 1))
 	{
-		if (it1 == 0)
-		{	
-			dens_old = SRotDens(p1, type);
-		}
-		else
+		if (it1 == 0) dens_old = SRotDens(p1, type);
+		else dens_old = SRotDens(p0, type);
+	}
+	else dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+	
+	int beadMminus1 = (((NumbRotTimes - 1)/2) - 1);
+	int beadM       = ((NumbRotTimes - 1)/2);
+	if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
+	{
+		if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
 		{
-			dens_old = SRotDens(p0, type);
+			dens_old = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, MCCosine);
 		}
-	}
-	else
-	{
-		dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-	}
-	if (Distribution == "Swap")
-	{
-       	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
-       	{
-       		int gatomSwap = particleA2Max - (gatom - particleA1Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
-
-         	if (it1 == (((NumbRotTimes - 1)/2) - 1))
-           	{
-           		int tSwap = offsetSwap + it2;
-				double pSwap = 0.0;
-           		for (int id = 0; id < NDIM; id++)
-           		{
-               		pSwap += (MCCosine[id][t1]*MCCosine[id][tSwap]);
-           		}
-               	dens_old = SRotDens(p0,type)*SRotDens(pSwap,type);
-           	}
-           	if (it1 == ((NumbRotTimes - 1)/2))
-           	{
-           		int tSwap = offsetSwap + it0;
-				double pSwap = 0.0;
-           		for (int id = 0; id < NDIM; id++)
-           		{
-               		pSwap += (MCCosine[id][tSwap]*MCCosine[id][t1]);
-           		}
-               	dens_old = SRotDens(pSwap,type)*SRotDens(p1,type);
-           	}
-       	}	
-
-       	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
-       	{
-           	int gatomSwap = particleA1Max - (gatom - particleA2Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
-
-           	if (it1 == (((NumbRotTimes - 1)/2) - 1))
-           	{
-           		int tSwap = offsetSwap + it2;
-				double pSwap = 0.0;
-           		for (int id = 0; id < NDIM; id++)
-           		{
-               		pSwap += (MCCosine[id][t1]*MCCosine[id][tSwap]);
-           		}
-               	dens_old = SRotDens(p0,type)*SRotDens(pSwap,type);
-           	}
-           	if (it1 == ((NumbRotTimes - 1)/2))
-           	{
-           		int tSwap = offsetSwap + it0;
-				double pSwap = 0.0;
-           		for (int id = 0; id < NDIM; id++)
-           		{
-               		pSwap += (MCCosine[id][tSwap]*MCCosine[id][t1]);
-           		}
-               	dens_old = SRotDens(pSwap,type)*SRotDens(p1,type);
-           	}
-       	}
 	}
 //
    	if (fabs(dens_old)<RZERO) dens_old = 0.0;
 #ifndef NEGATIVEDENSITY
-   	if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+   	if (dens_old<0.0 && RotDenType == 0) 
+	{
+		cout<<"dens_old"<<BLANK<<dens_old<<endl;
+		nrerror("Rotational Moves: ","Negative rot density");
+	}
 #else
    	if (dens_old<0.0) dens_old=fabs(dens_old);
 #endif
@@ -1308,7 +1163,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
-		pot_old  += (PotRotEnergySwap(gatom,EulangOld,it,Distribution));
+		pot_old  += (PotRotEnergySwap(iRefAtom,gatom,EulangOld,it,Distribution));
 	}
 
 // the new density 
@@ -1327,80 +1182,26 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
 	if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
 	{
-		if (it1 == 0)
-		{
-			dens_new = SRotDens(p1, type);
-		}
-		else
-		{
-			dens_new = SRotDens(p0, type);
-		}
+		if (it1 == 0) dens_new = SRotDens(p1, type);
+		else dens_new = SRotDens(p0, type);
 	}
-	else
+	else dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+
+	if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 	{
-		dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+		if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+		{
+			dens_new = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, newcoords);
+		}
 	}
-	if (Distribution == "Swap")
-    {
-       	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
-       	{
-           	int gatomSwap = particleA2Max - (gatom - particleA1Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
-
-           	if (it1 == (((NumbRotTimes - 1)/2) - 1))
-           	{
-               	int tSwap = offsetSwap + it2;
-               	double pSwap = 0.0;
-               	for (int id = 0; id < NDIM; id++)
-               	{
-                   	pSwap += (newcoords[id][t1]*MCCosine[id][tSwap]);
-               	}
-               	dens_new = SRotDens(p0,type)*SRotDens(pSwap,type);
-           	}
-           	if (it1 == ((NumbRotTimes - 1)/2))
-           	{
-               	int tSwap = offsetSwap + it0;
-               	double pSwap = 0.0;
-               	for (int id = 0; id < NDIM; id++)
-               	{
-                   	pSwap += (MCCosine[id][tSwap]*newcoords[id][t1]);
-               	}
-               	dens_new = SRotDens(pSwap,type)*SRotDens(p1,type);
-           	}
-       	}
-
-    	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
-   	    {
-           	int gatomSwap = particleA1Max - (gatom - particleA2Min);
-           	int offsetSwap = NumbRotTimes*gatomSwap;
-
-           	if (it1 == (((NumbRotTimes - 1)/2) - 1))
-           	{
-               	int tSwap = offsetSwap + it2;
-               	double pSwap = 0.0;
-               	for (int id = 0; id < NDIM; id++)
-               	{
-                   	pSwap += (newcoords[id][t1]*MCCosine[id][tSwap]);
-               	}
-               	dens_new = SRotDens(p0,type)*SRotDens(pSwap,type);
-           	}
-           	if (it1 == ((NumbRotTimes - 1)/2))
-           	{
-               	int tSwap = offsetSwap + it0;
-               	double pSwap = 0.0;
-               	for (int id = 0; id < NDIM; id++)
-               	{
-                   	pSwap += (MCCosine[id][tSwap]*newcoords[id][t1]);
-               	}
-               	dens_new = SRotDens(pSwap,type)*SRotDens(p1,type);
-           	}
-       	}
-	}
-
 //
 	if (fabs(dens_new)<RZERO) dens_new = 0.0;
 #ifndef NEGATIVEDENSITY
-	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
+	if (dens_new<0.0 && RotDenType == 0) 
+	{
+		cout<<"dens_new"<<BLANK<<dens_new<<endl;
+		nrerror("Rotational Moves: ","Negative rot density");
+	}
 #else
 	if (dens_new<0.0) dens_new=fabs(dens_new);
 #endif
@@ -1408,7 +1209,7 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 	double pot_new  = 0.0;
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
-		pot_new  += (PotRotEnergySwap(gatom,EulangNew,it,Distribution));
+		pot_new  += (PotRotEnergySwap(iRefAtom,gatom,EulangNew,it,Distribution));
 	}
 
 	double rd;
@@ -1436,15 +1237,74 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 	}
 }
 
-//double PotRotEnergySwap(int atom0, double **cosine, int it, int Distribution)   
-double PotRotEnergySwap(int atom0, const double *Eulang0, int it, string Distribution)   
+double GetDensityENT(string Distribution, int gatom, int type, int particleA1Min, int particleA1Max, int particleA2Min, int particleA2Max, int it0, int it1, int it2, int t1, int t0, int t2, double p0, double p1, double **cosine)
+{
+	double dens_ENT;
+	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
+	{
+		int gatomSwap = particleA2Max - (gatom - particleA1Min);
+		int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
+
+		if (it1 == (((NumbRotTimes - 1)/2) - 1))
+		{
+			int tSwap = offsetSwap + it2;
+			double pSwap = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{
+				pSwap += (cosine[id][t1]*MCCosine[id][tSwap]);
+			}
+			dens_ENT = SRotDens(p0,type)*SRotDens(pSwap,type);
+		}
+
+		if (it1 == ((NumbRotTimes - 1)/2))
+		{
+			int tSwap = offsetSwap + it0;
+			double pSwap = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{
+				pSwap += (MCCosine[id][tSwap]*cosine[id][t1]);
+			}
+			dens_ENT = SRotDens(pSwap,type)*SRotDens(p1,type);
+		}
+	}	
+
+	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
+	{
+		int gatomSwap = particleA1Max - (gatom - particleA2Min);
+		int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
+
+		if (it1 == (((NumbRotTimes - 1)/2) - 1))
+		{
+			int tSwap = offsetSwap + it2;
+			double pSwap = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{
+				pSwap += (cosine[id][t1]*MCCosine[id][tSwap]);
+			}
+			dens_ENT = SRotDens(p0,type)*SRotDens(pSwap,type);
+		}
+
+		if (it1 == ((NumbRotTimes - 1)/2))
+		{
+			int tSwap = offsetSwap + it0;
+			double pSwap = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{
+				pSwap += (MCCosine[id][tSwap]*cosine[id][t1]);
+			}
+			dens_ENT = SRotDens(pSwap,type)*SRotDens(p1,type);
+		}
+	}
+	return dens_ENT;
+}
+
+double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, string Distribution)   
 {
 	int type0   =  MCType[atom0];
 	double spot, spotSwap;
 
     double weight, weight1;
 	weight = 1.0;
-
     if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
 
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
@@ -1453,10 +1313,11 @@ double PotRotEnergySwap(int atom0, const double *Eulang0, int it, string Distrib
         int t0  = offset0 + it;
 
 		int atom1Init, NumbAtoms1;
-   	    int particleA1Min = (NumbAtoms/2) - NumbParticle;
-   	    int particleA1Max = particleA1Min + NumbParticle - 1;
-   	    int particleA2Min = particleA1Max + 1;
-   	    int particleA2Max = particleA2Min + NumbParticle - 1;
+   	    int particleA1Min = 0;
+   	    int particleA1Max = 0;
+   	    int particleA2Min = 0;
+   	    int particleA2Max = 0;
+		GetIndex(iRefAtom, type0, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
         if (atom0 <= particleA1Max)
         {
@@ -1485,7 +1346,7 @@ double PotRotEnergySwap(int atom0, const double *Eulang0, int it, string Distrib
                 Eulang1[CHI] = 0.0;
 
 				weight1 = 1.0;
-				if (Distribution == "Swap")
+				if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2))) 
 				{
 					if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
             		{
@@ -1506,7 +1367,7 @@ double PotRotEnergySwap(int atom0, const double *Eulang0, int it, string Distrib
             }  //stype
         } //loop over atom1 (molecules)
 		spotSwap = 0.0;
-		if (Distribution == "Swap")
+		if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2)))
 		{
 			if (it == ((NumbRotTimes - 1)/2))
 			{
@@ -1566,7 +1427,6 @@ double PotRotEnergySwap(int atom0, const double *Eulang0, int it, string Distrib
 
 void MCSwap(double rand4, string &Distribution)
 {
-
     double rd;
 
     if (Distribution == "unSwap")
@@ -2170,10 +2030,10 @@ void MCRotLinStepSwapBroken(int it1,int offset,int gatom,int type,double step,do
    	double dens_old;
 // 	If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
 // 	if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
-   	int particleA1Min = (NumbAtoms/2) - NumbParticle;
-   	int particleA1Max = particleA1Min + NumbParticle - 1;
+   	int particleA1Min = (NumbAtoms/2) - RefAtom;
+   	int particleA1Max = particleA1Min + RefAtom - 1;
    	int particleA2Min = particleA1Max + 1;
-   	int particleA2Max = particleA2Min + NumbParticle - 1;
+   	int particleA2Max = particleA2Min + RefAtom - 1;
 
     if (it1 == 0 || it1 == (NumbRotTimes - 1))
     {
@@ -2433,10 +2293,10 @@ double PotRotEnergySwapBroken(int atom0, double *Eulang0, int it)
         int t0  = offset0 + it;
 
 		int atom1Init, NumbAtoms1;
-   	    int particleA1Min = (NumbAtoms/2) - NumbParticle;
-   	    int particleA1Max = particleA1Min + NumbParticle - 1;
+   	    int particleA1Min = (NumbAtoms/2) - RefAtom;
+   	    int particleA1Max = particleA1Min + RefAtom - 1;
    	    int particleA2Min = particleA1Max + 1;
-   	    int particleA2Max = particleA2Min + NumbParticle - 1;
+   	    int particleA2Max = particleA2Min + RefAtom - 1;
 
         if (atom0 <= particleA1Max)
         {
@@ -2824,7 +2684,7 @@ double PotEnergy(int atom0, double **pos)
        	#pragma omp parallel for reduction(+: spot_pair)
        	for (int it = 0; it < NumbTimes; it++) 	    
        	{ 
-      		int t0 = offset0 + it;
+			int t0 = offset0 + it;
        		int t1 = offset1 + it;
 
 	        string stype = MCAtom[type0].type;
@@ -3042,6 +2902,55 @@ double PotEnergy(int atom0, double **pos)
        	} 
       	spot += spot_pair;
     } 
+
+#ifdef HARMONIC
+   	double spot_beads=0.0;
+
+   	#pragma omp parallel for reduction(+: spot_beads)
+   	for (int it = 0; it < NumbTimes; it++) 	    
+   	{ 
+   		int t0 = offset0 + it;
+
+		double spot3d = 0.0;
+		for (int id = 0; id < NDIM; id++)
+        {
+            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+        }
+		double weight = 1.0;
+#ifndef PIMCTYPE
+		if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+        spot_beads   += weight*spot3d;
+	}
+	spot = spot_beads;
+#endif
+	
+#ifdef CAGEPOT
+   	double spot_beads=0.0;
+
+   	#pragma omp parallel for reduction(+: spot_beads)
+   	for (int it = 0; it < NumbTimes; it++) 	    
+   	{ 
+   		int t0 = offset0 + it;
+
+		double Eulang[NDIM];
+   		Eulang[PHI]=MCAngles[PHI][t0];
+   		Eulang[CTH]=acos(MCAngles[CTH][t0]);
+   		Eulang[CHI]=MCAngles[CHI][t0];
+		double coordsXYZ[NDIM];
+		for (int id = 0; id < NDIM; id++) 
+		{
+			coordsXYZ[id] = pos[id][t0];
+		}
+
+		double weight = 1.0;
+#ifndef PIMCTYPE
+		if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+   		spot_beads += weight*PotFuncCage(coordsXYZ,Eulang);
+	}
+	spot = spot_beads;
+#endif
     return (spot);
 }
 
@@ -3464,6 +3373,7 @@ double PotEnergy(int atom0, double **pos, int it)
 {
    	int type0   = MCType[atom0];
    	int offset0 = NumbTimes*atom0;
+    int t0 = offset0 + it;
 
    	double dr[NDIM];
    	double spot = 0.0;
@@ -3473,7 +3383,6 @@ double PotEnergy(int atom0, double **pos, int it)
    	{	
      	int type1   = MCType[atom1];
      	int offset1 = NumbTimes*atom1; 
-        int t0 = offset0 + it;
         int t1 = offset1 + it;
 
 	    string stype = MCAtom[type0].type;
@@ -3685,6 +3594,33 @@ double PotEnergy(int atom0, double **pos, int it)
      	} // END sum over time slices 	   
 #endif
 	}   // END sum over atoms
+
+#ifdef HARMONIC
+    double spot3d = 0.0;
+    for (int id = 0; id < NDIM; id++)
+    {
+        spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+    }
+    double weight = 1.0;
+#ifndef PIMCTYPE
+    if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+    spot = weight*spot3d;
+#endif
+
+#ifdef CAGEPOT
+    double Eulang[NDIM];
+    Eulang[PHI]=MCAngles[PHI][t0];
+    Eulang[CTH]=acos(MCAngles[CTH][t0]);
+    Eulang[CHI]=MCAngles[CHI][t0];
+    double coordsXYZ[NDIM];
+	double weight = 1.0;
+#ifndef PIMCTYPE
+	if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+    for (int id = 0; id < NDIM; id++) coordsXYZ[id] = pos[id][t0];
+    spot = weight*PotFuncCage(coordsXYZ,Eulang);
+#endif
    	return (spot);
 }
 
@@ -3786,10 +3722,10 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 
 		int atom1Init, NumbAtoms1;
 #ifdef ENTANGLEMENT
-   	    int particleA1Min = (NumbAtoms/2) - NumbParticle;
-   	    int particleA1Max = particleA1Min + NumbParticle - 1;
+   	    int particleA1Min = (NumbAtoms/2) - RefAtom;
+   	    int particleA1Max = particleA1Min + RefAtom - 1;
    	    int particleA2Min = particleA1Max + 1;
-   	    int particleA2Max = particleA2Min + NumbParticle - 1;
+   	    int particleA2Max = particleA2Min + RefAtom - 1;
 
         if (atom0 <= particleA1Max)
         {

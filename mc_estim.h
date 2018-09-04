@@ -37,6 +37,7 @@ double GetKinEnergy(void);
 double GetPotEnergy_Entanglement(int atom0, int atom1);
 double GetEstimNM(void);
 double GetEstimDM(void);
+void GetIndex(int , int , int &, int &, int &, int &);
 double *GetCosThetaEntanglement();
 double *GetPhiEntanglement();
 double *GetProdUvec12();
@@ -93,7 +94,7 @@ double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
 void UnitVectors(const double *, double *);
 double PotFunc(int , int , const double *, const double *, int );
-double PotFuncCage(const double *);
+double PotFuncCage(double *, const double *);
 
 double GetPotEnergyPIGSENT(void);
 double GetTotalEnergyPIGSENT(void);

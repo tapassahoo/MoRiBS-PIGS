@@ -760,7 +760,7 @@ double GetPotEnergyPIGS(void)
         double E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
         spot    = E12*AuToKelvin;
 #else
-        int t0  = offset0 + (NumbTimes-1)/2;
+        int t0  = offset0 + it;
         double spot3d = 0.0;
         for (int id = 0; id < NDIM; id++)
         {
@@ -771,20 +771,33 @@ double GetPotEnergyPIGS(void)
     }
 #endif
 
+#ifdef HARMONIC
+    if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+    {
+        int offset0 = 0;
+        int t0  = offset0 + it;
+        double spot3d = 0.0;
+        for (int id = 0; id < NDIM; id++)
+        {
+            spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0]; //in bohr
+        }
+        spot   = spot3d*AuToKelvin;
+    }
+#endif
+
     double spot_cage = 0.0;
 #ifdef CAGEPOT
     for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 	{
         int offset0 = NumbTimes*atom0;
         int t0 = offset0 + it;
-    	double phi = MCAngles[PHI][t0];
-    	if (phi < 0.0) phi = 2.0*M_PI + phi;
-    	phi = fmod(phi,2.0*M_PI);
 		double Eulang0[NDIM];
         Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-        Eulang0[PHI] = phi;
+        Eulang0[PHI] = MCAngles[PHI][t0];
         Eulang0[CHI] = 0.0;
-    	spot_cage += PotFuncCage(Eulang0);
+		double coordsXYZ[NDIM];
+		for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
+    	spot_cage += PotFuncCage(coordsXYZ,Eulang0);
 	}
 #endif
 	double spotReturn = (spot + spot_cage);
@@ -1477,6 +1490,27 @@ double GetTotalEnergy(void)
     }
 #endif
 
+#ifdef HARMONIC
+    if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+    {
+        int offset0 = 0;
+
+        spot = 0.0;
+        double E12;
+        for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
+		{
+            int t0  = offset0 + it;
+
+			double spot3d = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{
+            	spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
+			}
+            spot   += spot3d;
+        }
+    }
+#endif
+
     double spot_cage = 0.0;
 #ifdef CAGEPOT
     for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
@@ -1488,15 +1522,13 @@ double GetTotalEnergy(void)
        	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 		{
         	int t0 = offset0 + it;
-        	double cost = MCAngles[CTH][t0];
-        	double phi = MCAngles[PHI][t0];
-        	if (phi < 0.0) phi = 2.0*M_PI + phi;
-        	phi = fmod(phi,2.0*M_PI);
 			double Eulang0[NDIM];
         	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-        	Eulang0[PHI] = phi;
+        	Eulang0[PHI] = MCAngles[PHI][t0];
         	Eulang0[CHI] = 0.0;
-    		spot_beads += PotFuncCage(Eulang0);
+			double coordsXYZ[NDIM];
+			for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
+    		spot_beads += PotFuncCage(coordsXYZ,Eulang0);
 		}
 		spot_cage += spot_beads;
     }
@@ -2278,19 +2310,17 @@ double GetPhi(void)
     return phi;
 }
 
-
 double GetPotEnergyEntanglement(int atom0, int atom1)
 {
 	const char *_proc_=__func__;
 
-    int it      = (NumbRotTimes - 1)/2;
+    int it       = (NumbRotTimes - 1)/2;
 
-    int offset0 = NumbRotTimes*atom0;
-    int offset1 = NumbRotTimes*atom1;
-    int t0      = offset0 + it;
-    int t1      = offset1 + it;
+    int offset0  = NumbRotTimes*atom0;
+    int offset1  = NumbRotTimes*atom1;
+    int t0       = offset0 + it;
+    int t1       = offset1 + it;
 
-    double spot;
 	double Eulang0[NDIM], Eulang1[NDIM];
    	Eulang0[PHI] = MCAngles[PHI][t0];
    	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
@@ -2298,129 +2328,170 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
    	Eulang1[PHI] = MCAngles[PHI][t1];
    	Eulang1[CTH] = acos(MCAngles[CTH][t1]);
    	Eulang1[CHI] = 0.0;
-    spot = 0.5*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+    double spot  = 0.5*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
     return spot;
 }
 
 double GetEstimNM(void)
 {
     int atom0, atom1;
-    int type        = IMTYPE;
+    int type          = IMTYPE;
 
-   	int particleA1Min = (NumbAtoms/2) - NumbParticle;
-   	int particleA1Max = particleA1Min + NumbParticle - 1;
-   	int particleA2Min = particleA1Max + 1;
-   	int particleA2Max = particleA2Min + NumbParticle - 1;
+   	int particleA1Min = 0;
+   	int particleA1Max = 0;
+   	int particleA2Min = 0;
+   	int particleA2Max = 0;
+	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
-    double spot    = 0.0;
+	double spot = 0.0;
+	if (RefAtom == 1)
+	{
+	    atom0 = particleA1Min;
+       	for (atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
+	    {
+            spot  += GetPotEnergyEntanglement(atom0, atom1);
+	    }
 
-    for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
-    {
-        for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
-        {
-            spot      += GetPotEnergyEntanglement(atom0, atom1);
+	    atom0 = particleA2Max;
+  		for (atom1 = 0; atom1 < particleA1Min; atom1++)
+  		{
+      		spot  += GetPotEnergyEntanglement(atom0, atom1);
 		}
-    }
-
-    for (int atom0 = particleA2Min; atom0 <= particleA2Max; atom0++)
-    {
-    	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
-    	{
-        	spot      += GetPotEnergyEntanglement(atom0, atom1);
-    	}
 	}
-    double potEstimNM = exp(-MCRotTau*spot);
-
-    int it0  = (((NumbRotTimes - 1)/2)-1);
-    int it1  = ((NumbRotTimes - 1)/2);
-
-    double dens1 = 1.0;
-    for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
+	else
 	{
-    	int atom1 = particleA2Max - (atom0 - particleA1Min);
-    	int offset0 = NumbRotTimes*atom0;
-    	int offset1 = NumbRotTimes*atom1;
+	    atom0 = particleA1Min;
+		for (atom1 = (particleA1Min+1); atom1 <= particleA1Max; atom1++)
+		{
+   	    	spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
 
-    	int t1M1 = offset0 + it0;
-    	int t1M = offset1 + it1;
+       	for (atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
+        {
+   	        spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
 
-    	double p0   = 0.0;
-    	for (int id = 0;id<NDIM;id++)
+	    atom0 = particleA2Max;
+		for (atom1 = particleA2Min; atom1 < particleA2Max; atom1++)
+		{
+   	    	spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
+
+   		for (int atom1 = 0; atom1 < particleA1Min; atom1++)
    	 	{
-        	p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+   	   		spot  += GetPotEnergyEntanglement(atom0, atom1);
     	}
-    	dens1 *= SRotDens(p0,type);
 	}
+   	double potEstimNM = exp(-MCRotTau*spot);
 
-    double dens2 = 1.0;
-    for (int atom0 = particleA2Min; atom0 <= particleA2Max; atom0++)
-	{
-    	int atom1 = particleA1Max - (atom0 - particleA2Min);
+	//
+   	int it0  = (((NumbRotTimes - 1)/2)-1);
+   	int it1  = ((NumbRotTimes - 1)/2);
 
-    	int offset0 = NumbRotTimes*atom0;
-    	int offset1 = NumbRotTimes*atom1;
+	int offset0, offset1;
+   	offset0  = NumbRotTimes*particleA1Min;
+   	offset1  = NumbRotTimes*particleA2Max;
 
-    	int t1M1 = offset0 + it0;
-    	int t1M = offset1 + it1;
+	int t0, t1;
+   	t0       = offset0 + it0;
+   	t1       = offset1 + it1;
 
-    	double p0   = 0.0;
-    	for (int id = 0;id<NDIM;id++)
-   	 	{
-        	p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
-    	}
-    	dens2 *= SRotDens(p0,type);
-	}
+   	double p0;
+	p0       = 0.0;
+   	for (int id  = 0;id<NDIM;id++)
+   	{
+   		p0  += (MCCosine[id][t0]*MCCosine[id][t1]);
+   	}
+   	double dens1 = SRotDens(p0,type);
+
+	//
+   	t1       = offset0 + it1;
+   	t0       = offset1 + it0;
+
+   	p0       = 0.0;
+   	for (int id = 0;id<NDIM;id++)
+   	{
+   		p0  += (MCCosine[id][t0]*MCCosine[id][t1]);
+   	}
+   	double dens2 = SRotDens(p0,type);
+	//
+
   	double estimNM = dens1*dens2*potEstimNM;
     return estimNM;
 }
 
 double GetEstimDM(void)
 {
-    int type       = IMTYPE;
+    int type          = IMTYPE;
 
-   	int particleA1Min = (NumbAtoms/2) - NumbParticle;
-   	int particleA1Max = particleA1Min + NumbParticle - 1;
-   	int particleA2Min = particleA1Max + 1;
-   	int particleA2Max = particleA2Min + NumbParticle - 1;
+   	int particleA1Min = 0;
+   	int particleA1Max = 0;
+   	int particleA2Min = 0;
+   	int particleA2Max = 0;
+	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+  
+	double spot = 0.0;
 
-    double spot    = 0.0;
-
-    for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
+	int atom0, atom1;
+	if (RefAtom == 1)
 	{
-    	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
-    	{
-        	spot      += GetPotEnergyEntanglement(atom0, atom1);
-    	}
-	}
+		atom0 = particleA1Min;
+   		for (atom1 = 0; atom1 < particleA1Min; atom1++)
+   		{
+   			spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
 
-    for (int atom0 = particleA2Min; atom0 <= particleA2Max; atom0++)
+		atom0 = particleA2Max;
+		for (atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
+		{
+			spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
+	}
+	else
 	{
-    	for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
-    	{
-        	spot      += GetPotEnergyEntanglement(atom0, atom1);
-    	}
+		atom0 = particleA1Min;
+		for (atom1 = particleA2Min; atom1 < particleA2Max; atom1++)
+		{
+   	    	spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
+
+   		for (atom1 = 0; atom1 < particleA1Min; atom1++)
+   		{
+   			spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
+
+		atom0 = particleA2Max;
+		for (atom1 = (particleA1Min+1); atom1<= particleA1Max; atom1++)
+		{ 
+   	    	spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
+
+		for (atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
+		{
+			spot  += GetPotEnergyEntanglement(atom0, atom1);
+		}
 	}
-    double potEstimDM = exp(-MCRotTau*spot);
+	double potEstimDM = exp(-MCRotTau*spot);
 
-    double dens = 1.0;
-    for (int atom0 = particleA1Min; atom0 <= particleA2Max; atom0++)
-    {
-        int it0 = (((NumbRotTimes - 1)/2)-1);
-        int it1 = ((NumbRotTimes - 1)/2);
+	double dens = 1.0;
+	for (atom0 = particleA1Min; atom0 <= particleA2Max; atom0 += (2*RefAtom-1))
+	{
+		int it0 = (((NumbRotTimes - 1)/2)-1);
+		int it1 = ((NumbRotTimes - 1)/2);
 
-        int offset0 = NumbRotTimes*atom0;
+		int offset0 = NumbRotTimes*atom0;
 
-        int t0 = offset0 + it0;
-        int t1 = offset0 + it1;
+		int t0 = offset0 + it0;
+		int t1 = offset0 + it1;
 
-        double p0   = 0.0;
-        for (int id = 0;id<NDIM;id++)
-        {
-            p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
-        }
-        dens *= SRotDens(p0,type);
-    }
-    double estimDM = dens*potEstimDM;
+		double p0   = 0.0;
+		for (int id = 0;id<NDIM;id++)
+		{
+			p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+		}
+		dens *= SRotDens(p0,type);
+	}
+	double estimDM = dens*potEstimDM;
     return estimDM;
 }
 
@@ -5012,19 +5083,47 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 #endif
 
 #ifdef CAGEPOT
-double PotFuncCage(const double *Eulang0)
+double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 {
-   	double phi = Eulang0[PHI];
-   	if (phi < 0.0) phi = 2.0*M_PI + phi;
-   	phi = fmod(phi,2.0*M_PI);
-	double RCage = 0.11; //Distance between the HF and the COM of C60
+	double RCage;
 	double EulangL[2];
 	double EulangJ[2];
-	EulangL[0] = 79.2;
-	EulangL[1] = 180.0;
+	if (TRANSLATION)
+	{
+		double dr2 = 0.0;  		 
+		for (int id=0;id<NDIM;id++) 
+		{
+			dr2 += coordsXYZ[id]*coordsXYZ[id];
+		}
+		RCage = sqrt(dr2);
+		double coordsZ[NDIM];
+		coordsZ[AXIS_X]=0.0;
+		coordsZ[AXIS_Y]=0.0;
+		coordsZ[AXIS_Z]=1.0;
+		if (RCage != 0.0) 
+		{ 
+			VectorNormalisation(coordsXYZ);
+		}
+
+		EulangL[0] = acos(DotProduct(coordsXYZ, coordsZ))*(180.0/M_PI);
+		double phiL= atan2(coordsXYZ[AXIS_Y], coordsXYZ[AXIS_X]);
+   		if (phiL < 0.0) phiL += 2.0*M_PI;
+   		phiL = fmod(phiL,2.0*M_PI);
+		EulangL[1] = phiL*(180.0/M_PI);
+	}
+	else
+	{
+		RCage = 0.11; //Distance between the HF and the COM of C60; Unit is in Angstrom
+		EulangL[0] = 79.2;
+		EulangL[1] = 180.0;
+	}
+   	double phi = Eulang0[PHI];
+   	if (phi < 0.0) phi += 2.0*M_PI;
+   	phi = fmod(phi,2.0*M_PI);
 	EulangJ[0] = Eulang0[CTH]*(180.0/M_PI);
 	EulangJ[1] = phi*(180.0/M_PI);
 	double EHFC60;
+
 	enhfc60_(&RCage, EulangL, EulangJ, &EHFC60);
    	double spot_cage = EHFC60*KCalperMolToCmInverse*CMRECIP2KL;
    	//spot_cage += LPot2DRotDOF(cost,phi,type0);
@@ -5189,4 +5288,12 @@ void UnitVectors(const double *Eulang, double *RotMat)
     RotMat[6] = -st*ck;
     RotMat[7] = st*sk;
     RotMat[8] = ct;
+}
+
+void GetIndex(int particle, int type, int &particleA1Min, int &particleA1Max, int &particleA2Min, int &particleA2Max)
+{
+    particleA1Min = (NumbAtoms/2) - particle;
+    particleA1Max = particleA1Min + particle - 1;
+    particleA2Min = particleA1Max + 1;
+    particleA2Max = particleA2Min + particle - 1;
 }
