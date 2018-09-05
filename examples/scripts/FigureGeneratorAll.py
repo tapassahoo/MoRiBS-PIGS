@@ -65,8 +65,8 @@ if (variableName == "beta"):
 #==================================Plotting====================================#
 if (TypeCal == "ENT" and TypePlot == "GFACTOR"):
 	beadsRef = 21
-	numbblocks	        = 5000
-	numbpass            = 400
+	numbblocks	        = 2000
+	numbpass            = 100
 	preskip             = 0
 	postskip            = 0
 

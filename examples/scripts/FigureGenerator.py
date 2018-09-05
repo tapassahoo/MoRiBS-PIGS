@@ -1085,9 +1085,9 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 	outfileEntropy       = FilePlotEntropy
 	call(["rm", FilePlotEntropy])
 #
-	plt.axhline(y=log(2.0), color='blue', lw = 2.0, linestyle='-', label = 'ln(2)')
+	#plt.axhline(y=log(2.0), color='blue', lw = 2.0, linestyle='-', label = 'ln(2)')
 #
-	nn = [2]
+	nn = [16]
 	for numbmolecules in nn:
 		
 		if (numbmolecules == 2):
@@ -1095,6 +1095,8 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 			gFactorList += [5.75+0.25*i for i in range(14)] # 2 HF
 		if (numbmolecules == 4):
 			gFactorList  = [0.5+0.25*i for i in range(15)]   # 4 HF 
+		if (numbmolecules >= 16):
+			gFactorList  = [0.4+0.1*i for i in range(7)]  # 2 HF
 
 		gFactorPlot      = gFactorList
 		entropy1Plot     = np.zeros(len(gFactorList))
@@ -1108,12 +1110,14 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 			FileToBePlotEntropy = FilePlotName.SaveEntropyRT+".txt"
 			#FileToBePlotDIAG    = FilePlotName.SaveEntropyDIAG+".txt"
 
-			beads1, var1, purity1, entropy1 = genfromtxt(FileToBePlotEntropy,unpack=True, usecols=[0, 1, 2,3], skip_header=0, skip_footer=0)
+			beads1, var1, purity1, entropy1, err_purity1, err_entropy1 = genfromtxt(FileToBePlotEntropy,unpack=True, usecols=[0, 1, 2, 3, 4, 5], skip_header=0, skip_footer=0)
 					
 			if (np.isscalar(entropy1) == True):
 				entropy1Plot[iii]     = entropy1
+				err_entropy1Plot[iii] = err_entropy1
 				purity1Plot[iii]      = purity1
-				err_entropy1Plot[iii] = 0.0
+				err_purity1Plot[iii]  = err_entropy1
+				iii += 1
 			else:
 				ii = 0
 				for i in beads1:
@@ -1122,7 +1126,8 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 					if beads == beadsRef:
 						entropy1Plot[iii]     = entropy1[ii]
 						purity1Plot[iii]      = purity1[ii]
-						err_entropy1Plot[iii] = 0.0
+						err_purity1Plot[iii]  = err_purity1[ii]
+						err_entropy1Plot[iii]  = err_purity1[ii]
 	
 					ii += 1
 				iii += 1
@@ -1130,7 +1135,7 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 		print("S2:  PIGS "+str(numbmolecules))
 		print(entropy1Plot)
 #
-		plt.plot(gFactorPlot, entropy1Plot, color = 'black', ls = 'None', linewidth=1, marker = "v", markersize = 10, label = 'ED: N=2')
+		plt.errorbar(gFactorPlot, entropy1Plot, yerr=err_entropy1Plot, color = 'black', ls = '-', linewidth=1, marker = "v", markersize = 3, label = 'N=2')
 
 	ymin, ymax = plt.ylim()
 	midpointy = 0.5*(ymax-ymin)
@@ -1152,15 +1157,17 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 	xmin, xmax = plt.xlim()
 	plt.ylabel(r'$S_{2}$', fontsize = font)
 	if ymin < 0.0:
-		plt.ylim(0.0,1.001)
+		plt.ylim(0.0,ymax)
 	if xmin < 0.0:
 		plt.xlim(0.0,xmax)
-	plt.xticks(np.arange(0, 9, step=2))
-	plt.yticks(np.arange(0, 0.9, step=0.2))
+	#plt.xticks(np.arange(0, 1.001, step=0.2))
+	#plt.yticks(np.arange(0, 0.40, step=0.1))
+	'''
 	Text1 = "(a)"
 	Text2 = ""
 	if Text1:
 		PlotLabel(Text1, Text2,font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
+	'''
 		
 	plt.subplots_adjust(top=0.97, bottom=0.14, left=0.14, right=0.98, hspace=0.0, wspace=0.0)
 	plt.legend(bbox_to_anchor=(0.68, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
