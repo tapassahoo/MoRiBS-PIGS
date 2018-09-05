@@ -29,6 +29,8 @@ Makefile
 /examples/*/
 !/examples/scripts
 /examples/scripts/*.pyc
+/examples/scripts/*new*
+/examples/scripts/*old*
 /examples/scripts/script_submission_analysis_MoRiBS-*.py
 /examples/scripts/code-*.py
 /examples/scripts/._*
