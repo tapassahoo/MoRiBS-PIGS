@@ -39,15 +39,6 @@ molecule            = "HF"
 molecule_rot        = "HF"
 #
 Rpt                 = 10.05
-dipolemoment        = 1.826      #J. Chem. Phys. 73(5), 2319 (1980).
-dipolemoment        = 1.0*dipolemoment
-
-ENT_TYPE 			= "SWAPTOUNSWAP"
-#ENT_TYPE 			= "SWAP"
-#ENT_TYPE 			= "BROKENPATH"
-#ENT_TYPE 			= "REGULARPATH"
-
-extra_file_name     = ""
 
 user_name           = "tapas"
 final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"
@@ -71,6 +62,7 @@ if (TypeCal == "ENT" and TypePlot == "GFACTOR"):
 	postskip            = 0
 
 	extra_file_name     = ""
+	ENT_TYPE 			= "SWAPTOUNSWAP"
 	FigureGenerator.FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, beadsRef)
 
 '''
@@ -95,18 +87,27 @@ if (TypeCal == "ENT" and TypePlot == "COMBINE"):
 	postskip            = 0
 	FigureGenerator.FigureENTCOMBINE(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA,TypePlot, beadsRef)
 
-
 if (TypePlot == "CorrFunc"):
 	beadsRef = 101
 	RefPoint = [3]
 	FigureGenerator.FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, beadsRef, RefPoint)
-
+'''
 
 if (TypePlot == "Energy"):
-	FigureGenerator.FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, TypePlot, beadsRef)
+	numbmolecules       = 16
+	numbblocks	        = 10000
+	numbpass            = 50
+	preskip             = 0
+	postskip            = 0
+	extra_file_name     = ""
+	dipolemoment        = 1.8212      
+	gfact               = -1.0
+
+	FigureGenerator.FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, "", preskip, postskip, extra_file_name, final_results_path, 1, TypePlot, 11)
 
 #End plotting ---energy
 
+'''
 if (TypePlot == "ChemPot"):
 	beadsRef = 61
 	FigureGenerator.FigureChemicalPotentialPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, beadsRef)
