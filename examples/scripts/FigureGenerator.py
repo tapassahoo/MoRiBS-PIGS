@@ -612,8 +612,8 @@ def FigureCorrelation(TypeCal, molecule_rot, TransMove, RotMove, variableName, R
 			call(["open", FilePlot])
 			#plt.show()
 
-def	FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
-	FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
+def	FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
+	FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, src_dir, particleA, beadsRef)
 
 	FilePlotEnergy      = FilePlotName.SaveEnergy+".eps"
 	outfileEnergy       = FilePlotEnergy
@@ -624,56 +624,52 @@ def	FigureEnergyPIGS(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rp
 	FileToBePlotDIAG    = FilePlotName.SaveEnergyDIAG+".txt"
 	print(FileToBePlotEnergy)
 	print(FileToBePlotDIAG)
-	if (numbmolecules <= 2):
-		FileToBePlotMM = FilePlotName.SaveEnergyMM+".txt"
-		beads2, energy2                	       = genfromtxt(FileToBePlotMM,unpack=True, usecols=[0,1], skip_header=0, skip_footer=0)
+
+	if (os.path.exists(FileToBePlotDIAG)):
+		FileToBePlotMM  = FilePlotName.SaveEnergyMM+".txt"
+		beads2, energy2 = genfromtxt(FileToBePlotMM,unpack=True, usecols=[0,1], skip_header=0, skip_footer=0)
 		print(energy2)
-			
-	if (numbmolecules <= 4):
-		energy3                                = loadtxt(FileToBePlotDIAG,unpack=True, usecols=[1])
-	BConstant        = support.GetBconst(molecule_rot)  # in wavenumber
-	Units          	 = support.GetUnitConverter()
-	BConstantK       = BConstant*Units.CMRECIP2KL
-	energy2 = energy2*BConstantK
-	energy3 = energy3*BConstantK
+		energy3         = loadtxt(FileToBePlotDIAG,unpack=True, usecols=[1])
+		BConstant       = support.GetBconst(molecule_rot)  # in wavenumber
+		Units           = support.GetUnitConverter()
+		BConstantK      = BConstant*Units.CMRECIP2KL
+		energy2         = energy2*BConstantK
+		energy3         = energy3*BConstantK
 					
-	if (variableName == "tau"):
-		var2 = parameter/(beads2-1.0)
+		if (variableName == "tau"):
+			var2 = parameter/(beads2-1.0)
 	
-	if (variableName == "beta"):
-		var2 = parameter*(beads2-1.0)
-	
-	fig        = plt.figure(figsize=(8, 4))
+		if (variableName == "beta"):
+			var2 = parameter*(beads2-1.0)
+		plotExtra= True
+	else:
+		plotExtra= False
+		var2     = 0.0
+		energy2  = 0.0
+		energy3  = 0.0
+		
+	fig          = plt.figure(figsize=(8, 4))
 	plt.grid(True)
-	font       = 20
-	fontlegend = font/2.0
+	font         = 28
+	fontlegend   = font/2.0
 
 	valTau, valRotEnergy, valPotEnergy, valTotalEnergy, errorRotEnergy, errorPotEnergy, errorTotalEnergy = genfromtxt(FileToBePlotEnergy, unpack=True, usecols=[1, 3, 4, 5, 7, 8, 9])
 
-	'''
-	plt.subplot(3, 1, 1)
-	YLabel = "Rotational"
-	PlotEnergyPIGS(font, valTau,valRotEnergy,errorRotEnergy,variableName,YLabel)
-	ymin, ymax = plt.ylim()
-	xmin, xmax = plt.xlim()
-	#PlotLabel(Text1,Text2,font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
-	'''
-
 	plt.subplot(1, 2, 1)
 	YLabel = "Total"
-	PlotEnergyPIGS(font, valTau,valTotalEnergy,errorTotalEnergy,variableName,YLabel,var2,energy2,energy3)
+	PlotEnergyPIGS(plotExtra, font, valTau,valTotalEnergy,errorTotalEnergy,variableName,YLabel,var2,energy2,energy3)
 	plt.legend(bbox_to_anchor=(0.33, 0.55), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
 
 	plt.subplot(1, 2, 2)
 	YLabel = "Potential"
-	PlotEnergyPIGS(font, valTau,valPotEnergy,errorPotEnergy,variableName,YLabel,var2,energy2,energy3)
+	PlotEnergyPIGS(plotExtra, font, valTau,valPotEnergy,errorPotEnergy,variableName,YLabel,var2,energy2,energy3)
 	plt.legend(bbox_to_anchor=(0.33, 0.55), loc=2, borderaxespad=0., shadow=True, fontsize = fontlegend)
 
 	plt.subplots_adjust(top=0.95, bottom=0.20, left=0.15, right=0.95, hspace=0.0, wspace=0.4)
 	plt.savefig(outfileEnergy, dpi = 200, format = 'eps')
 
-	call(["open", outfileEnergy])
-	#plt.show()
+	#call(["open", outfileEnergy])
+	plt.show()
 
 def PlotLabel(Text1, Text2, font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment):
 	midpointy = 0.5*(ymax-ymin)
@@ -707,48 +703,55 @@ def PlotLabel(Text1, Text2, font,xmin,xmax,ymin,ymax,variableName,parameter,numb
 	'''
 	
 
-def PlotEnergyPIGS(font,val1,val2,val3,variableName,YLabel,var2,energy2,energy3):
-	#plt.grid(True)
+def PlotEnergyPIGS(plotExtra, font,val1,val2,val3,variableName,YLabel,var2,energy2,energy3):
 	if (variableName == "tau"):
 		plt.xlabel(r'$\tau \ \  (\mathrm{K^{-1}})$', fontsize = font)
 	if (variableName == "beta"):
 		plt.xlabel(r'$\beta \ \  (\mathrm{K^{-1}})$', fontsize = font)
 		
 	if (YLabel == "Total"):
-		plt.ylabel(r'$\mathrm{E_{0}}$ (K)', fontsize = font)
+		plt.ylabel(r'$E_{0}$ (K)', fontsize = font)
 		if (variableName == "tau"):
 			plotfitting(val1, val2, val3)
 			plt.errorbar(val1, val2, yerr = val3, color = 'blue', ls = '-', label = 'PIGS', linewidth=2)
-			plt.axhline(y=energy3, color='black', lw = 3.0, linestyle='--', label = 'Diagonalization')
-			plt.plot(var2, energy2, color = 'green', ls = '--', label = 'Matrix Multiplication', marker = "o", linewidth=2)
+			if (plotExtra):	
+				plt.axhline(y=energy3, color='black', lw = 3.0, linestyle='--', label = 'ED')
+				plt.plot(var2, energy2, color = 'green', ls = '--', label = 'MM', marker = "o", linewidth=2)
 		if (variableName == "beta"):
 			plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=1)
-			plt.xlim(0,0.201)
-			plt.plot(var2, energy2, color = 'green', ls = '--', label = 'Matrix Multiplication', marker = "o", linewidth=2)
+			if (plotExtra):	
+				plt.plot(var2, energy2, color = 'green', ls = '--', label = 'MM', marker = "o", linewidth=2)
 	if (YLabel == "Potential"):
-		plt.ylabel(r'$\mathrm{V_{0}}$ (K)', fontsize = font)
-		plt.xlim(0,0.201)
+		plt.ylabel(r'$V_{0}$ (K)', fontsize = font)
 		plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=2)
 
 	if (YLabel == "Rotational"):
-		plt.ylabel(r'$\mathrm{K_{0}^{Rot}}$ (K)', fontsize = font)
-		plt.xlim(0,0.201)
+		plt.ylabel(r'$K_{0}^{Rot}$ (K)', fontsize = font)
 		plt.errorbar(val1, val2, yerr = val3, color = 'b', ls = '-', label = 'PIGS', linewidth=1)
 
-	plt.legend(loc='upper right', shadow=True, fontsize = font)
-	if (variableName == "tau"):
-		plt.xlim(0.000,0.00505)
-		x = [0.000, 0.0005, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004, 0.0045, 0.005]
-		labels = ['0.000', '', '0.001', '', '0.002', ' ', '0.003', '', '0.004', ' ', '0.005']
-		plt.xticks(x, labels, rotation='horizontal')
+	ymin, ymax = plt.ylim()
+	midpointy = 0.5*(ymax-ymin)
+	deltay = midpointy*0.15
+	xmin, xmax = plt.xlim()
+	midpointx = 0.5*(xmax-xmin)
+	deltax = midpointx*0.15
+	textpositionx = xmin+midpointx-0.25*midpointx
+	textpositiony = ymin+midpointy
+	plt.xticks(fontsize=font, rotation=0)
+	plt.yticks(fontsize=font, rotation=0)
 
+	#plt.xticks(np.arange(0, 1.001, step=0.2))
+	#plt.yticks(np.arange(0, 0.40, step=0.1))
+		
+	plt.subplots_adjust(top=0.97, bottom=0.14, left=0.16, right=0.98, hspace=0.0, wspace=0.0)
+	plt.legend(bbox_to_anchor=(0.28, 0.75), loc=2, borderaxespad=1., shadow=True, fontsize = font/2)
 
 def fitFunc(var, a, b):
 	return a + b*var*var
 
 def plotfitting(val1, val2, val3):
 	markersize_fig = 10
-	xdata = np.linspace(0, 0.006, 10000)
+	xdata = np.linspace(0, np.max(val1), 10000)
 	fitParams, fitCovariances = curve_fit(fitFunc, val1, val2, sigma = val3)
 	plt.plot(xdata, fitFunc(xdata, fitParams[0], fitParams[1]), linestyle = '-', color = 'r', label = 'Fit', lw = 2)
 
@@ -1081,7 +1084,7 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 	font          = 28
 	fontlegend    = font/2.0
 	fig           = plt.figure(figsize=(8, 6))
-	plt.grid(True)
+	#plt.grid(True)
 	colorList  = ['red', 'green', 'blue', 'magenta']
 	lsList     = ['-', '--', '-.', '-']
 	markerList = ['o', '^', 'v','s']
@@ -1091,11 +1094,12 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 	var             = beadsRef
 	FilePlotName    = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, var)
 	FilePlotEntropy = FilePlotName.SaveEntropyGFAC+".eps"
+	print(FilePlotEntropy)
 	outfileEntropy  = FilePlotEntropy
 	call(["rm", FilePlotEntropy])
 #
 	iLabel = 0
-	nn = [16]
+	nn = [16, 32]
 	for numbmolecules in nn:
 		
 		if (numbmolecules == 2):
@@ -1111,13 +1115,20 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 			preskip      = 0
 			postskip     = 0
 			gFactorList  = [0.5+0.25*i for i in range(15)] 
-		if (numbmolecules >= 16):
-			beadsRef     = 21
+		if (numbmolecules == 16):
+			beadsRef     = 11
 			numbblocks   = 2000
 			numbpass     = 100
 			preskip      = 0
 			postskip     = 0
 			gFactorList  = [0.4+0.1*i for i in range(7)]  
+		if (numbmolecules == 32):
+			beadsRef     = 11
+			numbblocks   = 2000
+			numbpass     = 100
+			preskip      = 0
+			postskip     = 0
+			gFactorList  = [0.4+0.1*i for i in range(6)]  
 
 		gFactorPlot      = gFactorList
 		entropy1Plot     = np.zeros(len(gFactorList))
