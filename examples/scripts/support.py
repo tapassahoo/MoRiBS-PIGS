@@ -581,7 +581,8 @@ def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, vari
 
 	FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, partition)
 	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%5d','%10.6f', '%10.6f', '%10.6f', '%10.6f', '%10.6f'])
-	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%5d','%10.6f', '%10.6f', '%10.6f', '%10.6f','%10.6f'])
+	SavedFile = FileAnalysis.SaveEntropyRT
+	FileCheck(TypeCal,list_nb,variableName,SavedFile)
 	call(["cat", FileAnalysis.SaveEntropyRT])
 	print("Successful execution!")
 
@@ -1038,7 +1039,7 @@ def GetAvgRotEnergy(molecule,beta):
 			Nsum += (2*jrot+1.0)*GetRotEnergy(molecule,jrot)*BoltzmannProb
 		else:
 			break
-	AvgEnergy = Nsum/Zsum
+	AvgEnergy = Nsum*CMRECIP2KL/Zsum
 	return AvgEnergy
 
 def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal):
@@ -1182,14 +1183,12 @@ class GetFileNameAnalysis:
 			if os.path.exists(self.SaveZCorr):     os.remove(self.SaveZCorr)
 			if os.path.exists(self.SaveXYCorr):    os.remove(self.SaveXYCorr)
 
-		'''
-		if (self.TypeCal == "ENT"):
+		if (self.TypeCal != "ENT"):
 			print(self.src_dir)
 			print("")
 			print("Final results - Energy vs "+str(self.variableName))
 			print(file_output1+mainFileName+".txt")
 			print("#------------------------------------------------------------------------#")
-		'''
 
 		if (self.TypeCal == "ENT"):
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
@@ -1431,26 +1430,20 @@ def GetPairDensity(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 		system(commandRun)
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
 
-def GetRotEnergy(molecule,jrot):
-	Energy = GetBconst(molecule)*jrot*(jrot+1.0)
-	return Energy
-
-def GetAvgRotEnergy(molecule,beta):
-	CMRECIP2KL = 1.4387672
-	Zsum = 0.0
-	Nsum = 0.0
-	for jrot in range(0,10000,1):
-		BoltzmannProb = exp(-beta*GetRotEnergy(molecule,jrot)*CMRECIP2KL)
-		if (BoltzmannProb > 10e-16):
-			Zsum += (2*jrot+1.0)*BoltzmannProb
-			Nsum += (2*jrot+1.0)*GetRotEnergy(molecule,jrot)*BoltzmannProb
-		else:
-			break
-	AvgEnergy = Nsum*CMRECIP2KL/Zsum
-	return AvgEnergy
-
 '''
 def GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable):
 	#FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
 	GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable)
 '''
+
+def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
+	'''
+	It calculates the pre factor in inverse temperature of dipole - dipole interaction potential
+	'''
+	Units          = GetUnitConverter()
+	DipoleMomentAU = DipoleMoment/Units.AuToDebye
+	RCOMAU         = RCOM/Units.BOHRRADIUS
+	preFact        = (DipoleMomentAU*DipoleMomentAU)/(RCOMAU*RCOMAU*RCOMAU)
+	preFact        = preFact*Units.HARTREE2KL
+	printingmessage= " DipoleMoment = "+str(DipoleMoment)+" Debye and the prefactor of the dipole-dipole interaction potential = " + str(preFact)+ " K^-1"
+	print(printingmessage)

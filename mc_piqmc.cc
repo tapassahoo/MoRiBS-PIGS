@@ -4105,80 +4105,84 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 
         spot = 0.0;
         for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
+		{
 #ifndef EWALDSUM
-        if (atom1 != atom0)                    
+        	if (atom1 != atom0)                    
+        	{
 #endif
-        {
-            int offset1 = atom1*NumbRotTimes;
-            int t1  = offset1 + it;
+				int offset1 = atom1*NumbRotTimes;
+				int t1  = offset1 + it;
 
-	        string stype = MCAtom[type0].type;
-			if (stype == H2)
-	        {
-                double s1 = 0.0;
-                double s2 = 0.0;
-                double dr2 = 0.0;
-				double dr[NDIM];
+				string stype = MCAtom[type0].type;
+				if (stype == H2)
+				{
+					double s1 = 0.0;
+					double s2 = 0.0;
+					double dr2 = 0.0;
+					double dr[NDIM];
 
-                for (int id=0;id<NDIM;id++)
-                {
-                    dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
-                    dr2    += (dr[id]*dr[id]);
-                    double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*cosine[id][t0];
-                    double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][t1];
-                    s1 += cst1;
-                    s2 += cst2;
-                }
-                double r = sqrt(dr2);
-                double th1 = acos(s1/r);
-                double th2 = acos(s2/r);
+					for (int id=0;id<NDIM;id++)
+					{
+						dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+						dr2    += (dr[id]*dr[id]);
+						double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*cosine[id][t0];
+						double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][t1];
+						s1 += cst1;
+						s2 += cst2;
+					}
+					double r = sqrt(dr2);
+					double th1 = acos(s1/r);
+					double th2 = acos(s2/r);
 
-                double b1[NDIM];
-                double b2[NDIM];
-                double b3[NDIM];
-                for (int id=0;id<NDIM;id++)
-                {
-                    b1[id] = cosine[id][t0];
-                    b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
-                    b3[id] = MCCosine[id][t1];
-                }
-                VectorNormalisation(b1);
-                VectorNormalisation(b2);
-                VectorNormalisation(b3);
+					double b1[NDIM];
+					double b2[NDIM];
+					double b3[NDIM];
+					for (int id=0;id<NDIM;id++)
+					{
+						b1[id] = cosine[id][t0];
+						b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
+						b3[id] = MCCosine[id][t1];
+					}
+					VectorNormalisation(b1);
+					VectorNormalisation(b2);
+					VectorNormalisation(b3);
 
-                //Calculation of dihedral angle 
-                double n1[NDIM];
-                double n2[NDIM];
-                double mm[NDIM];
+					//Calculation of dihedral angle 
+					double n1[NDIM];
+					double n2[NDIM];
+					double mm[NDIM];
 
-                CrossProduct(b2, b1, n1);
-                CrossProduct(b2, b3, n2);
-                CrossProduct(b2, n2, mm);
+					CrossProduct(b2, b1, n1);
+					CrossProduct(b2, b3, n2);
+					CrossProduct(b2, n2, mm);
 
-                double xx = DotProduct(n1, n2);
-                double yy = DotProduct(n1, mm);
+					double xx = DotProduct(n1, n2);
+					double yy = DotProduct(n1, mm);
 
-                double phi = atan2(yy, xx);
-                if (phi<0.0) phi += 2.0*M_PI;
+					double phi = atan2(yy, xx);
+					if (phi<0.0) phi += 2.0*M_PI;
 
-                //Dihedral angle calculation is completed here
-                double r1 = 0.74;// bond length in Angstrom
-				r1 /= BOHRRADIUS;
-                double r2 = r1;// bond length in bohr
-                double rd = r/BOHRRADIUS;
-                double potl;
-                vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-                spot += potl*CMRECIP2KL;
-			}  //stype
+					//Dihedral angle calculation is completed here
+					double r1 = 0.74;// bond length in Angstrom
+					r1 /= BOHRRADIUS;
+					double r2 = r1;// bond length in bohr
+					double rd = r/BOHRRADIUS;
+					double potl;
+					vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
+					spot += potl*CMRECIP2KL;
+				}  //stype
 
-		    if (stype == HF )
-            {
-				double Eulang1[NDIM];
-				Eulang1[PHI] = MCAngles[PHI][t1];
-        		Eulang1[CTH] = acos(MCAngles[CTH][t1]);
-        		Eulang1[CHI] = 0.0;
-        		spot += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
-            }  //stype
+				if (stype == HF )
+				{
+					double Eulang1[NDIM];
+					Eulang1[PHI] = MCAngles[PHI][t1];
+					Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+					Eulang1[CHI] = 0.0;
+					spot += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+				}  //stype
+#ifndef EWALDSUM
+			}
+#endif
         } //loop over atom1 (molecules)
     }
 
@@ -4204,7 +4208,7 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
     return spotReturn;
 }
 
-void MCRotationsMoveCL(int type) // update all time slices for rotational degrees of freedom by Cluster update algorithm
+void MCRotationsMoveCL(int type) 
 {
 #ifdef DEBUG_PIMC
 	const char *_proc_=__func__;    //  MCRotationsMoveCL() 
@@ -4294,21 +4298,21 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	double vectorAtom0[NDIM];
 	for (int id=0;id<NDIM;id++) vectorAtom0[id]   = MCCosine[id][t0];
 	for (int id=0;id<NDIM;id++) newcoords[id][t0] = MCCosine[id][t0] - 2.0*DotProduct(vectorAtom0, randomVector)*randomVector[id];
-/*
+#ifdef TESTWRITE
 	cout<<"     "<<endl;
 	cout<<"     "<<endl;
-*/
+#endif
 
 	do 
 	{
-/*
+#ifdef TESTWRITE
 		cout<<"buffer [";
 		for (int i = 0; i < buffer.size(); i++) cout<<buffer[i]<<",";
 		cout<<"]"<<endl;
 		cout<<"cluster [";
 		for (int i = 0; i < cluster.size(); i++) cout<<cluster[i]<<",";
 		cout<<"]"<<endl;
-*/
+#endif
 
 		atom0 = buffer[0];
 		buffer.erase(buffer.begin());
@@ -4341,14 +4345,14 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 		}
 	} while (!buffer.empty());
 	
-/*
+#ifdef TESTWRITE
 	cout<<"buffer [";
 	for (int i = 0; i < buffer.size(); i++) cout<<buffer[i]<<",";
 	cout<<"]"<<endl;
 	cout<<"cluster [";
 	for (int i = 0; i < cluster.size(); i++) cout<<cluster[i]<<",";
 	cout<<"]"<<endl;
-*/
+#endif
 
 	int arrayRotors[MCAtom[type].numb];
 	for (int iAtom0 = 0; iAtom0 < MCAtom[type].numb; iAtom0++) arrayRotors[iAtom0] = iAtom0;
@@ -4362,12 +4366,12 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	vector<int> antiCluster;
 	for (list<int>::iterator atom_antiCluster=arrayList.begin(); atom_antiCluster!=arrayList.end(); ++atom_antiCluster) antiCluster.push_back(*atom_antiCluster);
 
-/*
+#ifdef TESTWRITE
 	cout<<"arrayRotors [";
 	for (int i = 0; i < antiCluster.size(); i++) cout<<antiCluster[i]<<",";
 	cout<<"]"<<endl;
 	exit(0);
-*/
+#endif
 
 // Computation of Acceptance probability
 	int itm = (it - 1);

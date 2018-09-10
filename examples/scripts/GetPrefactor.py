@@ -11,7 +11,8 @@ import support
 import sys
 import argparse
 
-dipolemoment=1.8548
-Rpt=6.0
+dipolemoment=1.86
+Rpt=10.05
 molecule="HF"
 support.GetrAndgFactor(molecule, Rpt, dipolemoment)
+support.GetPreFactDDPot(molecule, Rpt, dipolemoment)
