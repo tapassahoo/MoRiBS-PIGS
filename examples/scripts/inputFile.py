@@ -20,15 +20,16 @@ def Getbeads(TypeCal, variableName):
 			list_nb = [2,4,10,14,20,24,30,34,40]
 	if (variableName == "tau"):
 		#list_nb  = [i for i in range(loopStart, loopEnd, skip)]
-		list_nb  = [10, 20, 40, 60]
+		list_nb  = [10]
 
-	print(" ")
-	print("====================================== ")
-	print(" List of quantum beads ")
-	print(list_nb)
-	print(" ")
-	print("====================================== ")
-	print(" ")
+	if (TypeCal != "ENT"):
+		print(" ")
+		print("====================================== ")
+		print(" List of quantum beads ")
+		print(list_nb)
+		print(" ")
+		print("====================================== ")
+		print(" ")
 	return list_nb
 
 class GetStepAndLevel:

@@ -23,14 +23,14 @@ TransMove           = False
 RotMove             = True
 #
 #TypeCal             = 'PIMC'
-#TypeCal             = 'PIGS'
-TypeCal             = 'ENT'
+TypeCal             = 'PIGS'
+#TypeCal             = 'ENT'
 #
-#TypePlot            = "Energy"
+TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
 #TypePlot            = "CorrFunc"
 #TypePlot            = "S2"
-TypePlot            = "GFACTOR"
+#TypePlot            = "GFACTOR"
 #TypePlot            = "COMBINE"
 #
 #molecule            = "HFC60"                                                  
@@ -55,9 +55,9 @@ if (variableName == "beta"):
 
 #==================================Plotting====================================#
 if (TypeCal == "ENT" and TypePlot == "GFACTOR"):
-	beadsRef            = 41
-	numbblocks	        = 5000
-	numbpass            = 400
+	beadsRef            = 61
+	numbblocks	        = 2000
+	numbpass            = 100
 	preskip             = 0
 	postskip            = 0
 

@@ -1099,7 +1099,7 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 	call(["rm", FilePlotEntropy])
 #
 	iLabel = 0
-	nn = [16, 32]
+	nn = [16]
 	for numbmolecules in nn:
 		
 		if (numbmolecules == 2):
@@ -1116,14 +1116,15 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 			postskip     = 0
 			gFactorList  = [0.5+0.25*i for i in range(15)] 
 		if (numbmolecules == 16):
-			beadsRef     = 11
+			beadsRef     = 61
 			numbblocks   = 2000
 			numbpass     = 100
 			preskip      = 0
 			postskip     = 0
 			gFactorList  = [0.4+0.1*i for i in range(7)]  
+			gFactorList += [1.1, 1.2, 1.3, 1.4, 1.5]  
 		if (numbmolecules == 32):
-			beadsRef     = 11
+			beadsRef     = 21
 			numbblocks   = 2000
 			numbpass     = 100
 			preskip      = 0
@@ -1138,6 +1139,8 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 
 		iii = 0
 		for gFact in gFactorList:
+			gFact = '{:03.1f}'.format(gFact)
+			gFact = float(gFact)
 			FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gFact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
 			FileToBePlotEntropy = FilePlotName.SaveEntropyRT+".txt"
 			#FileToBePlotDIAG    = FilePlotName.SaveEntropyDIAG+".txt"
@@ -1168,7 +1171,6 @@ def	FigureEntropyRT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt
 		print("S2:  PIGS "+str(numbmolecules))
 		print(entropy1Plot)
 #
-		#plt.errorbar(gFactorPlot, entropy1Plot, yerr=err_entropy1Plot, color = 'black', ls = '-', linewidth=1, marker = "v", markersize = 3, label = 'N=2')
 		labelString = "N = "+str(numbmolecules)
 		plt.errorbar(gFactorPlot, entropy1Plot, yerr=err_entropy1Plot, color = colorList[iLabel], ls = lsList[iLabel], linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelString)
 		iLabel += 1
