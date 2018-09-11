@@ -23,14 +23,14 @@ TransMove           = False
 RotMove             = True
 #
 #TypeCal             = 'PIMC'
-TypeCal             = 'PIGS'
-#TypeCal             = 'ENT'
+#TypeCal             = 'PIGS'
+TypeCal             = 'ENT'
 #
-TypePlot            = "Energy"
+#TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
 #TypePlot            = "CorrFunc"
 #TypePlot            = "S2"
-#TypePlot            = "GFACTOR"
+TypePlot            = "GFACTOR"
 #TypePlot            = "COMBINE"
 #
 #molecule            = "HFC60"                                                  

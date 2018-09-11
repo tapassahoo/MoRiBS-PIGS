@@ -1006,7 +1006,7 @@ time ./pimc
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-#SBATCH --account=rrg-pnroy
+##SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
