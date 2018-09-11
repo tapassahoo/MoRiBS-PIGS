@@ -620,14 +620,14 @@ ParamsPotential();
                     	if(PrintXYZprl)
                     	{
 #ifdef IOWRITE
-                    		stringstream bc;                // convert block # to string
-                    		bc.width(IO_BLOCKNUMB_WIDTH);
-                    		bc.fill('0');
-                    		bc<<blockCount;
-                    		string fname = MCFileName + bc.str();  // file name prefix including block #
-                    		IOxyzAng(IOWrite,fname.c_str());
+							stringstream bc;                // convert block # to string
+							bc.width(IO_BLOCKNUMB_WIDTH);
+							bc.fill('0');
+							bc<<blockCount;
+							string fname = MCFileName + bc.str();  // file name prefix including block #
+							IOxyzAng(IOWrite,fname.c_str());
+							PrintXYZprl = 0;
 #endif
-                    		PrintXYZprl = 0;
                     	}
                  	}
               	}
@@ -696,9 +696,20 @@ ParamsPotential();
 		//  CHECKPOINT: save status, rnd streams and configs ------
 	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
 
+		if (blockCount % 10 == 0)
+		{
+			stringstream bc;                // convert block # to string
+			bc.width(IO_BLOCKNUMB_WIDTH);
+			bc.fill('0');
+			bc<<blockCount;
+			string fname = MCFileName + bc.str();  // file name prefix including block #
+			IOxyzAng(IOWrite,fname.c_str());
+			PrintXYZprl = 0;
+		}
+
 		MCStartBlock = blockCount; 
 
-		if (blockCount % 1000 == 0)
+		if (blockCount % 10 == 0)
 		{
 			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
