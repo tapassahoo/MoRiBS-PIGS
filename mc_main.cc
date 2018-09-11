@@ -696,7 +696,7 @@ ParamsPotential();
 		//  CHECKPOINT: save status, rnd streams and configs ------
 	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
 
-		if (blockCount % 10 == 0)
+		if (blockCount % 200 == 0)
 		{
 			stringstream bc;                // convert block # to string
 			bc.width(IO_BLOCKNUMB_WIDTH);
@@ -709,7 +709,7 @@ ParamsPotential();
 
 		MCStartBlock = blockCount; 
 
-		if (blockCount % 10 == 0)
+		if (blockCount % 200 == 0)
 		{
 			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
