@@ -4050,47 +4050,47 @@ void SaveDensities3D(const char fname [], double acount, int mode)
 // added by Toby Zeng
 void IOxyzAng(int tstatus, const char file_name[])
 {
-   const char *_proc_=__func__;    // "IOxyz"; 
+	const char *_proc_=__func__;    // "IOxyz"; 
 
-   string fdens;
+	string fdens;
 
 //---------------- Open  ------------
 
-   ios::openmode mode;
+	ios::openmode mode;
 
-   switch (tstatus)
-   {
-      case IOWrite: mode = ios::out;  break;
-      case IORead : mode = ios::in;   break;
-      default     :
-      nrerror (_proc_,IO_ERR_WMODE);  break;
-   }
+	switch (tstatus)
+	{
+		case IOWrite: mode = ios::out;  break;
+		case IORead : mode = ios::in;   break;
+		default     :
+		nrerror (_proc_,IO_ERR_WMODE);  break;
+	}
 
-   fdens = file_name;
+	fdens = file_name;
 
-   if(IOWrite)
-   fdens += IO_EXT_XYZ;
+	if(IOWrite)
+	fdens += IO_EXT_XYZ;
 
-   fstream fid(fdens.c_str(),mode);
+	fstream fid(fdens.c_str(),mode);
 
-   if (!fid.good())
-   _io_error(_proc_,IO_ERR_FOPEN,file_name);
+	if (!fid.good())
+	_io_error(_proc_,IO_ERR_FOPEN,file_name);
 
-   io_setout(fid);
+	io_setout(fid);
 
 //---------------- Read/Write ------------
 
 // stringstream stype;
-   string       sbuff,stype;
+	string       sbuff,stype;
 
-   int offset;
+	int offset;
 
-   int type = 0;
-   int atom = 0;  // first atom # will be 1, NOT 0 
-   switch (tstatus)
-   {
-      case IOWrite:
-         fid<<MaxnTimes<<" ";                    // total number of "atoms" 
+	int type = 0;
+	int atom = 0;  // first atom # will be 1, NOT 0 
+	switch (tstatus)
+	{
+		case IOWrite:
+		fid<<MaxnTimes<<" ";                    // total number of "atoms" 
 //       permutation table
          if(BOSONS)
          {
@@ -4138,7 +4138,7 @@ void IOxyzAng(int tstatus, const char file_name[])
             for (int id=0;id<NDIM;id++)
             {
              fid>>MCCoords[id][offset+it];
-             fid>>MCCosine[id][offset+it];
+             fid>>MCAngles[id][offset+it];
 //           Toby replaces the above line by
 //           fid>>MCAngles[id][offset+it];
 //           by doing that, Toby reads the three Euler angles, not the unit vector of the two angle orientation
