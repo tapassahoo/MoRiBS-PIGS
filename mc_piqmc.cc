@@ -4483,8 +4483,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 #endif
 	rd *= exp(- MCRotTau*pot_diff);
 	bool Accepted = false;
-	if (rd>1.0)        Accepted = true;
-	else if (rd>rand4) Accepted = true;
+	if (rd>rand4) Accepted = true;
 
 	MCRotChunkTot += 1.0;
 	if (Accepted)

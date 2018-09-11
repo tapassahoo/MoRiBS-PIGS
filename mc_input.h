@@ -1,6 +1,7 @@
 #ifndef _MC_INPUT_H
 #define _MC_INOUT_H 1
 #include <stdlib.h>
+#include <string>
 
 const char FINPUT[]="qmc.input";   // input params file
 
@@ -19,6 +20,7 @@ extern double _kin_total;
 extern double _pot_total;
 extern double _rot_total;
 extern double _rot_total1;
+extern std::string Distribution;
 
 void IOReadParams (const char [],int &);  
 void StatusIO(int, const char []);       // save/restore status of simulation

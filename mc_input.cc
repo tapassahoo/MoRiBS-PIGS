@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <string>
 
 #include "mc_confg.h"
 #include "mc_setup.h"
@@ -22,6 +23,7 @@ double _pot_total;
 double _rot_total;
 double _rot_total1;
 double _kin_total;
+std::string Distribution;
 // FILE NAMES
 
 const char IO_MASTERDIR[]      = "MASTERDIR";               
@@ -555,15 +557,19 @@ void StatusIO(int tstatus, const char file_name[])
    switch (tstatus)
    {
       case IOWrite: 
-         fid<<STATUS_STARTBLOCK<<" "<<MCStartBlock<<endl;
-         fid<<totalStep<<endl;
-         fid<<sumsCount<<endl;
-         fid<<totalCount<<endl;
-         fid<<_total<<endl;
-         fid<<_kin_total<<endl;
-         fid<<_pot_total<<endl;
-         fid<<_rot_total<<endl;
-         fid<<_rot_total1<<endl;
+        fid<<STATUS_STARTBLOCK<<" "<<MCStartBlock<<endl;
+        fid<<totalStep<<endl;
+        fid<<sumsCount<<endl;
+        fid<<totalCount<<endl;
+#ifdef PIGSENTTYPE
+        fid<<Distribution<<endl;
+#else
+        fid<<_total<<endl;
+        fid<<_kin_total<<endl;
+        fid<<_pot_total<<endl;
+        fid<<_rot_total<<endl;
+        fid<<_rot_total1<<endl;
+#endif
          break;
       case IORead: 
          while (fid>>status)
@@ -573,11 +579,15 @@ void StatusIO(int tstatus, const char file_name[])
             fid>>totalStep;
             fid>>sumsCount;
             fid>>totalCount;
+#ifdef PIGSENTTYPE
+        	fid>>Distribution;
+#else
             fid>>_total;
             fid>>_kin_total;
             fid>>_pot_total;
             fid>>_rot_total;
             fid>>_rot_total1;
+#endif
  
             getline(fid,status,'\n');  // skip comments 
          }

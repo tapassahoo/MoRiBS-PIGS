@@ -36,9 +36,6 @@ double avergCount;   // # of calls of get_estim inside a block
 double avergCountENT;   // # of calls of get_estim inside a block
 double totalCountENT;
 #endif
-//double totalCount;   // sum avergCount   
-//double sumsCount;
-//long int totalStep;
 
 void PIMCPass(int,int);
 
@@ -67,9 +64,6 @@ double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
 
 double _dpot_total;  // potential energy differences, global average  added by Hui Li
-//double _pot_total;  // kinetic   energy, global average
-//double _kin_total;  // potential energy, global average 
-//double _total;  // potential energy, global average 
 double _bcostheta;
 double _costheta_total;
 #
@@ -102,15 +96,10 @@ vector<double> _cdipoleXY_total;
 //
 double _bnm;
 double _bdm;
-double _nm_total;
-double _dm_total;
 double _trOfDensitySq;
-double _trOfDensitySq_total;
 
 double _brot;       // rotational kin energy, block average
 double _brot1;       // rotational kin energy, block average
-//double _rot_total;  // rotational kin energy, global average
-//double _rot_total1;  // rotational kin energy, global average
 double _brotsq;     // rotational energy square, block average
 double _rotsq_total; // rotational energy square, global average
 double _Cv_total;    // heat capacity, global average
@@ -138,12 +127,9 @@ void SaveInstantEnergy ();                 // accumulated average
 
 #ifdef DDCORR
 void SaveDipoleCorr(const char [],double,long int);
-void SaveSumDipoleCorr(double,double);              // accumulated average
 #endif
 void SaveAngularDOF(const char [],double,long int);
-void SaveSumAngularDOF(double,double);              // accumulated average
 void SaveTrReducedDens(const char [], double , long int );
-void SaveSumTrReducedDens(double , double);
 
 void InitTotalAverage(void);
 void DoneTotalAverage(void);
@@ -159,7 +145,6 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 //----------- subroutine that performs some initialization work for vh2h2.f-----
 
 extern "C" void vinit_();
-string Distribution = "unSwap";
 double MCAccepSwap;
 double MCAccepUnSwap;
 int iSwap;
@@ -175,6 +160,7 @@ int iChoose;
 
 int main(int argc, char *argv[])
 {
+Distribution = "unSwap";
 #ifdef PAIRDENSITY
 	readPairDensity();
 	cout<<"TAPAS"<<endl;
@@ -634,14 +620,14 @@ ParamsPotential();
                     	if(PrintXYZprl)
                     	{
 #ifdef IOWRITE
-                    		stringstream bc;                // convert block # to string
-                    		bc.width(IO_BLOCKNUMB_WIDTH);
-                    		bc.fill('0');
-                    		bc<<blockCount;
-                    		string fname = MCFileName + bc.str();  // file name prefix including block #
-                    		IOxyzAng(IOWrite,fname.c_str());
+							stringstream bc;                // convert block # to string
+							bc.width(IO_BLOCKNUMB_WIDTH);
+							bc.fill('0');
+							bc<<blockCount;
+							string fname = MCFileName + bc.str();  // file name prefix including block #
+							IOxyzAng(IOWrite,fname.c_str());
+							PrintXYZprl = 0;
 #endif
-                    		PrintXYZprl = 0;
                     	}
                  	}
               	}
@@ -655,7 +641,6 @@ ParamsPotential();
 #ifdef PIGSENTBOTH
                		SaveSumEnergy (totalCountENT,sumsCount);
 #endif
-                    SaveSumTrReducedDens(totalCount, sumsCount);
 #else
                		SaveSumEnergy (totalCount,sumsCount);
 #endif
@@ -711,9 +696,20 @@ ParamsPotential();
 		//  CHECKPOINT: save status, rnd streams and configs ------
 	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
 
+		if (blockCount % 10 == 0)
+		{
+			stringstream bc;                // convert block # to string
+			bc.width(IO_BLOCKNUMB_WIDTH);
+			bc.fill('0');
+			bc<<blockCount;
+			string fname = MCFileName + bc.str();  // file name prefix including block #
+			IOxyzAng(IOWrite,fname.c_str());
+			PrintXYZprl = 0;
+		}
+
 		MCStartBlock = blockCount; 
 
-		if (blockCount%1000 == 0)
+		if (blockCount % 10 == 0)
 		{
 			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
@@ -956,16 +952,14 @@ void MCGetAveragePIGSENT(void)
 	totalCount       += 1.0;  
 
 #ifdef SWAPTOUNSWAP
-    double snm        = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
-    double sdm        = MCAccepUnSwap/(MCAccepSwap+MCAccepUnSwap);
+    double snm        = (double)MCAccepSwap/(double)((MCAccepSwap+MCAccepUnSwap));
+    double sdm        = (double)MCAccepUnSwap/((double)(MCAccepSwap+MCAccepUnSwap));
 #else
     double snm        = GetEstimNM();
     double sdm        = GetEstimDM();
 #endif
     _bnm             += snm;
     _bdm             += sdm;
-    _nm_total        += snm;
-    _dm_total        += sdm;
 #ifdef SWAP
 	_trOfDensitySq   += sdm/snm;
 	_trOfDensitySq_total += sdm/snm;
@@ -2042,17 +2036,6 @@ void SaveInstantSwap(double numbSwap, double numbUnSwap, long int numb)
 }
 #endif
 
-void SaveSumTrReducedDens(double acount, double numb)
-{
-    const char *_proc_=__func__;
-
-    _fentropy << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-    _fentropy << setw(IO_WIDTH) << _nm_total/acount << BLANK;
-    _fentropy << setw(IO_WIDTH) << _dm_total/acount << BLANK;
-    _fentropy << setw(IO_WIDTH) << _trOfDensitySq_total/acount << BLANK;
-    _fentropy << endl;
-}
-
 void InitTotalAverage(void)  // DUMP
 {
 	const char *_proc_=__func__;    
@@ -2095,9 +2078,6 @@ void InitTotalAverage(void)  // DUMP
 		 _cdipoleZ_total[idp] = 0.0;
 		 _cdipoleXY_total[idp] = 0.0;
 	}
-    _nm_total  = 0.0;
-    _dm_total  = 0.0;
-    _trOfDensitySq_total = 0.0;
 	_dpot_total = 0.0;  //added by Hui Li
 
 	_rot_total = 0.0;
@@ -2201,6 +2181,7 @@ void InitTotalAverage(void)  // DUMP
     _io_error(_proc_,IO_ERR_FOPEN,fangularins.c_str());
 #endif
 
+#ifdef PIGSENTTYPE
 #ifdef IOFILES
     string fenergyins;
 
@@ -2216,22 +2197,6 @@ void InitTotalAverage(void)  // DUMP
     if (!_fengins.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fenergyins.c_str());
 #endif
-
-#ifdef PIGSENTTYPE
-    string fentropy;
-
-    fentropy  = MCFileName + IO_SUM;
-    fentropy += ".rden";
-
-    if (FileExist(fentropy.c_str()))   // backup the output of previous simulations 
-    IOFileBackUp(fentropy.c_str());
-
-    _fentropy.open(fentropy.c_str(), ios::out);
-    io_setout(_fentropy);
-
-    if (!_fentropy.is_open())
-    _io_error(_proc_,IO_ERR_FOPEN,fentropy.c_str());
-
 
 #ifdef INSTANT
     string fswapins;
