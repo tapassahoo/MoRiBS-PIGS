@@ -4533,12 +4533,12 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 
 	double pot_new = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
 
-	double pot_diff = pot_new-pot_old;
+	double pot_diff = pot_old-pot_new;
 #ifndef PIMCTYPE
 	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
 #endif
-	double factor  = -MCRotTau*pot_diff;
-	double linkProb = (factor < 0.0) ? (1.0-exp(factor)) : 0.0;
+	double exponent = -MCRotTau*pot_diff;
+	double linkProb = (exponent < 0.0) ? (1.0-exp(exponent)) : 0.0;
    	double rand5   = runif(Rng);
 	int activation = 0;
 	if (linkProb > rand5) activation = 1;
