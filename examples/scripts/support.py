@@ -716,7 +716,7 @@ def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
 		numbbeads1		= numbbeads
 	else:
 		numbbeads1		= numbbeads - 1
-	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
+	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 1500 -1"
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
@@ -1318,7 +1318,7 @@ class GetFileNamePlot:
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 			mainFileNameRT   += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
-			self.SaveEntropyRT= self.src_dir+file_output9+mainFileNameRT
+			self.SaveEntropyRT     = self.src_dir+file_output9+mainFileNameRT
 
 def FileCheck(TypeCal,list_nb,variableName,SavedFile):
 	for i in list_nb:
