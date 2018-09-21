@@ -109,7 +109,6 @@ double _Cv_trans_2_total;    // translational heat capacity, global average
 double _Cv_rot_total;    // rotational heat capacity, global average
 
 fstream _feng;      // save accumulated energy
-fstream _fang;      // save accumulated energy
 fstream _fdc;      // save accumulated energy
 fstream _fangins;      // save accumulated energy
 fstream _fanginsc;      // save accumulated energy
@@ -1868,23 +1867,6 @@ void SaveSumDipoleCorr(double acount, double numb)
 }
 #endif
 
-void SaveSumAngularDOF(double acount, double numb)
-{
-    const char *_proc_=__func__;
-
-    _fang << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-    _fang << setw(IO_WIDTH) << _costheta_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _ucompx_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _ucompy_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _ucompz_total/acount << BLANK;
-#ifdef PIGSTYPE
-    _fang << setw(IO_WIDTH) << _abs_ucompx_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _abs_ucompy_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _abs_ucompz_total/acount << BLANK;
-#endif
-    _fang << endl;
-}
-
 void SaveInstantAngularDOF(long int numb)
 {
     const char *_proc_=__func__;
@@ -1905,9 +1887,9 @@ void SaveInstantAngularDOF(long int numb)
 #endif
 */
 #ifdef PIMCTYPE
-	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-   	{
-   		for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+	for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+	{
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
         	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
             int t0      = offset0 + it;
@@ -1925,9 +1907,8 @@ void SaveInstantAngularDOF(long int numb)
 				_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
 				_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
 			}
-
-			_fangins << endl;
         }
+		_fangins << endl;
     }
 #endif
 
@@ -2112,7 +2093,6 @@ void InitTotalAverage(void)  // DUMP
 void DoneTotalAverage(void)
 {
   _feng.close();
-  _fang.close();
 }
 
 void MCSaveAcceptRatio(long int step,long int pass,long int block)

@@ -985,6 +985,7 @@ double GetPotEnergy_Densities(void)
                 	int t0 = offset0 + it;
                 	int t1 = offset1 + it;
 
+					/*
                 	if (stype == H2)
                 	{
                     	double s1 = 0.0;
@@ -1041,6 +1042,7 @@ double GetPotEnergy_Densities(void)
                     	vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
                     	spot_pair += potl*CMRECIP2KL;
                 	} //stype
+					*/
 
                 	if (stype == HF)
                 	{
@@ -1059,6 +1061,7 @@ double GetPotEnergy_Densities(void)
         }// loop over atoms (molecules)
     }
 //
+	/*
 	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) )
 	{
         spot = 0.0;
@@ -1089,28 +1092,22 @@ double GetPotEnergy_Densities(void)
         	}// loop over atoms (molecules)
         }// loop over atoms (molecules)
     }
-    if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+	*/
+    if ((MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1))
     {
         spot = 0.0;
-        double dm   = DipoleMoment/AuToDebye;
-        double dm2  = dm*dm;
-        double RR = Distance/BOHRRADIUS;
-
-        int offset0 = 0;
-
-        double spot_pair = 0.0;
-#pragma omp parallel for reduction(+: spot_pair)
+        double spot_beads = 0.0;
+		double Eulang0[NDIM];
+#pragma omp parallel for reduction(+: spot_beads)
 	    for (int it = 0; it < NumbTimes; it++) 	  
         {  
-            int t0  = offset0 + it;
-
-            double E12 = -2.0*dm2*MCCosine[2][t0]/(RR*RR*RR);
-            spot_pair  = E12*AuToKelvin;
-#ifdef POTZERO
-			spot_pair = 0.0;
-#endif
+            int t0       = MCAtom[IMTYPE].offset + it;
+			Eulang0[PHI] = MCAngles[PHI][t0];
+            Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+			Eulang0[CHI] = 0.0;
+            spot_beads  += PotFunc(Eulang0);
         }
-      	spot += spot_pair;
+      	spot = spot_beads;
     }
 #ifdef IOWRITE
 	if ( MCAtom[IMTYPE].numb > 1)
@@ -5075,6 +5072,18 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 	}
 #endif
     double PotReturn = potential*AuToKelvin;
+#ifdef POTZERO
+	PotReturn = 0.0;
+#endif
+    return PotReturn;
+}
+
+double PotFunc(const double *Eulang0)
+{
+	/*
+	Here DipoleMoment is acting as a field and its unit is Kelvin^-1. The field is -F*Cos(theta).
+	*/
+    double PotReturn = -DipoleMoment*cos(Eulang0[CTH]);
 #ifdef POTZERO
 	PotReturn = 0.0;
 #endif

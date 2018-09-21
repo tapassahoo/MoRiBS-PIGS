@@ -17,6 +17,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
 #rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
+from collections import OrderedDict
 
 
 def	FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, TypePlot, beadsRef):
@@ -1100,22 +1101,13 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 #
 	FileToBePlotDMRG= src_dir+"rotor_S2"
 	iLabel = 0
-	nn = [8,16]
+	nn = [8, 16]
 	for numbmolecules in nn:
 		
 		if (numbmolecules == 2):
-			numbblocks   = 5000
-			numbpass     = 400
-			preskip      = 0
-			postskip     = 0
-			gFactorList  = [0.5+0.25*i for i in range(21)] 
-			gFactorList += [5.75+0.25*i for i in range(14)]
+			gFactorList  = [0.5+0.1*i for i in range(76)]  
 		if (numbmolecules == 4):
-			numbblocks   = 5000
-			numbpass     = 400
-			preskip      = 0
-			postskip     = 0
-			gFactorList  = [0.5+0.25*i for i in range(15)] 
+			gFactorList  = [0.5+0.1*i for i in range(31)]  
 		if (numbmolecules == 8):
 			gFactorList  = [0.5+0.1*i for i in range(14)]  
 		if (numbmolecules == 16):
@@ -1167,17 +1159,18 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 		plt.errorbar(gFactorPlot, entropy1Plot, yerr=err_entropy1Plot, color = colorList[iLabel], ls = lsList[iLabel], linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelString)
 
 # Data taken from Dmitri's DMRG 
-		labelStringDMRG = 'DMRG: '+r'$N = $'+str(numbmolecules)
-		iRotors, rFact, EntropyFull = genfromtxt(FileToBePlotDMRG,unpack=True, usecols=[0, 1, 3])
+		if numbmolecules is not 2:
+			labelStringDMRG = 'DMRG: '+r'$N = $'+str(numbmolecules)
+			iRotors, rFact, EntropyFull = genfromtxt(FileToBePlotDMRG,unpack=True, usecols=[0, 1, 3])
 
-		gFactDMRG   = []
-		EntropyDMRG = []
-		for i in range(int(len(iRotors))):
-			if (iRotors[i] == numbmolecules):
-				gFactDMRG.append(1.0/(rFact[i]*rFact[i]*rFact[i]))
-				EntropyDMRG.append(EntropyFull[i])
-			
-		plt.plot(gFactDMRG, EntropyDMRG, color = 'black', ls = 'None', linewidth=1,  marker = markerList[iLabel], markersize = 10, label = labelStringDMRG)
+			gFactDMRG   = []
+			EntropyDMRG = []
+			for i in range(int(len(iRotors))):
+				if (iRotors[i] == numbmolecules):
+					gFactDMRG.append(1.0/(rFact[i]*rFact[i]*rFact[i]))
+					EntropyDMRG.append(EntropyFull[i])
+				
+			plt.plot(gFactDMRG, EntropyDMRG, color = 'black', ls = 'None', linewidth=1,  marker = markerList[iLabel], markersize = 10, label = labelStringDMRG)
 #
 		iLabel += 1
 
@@ -1188,7 +1181,7 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 	midpointy = 0.5*(ymax-ymin)
 	deltay = midpointy*0.15
 	xmin, xmax = plt.xlim()
-	plt.xlim(0.4,2.0)
+	plt.xlim(0.0,2.01)
 	midpointx = 0.5*(xmax-xmin)
 	deltax = midpointx*0.15
 	textpositionx = xmin+midpointx-0.25*midpointx
@@ -1205,8 +1198,8 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 		PlotLabel(Text1, Text2,font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 	'''
 		
-	plt.subplots_adjust(top=0.97, bottom=0.14, left=0.16, right=0.98, hspace=0.0, wspace=0.0)
-	plt.legend(bbox_to_anchor=(0.65, 0.35), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+	plt.subplots_adjust(top=0.97, bottom=0.13, left=0.13, right=0.98, hspace=0.0, wspace=0.0)
+	plt.legend(bbox_to_anchor=(0.65, 0.65), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
 	plt.savefig(outfileEntropy, dpi = 200, format = 'eps')
 	plt.show()
 
@@ -1225,9 +1218,9 @@ def	GetFigureEntropyRT_vs_beta(TypeCal, molecule_rot, TransMove, RotMove, variab
 	fontlegend    = font/2.0
 	fig           = plt.figure(figsize=(8, 6))
 	#plt.grid(True)
-	colorList  = ['red', 'green', 'blue', 'magenta']
+	colorList  = ['black','red', 'green','blue','cyan']
 	lsList     = ['-', '--', '-.', '-']
-	markerList = ['o', '^', 'v','s']
+	markerList = ['o', '^', 'v','s','H']
 	#------------------------------------------------#
 	FilePlotName    = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, 21)
 	#------------------------------------------------#
@@ -1239,6 +1232,8 @@ def	GetFigureEntropyRT_vs_beta(TypeCal, molecule_rot, TransMove, RotMove, variab
 	outfileEntropy  = FilePlotEntropy
 	call(["rm", FilePlotEntropy])
 #
+	if (numbmolecules == 2):
+		gFactorList  = [1.0, 2.0, 4.0, 6.0, 8.0]  
 	if (numbmolecules == 8):
 		gFactorList  = [1.0, 1.5, 2.0]  
 	if (numbmolecules == 16):
@@ -1258,7 +1253,7 @@ def	GetFigureEntropyRT_vs_beta(TypeCal, molecule_rot, TransMove, RotMove, variab
 		print(entropy1)
 #
 		labelString = 'PIGS:  '+r'$g = $'+str(gFact)
-		plt.errorbar(var1, entropy1, yerr=err_entropy1, color = colorList[iLabel], ls = lsList[iLabel], linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelString)
+		plt.errorbar(var1, entropy1, yerr=err_entropy1, color = colorList[iLabel], ls = lsList[1], linewidth=1,  marker = markerList[iLabel], markersize = 10, label = labelString)
 		iLabel += 1
 
 	plt.xlabel(r'$\beta$', fontsize = font, labelpad=-3)
@@ -1277,7 +1272,7 @@ def	GetFigureEntropyRT_vs_beta(TypeCal, molecule_rot, TransMove, RotMove, variab
 
 	plt.xticks(np.arange(0, 0.201, step=0.04))
 	plt.yticks(np.arange(0, ymax, step=0.1))
-	plt.text(0.1, ymax-0.1, r'$N = $'+str(numbmolecules), fontsize = font)
+	plt.text(midpointx, ymax-0.06, r'$N = $'+str(numbmolecules), fontsize = font)
 	'''
 	Text1 = "(a)"
 	Text2 = ""
@@ -1285,7 +1280,12 @@ def	GetFigureEntropyRT_vs_beta(TypeCal, molecule_rot, TransMove, RotMove, variab
 		PlotLabel(Text1, Text2,font,xmin,xmax,ymin,ymax,variableName,parameter,numbmolecules,molecule,Rpt,dipolemoment)
 	'''
 		
-	plt.subplots_adjust(top=0.97, bottom=0.14, left=0.16, right=0.98, hspace=0.0, wspace=0.0)
-	plt.legend(bbox_to_anchor=(0.65, 0.55), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+	plt.subplots_adjust(top=0.97, bottom=0.13, left=0.13, right=0.98, hspace=0.0, wspace=0.0)
+	if (numbmolecules == 2):
+		plt.legend(bbox_to_anchor=(0.65, 0.70), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+	if (numbmolecules == 8):
+		plt.legend(bbox_to_anchor=(0.65, 0.45), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+	if (numbmolecules == 16):
+		plt.legend(bbox_to_anchor=(0.65, 0.70), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
 	plt.savefig(outfileEntropy, dpi = 200, format = 'eps')
 	plt.show()

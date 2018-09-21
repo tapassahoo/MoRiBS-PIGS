@@ -1042,8 +1042,7 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
 #ifdef ONSITE
 	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb == 1) )
 	{
-        double E12 = -2.0*DipoleMomentAU2*cos(Eulang0[CTH])/(RR*RR*RR);
-        spot        = weight*E12*AuToKelvin;
+        spot = weight*PotFunc(Eulang0);
     }
 #endif
     double spot_cage = 0.0;
@@ -4185,15 +4184,12 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 #endif
         } //loop over atom1 (molecules)
     }
-
-	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
+//
+	if ((MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
 	{
-        double E12 = -2.0*DipoleMomentAU2*cos(Eulang0[CTH])/(RR*RR*RR);
-        spot       = E12*AuToKelvin;
-#ifdef POTZERO
-		spot       = 0.0;
-#endif
+        spot = PotFunc(Eulang0);
     }
+//
     double spot_cage;
 #ifdef CAGEPOT
     double cost = cos(Eulang0[CTH]);
@@ -4261,11 +4257,12 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 {
 // The following block of statements creates 3 dimensional unit random vector 
    	double costRef, phiRef;
-   	//costRef = (step*(rand1-0.5));
-   	//phiRef  = (step*(rand2-0.5));
    	costRef = runifab(Rng, -1.0,1.0);
    	phiRef  = runifab(Rng, 0.0, 2.0*M_PI);
 
+	/*
+   	costRef = (step*(rand1-0.5));
+   	phiRef  = (step*(rand2-0.5));
    	if (costRef> 1.0) costRef =  2.0 - costRef;
    	if (costRef<-1.0) costRef = -2.0 - costRef;
 	if (abs(costRef) > 1.0) 
@@ -4273,6 +4270,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
         cout<<"Upper or lower limit of costRef is excided " << costRef<<endl;
 		exit(0);
 	}
+	*/
 	double sintRef = sqrt(1.0 - costRef*costRef);
 
    	double randomVector[NDIM];
@@ -4333,7 +4331,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	
 				if (Attempt)
 				{
-					int activation = ClusterGrowth(type,randomVector,atom0,atom1,t0,it,Rng);
+					int activation = ClusterGrowth(type,randomVector,atom0,atom1,t0,it,Rng,newcoords);
 
 					if (activation == 1) 
 					{
@@ -4346,6 +4344,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	} while (!buffer.empty());
 	
 #ifdef TESTWRITE
+	cout<<"Final configurations - "<<BLANK<<endl;
 	cout<<"buffer [";
 	for (int i = 0; i < buffer.size(); i++) cout<<buffer[i]<<",";
 	cout<<"]"<<endl;
@@ -4440,6 +4439,17 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 		EulangCluster_new[CTH] = acos(newcoords[AXIS_Z][tCluster]);
 		EulangCluster_new[CHI] = 0.0;
 
+//ONSITE TERM
+		if (MCAtom[type].numb == 1)
+		{
+			EulangCluster_old[PHI] = MCAngles[PHI][tCluster];
+			EulangCluster_old[CTH] = acos(MCAngles[CTH][tCluster]);
+			EulangCluster_old[CHI] = MCAngles[CHI][tCluster];
+			pot_old = PotFunc(EulangCluster_old);
+			pot_new = PotFunc(EulangCluster_new);
+		}
+// ONSITE TERM
+
 		if (!antiCluster.empty())
 		{
 			EulangCluster_old[PHI] = MCAngles[PHI][tCluster];
@@ -4506,7 +4516,48 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	cluster.erase(cluster.begin(),cluster.end());
 }
 
-int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int it,RngStream *Rng)
+int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int it,RngStream *Rng, double **newcoords)
+{
+	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
+	int t1         = offset1 + it;
+
+	double Eulang0[NDIM], Eulang1[NDIM];
+	Eulang0[PHI]   = MCAngles[PHI][t0];
+	Eulang0[CTH]   = acos(MCAngles[CTH][t0]);
+	Eulang0[CHI]   = MCAngles[CHI][t0];
+
+	Eulang1[PHI]   = MCAngles[PHI][t1];
+	Eulang1[CTH]   = acos(MCAngles[CTH][t1]);
+	Eulang1[CHI]   = MCAngles[CHI][t1];
+
+	double pot_old = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+
+	Eulang0[PHI]   = atan2(newcoords[AXIS_Y][t0],newcoords[AXIS_X][t0]);
+	if (Eulang0[PHI] < 0.0) Eulang0[PHI] += 2.0*M_PI;
+	Eulang0[CTH]   = acos(newcoords[AXIS_Z][t0]);
+
+	double pot_new = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+
+	double pot_diff = pot_old-pot_new;
+#ifndef PIMCTYPE
+	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
+#endif
+	double exponent = -MCRotTau*pot_diff;
+	double linkProb = (exponent < 0.0) ? (1.0-exp(exponent)) : 0.0;
+   	double rand5   = runif(Rng);
+	int activation = 0;
+	if (linkProb > rand5) activation = 1;
+	if (activation == 1) 
+	{
+		double vectorAtom1[NDIM];
+		for (int id=0;id<NDIM;id++) vectorAtom1[id]   = MCCosine[id][t1];
+		for (int id=0;id<NDIM;id++) newcoords[id][t1] = MCCosine[id][t1] - 2.0*DotProduct(vectorAtom1, randomVector)*randomVector[id]; 
+	}
+	return activation;
+}
+
+/*
+int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int it,RngStream *Rng, double **newcoords)
 {
 	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
 	int t1         = offset1 + it;
@@ -4539,47 +4590,6 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 #endif
 	double exponent = -MCRotTau*pot_diff;
 	double linkProb = (exponent < 0.0) ? (1.0-exp(exponent)) : 0.0;
-   	double rand5   = runif(Rng);
-	int activation = 0;
-	if (linkProb > rand5) activation = 1;
-	if (activation == 1) for (int id=0;id<NDIM;id++) newcoords[id][t1] = reflectAtom1[id];
-	return activation;
-}
-
-/*
-int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int it,RngStream *Rng)
-{
-	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
-	int t1         = offset1 + it;
-
-	double Eulang0[NDIM], Eulang1[NDIM];
-	Eulang0[PHI]   = atan2(newcoords[AXIS_Y][t0],newcoords[AXIS_X][t0]);
-	if (Eulang0[PHI] < 0.0) Eulang0[PHI] += 2.0*M_PI;
-	Eulang0[CTH]   = acos(newcoords[AXIS_Z][t0]);
-	Eulang0[CHI]   = 0.0;
-
-	Eulang1[PHI]   = MCAngles[PHI][t1];
-	Eulang1[CTH]   = acos(MCAngles[CTH][t1]);
-	Eulang1[CHI]   = MCAngles[CHI][t1];
-
-	double pot_old = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
-
-	double vectorAtom1[NDIM];
-	double reflectAtom1[NDIM];
-	for (int id=0;id<NDIM;id++) vectorAtom1[id]  = MCCosine[id][t1];
-	for (int id=0;id<NDIM;id++) reflectAtom1[id] = MCCosine[id][t1] - 2.0*DotProduct(vectorAtom1, randomVector)*randomVector[id];
-	Eulang1[PHI]   = atan2(reflectAtom1[AXIS_Y],reflectAtom1[AXIS_X]);
-	if (Eulang1[PHI] < 0.0) Eulang1[PHI] += 2.0*M_PI;
-	Eulang1[CTH]   = acos(reflectAtom1[AXIS_Z]);
-
-	double pot_new = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
-
-	double pot_diff= pot_new-pot_old;
-#ifndef PIMCTYPE
-	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
-#endif
-	double factor  = -MCRotTau*pot_diff;
-	double linkProb = (factor < 0.0) ? (1.0-exp(factor)) : 0.0;
    	double rand5   = runif(Rng);
 	int activation = 0;
 	if (linkProb > rand5) activation = 1;

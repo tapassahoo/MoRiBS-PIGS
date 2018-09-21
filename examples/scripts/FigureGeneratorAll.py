@@ -29,7 +29,7 @@ TypeCal             = 'ENT'
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
 #TypePlot            = "CorrFunc"
-TypePlot            = "S2"
+#TypePlot            = "S2"
 TypePlot            = "GFACTOR"
 #TypePlot            = "COMBINE"
 #
@@ -58,7 +58,7 @@ if (TypeCal == "ENT" and TypePlot == "GFACTOR"):
 	beadsRef            = 41
 	numbblocks	        = 20000
 	numbpass            = 100
-	preskip             = 5000
+	preskip             = 10000
 	postskip            = 0
 
 	extra_file_name     = ""
@@ -69,7 +69,7 @@ if (TypeCal == "ENT" and TypePlot == "S2"):
 	numbmolecules       = 16
 	numbblocks	        = 20000
 	numbpass            = 100
-	preskip             = 5000
+	preskip             = 10000
 	postskip            = 0
 
 	extra_file_name     = ""
