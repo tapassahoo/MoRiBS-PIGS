@@ -716,7 +716,7 @@ def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
 		numbbeads1		= numbbeads
 	else:
 		numbbeads1		= numbbeads - 1
-	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
+	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 1500 -1"
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
@@ -1301,13 +1301,14 @@ class GetFileNamePlot:
 		mainFileNameMM       += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
 		mainFileNameCOMBO     = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameCOMBO    += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+		mainFileNameED 		  = "of-System"+str(self.numbmolecules)+str(self.molecule)+add1
 #
 		self.SaveEntropyGFAC  = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFAC
 		self.SaveEntropyRFAC  = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameRFAC
 		self.SaveEnergyGFAC   = self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameGFAC
 		self.SaveEnergyRFAC   = self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameRFAC
-		self.SaveEnergyDIAG   = self.src_dir+file_output1+mainFileNameMM+add2+"-DIAG"
-		self.SaveEntropyDIAG  = self.src_dir+file_output9+mainFileNameMM+add2+"-DIAG"
+		self.SaveEnergyED     = self.src_dir+file_output1+mainFileNameED+add2+"-ED"
+		self.SaveEntropyED    = self.src_dir+file_output9+mainFileNameED+add2+"-ED"
 		self.SaveCorrGFAC     = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameGFAC
 		self.SaveCorrRFAC     = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameRFAC
 		self.SaveEnergyMM     = self.src_dir+file_output1+mainFileNameMM+add2+"-MM"
@@ -1318,7 +1319,7 @@ class GetFileNamePlot:
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 			mainFileNameRT   += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
-			self.SaveEntropyRT= self.src_dir+file_output9+mainFileNameRT
+			self.SaveEntropyRT     = self.src_dir+file_output9+mainFileNameRT
 
 def FileCheck(TypeCal,list_nb,variableName,SavedFile):
 	for i in list_nb:
@@ -1386,23 +1387,27 @@ def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
 	DipoleMoment   = DipoleMomentAU*Units.AuToDebye
 	return DipoleMoment
 
-def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal):
+def GetEDResults(TypeCal, FilePlotName, srcCodePath, RFactor, numbmolecules, particleA, lmax, ltotalmax):
+	'''
+	It will give ground state energy, von Neuman and Renyi entropies computed by diagonalizing full Hamiltonian matrix. It is developed by Dmitri https://github.com/0/DipoleChain.jl
+	'''
 	if (TypeCal == "ENT"):
-		FileToBeSavedDIAG = FilePlotName.SaveEntropyDIAG+".txt"
+		FileToBeSavedED = FilePlotName.SaveEntropyED+".txt"
 		FileToBeSavedMM = FilePlotName.SaveEntropyMM+".txt"
 	if (TypeCal == "PIGS"):
-		FileToBeSavedDIAG = FilePlotName.SaveEnergyDIAG+".txt"
+		FileToBeSavedED = FilePlotName.SaveEnergyED+".txt"
 		FileToBeSavedMM = FilePlotName.SaveEnergyMM+".txt"
+	print(FileToBeSavedED)
 
-	commandRunDIAG    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 8 --l-total-max 8 --A-start 1"+" --A-size "+str(particleA)
-	call(["rm", "outputDIAG.txt"])
-	system(commandRunDIAG)
-	call(["mv", "outputDIAG.txt", FileToBeSavedDIAG])
+	commandRunED    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max "+str(lmax)+" --l-total-max "+str(ltotalmax)+" --A-start 1 --A-size "+str(particleA)
+	call(["rm", "outputED.txt"])
+	system(commandRunED)
+	call(["mv", "outputED.txt", FileToBeSavedED])
+	'''
 	if (numbmolecules >6):
 		print("It is not computing Matrix multiplication stuffs")
 		return
 
-	'''
 	if (numbmolecules <= 4):
 		call(["rm", "outputMM.txt"])
 

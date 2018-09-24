@@ -14,7 +14,7 @@ void MCRotLinStep(int,int,int,int,double,double,double,double,double &,double &)
 void MCRotLinStepPIMC(int,int,int,int,double,double,double,double,double &,double &);
 void MCRotLinStepPIGS(int,int,int,int,double,double,double,double,double &,double &);
 void MCRotLinStepCL(int,int,double,double,double,int,double,double &,double &, RngStream *);
-int ClusterGrowth(int,double *,int,int,int,int, RngStream *);
+int ClusterGrowth(int,double *,int,int,int,int, RngStream *, double **);
 void MCRotLinStepSwap(int,int,int,int,double,double,double,double,double &,double &, string);
 void MCRotLinStepSwapBroken(int,int,int,int,double,double,double,double,double &,double &);
 void MCSwap(double, string &);

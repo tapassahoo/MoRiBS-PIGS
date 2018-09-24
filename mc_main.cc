@@ -109,7 +109,6 @@ double _Cv_trans_2_total;    // translational heat capacity, global average
 double _Cv_rot_total;    // rotational heat capacity, global average
 
 fstream _feng;      // save accumulated energy
-fstream _fang;      // save accumulated energy
 fstream _fdc;      // save accumulated energy
 fstream _fangins;      // save accumulated energy
 fstream _fanginsc;      // save accumulated energy
@@ -149,7 +148,6 @@ double MCAccepSwap;
 double MCAccepUnSwap;
 int iSwap;
 int iUnSwap;
-void SaveInstantSwap(double, double, long int);                 // accumulated average
 #ifdef PROPOSED
 int iChooseOld = 0;
 int iChooseNew;
@@ -561,9 +559,6 @@ ParamsPotential();
 			if (blockCount > (NumberOfMCBlocks - 10))
 			{
 		    	SaveInstantAngularDOF(totalStep);
-#ifdef SWAPTOUNSWAP
-	    		SaveInstantSwap(iUnSwap, iSwap, totalStep);
-#endif
 			}
 #endif
 
@@ -696,7 +691,7 @@ ParamsPotential();
 		//  CHECKPOINT: save status, rnd streams and configs ------
 	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
 
-		if (blockCount % 10 == 0)
+		if (blockCount % 200 == 0)
 		{
 			stringstream bc;                // convert block # to string
 			bc.width(IO_BLOCKNUMB_WIDTH);
@@ -709,7 +704,7 @@ ParamsPotential();
 
 		MCStartBlock = blockCount; 
 
-		if (blockCount % 10 == 0)
+		if (blockCount % 200 == 0)
 		{
 			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
@@ -1872,23 +1867,6 @@ void SaveSumDipoleCorr(double acount, double numb)
 }
 #endif
 
-void SaveSumAngularDOF(double acount, double numb)
-{
-    const char *_proc_=__func__;
-
-    _fang << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-    _fang << setw(IO_WIDTH) << _costheta_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _ucompx_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _ucompy_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _ucompz_total/acount << BLANK;
-#ifdef PIGSTYPE
-    _fang << setw(IO_WIDTH) << _abs_ucompx_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _abs_ucompy_total/acount << BLANK;
-    _fang << setw(IO_WIDTH) << _abs_ucompz_total/acount << BLANK;
-#endif
-    _fang << endl;
-}
-
 void SaveInstantAngularDOF(long int numb)
 {
     const char *_proc_=__func__;
@@ -1907,43 +1885,34 @@ void SaveInstantAngularDOF(long int numb)
     }
 	_fangins << endl;
 #endif
-//
+*/
 #ifdef PIMCTYPE
-   	_fanginsc << setw(IO_WIDTH) << numb << BLANK;
-	double cosTheta   = 0.0;
-	double compxyz[NDIM];
-	compxyz[0] = 0.0;
-	compxyz[1] = 0.0;
-	compxyz[2] = 0.0;
-
-	GetCosThetaPIMC(cosTheta, compxyz); //Centroid distribution
-   	_fanginsc << setw(IO_WIDTH) << cosTheta << BLANK;
-   	_fanginsc << setw(IO_WIDTH) << compxyz[0] << BLANK;
-   	_fanginsc << setw(IO_WIDTH) << compxyz[1] << BLANK;
-   	_fanginsc << setw(IO_WIDTH) << compxyz[2] << BLANK;
-    _fanginsc << endl;
-//
-   	//_fangins << setw(IO_WIDTH) << numb << BLANK;
-	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-   	{
-   		for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+	for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+	{
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
         	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
             int t0      = offset0 + it;
 
-			_fangins << setw(IO_WIDTH) << MCCoords[0][t0] << BLANK;
-			_fangins << setw(IO_WIDTH) << MCCoords[1][t0] << BLANK;
-			_fangins << setw(IO_WIDTH) << MCCoords[2][t0] << BLANK;
+			if (TRANSLATION)
+			{
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+			}
 
-			_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-			_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-			_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
-
-			_fangins << endl;
+			if (ROTATION)
+			{
+				_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+			}
         }
+		_fangins << endl;
     }
 #endif
 
+/*
 #ifdef PIGSTYPE
 #ifdef BINARY
 	double instArray[5];
@@ -1973,6 +1942,7 @@ void SaveInstantAngularDOF(long int numb)
     _fangins << endl;
 #else
 */
+#ifdef PIGSTYPE
    	_fangins << setw(IO_WIDTH) << numb << BLANK;
 
     for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
@@ -1982,21 +1952,23 @@ void SaveInstantAngularDOF(long int numb)
         {
             int t0      = offset0 + it;
 
-            //_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-            //_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-            //_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
-
-            _fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-            _fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-            //_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+			if (TRANSLATION)
+			{
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+			}
+			
+			if (ROTATION)
+			{
+				_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+			}
         }
     }
 	_fangins << endl;
-/*
 #endif
-#endif 
-#endif 
-*/
 }
 
 void SaveInstantEnergy()
@@ -2023,18 +1995,6 @@ void SaveInstantEnergy()
     _fengins << setw(IO_WIDTH) << srotinst << BLANK;
     _fengins << endl;
 }
-
-#ifdef SWAPTOUNSWAP
-void SaveInstantSwap(double numbSwap, double numbUnSwap, long int numb)
-{
-    const char *_proc_=__func__;
-
-    _fswap << setw(IO_WIDTH) << numb << BLANK;
-    _fswap << setw(IO_WIDTH) << numbUnSwap << BLANK;
-    _fswap << setw(IO_WIDTH) << numbSwap << BLANK;
-    _fswap << endl;
-}
-#endif
 
 void InitTotalAverage(void)  // DUMP
 {
@@ -2106,62 +2066,10 @@ void InitTotalAverage(void)  // DUMP
 
 	if (!_feng.is_open())
 	_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
-//
-
-#ifdef IOWRITE
-    string fangular;
-
-    fangular  = MCFileName + IO_SUM;
-    fangular += ".dof";
-
-    if (FileExist(fangular.c_str()))   // backup the output of previous simulations 
-    IOFileBackUp(fangular.c_str());
-
-    _fang.open(fangular.c_str(), ios::out);
-    io_setout(_fang);
-
-    if (!_fang.is_open())
-    _io_error(_proc_,IO_ERR_FOPEN,fangular.c_str());
-
-//
-    string fdipolecorr;
-
-    fdipolecorr  = MCFileName + IO_SUM;
-    fdipolecorr += "Dipole.corr";
-
-    if (FileExist(fdipolecorr.c_str()))   // backup the output of previous simulations 
-    IOFileBackUp(fdipolecorr.c_str());
-
-    _fdc.open(fdipolecorr.c_str(), ios::out);
-    io_setout(_fdc);
-
-    if (!_fdc.is_open())
-    _io_error(_proc_,IO_ERR_FOPEN,fdipolecorr.c_str());
-#endif
 #endif
 
 //
 #ifdef INSTANT
-#ifdef PIMCTYPE
-    string fangularinsc;
-
-    fangularinsc  = MCFileName + "_instant_centroid";
-    fangularinsc += ".dof";
-
-    if (FileExist(fangularinsc.c_str()))   // backup the output of previous simulations 
-    IOFileBackUp(fangularinsc.c_str());
-
-#ifdef BINARY
-    _fanginsc.open(fangularinsc.c_str(), ios::out | ios::binary);
-#else
-    _fanginsc.open(fangularinsc.c_str(), ios::out);
-#endif
-    io_setout(_fanginsc);
-
-    if (!_fanginsc.is_open())
-    _io_error(_proc_,IO_ERR_FOPEN,fangularinsc.c_str());
-#endif
-//
     string fangularins;
 
     fangularins  = MCFileName + "_instant";
@@ -2180,46 +2088,11 @@ void InitTotalAverage(void)  // DUMP
     if (!_fangins.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fangularins.c_str());
 #endif
-
-#ifdef PIGSENTTYPE
-#ifdef IOFILES
-    string fenergyins;
-
-    fenergyins  = MCFileName + "_instant";
-    fenergyins += ".eng";
-
-    if (FileExist(fenergyins.c_str()))   // backup the output of previous simulations
-    IOFileBackUp(fenergyins.c_str());
-
-    _fengins.open(fenergyins.c_str(), ios::out);
-    io_setout(_fengins);
-
-    if (!_fengins.is_open())
-    _io_error(_proc_,IO_ERR_FOPEN,fenergyins.c_str());
-#endif
-
-#ifdef INSTANT
-    string fswapins;
-
-    fswapins  = MCFileName + "SwapUnSwapRatio";
-    fswapins += ".inst";
-
-    if (FileExist(fswapins.c_str()))   // backup the output of previous simulations
-    IOFileBackUp(fswapins.c_str());
-
-    _fswap.open(fswapins.c_str(), ios::out);
-    io_setout(_fswap);
-
-    if (!_fswap.is_open())
-    _io_error(_proc_,IO_ERR_FOPEN,fswapins.c_str());
-#endif
-#endif
 }
 
 void DoneTotalAverage(void)
 {
   _feng.close();
-  _fang.close();
 }
 
 void MCSaveAcceptRatio(long int step,long int pass,long int block)
