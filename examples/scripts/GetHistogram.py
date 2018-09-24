@@ -34,13 +34,14 @@ print(ncol)
 num_bins = 50
 #file1 = "/work/tapas/test-cluster-update/PIGS-cluster-update-correct-RotDOFs-Rpt10.05Angstrom-gFactor1.0-beta0.2Kinv-Blocks5000-Passes100-System8HF-e0vsbeads11/results/output_instant.dof"
 #file2 = "/work/tapas/test-cluster-update/PIMC-RotDOFs-Rpt10.05Angstrom-gFactor1.0-beta0.2Kinv-Blocks5000-Passes100-System8HF-e0vsbeads11/results/output_instant.dof"
-file1 = "/work/tapas/test-cluster-update/PIMC-cluster-update-RotDOFs-Rpt10.05Angstrom-gFactor1.0-beta0.2Kinv-Blocks5000-Passes100-System8HF-e0vsbeads10/results/output_instant.dof"
-file2 = "/work/tapas/test-cluster-update/PIMC-RotDOFs-Rpt10.05Angstrom-gFactor1.0-beta0.2Kinv-Blocks5000-Passes100-System8HF-e0vsbeads10/results/output_instant.dof"
+file1 = "/work/tapas/test-cluster-update/PIMC-cluster-update-RotDOFs-Rpt10.05Angstrom-DipoleMoment8.0Debye-beta0.05Kinv-Blocks50000-Passes100-System1HF-e0vsbeads16/results/output_instant.dof"
+file2 = "/work/tapas/test-cluster-update/PIMC-RotDOFs-Rpt10.05Angstrom-DipoleMoment8.0Debye-beta0.05Kinv-Blocks50000-Passes100-System1HF-e0vsbeads16/results/output_instant.dof"
 x = loadtxt(file1, unpack=True, usecols=[ncol])
 y = loadtxt(file2, unpack=True, usecols=[ncol])
-y = np.fmod(y,2.0*pi)
-plt.hist(x, bins=num_bins, normed=1, facecolor='blue', alpha=0.7, label = "PIMC-CL")
-plt.hist(y, bins=num_bins, normed=1, facecolor='green', alpha=0.7, label = "PIMC")
+x = np.fmod(x,2.0*pi)
+y = np.fabs(np.fmod(y,2.0*pi))
+plt.hist(x, bins='auto', normed=1, facecolor='blue', alpha=0.7, label = "PIMC-CL")
+plt.hist(y, bins='auto', normed=1, facecolor='green', alpha=0.7, label = "PIMC")
 plt.xlabel('bins')
 plt.ylabel('Probability Distribution')
 

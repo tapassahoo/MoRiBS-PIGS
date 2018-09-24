@@ -1101,8 +1101,11 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 #
 	FileToBePlotDMRG= src_dir+"rotor_S2"
 	iLabel = 0
-	nn = [8, 16]
+	#nn = [8, 16]
+	nn = [2, 4]
 	for numbmolecules in nn:
+		
+		particleA = int(numbmolecules/2.0)
 		
 		if (numbmolecules == 2):
 			gFactorList  = [0.5+0.1*i for i in range(76)]  
@@ -1121,15 +1124,23 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 		err_entropy1Plot = np.zeros(len(gFactorList))
 		err_purity1Plot  = np.zeros(len(gFactorList))
 
+		varEDPlot        = np.zeros(len(gFactorList))
+		EntropyEDPlot    = np.zeros(len(gFactorList))
+
 		iii = 0
 		for gFact in gFactorList:
 			gFact = '{:03.1f}'.format(gFact)
 			gFact = float(gFact)
 			FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gFact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
-			FileToBePlotEntropy = FilePlotName.SaveEntropyRT+".txt"
+			FileToBePlotEntropy       = FilePlotName.SaveEntropyRT+".txt"
+			FileToBePlotEntropyED     = FilePlotName.SaveEntropyED+".txt"
 			#print(FileToBePlotEntropy)
 
 			beads1, var1, purity1, entropy1, err_purity1, err_entropy1 = genfromtxt(FileToBePlotEntropy,unpack=True, usecols=[0, 1, 2, 3, 4, 5], skip_header=0, skip_footer=0)
+			if (numbmolecules <= 4):
+				varED, EntropyED = genfromtxt(FileToBePlotEntropyED,unpack=True, usecols=[0, 2])
+				varEDPlot[iii]        = 1.0/math.pow(varED,3)
+				EntropyEDPlot[iii]    = EntropyED
 					
 			if (np.isscalar(entropy1) == True):
 				entropy1Plot[iii]     = entropy1
@@ -1154,12 +1165,19 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 		
 		print("S2:  PIGS "+str(numbmolecules))
 		print(entropy1Plot)
+		print("S2:  ED   "+str(numbmolecules))
+		print(EntropyEDPlot)
 #
 		labelString = 'PIGS:  '+r'$N = $'+str(numbmolecules)
 		plt.errorbar(gFactorPlot, entropy1Plot, yerr=err_entropy1Plot, color = colorList[iLabel], ls = lsList[iLabel], linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelString)
 
+		if (numbmolecules <= 4):
+			labelStringED = 'ED:   '+r'$N = $'+str(numbmolecules)
+
+			plt.plot(varEDPlot, EntropyEDPlot, color = 'black', ls = 'None', linewidth=1,  marker = markerList[iLabel], markersize = 10, label = labelStringED)
+
 # Data taken from Dmitri's DMRG 
-		if numbmolecules is not 2:
+		if (numbmolecules >= 8):
 			labelStringDMRG = 'DMRG: '+r'$N = $'+str(numbmolecules)
 			iRotors, rFact, EntropyFull = genfromtxt(FileToBePlotDMRG,unpack=True, usecols=[0, 1, 3])
 
@@ -1181,7 +1199,7 @@ def	GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, var
 	midpointy = 0.5*(ymax-ymin)
 	deltay = midpointy*0.15
 	xmin, xmax = plt.xlim()
-	plt.xlim(0.0,2.01)
+	plt.xlim(0.0,8.01)
 	midpointx = 0.5*(xmax-xmin)
 	deltax = midpointx*0.15
 	textpositionx = xmin+midpointx-0.25*midpointx
