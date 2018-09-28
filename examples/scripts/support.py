@@ -716,7 +716,7 @@ def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
 		numbbeads1		= numbbeads
 	else:
 		numbbeads1		= numbbeads - 1
-	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 1500 -1"
+	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
@@ -1294,6 +1294,8 @@ class GetFileNamePlot:
 #
 		mainFileNameGFAC      = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameGFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
+		mainFileNameGFACFit   = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileNameGFACFit  += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2+"-Fit"
 #
 		mainFileNameRFAC      = "vs-RFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameRFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
@@ -1314,6 +1316,8 @@ class GetFileNamePlot:
 		self.SaveEnergyMM     = self.src_dir+file_output1+mainFileNameMM+add2+"-MM"
 		self.SaveEntropyMM    = self.src_dir+file_output9+mainFileNameMM+add2+"-MM"
 		self.SaveEntropyCOMBO = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameCOMBO+"-COMBINE"
+		self.SaveEntropyGFACFit = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFACFit
+		self.SaveEnergyGFACFit= self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameGFACFit
 
 		if (self.TypeCal == "ENT"):
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)

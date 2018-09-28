@@ -29,8 +29,8 @@ TypeCal             = 'ENT'
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
 #TypePlot            = "CorrFunc"
-#TypePlot            = "S2"
-TypePlot            = "GFACTOR"
+TypePlot            = "S2"
+#TypePlot            = "GFACTOR"
 #TypePlot            = "COMBINE"
 #
 #molecule            = "HFC60"                                                  
@@ -42,20 +42,10 @@ Rpt                 = 10.05
 
 user_name           = "tapas"
 final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"
-if (variableName == "tau"):
-	parameterName   = "beta"
-	beta            = 0.2
-	parameter       = beta
-	temperature     = 1.0/beta   
-
-if (variableName == "beta"):
-	parameterName   = "tau"
-	tau             = 0.005
-	parameter       = tau
-
+#
 #==================================Plotting====================================#
 if (TypeCal == "ENT" and TypePlot == "GFACTOR"):
-	beadsRef            = 61
+	beadsRef            = 21
 	numbblocks	        = 20000
 	numbpass            = 100
 	preskip             = 10000
@@ -63,10 +53,13 @@ if (TypeCal == "ENT" and TypePlot == "GFACTOR"):
 
 	extra_file_name     = ""
 	ENT_TYPE 			= "SWAPTOUNSWAP"
+	parameterName       = "beta"
+	beta                = 0.2
+	parameter           = beta
 	FigureGenerator.GetFigureEntropyRT_vs_gFactor(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, beadsRef)
 
 if (TypeCal == "ENT" and TypePlot == "S2"):
-	numbmolecules       = 16
+	numbmolecules       = 2
 	numbblocks	        = 20000
 	numbpass            = 100
 	preskip             = 10000
@@ -75,24 +68,35 @@ if (TypeCal == "ENT" and TypePlot == "S2"):
 	extra_file_name     = ""
 	ENT_TYPE 			= "SWAPTOUNSWAP"
 
-	parameterName       = "tau"
-	tau                 = 0.005
-	parameter           = tau
+	if (variableName == "beta"):
+		parameterName       = "tau"
+		tau                 = 0.005
+		parameter           = tau
 
-	FigureGenerator.GetFigureEntropyRT_vs_beta(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, numbmolecules)
+		FigureGenerator.GetFigureEntropyRT_vs_beta(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, numbmolecules)
+
+	if (variableName == "tau"):
+		parameterName       = "beta"
+		beta                = 0.2
+		parameter           = beta
+		gFactor             = 1.0
+
+		FigureGenerator.GetFigureEntropyRT_vs_tau(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gFactor, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, numbmolecules)
 
 '''
 if (TypeCal == "ENT" and TypePlot == "GFACTOR" or TypePlot == "S2"):
-	beadsRef = 61
-	numbblocks	        = 50000
+	beadsRef = 21
+	numbblocks	        = 10000
 	numbmolecules       = 2
 	numbpass            = 200
 	particleA           = int(numbmolecules/2)
-	preskip             = 1000
+	preskip             = 6000
 	postskip            = 0
 
-	FigureGenerator.FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA,TypePlot, beadsRef)
+	FigureGenerator.FigureENT(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, '1.0', parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA,TypePlot, beadsRef)
+'''
 
+'''
 if (TypeCal == "ENT" and TypePlot == "COMBINE"):
 	beadsRef = 101
 	numbblocks	        = 50000
