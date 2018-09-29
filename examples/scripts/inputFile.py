@@ -17,7 +17,7 @@ def Getbeads(TypeCal, variableName):
 			list_nb = [4,8,12,16,20,24,28,32,36,40]
 
 	if (variableName == "tau"):
-		list_nb  = [4, 10, 20, 40, 60]
+		list_nb  = [10, 20, 40, 60]
 		#list_nb  = [24, 30]
 
 	if (TypeCal != "ENT"):
@@ -44,7 +44,7 @@ class GetStepAndLevel:
 
 			if (self.molecule_rot == "HF"):
 				self.step_trans = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-				self.step       = [2.0, 2.0, 2.0, 1.7, 1.5] #list_nb = [4, 10, 20, 40, 60] beta = 0.2
+				self.step       = [2.0, 2.0, 1.7, 1.5] #list_nb = [10, 20, 40, 60] beta = 0.2
 				#self.step       = [2.0, 2.0, 2.0]            #list_nb = [14, 24, 30] beta = 0.2
 				self.level      = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 

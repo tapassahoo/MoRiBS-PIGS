@@ -20,6 +20,7 @@ parser.add_argument("variable", help="Name of a variable: either beta or tau. It
 parser.add_argument("job", help="Type of a job: submission of new jobs or analyzing output files. It must be a string.", choices = ["submission", "analysis"])
 parser.add_argument("cal", help="Type of calculation - it is a string: a) PIMC - Finite Temperature calculation by Path Integral Monte Carlo b) PIGS - Ground State Path Integral c) ENT - Entanglement by replica algorithm based on PIGS.", choices = ["PIMC", "PIGS", "ENT"])
 parser.add_argument("--scal", help="subtype of calculations - must be defined as a string in case of ENT.", default = "SWAPTOUNSWAP", choices = ["SWAPTOUNSWAP", "BROKENPATH"])
+parser.add_argument("--RATIO", help="subtype of calculations - must be defined as a string in case of ENT. It applies ratio trick algorithm.", action="store_true")
 parser.add_argument("-N", help="Number of Molecules. It must be an integer.", type = int)
 parser.add_argument("-Block", help="Number of Blocks. It must be an integer", type = int)
 parser.add_argument("-Pass", help="Number of Passes. It must be an integer", type = int)
@@ -160,7 +161,12 @@ if (TypeCal == "ENT"):
 else:
 	maxloop = 1
 
-for particleA in range(1,maxloop+1):
+if (args.RATIO):	
+	particleAList = np.arange(1, maxloop+1)
+else:
+	particleAList = [maxloop]
+
+for particleA in particleAList:
 	#==================================Generating files for submission================#
 	file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
 	#===============================================================================
