@@ -7,7 +7,7 @@ from subprocess import call
 import numpy as np
 from numpy import *
 import decimal
-import support
+import support_without_parallel as support
 import FigureGenerator
 
 #===============================================================================
@@ -29,9 +29,9 @@ TypeCal             = 'ENT'
 #TypePlot            = "Energy"
 #TypePlot            = "ChemPot"
 #TypePlot            = "CorrFunc"
-TypePlot            = "S2"
+#TypePlot            = "S2"
 #TypePlot            = "GFACTOR"
-#TypePlot            = "COMBINE"
+TypePlot            = "COMBINE"
 #
 #molecule            = "HFC60"                                                  
 molecule            = "HF"                                                      
@@ -82,6 +82,21 @@ if (TypeCal == "ENT" and TypePlot == "S2"):
 		gFactor             = 1.0
 
 		FigureGenerator.GetFigureEntropyRT_vs_tau(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gFactor, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, numbmolecules)
+
+if (TypeCal == "ENT" and TypePlot == "COMBINE"):
+	beadsRef            = 61
+	numbblocks	        = 20000
+	numbpass            = 100
+	preskip             = 10000
+	postskip            = 0
+
+	extra_file_name     = ""
+	ENT_TYPE 			= ["SWAPTOUNSWAP","BROKENPATH"]
+	parameterName       = "beta"
+	beta                = 0.2
+	parameter           = beta
+	numbmolecules       = 2
+	FigureGenerator.GetFigureEntropyRT_vs_gFactor_COMBO(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, TypePlot, beadsRef, numbmolecules)
 
 '''
 if (TypeCal == "ENT" and TypePlot == "GFACTOR" or TypePlot == "S2"):

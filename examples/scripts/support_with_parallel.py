@@ -514,14 +514,18 @@ def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, vari
 	ii = 0
 	for iBead in list_nb:
 		if ((iBead % 2) != 0):
-			value = iBead
+			value     = iBead
 		else:
-			value = iBead+1
+			value     = iBead+1
 
-		tau       = parameter/(value-1)
-		variable  = tau
+		if (variableName == "beta"):
+			beta      = parameter*(value - 1)
+			variable  = beta
+		if (variableName == "tau"):
+			tau       = parameter/(value-1)
+			variable  = tau
 
-		numbbeads = value
+		numbbeads     = value
 
 		condition = True
 		col_purity= np.zeros((maxloop),dtype = 'f')
@@ -790,106 +794,126 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
+def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType,Config,file1_name,Parallel):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
 	step1_trans   = step_trans[iStep]
-	final_dir_in_work = dir_output + folder_run
 
-	if not Restart1:
-		os.chdir(dir_output)
-		if (os.path.isdir(folder_run) == True):
-			print("")
-			print("")
-			print("Error message")
-			print("")
-			print("")
-			printingMessage = "Remove "+str(dir_output)+str(folder_run)
-			print(printingMessage)
+	ConfigInput   = []
+	for iConfig in range(int(len(Config))):
+		if (Parallel == False):
+			iConfig = -1
+			
+		folder_run        = file1_name[iConfig+1]+str(numbbeads)
+		final_dir_in_work = dir_output + folder_run
+		if not Restart1:
+			os.chdir(dir_output)
+			if (os.path.isdir(folder_run) == True):
+				print("")
+				print("")
+				print("Error message")
+				print("")
+				print("")
+				printingMessage = "Remove "+str(dir_output)+str(folder_run)
+				print(printingMessage)
+				os.chdir(src_dir)
+				return
+
 			os.chdir(src_dir)
-			return
+			if (RotorType == "LINEAR"):
+				rotmat(TypeCal,molecule_rot,temperature,numbbeads,source_dir_exe)
 
-		os.chdir(src_dir)
-		if (RotorType == "LINEAR"):
-			rotmat(TypeCal,molecule_rot,temperature,numbbeads,source_dir_exe)
+				#call(["rm", "-rf", folder_run])
+			temperature1    = "%5.3f" % temperature
+			if (RotorType == "LINEAR"):
+				file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+				call(["mv", file_rotdens, dir_run_input_pimc[iConfig+1]])
+			else:
+				file_rotdens_rho = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rho"
+				call(["cp", file_rotdens_rho, dir_run_input_pimc[iConfig+1]])
+				file_rotdens_eng = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".eng"
+				call(["cp", file_rotdens_eng, dir_run_input_pimc[iConfig+1]])
+				file_rotdens_esq = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".esq"
+				call(["cp", file_rotdens_esq, dir_run_input_pimc[iConfig+1]])
 
-			#call(["rm", "-rf", folder_run])
-		temperature1    = "%5.3f" % temperature
-		if (RotorType == "LINEAR"):
-			file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
-			call(["mv", file_rotdens, dir_run_input_pimc])
+			if (crystal == True):
+				call(["cp", "LatticeConfig.xyz", dir_run_input_pimc[iConfig+1]])
 		else:
-			file_rotdens_rho = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rho"
-			call(["cp", file_rotdens_rho, dir_run_input_pimc])
-			file_rotdens_eng = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".eng"
-			call(["cp", file_rotdens_eng, dir_run_input_pimc])
-			file_rotdens_esq = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".esq"
-			call(["cp", file_rotdens_esq, dir_run_input_pimc])
-
-		if (crystal == True):
-			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
-	else:
-		os.chdir(dir_output)
-		if (os.path.isdir(folder_run) == False):
-			print("")
-			print("")
-			print("Error message")
-			print("")
-			print("")
-			printingMessage = str(dir_output)+str(folder_run)+" directory is absent."
-			print(printingMessage)
-			os.chdir(src_dir)
-			return
+			os.chdir(dir_output)
+			if (os.path.isdir(folder_run) == False):
+				print("")
+				print("")
+				print("Error message")
+				print("")
+				print("")
+				printingMessage = str(dir_output)+str(folder_run)+" directory is absent."
+				print(printingMessage)
+				os.chdir(src_dir)
+				return
 
 		os.chdir(src_dir)
-	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove)
+		GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove)
 
-	input_file    = "qmcbeads"+str(i)+".input"
-	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
-	folder_run_path = dir_run_job + folder_run 
+		input_file    = "qmcbeads"+str(i)+".input"
+		call(["mv", "qmc.input", dir_run_input_pimc[iConfig+1]+"/"+input_file])
+		folder_run_path = dir_run_job + folder_run 
 	
-	#call(["mkdir", "-p", folder_run_path+"/results"]) # add for graham.computecanada.ca
+		#job submission
+		fname         = 'job-for-P'+str(numbbeads)
+		if (TypeCal == 'PIGS'):
+			argument2     = "pigs"+str(numbmolecules)+"b"
+		if (TypeCal == 'PIMC'):
+			argument2     = "pimc"+str(numbmolecules)+"b"
+		if (TypeCal == 'ENT'):
+			argument2     = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
 
-	#job submission
-	if (TypeCal == 'PIGS'):
-		fname         = 'job-pigs-'+str(i)+'-for-'+folder_run
-		argument2     = "pigs"+str(numbmolecules)+"b"
-	if (TypeCal == 'PIMC'):
-		fname         = 'job-pimc-'+str(i)+'-for-'+folder_run
-		argument2     = "pimc"+str(numbmolecules)+"b"
-	if (TypeCal == 'ENT'):
-		fname         = 'job-ent-'+str(i)+'-for-'+folder_run
-		argument2       = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
+		fwrite        = open(fname, 'w')
 
-	fwrite        = open(fname, 'w')
+		if RUNDIR == "scratch":
+			if RUNIN == "CPU":
+				fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir, Restart1, dir_run_job,status_cagepot, dir_output))
+			else:
+				fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc[iConfig+1], PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output,Parallel))
+		else: 
+			fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc[iConfig+1], PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output,Parallel))
 
-	if RUNDIR == "scratch":
-		if RUNIN == "CPU":
-			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir, Restart1, dir_run_job,status_cagepot, dir_output))
-		else:
-			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output))
-	else: 
-		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output))
+		fwrite.close()
+		call(["mv", fname, dir_run_input_pimc[iConfig+1]])
+		if (Parallel):
+			InputPrint = "cd "+dir_run_input_pimc[iConfig+1]+"; sbatch "+fname
+			ConfigInput.append(InputPrint)
+		
+	if (Parallel):
+		fname_parallel_input = 'input-for-P'+str(numbbeads)
+		f = open(dir_run_input_pimc[0]+"/"+fname_parallel_input, "w")
+		f.write("\n".join(map(lambda x: str(x), ConfigInput)))
+		f.close()
 
-	fwrite.close()
-	call(["mv", fname, dir_run_input_pimc])
-	os.chdir(dir_run_input_pimc)
-
-	if (RUNIN == "CPU"):
-		call(["chmod", "755", fname])
-		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
-		command_pimc_run = "./"+fname + ">outpimc"+str(i)+" & "
-		print(command_pimc_run)
-		system(command_pimc_run)
+		fname_parallel_job = dir_run_input_pimc[0]+"/parallel-job-for-P"+str(numbbeads)
+		f1 = open(fname_parallel_job, "w")
+		f1.write(jobstring_sbatch_parallel(argument2+str(numbbeads)+"Config"+str(Config[iConfig]),fname_parallel_job, dir_run_input_pimc[0], fname_parallel_input))
+		f1.close()
+		
+	os.chdir(dir_run_input_pimc[0])
+	if (Parallel):
+		call(["sbatch", fname_parallel_job])
+		os.chdir(src_dir)
 	else:
-		#call(["qsub", fname])
-		if (NameOfPartition == 'tapas'):
-			call(["sbatch", "-p", "tapas", fname])
+		if (RUNIN == "CPU"):
+			call(["chmod", "755", fname])
+			#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
+			command_pimc_run = "./"+fname + ">outpimc"+str(i)+" & "
+			print(command_pimc_run)
+			system(command_pimc_run)
 		else:
-			call(["sbatch", fname])
+			#call(["qsub", fname])
+			if (NameOfPartition == 'tapas'):
+				call(["sbatch", "-p", "tapas", fname])
+			else:
+				call(["sbatch", fname])
 
-	os.chdir(src_dir)
+		os.chdir(src_dir)
 
 def jobstring_scratch_cpu(file_name, value, thread, run_dir, molecule, temperature, numbbeads, final_dir, dir_run_input_pimc, src_dir, Restart1, dir_run_job,status_cagepot, dir_output):
 	'''
@@ -919,7 +943,7 @@ mv %s /work/tapas/linear_rotors
 """ % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output):
+def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, Parallel):
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
@@ -927,7 +951,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "7-30:00"
+	walltime       = "28-00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -947,7 +971,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		CommandForMove = "mv "+folder_run_path+" "+dir_output
 	if (RUNDIR == "work"):
 		CommandForMove = " "
-	#CommandForMove = " " #for graham
+	CommandForMove = " " #for graham
 
 	if not PPA1:
 		CommandForPPA = "#"
@@ -983,7 +1007,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-##SBATCH --account=rrg-pnroy
+#SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=2048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -1002,11 +1026,28 @@ time ./pimc
 %s
 """ % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_cp, input_file, folder_run_path, file_rotdens, folder_run_path, "LatticeConfig.xyz", folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
 
+	job_string_parallel     = """#!/bin/bash
+export OMP_NUM_THREADS=%s
+rm -rf %s
+mkdir -p %s
+%s
+mv %s %s
+mv %s %s
+mv %s %s
+cd %s
+cp %s qmc.input
+cp %s %s
+%s cp %s %s
+####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
+time ./pimc>%s
+%s
+""" % (omp_thread, folder_run_path, output_dir, cagepot_cp, input_file, folder_run_path, file_rotdens, folder_run_path, "LatticeConfig.xyz", folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, logpath, CommandForMove)
+
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-##SBATCH --account=rrg-pnroy
+#SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -1022,7 +1063,10 @@ time ./pimc
 	if Restart1:
 		return job_string_restart
 	else:
-		return job_string
+		if (Parallel):	
+			return job_string_parallel
+		else:
+			return job_string
 
 def GetRotEnergy(molecule,jrot):
 	Energy = GetBconst(molecule)*jrot*(jrot+1.0)
@@ -1042,8 +1086,7 @@ def GetAvgRotEnergy(molecule,beta):
 	AvgEnergy = Nsum*CMRECIP2KL/Zsum
 	return AvgEnergy
 
-def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal):
-	#add                     = "-NumTimes"
+def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal,Config, Parallel):
 	add                     = ""
 	if (TypeCal == "ENT"):
 		add1                = "-ParticleA"+str(particleA)
@@ -1089,11 +1132,16 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact,
 	else:
 		FragmentGFactor = ""
 
-	file1_name      = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+mainFileName
+	file_name      = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+mainFileName
 	if (TypeCal == "ENT"):
-		file1_name += ENT_TYPE
+		file_name += ENT_TYPE
 	
-	return file1_name
+	file_name_submit = []
+	file_name_submit.append(file_name)
+	if (Parallel):
+		for i in range(int(len(Config))):
+			file_name_submit.append(file_name+str(Config[i])+'Config')
+	return file_name_submit
 
 class GetFileNameAnalysis:
 	def __init__(self, TypeCal1,TypeCal2, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
@@ -1294,8 +1342,6 @@ class GetFileNamePlot:
 #
 		mainFileNameGFAC      = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameGFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
-		mainFileNameGFACFit   = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
-		mainFileNameGFACFit  += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2+"-Fit"
 #
 		mainFileNameRFAC      = "vs-RFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameRFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
@@ -1303,27 +1349,24 @@ class GetFileNamePlot:
 		mainFileNameMM       += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
 		mainFileNameCOMBO     = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameCOMBO    += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
-		mainFileNameED 		  = "of-System"+str(self.numbmolecules)+str(self.molecule)+add1
 #
 		self.SaveEntropyGFAC  = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFAC
 		self.SaveEntropyRFAC  = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameRFAC
 		self.SaveEnergyGFAC   = self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameGFAC
 		self.SaveEnergyRFAC   = self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameRFAC
-		self.SaveEnergyED     = self.src_dir+file_output1+mainFileNameED+add2+"-ED"
-		self.SaveEntropyED    = self.src_dir+file_output9+mainFileNameED+add2+"-ED"
+		self.SaveEnergyDIAG   = self.src_dir+file_output1+mainFileNameMM+add2+"-DIAG"
+		self.SaveEntropyDIAG  = self.src_dir+file_output9+mainFileNameMM+add2+"-DIAG"
 		self.SaveCorrGFAC     = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameGFAC
 		self.SaveCorrRFAC     = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameRFAC
 		self.SaveEnergyMM     = self.src_dir+file_output1+mainFileNameMM+add2+"-MM"
 		self.SaveEntropyMM    = self.src_dir+file_output9+mainFileNameMM+add2+"-MM"
 		self.SaveEntropyCOMBO = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameCOMBO+"-COMBINE"
-		self.SaveEntropyGFACFit = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFACFit
-		self.SaveEnergyGFACFit= self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameGFACFit
 
 		if (self.TypeCal == "ENT"):
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 			mainFileNameRT   += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
-			self.SaveEntropyRT     = self.src_dir+file_output9+mainFileNameRT
+			self.SaveEntropyRT= self.src_dir+file_output9+mainFileNameRT
 
 def FileCheck(TypeCal,list_nb,variableName,SavedFile):
 	for i in list_nb:
@@ -1391,27 +1434,23 @@ def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
 	DipoleMoment   = DipoleMomentAU*Units.AuToDebye
 	return DipoleMoment
 
-def GetEDResults(TypeCal, FilePlotName, srcCodePath, RFactor, numbmolecules, particleA, lmax, ltotalmax):
-	'''
-	It will give ground state energy, von Neuman and Renyi entropies computed by diagonalizing full Hamiltonian matrix. It is developed by Dmitri https://github.com/0/DipoleChain.jl
-	'''
+def GetExactValues(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, particleA, molecule_rot, Rpt, dipolemoment, parameter, BConstantK, variableName, TypeCal):
 	if (TypeCal == "ENT"):
-		FileToBeSavedED = FilePlotName.SaveEntropyED+".txt"
+		FileToBeSavedDIAG = FilePlotName.SaveEntropyDIAG+".txt"
 		FileToBeSavedMM = FilePlotName.SaveEntropyMM+".txt"
 	if (TypeCal == "PIGS"):
-		FileToBeSavedED = FilePlotName.SaveEnergyED+".txt"
+		FileToBeSavedDIAG = FilePlotName.SaveEnergyDIAG+".txt"
 		FileToBeSavedMM = FilePlotName.SaveEnergyMM+".txt"
-	print(FileToBeSavedED)
 
-	commandRunED    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max "+str(lmax)+" --l-total-max "+str(ltotalmax)+" --A-start 1 --A-size "+str(particleA)
-	call(["rm", "outputED.txt"])
-	system(commandRunED)
-	call(["mv", "outputED.txt", FileToBeSavedED])
-	'''
+	commandRunDIAG    = "julia "+srcCodePath+"diagonalization.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 8 --l-total-max 8 --A-start 1"+" --A-size "+str(particleA)
+	call(["rm", "outputDIAG.txt"])
+	system(commandRunDIAG)
+	call(["mv", "outputDIAG.txt", FileToBeSavedDIAG])
 	if (numbmolecules >6):
 		print("It is not computing Matrix multiplication stuffs")
 		return
 
+	'''
 	if (numbmolecules <= 4):
 		call(["rm", "outputMM.txt"])
 
@@ -1439,11 +1478,9 @@ def GetPairDensity(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 		system(commandRun)
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
 
-'''
 def GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable):
 	#FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
 	GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable)
-'''
 
 def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
 	'''
@@ -1456,3 +1493,24 @@ def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
 	preFact        = preFact*Units.HARTREE2KL
 	printingmessage= " DipoleMoment = "+str(DipoleMoment)+" Debye and the prefactor of the dipole-dipole interaction potential = " + str(preFact)+ " K^-1"
 	print(printingmessage)
+
+def jobstring_sbatch_parallel(file_name, logfile, dir_run_input_pimc, input_file):
+	'''
+	This function creats jobstring for #SBATCH script
+	'''
+	job_name       = file_name
+	walltime       = "00:30:00"
+	logpath        = logfile
+
+	job_string     = """#!/bin/bash
+#SBATCH --job-name=%s
+#SBATCH --output=%s.out
+#SBATCH --time=%s
+#SBATCH --account=rrg-pnroy
+#SBATCH --mem-per-cpu=1048mb
+cd %s
+parallel --jobs 0 < %s 
+""" % (job_name, logpath, walltime, dir_run_input_pimc, input_file)
+
+	print(job_string)
+	return job_string

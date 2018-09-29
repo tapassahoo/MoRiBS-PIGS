@@ -9,7 +9,7 @@ from scipy.optimize import curve_fit
 from subprocess import call
 #from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import ScalarFormatter
-import support
+import support_without_parallel as support
 import os
 from pylab import *
 import matplotlib.axes
@@ -1461,5 +1461,130 @@ def	GetFigureEntropyRT_vs_tau(TypeCal, molecule_rot, TransMove, RotMove, variabl
 		
 	plt.subplots_adjust(top=0.97, bottom=0.16, left=0.16, right=0.98, hspace=0.0, wspace=0.0)
 	plt.legend(bbox_to_anchor=(0.70, 0.50), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
+	plt.savefig(outfileEntropy, dpi = 200, format = 'eps')
+	plt.show()
+
+def	GetFigureEntropyRT_vs_gFactor_COMBO(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, parameterName, parameter, numbblocks, numbpass, molecule, ENT_TYPE_LIST, preskip1, postskip1, extra_file_name, src_dir, TypePlot, beadsRef, numbmolecules):
+	'''
+	The below 4 parameters are defined arbitrarily 
+	as "support.GetFileNamePlot" function needs! 
+	'''
+	dipolemoment  = -1.0
+	particleA     = 1
+	gfact         = -1.0
+	#-------------------------------------------------#
+	# Here some parameters are defined for the Figure!
+	#-------------------------------------------------#
+	font          = 28
+	fontlegend    = font/2.0
+	fig           = plt.figure(figsize=(8, 6))
+	#plt.grid(True)
+	colorList  = ['blue', 'red', 'magenta', 'black','cyan']
+	lsList     = ['-', '--', '-.', '-']
+	markerList = ['o', '^', '*', 's','D']
+	#------------------------------------------------#
+	FilePlotName    = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, "", preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+	FilePlotEntropy = FilePlotName.SaveEntropyCOMBO+".eps"
+	outfileEntropy  = FilePlotEntropy
+	print(outfileEntropy)
+	call(["rm", FilePlotEntropy])
+#
+	gFactorList  = [0.5+0.1*i for i in range(76)]  
+	entropy1Plot     = np.zeros((len(ENT_TYPE_LIST),len(gFactorList)))
+	purity1Plot      = np.zeros((len(ENT_TYPE_LIST),len(gFactorList)))
+	err_entropy1Plot = np.zeros((len(ENT_TYPE_LIST),len(gFactorList)))
+	err_purity1Plot  = np.zeros((len(ENT_TYPE_LIST),len(gFactorList)))
+	entropyFitPlot   = np.zeros((len(ENT_TYPE_LIST),len(gFactorList)))
+	errorFitPlot     = np.zeros((len(ENT_TYPE_LIST),len(gFactorList)))
+
+	iLabel = 0
+	for ENT_TYPE in ENT_TYPE_LIST:
+		iii = 0
+		for gfact in gFactorList:	
+			gfact = '{:03.1f}'.format(gfact)
+			gfact = float(gfact)
+
+			FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+			FileToBePlotEntropy = FilePlotName.SaveEntropyRT+".txt"
+
+			beads1, var1, purity1, entropy1, err_purity1, err_entropy1 = genfromtxt(FileToBePlotEntropy,unpack=True, usecols=[0, 1, 2, 3, 4, 5], skip_header=0, skip_footer=0)
+
+			entropyFit,errorFit = GetFitPurity(FileToBePlotEntropy,numbmolecules,"g")
+			entropyFitPlot[iLabel,iii] = -math.log(entropyFit)
+			errorFitPlot[iLabel,iii]   = abs(errorFit/entropyFit)
+
+			if (np.isscalar(entropy1) == True):
+				entropy1Plot[iLabel,iii]     = entropy1
+				err_entropy1Plot[iLabel,iii] = err_entropy1
+				purity1Plot[iLabel,iii]      = purity1
+				err_purity1Plot[iLabel,iii]  = err_entropy1
+
+				iii += 1
+			else:
+				ii = 0
+				for i in beads1:
+					indexi =int(i+0.5)
+					beads = indexi
+					if (beads == beadsRef):
+						entropy1Plot[iLabel,iii]     = entropy1[ii]
+						err_purity1Plot[iLabel,iii]  = err_purity1[ii]
+						purity1Plot[iLabel,iii]      = purity1[ii]
+						err_entropy1Plot[iLabel,iii] = err_entropy1[ii]
+
+					ii += 1
+				iii += 1
+		iLabel += 1
+		
+	#print("S2:  PIGS "+str(numbmolecules))
+	#print(entropy1Plot)
+	#print("S2:  PIGS Fit "+str(numbmolecules))
+	#print(EntropyFitPlot)
+#
+	iLabel = 0
+	gFactorPlot      = gFactorList
+	textLabel        = ['Swap+Unswap grand ensemble', 'Broken path ensemble']
+	for ENT_TYPE in ENT_TYPE_LIST:
+		labelString = textLabel[iLabel]
+		#plt.errorbar(gFactorPlot, entropy1Plot[iLabel,:], yerr=err_entropy1Plot[iLabel,:], color = colorList[iLabel], ls = 'None', linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelString)
+		plt.errorbar(gFactorPlot, entropyFitPlot[iLabel,:], yerr=errorFitPlot[iLabel,:], color = colorList[iLabel], ls = 'None', linewidth=1,  marker = markerList[iLabel], markersize = 8, label = labelString)
+		iLabel += 1
+
+#Exact results obtained either by diagonalizing the Full Hamiltonian matrix or by DMRG #
+	varEDPlot        = np.zeros(len(gFactorList))
+	entropyEDPlot    = np.zeros(len(gFactorList))
+
+	iii = 0
+	for gfact in gFactorList:	
+		gfact = '{:03.1f}'.format(gfact)
+		gfact = float(gfact)
+
+		FilePlotName = support.GetFileNamePlot(TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, "SWAPTOUNSWAP", preskip1, postskip1, extra_file_name, src_dir, particleA, beadsRef)
+		FileToBePlotEntropyED     = FilePlotName.SaveEntropyED+".txt"
+
+		if (numbmolecules <= 4):
+			varED, entropyED = genfromtxt(FileToBePlotEntropyED,unpack=True, usecols=[0, 2])
+			varEDPlot[iii]        = 1.0/math.pow(varED,3)
+			entropyEDPlot[iii]    = entropyED
+		iii += 1
+
+	labelStringED = 'DMRG'
+
+	#print(varEDPlot)
+	#print(entropyEDPlot)
+	plt.plot(varEDPlot, entropyEDPlot, color = 'green', ls = 'None', linewidth=1,  marker = 'D', markersize = 8, label = labelStringED)
+
+	plt.xlabel(r'$g$', fontsize = font, labelpad=-3)
+	plt.ylabel(r'$S_{2}$', fontsize = font)
+	plt.xlim(0.0,8.1)
+	ymin, ymax = plt.ylim()
+	plt.ylim(0.0,ymax)
+	xmin, xmax = plt.xlim()
+
+	plt.xticks(fontsize=font, rotation=0)
+	plt.yticks(fontsize=font, rotation=0)
+
+	plt.text((xmin+(xmax-xmin)*0.4), ymax-(ymax-ymin)*0.1, r'$N = $'+str(numbmolecules), fontsize = font) 
+	plt.subplots_adjust(top=0.97, bottom=0.13, left=0.13, right=0.98, hspace=0.0, wspace=0.0)
+	plt.legend(bbox_to_anchor=(0.40, 0.40), loc=2, borderaxespad=1., shadow=True, fontsize = fontlegend)
 	plt.savefig(outfileEntropy, dpi = 200, format = 'eps')
 	plt.show()
