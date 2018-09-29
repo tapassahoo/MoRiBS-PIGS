@@ -2329,7 +2329,7 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
     return spot;
 }
 
-#ifdef BROKENPATH
+#ifndef RATIOTRICK
 double GetEstimNM(void)
 {
     int atom0, atom1;
@@ -2455,7 +2455,7 @@ double GetEstimDM(void)
 }
 #endif
 
-#ifdef SWAPTOUNSWAP
+#ifdef RATIOTRICK
 double GetEstimNM(void)
 {
     int atom0, atom1;
