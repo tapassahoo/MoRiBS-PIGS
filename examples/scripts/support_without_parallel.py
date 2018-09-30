@@ -499,7 +499,7 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal, final_results_path):
+def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal, final_results_path):
 	'''
 	This function gives us Renyi entropy of a many-rotors system simulated by Ratio trick algorithm.
 	'''
@@ -527,53 +527,43 @@ def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, vari
 
 		numbbeads     = value
 
-		condition = True
-		col_purity= np.zeros((maxloop),dtype = 'f')
-		col_err_purity= np.zeros((maxloop),dtype = 'f')
-		for partition in range(1,maxloop+1):
+		col_purity= np.zeros(len(particleAList),dtype = 'f')
+		col_err_purity= np.zeros(len(particleAList),dtype = 'f')
+
+		contition = False
+		iPartition = 0
+		for partition in particleAList:
 			file1_name = GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, partition, extra_file_name, crystal)
 			folder_run = file1_name+str(numbbeads)
 			final_dir_in_work = dir_output+folder_run
-			print(final_dir_in_work)
-			dir = os.path.dirname(final_dir_in_work+"/")
-			if not os.path.exists(dir):
-				condition = False
-				break	
-			col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
-			if (numbmolecules1 > 2):
+			if os.path.isdir(final_dir_in_work):
+				condition = True
+
+				col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+
 				workingNdim  = int(math.log(len(col_nm))/math.log(2))
 				trunc        = int(len(col_nm)-2**workingNdim)
-				mean_nm = np.mean(col_nm)
-				mean_dm = np.mean(col_dm)
-				err_nm  = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
-				err_dm  = maxError_byBining(mean_dm, col_dm, workingNdim-6)
+				mean_nm = np.mean(col_nm[trunc:])
+				mean_dm = np.mean(col_dm[trunc:])
+				err_nm  = maxError_byBining(mean_nm, col_nm[trunc:], workingNdim-6) 
+				err_dm  = maxError_byBining(mean_dm, col_dm[trunc:], workingNdim-6)
 
-				col_purity[partition-1]      = mean_nm/mean_dm
-				col_err_purity[partition-1]  = abs(mean_nm/mean_dm)*sqrt((err_dm/mean_dm)*(err_dm/mean_dm) + (err_nm/mean_nm)*(err_nm/mean_nm))
+				col_purity[iPartition]      = mean_nm/mean_dm
+				col_err_purity[iPartition]  = abs(mean_nm/mean_dm)*sqrt((err_dm/mean_dm)*(err_dm/mean_dm) + (err_nm/mean_nm)*(err_nm/mean_nm))
+			else:
+				condition = False
+			iPartition += 1
 			
 		if (condition == True):
-
-			workingNdim  = int(math.log(len(col_nm))/math.log(2))
-			trunc        = int(len(col_nm)-2**workingNdim)
-
-			if (numbmolecules1 > 2):
-
-				purity_block = np.prod(col_purity,axis=0)
-				purity       = purity_block
+			if (len(particleAList) > 1):
+				purity       = np.prod(col_purity,axis=0)
 				entropy      = -log(purity)
 				err_purity   = abs(purity)*sqrt(np.sum(np.square(np.divide(col_err_purity,col_purity))))
 				err_entropy  = abs(err_purity)/purity
 			else:
-				col_nm       = col_nm[trunc:]
-				col_dm       = col_dm[trunc:]
-				mean_nm      = np.mean(col_nm)
-				mean_dm      = np.mean(col_dm)
-				err_nm       = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
-				err_dm       = maxError_byBining(mean_dm, col_dm, workingNdim-6)
-
-				purity       = mean_nm/mean_dm
+				purity       = col_purity[0]
 				entropy      = -log(purity)
-				err_purity   = abs(purity)*sqrt((err_dm/mean_dm)*(err_dm/mean_dm) + (err_nm/mean_nm)*(err_nm/mean_nm))
+				err_purity   = col_err_purity[0]
 				err_entropy  = abs(err_purity)/purity
 
 			purity_combo[ii]      = purity
@@ -585,35 +575,19 @@ def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, vari
 			ii = ii+1
 
 	FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, partition)
-	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%5d','%10.6f', '%10.6f', '%10.6f', '%10.6f', '%10.6f'])
+	headerString = fmtAverageEntropyRT('tau')
+	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%4d','%10.6f', '%10.6f', '%10.6f', '%10.6f', '%10.6f'],header=headerString)
 	SavedFile = FileAnalysis.SaveEntropyRT
 	FileCheck(TypeCal,list_nb,variableName,SavedFile)
 	call(["cat", FileAnalysis.SaveEntropyRT])
 	print("Successful execution!")
 
-def fmtAverageEntropyRT(status,variable,ENT_TYPE):
+def fmtAverageEntropyRT(variable):
 	'''
 	This function gives us the output 
 	'''
-	if variable == "Rpt":
-		unit = "(Angstrom)"
-	else:
-		unit = "(1/K)"
-
-	if status == "analysis":
-		output     ="#"
-		if ENT_TYPE == 'SWAPTOUNSWAP':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}'.format('Beads', variable+'  (1/K)', 'Avg. Purity', 'Entropy', 'Error of Purity', 'Error of Entropy')
-		if ENT_TYPE == 'BROKENPATH':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}'.format('Beads', variable+'  (1/K)', 'Entropy', 'Error of Entropy')
-		if ENT_TYPE == 'SWAP':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}'.format('Beads', variable+'  (1/K)', 'Avg. Purity', 'Entropy', 'Error of Purity', 'Error of Entropy')
-		if ENT_TYPE == 'REGULARPATH':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}'.format('Beads', variable+'  (1/K)', 'Avg. Purity', 'Entropy', 'Error of Purity', 'Error of Entropy')
-		output    +="\n"
-		output    += '{0:=<115}'.format('#')
-		output    +="\n"
-		return output
+	output    = '{0:5}{1:10}{2:10}{3:10}{4:10}{5:30}'.format('P', variable+'(1/K)', 'Purity', 'Entropy', 'ErrorPurity', '  ErrorEntropy')
+	return output
 
 def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove):
 	'''
