@@ -499,7 +499,7 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal, final_results_path):
+def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal, final_results_path):
 	'''
 	This function gives us Renyi entropy of a many-rotors system simulated by Ratio trick algorithm.
 	'''
@@ -514,61 +514,56 @@ def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, vari
 	ii = 0
 	for iBead in list_nb:
 		if ((iBead % 2) != 0):
-			value = iBead
+			value     = iBead
 		else:
-			value = iBead+1
+			value     = iBead+1
 
-		tau       = parameter/(value-1)
-		variable  = tau
+		if (variableName == "beta"):
+			beta      = parameter*(value - 1)
+			variable  = beta
+		if (variableName == "tau"):
+			tau       = parameter/(value-1)
+			variable  = tau
 
-		numbbeads = value
+		numbbeads     = value
 
-		condition = True
-		col_purity= np.zeros((maxloop),dtype = 'f')
-		col_err_purity= np.zeros((maxloop),dtype = 'f')
-		for partition in range(1,maxloop+1):
+		col_purity= np.zeros(len(particleAList),dtype = 'f')
+		col_err_purity= np.zeros(len(particleAList),dtype = 'f')
+
+		contition = False
+		iPartition = 0
+		for partition in particleAList:
 			file1_name = GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, partition, extra_file_name, crystal)
 			folder_run = file1_name+str(numbbeads)
 			final_dir_in_work = dir_output+folder_run
-			dir = os.path.dirname(final_dir_in_work+"/")
-			if not os.path.exists(dir):
-				condition = False
-				break	
-			col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
-			if (numbmolecules1 > 2):
+			if os.path.isdir(final_dir_in_work):
+				condition = True
+
+				col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
+
 				workingNdim  = int(math.log(len(col_nm))/math.log(2))
 				trunc        = int(len(col_nm)-2**workingNdim)
-				mean_nm = np.mean(col_nm)
-				mean_dm = np.mean(col_dm)
-				err_nm  = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
-				err_dm  = maxError_byBining(mean_dm, col_dm, workingNdim-6)
+				mean_nm = np.mean(col_nm[trunc:])
+				mean_dm = np.mean(col_dm[trunc:])
+				err_nm  = maxError_byBining(mean_nm, col_nm[trunc:], workingNdim-6) 
+				err_dm  = maxError_byBining(mean_dm, col_dm[trunc:], workingNdim-6)
 
-				col_purity[partition-1]      = mean_nm/mean_dm
-				col_err_purity[partition-1]  = abs(mean_nm/mean_dm)*sqrt((err_dm/mean_dm)*(err_dm/mean_dm) + (err_nm/mean_nm)*(err_nm/mean_nm))
+				col_purity[iPartition]      = mean_nm/mean_dm
+				col_err_purity[iPartition]  = abs(mean_nm/mean_dm)*sqrt((err_dm/mean_dm)*(err_dm/mean_dm) + (err_nm/mean_nm)*(err_nm/mean_nm))
+			else:
+				condition = False
+			iPartition += 1
 			
 		if (condition == True):
-
-			workingNdim  = int(math.log(len(col_nm))/math.log(2))
-			trunc        = int(len(col_nm)-2**workingNdim)
-
-			if (numbmolecules1 > 2):
-
-				purity_block = np.prod(col_purity,axis=0)
-				purity       = purity_block
+			if (len(particleAList) > 1):
+				purity       = np.prod(col_purity,axis=0)
 				entropy      = -log(purity)
 				err_purity   = abs(purity)*sqrt(np.sum(np.square(np.divide(col_err_purity,col_purity))))
 				err_entropy  = abs(err_purity)/purity
 			else:
-				col_nm       = col_nm[trunc:]
-				col_dm       = col_dm[trunc:]
-				mean_nm      = np.mean(col_nm)
-				mean_dm      = np.mean(col_dm)
-				err_nm       = maxError_byBining(mean_nm, col_nm, workingNdim-6) 
-				err_dm       = maxError_byBining(mean_dm, col_dm, workingNdim-6)
-
-				purity       = mean_nm/mean_dm
+				purity       = col_purity[0]
 				entropy      = -log(purity)
-				err_purity   = abs(purity)*sqrt((err_dm/mean_dm)*(err_dm/mean_dm) + (err_nm/mean_nm)*(err_nm/mean_nm))
+				err_purity   = col_err_purity[0]
 				err_entropy  = abs(err_purity)/purity
 
 			purity_combo[ii]      = purity
@@ -580,35 +575,19 @@ def GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, vari
 			ii = ii+1
 
 	FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, partition)
-	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%5d','%10.6f', '%10.6f', '%10.6f', '%10.6f', '%10.6f'])
+	headerString = fmtAverageEntropyRT('tau')
+	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%4d','%10.6f', '%10.6f', '%10.6f', '%10.6f', '%10.6f'],header=headerString)
 	SavedFile = FileAnalysis.SaveEntropyRT
 	FileCheck(TypeCal,list_nb,variableName,SavedFile)
 	call(["cat", FileAnalysis.SaveEntropyRT])
 	print("Successful execution!")
 
-def fmtAverageEntropyRT(status,variable,ENT_TYPE):
+def fmtAverageEntropyRT(variable):
 	'''
 	This function gives us the output 
 	'''
-	if variable == "Rpt":
-		unit = "(Angstrom)"
-	else:
-		unit = "(1/K)"
-
-	if status == "analysis":
-		output     ="#"
-		if ENT_TYPE == 'SWAPTOUNSWAP':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}'.format('Beads', variable+'  (1/K)', 'Avg. Purity', 'Entropy', 'Error of Purity', 'Error of Entropy')
-		if ENT_TYPE == 'BROKENPATH':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}'.format('Beads', variable+'  (1/K)', 'Entropy', 'Error of Entropy')
-		if ENT_TYPE == 'SWAP':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}'.format('Beads', variable+'  (1/K)', 'Avg. Purity', 'Entropy', 'Error of Purity', 'Error of Entropy')
-		if ENT_TYPE == 'REGULARPATH':
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}'.format('Beads', variable+'  (1/K)', 'Avg. Purity', 'Entropy', 'Error of Purity', 'Error of Entropy')
-		output    +="\n"
-		output    += '{0:=<115}'.format('#')
-		output    +="\n"
-		return output
+	output    = '{0:5}{1:10}{2:10}{3:10}{4:10}{5:30}'.format('P', variable+'(1/K)', 'Purity', 'Entropy', 'ErrorPurity', '  ErrorEntropy')
+	return output
 
 def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove):
 	'''
@@ -716,7 +695,7 @@ def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
 		numbbeads1		= numbbeads
 	else:
 		numbbeads1		= numbbeads - 1
-	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 1500 -1"
+	command_linden_run = source_dir_exe+"linear_prop/linden.x "+str(temperature)+" "+str(numbbeads1)+" "+str(GetBconst(molecule))+" 15000 -1"
 	system(command_linden_run)
 	file_rotdens    = molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	call(["mv", "linden.out", file_rotdens])
@@ -841,6 +820,14 @@ def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_
 			print(printingMessage)
 			os.chdir(src_dir)
 			return
+		else:
+			os.chdir(dir_output+folder_run+"/results")
+			print(dir_output+folder_run+"/results")
+			if (TypeCal == "ENT"):
+				fileList = ["output.rden", "output.xyz"]
+				for filemv in fileList:
+					call(["mv", filemv, filemv+"_old"])
+					#call(["rm", filemv])
 
 		os.chdir(src_dir)
 	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove)
@@ -849,18 +836,16 @@ def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
 	folder_run_path = dir_run_job + folder_run 
 	
-	#call(["mkdir", "-p", folder_run_path+"/results"]) # add for graham.computecanada.ca
-
 	#job submission
+	fname         = 'job-for-P'+str(numbbeads)
 	if (TypeCal == 'PIGS'):
-		fname         = 'job-pigs-'+str(i)+'-for-'+folder_run
 		argument2     = "pigs"+str(numbmolecules)+"b"
 	if (TypeCal == 'PIMC'):
-		fname         = 'job-pimc-'+str(i)+'-for-'+folder_run
 		argument2     = "pimc"+str(numbmolecules)+"b"
 	if (TypeCal == 'ENT'):
-		fname         = 'job-ent-'+str(i)+'-for-'+folder_run
-		argument2       = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
+		argument2     = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
+		if(Restart1):
+			argument2 += "Restart"
 
 	fwrite        = open(fname, 'w')
 
@@ -927,7 +912,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "7-30:00"
+	walltime       = "28-00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -1228,7 +1213,10 @@ class GetFileNamePlot:
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"+self.extra
 			add1                  = "-ParticleA"+str(self.particleA)
-			add2                  = "-"+self.ENT_TYPE
+			if (self.ENT_TYPE):	
+				add2                  = "-"+self.ENT_TYPE
+			else:
+				add2                  = ""
 		else:
 			frontName             = self.TypeCal+"-"+self.extra
 			add1                  = ""
@@ -1294,13 +1282,15 @@ class GetFileNamePlot:
 #
 		mainFileNameGFAC      = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameGFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
+		mainFileNameGFACFit   = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileNameGFACFit  += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2+"-Fit"
 #
 		mainFileNameRFAC      = "vs-RFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
 		mainFileNameRFAC     += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 		mainFileNameMM 		  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv"
 		mainFileNameMM       += "-System"+str(self.numbmolecules)+str(self.molecule)+add1
-		mainFileNameCOMBO     = "vs-gFactor-of-"+str(self.molecule)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-numbbeads"+str(self.var)+"-Blocks"+str(self.numbblocks)
-		mainFileNameCOMBO    += "-Passes"+str(self.numbpass)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+		mainFileNameCOMBO     = "vs-gFactor-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileNameCOMBO    += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 		mainFileNameED 		  = "of-System"+str(self.numbmolecules)+str(self.molecule)+add1
 #
 		self.SaveEntropyGFAC  = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFAC
@@ -1313,7 +1303,9 @@ class GetFileNamePlot:
 		self.SaveCorrRFAC     = self.src_dir+frontName+FragmentRpt+"correlation-"+mainFileNameRFAC
 		self.SaveEnergyMM     = self.src_dir+file_output1+mainFileNameMM+add2+"-MM"
 		self.SaveEntropyMM    = self.src_dir+file_output9+mainFileNameMM+add2+"-MM"
-		self.SaveEntropyCOMBO = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameCOMBO+"-COMBINE"
+		self.SaveEntropyCOMBO = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFACFit+"-COMBINE"
+		self.SaveEntropyGFACFit = self.src_dir+frontName+FragmentRpt+"Entropy-"+mainFileNameGFACFit
+		self.SaveEnergyGFACFit= self.src_dir+frontName+FragmentRpt+"Energy-"+mainFileNameGFACFit
 
 		if (self.TypeCal == "ENT"):
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)

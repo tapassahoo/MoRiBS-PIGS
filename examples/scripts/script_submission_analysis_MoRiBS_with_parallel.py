@@ -7,13 +7,13 @@ import os
 import decimal
 import numpy as np
 from numpy import *
-import support
+import support_with_parallel as support
 import inputFile
 import sys
 import argparse
 
 parser = argparse.ArgumentParser(description='It is a script file, written in Python, used to submit jobs in a queue as well as analyze output data files. Note: Module support.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo. User can easily modify module inputFile.py to generate lists of beads (see Getbeads function), step lengths for rotational and translational motions, and levels for Bisection move (see class GetStepAndLevel) as needed.')
-parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye. In case of V = -A*cos(theta), A is passed by -d argument and its unit is defined as Kelvin^-1 in the code.", default = -1.0)
+parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye.", default = -1.0)
 parser.add_argument("-g", "--gFactor", type=float, help="It defines interaction strength.", default = -1.0)
 parser.add_argument("-R", "--Rpt", type=float, help="Inter molecular spacing.", default = -1.0)
 parser.add_argument("variable", help="Name of a variable: either beta or tau. It must be a string. Note: for finite temperature computations only the variable tau is needed.", choices =["tau","beta"])
@@ -28,8 +28,8 @@ parser.add_argument("--ROTMOVE", action="store_true", help="It allows rotational
 parser.add_argument("--partition", help="allows to submit jobs in a specific cpu. It is a string. User does not need it.", default = "ntapas")
 parser.add_argument("Molecule", help="Name of molecular system. E.g. - H2O, FCC-H2O, H2O@c60")
 parser.add_argument("--PPA", action="store_true", help="Inclussion of Pair Product Approximation. It is in the developing condition.")
-parser.add_argument("-lmax", "--lmax", type=int, help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
-parser.add_argument("-ltotalmax", "--ltotalmax", type=int,  help="Maximum lmax quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
+parser.add_argument("-lmax", "--lmaxloop,max", help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
+parser.add_argument("-ltotalmax", "--ltotalmax", help="Maximum lmax quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
 parser.add_argument("Rotor", help="Name of rotor. E.g. - HF, H2O. It is needed to save rotational density matrix.")
 parser.add_argument("param", type=float, help="Fixed value of beta or tau.")
 parser.add_argument("--preskip", type=int, help="skips # of lines from the begining of an output file. It can be needed while analysis flag is open!", default = 0)
@@ -39,6 +39,7 @@ parser.add_argument("--RESTART", action="store_true", help="It is used to restar
 parser.add_argument("-NR", type = int, help="Number of blocks extended by uesr.", default = 0)
 parser.add_argument("--CRYSTAL", action="store_true", help="Reads Lattice configurations and the corresponding dipolemoments.")
 parser.add_argument("--Type", default = "LINEAR", help="Specify your rotor type: LINEAR or NONLINEAR.")
+parser.add_argument("--PARALLEL", action="store_true", help="This flag helps the user to submit jobs using GNU parallel. In this case, the source codes need the initial configurations from the previous simulated ones.")
 args = parser.parse_args()
 
 #===============================================================================
@@ -51,13 +52,18 @@ variableName        = args.variable
 #
 TransMove           = args.MOVECOM
 RotMove             = args.ROTMOVE
+Parallel            = args.PARALLEL
+if(Parallel):
+	Config          = [10000, 15000, 20000]
+else:
+	Config          = [""]
 #
 status              = args.job
 #
 #Request to change
 #If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham""
-NameOfServer        = "nlogn"
-#NameOfServer        = "graham"
+#NameOfServer        = "nlogn"
+NameOfServer        = "graham"
 NameOfPartition     = args.partition
 #
 TypeCal             = args.cal
@@ -154,15 +160,15 @@ if (NameOfServer == "graham"):
 else:
 	dir_output      = "/work/"+user_name+"/"+out_dir            
 
-
 if (TypeCal == "ENT"):
 	maxloop = int(numbmolecules1/2)
 else:
 	maxloop = 1
 
 for particleA in range(1,maxloop+1):
+	index = 0
 	#==================================Generating files for submission================#
-	file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
+	file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal, Config, Parallel)
 	#===============================================================================
 	#                                                                              |
 	#   compilation of linden.f to generate rotational density matrix - linden.out |
@@ -170,27 +176,50 @@ for particleA in range(1,maxloop+1):
 	#                                                                              |
 	#===============================================================================
 	if status == "submission":
+		dir_run_input_pimc = []
 		if (NameOfServer == "graham"):
-			dir_run_input_pimc = "/scratch/"+user_name+"/"+out_dir+file1_name+"PIMC"
+			dir_run_input_pimc.append("/scratch/"+user_name+"/"+out_dir+file1_name[0]+"PIMC")
+			if (os.path.isdir(dir_run_input_pimc[0]) == False):
+				call(["mkdir", "-p", dir_run_input_pimc[0]])
 		else:
-			dir_run_input_pimc = "/work/"+user_name+"/"+out_dir+file1_name+"PIMC"
+			dir_run_input_pimc.append("/work/"+user_name+"/"+out_dir+file1_name[0]+"PIMC")
+			if (os.path.isdir(dir_run_input_pimc[0]) == False):
+				call(["mkdir", "-p", dir_run_input_pimc[0]])
+		for iConfig in range(int(len(Config))):
+			if (Parallel):
+				if (NameOfServer == "graham"):
+					dir_run_input_pimc.append("/scratch/"+user_name+"/"+out_dir+file1_name[iConfig+1]+"PIMC")
+				else:
+					dir_run_input_pimc.append("/work/"+user_name+"/"+out_dir+file1_name[iConfig+1]+"PIMC")
 
-		if (os.path.isdir(dir_run_input_pimc) == False):
-			call(["rm", "-rf",  dir_run_input_pimc])
-			call(["mkdir", "-p", dir_run_input_pimc])
+		if (Parallel == False):
+			if not args.RESTART:
+				call(["cp", execution_file, dir_run_input_pimc[0]])
 
-		if not args.RESTART:
-			call(["cp", execution_file, dir_run_input_pimc])
+			if (status_cagepot == True):
+				if not args.RESTART:
+					support.compile_cagepot(source_dir_exe, input_dir)
+					support.cagepot(source_dir_exe);
+					call(["mv", "hfc60.pot", dir_run_input_pimc[0]])
+
+		if (Parallel):
+			for iConfig in range(int(len(Config))):
+				if (os.path.isdir(dir_run_input_pimc[iConfig+1]) == False):
+					call(["rm", "-rf",  dir_run_input_pimc[iConfig+1]])
+					call(["mkdir", "-p", dir_run_input_pimc[iConfig+1]])
+
+				if not args.RESTART:
+					call(["cp", execution_file, dir_run_input_pimc[iConfig+1]])
+
+				if (status_cagepot == True):
+					if not args.RESTART:
+						support.compile_cagepot(source_dir_exe, input_dir)
+						support.cagepot(source_dir_exe);
+						call(["mv", "hfc60.pot", dir_run_input_pimc[iConfig+1]])
 
 		if (RotorType == "LINEAR"):
 			if not args.RESTART:
 				support.compile_rotmat(source_dir_exe, input_dir)
-
-		if (status_cagepot == True):
-			if not args.RESTART:
-				support.compile_cagepot(source_dir_exe, input_dir)
-				support.cagepot(source_dir_exe);
-				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
 	if ((status == "analysis") and (TypeCal != "ENT")):
 		FileAnalysis = support.GetFileNameAnalysis(TypeCal, False, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
@@ -259,7 +288,7 @@ for particleA in range(1,maxloop+1):
 				else:
 					Restart1 = False
 
-				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType)
+				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1,crystal,RotorType,Config,file1_name,Parallel)
 
 			if status == "analysis":
 
@@ -290,7 +319,7 @@ for particleA in range(1,maxloop+1):
 				variable = tau
 
 			numbbeads    = value
-			folder_run   = file1_name+str(numbbeads)
+			folder_run   = file1_name[0]+str(numbbeads)
 
 			if status   == "submission":
 
@@ -308,7 +337,7 @@ for particleA in range(1,maxloop+1):
 				else:
 					Restart1 = False
 
-				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType)
+				support.Submission(status,TransMove, RotMove,RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step_rot, step_COM, level_bisection, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal,RotorType,Config,file1_name,Parallel)
 
 			if status == "analysis":
 
@@ -317,13 +346,11 @@ for particleA in range(1,maxloop+1):
 					if (TypeCal != "ENT"):
 						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
 						fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
-						'''
-						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						'''
+						#fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						#fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						#fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						#fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						#fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 				except:
 					pass
 		iStep = iStep + 1
@@ -363,6 +390,4 @@ for particleA in range(1,maxloop+1):
 if (status == "analysis") and (TypeCal == "ENT"):
 	print("Final Entropy obtained by employing Ratio Trick")
 	support.GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal, final_results_path)
-	'''
-	support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
-	'''
+	#support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)

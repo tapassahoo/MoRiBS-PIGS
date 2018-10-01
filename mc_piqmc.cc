@@ -1110,7 +1110,9 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 	int particleA2Min = 0;
 	int particleA2Max = 0;
 	int iRefAtom = RefAtom;
+#ifdef RATIOTRICK
 	if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
+#endif
 	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
 // the old density
@@ -1125,8 +1127,6 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	}
 
    	double dens_old;
-// If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
-// if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
 	if (it1 == 0 || it1 == (NumbRotTimes - 1))
 	{
 		if (it1 == 0) dens_old = SRotDens(p1, type);
@@ -1138,10 +1138,17 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 	int beadM       = ((NumbRotTimes - 1)/2);
 	if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 	{
+#ifdef RATIOTRICK
 		if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
 		{
 			dens_old = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, MCCosine);
 		}
+#else
+		if (Distribution == "Swap")
+		{
+			dens_old = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, MCCosine);
+		}
+#endif
 	}
 //
    	if (fabs(dens_old)<RZERO) dens_old = 0.0;
@@ -1188,10 +1195,17 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
 	if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 	{
+#ifdef RATIOTRICK
 		if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
 		{
 			dens_new = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, newcoords);
 		}
+#else
+		if (Distribution == "Swap")
+		{
+			dens_new = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, newcoords);
+		}
+#endif
 	}
 //
 	if (fabs(dens_new)<RZERO) dens_new = 0.0;
@@ -1345,7 +1359,11 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
                 Eulang1[CHI] = 0.0;
 
 				weight1 = 1.0;
+#ifdef RATIOTRICK
 				if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2))) 
+#else
+				if (Distribution == "Swap")
+#endif
 				{
 					if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
             		{
@@ -1366,7 +1384,11 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
             }  //stype
         } //loop over atom1 (molecules)
 		spotSwap = 0.0;
+#ifdef RATIOTRICK
 		if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2)))
+#else
+		if (Distribution == "Swap")
+#endif
 		{
 			if (it == ((NumbRotTimes - 1)/2))
 			{

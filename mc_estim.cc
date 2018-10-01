@@ -2329,6 +2329,133 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
     return spot;
 }
 
+#ifndef RATIOTRICK
+double GetEstimNM(void)
+{
+    int atom0, atom1;
+    int type        = IMTYPE;
+
+   	int particleA1Min = 0;
+   	int particleA1Max = 0;
+   	int particleA2Min = 0;
+   	int particleA2Max = 0;
+	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
+    double spot    = 0.0;
+
+    for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
+    {
+        for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
+        {
+            spot      += GetPotEnergyEntanglement(atom0, atom1);
+		}
+    }
+
+    for (int atom0 = particleA2Min; atom0 <= particleA2Max; atom0++)
+    {
+    	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
+    	{
+        	spot      += GetPotEnergyEntanglement(atom0, atom1);
+    	}
+	}
+    double potEstimNM = exp(-MCRotTau*spot);
+
+    int it0  = (((NumbRotTimes - 1)/2)-1);
+    int it1  = ((NumbRotTimes - 1)/2);
+
+    double dens1 = 1.0;
+    for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
+	{
+    	int atom1 = particleA2Max - (atom0 - particleA1Min);
+    	int offset0 = NumbRotTimes*atom0;
+    	int offset1 = NumbRotTimes*atom1;
+
+    	int t1M1 = offset0 + it0;
+    	int t1M = offset1 + it1;
+
+    	double p0   = 0.0;
+    	for (int id = 0;id<NDIM;id++)
+   	 	{
+        	p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+    	}
+    	dens1 *= SRotDens(p0,type);
+	}
+
+    double dens2 = 1.0;
+    for (int atom0 = particleA2Min; atom0 <= particleA2Max; atom0++)
+	{
+    	int atom1 = particleA1Max - (atom0 - particleA2Min);
+
+    	int offset0 = NumbRotTimes*atom0;
+    	int offset1 = NumbRotTimes*atom1;
+
+    	int t1M1 = offset0 + it0;
+    	int t1M = offset1 + it1;
+
+    	double p0   = 0.0;
+    	for (int id = 0;id<NDIM;id++)
+   	 	{
+        	p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+    	}
+    	dens2 *= SRotDens(p0,type);
+	}
+  	double estimNM = dens1*dens2*potEstimNM;
+    return estimNM;
+}
+
+double GetEstimDM(void)
+{
+    int type       = IMTYPE;
+
+   	int particleA1Min = 0;
+   	int particleA1Max = 0;
+   	int particleA2Min = 0;
+   	int particleA2Max = 0;
+	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
+    double spot    = 0.0;
+
+    for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
+	{
+    	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
+    	{
+        	spot      += GetPotEnergyEntanglement(atom0, atom1);
+    	}
+	}
+
+    for (int atom0 = particleA2Min; atom0 <= particleA2Max; atom0++)
+	{
+    	for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
+    	{
+        	spot      += GetPotEnergyEntanglement(atom0, atom1);
+    	}
+	}
+    double potEstimDM = exp(-MCRotTau*spot);
+
+    double dens = 1.0;
+    for (int atom0 = particleA1Min; atom0 <= particleA2Max; atom0++)
+    {
+        int it0 = (((NumbRotTimes - 1)/2)-1);
+        int it1 = ((NumbRotTimes - 1)/2);
+
+        int offset0 = NumbRotTimes*atom0;
+
+        int t0 = offset0 + it0;
+        int t1 = offset0 + it1;
+
+        double p0   = 0.0;
+        for (int id = 0;id<NDIM;id++)
+        {
+            p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+        }
+        dens *= SRotDens(p0,type);
+    }
+    double estimDM = dens*potEstimDM;
+    return estimDM;
+}
+#endif
+
+#ifdef RATIOTRICK
 double GetEstimNM(void)
 {
     int atom0, atom1;
@@ -2491,6 +2618,7 @@ double GetEstimDM(void)
 	double estimDM = dens*potEstimDM;
     return estimDM;
 }
+#endif
 
 double GetPotEnergy(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc
