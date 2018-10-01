@@ -1,6 +1,6 @@
 Here are few instructions that will help a user to modify script files before submitting jobs in queue. The source codes can be downloaded directly from github by typing the following line on the terminal:
 
-        git clone git@github.com:tapassahoo/MoRiBS-PIGS.git
+        [](git clone git@github.com:tapassahoo/MoRiBS-PIGS.git)
 
 > It is important to note that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
 
