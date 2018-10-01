@@ -47,25 +47,27 @@ but the user may change these as
         input_dir           = "INPUT/"
         final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
 
-1. In **support.py**
+2. In **support.py**
 
-- Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
+   - Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
 
-- In jobstring_sbatch function, adjust thread and walltime format.
+   - In jobstring_sbatch function, adjust thread and walltime format.
+   
+```
+thread         = Number of thread. In general user can use 4 threads to get speed up.
+walltime       = "40-00:00" # for Feynman or nlogn server
+walltime       = "40:00:00" # for graham.computecanada.ca
+```
+   - In case of feynman, user comment out the below line in the above mentioned function
+```   
+#SBATCH --account=rrg-pnroy
+```
 
-    thread         = Number of thread. In general user can use 4 threads to get speed up.
-    walltime       = "40-00:00" # for Feynman or nlogn server
-    walltime       = "40:00:00" # for graham.computecanada.ca
+3. In **inputFile.py**
 
-    In case of feynman, user comment out the below line in the above mentioned function
-    
-    #SBATCH --account=rrg-pnroy
+   - Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
 
-In **inputFile.py**
-
-- Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
-
-- Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.
+   - Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.
 
 
 
@@ -86,16 +88,13 @@ Examples of command line arguments to submit the jobs are given below:
 
 Read the outputs printed on the screen.
 
-#------------------------------------------------------------------------#
-
 To analyze the output data -
 
         python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE --preskip 10000 tau analysis PIMC H2O H2O 0.0333333333"
 
 Read the outputs printed on the screen. Final output files will be saved in directory final_results_path.
 
-#---------------------Best of Luck---------------------------------------#
 
-N.B.: Don't hesitate to email to the developer if you face any problem to submit your jobs or analyze the output files by the scripts.
+***N.B.: Don't hesitate to email to the developer if you face any problem to submit your jobs or analyze the output files by the scripts.***
 
 Email: tapascuchem@gmail.com
