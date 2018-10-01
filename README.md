@@ -25,11 +25,11 @@ The user are suggested to make the following modifications in the scripts before
 
 1. In **script_submission_analysis_MoRiBS.py**
 
-        - If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
+   - If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
 
-        - If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
+   - If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
 
-        - Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
+   - Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
 
         user_name           = "tapas"
         source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
