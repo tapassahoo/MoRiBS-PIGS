@@ -58,7 +58,9 @@ thread         = Number of thread. In general user can use 4 threads to get spee
 walltime       = "40-00:00" # for Feynman or nlogn server
 walltime       = "40:00:00" # for graham.computecanada.ca
 ```
+
    - In case of feynman, user comment out the below line in the above mentioned function
+   
 ```   
 #SBATCH --account=rrg-pnroy
 ```
