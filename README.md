@@ -23,7 +23,7 @@ But the user does not need to compile the source codes manually if the user wish
 
 The user are suggested to make the following modifications in the scripts before running MoRiBs successfully:
 
-### In script_submission_analysis_MoRiBS.py
+1. In ***script_submission_analysis_MoRiBS.py***
 
 - If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
 
