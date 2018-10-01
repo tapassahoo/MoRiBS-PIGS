@@ -14,20 +14,22 @@ In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PI
 But the user does not need to compile the source codes manually if the user like to submit jobs by script files. The script files are in dir: MoRiBS-PIGS/examples/scripts). There are three python scripts:
 
 [ ] script_submission_analysis_MoRiBS.py
+
 [ ] support.py
+
 [ ] inputFile.py
 
 The user are suggested to make the following modifications in the scripts before running MoRiBs successfully:
 
 #------------------------------------------------------------------------#
 
-A. In script_submission_analysis_MoRiBS.py
+### In script_submission_analysis_MoRiBS.py
 
-1. If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
+- If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
 
-2. If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
+- If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
 
-3. Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
+- Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
 
         user_name           = "tapas"
         source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
