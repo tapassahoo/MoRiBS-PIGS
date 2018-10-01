@@ -32,20 +32,22 @@ The user are suggested to make the following modifications in the scripts before
    - Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
 
 ```
-        user_name           = "tapas"
-        source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
-        out_dir             = "nonlinear-molecule/"                         #This directory will automatically be created in /work or in /scratch if it does not exits.      
-        input_dir           = "examples/nonlinear-molecule/"                #Where all the input and scripts are
-        final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"   #Where all the final results will be stored after analyzing the MoRiBs outputs.
+user_name           = "tapas"
+source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
+out_dir             = "nonlinear-molecule/"                         #This directory will automatically be created in /work or in /scratch if it does not exits.      
+input_dir           = "examples/nonlinear-molecule/"                #Where all the input and scripts are
+final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"   #Where all the final results will be stored after analyzing the MoRiBs outputs.
 ```
 
-but the user may change these as
+   - but the user may change these as
 
-        user_name           = "user_name" excluding "/"
-        source_dir          = "MoRiBS-PIMC/"
-        out_dir             = "PIMC-H2O/"
-        input_dir           = "INPUT/"
-        final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
+```
+user_name           = "user_name" excluding "/"
+source_dir          = "MoRiBS-PIMC/"
+out_dir             = "PIMC-H2O/"
+input_dir           = "INPUT/"
+final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
+```
 
 2. In **support.py**
 
