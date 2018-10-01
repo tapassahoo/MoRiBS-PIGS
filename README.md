@@ -21,8 +21,6 @@ But the user does not need to compile the source codes manually if the user like
 
 The user are suggested to make the following modifications in the scripts before running MoRiBs successfully:
 
-#------------------------------------------------------------------------#
-
 ### In script_submission_analysis_MoRiBS.py
 
 - If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
@@ -45,12 +43,11 @@ but the user may change these as
         input_dir           = "INPUT/"
         final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
 
-#------------------------------------------------------------------------#
+1. In **support.py**
 
-B. In support.py
-1. Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
+- Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
 
-2. In jobstring_sbatch function, adjust thread and walltime format.
+- In jobstring_sbatch function, adjust thread and walltime format.
 
     thread         = Number of thread. In general user can use 4 threads to get speed up.
     walltime       = "40-00:00" # for Feynman or nlogn server
@@ -60,15 +57,13 @@ B. In support.py
     
     #SBATCH --account=rrg-pnroy
 
-#------------------------------------------------------------------------#
-
-### In inputFile.py
+In **inputFile.py**
 
 - Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
 
 - Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.
 
-#------------------------------------------------------------------------#
+
 
 Now the script files are ready to submit your jobs. To know the command line arguments, just type the following command in terminal
 
