@@ -13,7 +13,7 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser(description='It is a script file, written in Python, used to submit jobs in a queue as well as analyze output data files. Note: Module support.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo. User can easily modify module inputFile.py to generate lists of beads (see Getbeads function), step lengths for rotational and translational motions, and levels for Bisection move (see class GetStepAndLevel) as needed.')
-parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye.", default = -1.0)
+parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye. In case of V = -A*cos(theta), A is passed by -d argument and its unit is defined as Kelvin^-1 in the code.", default = -1.0)
 parser.add_argument("-g", "--gFactor", type=float, help="It defines interaction strength.", default = -1.0)
 parser.add_argument("-R", "--Rpt", type=float, help="Inter molecular spacing.", default = -1.0)
 parser.add_argument("variable", help="Name of a variable: either beta or tau. It must be a string. Note: for finite temperature computations only the variable tau is needed.", choices =["tau","beta"])
@@ -28,8 +28,8 @@ parser.add_argument("--ROTMOVE", action="store_true", help="It allows rotational
 parser.add_argument("--partition", help="allows to submit jobs in a specific cpu. It is a string. User does not need it.", default = "ntapas")
 parser.add_argument("Molecule", help="Name of molecular system. E.g. - H2O, FCC-H2O, H2O@c60")
 parser.add_argument("--PPA", action="store_true", help="Inclussion of Pair Product Approximation. It is in the developing condition.")
-parser.add_argument("-lmax", "--lmaxloop,max", help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
-parser.add_argument("-ltotalmax", "--ltotalmax", help="Maximum lmax quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
+parser.add_argument("-lmax", "--lmax", type=int, help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
+parser.add_argument("-ltotalmax", "--ltotalmax", type=int,  help="Maximum lmax quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default = 0)
 parser.add_argument("Rotor", help="Name of rotor. E.g. - HF, H2O. It is needed to save rotational density matrix.")
 parser.add_argument("param", type=float, help="Fixed value of beta or tau.")
 parser.add_argument("--preskip", type=int, help="skips # of lines from the begining of an output file. It can be needed while analysis flag is open!", default = 0)
