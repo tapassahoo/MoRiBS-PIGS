@@ -2,7 +2,7 @@ Here are few instructions that will help a user to modify script files before su
 
         git clone git@github.com:tapassahoo/MoRiBS-PIGS.git
 
-It is important to be noted that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
+> It is important to be noted that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
 
 First, the author must read README file in MoRiBS-PIGS/ and follow the instructions.
 
