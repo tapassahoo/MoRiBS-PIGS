@@ -2,14 +2,16 @@ Here are few instructions that will help a user to modify script files before su
 
         git clone git@github.com:tapassahoo/MoRiBS-PIGS.git
 
-> It is important to be noted that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
+> It is important to note that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
 
 First, the author must read README file in MoRiBS-PIGS/ and follow the instructions.
 
 In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PIGS are the makefiles that a user needs to compile the source codes for finite temperature (PIMC) and ground state (PIGS) canculations, respectively. To compile the source codes, first copy Makefile-PIMC of Makefile-PIGS to Makefile and use the following command:
 
-                               make clean
-                               make
+```
+make clean
+make
+```
 
 But the user does not need to compile the source codes manually if the user like to submit jobs by script files. The script files are in dir: MoRiBS-PIGS/examples/scripts). There are three python scripts:
 
