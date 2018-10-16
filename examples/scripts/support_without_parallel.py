@@ -139,16 +139,6 @@ def beads(tau,beta):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
-def inputstr(numbbeads,tau,temperature):
-	'''
-	This function gives us the exact values of the agruments
-	'''
-	argu1          = "%7d"   % numbbeads
-	argu2          = "%20.15f" % tau
-	argu3          = "%7.5f" % temperature
-	output ="numbbeads = "+argu1+", tau = "+argu2+", temperature = "+argu3+"\n"
-	return output
-
 def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip):
 	'''
 	This function gives us the output 
@@ -503,8 +493,9 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 	'''
 	This function gives us Renyi entropy of a many-rotors system simulated by Ratio trick algorithm.
 	'''
-	list_nb = inputFile.Getbeads(TypeCal, variableName)
-	ndim_beads = int(len(list_nb))
+	list_nb           = inputFile.Getbeads(TypeCal, variableName)
+	ndim_beads        = int(len(list_nb))
+
 	purity_combo      = np.zeros(ndim_beads,dtype = 'f')
 	err_purity_combo  = np.zeros(ndim_beads,dtype = 'f')
 	entropy_combo     = np.zeros(ndim_beads,dtype = 'f')
@@ -512,6 +503,7 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 	col_beads         = np.zeros(ndim_beads,dtype = int)
 	col_var           = np.zeros(ndim_beads,dtype = 'f')
 	ii = 0
+
 	for iBead in list_nb:
 		if ((iBead % 2) != 0):
 			value     = iBead
@@ -539,8 +531,18 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 			if os.path.isdir(final_dir_in_work):
 				condition = True
 
-				col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
-
+				file_old = final_dir_in_work+"/results/output.rden_old"
+				if os.path.isfile(file_old) == True:
+					col_data_new = genfromtxt(final_dir_in_work+"/results/output.rden")
+					index = int(col_data_new[0,0])
+					col_data_old = genfromtxt(final_dir_in_work+"/results/output.rden_old")
+					marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+					aa = col_data_new[:,0]
+					col_block    = marged_data[preskip:(int(aa[-1])-postskip),0]
+					col_nm       = marged_data[preskip:(int(aa[-1])-postskip),1]
+					col_dm       = marged_data[preskip:(int(aa[-1])-postskip),2]
+				else:
+					col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 				workingNdim  = int(math.log(len(col_nm))/math.log(2))
 				trunc        = int(len(col_nm)-2**workingNdim)
 				mean_nm = np.mean(col_nm[trunc:])
@@ -574,6 +576,7 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 			err_entropy_combo[ii] = err_entropy
 			ii = ii+1
 
+	#extra_file_name = 'Ratio-Trick-'	
 	FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, partition)
 	headerString = fmtAverageEntropyRT('tau')
 	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%4d','%10.6f', '%10.6f', '%10.6f', '%10.6f', '%10.6f'],header=headerString)
@@ -968,7 +971,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-##SBATCH --account=rrg-pnroy
+###SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=2048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -991,7 +994,7 @@ time ./pimc
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-##SBATCH --account=rrg-pnroy
+###SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=1200mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s

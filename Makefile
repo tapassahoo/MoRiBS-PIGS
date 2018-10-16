@@ -4,8 +4,7 @@
 options= -Ofast -fopenmp
 
 # CFLAGS for ENTANGLEMENT
-CFLAGS =-I./sprng/include -I/usr/local/include -DCHAINCONFIG -DSWAPTOUNSWAP -DPIGSENTTYPE -DTYPE1 -DSHORTFORM
-#-DRATIOTRICK
+CFLAGS =-I./sprng/include -I/usr/local/include -DCHAINCONFIG -DSWAPTOUNSWAP -DPIGSENTTYPE -DTYPE1 -DSHORTFORM -DRATIOTRICK
 #-DCAGEPOT
 
 #Below is the LDFLAGS Toby Zeng use on nlogn
