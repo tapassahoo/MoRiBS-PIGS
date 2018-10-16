@@ -60,7 +60,7 @@ thread         = Number of thread.
 walltime       = "40-00:00" 
 ```
 
-   - In case of feynman, user comment out the below line in the above mentioned function
+   - In case of feynman, user must comment out the following #SBATCH command in the above mentioned function
    
 ```   
 #SBATCH --account=rrg-pnroy
