@@ -66,6 +66,8 @@ walltime       = "40-00:00"
 #SBATCH --account=rrg-pnroy
 ```
 
+   - In the same function, change **CommandForMove**
+
 3. In **inputFile.py**
 
    - Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
