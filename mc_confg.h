@@ -35,6 +35,7 @@ const char FTABLES[] = "yw001.tabl"; // permutation tables
 const char FRANDOM[] = "yw001.rand"; // status of sprng streams 
 const char FQWORMS[] = "yw001.worm"; // status of the worm 
 
+const char READCONFIG[] = "read.conf"; // initial configurations
 const char FBACKUP_EXTENSION[]=".old";
  
 //------- MC-----------------------

@@ -374,6 +374,10 @@ ParamsPotential();
       	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 	}
 //PIMCRESTART ends here//
+//##ifdef BROKENPATH
+	ConfigIO(IORead,READCONFIG);  // load atoms/molecules positions
+	exit(0);
+//#endif
 
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
     {
