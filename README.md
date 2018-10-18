@@ -51,21 +51,22 @@ final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
 
 2. In **support.py**
 
-   - Change system dependent rotational B constant in GetBconst() functin. It is needed only for linear rotor.
+   - Update system dependent rotational B constant in **GetBconst()** function. It is needed only for linear rotor.
 
-   - In jobstring_sbatch function, adjust thread and walltime format.
+   - In **jobstring_sbatch()** function, adjust thread and walltime format.
    
 ```
-thread         = Number of thread. In general user can use 4 threads to get speed up.
-walltime       = "40-00:00" # for Feynman or nlogn server
-walltime       = "40:00:00" # for graham.computecanada.ca
+thread         = Number of thread. 
+walltime       = "40-00:00" 
 ```
 
-   - In case of feynman, user comment out the below line in the above mentioned function
+   - In case of feynman, user must comment out the following #SBATCH command in the above mentioned function
    
 ```   
 #SBATCH --account=rrg-pnroy
 ```
+
+   - In the same function, change **CommandForMove**
 
 3. In **inputFile.py**
 
