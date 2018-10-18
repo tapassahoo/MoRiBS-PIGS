@@ -2,6 +2,8 @@
 //         main()
 //
 
+#include <fstream>
+#include <iostream>
 #include <string>
 #include <stdlib.h>
 //#include <stdlib>
@@ -27,6 +29,7 @@
 #include "rngstream.h"
 #include "omprng.h"
 
+using namespace std;
 
 void MCWormAverage(void);
 void MCWormAverageReset(void);
@@ -172,7 +175,6 @@ srand( time(NULL) );
 #ifdef POTH2
    vinit_();
 #endif
-
 //int numprocs, rank, namelen;
 //char processor_name[MPI_MAX_PROCESSOR_NAME];
 
@@ -340,8 +342,8 @@ ParamsPotential();
 
     	//string fname = MCFileName + IO_EXT_XYZ;
     	//IOxyz(IOWrite,fname.c_str());  // test output of initial config
-      	string fname = MCFileName;
-      	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
+      	//string fname = MCFileName;
+      	//IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 
 //--------------------------------------------------------
 
@@ -360,8 +362,37 @@ ParamsPotential();
    	MCWormAverageReset();      // debug worm
 
    	InitTotalAverage();      // DUMP 
-// --- RESTART/START NEW RUN ----------------------------
 
+#ifdef NORATIOTRICK
+    ifstream fid("readConf.xyz");
+
+	string sbuff;
+    //string name;
+	int offset;
+	int type = 0;
+	int atom = 0;  // first atom # will be 1, NOT 0 
+
+	//fid>>MaxnTimes;
+	//getline (fid,name);
+
+	for (int type=0;type<NumbTypes;type++)
+	for (int atom=0;atom<MCAtom[type].numb;atom++)
+	for (int it=0;it<NumbTimes;it++)
+	{
+		fid>>sbuff;         // skip an atom type
+
+		offset=MCAtom[type].offset+NumbTimes*atom;
+		for (int id=0;id<NDIM;id++)
+		{
+			fid>>MCCoords[id][offset+it];
+			fid>>MCAngles[id][offset+it];
+		}
+	}
+    fid.close();
+	//string fnamer = "readConf";
+	//IOxyzAng(IORead,fnamer.c_str());
+#endif
+// --- RESTART/START NEW RUN ----------------------------
 //PIMCRESTART begins here//
    	if (restart) // new run, generate new status, rnd() streams and config files     
    	{
@@ -374,14 +405,8 @@ ParamsPotential();
       	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 	}
 //PIMCRESTART ends here//
-//##ifdef BROKENPATH
-	ConfigIO(IORead,READCONFIG);  // load atoms/molecules positions
-	exit(0);
-//#endif
-
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
     {
-
         double phi  = MCAngles[PHI][it];
         double cost = MCAngles[CTH][it];
         double sint = sqrt(1.0 - cost*cost);
@@ -391,6 +416,9 @@ ParamsPotential();
         MCCosine[AXIS_Y][it] = sint*sin(phi);
         MCCosine[AXIS_Z][it] = cost;
     }
+
+	string fnamew = "writeConf";
+	IOxyzAng(IOWrite,fnamew.c_str());
 
    	if (WORM)
    	QWormsIO(IORead,FQWORMS);
@@ -717,8 +745,8 @@ ParamsPotential();
 			IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
 		}
       
-		string fname = MCFileName;// + IO_EXT_XYZ;
-		IOxyzAng(IOWrite,fname.c_str());  // test output of initial config
+		//string fname = MCFileName;// + IO_EXT_XYZ;
+		//IOxyzAng(IOWrite,fname.c_str());  // test output of initial config
 //PIMCRESTART ends // 
 
        	if (WORM)

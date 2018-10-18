@@ -2051,10 +2051,11 @@ void MCRotLinStepSwapBroken(int it1,int offset,int gatom,int type,double step,do
    	double dens_old;
 // 	If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
 // 	if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
-   	int particleA1Min = (NumbAtoms/2) - RefAtom;
-   	int particleA1Max = particleA1Min + RefAtom - 1;
-   	int particleA2Min = particleA1Max + 1;
-   	int particleA2Max = particleA2Min + RefAtom - 1;
+   	int particleA1Min = 0;
+   	int particleA1Max = 0;
+   	int particleA2Min = 0;
+   	int particleA2Max = 0;
+	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
     if (it1 == 0 || it1 == (NumbRotTimes - 1))
     {
@@ -2313,12 +2314,13 @@ double PotRotEnergySwapBroken(int atom0, double *Eulang0, int it)
 	    int offset0 =  atom0*NumbRotTimes;
         int t0  = offset0 + it;
 
-		int atom1Init, NumbAtoms1;
-   	    int particleA1Min = (NumbAtoms/2) - RefAtom;
-   	    int particleA1Max = particleA1Min + RefAtom - 1;
-   	    int particleA2Min = particleA1Max + 1;
-   	    int particleA2Max = particleA2Min + RefAtom - 1;
+		int particleA1Min = 0;
+		int particleA1Max = 0;
+		int particleA2Min = 0;
+		int particleA2Max = 0;
+		GetIndex(RefAtom, type0, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
+		int atom1Init, NumbAtoms1;
         if (atom0 <= particleA1Max)
         {
             atom1Init  = 0;
