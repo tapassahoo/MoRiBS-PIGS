@@ -1,5 +1,6 @@
 // estimators for MC
 
+#include <iostream>
 #include <math.h>
 #include <iomanip>
 
@@ -2329,7 +2330,7 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
     return spot;
 }
 
-#ifndef RATIOTRICK
+#ifdef NORATIOTRICK
 double GetEstimNM(void)
 {
     int atom0, atom1;
