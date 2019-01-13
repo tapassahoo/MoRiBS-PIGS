@@ -363,6 +363,7 @@ ParamsPotential();
 
    	InitTotalAverage();      // DUMP 
 
+/*
 #ifdef NORATIOTRICK
     ifstream fid("readConf.xyz");
 
@@ -392,6 +393,7 @@ ParamsPotential();
 	//string fnamer = "readConf";
 	//IOxyzAng(IORead,fnamer.c_str());
 #endif
+*/
 // --- RESTART/START NEW RUN ----------------------------
 //PIMCRESTART begins here//
    	if (restart) // new run, generate new status, rnd() streams and config files     
