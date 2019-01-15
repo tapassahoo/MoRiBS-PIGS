@@ -928,7 +928,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "28-00:00"
+	walltime       = "7-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature

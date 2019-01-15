@@ -36,3 +36,4 @@ Makefile
 /examples/scripts/._*
 /examples/scripts/*/
 examples/scripts/RenameOfFigures.sh
+examples/scripts/support_without_parallel_original.py
