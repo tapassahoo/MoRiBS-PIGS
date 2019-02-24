@@ -533,8 +533,22 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 
 				file_old = final_dir_in_work+"/results/output.rden_old"
 				if os.path.isfile(file_old) == True:
+					file_old_1 = final_dir_in_work+"/results/output.rden_old_1"
 					file_new = final_dir_in_work+"/results/output.rden"
-					if os.path.isfile(file_new) == True:
+					if os.path.isfile(file_old_1) == True:
+						col_data_new = genfromtxt(final_dir_in_work+"/results/output.rden_old_1")
+						index = int(col_data_new[0,0])
+						col_data_old = genfromtxt(final_dir_in_work+"/results/output.rden_old")
+						marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+
+						col_data_new = genfromtxt(final_dir_in_work+"/results/output.rden")
+						index = int(col_data_new[0,0])
+						marged_data  = np.concatenate((marged_data[:index-1], col_data_new), axis=0)
+						aa = col_data_new[:,0]
+						col_block    = marged_data[preskip:(int(aa[-1])-postskip),0]
+						col_nm       = marged_data[preskip:(int(aa[-1])-postskip),1]
+						col_dm       = marged_data[preskip:(int(aa[-1])-postskip),2]
+					elif ((os.path.isfile(file_new) == True) and (os.path.isfile(file_old_1) == False)):
 						col_data_new = genfromtxt(final_dir_in_work+"/results/output.rden")
 						index = int(col_data_new[0,0])
 						col_data_old = genfromtxt(final_dir_in_work+"/results/output.rden_old")
@@ -543,7 +557,7 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 						col_block    = marged_data[preskip:(int(aa[-1])-postskip),0]
 						col_nm       = marged_data[preskip:(int(aa[-1])-postskip),1]
 						col_dm       = marged_data[preskip:(int(aa[-1])-postskip),2]
-					else:
+					elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
 						col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden_old",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 				else:
 					col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
@@ -838,6 +852,8 @@ def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_
 				fileList = ["output.rden", "output.xyz"]
 				file_old = final_dir_in_work+"/results/output.rden_old"
 				if os.path.isfile(file_old) == True:
+					#print("Jobs have been resubmitted")
+					#return
 					for filemv in fileList:
 						call(["mv", filemv, filemv+"_old_1"])
 						#call(["rm", filemv])
@@ -928,7 +944,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "7-00:00"
+	walltime       = "28-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature

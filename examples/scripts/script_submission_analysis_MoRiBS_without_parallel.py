@@ -165,6 +165,7 @@ if (args.RATIO):
 	particleAList = np.arange(1, maxloop+1)
 else:
 	particleAList = [maxloop]
+#particleAList = [1]
 
 for particleA in particleAList:
 	#==================================Generating files for submission================#
