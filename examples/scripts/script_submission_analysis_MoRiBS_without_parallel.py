@@ -17,7 +17,7 @@ parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a
 parser.add_argument("-g", "--gFactor", type=float, help="It defines interaction strength.", default = -1.0)
 parser.add_argument("-R", "--Rpt", type=float, help="Inter molecular spacing.", default = -1.0)
 parser.add_argument("variable", help="Name of a variable: either beta or tau. It must be a string. Note: for finite temperature computations only the variable tau is needed.", choices =["tau","beta"])
-parser.add_argument("job", help="Type of a job: submission of new jobs or analyzing output files. It must be a string.", choices = ["submission", "analysis"])
+parser.add_argument("job", help="Type of a job: submission of new jobs or analyzing output files. It must be a string.", choices = ["submission", "analysis", "rename"])
 parser.add_argument("cal", help="Type of calculation - it is a string: a) PIMC - Finite Temperature calculation by Path Integral Monte Carlo b) PIGS - Ground State Path Integral c) ENT - Entanglement by replica algorithm based on PIGS.", choices = ["PIMC", "PIGS", "ENT"])
 parser.add_argument("--scal", help="subtype of calculations - must be defined as a string in case of ENT.", default = "SWAPTOUNSWAP", choices = ["SWAPTOUNSWAP", "BROKENPATH"])
 parser.add_argument("--RATIO", help="subtype of calculations - must be defined as a string in case of ENT. It applies ratio trick algorithm.", action="store_true")
@@ -170,6 +170,19 @@ else:
 for particleA in particleAList:
 	#==================================Generating files for submission================#
 	file1_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
+
+	if status == "rename":
+		numbblocks_rename = args.NR
+		file2_name = support.GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks_rename, numbpass, numbmolecules1, molecule, ENT_TYPE, particleA, extra_file_name, crystal)
+
+		if (NameOfServer == "graham"):
+			dir_run_input_pimc     = "/scratch/"+user_name+"/"+out_dir+file1_name+"PIMC"
+			dir_input_pimc_renamed = "/scratch/"+user_name+"/"+out_dir+file2_name+"PIMC"
+		else:
+			dir_run_input_pimc     = "/work/"+user_name+"/"+out_dir+file1_name+"PIMC"
+			dir_input_pimc_renamed = "/work/"+user_name+"/"+out_dir+file2_name+"PIMC"
+
+
 	#===============================================================================
 	#                                                                              |
 	#   compilation of linden.f to generate rotational density matrix - linden.out |
@@ -298,6 +311,10 @@ for particleA in particleAList:
 
 			numbbeads    = value
 			folder_run   = file1_name+str(numbbeads)
+
+			if status   == "rename":
+				folder_rename = file2_name+str(numbbeads)
+				support.GetRenamingFunc(dir_run_input_pimc, dir_input_pimc_renamed, dir_output, folder_run, folder_rename, src_dir)
 
 			if status   == "submission":
 

@@ -944,7 +944,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "28-00:00"
+	walltime       = "4-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature
@@ -1459,11 +1459,9 @@ def GetPairDensity(FilePlotName, srcCodePath, RFactor, numbmolecules, loop, part
 		system(commandRun)
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
 
-'''
-def GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable):
+#def GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable):
 	#FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
-	GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable)
-'''
+#	GetAverageEntropyRT(maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable)
 
 def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
 	'''
@@ -1476,3 +1474,18 @@ def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
 	preFact        = preFact*Units.HARTREE2KL
 	printingmessage= " DipoleMoment = "+str(DipoleMoment)+" Debye and the prefactor of the dipole-dipole interaction potential = " + str(preFact)+ " K^-1"
 	print(printingmessage)
+
+def GetRenamingFunc(dir_run_input_pimc, dir_input_pimc_renamed, dir_output, folder_run, folder_renamed, src_dir):
+	final_dir_in_work = dir_output + folder_run
+
+	call(["rm", "-rf", dir_run_input_pimc])
+	#call(["cp", "-R", dir_run_input_pimc, dir_input_pimc_renamed])
+	os.chdir(dir_output)
+	if (os.path.isdir(folder_run) == True):
+		#call(["cp", "-R", folder_run, folder_renamed])
+		call(["rm", "-rf", folder_run])
+		#print(dir_run_input_pimc)
+		#printingMessage = "move "+str(dir_output)+str(folder_run)
+		#print(printingMessage)
+	os.chdir(src_dir)
+	#call(["pwd"])
