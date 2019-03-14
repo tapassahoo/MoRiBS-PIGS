@@ -1446,6 +1446,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
     return spotReturn;
 }
 
+#ifdef SWAPTOUNSWAP
 void MCSwap(double rand4, string &Distribution)
 {
     double rd;
@@ -1471,6 +1472,7 @@ void MCSwap(double rand4, string &Distribution)
         if (DistributionInit == "Swap" ) Distribution = "unSwap";
     }
 }
+#endif
 
 /*
 void MCRotationsMove(int type) // update all time slices for rotational degrees of freedom
