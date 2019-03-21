@@ -847,7 +847,12 @@ def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_
 			return
 		else:
 			os.chdir(dir_output+folder_run+"/results")
-			print(dir_output+folder_run+"/results")
+			col_data_new = genfromtxt("output.rden")
+			lastIndex = int(col_data_new[-1,0])
+			if ((numbblocks-lastIndex) <= 0):
+				print(dir_output+folder_run+"          Done!")
+				return
+			print(dir_output+folder_run+"         Resubmitted!")
 			if (TypeCal == "ENT"):
 				fileList = ["output.rden", "output.xyz"]
 				file_old = final_dir_in_work+"/results/output.rden_old"
@@ -944,7 +949,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "4-00:00"
+	walltime       = "7-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%5.3f" % temperature

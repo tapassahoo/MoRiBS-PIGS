@@ -17,8 +17,8 @@ def Getbeads(TypeCal, variableName):
 			list_nb = [4,8,12,16,20,24,28,32,36,40]
 
 	if (variableName == "tau"):
-		#list_nb  = [14, 24, 34, 44, 54]
 		list_nb  = [4, 10, 14, 20, 24, 30, 34, 40, 44, 50, 54, 60]
+		list_nb  = [4, 10, 14, 20, 24, 30, 34, 40, 44]
 
 	if (TypeCal != "ENT"):
 		print(" ")
