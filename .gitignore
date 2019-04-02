@@ -32,7 +32,7 @@ Makefile
 /examples/scripts/*new*
 /examples/scripts/*old*
 /examples/scripts/script_submission_analysis_MoRiBS-*.py
-/examples/scripts/code-*.py
+#/examples/scripts/code-*.py
 /examples/scripts/._*
 /examples/scripts/*/
 examples/scripts/RenameOfFigures.sh

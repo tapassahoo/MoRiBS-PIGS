@@ -1036,10 +1036,11 @@ mv %s %s
 mv %s %s
 cd %s
 cp %s qmc.input
+#cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, omp_thread, omp_thread,final_dir_in_work, dir_run_job, input_file, folder_run_path, folder_run_path, qmcinp, CommandForMove)
+""" % (job_name, logpath, walltime, omp_thread, omp_thread,final_dir_in_work, dir_run_job, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForMove)
 
 	if Restart1:
 		return job_string_restart

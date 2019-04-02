@@ -116,7 +116,7 @@ if (variableName == "beta"):
 	tau             = args.param
 	parameter       = tau
 
-steplevel           = inputFile.GetStepAndLevel(molecule_rot,variableName)
+steplevel           = inputFile.GetStepAndLevel(molecule_rot,variableName,TypeCal)
 step_COM            = steplevel.step_trans
 step_rot	        = steplevel.step
 level_bisection     = steplevel.level
@@ -201,6 +201,7 @@ for particleA in particleAList:
 
 		if not args.RESTART:
 			call(["cp", execution_file, dir_run_input_pimc])
+		#call(["cp", execution_file, dir_run_input_pimc])
 
 		if (RotorType == "LINEAR"):
 			if not args.RESTART:

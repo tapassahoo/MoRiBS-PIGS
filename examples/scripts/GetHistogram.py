@@ -1,23 +1,21 @@
 #!/usr/bin/python
-#!/usr/bin/env python
-import math
-from math import *
+#import math
+#from math import *
 import sys
-import numpy as np
-from numpy import *
+#import numpy as np
+#from numpy import *
 import matplotlib
 #matplotlib.use('pdf')
 import matplotlib.pyplot as plt
-from itertools import cycle
-import itertools
-from scipy.optimize import curve_fit
-from subprocess import call
-from matplotlib.backends.backend_pdf import PdfPages
-from matplotlib.ticker import ScalarFormatter
-import support
-import os
+#from itertools import cycle
+#import itertools
+#from scipy.optimize import curve_fit
+#from subprocess import call
+#from matplotlib.backends.backend_pdf import PdfPages
+#from matplotlib.ticker import ScalarFormatter
+#import os
  
-import matplotlib.mlab as mlab
+#import matplotlib.mlab as mlab
 
 fig = plt.figure()
 
@@ -31,6 +29,8 @@ ncol  = naxis + (ncol1-1)*2 # Here we have taken cost and phi
 print(ncol1)
 print(ncol)
 
+exit()
+'''
 num_bins = 50
 #file1 = "/work/tapas/test-cluster-update/PIGS-cluster-update-correct-RotDOFs-Rpt10.05Angstrom-gFactor1.0-beta0.2Kinv-Blocks5000-Passes100-System8HF-e0vsbeads11/results/output_instant.dof"
 #file2 = "/work/tapas/test-cluster-update/PIMC-RotDOFs-Rpt10.05Angstrom-gFactor1.0-beta0.2Kinv-Blocks5000-Passes100-System8HF-e0vsbeads11/results/output_instant.dof"
@@ -53,3 +53,4 @@ plt.legend(bbox_to_anchor=(0.35, 0.20), loc=2, borderaxespad=1., shadow=True )
 #plt.savefig(outfile, dpi = 200, format = 'eps')
 plt.show()
 #call(["open", outfile])
+'''

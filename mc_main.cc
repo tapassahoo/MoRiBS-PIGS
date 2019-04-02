@@ -590,7 +590,7 @@ ParamsPotential();
 #ifdef IOWRITE
             SaveInstantEnergy (); 
 #endif
-			if (blockCount > (NumberOfMCBlocks - 10))
+			if (blockCount > (NumberOfMCBlocks - 20))
 			{
 		    	SaveInstantAngularDOF(totalStep);
 			}
@@ -1905,7 +1905,6 @@ void SaveInstantAngularDOF(long int numb)
 {
     const char *_proc_=__func__;
 
-/*
 #ifdef PIGSENTTYPE
 	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
    	{
@@ -1919,7 +1918,7 @@ void SaveInstantAngularDOF(long int numb)
     }
 	_fangins << endl;
 #endif
-*/
+
 #ifdef PIMCTYPE
 	for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
 	{
