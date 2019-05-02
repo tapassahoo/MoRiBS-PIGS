@@ -969,7 +969,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		CommandForMove = "mv "+folder_run_path+" "+dir_output
 	if (RUNDIR == "work"):
 		CommandForMove = " "
-	#CommandForMove = " " #for graham
+	CommandForMove = " " #for graham
 
 	if not PPA1:
 		CommandForPPA = "#"
@@ -1005,7 +1005,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-##SBATCH --account=rrg-pnroy
+#SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=2048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
