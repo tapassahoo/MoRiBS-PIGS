@@ -19,7 +19,7 @@ call(["rm", fileName2])
 molecule     = "HF"
 nMolecule    = 2
 RCOM         = 10.05
-gFactorList  = [2.0+2.0*i for i in range(2)]
+gFactorList  = [1.0+1.0*i for i in range(8)]
 beta         = 0.2
 Simulation   = "PIGS"
 #Erot         = support.GetAvgRotEnergy(molecule,beta)
@@ -36,8 +36,8 @@ for gFactor in gFactorList:
 	output  = '{:1.1f}'.format(DipoleMoment)
 	print(output)
 
-	command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau submission "+Simulation+" HF HF "+str(beta)
-	#command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau analysis   --preskip 15000 "+Simulation+" HF HF "+str(beta)
+	command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 200 --ROTMOVE tau submission "+Simulation+" HF HF "+str(beta)
+	command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 200 --ROTMOVE tau analysis   --preskip 0 "+Simulation+" HF HF "+str(beta)
 	system(command_line)
 #-------------------------------#
 	#command_line = "python script_exact_energy_entropy.py -d "+str(DipoleMoment)+" -R 10.05 -N 4 --ROTMOVE tau PIGS HF HF 0.2"

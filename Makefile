@@ -3,10 +3,13 @@
 #options= -Ofast -march=native -fopenmp
 options= -Ofast -fopenmp
 
-# CFLAGS for ENTANGLEMENT
-CFLAGS =-I./sprng/include -I/usr/local/include -DCHAINCONFIG -DSWAPTOUNSWAP -DPIGSENTTYPE -DTYPE1 -DSHORTFORM -DRATIOTRICK -DINSTANT
-#CFLAGS =-I./sprng/include -I/usr/local/include -DCHAINCONFIG -DBROKENPATH -DPIGSENTTYPE -DTYPE1 -DSHORTFORM -DNORATIOTRICK
-#-DCAGEPOT
+# CFLAGS for Finite Temperature Calculations 
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM -DPIMCTYPE -DINSTANT
+#-DEWALDSUM
+#-DDDCORR
+#-DPOTH2
+#-DCHAINCONFIG
+#-DINSTANT -DIOFILES -DCAGEPOT
 
 #Below is the LDFLAGS Toby Zeng use on nlogn
 #LDFLAGS=-L/home/pnroy/Dev/lib64/ -lm -L./sprng/lib -llcg -L/home/pnroy/Dev/lib64/ -lgfortran  -L/opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core

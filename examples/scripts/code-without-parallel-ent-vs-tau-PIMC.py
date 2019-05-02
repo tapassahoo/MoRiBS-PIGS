@@ -5,7 +5,7 @@ from os import system
 import support_without_parallel as support
 from subprocess import call
 
-stringName1   = "linear-rotors"
+stringName1   = "linear-rotors-PIMC"
 fileName1    = "script_submission_analysis_MoRiBS_without_parallel.py"
 fileName2    = "script_submission_analysis_MoRiBS1.py"
 support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
@@ -19,7 +19,8 @@ call(["rm", fileName2])
 molecule     = "HF"
 nMolecule    = 2
 RCOM         = 10.05
-gFactorList  = [2.0+2.0*i for i in range(2)]
+gFactorList  = [1.0+0.5*i for i in range(7)]
+print(gFactorList)
 beta         = 0.05
 Erot         = support.GetAvgRotEnergy(molecule,beta)
 Simulation   = "PIMC"
@@ -33,12 +34,12 @@ for gFactor in gFactorList:
 	printMessage = "Dipole Moment of "+molecule+" is "+str(DipoleMoment)+" Debye"
 	print(printMessage)
 	print("")
-	output  = '{:1.1f}'.format(DipoleMoment)
+	output  = float(support.dropzeros(DipoleMoment))
 	print(output)
 
-	command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau submission "+Simulation+" HF HF "+str(beta)
+	#command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 150000 -Pass 200 --ROTMOVE tau submission "+Simulation+" HF HF "+str(beta)
 	#command_line = "python script_submission_analysis_MoRiBS.py -d "+str(DipoleMoment)+" -R 10.05 --scal SWAPTOUNSWAP -N 2 -Block 200000 -Pass 200 --ROTMOVE --RESTART -NR 400000 tau submission ENT HF HF 0.2"
-	command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau analysis   --preskip 15000 "+Simulation+" HF HF "+str(beta)
+	command_line = "python "+fileName3+" -d "+str(output)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 150000 -Pass 200 --ROTMOVE tau analysis   --preskip 0 "+Simulation+" HF HF "+str(beta)
 	system(command_line)
 #-------------------------------#
 	#command_line = "python script_exact_energy_entropy.py -d "+str(DipoleMoment)+" -R 10.05 -N 4 --ROTMOVE tau PIGS HF HF 0.2"

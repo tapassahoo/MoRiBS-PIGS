@@ -57,8 +57,8 @@ status              = args.job
 #
 #Request to change
 #If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham""
-#NameOfServer        = "nlogn"
-NameOfServer        = "graham"
+NameOfServer        = "nlogn"
+#NameOfServer        = "graham"
 NameOfPartition     = args.partition
 #
 TypeCal             = args.cal
@@ -286,7 +286,7 @@ for particleA in particleAList:
 
 				final_dir_in_work = dir_output+folder_run
 				try:
-					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
 					fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
@@ -340,7 +340,7 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output+folder_run
 				try:
 					if (TypeCal != "ENT"):
-						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip))
+						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
 						fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
 						'''
 						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
@@ -364,10 +364,10 @@ for particleA in particleAList:
 		call(["cat",FileAnalysis.SaveEnergy])
 		print("")
 		print("")
-		call(["cat",FileAnalysis.SaveCorr])
-		print("")
-		print("")
-		call(["cat",FileAnalysis.SaveTotalCorr])
+		#call(["cat",FileAnalysis.SaveCorr])
+		#print("")
+		#print("")
+		#call(["cat",FileAnalysis.SaveTotalCorr])
 #=========================File Checking===============================#
 		SavedFile = FileAnalysis.SaveEnergy
 		support.FileCheck(TypeCal,list_nb,variableName,SavedFile)
