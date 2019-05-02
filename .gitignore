@@ -37,3 +37,5 @@ Makefile
 /examples/scripts/*/
 examples/scripts/RenameOfFigures.sh
 examples/scripts/support_without_parallel_original.py
+
+/sprng/*

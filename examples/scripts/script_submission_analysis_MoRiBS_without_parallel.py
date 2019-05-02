@@ -201,7 +201,7 @@ for particleA in particleAList:
 
 		if not args.RESTART:
 			call(["cp", execution_file, dir_run_input_pimc])
-		#call(["cp", execution_file, dir_run_input_pimc])
+		call(["cp", execution_file, dir_run_input_pimc])
 
 		if (RotorType == "LINEAR"):
 			if not args.RESTART:

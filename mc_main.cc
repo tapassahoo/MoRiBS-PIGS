@@ -590,7 +590,7 @@ ParamsPotential();
 #ifdef IOWRITE
             SaveInstantEnergy (); 
 #endif
-			if (blockCount > (NumberOfMCBlocks - 20))
+			if (blockCount > (NumberOfMCBlocks - 1000))
 			{
 		    	SaveInstantAngularDOF(totalStep);
 			}
@@ -1906,14 +1906,28 @@ void SaveInstantAngularDOF(long int numb)
     const char *_proc_=__func__;
 
 #ifdef PIGSENTTYPE
-	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-   	{
+   	_fangins << setw(IO_WIDTH) << numb << BLANK;
+
+    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+    {
+        int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
    		for (int it = ((NumbRotTimes - 1)/2-1); it <= ((NumbRotTimes-1)/2); it++) 
-		{
-        	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        {
             int t0      = offset0 + it;
 
-			_fangins << setw(IO_WIDTH) << MCCosine[2][t0] << BLANK;
+			if (TRANSLATION)
+			{
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+			}
+			
+			if (ROTATION)
+			{
+				_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+				_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+			}
         }
     }
 	_fangins << endl;
