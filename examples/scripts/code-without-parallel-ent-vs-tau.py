@@ -21,11 +21,11 @@ call(["rm", fileName2])
 
 # Informations about the system
 molecule     = "HF"
-nMolecule    = 8
+nMolecule    = 2
 RCOM         = 10.05
 if (nMolecule == 2):
 	#gFactorList  = [0.5+0.1*i for i in range(76)]
-	gFactorList  = [1.0+1.0*i for i in range(20)]
+	gFactorList  = [11.0+1.0*i for i in range(10)]
 	#gFactorList  = [9.0+1.0*i for i in range(12)]
 	#gFactorList  = [21.0+1.0*i for i in range(10)]
 if (nMolecule == 4):
@@ -57,10 +57,10 @@ for gFactor in gFactorList:
 	gFactor = '{:03.2f}'.format(gFactor)
 
 ######For SWAPUNSWAP with Ratio Trick######
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RATIO"
-	command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RESTART -NR 20000 --RATIO"
+	command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RATIO"
+	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RESTART -NR 20000 --RATIO"
 	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau rename "+Simulation+" HF HF "+str(beta)+" -NR 21000 --RATIO"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau analysis   --preskip 0 "+Simulation+" HF HF "+str(beta)+" --RATIO"
+	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau analysis   --preskip 0 "+Simulation+" HF HF "+str(beta)+" --RATIO"
 ######For BROKENPATH######
 	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 200 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --scal BROKENPATH"
 	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 200 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RESTART -NR 50000 --scal BROKENPATH"
