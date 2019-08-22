@@ -4281,7 +4281,7 @@ void MCRotationsMoveCL(int type)
 
 void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int rand3,double rand4,double &MCRotChunkTot,double &MCRotChunkAcp, RngStream *Rng)
 {
-// The following block of statements creates 3 dimensional unit random vector 
+// The following block of statements creates 3 dimensional unit random vectors 
    	double costRef, phiRef;
    	costRef = runifab(Rng, -1.0,1.0);
    	phiRef  = runifab(Rng, 0.0, 2.0*M_PI);
