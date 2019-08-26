@@ -1677,7 +1677,17 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 			rand2=runif(Rng);
 			rand3=runif(Rng);
 			rand4=runif(Rng);
+#ifdef PIMCTYPE
 			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSTYPE
+			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSENTTYPE
+#ifdef SWAPTOUNSWAP
+			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#endif
 		}
 	}
 
@@ -1698,7 +1708,17 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 			rand2=runif(Rng);
 			rand3=runif(Rng);
 			rand4=runif(Rng);
+#ifdef PIMCTYPE
 			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSTYPE
+			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSENTTYPE
+#ifdef SWAPTOUNSWAP
+			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#endif
 		}
 	}
 
@@ -2413,6 +2433,8 @@ double PotRotEnergySwapBroken(int atom0, double *Eulang0, int it)
 	double spotReturn = (spot + spotSwap);
     return spotReturn;
 }
+
+#ifdef PIMCTYPE
 void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp)
 {
 	int it0 = (it1 - 1);
@@ -2685,6 +2707,295 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 #endif
 	}	      
 }
+#endif
+
+#ifdef PIGSTYPE
+void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp)
+{
+	int it0 = (it1 - 1);
+	int it2 = (it1 + 1);
+ 
+	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
+	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+      
+	int t0 = offset + it0;
+	int t1 = offset + it1;
+	int t2 = offset + it2;
+
+	double cost = MCAngles[CTH][t1];
+	double phi  = MCAngles[PHI][t1];
+	double chi  = MCAngles[CHI][t1];
+
+	//cost += (step*(rnd1()-0.5));
+	cost += (step*(rand1-0.5));
+
+//    Toby change:
+//    cout<<"before random change "<<phi<<" "<<chi<<" "<<endl;
+//    phi += 2.0*M_PI*(step*(rnd1()-0.5));
+//    chi += 2.0*M_PI*(step*(rnd1()-0.5));
+      phi += 2.0*M_PI*(step*(rand2-0.5));
+      chi += 2.0*M_PI*(step*(rand3-0.5));
+/*
+//    axial symmetry of the molecule controlled by IROTSYM and NFOLD_ROT. use rand1 to judge whether rotate or not
+      if( IROTSYM == 1 )
+      {
+//       if(rand1 < 1.0/3.0)
+//       chi += 2.0*M_PI/(double)NFOLD_ROT;
+
+         if(rand1 < 2.0/3.0 && rand1 >= 1.0/3.0)
+         chi += 2.0*M_PI/(double)NFOLD_ROT;
+
+         if(rand1 >= 2.0/3.0 )
+         chi -= 2.0*M_PI/(double)NFOLD_ROT;
+      }
+*/
+
+//    get to the positive values of phi and chi
+      if(phi<0.0) phi = 2.0*M_PI + phi;
+      if(chi<0.0) chi = 2.0*M_PI + chi;
+//    Toby needs to recover the [0:2*Pi] range for phi and chi
+      phi = fmod(phi,2.0*M_PI);
+      chi = fmod(chi,2.0*M_PI);
+
+      if (cost >  1.0)
+      {
+         cost = 2.0 - cost;    
+//       phi  = phi + M_PI;
+      }		 
+      
+      if (cost < -1.0)
+      {
+          cost = -2.0 - cost;    
+//        phi  = phi  + M_PI;
+      }		  
+
+	double sint = sqrt(1.0 - cost*cost);
+
+	newcoords[PHI][t1] = phi;
+	newcoords[CHI][t1] = chi;
+	newcoords[CTH][t1] = cost;
+
+//----------------------------------------------
+
+// the old density
+
+	double rho = 0.0;
+	double erot = 0.0;
+	double esq  = 0.0;
+	double Eulan1[3];
+	double Eulan2[3];
+	double Eulrel[3];
+	int istop=0;
+	Eulan1[0]=MCAngles[PHI][t0];
+	Eulan1[1]=acos(MCAngles[CTH][t0]);
+	Eulan1[2]=MCAngles[CHI][t0];
+	Eulan2[0]=MCAngles[PHI][t1];
+	Eulan2[1]=acos(MCAngles[CTH][t1]);
+	Eulan2[2]=MCAngles[CHI][t1];
+
+	if(RotDenType == 0)
+	{
+		if (it1 != 0)
+		{
+			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+
+			if(istop == 1)
+			{
+				cerr<<"large matrix test error"<<endl;
+				exit(0);
+			}
+		}
+		else rho = 1.0;
+	}
+	else if(RotDenType == 1)
+	{
+		rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
+	}
+      double dens_old = rho;
+      double rhoold = rho;
+
+      Eulan1[0]=MCAngles[PHI][t1];
+      Eulan1[1]=acos(MCAngles[CTH][t1]);
+      Eulan1[2]=MCAngles[CHI][t1];
+      Eulan2[0]=MCAngles[PHI][t2];
+      Eulan2[1]=acos(MCAngles[CTH][t2]);
+      Eulan2[2]=MCAngles[CHI][t2];
+
+	istop=0;
+	if(RotDenType == 0)
+	{
+		if (it1 != (NumbRotTimes-1))
+		{
+			 rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			 if(istop == 1)
+			 {
+				  cerr<<"large matrix test error"<<endl;
+				  exit(0);
+			 }
+		}
+		else rho = 1.0;
+	else if(RotDenType == 1)
+	{
+		 rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
+	}
+// PN pigs
+// ask Toby if rhoold is for PQC only?
+      dens_old=dens_old*rho;
+      rhoold = rhoold + rho;
+
+      if (fabs(dens_old)<RZERO) dens_old = 0.0;
+//    if (dens_old<0.0) nrerror("Rotational Moves: ","Negative rot density");
+//    toby's temporary treatment for negative rho of paraH2O
+      if (dens_old<0.0) dens_old=fabs(dens_old);
+
+      double pot_old  = 0.0;
+
+      int itr0 = it1*RotRatio;     // interval to average over
+      int itr1 = itr0+RotRatio;     // translational time slices
+
+      for (int it=itr0;it<itr1;it++)  // average over tr time slices
+      pot_old+=(PotRotE3D(gatom,Eulan1,it));
+//    Toby: pot_old can be calculated with MCAngles
+
+//   the new density 
+
+      Eulan1[0]=MCAngles[PHI][t0];
+      Eulan1[1]=acos(MCAngles[CTH][t0]);
+      Eulan1[2]=MCAngles[CHI][t0];
+      Eulan2[0]=newcoords[PHI][t1];
+      Eulan2[1]=acos(newcoords[CTH][t1]);
+      Eulan2[2]=newcoords[CHI][t1];
+
+	istop=0;
+	if(RotDenType == 0)
+	{
+		if (it1 != 0)
+		{
+			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			if(istop == 1)
+			{
+				cerr<<"large matrix test error"<<endl;
+				exit(0);
+			}
+		}
+		else rho = 1.0;
+	}
+	else if(RotDenType == 1)
+	{
+		rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
+	}
+
+      double dens_new = rho;
+      double rhonew = rho;
+
+      Eulan1[0]=newcoords[PHI][t1];
+      Eulan1[1]=acos(newcoords[CTH][t1]);
+      Eulan1[2]=newcoords[CHI][t1];
+      Eulan2[0]=MCAngles[PHI][t2];
+      Eulan2[1]=acos(MCAngles[CTH][t2]);
+      Eulan2[2]=MCAngles[CHI][t2];
+
+	istop=0;
+	if(RotDenType == 0)
+	{
+		if (it1 != (NumbRotTimes-1))
+		{
+			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			if(istop == 1)
+			{
+				cerr<<"large matrix test error"<<endl;
+				exit(0);
+			}
+		else rho = 1.0;
+	}
+	else if(RotDenType == 1)
+	{
+		rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
+	}
+
+      dens_new = dens_new * rho;
+      rhonew = rhonew + rho;
+
+      if (fabs(dens_new)<RZERO) dens_new = 0.0;
+//    if (dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
+//    toby's temporary treatment for negative rho of paraH2O
+      if (dens_new<0.0) dens_new=fabs(dens_new);
+
+
+      double pot_new  = 0.0;
+
+      for (int it=itr0;it<itr1;it++)  // average over tr time slices
+      pot_new  += (PotRotE3D(gatom,Eulan1,it));
+//    Toby: pot_new can be calculated with newcoords
+     
+      double rd;
+
+//    distinginsh between Noya and RS
+	if(RotDenType == 0)
+    {
+    	if (dens_old>RZERO)
+        rd = dens_new/dens_old;
+        else rd = 1.0;
+        rd *= exp(- MCRotTau*(pot_new-pot_old));
+    }
+    else if(RotDenType == 1)
+   	{
+		//rd = dens_new/dens_old;
+		//use logarithmic for RS
+		rd = (rhonew - rhoold)/(4.0*(MCRotTau/WNO2K));
+		//cout<<"in cc:"<<rhonew<<" "<<rhoold<<" "<<rd<<" "<<4.0*(MCRotTau/WNO2K)<<endl;
+		//rd = rhonew - rhoold;
+		//rd = exp(rd);
+		rd -= MCRotTau*(pot_new-pot_old);
+	}
+
+	//rd *= exp(- MCRotTau*(pot_new-pot_old));   
+
+	bool Accepted = false;
+	if(RotDenType == 0)
+	{
+		if (rd>1.0)         Accepted = true;
+		//else if (rd>rnd7()) Accepted = true;
+		else if (rd>rand4) Accepted = true;
+    }
+    else
+    {
+    	if (rd > 0.0)       Accepted = true;
+		//else if (rd > log(rnd7())) Accepted = true;
+		else if (rd > log(rand4)) Accepted = true;
+	}
+
+	//MCTotal[type][MCROTAT] += 1.0;  
+	MCRotChunkTot +=1.0;
+      
+	if (Accepted)
+	{
+		//MCAccep[type][MCROTAT] += 1.0;
+		MCRotChunkAcp +=1.0;
+
+		MCAngles[CTH][t1] = cost;
+		MCAngles[PHI][t1] = phi;
+		MCAngles[CHI][t1] = chi; //toby adds
+  
+		sint=sqrt(1.0-cost*cost);
+		MCCosine [AXIS_X][t1] = sint*cos(phi);
+		MCCosine [AXIS_Y][t1] = sint*sin(phi);
+		MCCosine [AXIS_Z][t1] = cost;
+		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
+		//and Ieff about and perpendicular to one molecule-ixed axis.
+
+#ifdef MOLECULEINCAGE
+		MCCosinex[AXIS_X][t1] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
+		MCCosinex[AXIS_Y][t1] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
+		MCCosinex[AXIS_Z][t1] = -sint*cos(chi);
+
+		MCCosiney[AXIS_X][t1] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
+		MCCosiney[AXIS_Y][t1] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
+		MCCosiney[AXIS_Z][t1] = sint*sin(chi);
+#endif
+	}	      
+}
+#endif
 
 double PotEnergy(int atom0, double **pos)   
 // 

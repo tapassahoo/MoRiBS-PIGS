@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 from os import system
 import support_without_parallel as support

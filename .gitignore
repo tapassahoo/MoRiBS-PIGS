@@ -11,6 +11,7 @@ run
 aa.f
 *1.*
 *2.*
+*old.cc
 test-hfhf.f
 Makefile-TEST
 Makefile
