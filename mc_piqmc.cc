@@ -1647,85 +1647,6 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 }
 */
 
-void MCRotations3D(int type) // update all time slices for rotational degrees of freedom
-{
-#ifdef DEBUG_PIMC
-	const char *_proc_=__func__;    //  MCRotationsMove() 
-	if (type != IMTYPE)
-	nrerror(_proc_,"Wrong impurity type");
-
-	if (NDIM != 3)
-	nrerror(_proc_,"Rotational sampling for 3D systems only");
-#endif
-
-	double step   = MCAtom[type].rtstep; 
-	double MCRotChunkTot = 0.0;
-	double MCRotChunkAcp = 0.0;
-
-	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
-	double rand1,rand2,rand3,rand4;
-	int offset, gatom;
-
-	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int itrot = 0; itrot<NumbRotTimes; itrot = itrot+2)
-	{
-		for(int atom0 = 0; atom0<MCAtom[type].numb; atom0++)
-		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
-			rand1=runif(Rng);
-			rand2=runif(Rng);
-			rand3=runif(Rng);
-			rand4=runif(Rng);
-#ifdef PIMCTYPE
-			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSTYPE
-			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSENTTYPE
-#ifdef SWAPTOUNSWAP
-			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#endif
-		}
-	}
-
-	MCTotal[type][MCROTAT] += MCRotChunkTot;
-	MCAccep[type][MCROTAT] += MCRotChunkAcp;
-
-	MCRotChunkTot = 0;
-	MCRotChunkAcp = 0;
-
-	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int itrot = 1; itrot<NumbRotTimes; itrot = itrot+2)
-	{
-		for(int atom0 = 0; atom0<MCAtom[type].numb; atom0++)
-		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
-			rand1=runif(Rng);
-			rand2=runif(Rng);
-			rand3=runif(Rng);
-			rand4=runif(Rng);
-#ifdef PIMCTYPE
-			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSTYPE
-			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSENTTYPE
-#ifdef SWAPTOUNSWAP
-			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#endif
-		}
-	}
-
-	MCTotal[type][MCROTAT] += MCRotChunkTot;
-	MCAccep[type][MCROTAT] += MCRotChunkAcp;
-}
-
 #ifdef IOWRITE
 void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
 {
@@ -2434,7 +2355,85 @@ double PotRotEnergySwapBroken(int atom0, double *Eulang0, int it)
     return spotReturn;
 }
 
+void MCRotations3D(int type) // update all time slices for rotational degrees of freedom
+{
+#ifdef DEBUG_PIMC
+	const char *_proc_=__func__;    //  MCRotationsMove() 
+	if (type != IMTYPE)
+	nrerror(_proc_,"Wrong impurity type");
+
+	if (NDIM != 3)
+	nrerror(_proc_,"Rotational sampling for 3D systems only");
+#endif
+
+	double step   = MCAtom[type].rtstep; 
+	double MCRotChunkTot = 0.0;
+	double MCRotChunkAcp = 0.0;
+
+	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+	double rand1,rand2,rand3,rand4;
+	int offset, gatom;
+
+	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
+	for (int itrot = 0; itrot<NumbRotTimes; itrot = itrot+2)
+	{
+		for(int atom0 = 0; atom0<MCAtom[type].numb; atom0++)
+		{
+			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			rand1=runif(Rng);
+			rand2=runif(Rng);
+			rand3=runif(Rng);
+			rand4=runif(Rng);
 #ifdef PIMCTYPE
+			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSTYPE
+			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSENTTYPE
+#ifdef SWAPTOUNSWAP
+			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#endif
+		}
+	}
+
+	MCTotal[type][MCROTAT] += MCRotChunkTot;
+	MCAccep[type][MCROTAT] += MCRotChunkAcp;
+
+	MCRotChunkTot = 0;
+	MCRotChunkAcp = 0;
+
+	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
+	for (int itrot = 1; itrot<NumbRotTimes; itrot = itrot+2)
+	{
+		for(int atom0 = 0; atom0<MCAtom[type].numb; atom0++)
+		{
+			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			rand1=runif(Rng);
+			rand2=runif(Rng);
+			rand3=runif(Rng);
+			rand4=runif(Rng);
+#ifdef PIMCTYPE
+			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSTYPE
+			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#ifdef PIGSENTTYPE
+#ifdef SWAPTOUNSWAP
+			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+#endif
+#endif
+		}
+	}
+
+	MCTotal[type][MCROTAT] += MCRotChunkTot;
+	MCAccep[type][MCROTAT] += MCRotChunkAcp;
+}
+
 void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp)
 {
 	int it0 = (it1 - 1);
@@ -2707,17 +2706,15 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 #endif
 	}	      
 }
-#endif
 
-#ifdef PIGSTYPE
-void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp)
+void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp) //Original function is MCRot3Dstep()
 {
 	int it0 = (it1 - 1);
 	int it2 = (it1 + 1);
- 
+
 	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
 	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
-      
+	  
 	int t0 = offset + it0;
 	int t1 = offset + it1;
 	int t2 = offset + it2;
@@ -2728,46 +2725,42 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 
 	//cost += (step*(rnd1()-0.5));
 	cost += (step*(rand1-0.5));
-
-//    Toby change:
-//    cout<<"before random change "<<phi<<" "<<chi<<" "<<endl;
-//    phi += 2.0*M_PI*(step*(rnd1()-0.5));
-//    chi += 2.0*M_PI*(step*(rnd1()-0.5));
-      phi += 2.0*M_PI*(step*(rand2-0.5));
-      chi += 2.0*M_PI*(step*(rand3-0.5));
+	//phi += 2.0*M_PI*(step*(rnd1()-0.5));
+	//chi += 2.0*M_PI*(step*(rnd1()-0.5));
+	phi += 2.0*M_PI*(step*(rand2-0.5));
+	chi += 2.0*M_PI*(step*(rand3-0.5));
 /*
-//    axial symmetry of the molecule controlled by IROTSYM and NFOLD_ROT. use rand1 to judge whether rotate or not
-      if( IROTSYM == 1 )
-      {
-//       if(rand1 < 1.0/3.0)
-//       chi += 2.0*M_PI/(double)NFOLD_ROT;
+	//axial symmetry of the molecule controlled by IROTSYM and NFOLD_ROT. use rand1 to judge whether rotate or not
+	if( IROTSYM == 1 )
+	{
+		//if(rand1 < 1.0/3.0)
+		//chi += 2.0*M_PI/(double)NFOLD_ROT;
 
-         if(rand1 < 2.0/3.0 && rand1 >= 1.0/3.0)
-         chi += 2.0*M_PI/(double)NFOLD_ROT;
+		 if(rand1 < 2.0/3.0 && rand1 >= 1.0/3.0)
+		 chi += 2.0*M_PI/(double)NFOLD_ROT;
 
-         if(rand1 >= 2.0/3.0 )
-         chi -= 2.0*M_PI/(double)NFOLD_ROT;
-      }
+		 if(rand1 >= 2.0/3.0 )
+		 chi -= 2.0*M_PI/(double)NFOLD_ROT;
+	  }
 */
+	//get to the positive values of phi and chi
+	if(phi<0.0) phi = 2.0*M_PI + phi;
+	if(chi<0.0) chi = 2.0*M_PI + chi;
+	//Toby needs to recover the [0:2*Pi] range for phi and chi
+	phi = fmod(phi,2.0*M_PI);
+	chi = fmod(chi,2.0*M_PI);
 
-//    get to the positive values of phi and chi
-      if(phi<0.0) phi = 2.0*M_PI + phi;
-      if(chi<0.0) chi = 2.0*M_PI + chi;
-//    Toby needs to recover the [0:2*Pi] range for phi and chi
-      phi = fmod(phi,2.0*M_PI);
-      chi = fmod(chi,2.0*M_PI);
+	if (cost >  1.0)
+	{
+		cost = 2.0 - cost;    
+		//phi  = phi + M_PI;
+	}		 
 
-      if (cost >  1.0)
-      {
-         cost = 2.0 - cost;    
-//       phi  = phi + M_PI;
-      }		 
-      
-      if (cost < -1.0)
-      {
-          cost = -2.0 - cost;    
-//        phi  = phi  + M_PI;
-      }		  
+	if (cost < -1.0)
+	{
+		cost = -2.0 - cost;    
+		//phi  = phi  + M_PI;
+	}		  
 
 	double sint = sqrt(1.0 - cost*cost);
 
@@ -2775,162 +2768,65 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	newcoords[CHI][t1] = chi;
 	newcoords[CTH][t1] = cost;
 
-//----------------------------------------------
-
-// the old density
-
-	double rho = 0.0;
-	double erot = 0.0;
-	double esq  = 0.0;
+	double Eulan0[3];
 	double Eulan1[3];
 	double Eulan2[3];
-	double Eulrel[3];
-	int istop=0;
-	Eulan1[0]=MCAngles[PHI][t0];
-	Eulan1[1]=acos(MCAngles[CTH][t0]);
-	Eulan1[2]=MCAngles[CHI][t0];
-	Eulan2[0]=MCAngles[PHI][t1];
-	Eulan2[1]=acos(MCAngles[CTH][t1]);
-	Eulan2[2]=MCAngles[CHI][t1];
 
-	if(RotDenType == 0)
-	{
-		if (it1 != 0)
-		{
-			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+	Eulan0[0]=MCAngles[PHI][t0];
+	Eulan0[1]=acos(MCAngles[CTH][t0]);
+	Eulan0[2]=MCAngles[CHI][t0];
 
-			if(istop == 1)
-			{
-				cerr<<"large matrix test error"<<endl;
-				exit(0);
-			}
-		}
-		else rho = 1.0;
-	}
-	else if(RotDenType == 1)
-	{
-		rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
-	}
-      double dens_old = rho;
-      double rhoold = rho;
+	Eulan1[0]=MCAngles[PHI][t1];
+	Eulan1[1]=acos(MCAngles[CTH][t1]);
+	Eulan1[2]=MCAngles[CHI][t1];
 
-      Eulan1[0]=MCAngles[PHI][t1];
-      Eulan1[1]=acos(MCAngles[CTH][t1]);
-      Eulan1[2]=MCAngles[CHI][t1];
-      Eulan2[0]=MCAngles[PHI][t2];
-      Eulan2[1]=acos(MCAngles[CTH][t2]);
-      Eulan2[2]=MCAngles[CHI][t2];
+	Eulan2[0]=MCAngles[PHI][t2];
+	Eulan2[1]=acos(MCAngles[CTH][t2]);
+	Eulan2[2]=MCAngles[CHI][t2];
 
-	istop=0;
-	if(RotDenType == 0)
-	{
-		if (it1 != (NumbRotTimes-1))
-		{
-			 rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			 if(istop == 1)
-			 {
-				  cerr<<"large matrix test error"<<endl;
-				  exit(0);
-			 }
-		}
-		else rho = 1.0;
-	else if(RotDenType == 1)
-	{
-		 rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
-	}
-// PN pigs
-// ask Toby if rhoold is for PQC only?
-      dens_old=dens_old*rho;
-      rhoold = rhoold + rho;
+	double dens_old;
+	if (RotDenType == 0) dens_old = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
 
-      if (fabs(dens_old)<RZERO) dens_old = 0.0;
-//    if (dens_old<0.0) nrerror("Rotational Moves: ","Negative rot density");
-//    toby's temporary treatment for negative rho of paraH2O
-      if (dens_old<0.0) dens_old=fabs(dens_old);
+	if (fabs(dens_old)<RZERO) dens_old = 0.0;
+	//if (dens_old<0.0) nrerror("Rotational Moves: ","Negative rot density");
+	//toby's temporary treatment for negative rho of paraH2O
+	if (dens_old<0.0) dens_old=fabs(dens_old);
 
-      double pot_old  = 0.0;
+	double pot_old  = 0.0;
 
-      int itr0 = it1*RotRatio;     // interval to average over
-      int itr1 = itr0+RotRatio;     // translational time slices
+	int itr0 = it1*RotRatio;     // interval to average over
+	int itr1 = itr0+RotRatio;     // translational time slices
 
-      for (int it=itr0;it<itr1;it++)  // average over tr time slices
-      pot_old+=(PotRotE3D(gatom,Eulan1,it));
-//    Toby: pot_old can be calculated with MCAngles
+	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	pot_old+=(PotRotE3DPIGS(gatom,Eulan1,it));
+	//Toby: pot_old can be calculated with MCAngles
 
-//   the new density 
+	Eulan0[0]=MCAngles[PHI][t0];
+	Eulan0[1]=acos(MCAngles[CTH][t0]);
+	Eulan0[2]=MCAngles[CHI][t0];
 
-      Eulan1[0]=MCAngles[PHI][t0];
-      Eulan1[1]=acos(MCAngles[CTH][t0]);
-      Eulan1[2]=MCAngles[CHI][t0];
-      Eulan2[0]=newcoords[PHI][t1];
-      Eulan2[1]=acos(newcoords[CTH][t1]);
-      Eulan2[2]=newcoords[CHI][t1];
+	Eulan1[0]=newcoords[PHI][t1];
+	Eulan1[1]=acos(newcoords[CTH][t1]);
+	Eulan1[2]=newcoords[CHI][t1];
 
-	istop=0;
-	if(RotDenType == 0)
-	{
-		if (it1 != 0)
-		{
-			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			if(istop == 1)
-			{
-				cerr<<"large matrix test error"<<endl;
-				exit(0);
-			}
-		}
-		else rho = 1.0;
-	}
-	else if(RotDenType == 1)
-	{
-		rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
-	}
+	Eulan2[0]=MCAngles[PHI][t2];
+	Eulan2[1]=acos(MCAngles[CTH][t2]);
+	Eulan2[2]=MCAngles[CHI][t2];
 
-      double dens_new = rho;
-      double rhonew = rho;
+	double dens_new;
+	if(RotDenType == 0) dens_new = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
 
-      Eulan1[0]=newcoords[PHI][t1];
-      Eulan1[1]=acos(newcoords[CTH][t1]);
-      Eulan1[2]=newcoords[CHI][t1];
-      Eulan2[0]=MCAngles[PHI][t2];
-      Eulan2[1]=acos(MCAngles[CTH][t2]);
-      Eulan2[2]=MCAngles[CHI][t2];
+	if (fabs(dens_new)<RZERO) dens_new = 0.0;
+	//if (dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
+	//toby's temporary treatment for negative rho of paraH2O
+	if (dens_new<0.0) dens_new=fabs(dens_new);
 
-	istop=0;
-	if(RotDenType == 0)
-	{
-		if (it1 != (NumbRotTimes-1))
-		{
-			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			if(istop == 1)
-			{
-				cerr<<"large matrix test error"<<endl;
-				exit(0);
-			}
-		else rho = 1.0;
-	}
-	else if(RotDenType == 1)
-	{
-		rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
-	}
-
-      dens_new = dens_new * rho;
-      rhonew = rhonew + rho;
-
-      if (fabs(dens_new)<RZERO) dens_new = 0.0;
-//    if (dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
-//    toby's temporary treatment for negative rho of paraH2O
-      if (dens_new<0.0) dens_new=fabs(dens_new);
-
-
-      double pot_new  = 0.0;
-
-      for (int it=itr0;it<itr1;it++)  // average over tr time slices
-      pot_new  += (PotRotE3D(gatom,Eulan1,it));
-//    Toby: pot_new can be calculated with newcoords
+	double pot_new  = 0.0;
+	for (int it=itr0;it<itr1;it++) 
+	pot_new  += (PotRotE3DPIGS(gatom,Eulan1,it));
      
-      double rd;
+	double rd;
 
-//    distinginsh between Noya and RS
 	if(RotDenType == 0)
     {
     	if (dens_old>RZERO)
@@ -2938,32 +2834,13 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
         else rd = 1.0;
         rd *= exp(- MCRotTau*(pot_new-pot_old));
     }
-    else if(RotDenType == 1)
-   	{
-		//rd = dens_new/dens_old;
-		//use logarithmic for RS
-		rd = (rhonew - rhoold)/(4.0*(MCRotTau/WNO2K));
-		//cout<<"in cc:"<<rhonew<<" "<<rhoold<<" "<<rd<<" "<<4.0*(MCRotTau/WNO2K)<<endl;
-		//rd = rhonew - rhoold;
-		//rd = exp(rd);
-		rd -= MCRotTau*(pot_new-pot_old);
-	}
-
-	//rd *= exp(- MCRotTau*(pot_new-pot_old));   
 
 	bool Accepted = false;
 	if(RotDenType == 0)
 	{
 		if (rd>1.0)         Accepted = true;
-		//else if (rd>rnd7()) Accepted = true;
 		else if (rd>rand4) Accepted = true;
     }
-    else
-    {
-    	if (rd > 0.0)       Accepted = true;
-		//else if (rd > log(rnd7())) Accepted = true;
-		else if (rd > log(rand4)) Accepted = true;
-	}
 
 	//MCTotal[type][MCROTAT] += 1.0;  
 	MCRotChunkTot +=1.0;
@@ -2983,19 +2860,664 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 		MCCosine [AXIS_Z][t1] = cost;
 		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
 		//and Ieff about and perpendicular to one molecule-ixed axis.
-
-#ifdef MOLECULEINCAGE
-		MCCosinex[AXIS_X][t1] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
-		MCCosinex[AXIS_Y][t1] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
-		MCCosinex[AXIS_Z][t1] = -sint*cos(chi);
-
-		MCCosiney[AXIS_X][t1] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
-		MCCosiney[AXIS_Y][t1] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
-		MCCosiney[AXIS_Z][t1] = sint*sin(chi);
-#endif
 	}	      
 }
+
+void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp, string Distribution) //Original function is MCRot3Dstep()
+{
+	int it0 = (it1 - 1);
+	int it2 = (it1 + 1);
+
+	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
+	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+	  
+	int t0 = offset + it0;
+	int t1 = offset + it1;
+	int t2 = offset + it2;
+
+	double cost = MCAngles[CTH][t1];
+	double phi  = MCAngles[PHI][t1];
+	double chi  = MCAngles[CHI][t1];
+
+	//cost += (step*(rnd1()-0.5));
+	cost += (step*(rand1-0.5));
+	//phi += 2.0*M_PI*(step*(rnd1()-0.5));
+	//chi += 2.0*M_PI*(step*(rnd1()-0.5));
+	phi += 2.0*M_PI*(step*(rand2-0.5));
+	chi += 2.0*M_PI*(step*(rand3-0.5));
+/*
+	//axial symmetry of the molecule controlled by IROTSYM and NFOLD_ROT. use rand1 to judge whether rotate or not
+	if( IROTSYM == 1 )
+	{
+		//if(rand1 < 1.0/3.0)
+		//chi += 2.0*M_PI/(double)NFOLD_ROT;
+
+		 if(rand1 < 2.0/3.0 && rand1 >= 1.0/3.0)
+		 chi += 2.0*M_PI/(double)NFOLD_ROT;
+
+		 if(rand1 >= 2.0/3.0 )
+		 chi -= 2.0*M_PI/(double)NFOLD_ROT;
+	  }
+*/
+	//get to the positive values of phi and chi
+	if(phi<0.0) phi = 2.0*M_PI + phi;
+	if(chi<0.0) chi = 2.0*M_PI + chi;
+	//Toby needs to recover the [0:2*Pi] range for phi and chi
+	phi = fmod(phi,2.0*M_PI);
+	chi = fmod(chi,2.0*M_PI);
+
+	if (cost >  1.0)
+	{
+		cost = 2.0 - cost;    
+		//phi  = phi + M_PI;
+	}		 
+
+	if (cost < -1.0)
+	{
+		cost = -2.0 - cost;    
+		//phi  = phi  + M_PI;
+	}		  
+
+	double sint = sqrt(1.0 - cost*cost);
+
+	newcoords[PHI][t1] = phi;
+	newcoords[CHI][t1] = chi;
+	newcoords[CTH][t1] = cost;
+
+	double Eulan0[3];
+	double Eulan1[3];
+	double Eulan2[3];
+
+	Eulan0[0]=MCAngles[PHI][t0];
+	Eulan0[1]=acos(MCAngles[CTH][t0]);
+	Eulan0[2]=MCAngles[CHI][t0];
+
+	Eulan1[0]=MCAngles[PHI][t1];
+	Eulan1[1]=acos(MCAngles[CTH][t1]);
+	Eulan1[2]=MCAngles[CHI][t1];
+
+	Eulan2[0]=MCAngles[PHI][t2];
+	Eulan2[1]=acos(MCAngles[CTH][t2]);
+	Eulan2[2]=MCAngles[CHI][t2];
+
+// Rotors partitioning
+	int particleA1Min = 0;
+	int particleA1Max = 0;
+	int particleA2Min = 0;
+	int particleA2Max = 0;
+	int iRefAtom = RefAtom;
+#ifdef RATIOTRICK
+	if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
 #endif
+	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
+	int beadMminus1 = (((NumbRotTimes - 1)/2) - 1);
+	int beadM       = ((NumbRotTimes - 1)/2);
+
+	double dens_old;
+	if (RotDenType == 0) 
+	{
+		dens_old = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
+
+		if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
+		{
+#ifdef RATIOTRICK
+			if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+			{
+				dens_old = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+			}
+#else
+			if (Distribution == "Swap")
+			{
+				dens_old = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+			}
+#endif
+		}
+	
+	}
+
+	if (fabs(dens_old)<RZERO) dens_old = 0.0;
+	//if (dens_old<0.0) nrerror("Rotational Moves: ","Negative rot density");
+	//toby's temporary treatment for negative rho of paraH2O
+	if (dens_old<0.0) dens_old=fabs(dens_old);
+
+	double pot_old  = 0.0;
+
+	int itr0 = it1*RotRatio;     // interval to average over
+	int itr1 = itr0+RotRatio;     // translational time slices
+
+	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	pot_old+=(PotRotE3DSwap(iRefAtom,gatom,Eulan1,it,Distribution));
+	//Toby: pot_old can be calculated with MCAngles
+
+	Eulan0[0]=MCAngles[PHI][t0];
+	Eulan0[1]=acos(MCAngles[CTH][t0]);
+	Eulan0[2]=MCAngles[CHI][t0];
+
+	Eulan1[0]=newcoords[PHI][t1];
+	Eulan1[1]=acos(newcoords[CTH][t1]);
+	Eulan1[2]=newcoords[CHI][t1];
+
+	Eulan2[0]=MCAngles[PHI][t2];
+	Eulan2[1]=acos(MCAngles[CTH][t2]);
+	Eulan2[2]=MCAngles[CHI][t2];
+
+	double dens_new;
+	if(RotDenType == 0)
+	{
+		dens_new = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
+
+		if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
+		{
+#ifdef RATIOTRICK
+			if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+			{
+				dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+			}
+#else
+			if (Distribution == "Swap")
+			{
+				dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+			}
+#endif
+		}
+
+	}
+
+	if (fabs(dens_new)<RZERO) dens_new = 0.0;
+	//if (dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
+	//toby's temporary treatment for negative rho of paraH2O
+	if (dens_new<0.0) dens_new=fabs(dens_new);
+
+	double pot_new  = 0.0;
+	for (int it=itr0;it<itr1;it++) 
+	pot_new  += (PotRotE3DSwap(iRefAtom,gatom,Eulan1,it,Distribution));
+     
+	double rd;
+
+	if(RotDenType == 0)
+    {
+    	if (dens_old>RZERO)
+        rd = dens_new/dens_old;
+        else rd = 1.0;
+        rd *= exp(- MCRotTau*(pot_new-pot_old));
+    }
+
+	bool Accepted = false;
+	if(RotDenType == 0)
+	{
+		if (rd>1.0)         Accepted = true;
+		else if (rd>rand4) Accepted = true;
+    }
+
+	//MCTotal[type][MCROTAT] += 1.0;  
+	MCRotChunkTot +=1.0;
+      
+	if (Accepted)
+	{
+		//MCAccep[type][MCROTAT] += 1.0;
+		MCRotChunkAcp +=1.0;
+
+		MCAngles[CTH][t1] = cost;
+		MCAngles[PHI][t1] = phi;
+		MCAngles[CHI][t1] = chi; //toby adds
+  
+		sint=sqrt(1.0-cost*cost);
+		MCCosine [AXIS_X][t1] = sint*cos(phi);
+		MCCosine [AXIS_Y][t1] = sint*sin(phi);
+		MCCosine [AXIS_Z][t1] = cost;
+		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
+		//and Ieff about and perpendicular to one molecule-ixed axis.
+	}	      
+}
+
+double GetDensity3DPIGS(int it1, double *Eulan0, double *Eulan1, double *Eulan2)
+{
+	double rho = 0.0;
+	double erot = 0.0;
+	double esq  = 0.0;
+	double Eulrel[3];
+	int istop=0;
+	double dens;
+	
+	if (it1 == 0)
+	{
+		rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+		dens = rho;
+		CodeExit(istop);
+	}
+	else if (it1 == (NumbRotTimes - 1))
+	{
+		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+		dens = rho;
+		CodeExit(istop);
+	}
+	else
+	{
+		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+		dens = rho;
+		CodeExit(istop);
+		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+		dens *= rho;
+		CodeExit(istop);
+	}
+	return dens;	
+}
+
+double GetDensity3DENT(string Distribution, int gatom, int type, int particleA1Min, int particleA1Max, int particleA2Min, int particleA2Max, int it0, int it1, int it2, int t1, int t0, int t2, double *Eulan0, double *Eulan1, double *Eulan2)
+{
+	double rho = 0.0;
+	double erot = 0.0;
+	double esq  = 0.0;
+	double Eulrel[3];
+	double EulanSwap[3];
+	int istop=0;
+	double dens;
+	
+	double dens_ENT;
+	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
+	{
+		int gatomSwap = particleA2Max - (gatom - particleA1Min);
+		int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
+
+		if (it1 == (((NumbRotTimes - 1)/2) - 1))
+		{
+			int tSwap = offsetSwap + it2;
+			EulanSwap[0]=MCAngles[PHI][tSwap];
+			EulanSwap[1]=acos(MCAngles[CTH][tSwap]);
+			EulanSwap[2]=MCAngles[CHI][tSwap];
+
+			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens = rho;
+			CodeExit(istop);
+			rotden_(Eulan1,EulanSwap,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens *= rho;
+			CodeExit(istop);
+		}
+
+		if (it1 == ((NumbRotTimes - 1)/2))
+		{
+			int tSwap = offsetSwap + it0;
+			EulanSwap[0]=MCAngles[PHI][tSwap];
+			EulanSwap[1]=acos(MCAngles[CTH][tSwap]);
+			EulanSwap[2]=MCAngles[CHI][tSwap];
+
+			rotden_(EulanSwap,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens = rho;
+			CodeExit(istop);
+			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens *= rho;
+			CodeExit(istop);
+		}
+	}	
+
+	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
+	{
+		int gatomSwap = particleA1Max - (gatom - particleA2Min);
+		int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
+
+		if (it1 == (((NumbRotTimes - 1)/2) - 1))
+		{
+			int tSwap = offsetSwap + it2;
+			EulanSwap[0]=MCAngles[PHI][tSwap];
+			EulanSwap[1]=acos(MCAngles[CTH][tSwap]);
+			EulanSwap[2]=MCAngles[CHI][tSwap];
+
+			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens = rho;
+			CodeExit(istop);
+			rotden_(Eulan1,EulanSwap,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens *= rho;
+			CodeExit(istop);
+		}
+
+		if (it1 == ((NumbRotTimes - 1)/2))
+		{
+			int tSwap = offsetSwap + it0;
+			EulanSwap[0]=MCAngles[PHI][tSwap];
+			EulanSwap[1]=acos(MCAngles[CTH][tSwap]);
+			EulanSwap[2]=MCAngles[CHI][tSwap];
+
+			rotden_(EulanSwap,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens = rho;
+			CodeExit(istop);
+			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			dens *= rho;
+			CodeExit(istop);
+		}
+	}
+	return dens;
+}
+
+double PotRotE3D(int atom0, double *Eulang, int it)   
+{
+	int type0   =  MCType[atom0];
+
+#ifdef DEBUG_PIMC
+	const char *_proc_=__func__;         //  PotRotEnergy()
+
+	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
+	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
+
+	if (MCAtom[type0].numb > NumbRotLim)
+	nrerror(_proc_,"Too many non-linear rotors");
+#endif
+
+	double spot = 0.0;
+
+	int offset0 = atom0*NumbRotTimes;
+
+	for (int atom1=0; atom1<NumbAtoms; atom1++)
+	if (atom1 != atom0)                    // skip "self-interaction"
+	{	
+		int offset1 = atom1*NumbRotTimes;
+		int type1   = MCType[atom1];
+
+#ifdef DEBUG_PIMC
+		//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
+		//nrerror(_proc_,"More then one molecular impurity type");
+		if(MCAtom[type1].molecule == 1)
+		nrerror(_proc_,"No support of non-linear-linear interaction yet");
+#endif
+
+		if (type1 != IMTYPE) // atom-rotor interaction
+		{
+			bool wline = true;                  // skip if the time slice between ira and masha
+
+			if (WORM && Worm.exists && (Worm.type == type1))  
+			wline = WorldLine((atom1-MCAtom[type1].offset/NumbTimes), it);
+    
+			if (wline)
+			{  
+				int t0 = offset0 + it;
+				int t1 = offset1 + it;
+
+				double RCOM[3];
+				double Rpt[3];
+				double vpot3d;
+				double radret;
+				double theret;
+				double chiret;
+				double hatx[3];
+				double haty[3];
+				double hatz[3];
+				int    ivcord = 0;
+				for (int id=0;id<NDIM;id++)
+				{
+					RCOM[id] = MCCoords[id][t0];
+					Rpt[id]  = MCCoords[id][t1];
+				}
+
+				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+
+//				for(int id=0;id<NDIM;id++)
+/*
+				Toby's printing
+				cout<<Eulang[id]<<" "<<RCOM[id]<<" "<<Rpt[id]<<endl;
+				cout<<vpot3d<<endl;
+*/
+
+				spot += vpot3d;
+ 
+			} // END sum over time slices 	   
+		}
+		else if (MCType[atom1] == IMTYPE)
+		{
+			int t0 = offset0 + it;
+			int t1 = offset1 + it;
+			double com_1[NDIM];
+			double com_2[NDIM];
+			double Eulang_1[NDIM];
+			double Eulang_2[NDIM];
+			double E_2H2O;
+			for (int id=0; id<NDIM; id++)
+			{
+				com_1[id] = MCCoords[id][t0];
+				com_2[id] = MCCoords[id][t1];
+			}
+			int tm0=offset0 + it/RotRatio;
+			int tm1=offset1 + it/RotRatio;
+			Eulang_1[PHI]=MCAngles[PHI][tm0];
+			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+			Eulang_1[CHI]=MCAngles[CHI][tm0];
+			Eulang_2[PHI]=MCAngles[PHI][tm1];
+			Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+			Eulang_2[CHI]=MCAngles[CHI][tm1];
+			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
+			spot += E_2H2O;
+		}
+	}   // END sum over atoms
+	return (spot);
+}
+
+double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is PotRotE3D
+{
+	int type0   =  MCType[atom0];
+
+#ifdef DEBUG_PIMC
+	const char *_proc_=__func__;         //  PotRotEnergy()
+
+	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
+	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
+
+	if (MCAtom[type0].numb > NumbRotLim)
+	nrerror(_proc_,"Too many non-linear rotors");
+#endif
+
+	double spot = 0.0;
+
+	int offset0 = atom0*NumbRotTimes;
+
+	for (int atom1=0; atom1<NumbAtoms; atom1++)
+	if (atom1 != atom0)                    // skip "self-interaction"
+	{	
+		int offset1 = atom1*NumbRotTimes;
+		int type1   = MCType[atom1];
+
+#ifdef DEBUG_PIMC
+		//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
+		//nrerror(_proc_,"More then one molecular impurity type");
+		if(MCAtom[type1].molecule == 1)
+		nrerror(_proc_,"No support of non-linear-linear interaction yet");
+#endif
+
+		if (MCType[atom1] == IMTYPE)
+		{
+			int t0 = offset0 + it;
+			int t1 = offset1 + it;
+			double com_1[NDIM];
+			double com_2[NDIM];
+			double Eulang_1[NDIM];
+			double Eulang_2[NDIM];
+			double E_2H2O;
+			for (int id=0; id<NDIM; id++)
+			{
+				com_1[id] = MCCoords[id][t0];
+				com_2[id] = MCCoords[id][t1];
+			}
+			int tm0=offset0 + it/RotRatio;
+			int tm1=offset1 + it/RotRatio;
+			Eulang_1[PHI]=MCAngles[PHI][tm0];
+			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+			Eulang_1[CHI]=MCAngles[CHI][tm0];
+			Eulang_2[PHI]=MCAngles[PHI][tm1];
+			Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+			Eulang_2[CHI]=MCAngles[CHI][tm1];
+			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
+			spot += E_2H2O;
+		}
+	}   // END sum over atoms
+    double weight;
+	weight = 1.0;
+    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
+	return (weight*spot);
+}
+
+double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Distribution)   
+{
+	int type0   =  MCType[atom0];
+
+#ifdef DEBUG_PIMC
+	const char *_proc_=__func__;         //  PotRotEnergy()
+
+	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
+	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
+
+	if (MCAtom[type0].numb > NumbRotLim)
+	nrerror(_proc_,"Too many non-linear rotors");
+#endif
+
+	double spot, spotSwap;
+
+    double weight, weight1;
+	weight = 1.0;
+    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
+
+	int offset0 = atom0*NumbRotTimes;
+	int t0  = offset0 + it;
+
+	int atom1Init, NumbAtoms1;
+	int particleA1Min = 0;
+	int particleA1Max = 0;
+	int particleA2Min = 0;
+	int particleA2Max = 0;
+	GetIndex(iRefAtom, type0, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
+	if (atom0 <= particleA1Max)
+	{
+		atom1Init  = 0;
+		NumbAtoms1 = (particleA1Max+1);
+	}
+	else
+	{
+		atom1Init  = particleA2Min;
+		NumbAtoms1 = NumbAtoms;
+	}
+
+	spot = 0.0;
+	for (int atom1=0; atom1<NumbAtoms; atom1++)
+	if (atom1 != atom0)                    // skip "self-interaction"
+	{	
+		int type1   = MCType[atom1];
+
+#ifdef DEBUG_PIMC
+		//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
+		//nrerror(_proc_,"More then one molecular impurity type");
+		if(MCAtom[type1].molecule == 1)
+		nrerror(_proc_,"No support of non-linear-linear interaction yet");
+#endif
+
+		if (MCType[atom1] == IMTYPE)
+		{
+			int offset1 = atom1*NumbRotTimes;
+			int t1 = offset1 + it;
+			double com_1[NDIM];
+			double com_2[NDIM];
+			double Eulang_1[NDIM];
+			double Eulang_2[NDIM];
+			double E_2H2O;
+			for (int id=0; id<NDIM; id++)
+			{
+				com_1[id] = MCCoords[id][t0];
+				com_2[id] = MCCoords[id][t1];
+			}
+			int tm0=offset0 + it/RotRatio;
+			int tm1=offset1 + it/RotRatio;
+			Eulang_1[PHI]=MCAngles[PHI][tm0];
+			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+			Eulang_1[CHI]=MCAngles[CHI][tm0];
+			Eulang_2[PHI]=MCAngles[PHI][tm1];
+			Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+			Eulang_2[CHI]=MCAngles[CHI][tm1];
+			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
+
+			weight1 = 1.0;
+#ifdef RATIOTRICK
+			if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2))) 
+#else
+			if (Distribution == "Swap")
+#endif
+			{
+				if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
+				{
+					if (it == ((NumbRotTimes - 1)/2))
+					{
+						weight1 = 0.5;
+					}
+				} 
+				if (((atom0 >= particleA1Min) && (atom0 <= particleA2Max)) && ((atom1 < particleA1Min) || (atom1 > particleA2Max)))
+				{
+					if (it == ((NumbRotTimes - 1)/2))
+					{
+						weight1 = 0.5;
+					}
+				} 
+			}
+			spot += weight*weight1*E_2H2O;
+		} //loop over atom1 (molecules)
+
+		spotSwap = 0.0;
+#ifdef RATIOTRICK
+		if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2)))
+#else
+		if (Distribution == "Swap")
+#endif
+		{
+			if (it == ((NumbRotTimes - 1)/2))
+			{
+				int atomSwapMin, atomSwapMax;
+				if (atom0 < particleA1Min)
+    	   		{
+					atomSwapMin = particleA2Min;
+                	atomSwapMax = (particleA2Max + 1);
+				}
+				if (atom0 > particleA2Max)
+    	   		{
+					atomSwapMin = particleA1Min;
+                	atomSwapMax = (particleA1Max + 1);
+				}
+	    		if ((atom0 >= particleA1Min) && (atom0 <= particleA1Max))
+       	    	{
+			    	atomSwapMin = (particleA2Max + 1);
+                	atomSwapMax = NumbAtoms;
+		    	}
+     			if ((atom0 >= particleA2Min) && (atom0 <= particleA2Max))
+         		{
+	     			atomSwapMin = 0;
+                	atomSwapMax = particleA1Min;
+		    	}
+				spotSwap = 0.0;
+     			for (int atomSwap = atomSwapMin; atomSwap < atomSwapMax; atomSwap++)
+	    		{
+                	int offsetSwap = NumbRotTimes*atomSwap;
+                	int tSwap  = offsetSwap + it;
+					double com_1[NDIM];
+					double com_2[NDIM];
+					double EulangSwap_1[NDIM];
+					double EulangSwap_2[NDIM];
+					double E_2H2O;
+					for (int id=0; id<NDIM; id++)
+					{
+						com_1[id] = MCCoords[id][t0];
+						com_2[id] = MCCoords[id][tSwap];
+					}
+					int tm0=offset0 + it/RotRatio;
+					int tm1=offsetSwap + it/RotRatio;
+					EulangSwap_1[PHI]=MCAngles[PHI][tm0];
+					EulangSwap_1[CTH]=acos(MCAngles[CTH][tm0]);
+					EulangSwap_1[CHI]=MCAngles[CHI][tm0];
+					EulangSwap_2[PHI]=MCAngles[PHI][tm1];
+					EulangSwap_2[CTH]=acos(MCAngles[CTH][tm1]);
+					EulangSwap_2[CHI]=MCAngles[CHI][tm1];
+					caleng_(com_1, com_2, &E_2H2O, Eulang, EulangSwap_2);
+					spotSwap += 0.5*E_2H2O;
+		    	}
+        	}
+		}
+    }
+	double spotReturn = spot + spotSwap;
+    return spotReturn;
+}
 
 double PotEnergy(int atom0, double **pos)   
 // 
@@ -4234,117 +4756,6 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 }
 #endif
 
-double PotRotE3D(int atom0, double *Eulang, int it)   
-{
-	int type0   =  MCType[atom0];
-
-#ifdef DEBUG_PIMC
-	const char *_proc_=__func__;         //  PotRotEnergy()
-
-	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
-	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
-
-	if (MCAtom[type0].numb > NumbRotLim)
-	nrerror(_proc_,"Too many non-linear rotors");
-#endif
-
-	double spot = 0.0;
-
-	int offset0 = atom0*NumbRotTimes;
-
-	for (int atom1=0; atom1<NumbAtoms; atom1++)
-	if (atom1 != atom0)                    // skip "self-interaction"
-	{	
-		int offset1 = atom1*NumbRotTimes;
-		int type1   = MCType[atom1];
-
-#ifdef DEBUG_PIMC
-		//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
-		//nrerror(_proc_,"More then one molecular impurity type");
-		if(MCAtom[type1].molecule == 1)
-		nrerror(_proc_,"No support of non-linear-linear interaction yet");
-#endif
-
-#ifdef IOWRITE
-		if (type1 != IMTYPE) // atom-rotor interaction
-		{
-			bool wline = true;                  // skip if the time slice between ira and masha
-
-			if (WORM && Worm.exists && (Worm.type == type1))  
-			wline = WorldLine((atom1-MCAtom[type1].offset/NumbTimes), it);
-    
-			if (wline)
-			{  
-				int t0 = offset0 + it;
-				int t1 = offset1 + it;
-
-				double RCOM[3];
-				double Rpt[3];
-				double vpot3d;
-				double radret;
-				double theret;
-				double chiret;
-				double hatx[3];
-				double haty[3];
-				double hatz[3];
-				int    ivcord = 0;
-				for (int id=0;id<NDIM;id++)
-				{
-					RCOM[id] = MCCoords[id][t0];
-					Rpt[id]  = MCCoords[id][t1];
-				}
-
-				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-
-//				for(int id=0;id<NDIM;id++)
-/*
-				Toby's printing
-				cout<<Eulang[id]<<" "<<RCOM[id]<<" "<<Rpt[id]<<endl;
-				cout<<vpot3d<<endl;
-*/
-
-				spot += vpot3d;
- 
-			} // END sum over time slices 	   
-		}
-		else if (MCType[atom1] == IMTYPE)
-		{
-			int t0 = offset0 + it;
-			int t1 = offset1 + it;
-			double com_1[NDIM];
-			double com_2[NDIM];
-			double Eulang_1[NDIM];
-			double Eulang_2[NDIM];
-			double E_2H2O;
-			for (int id=0; id<NDIM; id++)
-			{
-				com_1[id] = MCCoords[id][t0];
-				com_2[id] = MCCoords[id][t1];
-			}
-			int tm0=offset0 + it/RotRatio;
-			int tm1=offset1 + it/RotRatio;
-			Eulang_1[PHI]=MCAngles[PHI][tm0];
-			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
-			Eulang_1[CHI]=MCAngles[CHI][tm0];
-			Eulang_2[PHI]=MCAngles[PHI][tm1];
-			Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
-			Eulang_2[CHI]=MCAngles[CHI][tm1];
-			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
-			spot += E_2H2O;
-//			cout<<"in PotRotE3D "<<it<<" "<<t0<<" "<<t1<<" "<<tm0<<" "<<tm1<<" "<<" "<<offset0<<" "<<offset1<<" "<<E_2H2O<<endl;
-//			cout<<Eulang[PHI]<<" "<<Eulang[CTH]<<" "<<Eulang[CHI]<<" "<<Eulang_2[PHI]<<" "<<Eulang_2[CTH]<<" "<<Eulang_2[CHI]<<endl;
-//			cout<<com_1[0]<<" "<<com_1[1]<<" "<<com_1[2]<<" "<<com_2[0]<<" "<<com_2[1]<<" "<<com_2[2]<<endl;
-		}
-#endif
-		int tm1=offset1 + it/RotRatio;
-		double Eulang_2[NDIM];
-		Eulang_2[PHI]=MCAngles[PHI][tm1];
-		Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
-		Eulang_2[CHI]=MCAngles[CHI][tm1];
-   		spot += PotFunc(atom0, atom1, Eulang, Eulang_2, it);
-	}   // END sum over atoms
-	return (spot);
-}
 
 void ResetMCCounts(void)
 {
@@ -4934,3 +5345,11 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 	return activation;
 }
 */
+void CodeExit(int istop)
+{
+	if(istop == 1)
+	{
+		cerr<<"large matrix test error"<<endl;
+		exit(0);
+	}
+}
