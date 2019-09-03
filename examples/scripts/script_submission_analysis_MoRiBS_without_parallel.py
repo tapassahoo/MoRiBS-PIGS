@@ -57,8 +57,8 @@ status              = args.job
 #
 #Request to change
 #If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham""
-NameOfServer        = "nlogn"
-#NameOfServer        = "graham"
+#NameOfServer        = "nlogn"
+NameOfServer        = "graham"
 NameOfPartition     = args.partition
 #
 TypeCal             = args.cal
@@ -201,7 +201,7 @@ for particleA in particleAList:
 
 		if not args.RESTART:
 			call(["cp", execution_file, dir_run_input_pimc])
-		#call(["cp", execution_file, dir_run_input_pimc])
+		call(["cp", execution_file, dir_run_input_pimc])
 
 		if (RotorType == "LINEAR"):
 			if not args.RESTART:

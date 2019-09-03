@@ -11,6 +11,7 @@ run
 aa.f
 *1.*
 *2.*
+*old.cc
 test-hfhf.f
 Makefile-TEST
 Makefile
@@ -38,3 +39,4 @@ Makefile
 examples/scripts/RenameOfFigures.sh
 examples/scripts/support_without_parallel_original.py
 /sprng/*
+Makefile

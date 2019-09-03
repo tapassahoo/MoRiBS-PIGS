@@ -969,7 +969,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		CommandForMove = "mv "+folder_run_path+" "+dir_output
 	if (RUNDIR == "work"):
 		CommandForMove = " "
-	#CommandForMove = " " #for graham
+	CommandForMove = " " #for graham
 
 	if not PPA1:
 		CommandForPPA = "#"
@@ -1005,7 +1005,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-##SBATCH --account=rrg-pnroy
+#SBATCH --account=rrg-pnroy
 #SBATCH --mem-per-cpu=2048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -1036,7 +1036,7 @@ mv %s %s
 mv %s %s
 cd %s
 cp %s qmc.input
-#cp %s %s
+cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 time ./pimc 
 %s
@@ -1484,12 +1484,12 @@ def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
 def GetRenamingFunc(dir_run_input_pimc, dir_input_pimc_renamed, dir_output, folder_run, folder_renamed, src_dir):
 	final_dir_in_work = dir_output + folder_run
 
-	call(["rm", "-rf", dir_run_input_pimc])
-	#call(["cp", "-R", dir_run_input_pimc, dir_input_pimc_renamed])
+	#call(["rm", "-rf", dir_run_input_pimc])
+	call(["cp", "-R", dir_run_input_pimc, dir_input_pimc_renamed])
 	os.chdir(dir_output)
 	if (os.path.isdir(folder_run) == True):
-		#call(["cp", "-R", folder_run, folder_renamed])
-		call(["rm", "-rf", folder_run])
+		call(["cp", "-R", folder_run, folder_renamed])
+		#call(["rm", "-rf", folder_run])
 		#print(dir_run_input_pimc)
 		#printingMessage = "move "+str(dir_output)+str(folder_run)
 		#print(printingMessage)
