@@ -1,0 +1,7 @@
+============================================================
+running job 'tt' (595752)
+on node 'gregoire' in partition 'serial'
+on cluster 'feynman'
+as 'tapas' (1172)
+============================================================
+slurmstepd-gregoire: error: *** JOB 595752 ON gregoire CANCELLED AT 2019-09-03T15:01:30 ***

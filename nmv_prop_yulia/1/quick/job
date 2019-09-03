@@ -1,0 +1,10 @@
+!/bin/sh
+
+#PBS -j oe
+
+#PBS -m ae
+
+export LD_LIBRARY_PATH=/home/pnroy/Dev/lib64
+cd ${PBS_O_WORKDIR}
+
+./asymrho_copy.x 1. 4 -1 10 10 0.6666525 0.2306476 0.1769383 10
