@@ -1,11 +1,13 @@
 #FC=~pnroy/Dev/bin/gfortran
+#LDFLAGS=-L/opt/intel/mkl/lib/intel64 -llapack -L/home/pnroy/Dev/lib64/
+
 HOST=$(shell hostname)
 ifeq ($(HOST), gra-login3)
 	FC=ifort
 	LDFLAGS=-mkl=sequential
 else
 	FC=gfortran
-	LDFLAGS=-L/opt/intel/mkl/lib/intel64 -llapack -L/home/pnroy/Dev/lib64/
+	LDFLAGS=-llapack
 endif
 
 asymrho.x:	asymrho.o
