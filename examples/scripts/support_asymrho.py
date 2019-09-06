@@ -8,8 +8,11 @@ from subprocess import call
 
 import numpy as np
 
-import inputFile
 
+def dropzeros(number):
+    mynum          = decimal.Decimal(number).normalize()
+    # e.g 22000 --> Decimal('2.2E+4')
+    return mynum.__trunc__() if not mynum % 1 else float(mynum)
 
 def GetDirNameSubmission(rotor, temperature, numbbeads, iodevn, jmax):
     if iodevn == 0:
@@ -19,7 +22,7 @@ def GetDirNameSubmission(rotor, temperature, numbbeads, iodevn, jmax):
     elif iodevn == -1:
         spinstate = "-spin-less-"
 
-    file_name = "rot-dens-matrix-of" + spinstate + rotor + "-Temp" + str(temperature) + "Kelvin"
+    file_name = "rot-dens-matrix-of" + spinstate + rotor + "-Temp" + str(temperature) + "Kelvin-Beads"+str(numbbeads)
 
     return file_name
 
@@ -73,7 +76,10 @@ def Submission(
 ):
     for theta in range(181):
         folder_run = dir_name + "-theta" + str(theta)
-        folder_run_path = dir_job + folder_run
+        if (NameOfServer == "graham"):
+            folder_run_path = dir_job +"/"+ folder_run
+        else:
+            folder_run_path = dir_job + folder_run
         fname = dir_input + "/job-for-theta" + str(theta)
         logfile = "t" + str(theta) + "P" + str(numbbeads) + "T" + str(temperature)
 
@@ -168,7 +174,7 @@ def jobstring_sbatch(
     job_string = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
-#SBATCH --time=1-00:00
+#SBATCH --time=0-08:00
 %s
 #SBATCH --mem-per-cpu=2048mb
 #SBATCH --cpus-per-task=1
@@ -199,28 +205,39 @@ cp %s %s
     return job_string
 
 
-def GetPackRotDens(src_dir_exe, dir_output, script_dir):
+def GetPackRotDens(src_dir_exe, dir_output, script_dir,rotor, temperature,numbbeads):
     cmd_cp = "cp " + src_dir_exe + "*.x " + dir_output
     os.system(cmd_cp)
 
     os.chdir(dir_output)
 
+    file0 = dir_output + "/rho.den000"
+    if (os.path.exists(file0) != True):
+       print("Stop. There is no rho.dens*.")
+       exit()
+
     cmd_exe = "./compile.x"
     os.system(cmd_exe)
-    RemoveAllFiles(dir_output)
+    RemoveAllFiles(dir_output,rotor,temperature,numbbeads)
 
     os.chdir(script_dir)
 
 
-def RemoveAllFiles(dir_output):
+def RemoveAllFiles(dir_output,rotor,temperature,numbbeads):
     filelist = glob.glob(dir_output + "/*")
-    file = dir_output + "/rho.den"
-    filelist.remove(file)
-    file = dir_output + "/rho.den_rho"
-    filelist.remove(file)
-    file = dir_output + "/rho.den_eng"
-    filelist.remove(file)
-    file = dir_output + "/rho.den_esq"
-    filelist.remove(file)
+
+    file0 = dir_output + "/rho.den"
+    filelist.remove(file0)
+    file1 = dir_output + "/rho.den_rho"
+    filelist.remove(file1)
+    file2 = dir_output + "/rho.den_eng"
+    filelist.remove(file2)
+    file3 = dir_output + "/rho.den_esq"
+    filelist.remove(file3)
     for file in filelist:
         os.remove(file)
+
+    subscript = dir_output+"/"+rotor+'_T'+str(dropzeros(temperature))+"t"+str(int(numbbeads))
+    os.rename(file1, subscript+".rho")
+    os.rename(file2, subscript+".eng")
+    os.rename(file3, subscript+".esq")

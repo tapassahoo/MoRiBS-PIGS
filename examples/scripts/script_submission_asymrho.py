@@ -64,9 +64,13 @@ parser.add_argument(
     "--TypeCal", help="It is either submission for analysis.", type=str, default="A"
 )
 args = parser.parse_args()
+#Argparser ends here
 
-NameOfServer = "nlogn"
-# NameOfServer        = "graham"
+myhost = os.uname()[1]
+if ((myhost == 'gra-login1') or (myhost == 'gra-login2') or (myhost == 'gra-login3')):
+	NameOfServer = "graham"
+else:
+	NameOfServer = "nlogn"
 NameOfPartition = args.Partition
 
 rotor = args.Rotor
@@ -82,11 +86,12 @@ RUNDIR = "scratch"
 extra_file_name = ""
 script_dir = os.getcwd()
 user_name = os.getlogin()
+home = os.path.expanduser('~')
 
 if user_name == "tsahoo":
     dir_user = "/Users/tsahoo/mount_feynman/"
 else:
-    dir_user = "/home/tapas/"
+    dir_user = home+"/"
 moribs_dir = "MoRiBS-PIGS/"
 asymrho_dir = "nmv_prop/"
 dir_store = "rot-dens-asymmetric-top/"
@@ -95,10 +100,12 @@ src_dir_exe = dir_user + moribs_dir + asymrho_dir
 if TypeCal == "S":
     asym.MakeExecutable(script_dir, src_dir_exe)
 
-if (RUNDIR == "scratch") or (NameOfServer == "graham"):
-    dir_job = "/scratch/" + user_name + "/"
-
 dir_name = asym.GetDirNameSubmission(rotor, temperature, numbbeads, iodevn, jmax)
+
+if (RUNDIR == "scratch"):
+    dir_job = "/scratch/" + user_name + "/"
+if (NameOfServer == "graham"):
+    dir_job = "/scratch/" + user_name +"/"+dir_store+dir_name
 
 if NameOfServer == "graham":
     dir_input = "/scratch/" + user_name + "/" + dir_store + dir_name
@@ -134,4 +141,4 @@ if TypeCal == "S":
         NameOfServer,
     )
 else:
-    asym.GetPackRotDens(src_dir_exe, dir_output, script_dir)
+    asym.GetPackRotDens(src_dir_exe, dir_output, script_dir,rotor,temperature,numbbeads)
