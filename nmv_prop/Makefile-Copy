@@ -5,7 +5,20 @@ HOST=$(shell hostname)
 ifeq ($(HOST), gra-login3)
 	FC=ifort
 	LDFLAGS=-mkl=sequential
-else
+endif
+ifeq ($(HOST), gra-login2)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), gra-login1)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), feynman)
+	FC=gfortran
+	LDFLAGS=-llapack
+endif
+ifeq ($(HOST), nlogn)
 	FC=gfortran
 	LDFLAGS=-llapack
 endif
