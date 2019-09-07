@@ -1,5 +1,3 @@
-#!/usr/bin/python
- 
 import time
 from subprocess import call
 from os import system

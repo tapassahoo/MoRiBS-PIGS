@@ -1,16 +1,16 @@
-#!/usr/bin/python
- 
-import time
-from subprocess import call
-from os import system
-import os
+import argparse
 import decimal
+import os
+import sys
+import time
+from os import system
+from subprocess import call
+
 import numpy as np
 from numpy import *
-import support_with_parallel as support
+
 import inputFile
-import sys
-import argparse
+import support_with_parallel as support
 
 parser = argparse.ArgumentParser(description='It is a script file, written in Python, used to submit jobs in a queue as well as analyze output data files. Note: Module support.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo. User can easily modify module inputFile.py to generate lists of beads (see Getbeads function), step lengths for rotational and translational motions, and levels for Bisection move (see class GetStepAndLevel) as needed.')
 parser.add_argument("-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye.", default = -1.0)
