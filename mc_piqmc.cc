@@ -2768,9 +2768,9 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	newcoords[CHI][t1] = chi;
 	newcoords[CTH][t1] = cost;
 
-	double Eulan0[3];
-	double Eulan1[3];
-	double Eulan2[3];
+	double Eulan0[NDIM];
+	double Eulan1[NDIM];
+	double Eulan2[NDIM];
 
 	Eulan0[0]=MCAngles[PHI][t0];
 	Eulan0[1]=acos(MCAngles[CTH][t0]);
@@ -2801,17 +2801,9 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	pot_old+=(PotRotE3DPIGS(gatom,Eulan1,it));
 	//Toby: pot_old can be calculated with MCAngles
 
-	Eulan0[0]=MCAngles[PHI][t0];
-	Eulan0[1]=acos(MCAngles[CTH][t0]);
-	Eulan0[2]=MCAngles[CHI][t0];
-
 	Eulan1[0]=newcoords[PHI][t1];
 	Eulan1[1]=acos(newcoords[CTH][t1]);
 	Eulan1[2]=newcoords[CHI][t1];
-
-	Eulan2[0]=MCAngles[PHI][t2];
-	Eulan2[1]=acos(MCAngles[CTH][t2]);
-	Eulan2[2]=MCAngles[CHI][t2];
 
 	double dens_new;
 	if(RotDenType == 0) dens_new = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
@@ -3083,23 +3075,23 @@ double GetDensity3DPIGS(int it1, double *Eulan0, double *Eulan1, double *Eulan2)
 	if (it1 == 0)
 	{
 		rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-		dens = rho;
 		CodeExit(istop);
+		dens = rho;
 	}
 	else if (it1 == (NumbRotTimes - 1))
 	{
 		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-		dens = rho;
 		CodeExit(istop);
+		dens = rho;
 	}
 	else
 	{
 		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+		CodeExit(istop);
 		dens = rho;
+		rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 		CodeExit(istop);
-		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 		dens *= rho;
-		CodeExit(istop);
 	}
 	return dens;	
 }

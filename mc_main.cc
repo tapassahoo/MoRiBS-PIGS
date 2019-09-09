@@ -1236,9 +1236,10 @@ void MCGetAveragePIGS(void)
 			srot      = GetRotPlanarEnergy();     // kin energy
 		}
 
-		if(MCAtom[IMTYPE].molecule == 3)
+		if(MCAtom[IMTYPE].molecule == 2)
 		{
-			srot          = GetRotE3D();
+			//srot          = GetRotE3D();
+			srot          = 0.0;
 		}
         
 		if(MCAtom[IMTYPE].molecule == 4)
