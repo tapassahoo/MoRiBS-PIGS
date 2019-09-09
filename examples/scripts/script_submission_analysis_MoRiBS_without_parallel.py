@@ -418,6 +418,7 @@ for particleA in particleAList:
                     Restart1 = False
 
                 support.Submission(
+					NameOfServer,
                     status,
                     TransMove,
                     RotMove,
@@ -582,6 +583,7 @@ for particleA in particleAList:
                     Restart1 = False
 
                 support.Submission(
+					NameOfServer,
                     status,
                     TransMove,
                     RotMove,

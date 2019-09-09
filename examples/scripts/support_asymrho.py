@@ -3,7 +3,6 @@ import glob
 import math
 import os
 import time
-from os import system
 from subprocess import call
 
 import numpy as np
@@ -58,9 +57,9 @@ def MakeExecutable(src_dir, source_dir_exe):
 
 def GetABCconsts(rotor):
 	if rotor == "H2O":
-		aconst = 0.6666525
-		bconst = 0.2306476
-		cconst = 0.1769383
+		aconst = 27.877
+		bconst = 14.512
+		cconst = 9.285
 	abc = {"aconst": aconst, "bconst": bconst, "cconst": cconst}
 	return abc
 

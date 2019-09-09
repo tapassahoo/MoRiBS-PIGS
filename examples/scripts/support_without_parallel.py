@@ -1,5 +1,3 @@
-#!/usr/bin/python
- 
 import time
 from subprocess import call
 from os import system
@@ -9,6 +7,7 @@ import numpy as np
 from numpy import *
 import math
 import inputFile
+import support_asymrho as asym
 
 def error_message(number):
 	if(number<=1):
@@ -794,7 +793,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
+def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
@@ -819,17 +818,22 @@ def Submission(status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_
 			rotmat(TypeCal,molecule_rot,temperature,numbbeads,source_dir_exe)
 
 			#call(["rm", "-rf", folder_run])
-		temperature1    = "%5.3f" % temperature
+		
+		temperature1    = "%8.6f" % temperature
 		if (RotorType == "LINEAR"):
 			file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
 		else:
-			file_rotdens_rho = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rho"
-			call(["cp", file_rotdens_rho, dir_run_input_pimc])
-			file_rotdens_eng = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".eng"
-			call(["cp", file_rotdens_eng, dir_run_input_pimc])
-			file_rotdens_esq = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".esq"
-			call(["cp", file_rotdens_esq, dir_run_input_pimc])
+			if (NameOfServer == "graham"):
+				iodevn   = -1
+				jmax = 70
+				numbbeads2 = int(numbbeads-1)
+				dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature, numbbeads2, iodevn, jmax)
+			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature))+"t"+str(numbbeads2)
+			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
+			call(["cp", dir_dens+file_rotdens+".rho", dir_run_input_pimc+file_rotdens_mod+".rho"])
+			call(["cp", dir_dens+file_rotdens+".eng", dir_run_input_pimc+file_rotdens_mod+".eng"])
+			call(["cp", dir_dens+file_rotdens+".esq", dir_run_input_pimc+file_rotdens_mod+".esq"])
 
 		if (crystal == True):
 			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
@@ -949,10 +953,10 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "7-00:00"
+	walltime       = "1-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
-	temperature1   = "%5.3f" % temperature
+	temperature1   = "%8.6f" % temperature
 	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".*"
 	logpath        = dir_run_input_pimc+"/"+job_name
 
@@ -1006,7 +1010,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --output=%s.out
 #SBATCH --time=%s
 #SBATCH --account=rrg-pnroy
-#SBATCH --mem-per-cpu=2048mb
+#SBATCH --mem-per-cpu=1024mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s
