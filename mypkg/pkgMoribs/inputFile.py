@@ -66,7 +66,7 @@ class GetStepAndLevel:
 
 			if (self.molecule_rot == "H2O"):
 				self.step_trans = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-				self.step       = [1.0, 1.0, 1.5, 1.5, 0.6, 0.3, 0.2, 0.5] #list_nb = [4, 8, 16, 32, 64, 128, 256] beta = 1; 
+				self.step       = [2.0, 2.0, 0.7, 0.4, 0.25, 0.15] #list_nb = [4, 8, 16, 32, 64, 128] beta = 0.32; 
 				self.level      = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 
@@ -96,5 +96,5 @@ class GetStepAndLevel:
 
 			if (self.molecule_rot == "H2O"):
 				self.step_trans  = [0.3 for i in range(100)]
-				self.step        = [0.4 for i in range(100)]  
+				self.step        = [0.4 for i in range(100)]  # for tau = 0.01
 				self.level       = [1   for i in range(100)]

@@ -9,8 +9,8 @@ from subprocess import call
 import numpy as np
 from numpy import *
 
-import inputFile
-import support_without_parallel as support
+import mypkg.pkgMoribs.inputFile as inputFile
+import mypkg.pkgMoribs.support_without_parallel as support
 
 parser = argparse.ArgumentParser(
     description="It is a script file, written in Python, used to submit jobs in a queue as well as analyze output data files. Note: Module support.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo. User can easily modify module inputFile.py to generate lists of beads (see Getbeads function), step lengths for rotational and translational motions, and levels for Bisection move (see class GetStepAndLevel) as needed."

@@ -21,8 +21,7 @@ from subprocess import call
 
 import numpy as np
 
-import support_asymrho as asym
-import inputFile
+import mypkg.pkgAsymrho.support_asymrho as asym
 
 parser = argparse.ArgumentParser(
     description="It is a script file, written in Python, used to submit jobs in a queue for generating the rotational density matrix of an asymmetric rotor. Note: Module support_asymrho.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo."

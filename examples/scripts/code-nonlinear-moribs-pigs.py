@@ -1,11 +1,16 @@
 import os
 from subprocess import call
 
-import support_without_parallel as support
+import mypkg.pkgMoribs.support_without_parallel as support
+import mypkg.pkgMoribs
+
+module_path = mypkg.pkgMoribs.__file__
+module_path=module_path.replace('__init__.py', '')
 
 space=" "
+
 stringName1 = "nonlinear-rotors"
-fileName1 = "script_submission_analysis_MoRiBS_without_parallel.py"
+fileName1 = module_path+"script_submission_analysis_MoRiBS_without_parallel.py"
 fileName2 = "script_submission_analysis_MoRiBS1.py"
 support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
@@ -16,15 +21,21 @@ call(["rm", fileName2])
 
 # Informations about the system
 simType = "PIGS"
-simType1="submission -C"
-#simType1 = "analysis"
+
+#simType1="submission -C"
+simType1 = "analysis"
+
 molecule = "H2O"
 rotor = "H2O"
-var = "beta"
+
+#var = "beta" # for fixed tau
+#param = 0.01 # for fixed tau
+
+var = "tau"  # for fixed beta
+param = 0.32 # for fixed beta
 
 rcom = 10.05
 nMolecule = 2
-param = 0.01
 nblocks = 20000
 npass = 100
 

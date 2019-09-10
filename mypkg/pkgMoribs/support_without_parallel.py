@@ -6,8 +6,8 @@ import decimal
 import numpy as np
 from numpy import *
 import math
-import inputFile
-import support_asymrho as asym
+import mypkg.pkgMoribs.inputFile
+import mypkg.pkgAsymrho.support_asymrho as asym
 
 def error_message(number):
 	if(number<=1):
