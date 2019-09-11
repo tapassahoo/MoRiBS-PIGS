@@ -1,5 +1,6 @@
 #ignore all object files
 *.o
+*--pycache__*
 #ignore executable
 modify*
 pimc*
@@ -41,3 +42,5 @@ examples/scripts/support_without_parallel_original.py
 sprng/
 /nmv_prop/asymrho.x
 Makefile
+/mypkg/__pycache__/
+/mypkg/pkgMoribs/__pycache__/
