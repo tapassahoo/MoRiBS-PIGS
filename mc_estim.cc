@@ -786,15 +786,10 @@ double GetPotEnergyPIGS(void)
         	}// loop over atoms1 
        	}// loop over atoms0 
     }
-#ifdef ONSITE
+#ifdef GAUSSIANMOVE
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         int offset0 = 0;
-#ifndef GAUSSIANMOVE
-        int t0  = offset0 + it;
-        double E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
-        spot    = E12*AuToKelvin;
-#else
         int t0  = offset0 + it;
         double spot3d = 0.0;
         for (int id = 0; id < NDIM; id++)
@@ -802,7 +797,18 @@ double GetPotEnergyPIGS(void)
             spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
         }
         spot   = spot3d;
+    }
 #endif
+
+#ifdef ONSITE
+    if (MCAtom[IMTYPE].numb == 1) 
+    {
+        int offset0 = 0;
+        int t0  = offset0 + it;
+		Eulang0[PHI] = MCAngles[PHI][t0];
+		Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+		Eulang0[CHI] = 0.0;
+        spot    = PotFunc(Eulang0);
     }
 #endif
 
@@ -1537,7 +1543,7 @@ double GetTotalEnergy(void)
         	}// loop over atoms (molecules)
         }// loop over atoms (molecules)
     }
-#ifdef ONSITE
+#ifndef GAUSSIANMOVE
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         int offset0 = 0;
@@ -1548,17 +1554,30 @@ double GetTotalEnergy(void)
 		{
             int t0  = offset0 + it;
 
-#ifndef GAUSSIANMOVE
-            E12     = -2.0*DipoleMomentAU2*MCCosine[2][t0]/(RR*RR*RR);
-            spot   += E12*AuToKelvin;
-#else
 			double spot3d = 0.0;
 			for (int id = 0; id < NDIM; id++)
 			{
             	spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
 			}
             spot   += spot3d;
+        }
+    }
 #endif
+
+#ifdef ONSITE
+    if (MCAtom[IMTYPE].numb == 1)
+    {
+        int offset0 = 0;
+
+        spot = 0.0;
+        double E12;
+        for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
+		{
+            int t0  = offset0 + it;
+			Eulang0[PHI] = MCAngles[PHI][t0];
+            Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+			Eulang0[CHI] = 0.0;
+            spot   += PotFunc(Eulang0);
         }
     }
 #endif

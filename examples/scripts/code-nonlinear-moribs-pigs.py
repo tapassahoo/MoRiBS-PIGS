@@ -22,8 +22,8 @@ call(["rm", fileName2])
 # Informations about the system
 simType = "PIGS"
 
-simType1="submission -C"
-#simType1 = "analysis"
+#simType1="submission -C"
+simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
@@ -35,7 +35,7 @@ var = "tau"  # for fixed beta
 param = 0.32 # for fixed beta
 
 rcom = 10.05
-nMolecule = 10
+nMolecule = 2
 nblocks = 20000
 npass = 100
 

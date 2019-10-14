@@ -43,4 +43,4 @@ sprng/
 /nmv_prop/asymrho.x
 Makefile
 /mypkg/__pycache__/
-/mypkg/pkgMoribs/__pycache__/
+mypkg/pkgMoribs/__pycache__/

@@ -3300,45 +3300,54 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 
 	int offset0 = atom0*NumbRotTimes;
 
-	for (int atom1=0; atom1<NumbAtoms; atom1++)
-	if (atom1 != atom0)                    // skip "self-interaction"
-	{	
-		int offset1 = atom1*NumbRotTimes;
-		int type1   = MCType[atom1];
+	if (MCAtom[type0].numb > 1)
+	{
+		for (int atom1=0; atom1<NumbAtoms; atom1++)
+		if (atom1 != atom0)                    // skip "self-interaction"
+		{	
+			int offset1 = atom1*NumbRotTimes;
+			int type1   = MCType[atom1];
 
 #ifdef DEBUG_PIMC
-		//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
-		//nrerror(_proc_,"More then one molecular impurity type");
-		if(MCAtom[type1].molecule == 1)
-		nrerror(_proc_,"No support of non-linear-linear interaction yet");
+			//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
+			//nrerror(_proc_,"More then one molecular impurity type");
+			if(MCAtom[type1].molecule == 1)
+			nrerror(_proc_,"No support of non-linear-linear interaction yet");
 #endif
 
-		if (MCType[atom1] == IMTYPE)
-		{
-			int t0 = offset0 + it;
-			int t1 = offset1 + it;
-			double com_1[NDIM];
-			double com_2[NDIM];
-			double Eulang_1[NDIM];
-			double Eulang_2[NDIM];
-			double E_2H2O;
-			for (int id=0; id<NDIM; id++)
+			if (MCType[atom1] == IMTYPE)
 			{
-				com_1[id] = MCCoords[id][t0];
-				com_2[id] = MCCoords[id][t1];
+				int t0 = offset0 + it;
+				int t1 = offset1 + it;
+				double com_1[NDIM];
+				double com_2[NDIM];
+				double Eulang_1[NDIM];
+				double Eulang_2[NDIM];
+				double E_2H2O;
+				for (int id=0; id<NDIM; id++)
+				{
+					com_1[id] = MCCoords[id][t0];
+					com_2[id] = MCCoords[id][t1];
+				}
+				int tm0=offset0 + it/RotRatio;
+				int tm1=offset1 + it/RotRatio;
+				Eulang_1[PHI]=MCAngles[PHI][tm0];
+				Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+				Eulang_1[CHI]=MCAngles[CHI][tm0];
+				Eulang_2[PHI]=MCAngles[PHI][tm1];
+				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+				Eulang_2[CHI]=MCAngles[CHI][tm1];
+				caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
+				spot += E_2H2O;
 			}
-			int tm0=offset0 + it/RotRatio;
-			int tm1=offset1 + it/RotRatio;
-			Eulang_1[PHI]=MCAngles[PHI][tm0];
-			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
-			Eulang_1[CHI]=MCAngles[CHI][tm0];
-			Eulang_2[PHI]=MCAngles[PHI][tm1];
-			Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
-			Eulang_2[CHI]=MCAngles[CHI][tm1];
-			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
-			spot += E_2H2O;
-		}
-	}   // END sum over atoms
+		}   // END sum over atoms
+	}
+#ifdef ONSITE
+	if (MCAtom[type0].numb == 1) 
+	{
+        spot = PotFunc(Eulang0);
+    }
+#endif
     double weight;
 	weight = 1.0;
     if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
