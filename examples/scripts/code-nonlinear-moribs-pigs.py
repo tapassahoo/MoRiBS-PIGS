@@ -22,20 +22,22 @@ call(["rm", fileName2])
 # Informations about the system
 simType = "PIGS"
 
-#simType1="submission -C"
-simType1 = "analysis"
+simType1="submission -C"
+#simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
+SpinIsomer = 0
 
-#var = "beta" # for fixed tau
-#param = 0.01 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.002 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.32 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.32 # for fixed beta
 
 rcom = 10.05
-nMolecule = 2
+field_strength = 20.0 # Unit inverse of Kelvin
+nMolecule = 1
 nblocks = 20000
 npass = 100
 
@@ -49,6 +51,8 @@ cmd_run = (
     + fileName3+space
     + "-R"+space
     + str(rcom)+space
+    + "-d"+space
+    + str(field_strength)+space
     + "-N"+space
     + str(nMolecule)+space
     + "-Block"+space
@@ -64,6 +68,8 @@ cmd_run = (
     + molecule+space
 	+ rotor+space
     + str(param)+space
+	+ "-spin"+space
+	+ str(SpinIsomer)+space
 ) 
 print(cmd_run)
 os.system(cmd_run)
