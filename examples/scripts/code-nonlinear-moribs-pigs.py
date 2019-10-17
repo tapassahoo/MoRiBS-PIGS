@@ -22,24 +22,24 @@ call(["rm", fileName2])
 # Informations about the system
 simType = "PIGS"
 
-simType1="submission -C"
-#simType1 = "analysis"
+#simType1="submission -C"
+simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-var = "beta" # for fixed tau
-param = 0.002 # for fixed tau
+#var = "beta" # for fixed tau
+#param = 0.002 # for fixed tau
 
-#var = "tau"  # for fixed beta
-#param = 0.32 # for fixed beta
+var = "tau"  # for fixed beta
+param = 0.128 # for fixed beta
 
 rcom = 10.05
 field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 1
-nblocks = 20000
-npass = 100
+nblocks = 10000
+npass = 50
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"
