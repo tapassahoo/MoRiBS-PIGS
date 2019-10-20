@@ -11,10 +11,10 @@ file_sim = module_path + "script_submission_asymrho.py"
 # Informations about the system
 simType = "A"
 rotor = "H2O"
-#param = "tau"
-#value = 0.002
-param = "beta"
-value = 0.128
+param = "tau"
+value = 0.004
+#param = "beta"
+#value = 0.128
 #nbeads = [4, 8, 16, 32]
 nbeads = [64, 128, 256, 512]
 Jmax = 70

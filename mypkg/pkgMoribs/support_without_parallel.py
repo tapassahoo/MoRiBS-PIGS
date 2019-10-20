@@ -6,7 +6,7 @@ import decimal
 import numpy as np
 from numpy import *
 import math
-import mypkg.pkgMoribs.inputFile
+import inputFile
 import mypkg.pkgAsymrho.support_asymrho as asym
 
 def error_message(number):
@@ -793,7 +793,7 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType):
+def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType, spin_isomer):
 	argument1     = Rpt
 	level1        = level[iStep]
 	step1         = step[iStep]
@@ -825,7 +825,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			call(["mv", file_rotdens, dir_run_input_pimc])
 		else:
 			if (NameOfServer == "graham"):
-				iodevn   = -1
+				iodevn   = spin_isomer
 				jmax = 70
 				numbbeads2 = int(numbbeads-1)
 				dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature, numbbeads2, iodevn, jmax)
@@ -953,7 +953,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		thread     = 4
 	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "28-00:00"
+	walltime       = "07-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%8.6f" % temperature
@@ -1107,7 +1107,10 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact,
 		FragmentRpt = ""
 
 	if (dipolemoment >= 0.0):
-		FragmentDipoleMoment = "DipoleMoment"+str(dipolemoment)+"Debye-"
+		if (numbmolecules > 1):
+			FragmentDipoleMoment = "DipoleMoment"+str(dipolemoment)+"Debye-"
+		else:
+			FragmentDipoleMoment = "Field"+str(dipolemoment)+"Kinv-"
 	else:
 		FragmentDipoleMoment = ""
 
@@ -1170,7 +1173,10 @@ class GetFileNameAnalysis:
 			FragmentRpt           = ""
 
 		if (self.dipolemoment >= 0.0):
-			FragmentDipoleMoment  = "DipoleMoment"+str(self.dipolemoment)+"Debye-"
+			if (self.numbmolecules > 1):
+				FragmentDipoleMoment = "DipoleMoment"+str(self.dipolemoment)+"Debye-"
+			else:
+				FragmentDipoleMoment = "Field"+str(self.dipolemoment)+"Kinv-"
 		else:
 			FragmentDipoleMoment  = ""
 

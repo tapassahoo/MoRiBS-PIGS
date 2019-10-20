@@ -9,7 +9,7 @@ from subprocess import call
 import numpy as np
 from numpy import *
 
-import mypkg.pkgMoribs.inputFile as inputFile
+import inputFile
 import mypkg.pkgMoribs.support_without_parallel as support
 
 parser = argparse.ArgumentParser(
@@ -118,6 +118,13 @@ parser.add_argument(
 parser.add_argument(
     "--Type", default="LINEAR", help="Specify your rotor type: LINEAR or NONLINEAR."
 )
+parser.add_argument(
+    "-spin",
+    "--SpinIsomer",
+    type=int,
+    help="It hvae three values -1, 0, 1 for spinless, para and ortho isomers.",
+    default=-1,
+)
 args = parser.parse_args()
 
 # ===============================================================================
@@ -193,6 +200,17 @@ if variableName == "beta":
     parameterName = "tau"
     tau = args.param
     parameter = tau
+
+spin_isomer = args.SpinIsomer
+
+if (spin_isomer == -1):
+	preName = ""
+if (spin_isomer == 0):
+	preName = "-p-"
+if (spin_isomer == 1):
+	print("This code is not ready for ortho isomer")
+	exit()
+molecule = preName+molecule
 
 steplevel = inputFile.GetStepAndLevel(molecule_rot, variableName, TypeCal)
 step_COM = steplevel.step_trans
@@ -456,6 +474,7 @@ for particleA in particleAList:
                     numbblocks_Restart1,
                     crystal,
                     RotorType,
+					spin_isomer,
                 )
 
             if status == "analysis":
@@ -621,6 +640,7 @@ for particleA in particleAList:
                     numbblocks_Restart1,
                     crystal,
                     RotorType,
+					spin_isomer,
                 )
 
             if status == "analysis":

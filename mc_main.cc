@@ -840,20 +840,23 @@ void MCResetBlockAveragePIMC(void)
 	PrintXrfl   = 1;
 	PrintZrfl   = 1;
 #ifdef DDCORR
-	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-    _cdipoleXYZ.resize(NDIMDP);
-    _cdipoleX.resize(NDIMDP);
-    _cdipoleY.resize(NDIMDP);
-    _cdipoleZ.resize(NDIMDP);
-  	_cdipoleXY.resize(NDIMDP);
-	
-	for (int idp = 0; idp < NDIMDP; idp++)
+	if(MCAtom[IMTYPE].num > 1)
 	{
-        _cdipoleXYZ[idp] = 0.0;
-        _cdipoleX[idp] = 0.0;
-        _cdipoleY[idp] = 0.0;
-        _cdipoleZ[idp] = 0.0;
-    	_cdipoleXY[idp] = 0.0;
+		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+		_cdipoleXYZ.resize(NDIMDP);
+		_cdipoleX.resize(NDIMDP);
+		_cdipoleY.resize(NDIMDP);
+		_cdipoleZ.resize(NDIMDP);
+		_cdipoleXY.resize(NDIMDP);
+		
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			_cdipoleXYZ[idp] = 0.0;
+			_cdipoleX[idp] = 0.0;
+			_cdipoleY[idp] = 0.0;
+			_cdipoleZ[idp] = 0.0;
+			_cdipoleXY[idp] = 0.0;
+		}
 	}
 #endif
 	_bcostheta = 0.0;
@@ -884,20 +887,23 @@ void MCResetBlockAveragePIGS(void)
 	_abs_ucompy     = 0.0;
 	_abs_ucompz     = 0.0;
 #ifdef DDCORR
-	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-    _cdipoleXYZ.resize(NDIMDP);
-    _cdipoleX.resize(NDIMDP);
-    _cdipoleY.resize(NDIMDP);
-    _cdipoleZ.resize(NDIMDP);
-  	_cdipoleXY.resize(NDIMDP);
-	
-	for (int idp = 0; idp < NDIMDP; idp++)
+	if(MCAtom[IMTYPE].numb > 1)
 	{
-        _cdipoleXYZ[idp] = 0.0;
-        _cdipoleX[idp] = 0.0;
-        _cdipoleY[idp] = 0.0;
-        _cdipoleZ[idp] = 0.0;
-    	_cdipoleXY[idp] = 0.0;
+		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+		_cdipoleXYZ.resize(NDIMDP);
+		_cdipoleX.resize(NDIMDP);
+		_cdipoleY.resize(NDIMDP);
+		_cdipoleZ.resize(NDIMDP);
+		_cdipoleXY.resize(NDIMDP);
+		
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			_cdipoleXYZ[idp] = 0.0;
+			_cdipoleX[idp] = 0.0;
+			_cdipoleY[idp] = 0.0;
+			_cdipoleZ[idp] = 0.0;
+			_cdipoleXY[idp] = 0.0;
+		}
 	}
 #endif
 	_bkin        = 0.0;
@@ -1161,66 +1167,69 @@ void MCGetAveragePIGS(void)
 	_brot1           += srot1;
 	_rot_total1      += srot1;
 
-	double cosTheta   = 0.0;
-	double compxyz[NDIM];
-	double abs_compxyz[NDIM];
-	GetCosThetaPIGS(cosTheta, abs_compxyz, compxyz);
-	double scostheta  = cosTheta;
-	double scompx     = compxyz[0];
-	double scompy     = compxyz[1];
-	double scompz     = compxyz[2];
-	double abs_scompx = abs_compxyz[0];
-	double abs_scompy = abs_compxyz[1];
-	double abs_scompz = abs_compxyz[2];
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+		double cosTheta   = 0.0;
+		double compxyz[NDIM];
+		double abs_compxyz[NDIM];
+		GetCosThetaPIGS(cosTheta, abs_compxyz, compxyz);
+		double scostheta  = cosTheta;
+		double scompx     = compxyz[0];
+		double scompy     = compxyz[1];
+		double scompz     = compxyz[2];
+		double abs_scompx = abs_compxyz[0];
+		double abs_scompy = abs_compxyz[1];
+		double abs_scompz = abs_compxyz[2];
 
-	_bcostheta       += scostheta; 
-	_costheta_total  += scostheta;
+		_bcostheta       += scostheta; 
+		_costheta_total  += scostheta;
 
-	_ucompx          += scompx;
-	_ucompy          += scompy;
-	_ucompz          += scompz;
-	_ucompx_total    += scompx;
-	_ucompy_total    += scompy;
-	_ucompz_total    += scompz;
+		_ucompx          += scompx;
+		_ucompy          += scompy;
+		_ucompz          += scompz;
+		_ucompx_total    += scompx;
+		_ucompy_total    += scompy;
+		_ucompz_total    += scompz;
 
-	_abs_ucompx          += abs_scompx;
-	_abs_ucompy          += abs_scompy;
-	_abs_ucompz          += abs_scompz;
-	_abs_ucompx_total    += abs_scompx;
-	_abs_ucompy_total    += abs_scompy;
-	_abs_ucompz_total    += abs_scompz;
+		_abs_ucompx          += abs_scompx;
+		_abs_ucompy          += abs_scompy;
+		_abs_ucompz          += abs_scompz;
+		_abs_ucompx_total    += abs_scompx;
+		_abs_ucompy_total    += abs_scompy;
+		_abs_ucompz_total    += abs_scompz;
 
 #ifdef DDCORR
-	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-    double DipoleCorrXYZ[NDIMDP];
-    double DipoleCorrX[NDIMDP];
-    double DipoleCorrY[NDIMDP];
-    double DipoleCorrZ[NDIMDP];
-    double DipoleCorrXY[NDIMDP];
+		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+		double DipoleCorrXYZ[NDIMDP];
+		double DipoleCorrX[NDIMDP];
+		double DipoleCorrY[NDIMDP];
+		double DipoleCorrZ[NDIMDP];
+		double DipoleCorrXY[NDIMDP];
 
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{
-		DipoleCorrXYZ[idp] = 0.0;
-		DipoleCorrX[idp]   = 0.0;
-		DipoleCorrY[idp]   = 0.0;
-		DipoleCorrZ[idp]   = 0.0;
-		DipoleCorrXY[idp]  = 0.0;
-	}
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			DipoleCorrXYZ[idp] = 0.0;
+			DipoleCorrX[idp]   = 0.0;
+			DipoleCorrY[idp]   = 0.0;
+			DipoleCorrZ[idp]   = 0.0;
+			DipoleCorrXY[idp]  = 0.0;
+		}
 
-	GetDipoleCorrelationPIGS(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
+		GetDipoleCorrelationPIGS(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
 
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{
-		_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
-		_cdipoleX[idp]   += DipoleCorrX[idp];
-		_cdipoleY[idp]   += DipoleCorrY[idp];
-		_cdipoleZ[idp]   += DipoleCorrZ[idp];
-		_cdipoleXY[idp]  += DipoleCorrXY[idp];
-		_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
-		_cdipoleX_total[idp]   += DipoleCorrX[idp];
-		_cdipoleY_total[idp]   += DipoleCorrY[idp];
-		_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
-		_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
+			_cdipoleX[idp]   += DipoleCorrX[idp];
+			_cdipoleY[idp]   += DipoleCorrY[idp];
+			_cdipoleZ[idp]   += DipoleCorrZ[idp];
+			_cdipoleXY[idp]  += DipoleCorrXY[idp];
+			_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
+			_cdipoleX_total[idp]   += DipoleCorrX[idp];
+			_cdipoleY_total[idp]   += DipoleCorrY[idp];
+			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
+			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
+		}
 	}
 #endif
 	double srot;
@@ -1322,62 +1331,65 @@ void MCGetAveragePIMC(void)
 	_pot_total       += spot;
 
 
+	if(MCAtom[IMTYPE].numb > 1)
+	{
 #ifdef IOWRITE
-    double cosTheta   = 0.0;
-    double compxyz[NDIM];
-    compxyz[0] = 0.0;
-    compxyz[1] = 0.0;
-    compxyz[2] = 0.0;
+		double cosTheta   = 0.0;
+		double compxyz[NDIM];
+		compxyz[0] = 0.0;
+		compxyz[1] = 0.0;
+		compxyz[2] = 0.0;
 
-    GetCosThetaPIMC(cosTheta, compxyz);
-    double scostheta  = cosTheta;
-    double scompx     = compxyz[0];
-    double scompy     = compxyz[1];
-    double scompz     = compxyz[2];
+		GetCosThetaPIMC(cosTheta, compxyz);
+		double scostheta  = cosTheta;
+		double scompx     = compxyz[0];
+		double scompy     = compxyz[1];
+		double scompz     = compxyz[2];
 
-    _bcostheta       += scostheta;
-    _costheta_total  += scostheta;
+		_bcostheta       += scostheta;
+		_costheta_total  += scostheta;
 
-    _ucompx          += scompx;
-    _ucompy          += scompy;
-    _ucompz          += scompz;
-    _ucompx_total    += scompx;
-    _ucompy_total    += scompy;
-    _ucompz_total    += scompz;
+		_ucompx          += scompx;
+		_ucompy          += scompy;
+		_ucompz          += scompz;
+		_ucompx_total    += scompx;
+		_ucompy_total    += scompy;
+		_ucompz_total    += scompz;
 #endif
 
 #ifdef DDCORR
-	int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-    double DipoleCorrXYZ[NDIMDP];
-    double DipoleCorrX[NDIMDP];
-    double DipoleCorrY[NDIMDP];
-    double DipoleCorrZ[NDIMDP];
-    double DipoleCorrXY[NDIMDP];
+		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
+		double DipoleCorrXYZ[NDIMDP];
+		double DipoleCorrX[NDIMDP];
+		double DipoleCorrY[NDIMDP];
+		double DipoleCorrZ[NDIMDP];
+		double DipoleCorrXY[NDIMDP];
 
-    for (int idp = 0; idp < NDIMDP; idp++)
-    {
-        DipoleCorrXYZ[idp] = 0.0;
-        DipoleCorrX[idp]   = 0.0;
-        DipoleCorrY[idp]   = 0.0;
-        DipoleCorrZ[idp]   = 0.0;
-        DipoleCorrXY[idp]  = 0.0;
-    }
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			DipoleCorrXYZ[idp] = 0.0;
+			DipoleCorrX[idp]   = 0.0;
+			DipoleCorrY[idp]   = 0.0;
+			DipoleCorrZ[idp]   = 0.0;
+			DipoleCorrXY[idp]  = 0.0;
+		}
 
-    GetDipoleCorrelationPIMC(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
+		GetDipoleCorrelationPIMC(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
 
-    for (int idp = 0; idp < NDIMDP; idp++)
-    {
-        _cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
-        _cdipoleX[idp]   += DipoleCorrX[idp];
-        _cdipoleY[idp]   += DipoleCorrY[idp];
-        _cdipoleZ[idp]   += DipoleCorrZ[idp];
-        _cdipoleXY[idp]  += DipoleCorrXY[idp];
-        _cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
-        _cdipoleX_total[idp]   += DipoleCorrX[idp];
-        _cdipoleY_total[idp]   += DipoleCorrY[idp];
-        _cdipoleZ_total[idp]   += DipoleCorrZ[idp];
-        _cdipoleXY_total[idp]  += DipoleCorrXY[idp];
-    }
+		for (int idp = 0; idp < NDIMDP; idp++)
+		{
+			_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
+			_cdipoleX[idp]   += DipoleCorrX[idp];
+			_cdipoleY[idp]   += DipoleCorrY[idp];
+			_cdipoleZ[idp]   += DipoleCorrZ[idp];
+			_cdipoleXY[idp]  += DipoleCorrXY[idp];
+			_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
+			_cdipoleX_total[idp]   += DipoleCorrX[idp];
+			_cdipoleY_total[idp]   += DipoleCorrY[idp];
+			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
+			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
+		}
+	}
 #endif
 
 	double srot;
@@ -1577,10 +1589,13 @@ void MCSaveBlockAverages(long int blocknumb)
 	}
 #endif
 	SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
-	SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+		SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
 #ifdef DDCORR
-	SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
+		SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
+	}
 
 #ifdef IOWRITE
 	if (BOSONS) 
@@ -2027,15 +2042,15 @@ void SaveInstantEnergy()
     if (MCAtom[IMTYPE].molecule == 4)
     {
 #ifdef PIGSTYPE
-    srotinst   = GetRotEnergyPIGS();
-	spotinst   = GetPotEnergyPIGS(); 
-	stotalinst = GetTotalEnergy();
+		srotinst   = GetRotEnergyPIGS();
+		spotinst   = GetPotEnergyPIGS(); 
+		stotalinst = GetTotalEnergy();
 #endif
 //
 #ifdef PIMCTYPE
-    srotinst   = GetRotPlanarEnergy(); 
-	spotinst   = GetPotEnergy_Densities(); 
-    stotalinst = 0.0;
+		srotinst   = GetRotPlanarEnergy(); 
+		spotinst   = GetPotEnergy_Densities(); 
+		stotalinst = 0.0;
 #endif
     }
     _fengins << setw(IO_WIDTH) << spotinst << BLANK;

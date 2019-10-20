@@ -661,6 +661,7 @@ double GetPotEnergyPIGS(void)
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbRotTimes - 1)/2);
 	double spot = 0.0;
+	double Eulang0[NDIM], Eulang1[NDIM];
 	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) )
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
@@ -697,8 +698,6 @@ double GetPotEnergyPIGS(void)
     }
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
-		double Eulang0[NDIM], Eulang1[NDIM];
-
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
@@ -807,7 +806,7 @@ double GetPotEnergyPIGS(void)
         int t0  = offset0 + it;
 		Eulang0[PHI] = MCAngles[PHI][t0];
 		Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-		Eulang0[CHI] = 0.0;
+		Eulang0[CHI] = MCAngles[CHI][t0];
         spot    = PotFunc(Eulang0);
     }
 #endif
@@ -1409,6 +1408,7 @@ double GetTotalEnergy(void)
 {
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
+	double Eulang0[NDIM],Eulang1[NDIM];
 	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) )
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
@@ -1426,7 +1426,6 @@ double GetTotalEnergy(void)
                 	int t0 = offset0 + it;
                 	int t1 = offset1 + it;
 
-					double Eulang0[NDIM],Eulang1[NDIM];
 					double com0[NDIM],com1[NDIM];
 					double E_2H2O;
 					for (int id=0;id<NDIM;id++)
@@ -1543,7 +1542,7 @@ double GetTotalEnergy(void)
         	}// loop over atoms (molecules)
         }// loop over atoms (molecules)
     }
-#ifndef GAUSSIANMOVE
+#ifdef GAUSSIANMOVE
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
         int offset0 = 0;
@@ -1570,13 +1569,12 @@ double GetTotalEnergy(void)
         int offset0 = 0;
 
         spot = 0.0;
-        double E12;
         for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 		{
             int t0  = offset0 + it;
 			Eulang0[PHI] = MCAngles[PHI][t0];
             Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-			Eulang0[CHI] = 0.0;
+			Eulang0[CHI] = MCAngles[CHI][t0];
             spot   += PotFunc(Eulang0);
         }
     }

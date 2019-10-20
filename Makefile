@@ -4,10 +4,11 @@
 options= -Ofast -fopenmp
 
 # CFLAGS for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DPIGSTYPE -DDDCORR -DINSTANT -DSHORTFORM
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DPIGSTYPE -DDDCORR -DINSTANT -DSHORTFORM 
+#-DONSITE
 #-DPROPOSED
 #-DCAGEPOT
-#-DIOFILES #-DINSTANT -DBINARY 
+#-DIOFILES -DBINARY 
 
 #Below is the LDFLAGS Toby Zeng use on nlogn
 #LDFLAGS=-L/home/pnroy/Dev/lib64/ -lm -L./sprng/lib -llcg -L/home/pnroy/Dev/lib64/ -lgfortran  -L/opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core

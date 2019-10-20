@@ -3321,7 +3321,6 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 				int t1 = offset1 + it;
 				double com_1[NDIM];
 				double com_2[NDIM];
-				double Eulang_1[NDIM];
 				double Eulang_2[NDIM];
 				double E_2H2O;
 				for (int id=0; id<NDIM; id++)
@@ -3329,11 +3328,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 					com_1[id] = MCCoords[id][t0];
 					com_2[id] = MCCoords[id][t1];
 				}
-				int tm0=offset0 + it/RotRatio;
 				int tm1=offset1 + it/RotRatio;
-				Eulang_1[PHI]=MCAngles[PHI][tm0];
-				Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
-				Eulang_1[CHI]=MCAngles[CHI][tm0];
 				Eulang_2[PHI]=MCAngles[PHI][tm1];
 				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
 				Eulang_2[CHI]=MCAngles[CHI][tm1];
@@ -3345,7 +3340,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 #ifdef ONSITE
 	if (MCAtom[type0].numb == 1) 
 	{
-        spot = PotFunc(Eulang0);
+        spot = PotFunc(Eulang);
     }
 #endif
     double weight;
