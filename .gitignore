@@ -28,6 +28,7 @@ Makefile
 /linear_prop/linden-original.f
 /linear_prop_test/*
 #
+examples/scripts/test*
 /examples/*/
 !/examples/scripts
 /examples/scripts/*.pyc

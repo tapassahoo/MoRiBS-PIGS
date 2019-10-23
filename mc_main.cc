@@ -2,6 +2,8 @@
 //         main()
 //
 
+#include <bits/stdc++.h> 
+#include <chrono> 
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -530,6 +532,10 @@ ParamsPotential();
    	//randomseed(); //set seed according to clock
 	//RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 
+	auto start = chrono::high_resolution_clock::now(); 
+  
+
+
    	long int blockCount = MCStartBlock;  
    	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
    	{      
@@ -778,6 +784,18 @@ ParamsPotential();
 
 	MFreeMCCounts();
 	MFreeQWCounts();
+
+    auto end = chrono::high_resolution_clock::now(); 
+  
+    // Calculating total time taken by the program. 
+    double time_taken =  
+      chrono::duration_cast<chrono::nanoseconds>(end - start).count(); 
+  
+    time_taken *= 1e-9; 
+  
+    cout << "Time taken by program is : " << fixed  
+         << time_taken << setprecision(9); 
+    cout << " sec" << endl; 
 
 	return 1; 
 }
@@ -1167,6 +1185,7 @@ void MCGetAveragePIGS(void)
 	_brot1           += srot1;
 	_rot_total1      += srot1;
 
+#ifdef IOWRITE
 	if(MCAtom[IMTYPE].numb > 1)
 	{
 		double cosTheta   = 0.0;
@@ -1230,6 +1249,7 @@ void MCGetAveragePIGS(void)
 			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
 			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
 		}
+#endif
 	}
 #endif
 	double srot;
@@ -1589,6 +1609,7 @@ void MCSaveBlockAverages(long int blocknumb)
 	}
 #endif
 	SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
+#ifdef IOWRITE
 	if(MCAtom[IMTYPE].numb > 1)
 	{
 		SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
@@ -1596,6 +1617,7 @@ void MCSaveBlockAverages(long int blocknumb)
 		SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
 	}
+#endif
 
 #ifdef IOWRITE
 	if (BOSONS) 

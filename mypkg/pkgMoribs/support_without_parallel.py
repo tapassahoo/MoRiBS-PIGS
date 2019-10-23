@@ -949,11 +949,11 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (thread > 4):
-		thread     = 4
-	thread         = 1
+	#if (thread > 4):
+	#	thread     = 4
+	thread         = 3
 	job_name       = file_name+str(value)
-	walltime       = "07-00:00"
+	walltime       = "00-00:30"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%8.6f" % temperature

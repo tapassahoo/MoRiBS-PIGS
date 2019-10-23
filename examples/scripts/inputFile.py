@@ -21,7 +21,7 @@ def Getbeads(TypeCal, variableName):
 
 	if (TypeCal == "PIGS"):
 		if (variableName == "tau"):
-			list_nb  = [4, 8, 16, 32, 64, 128, 256]
+			list_nb  = [4, 8, 16, 32, 64, 128, 256, 512]
 		if (variableName == "beta"):
 			list_nb  = [4, 8, 16, 32, 64, 128, 256]
 

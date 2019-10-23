@@ -2081,7 +2081,6 @@ void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)
 	compxyz[2] = scompxyz_sector[2]/NumbAtoms;
 }
 
-#ifdef DDCORR
 void GetDipoleCorrelationPIMC(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
@@ -2138,9 +2137,7 @@ void GetDipoleCorrelationPIMC(double *DipoleCorrXYZ, double *DipoleCorrX, double
 		}
 	}
 }
-#endif
 
-#ifdef DDCORR
 void GetDipoleCorrelationPIGS(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
@@ -2186,9 +2183,7 @@ void GetDipoleCorrelationPIGS(double *DipoleCorrXYZ, double *DipoleCorrX, double
 		}
 	}
 }
-#endif
 
-#ifdef DDCORR
 void GetDipoleCorrelationPIGSENT(double *DipoleCorrXYZ, double *DipoleCorrX, double *DipoleCorrY, double *DipoleCorrZ, double *DipoleCorrXY)
 {
     const char *_proc_=__func__; 
@@ -2248,7 +2243,6 @@ void GetDipoleCorrelationPIGSENT(double *DipoleCorrXYZ, double *DipoleCorrX, dou
 		}
 	}
 }
-#endif
 
 double *GetPhiEntanglement()
 {
