@@ -33,13 +33,13 @@ SpinIsomer = 0
 #param = 0.004 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.128 # for fixed beta
+param = 0.256 # for fixed beta
 
 rcom = 10.05
-field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 1
+field_strength = 50.0 # Unit inverse of Kelvin
+nMolecule = 2
 nblocks = 10000
-npass = 50
+npass = 100
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"
@@ -51,8 +51,8 @@ cmd_run = (
     + fileName3+space
     + "-R"+space
     + str(rcom)+space
-    + "-d"+space
-    + str(field_strength)+space
+#    + "-d"+space
+#    + str(field_strength)+space
     + "-N"+space
     + str(nMolecule)+space
     + "-Block"+space
