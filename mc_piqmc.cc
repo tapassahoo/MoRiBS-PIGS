@@ -2772,17 +2772,17 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	double Eulan1[NDIM];
 	double Eulan2[NDIM];
 
-	Eulan0[0]=MCAngles[PHI][t0];
-	Eulan0[1]=acos(MCAngles[CTH][t0]);
-	Eulan0[2]=MCAngles[CHI][t0];
+	Eulan0[PHI]=MCAngles[PHI][t0];
+	Eulan0[CTH]=acos(MCAngles[CTH][t0]);
+	Eulan0[CHI]=MCAngles[CHI][t0];
 
-	Eulan1[0]=MCAngles[PHI][t1];
-	Eulan1[1]=acos(MCAngles[CTH][t1]);
-	Eulan1[2]=MCAngles[CHI][t1];
+	Eulan1[PHI]=MCAngles[PHI][t1];
+	Eulan1[CTH]=acos(MCAngles[CTH][t1]);
+	Eulan1[CHI]=MCAngles[CHI][t1];
 
-	Eulan2[0]=MCAngles[PHI][t2];
-	Eulan2[1]=acos(MCAngles[CTH][t2]);
-	Eulan2[2]=MCAngles[CHI][t2];
+	Eulan2[PHI]=MCAngles[PHI][t2];
+	Eulan2[CTH]=acos(MCAngles[CTH][t2]);
+	Eulan2[CHI]=MCAngles[CHI][t2];
 
 	double dens_old;
 	if (RotDenType == 0) dens_old = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
@@ -2801,9 +2801,9 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	pot_old+=(PotRotE3DPIGS(gatom,Eulan1,it));
 	//Toby: pot_old can be calculated with MCAngles
 
-	Eulan1[0]=newcoords[PHI][t1];
-	Eulan1[1]=acos(newcoords[CTH][t1]);
-	Eulan1[2]=newcoords[CHI][t1];
+	Eulan1[PHI]=newcoords[PHI][t1];
+	Eulan1[CTH]=acos(newcoords[CTH][t1]);
+	Eulan1[CHI]=newcoords[CHI][t1];
 
 	double dens_new;
 	if(RotDenType == 0) dens_new = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
@@ -2916,21 +2916,21 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 	newcoords[CHI][t1] = chi;
 	newcoords[CTH][t1] = cost;
 
-	double Eulan0[3];
-	double Eulan1[3];
-	double Eulan2[3];
+	double Eulan0[NDIM];
+	double Eulan1[NDIM];
+	double Eulan2[NDIM];
 
-	Eulan0[0]=MCAngles[PHI][t0];
-	Eulan0[1]=acos(MCAngles[CTH][t0]);
-	Eulan0[2]=MCAngles[CHI][t0];
+	Eulan0[PHI]=MCAngles[PHI][t0];
+	Eulan0[CTH]=acos(MCAngles[CTH][t0]);
+	Eulan0[CHI]=MCAngles[CHI][t0];
 
-	Eulan1[0]=MCAngles[PHI][t1];
-	Eulan1[1]=acos(MCAngles[CTH][t1]);
-	Eulan1[2]=MCAngles[CHI][t1];
+	Eulan1[PHI]=MCAngles[PHI][t1];
+	Eulan1[CTH]=acos(MCAngles[CTH][t1]);
+	Eulan1[CHI]=MCAngles[CHI][t1];
 
-	Eulan2[0]=MCAngles[PHI][t2];
-	Eulan2[1]=acos(MCAngles[CTH][t2]);
-	Eulan2[2]=MCAngles[CHI][t2];
+	Eulan2[PHI]=MCAngles[PHI][t2];
+	Eulan2[CTH]=acos(MCAngles[CTH][t2]);
+	Eulan2[CHI]=MCAngles[CHI][t2];
 
 // Rotors partitioning
 	int particleA1Min = 0;
@@ -2982,17 +2982,9 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 	pot_old+=(PotRotE3DSwap(iRefAtom,gatom,Eulan1,it,Distribution));
 	//Toby: pot_old can be calculated with MCAngles
 
-	Eulan0[0]=MCAngles[PHI][t0];
-	Eulan0[1]=acos(MCAngles[CTH][t0]);
-	Eulan0[2]=MCAngles[CHI][t0];
-
-	Eulan1[0]=newcoords[PHI][t1];
-	Eulan1[1]=acos(newcoords[CTH][t1]);
-	Eulan1[2]=newcoords[CHI][t1];
-
-	Eulan2[0]=MCAngles[PHI][t2];
-	Eulan2[1]=acos(MCAngles[CTH][t2]);
-	Eulan2[2]=MCAngles[CHI][t2];
+	Eulan1[PHI]=newcoords[PHI][t1];
+	Eulan1[CTH]=acos(newcoords[CTH][t1]);
+	Eulan1[CHI]=newcoords[CHI][t1];
 
 	double dens_new;
 	if(RotDenType == 0)
@@ -3329,8 +3321,8 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 					com_2[id] = MCCoords[id][t1];
 				}
 				int tm1=offset1 + it/RotRatio;
-				Eulang_2[PHI]=MCAngles[PHI][tm1];
 				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+				Eulang_2[PHI]=MCAngles[PHI][tm1];
 				Eulang_2[CHI]=MCAngles[CHI][tm1];
 				caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
 				spot += E_2H2O;

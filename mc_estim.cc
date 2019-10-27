@@ -1287,10 +1287,10 @@ double GetPotEnergy_Densities(void)
          	//if ( (MCAtom[type0].molecule == 2) && (MCAtom[type1].molecule == 2) )
          	//{
         	//cout<<"Le if de GG: MCAtom[type0].molecule MCAtom[type1].molecule"<<MCAtom[type0].molecule<<" "<<MCAtom[type1].molecule<<endl;
-             	double com_1[3];
-             	double com_2[3];
-             	double Eulang_1[3];
-             	double Eulang_2[3];
+             	double com_1[NDIM];
+             	double com_2[NDIM];
+             	double Eulang_1[NDIM];
+             	double Eulang_2[NDIM];
              	double E_2H2O;
              	for (int id=0;id<NDIM;id++)
              	{

@@ -174,9 +174,9 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 
 	if (TypeCal == "PIGS"):
 		col_block, col_rot, col_rot1, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/output.eng",unpack=True, usecols=[0,1,2,3,4], skip_header=preskip, skip_footer=postskip)
-		#print("")
-		#print("array size of output.eng")
-		#print(len(col_tot))
+		if (int(len(col_block)) != numbblocks-(preskip+postskip)):
+			print(len(col_block))
+			print(final_dir_in_work)
 	
 		workingNdim   = int(math.log(len(col_tot))/math.log(2))
 		trunc         = int(len(col_tot)-2**workingNdim)
@@ -688,8 +688,11 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	mcskip = numbbeads*numbpass
-	#mcskip = numbpass
 	replace("mskip_input", str(mcskip),                       "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	mcskip_avg = numbpass
+	replace("mskip_avg_input", str(mcskip_avg),               "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	replace("numbparticle_input", str(particleA),             "qmc2.input", "qmc3.input")
@@ -951,9 +954,9 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	#if (thread > 4):
 	#	thread     = 4
-	thread         = 3
+	thread         = 1
 	job_name       = file_name+str(value)
-	walltime       = "00-00:30"
+	walltime       = "07-00:00"
 	omp_thread     = str(thread)
 	output_dir     = folder_run_path+"/results"
 	temperature1   = "%8.6f" % temperature

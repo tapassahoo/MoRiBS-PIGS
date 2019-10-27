@@ -58,6 +58,10 @@ void MCSaveBlockAveragesPIGSENT(long int);
 
 void MCSaveAcceptRatio(long int,long int,long int);
 
+#ifdef DEBUG_POT
+extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eulang_1, double *Eulang_2);
+#endif
+
 //--------------- BLOCK AVERAGE ------------
 
 double _dbpot;       // potential energy differencies, block average  added by Hui Li
@@ -346,6 +350,60 @@ ParamsPotential();
     	//IOxyz(IOWrite,fname.c_str());  // test output of initial config
       	//string fname = MCFileName;
       	//IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
+	
+#ifdef DEBUG_POT
+		//Testing the potential
+		cout<<"Printing of values related to the caleng potential!"<<endl;
+		int it=0;
+		int atom0=0;
+		double Eulang1[NDIM];
+
+		int offset0 = atom0*NumbRotTimes;
+		int tm0=offset0 + it/RotRatio;
+
+		Eulang1[PHI]=1.0;
+		Eulang1[CTH]=1.0;
+		Eulang1[CHI]=1.0;
+
+		cout<<" Eulang1[PHI] "<<Eulang1[PHI];
+		cout<<" Eulang1[CTH] "<<Eulang1[CTH];
+		cout<<" Eulang1[CHI] "<<Eulang1[CHI];
+		cout<<endl;
+
+		int atom1=1;
+		double spot=0.0;
+		if (atom1 != atom0)                    // skip "self-interaction"
+		{	
+			int offset1 = atom1*NumbRotTimes;
+			if (MCType[atom1] == IMTYPE)
+			{
+				int t0 = offset0 + it;
+				int t1 = offset1 + it;
+				double com1[NDIM];
+				double com2[NDIM];
+				double Eulang2[NDIM];
+				double E_2H2O;
+				for (int id=0; id<NDIM; id++)
+				{
+					com1[id] = MCCoords[id][t0];
+					com2[id] = MCCoords[id][t1];
+					cout<<" com1 "<<com1[id]<<" com2 "<<com2[id]<<endl;
+				}
+				Eulang2[PHI]=1.0;
+				Eulang2[CTH]=-1.0;
+				Eulang2[CHI]=1.0;
+
+				cout<<" Eulang2[PHI] "<<Eulang2[PHI];
+				cout<<" Eulang2[CTH] "<<Eulang2[CTH];
+				cout<<" Eulang2[CHI] "<<Eulang2[CHI];
+				cout<<endl;
+				caleng_(com1, com2, &E_2H2O, Eulang1, Eulang2);
+				spot += E_2H2O;
+			}
+		}   // END sum over atoms
+		cout<<" Caleng value "<<spot<<endl;
+		exit(100);
+#endif
 
 //--------------------------------------------------------
 
@@ -1185,7 +1243,6 @@ void MCGetAveragePIGS(void)
 	_brot1           += srot1;
 	_rot_total1      += srot1;
 
-#ifdef IOWRITE
 	if(MCAtom[IMTYPE].numb > 1)
 	{
 		double cosTheta   = 0.0;
@@ -1251,7 +1308,7 @@ void MCGetAveragePIGS(void)
 		}
 #endif
 	}
-#endif
+
 	double srot;
 	if (ROTATION)
 	{
@@ -1609,7 +1666,7 @@ void MCSaveBlockAverages(long int blocknumb)
 	}
 #endif
 	SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
-#ifdef IOWRITE
+
 	if(MCAtom[IMTYPE].numb > 1)
 	{
 		SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
@@ -1617,7 +1674,6 @@ void MCSaveBlockAverages(long int blocknumb)
 		SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
 	}
-#endif
 
 #ifdef IOWRITE
 	if (BOSONS) 
