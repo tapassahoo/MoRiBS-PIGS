@@ -1420,7 +1420,6 @@ double GetTotalEnergy(void)
             	int offset1 = NumbTimes*atom1;
 
         		double spot_pair=0.0;
-            	#pragma omp parallel for reduction(+: spot_pair)
             	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 				{
                 	int t0 = offset0 + it;
@@ -1460,7 +1459,6 @@ double GetTotalEnergy(void)
             	int offset1 = NumbTimes*atom1;
 
         		double spot_pair=0.0;
-            	#pragma omp parallel for reduction(+: spot_pair)
             	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 				{
                 	int t0 = offset0 + it;
@@ -1608,7 +1606,6 @@ double GetTotalEnergy(void)
         int offset0 = NumbTimes*atom0;
 
    		double spot_beads=0.0;
-       	#pragma omp parallel for reduction(+: spot_beads)
        	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 		{
         	int t0 = offset0 + it;
