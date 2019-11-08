@@ -1,5 +1,6 @@
 import os
 from subprocess import call
+import numpy as np
 
 import mypkg.pkgMoribs.support_without_parallel as support
 import mypkg.pkgMoribs
@@ -23,22 +24,22 @@ call(["rm", fileName2])
 # Informations about the system
 simType = "PIGS"
 
-simType1="submission -C"
-#simType1 = "analysis"
+#simType1="submission -C"
+simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-#var = "beta" # for fixed tau
-#param = 0.005 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.005 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.2 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.2 # for fixed beta
 
-rcom = 10.0
+rcom = 4.0
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 50
+nMolecule = 10
 nblocks = 20000
 npass = 100
 
@@ -48,27 +49,27 @@ else:
 	cmd1 = ""
 
 cmd_run = (
-    "python"+space
-    + fileName3+space
-    + "-R"+space
-    + str(rcom)+space
-    #+ "-d"+space
-    #+ str(field_strength)+space
-    + "-N"+space
-    + str(nMolecule)+space
-    + "-Block"+space
-    + str(nblocks)+space
-    + "-Pass"+space
-    + str(npass)+space
-    + "--ROTMOVE"+space
+	"python"+space
+	+ fileName3+space
+	+ "-R"+space
+	+ str(rcom)+space
+	#+ "-d"+space
+	#+ str(field_strength)+space
+	+ "-N"+space
+	+ str(nMolecule)+space
+	+ "-Block"+space
+	+ str(nblocks)+space
+	+ "-Pass"+space
+	+ str(npass)+space
+	+ "--ROTMOVE"+space
 	+ cmd1+space
-    + "--Type NONLINEAR"+space
-    + var+space
-    + simType1+space
-    + simType+space
-    + molecule+space
+	+ "--Type NONLINEAR"+space
+	+ var+space
+	+ simType1+space
+	+ simType+space
+	+ molecule+space
 	+ rotor+space
-    + str(param)+space
+	+ str(param)+space
 	+ "-spin"+space
 	+ str(SpinIsomer)+space
 ) 
