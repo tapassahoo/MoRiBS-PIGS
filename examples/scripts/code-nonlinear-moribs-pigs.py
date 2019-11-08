@@ -14,8 +14,8 @@ fileName1 = module_path+"script_submission_analysis_MoRiBS_without_parallel.py"
 fileName2 = "script_submission_analysis_MoRiBS1.py"
 support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
-stringName2 = '"thread-4-"'
-#stringName2 = '""'
+#stringName2 = '"thread-4-"'
+stringName2 = '""'
 fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
 support.replace("extraName", stringName2, fileName2, fileName3)
 call(["rm", fileName2])
@@ -24,22 +24,22 @@ call(["rm", fileName2])
 simType = "PIGS"
 
 simType1="submission -C"
-simType1 = "analysis"
+#simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
 #var = "beta" # for fixed tau
-#param = 0.004 # for fixed tau
+#param = 0.005 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.256 # for fixed beta
+param = 0.2 # for fixed beta
 
-rcom = 10.05
+rcom = 10.0
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 16
-nblocks = 40000
+nMolecule = 50
+nblocks = 20000
 npass = 100
 
 if simType1 == "analysis":
