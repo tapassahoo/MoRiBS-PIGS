@@ -37,7 +37,7 @@ param = 0.005 # for fixed tau
 #var = "tau"  # for fixed beta
 #param = 0.2 # for fixed beta
 
-rcom = 4.0
+rcom = 2
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 10
 nblocks = 20000
