@@ -15,8 +15,7 @@ fileName1 = module_path+"script_submission_analysis_MoRiBS_without_parallel.py"
 fileName2 = "script_submission_analysis_MoRiBS1.py"
 support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
-#stringName2 = '"thread-4-"'
-stringName2 = '""'
+stringName2 = '"TIP4P-2005-"'
 fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
 support.replace("extraName", stringName2, fileName2, fileName3)
 call(["rm", fileName2])
@@ -24,8 +23,8 @@ call(["rm", fileName2])
 # Informations about the system
 simType = "PIGS"
 
-#simType1="submission -C"
-simType1 = "analysis"
+simType1="submission -C"
+#simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"

@@ -24,7 +24,7 @@ def Getbeads(TypeCal, variableName):
 			#list_nb  = [4, 8, 16, 32, 64, 128, 256]
 			list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 		if (variableName == "beta"):
-			list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
+			list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 	return list_nb
 
