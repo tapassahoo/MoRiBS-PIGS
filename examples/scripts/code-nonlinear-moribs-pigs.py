@@ -8,70 +8,74 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-space=" "
+for i in range(39):
 
-stringName1 = "nonlinear-rotors"
-fileName1 = module_path+"script_submission_analysis_MoRiBS_without_parallel.py"
-fileName2 = "script_submission_analysis_MoRiBS1.py"
-support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
+	space=" "
 
-stringName2 = '"TIP4P-2005-"'
-fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
-support.replace("extraName", stringName2, fileName2, fileName3)
-call(["rm", fileName2])
+	stringName1 = "nonlinear-rotors"
+	fileName1 = module_path+"script_submission_analysis_MoRiBS_without_parallel.py"
+	fileName2 = "script_submission_analysis_MoRiBS1.py"
+	support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
-# Informations about the system
-simType = "PIGS"
+	#stringName2 = '""'
+	stringName2 = '"TIP4P-2005-"'
+	fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
+	support.replace("extraName", stringName2, fileName2, fileName3)
+	call(["rm", fileName2])
 
-simType1="submission -C"
-#simType1 = "analysis"
+	# Informations about the system
+	simType = "PIGS"
 
-molecule = "H2O"
-rotor = "H2O"
-SpinIsomer = 0
+	#simType1="submission -C"
+	simType1 = "analysis"
 
-var = "beta" # for fixed tau
-param = 0.005 # for fixed tau
+	molecule = "H2O"
+	rotor = "H2O"
+	SpinIsomer = 0
 
-#var = "tau"  # for fixed beta
-#param = 0.2 # for fixed beta
+	#var = "beta" # for fixed tau
+	#param = 0.005 # for fixed tau
 
-rcom = 2
-#field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 10
-nblocks = 20000
-npass = 100
+	var = "tau"  # for fixed beta
+	param = 0.2 # for fixed beta
 
-if simType1 == "analysis":
-	cmd1 = "--preskip 0"
-else:
-	cmd1 = ""
+	rcom = 2.2+0.1*i
+	rcom="{:3.1f}".format(rcom)
+	#field_strength = 20.0 # Unit inverse of Kelvin
+	nMolecule = 10
+	nblocks = 20000
+	npass = 100
 
-cmd_run = (
-	"python"+space
-	+ fileName3+space
-	+ "-R"+space
-	+ str(rcom)+space
-	#+ "-d"+space
-	#+ str(field_strength)+space
-	+ "-N"+space
-	+ str(nMolecule)+space
-	+ "-Block"+space
-	+ str(nblocks)+space
-	+ "-Pass"+space
-	+ str(npass)+space
-	+ "--ROTMOVE"+space
-	+ cmd1+space
-	+ "--Type NONLINEAR"+space
-	+ var+space
-	+ simType1+space
-	+ simType+space
-	+ molecule+space
-	+ rotor+space
-	+ str(param)+space
-	+ "-spin"+space
-	+ str(SpinIsomer)+space
-) 
-print(cmd_run)
-os.system(cmd_run)
-call(["rm", fileName3])
+	if simType1 == "analysis":
+		cmd1 = "--preskip 0"
+	else:
+		cmd1 = ""
+
+	cmd_run = (
+		"python"+space
+		+ fileName3+space
+		+ "-R"+space
+		+ str(rcom)+space
+		#+ "-d"+space
+		#+ str(field_strength)+space
+		+ "-N"+space
+		+ str(nMolecule)+space
+		+ "-Block"+space
+		+ str(nblocks)+space
+		+ "-Pass"+space
+		+ str(npass)+space
+		+ "--ROTMOVE"+space
+		+ cmd1+space
+		+ "--Type NONLINEAR"+space
+		+ var+space
+		+ simType1+space
+		+ simType+space
+		+ molecule+space
+		+ rotor+space
+		+ str(param)+space
+		+ "-spin"+space
+		+ str(SpinIsomer)+space
+	) 
+	print(cmd_run)
+	os.system(cmd_run)
+	call(["rm", fileName3])

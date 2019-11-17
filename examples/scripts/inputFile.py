@@ -65,7 +65,7 @@ class GetStepAndLevel:
 				self.step_trans = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
 
 				#self.step       = [2.0, 2.0, 2.0, 0.4, 0.25, 0.15, 0.1, 0.08] #list_nb = [4, 8, 16, 32, 64, 128, 256, 512] beta = 0.256 for 1 p-H2O V=-[10-50]*cos(theta) 
-				self.step       = [0.05, 0.06, 0.08, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1] #list_nb = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] beta = 0.2 for 10 p-H2O r = [2.2, 2.4] Angstrom
+				self.step       = [2.0, 0.4, 0.3, 0.25, 0.20, 0.20, 0.18, 0.15, 0.15, 0.15]
 				self.level      = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 
@@ -95,5 +95,5 @@ class GetStepAndLevel:
 				self.step_trans  = [0.3 for i in range(100)]
 				#self.step        = [0.4 for i in range(100)]  # for tau = 0.01
 				#self.step        = [0.15 for i in range(100)]  # for tau = 0.002 for 1 p-H2O
-				self.step        = [0.07 for i in range(100)]  # for tau = 0.005 for 2 p-H2O rcom = 2.0 AA
-				self.level       = [1   for i in range(100)]
+				self.step        = [0.07 for i in range(10)]
+				self.level       = [1 for i in range(100)]
