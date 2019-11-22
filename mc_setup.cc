@@ -60,6 +60,7 @@ double  BoxSize;
 
 double  MCBeta;
 double  MCTau;      // imaginary time step 
+int NumbStep;
 
 double  MCRotTau;   // imaginary time step for rotational degrees of freedom
 
@@ -510,6 +511,11 @@ void MCInit(void)  // only undimensional parameters in this function
 	nrerror (_proc_,"Define the impurity type for the area estimator");
 #endif 
 */
+#ifdef PIMCTYPE
+	NumbStep = 10;
+#else
+	NumbStep = 100;
+#endif
 }
 
 void MCConfigInit(void)

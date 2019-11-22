@@ -594,6 +594,7 @@ ParamsPotential();
   
 
 
+	//Monte Carlo simulation begins here//
    	long int blockCount = MCStartBlock;  
    	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
    	{      
@@ -654,7 +655,7 @@ ParamsPotential();
 #ifdef IOWRITE
             SaveInstantEnergy (); 
 #endif
-			if (blockCount > (NumberOfMCBlocks - 1000))
+			if (blockCount > (NumberOfMCBlocks - NumbStep))
 			{
 		    	SaveInstantAngularDOF(totalStep);
 			}
@@ -882,7 +883,7 @@ void PIMCPass(int type,int time)
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)
 	{
 #ifdef CLUSTERMOVE
-    	MCRotationsMoveCL(type);
+    	MCRotationsMoveCL(type); //It doesn't work
 #else
     	MCRotationsMove(type);
 #endif
@@ -916,7 +917,7 @@ void MCResetBlockAveragePIMC(void)
 	PrintXrfl   = 1;
 	PrintZrfl   = 1;
 #ifdef DDCORR
-	if(MCAtom[IMTYPE].num > 1)
+	if(MCAtom[IMTYPE].numb > 1)
 	{
 		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
 		_cdipoleXYZ.resize(NDIMDP);
@@ -1466,8 +1467,8 @@ void MCGetAveragePIMC(void)
 			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
 			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
 		}
-	}
 #endif
+	}
 
 	double srot;
 	if (ROTATION)

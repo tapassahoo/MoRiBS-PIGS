@@ -166,7 +166,7 @@ if args.DipoleMoment:
 if args.gFactor:
     gfact = args.gFactor
 # if args.Rpt:
-# 	support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
+#   support.GetrAndgFactor(molecule_rot, Rpt, dipolemoment)
 # exit()
 
 # Request to change
@@ -204,12 +204,12 @@ if variableName == "beta":
 spin_isomer = args.SpinIsomer
 
 if (spin_isomer == -1):
-	preName = ""
+    preName = ""
 if (spin_isomer == 0):
-	preName = "-p-"
+    preName = "-p-"
 if (spin_isomer == 1):
-	print("This code is not ready for ortho isomer")
-	exit()
+    print("This code is not ready for ortho isomer")
+    exit()
 molecule = preName+molecule
 
 steplevel = inputFile.GetStepAndLevel(molecule_rot, variableName, TypeCal)
@@ -401,18 +401,18 @@ for particleA in particleAList:
 
         if TypeCal == "PIMC":
 
-            if i % 2 == 0:
+            if (i%2==0):
                 value = i
             else:
                 value = i + 1
 
-            if variableName == "beta":
-                beta = tau * value
-                temperature = 1.0 / beta
-                variable = beta
+            if (variableName == "beta"):
+                beta = tau*value
+                temperature=1.0/beta
+                variable=beta
             if variableName == "tau":
-                tau = beta / value
-                variable = tau
+                tau=beta/value
+                variable=tau
 
             numbbeads = value
             folder_run = file1_name + str(numbbeads)
@@ -436,7 +436,7 @@ for particleA in particleAList:
                     Restart1 = False
 
                 support.Submission(
-					NameOfServer,
+                    NameOfServer,
                     status,
                     TransMove,
                     RotMove,
@@ -474,7 +474,7 @@ for particleA in particleAList:
                     numbblocks_Restart1,
                     crystal,
                     RotorType,
-					spin_isomer,
+                    spin_isomer,
                 )
 
             if status == "analysis":
@@ -602,7 +602,7 @@ for particleA in particleAList:
                     Restart1 = False
 
                 support.Submission(
-					NameOfServer,
+                    NameOfServer,
                     status,
                     TransMove,
                     RotMove,
@@ -640,7 +640,7 @@ for particleA in particleAList:
                     numbblocks_Restart1,
                     crystal,
                     RotorType,
-					spin_isomer,
+                    spin_isomer,
                 )
 
             if status == "analysis":
@@ -665,12 +665,12 @@ for particleA in particleAList:
                             )
                         )
                         """
-						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						"""
+                        fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+                        fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+                        fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+                        fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+                        fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+                        """
                 except:
                     pass
         iStep = iStep + 1
@@ -736,6 +736,6 @@ if (status == "analysis") and (TypeCal == "ENT"):
     )
     exit()
     """
-	support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
-	"""
+    support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
+    """
 

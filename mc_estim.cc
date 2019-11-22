@@ -1149,180 +1149,173 @@ double GetPotEnergy_Densities(void)
         }
       	spot = spot_beads;
     }
-#ifdef IOWRITE
+
 	if ( MCAtom[IMTYPE].numb > 1)
-    {
-	for (int atom0=0;atom0<(NumbAtoms-1);atom0++)      
-	for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
 	{
-		int type0   = MCType[atom0];
-		int type1   = MCType[atom1];
+		for (int atom0=0;atom0<(NumbAtoms-1);atom0++)      
+		for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
+		{
+			int type0   = MCType[atom0];
+			int type1   = MCType[atom1];
 
-		int offset0 = NumbTimes*atom0;
-		int offset1 = NumbTimes*atom1;
+			int offset0 = NumbTimes*atom0;
+			int offset1 = NumbTimes*atom1;
 
-		double spot_pair=0.0;
+			double spot_pair=0.0;
 
-		#pragma omp parallel for reduction(+: spot_pair)
-		for (int it=0;it<NumbTimes;it++) 	    
-		{  
-			double dr[NDIM];
-			int t0 = offset0 + it;
-			int t1 = offset1 + it;
+			#pragma omp parallel for reduction(+: spot_pair)
+			for (int it=0;it<NumbTimes;it++) 	    
+			{  
+				double dr[NDIM];
+				int t0 = offset0 + it;
+				int t1 = offset1 + it;
 
-			double dr2 = 0.0;  		 
-			for (int id=0;id<NDIM;id++)
-			{
-				dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+				double dr2 = 0.0;  		 
+				for (int id=0;id<NDIM;id++)
+				{
+					dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
 
-				if (MINIMAGE)
-				dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
-				dr2    += (dr[id]*dr[id]);
-			}
+					if (MINIMAGE)
+					dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
+					dr2    += (dr[id]*dr[id]);
+				}
    	 
 //#ifdef _CUTOFF_	     
 //       if (dr2<dljcutoff2)
 //#endif
-			double r = sqrt(dr2);
+				double r = sqrt(dr2);
 
 //----------- [ATOM - MOLECULE] ----------------------
 
-			if ((MCAtom[type0].molecule == 1)||(MCAtom[type1].molecule == 1))  // 2D interaction 
-			{
-				//  type 1 is a molecule 
-     
-				int sgn   = 1;             // set to -1 to correct the orientaion of dr
-
-				int tm    = offset1 + it/RotRatio;
-				//int tm    = offset1 + floor((double)it/(double)RotRatio);
-
-				int typep = type1;         // define the type of the potential
-				int typed = type0;         // define the type of the density
-
-				//  type 0 is a molecule ?   
-				if (MCAtom[type0].molecule == 1)  // does not work for two molecules
+				if ((MCAtom[type0].molecule == 1)||(MCAtom[type1].molecule == 1))  // 2D interaction 
 				{
-					sgn   = -1;   
-                	tm    = offset0 + it/RotRatio;
-                	typep = type0; 
-                	typed = type1; 
-             	}
+					//  type 1 is a molecule 
+     
+					int sgn   = 1;             // set to -1 to correct the orientaion of dr
 
-             	double cost = 0.0;
-             	for (int id=0;id<NDIM;id++)    // n*dr = r*cos(theta) 
-             	cost += (MCCosine[id][tm]*dr[id]);   	 
+					int tm    = offset1 + it/RotRatio;
+					//int tm    = offset1 + floor((double)it/(double)RotRatio);
+
+					int typep = type1;         // define the type of the potential
+					int typed = type0;         // define the type of the density
+
+					//  type 0 is a molecule ?   
+					if (MCAtom[type0].molecule == 1)  // does not work for two molecules
+					{
+						sgn   = -1;   
+						tm    = offset0 + it/RotRatio;
+						typep = type0; 
+						typed = type1; 
+					}
+
+					double cost = 0.0;
+					for (int id=0;id<NDIM;id++)    // n*dr = r*cos(theta) 
+					cost += (MCCosine[id][tm]*dr[id]);   	 
 	 
-             	cost /= r;                     // cos(theta)
-             	cost *= sgn;                   // correct the orientation 
+					cost /= r;                     // cos(theta)
+					cost *= sgn;                   // correct the orientation 
 
-             	bin_2Ddensity (r,cost,typed);  // densities 
-				spot_pair += LPot2D(r,cost,typep);  // potential energy 
-				//cout<<"it="<<it<<" spot_pair="<<spot_pair<<" LPot2D="<<LPot2D(r,cost,typep)<<endl;
-			}
+					bin_2Ddensity (r,cost,typed);  // densities 
+					spot_pair += LPot2D(r,cost,typep);  // potential energy 
+					//cout<<"it="<<it<<" spot_pair="<<spot_pair<<" LPot2D="<<LPot2D(r,cost,typep)<<endl;
+				}
 //----------- [ATOM - NON-LINEAR MOLECULE] ----------------------
-			else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) ) // 3D interaction, no density is calculated now
-			{
+				/*
+				else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) ) // 3D interaction, no density is calculated now
+				{
 
-            	int tm;
-            	int typed;
+					int tm;
+					int typed;
 
-            	double RCOM[3];
-            	double Rpt[3];
-        	    double Eulang[3];
-            	double vpot3d;
-            	double radret;
-            	double theret;
-            	double chiret;
-            	double hatx[3];
-            	double haty[3];
-            	double hatz[3];
-            	int    ivcord = 0;
-            	if(MCAtom[type0].molecule == 2)
-            	{
+					double RCOM[3];
+					double Rpt[3];
+					double Eulang[3];
+					double vpot3d;
+					double radret;
+					double theret;
+					double chiret;
+					double hatx[3];
+					double haty[3];
+					double hatz[3];
+					int    ivcord = 0;
+					if(MCAtom[type0].molecule == 2)
+					{
+						//determine type of atoms for bin_3Ddensity
+						typed = type1;
+						tm  = offset0 + it/RotRatio;
+						for (int id=0;id<NDIM;id++)
+						{
+							RCOM[id] = MCCoords[id][t0];
+							Rpt[id]  = MCCoords[id][t1];
+						}	
+					}
+					else
+					{
 					//determine type of atoms for bin_3Ddensity
-					typed = type1;
-               		tm  = offset0 + it/RotRatio;
-             		for (int id=0;id<NDIM;id++)
-              		{
-                  		RCOM[id] = MCCoords[id][t0];
-                 		Rpt[id]  = MCCoords[id][t1];
-              		}	
-            	}
-            	else
-            	{
-				//determine type of atoms for bin_3Ddensity
-					typed = type0;
-               		tm  = offset1 + it/RotRatio;
-               		for (int id=0;id<NDIM;id++)
-               		{
-                		Rpt[id]  = MCCoords[id][t0];
-                		RCOM[id] = MCCoords[id][t1];
-               		}
-            	}
-            	Eulang[PHI]=MCAngles[PHI][tm];
-            	Eulang[CTH]=acos(MCAngles[CTH][tm]);
-            	Eulang[CHI]=MCAngles[CHI][tm];
+						typed = type0;
+						tm  = offset1 + it/RotRatio;
+						for (int id=0;id<NDIM;id++)
+						{
+							Rpt[id]  = MCCoords[id][t0];
+							RCOM[id] = MCCoords[id][t1];
+						}
+					}
+					Eulang[PHI]=MCAngles[PHI][tm];
+					Eulang[CTH]=acos(MCAngles[CTH][tm]);
+					Eulang[CHI]=MCAngles[CHI][tm];
 
-            	if( ISPHER == 0)
-            	{
-               		vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-            	}
-            	else if( ISPHER == 1)
-            	{
-               		radret = r;
-               		vspher_(&radret,&vpot3d);
-               		theret = 0.0;
-               		chiret = 0.0;
-            	}
+					if( ISPHER == 0)
+					{
+						vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+					}
+					else if( ISPHER == 1)
+					{
+						radret = r;
+						vspher_(&radret,&vpot3d);
+						theret = 0.0;
+						chiret = 0.0;
+					}
 
-            	bin_3Ddensity (radret,theret,chiret,typed);  // accumulate density
+					bin_3Ddensity (radret,theret,chiret,typed);  // accumulate density
 
-            	spot_pair += vpot3d;
-        	}
-//----------[NON-LINEAR - NON-LINEAR from GG]
-         	else if ( ((MCAtom[type0].molecule == 2) && (MCAtom[type1].molecule == 2)) && (MCAtom[IMTYPE].numb > 1) )
-         	{
-          	//if ( (MCType[atom0] == IMTYPE) && (MCType[atom1] == IMTYPE) )
-         	//{
-         	//if ( (MCAtom[type0].molecule == 2) && (MCAtom[type1].molecule == 2) )
-         	//{
-        	//cout<<"Le if de GG: MCAtom[type0].molecule MCAtom[type1].molecule"<<MCAtom[type0].molecule<<" "<<MCAtom[type1].molecule<<endl;
-             	double com_1[NDIM];
-             	double com_2[NDIM];
-             	double Eulang_1[NDIM];
-             	double Eulang_2[NDIM];
-             	double E_2H2O;
-             	for (int id=0;id<NDIM;id++)
-             	{
-                	com_1[id] = MCCoords[id][t0];
-                  	com_2[id] = MCCoords[id][t1];
-             	}
-             	int tm0=offset0 + it/RotRatio;
-             	int tm1=offset1 + it/RotRatio;
-             	Eulang_1[PHI]=MCAngles[PHI][tm0];
-             	Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
-             	Eulang_1[CHI]=MCAngles[CHI][tm0];
-             	Eulang_2[PHI]=MCAngles[PHI][tm1];
-             	Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
-             	Eulang_2[CHI]=MCAngles[CHI][tm1];
-             	caleng_(com_1, com_2, &E_2H2O,
-                	    Eulang_1, Eulang_2);
-             	spot_pair += E_2H2O;
-          		//}  //
-          		//}
-         	}
+					spot_pair += vpot3d;
+				}
+				*/
+				// [NON-LINEAR - NON-LINEAR from TIP4P/2005]
+				else if ((MCAtom[type0].molecule == 2) && (MCAtom[type1].molecule == 2)) 
+				{
+					double com_1[NDIM];
+					double com_2[NDIM];
+					double Eulang_1[NDIM];
+					double Eulang_2[NDIM];
+					double E_2H2O;
+					for (int id=0;id<NDIM;id++)
+					{
+						com_1[id] = MCCoords[id][t0];
+						com_2[id] = MCCoords[id][t1];
+					}
+					int tm0=offset0 + it/RotRatio;
+					int tm1=offset1 + it/RotRatio;
+					Eulang_1[PHI]=MCAngles[PHI][tm0];
+					Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+					Eulang_1[CHI]=MCAngles[CHI][tm0];
+					Eulang_2[PHI]=MCAngles[PHI][tm1];
+					Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+					Eulang_2[CHI]=MCAngles[CHI][tm1];
+					caleng_(com_1, com_2, &E_2H2O, Eulang_1, Eulang_2);
+					spot_pair += E_2H2O;
+				}
 //----------[ATOM - ATOM] ------------------------------- 
-         	else                // only one atom type    
-         	if ((type0 == type1) && MCAtom[type0].molecule == 0) // no "cross" densities 
-         	{
-            	bin_1Ddensity (r,type1);    // densities 
-            	spot_pair += SPot1D(r,type1);    // potential energy
-         	}
-      	}  // LOOP OVER TIME SLICES
-      	spot += spot_pair;
-   	}     // LOOP OVER ATOM PAIRS
+				else                // only one atom type    
+				if ((type0 == type1) && MCAtom[type0].molecule == 0) // no "cross" densities 
+				{
+					bin_1Ddensity (r,type1);    // densities 
+					spot_pair += SPot1D(r,type1);    // potential energy
+				}
+			}  // LOOP OVER TIME SLICES
+			spot += spot_pair;
+		}     // LOOP OVER ATOM PAIRS
 	}
-#endif
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT

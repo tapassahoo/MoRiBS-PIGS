@@ -830,7 +830,10 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			if (NameOfServer == "graham"):
 				iodevn   = spin_isomer
 				jmax = 70
-				numbbeads2 = int(numbbeads-1)
+				if (TypeCal == 'PIMC'):
+					numbbeads2 = int(numbbeads)
+				else:
+					numbbeads2 = int(numbbeads-1)
 				dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature, numbbeads2, iodevn, jmax)
 			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature))+"t"+str(numbbeads2)
 			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
@@ -883,11 +886,11 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 	#job submission
 	fname         = 'job-for-P'+str(numbbeads)
 	if (TypeCal == 'PIGS'):
-		argument2     = "pigs"+str(numbmolecules)+"b"
+		argument2     = "pgR"+str(Rpt)+'n'+str(numbmolecules)+"b"
 	if (TypeCal == 'PIMC'):
-		argument2     = "pimc"+str(numbmolecules)+"b"
+		argument2     = "pm"+str(numbmolecules)+"b"
 	if (TypeCal == 'ENT'):
-		argument2     = "ent"+str(numbmolecules)+"a"+str(particleA)+"b"
+		argument2     = "et"+str(numbmolecules)+"a"+str(particleA)+"b"
 		if(Restart1):
 			argument2 += "Restart"
 
