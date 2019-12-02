@@ -121,6 +121,8 @@ int NThreads; // the number of threads as a global variable
 
 double ** MCCoords;   // translational degrees of freedom
 double ** MCCosine;   // orientational cosines
+double ** MCCosinex;   // orientational cosines
+double ** MCCosiney;   // orientational cosines
 double ** MCAngles;
 double ** DipoleCoords;   // translational degrees of freedom
 
@@ -178,6 +180,8 @@ void MCMemAlloc(void)  // allocate  memmory
 
   // MCCosine  = doubleMatrix (NDIM,NumbAtoms*NumbTimes);  
   MCCosine  = doubleMatrix (3,NumbAtoms*NumbTimes); 
+  MCCosinex  = doubleMatrix (3,NumbAtoms*NumbTimes); 
+  MCCosiney  = doubleMatrix (3,NumbAtoms*NumbTimes); 
   MCAngles  = doubleMatrix (3,NumbAtoms*NumbTimes); 
 
   MCCooInit = new double [NDIM*NumbAtoms*NumbTimes];
@@ -213,6 +217,8 @@ void MCMemFree(void)  //  free memory
   free_doubleMatrix(DipoleCoords);  
 
   free_doubleMatrix(MCCosine); 
+  free_doubleMatrix(MCCosinex); 
+  free_doubleMatrix(MCCosiney); 
   free_doubleMatrix(MCAngles); 
 
   delete [] atom_list;
@@ -540,16 +546,22 @@ void MCConfigInit(void)
     {
 		MCAngles[PHI][it] = 0.0;
 		MCAngles[CTH][it] = 1.0;
-		//toby
 		MCAngles[CHI][it] = 0.0;
 
 		double phi  = MCAngles[PHI][it];
 		double cost = MCAngles[CTH][it];
+		double chi = MCAngles[CHI][it];
 		double sint = sqrt(1.0 - cost*cost);
   
 		MCCosine[AXIS_X][it] = sint*cos(phi);
 		MCCosine[AXIS_Y][it] = sint*sin(phi);
 		MCCosine[AXIS_Z][it] = cost;
+		MCCosinex[AXIS_X][it] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
+		MCCosinex[AXIS_Y][it] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
+		MCCosinex[AXIS_Z][it] = -sint*cos(chi);
+		MCCosiney[AXIS_X][it] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
+		MCCosiney[AXIS_Y][it] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
+		MCCosiney[AXIS_Z][it] = sint*sin(chi);
 	}
 }
 

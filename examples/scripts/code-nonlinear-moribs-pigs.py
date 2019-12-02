@@ -8,7 +8,7 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-for i in range(16):
+for i in range(18):
 
 	space=" "
 
@@ -33,17 +33,17 @@ for i in range(16):
 	rotor = "H2O"
 	SpinIsomer = 0
 
-	var = "beta" # for fixed tau
-	param = 0.001 # for fixed tau
+	#var = "beta" # for fixed tau
+	#param = 0.001 # for fixed tau
 
-	#var = "tau"  # for fixed beta
-	#param = 0.2 # for fixed beta
+	var = "tau"  # for fixed beta
+	param = 0.025 # for fixed beta
 
-	rcom = 2.5+0.5*i
+	rcom = 2.3+0.1*i
 	rcom="{:3.1f}".format(rcom)
 	#field_strength = 20.0 # Unit inverse of Kelvin
 	nMolecule = 11
-	nblocks = 10000
+	nblocks = 20000
 	npass = 100
 
 	if simType1 == "analysis":

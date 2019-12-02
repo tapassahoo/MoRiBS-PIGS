@@ -21,10 +21,9 @@ def Getbeads(TypeCal, variableName):
 
 	if (TypeCal == "PIGS"):
 		if (variableName == "tau"):
-			list_nb  = [4, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+			list_nb  = [4, 6, 8, 10, 12, 14, 16, 18, 20, 24, 30, 34, 40, 44, 50, 60, 70, 80, 90, 100]
 		if (variableName == "beta"):
-			#list_nb  = [4, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-			list_nb  = [6, 8, 12, 14, 16, 18]
+			list_nb  = [4, 6, 8, 10, 12, 14, 16, 18, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 	return list_nb
 
@@ -62,11 +61,9 @@ class GetStepAndLevel:
 				self.level      = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 			if (self.molecule_rot == "H2O"):
-				self.step_trans = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-
-				#self.step       = [2.0, 2.0, 2.0, 0.4, 0.25, 0.15, 0.1, 0.08] #list_nb = [4, 8, 16, 32, 64, 128, 256, 512] beta = 0.256 for 1 p-H2O V=-[10-50]*cos(theta) 
-				self.step       = [2.0, 0.4, 0.3, 0.25, 0.20, 0.20, 0.18, 0.15, 0.15, 0.15]
-				self.level      = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+				self.step_trans = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
+				self.step       = [0.25,0.2,0.18,0.16,0.14,0.14,0.12,0.12,0.12,0.1,0.1,0.08,0.08,0.07,0.07,0.07,0.06,0.06,0.05,0.05]
+				self.level      = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 
 		if ((self.variableName == "tau") and (self.TypeCal == "PIMC")):
@@ -93,8 +90,6 @@ class GetStepAndLevel:
 
 			if (self.molecule_rot == "H2O"):
 				self.step_trans  = [0.3 for i in range(100)]
-				#self.step        = [0.4 for i in range(100)]  # for tau = 0.01
-				#self.step        = [0.15 for i in range(100)]  # for tau = 0.002 for 1 p-H2O
 				self.step        = [0.1 for i in range(20)]
 				self.level       = [1 for i in range(100)]
 

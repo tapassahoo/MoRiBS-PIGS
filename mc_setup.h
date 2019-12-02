@@ -199,6 +199,8 @@ extern long int MCStartBlock;
 
 extern double ** MCCoords;   // translational degrees of freedom
 extern double ** MCCosine;   // orientational cosines
+extern double ** MCCosinex;   // orientational cosines
+extern double ** MCCosiney;   // orientational cosines
 extern double ** MCAngles;   // cost and phi
 extern double ** DipoleCoords;
 #ifdef MOLECULEINCAGE

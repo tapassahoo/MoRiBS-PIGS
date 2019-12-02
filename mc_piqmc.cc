@@ -329,6 +329,105 @@ void MCBisectionMove(int type, int time)  // multilevel Metropolis
   	}  // END loop over time slices/atoms
 }
 
+void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
+{
+	int numb = MCAtom[type].numb;
+
+   	double mclambda = MCAtom[type].lambda;    
+   	int    mclevels = MCAtom[type].levels;  // number of levels
+   	int    seg_size = MCAtom[type].mlsegm;  // segmen size  
+
+// initialize the end points
+   	int pit = (time+seg_size);  // No periodicity in time for PIGS     	//Tapas modified for PIGS
+	if (pit > (NumbTimes-1)) return;                              
+
+   	for (int atom=0;atom<numb;atom++)         // one atom to move only
+   	{
+      	int offset = MCAtom[type].offset + NumbTimes*atom;
+      	int gatom  = offset/NumbTimes;
+
+      	for (int id=0;id<NDIM;id++)             
+      	{	  
+         	newcoords[id][offset + time] = MCCoords[id][offset + time];
+         	newcoords[id][offset + pit]  = MCCoords[id][offset + pit];
+      	}
+
+      	double bnorm = 1.0/(mclambda*MCTau);  // variance for gaussian sampling 
+
+      	bool Accepted; 
+
+      	int t0,t1,t2;
+
+      	double pot0 = 0.0;  // potential, current  level
+      	double pot1 = 0.0;  // potential, previous level
+       	
+      	for (int level=0;level<mclevels;level++) // loop over bisection levels
+      	{	                                                          
+         	int level_seg_size = (int)pow(2.0,(mclevels-level));
+
+         	double bkin_norm = bnorm/(double) level_seg_size;
+         	double bpot_norm = MCTau*(double)(level_seg_size/2);
+	   
+         	pot1 = pot0;   // swap level potentials
+         	pot0 = 0.0;
+	   
+         	t2 = 0;
+         	do             // loop over middle points
+         	{
+            	t0 =  t2;                   // left point
+            	t2 =  t0 + level_seg_size;  // right point	
+            	t1 = (t0 + t2)/2;           // middle point
+
+            	int pt0 = (time + t0);	
+            	int pt1 = (time + t1);	
+            	int pt2 = (time + t2);	
+
+//  change the offset if exchange
+ 
+            	for (int id=0;id<NDIM;id++)
+            	{  	   
+               		newcoords[id][offset+pt1]  = 0.5*(newcoords[id][offset+pt0]+newcoords[id][offset+pt2]);
+               		newcoords[id][offset+pt1] += gauss(bkin_norm);
+            	} 
+//---------------------------- the end point approximation    
+
+            	pot0 += (PotEnergyPIGS(gatom,newcoords,pt1) - PotEnergyPIGS(gatom,MCCoords,pt1));
+  
+            	if (t0!=0)                // skip the contributions of the end points
+            	pot0 += (PotEnergyPIGS(gatom,newcoords,pt0) - PotEnergyPIGS(gatom,MCCoords,pt0));
+         	}   	      
+         	while (t2<seg_size);        // end the loop over middle points 
+
+// inefficient version
+
+         	double deltav = (pot0-2.0*pot1);  // rho(0,1;tau) 
+         	deltav *= bpot_norm;
+ 
+         	Accepted = false;
+       
+         	if (deltav<0.0)               Accepted = true;
+         	else if (exp(-deltav)>rnd3()) Accepted = true;
+
+         	if (!Accepted) break;
+
+     	}  // END loop over levels        
+
+     	MCTotal[type][MCMULTI] += 1.0;
+     
+     	if (Accepted)     
+     	{
+         	MCAccep[type][MCMULTI] += 1.0;
+ 
+         	for (int id=0;id<NDIM;id++)                // save new coordinates
+         	for (int it=time;it<=(time+seg_size);it++)    
+         	{  
+            	int pit = it % NumbTimes;                // periodicity in time 	       	
+            	MCCoords[id][offset+pit] = newcoords[id][offset+pit];
+         	}                                                           
+      	}	     
+  	}  // END loop over time slices/atoms
+}
+
 void MCBisectionMoveExchange(int type, int time0)  // multilevel Metropolis
 {
    int numb = MCAtom[type].numb;
@@ -454,6 +553,168 @@ void MCBisectionMoveExchange(int type, int time0)  // multilevel Metropolis
   }  // END loop over time slices/atoms
 }
 
+void MCMolecularMoveNaive(int type)
+{
+	double mclambda = MCAtom[type].lambda;    
+   	double step = MCAtom[type].mcstep; 
+   	double MCTransChunkTot = 0.0;
+   	double MCTransChunkAcp = 0.0;
+
+   	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+   	double rand1,rand2,rand3,rand4;
+	int offset, gatom;
+
+#pragma omp parallel for reduction(+: MCTransChunkTot,MCTransChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
+	for (int it=0;it<NumbTimes;it += 2)
+	{
+		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
+		{
+			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			rand1=runif(Rng);
+			rand2=runif(Rng);
+			rand3=runif(Rng);
+			MCTransLinStepPIGS(it,offset,gatom,type,step,rand1,rand2,rand3,rand4,mclambda,MCTransChunkTot,MCTransChunkAcp);
+		}
+	}
+
+	MCTotal[type][MCMOLEC] += MCTransChunkTot;
+	MCAccep[type][MCMOLEC] += MCTransChunkAcp;
+
+	MCTransChunkTot = 0;
+	MCTransChunkAcp = 0;
+
+#pragma omp parallel for reduction(+: MCTransChunkTot,MCTransChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
+	for (int it = 1; it < NumbTimes; it += 2)
+	{
+		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
+		{
+			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+ 			rand1=runif(Rng);
+			rand2=runif(Rng);
+			rand3=runif(Rng);
+			MCTransLinStepPIGS(it,offset,gatom,type,step,rand1,rand2,rand3,rand4,mclambda,MCTransChunkTot,MCTransChunkAcp);
+		}
+	}
+
+	MCTotal[type][MCMOLEC] += MCTransChunkTot;
+	MCAccep[type][MCMOLEC] += MCTransChunkAcp;
+}
+
+void MCTransLinStepPIGS(int it1, int offset, int gatom, int type, double step, double rand1, double rand2, double rand3, double rand4, double mclambda, double &MCTransChunkTot, double &MCTransChunkAcp)
+{
+	int it0=(it1-1);
+	int it2=(it1+1);
+
+	if (it0<0)          it0 += NumbTimes; // NumbTimes - 1
+	if (it2>=NumbTimes) it2 -= NumbTimes; // 0
+	  
+	int t0 = offset + it0;
+	int t1 = offset + it1;
+	int t2 = offset + it2;
+
+	for (int id=0; id<NDIM; id++)
+	{
+		newcoords[id][t1]  = MCCoords[id][t1];
+	}
+	newcoords[AXIS_X][t1] += step*(rand1-0.5);
+	newcoords[AXIS_Y][t1] += step*(rand2-0.5);
+	newcoords[AXIS_Z][t1] += step*(rand3-0.5);
+
+	double dens_old;
+	dens_old=GetTransDensityPIGS(it1, t0, t1, t2, mclambda, MCCoords);
+
+	if (fabs(dens_old)<RZERO) dens_old = 0.0;
+
+	double pot_old=PotEnergy(gatom,MCCoords,it1);
+
+	double dens_new;
+	dens_new=GetTransDensityPIGS(it1, t0, t1, t2, mclambda, newcoords);
+
+	if (fabs(dens_new)<RZERO) dens_new = 0.0;
+
+	double pot_new=PotEnergy(gatom,newcoords,it1);
+     
+	double rd;
+
+	if (dens_old>RZERO)
+	rd = dens_new/dens_old;
+	else rd = 1.0;
+	rd *= exp(-MCTau*(pot_new-pot_old));
+
+	bool Accepted = false;
+	if (rd>1.0)        Accepted = true;
+	else if (rd>rand4) Accepted = true;
+
+	MCTransChunkTot +=1.0;
+      
+	if (Accepted)
+	{
+		MCTransChunkAcp +=1.0;
+		for (int id=0;id<NDIM;id++)
+		{
+			MCCoords[id][t1]=newcoords[id][t1];
+		}
+	}	      
+}
+
+double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, double **newcoords)
+{
+	double dr2, dens;
+	double dr[NDIM];
+	
+	double sigma=4.0*mclambda*MCTau;
+	if (it1 == 0)
+	{
+		dr2=0.0;
+		for (int id=0; id<NDIM; id++)
+		{
+			dr[id]=(newcoords[id][t1]-MCCoords[id][t2]);
+			dr2+=(dr[id]*dr[id]);
+		}
+		 
+		dens=Gauss(dr2,sigma);
+	}
+	else if (it1 == (NumbRotTimes - 1))
+	{
+		dr2=0.0;
+		for (int id=0; id<NDIM; id++)
+		{
+			dr[id]=(MCCoords[id][t0]-newcoords[id][t1]);
+			dr2+=(dr[id]*dr[id]);
+		}
+		dens=Gauss(dr2,sigma);
+	}
+	else
+	{
+		dr2=0.0;
+		for (int id=0; id<NDIM; id++)
+		{
+			dr[id]=(MCCoords[id][t0]-newcoords[id][t1]);
+			dr2+=(dr[id]*dr[id]);
+		}
+		 
+		dens=Gauss(dr2,sigma);
+
+		dr2=0.0;
+		for (int id=0; id<NDIM; id++)
+		{
+			dr[id]=(newcoords[id][t1]-MCCoords[id][t2]);
+			dr2+=(dr[id]*dr[id]);
+		}
+		 
+		dens*=Gauss(dr2,sigma);
+	}
+	return dens;	
+}
+
+double Gauss(double mean2, double sigma)
+{
+	double valr=exp(-mean2/sigma);
+	return valr;	
+}	
+
 void MCRotationsMove(int type) // update all time slices for rotational degrees of freedom
 {
 #ifdef DEBUG_PIMC
@@ -478,8 +739,8 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 	{
 		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			offset = MCAtom[type].offset+(NumbRotTimes*atom0);   // the same offset for rotational
+			gatom  = offset/NumbRotTimes;    // and translational degrees of freedom
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
@@ -512,8 +773,8 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 	{
 		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			offset = MCAtom[type].offset+(NumbRotTimes*atom0);   // the same offset for rotational
+			gatom  = offset/NumbRotTimes;    // and translational degrees of freedom
  			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
@@ -1473,179 +1734,6 @@ void MCSwap(double rand4, string &Distribution)
     }
 }
 #endif
-
-/*
-void MCRotationsMove(int type) // update all time slices for rotational degrees of freedom
-{
-#ifdef DEBUG_PIMC
-   const char *_proc_=__func__;    //  MCRotationsMove() 
-   if (type != IMTYPE)
-   nrerror(_proc_,"Wrong impurity type");
-
-   if (NDIM != 3)
-   nrerror(_proc_,"Rotational sampling for 3D systems only");
-#endif
-
-   double step   = MCAtom[type].rtstep; 
-   int    offset = MCAtom[type].offset;
- 
-   int atom0  = 0;                   // only one molecular impurtiy
-   offset    += (NumbTimes*atom0);   // the same offset for rotational
-   int gatom  = offset/NumbTimes;    // and translational degrees of freedom
-
-   for (int it1=0;it1<NumbRotTimes;it1++)
-   {
-      int it0 = (it1 - 1);
-      int it2 = (it1 + 1);
- 
-      if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
-      if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
-      
-      int t0 = offset + it0;
-      int t1 = offset + it1;
-      int t2 = offset + it2;
-
-      double n1[NDIM];
-
-      double cost = MCAngles[CTH][t1];
-      double phi  = MCAngles[PHI][t1];
-
-      cost += (step*(rnd1()-0.5));
-      phi  += (step*(rnd1()-0.5));
-
-      if (cost >  1.0)
-      {
-         cost = 2.0 - cost;    
-//       phi  = phi + M_PI;
-      }		 
-      
-      if (cost < -1.0)
-      {
-          cost = -2.0 - cost;    
-//        phi  = phi  + M_PI;
-      }		  
-
-      double sint = sqrt(1.0 - cost*cost);
-
-      newcoords[AXIS_X][t1] = sint*cos(phi);
-      newcoords[AXIS_Y][t1] = sint*sin(phi);
-      newcoords[AXIS_Z][t1] = cost;
-
-//----------------------------------------------
-
-// the old density
-
-      double p0 = 0.0;
-      double p1 = 0.0;
- 
-      for (int id=0;id<NDIM;id++)
-      {
-         p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
-         p1 += (MCCosine[id][t1]*MCCosine[id][t2]);
-      }
-
-      double dens_old;
-      double rho1,rho2,erot;
-
-      if(RotDenType == 0)
-      {
-         dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-      }
-      else if(RotDenType == 1)
-      {
-         rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
-         rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
-         dens_old = rho1+rho2;
-      }
-
-      if (fabs(dens_old)<RZERO) dens_old = 0.0;
-      if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-
-      double pot_old  = 0.0;
-
-      int itr0 = it1  * RotRatio;     // interval to average over
-      int itr1 = itr0 + RotRatio;     // translational time slices
- 
-      for (int it=itr0;it<itr1;it++)  // average over tr time slices
-      pot_old  += (PotRotEnergy(gatom,MCCosine,it));
-
-//   the new density 
-    
-      p0 = 0.0;
-      p1 = 0.0;
- 
-
-      for (int id=0;id<NDIM;id++)
-      {
-          p0 += (MCCosine [id][t0]*newcoords[id][t1]);
-          p1 += (newcoords[id][t1]*MCCosine [id][t2]);
-      }
-
-      double dens_new;
-
-      if(RotDenType == 0)
-      {
-         dens_new = SRotDens(p0,type)*SRotDens(p1,type);
-      }
-      else if(RotDenType == 1)
-      {
-         rsline_(&X_Rot,&p0,&MCRotTau,&rho1,&erot);
-         rsline_(&X_Rot,&p1,&MCRotTau,&rho2,&erot);
-         dens_new = rho1 + rho2;
-      }
-
-      if (fabs(dens_new)<RZERO) dens_new = 0.0;
-      if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-
-      double pot_new  = 0.0;
-
-      for (int it=itr0;it<itr1;it++)  // average over tr time slices
-      pot_new  += (PotRotEnergy(gatom,newcoords,it));
-     
-      double rd;
-
-      if(RotDenType == 0)
-      {
-         if (dens_old>RZERO)
-          rd = dens_new/dens_old;
-         else rd = 1.0;
-
-         rd *= exp(- MCTau*(pot_new-pot_old));   
-      }
-      else if(RotDenType == 1)
-      {
-         rd = dens_new - dens_old - MCTau*(pot_new-pot_old);
-//       rd = exp(rd);
-      }
-     
-
-      bool Accepted = false;
-      if(RotDenType == 0)
-      {
-         if (rd>1.0)         Accepted = true;
-         else if (rd>rnd7()) Accepted = true;
-      }
-      else if (RotDenType == 1)
-      {
-         if (rd > 0.0)   Accepted = true;
-         else if (rd > log(rnd7())) Accepted = true;
-      }
-
-      MCTotal[type][MCROTAT] += 1.0;  
-      
-      if (Accepted)
-      {
-         MCAccep[type][MCROTAT] += 1.0;
-
-         MCAngles[CTH][t1] = cost;
-         MCAngles[PHI][t1] = phi;
-  
-         for (int id=0;id<NDIM;id++)
-         MCCosine [id][t1] = newcoords[id][t1];
-      }	      
-   } // end of the loop over time slices
-}
-*/
 
 #ifdef IOWRITE
 void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
@@ -2695,7 +2783,7 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
 		//and Ieff about and perpendicular to one molecule-ixed axis.
 
-#ifdef MOLECULEINCAGE
+#ifdef IOWRITE
 		MCCosinex[AXIS_X][t1] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
 		MCCosinex[AXIS_Y][t1] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
 		MCCosinex[AXIS_Z][t1] = -sint*cos(chi);
@@ -4231,65 +4319,6 @@ double PotEnergy(int atom0, double **pos, int it)
      	int offset1 = NumbTimes*atom1; 
         int t1 = offset1 + it;
 
-	    string stype = MCAtom[type0].type;
-		if (stype == H2)
-	    {
-   			double s1 = 0.0;
-            double s2 = 0.0;
-            double dr2 = 0.0;
-			double dr[NDIM];
-
-            for (int id = 0; id < NDIM; id++)
-            {
-                dr[id]  = (pos[id][t0] - MCCoords[id][t1]);
-                dr2    += (dr[id]*dr[id]);
-                double cst1 = (MCCoords[id][t1] - pos[id][t0])*MCCosine[id][t0];
-                double cst2 = (MCCoords[id][t1] - pos[id][t0])*MCCosine[id][t1];
-                s1 += cst1;
-                s2 += cst2;
-           	}
-           	double r = sqrt(dr2);
-           	double th1 = acos(s1/r);
-           	double th2 = acos(s2/r);
-
-           	double b1[NDIM];
-           	double b2[NDIM];
-           	double b3[NDIM];
-           	for (int id = 0; id < NDIM; id++)
-           	{
-               	b1[id] = MCCosine[id][t0];
-               	b2[id] = (MCCoords[id][t1] - pos[id][t0])/r;
-               	b3[id] = MCCosine[id][t1];
-           	}
-           	VectorNormalisation(b1);
-           	VectorNormalisation(b2);
-           	VectorNormalisation(b3);
-
-           	//Calculation of dihedral angle 
-           	double n1[NDIM];
-           	double n2[NDIM];
-           	double mm[NDIM];
-
-           	CrossProduct(b2, b1, n1);
-           	CrossProduct(b2, b3, n2);
-           	CrossProduct(b2, n2, mm);
-
-           	double xx = DotProduct(n1, n2);
-           	double yy = DotProduct(n1, mm);
-
-           	double phi = atan2(yy, xx);
-           	if (phi<0.0) phi += 2.0*M_PI;
-
-           	//Dihedral angle calculation is completed here
-           	double r1 = 0.74;// bond length in Angstrom
-			r1 /= BOHRRADIUS;
-           	double r2 = r1;
-           	double rd = r/BOHRRADIUS;
-           	double potl;
-           	vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
-           	spot += potl*CMRECIP2KL;
-		}  //stype
-
 #ifdef IOWRITE
      bool wline = true;                  // skip if the time slice between ira and masha
 
@@ -4441,33 +4470,7 @@ double PotEnergy(int atom0, double **pos, int it)
 #endif
 	}   // END sum over atoms
 
-#ifdef HARMONIC
-    double spot3d = 0.0;
-    for (int id = 0; id < NDIM; id++)
-    {
-        spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
-    }
-    double weight = 1.0;
-#ifndef PIMCTYPE
-    if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
-#endif
-    spot = weight*spot3d;
-#endif
-
-#ifdef CAGEPOT
-    double Eulang[NDIM];
-    Eulang[PHI]=MCAngles[PHI][t0];
-    Eulang[CTH]=acos(MCAngles[CTH][t0]);
-    Eulang[CHI]=MCAngles[CHI][t0];
-    double coordsXYZ[NDIM];
-	double weight = 1.0;
-#ifndef PIMCTYPE
-	if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
-#endif
-    for (int id = 0; id < NDIM; id++) coordsXYZ[id] = pos[id][t0];
-    spot = weight*PotFuncCage(coordsXYZ,Eulang);
-#endif
-   	return (spot);
+   	return spot;
 }
 
 #ifdef IOWRITE
@@ -5340,4 +5343,78 @@ void CodeExit(int istop)
 		cerr<<"large matrix test error"<<endl;
 		exit(0);
 	}
+}
+
+double PotEnergyPIGS(int atom0, double **pos, int it)   
+{
+	int type0   = MCType[atom0];
+	int offset0 = NumbTimes*atom0;
+	int t0 = offset0 + it;
+
+	double dr[NDIM];
+	double spot = 0.0;
+
+	if (MCAtom[IMTYPE].numb>1)
+	{	
+		for (int atom1=0;atom1<NumbAtoms;atom1++)
+		if (atom1 != atom0)                    // skip "self-interaction"
+		{	
+			int type1   = MCType[atom1];
+			int offset1 = NumbTimes*atom1; 
+
+			int t1 = offset1 + it;
+
+			double dr2 = 0.0;  		 
+			for (int id=0;id<NDIM;id++)
+			{
+				dr[id]  = (pos[id][t0] - MCCoords[id][t1]);
+
+				if (MINIMAGE)
+				dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
+
+				dr2    += (dr[id]*dr[id]);
+			}
+			double r = sqrt(dr2);
+
+			if ((MCAtom[type0].molecule == 2)&&(MCAtom[type1].molecule == 2))
+			{
+				double com_1[3];
+				double com_2[3];
+				double Eulang_1[3];
+				double Eulang_2[3];
+				double E_2H2O;
+				int t0 = offset0 + it;
+				int t1 = offset1 + it;
+				for (int id=0;id<NDIM;id++)
+				{
+					com_1[id] = pos[id][t0];
+					com_2[id] = MCCoords[id][t1];
+				}
+				int tm0=offset0 + it/RotRatio;
+				int tm1=offset1 + it/RotRatio;
+				Eulang_1[PHI]=MCAngles[PHI][tm0];
+				Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+				Eulang_1[CHI]=MCAngles[CHI][tm0];
+				Eulang_2[PHI]=MCAngles[PHI][tm1];
+				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+				Eulang_2[CHI]=MCAngles[CHI][tm1];
+				caleng_(com_1, com_2, &E_2H2O, Eulang_1, Eulang_2);
+				spot += E_2H2O;
+			}
+		}   // END sum over atoms
+	}
+
+#ifdef HARMONIC
+    for (int id = 0; id < NDIM; id++)
+	{	
+        spot += 0.5*pos[id][t0]*pos[id][t0];
+    }
+#endif
+
+    double weight = 1.0;
+#ifndef PIMCTYPE
+    if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+#endif
+    spot = weight*spot;
+   	return spot;
 }

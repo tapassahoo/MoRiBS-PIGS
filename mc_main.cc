@@ -102,6 +102,8 @@ vector<double> _cdipoleX_total;
 vector<double> _cdipoleY_total;
 vector<double> _cdipoleZ_total;
 vector<double> _cdipoleXY_total;
+vector<double> _beiej;
+vector<double> _bei;
 //
 double _bnm;
 double _bdm;
@@ -135,6 +137,9 @@ void SaveInstantEnergy ();                 // accumulated average
 
 #ifdef DDCORR
 void SaveDipoleCorr(const char [],double,long int);
+#endif
+#ifdef ORDERPARA
+void SaveOrderCorr(const char fname [], double acount, long int blocknumb);
 #endif
 void SaveAngularDOF(const char [],double,long int);
 void SaveTrReducedDens(const char [], double , long int );
@@ -867,10 +872,15 @@ void PIMCPass(int type,int time)
 #ifdef GAUSSIANMOVE
 		MCMolecularMoveGauss(type);
 #else
+#ifdef PIGSTYPE
+		MCMolecularMoveNaive(type);
+		MCBisectionMovePIGS(type,time);
+#else
 		if (time == 0)
 		MCMolecularMove(type);        
 // move the solvent particles
 		MCBisectionMove(type,time);
+#endif
 #endif
 	}
 
@@ -936,6 +946,21 @@ void MCResetBlockAveragePIMC(void)
 		}
 	}
 #endif
+
+#ifdef ORDERPARA	
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+		_beiej.resize(NDIM+1);
+		_bei.resize(NDIM);
+		for (int id=0; id<(NDIM+1); id++){
+			_beiej[id]=0.0;
+		}	
+		for (int id=0; id<NDIM; id++){
+			_bei[id]=0.0;
+		}	
+	}
+#endif	
+
 	_bcostheta = 0.0;
 	_ucompx     = 0.0;
 	_ucompy     = 0.0;
@@ -963,6 +988,19 @@ void MCResetBlockAveragePIGS(void)
 	_abs_ucompx     = 0.0;
 	_abs_ucompy     = 0.0;
 	_abs_ucompz     = 0.0;
+#ifdef ORDERPARA	
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+		_beiej.resize(NDIM+1);
+		_bei.resize(NDIM);
+		for (int id=0; id<(NDIM+1); id++){
+			_beiej[id]=0.0;
+		}	
+		for (int id=0; id<NDIM; id++){
+			_bei[id]=0.0;
+		}	
+	}
+#endif	
 #ifdef DDCORR
 	if(MCAtom[IMTYPE].numb > 1)
 	{
@@ -1246,6 +1284,7 @@ void MCGetAveragePIGS(void)
 
 	if(MCAtom[IMTYPE].numb > 1)
 	{
+#ifdef IOWRITE
 		double cosTheta   = 0.0;
 		double compxyz[NDIM];
 		double abs_compxyz[NDIM];
@@ -1274,6 +1313,26 @@ void MCGetAveragePIGS(void)
 		_abs_ucompx_total    += abs_scompx;
 		_abs_ucompy_total    += abs_scompy;
 		_abs_ucompz_total    += abs_scompz;
+#endif		
+
+#ifdef ORDERPARA		
+		double eiej[NDIM+1];
+		double ei[NDIM];
+		for (int id=0; id<(NDIM+1); id++){
+			eiej[id]=0.0;
+		}
+		for (int id=0; id<NDIM; id++){
+			ei[id]=0.0;
+		}
+		GetOrderCorrPIGS(eiej, ei);
+		for (int id=0; id<(NDIM+1); id++){
+			_beiej[id]=eiej[id];
+		}
+		for (int id=0; id<NDIM; id++){
+			_bei[id]=ei[id];
+		}
+
+#endif		
 
 #ifdef DDCORR
 		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
@@ -1434,6 +1493,25 @@ void MCGetAveragePIMC(void)
 		_ucompy_total    += scompy;
 		_ucompz_total    += scompz;
 #endif
+
+#ifdef ORDERPARA		
+		double eiej[NDIM+1];
+		double ei[NDIM];
+		for (int id=0; id<(NDIM+1); id++){
+			eiej[id]=0.0;
+		}
+		for (int id=0; id<NDIM; id++){
+			ei[id]=0.0;
+		}
+		GetOrderCorrPIMC(eiej, ei);
+		for (int id=0; id<(NDIM+1); id++){
+			_beiej[id]=eiej[id];
+		}
+		for (int id=0; id<NDIM; id++){
+			_bei[id]=ei[id];
+		}
+
+#endif		
 
 #ifdef DDCORR
 		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
@@ -1670,9 +1748,14 @@ void MCSaveBlockAverages(long int blocknumb)
 
 	if(MCAtom[IMTYPE].numb > 1)
 	{
+#ifdef IOWRITE		
 		SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
+#endif		
 #ifdef DDCORR
 		SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
+#endif
+#ifdef ORDERPARA
+		SaveOrderCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
 	}
 
@@ -1830,6 +1913,38 @@ void SaveDipoleCorr(const char fname [], double acount, long int blocknumb)
 		for (int idp = 0; idp < NDIMDP; idp++)
 		{ 
     		fid << setw(IO_WIDTH) << _cdipoleXY[idp]/acount<< BLANK;
+		}
+    	fid << endl;
+	}
+    fid.close();
+}
+#endif
+
+#ifdef ORDERPARA
+void SaveOrderCorr(const char fname [], double acount, long int blocknumb)
+{
+    const char *_proc_=__func__;    
+
+    fstream fid;
+    string fenergy;
+
+    fenergy  = fname;
+    fenergy += "OrderPara.corr";
+
+    fid.open(fenergy.c_str(),ios::app | ios::out);
+    io_setout(fid);
+
+    if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
+	
+	if (acount != 0)
+	{
+   		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
+
+		for (int id=0; id<(NDIM+1); id++){ 
+    		fid << setw(IO_WIDTH) << _beiej[id]/acount<< BLANK;
+		}
+		for (int id=0; id<NDIM; id++){ 
+    		fid << setw(IO_WIDTH) << _bei[id]/acount<< BLANK;
 		}
     	fid << endl;
 	}

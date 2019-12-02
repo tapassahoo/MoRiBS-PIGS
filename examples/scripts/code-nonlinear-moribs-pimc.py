@@ -47,7 +47,7 @@ for i in range(1):
 	npass = 100
 
 	if simType1 == "analysis":
-		cmd1 = "--preskip 0"
+		cmd1 = "--preskip 15000"
 	else:
 		cmd1 = ""
 

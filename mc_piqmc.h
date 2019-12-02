@@ -4,10 +4,15 @@
 #include "omprng.h"
 
 void MCMolecularMove(int);
+void MCMolecularMoveNaive(int);
+void MCTransLinStepPIGS(int,int,int,int,double,double,double,double,double,double, double &,double &);
+double GetTransDensityPIGS(int, int, int, int, double,double **);
+double Gauss(double, double);	
 #ifdef GAUSSIANMOVE
 void MCMolecularMoveGauss(int);
 #endif
 void MCBisectionMove(int,int);
+void MCBisectionMovePIGS(int,int);
 void MCRotationsMove(int);
 void MCRotationsMoveCL(int);
 void MCRotLinStep(int,int,int,int,double,double,double,double,double &,double &);
@@ -39,6 +44,7 @@ void MCBisectionMoveExchange(int,int);
 
 double PotEnergy(int,double **);
 double PotEnergy(int,double **,int);
+double PotEnergyPIGS(int,double **,int);
 
 double PotRotEnergy(int,double **,int it);   
 double PotRotE3D(int,double *,int it);   

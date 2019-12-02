@@ -1990,6 +1990,132 @@ void GetCosThetaPIGS(double &cosTheta, double *abs_compxyz, double *compxyz)
 	}
 }
 
+void GetOrderCorrPIMC(double *eiej, double *ei)
+{
+    const char *_proc_=__func__; 
+
+    // if user passed in a null pointer for array, bail out early!
+    if (!eiej)
+        return;
+
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+		double bseiejz=0.0;
+		double bseiejx=0.0;
+		double bseiejy=0.0;
+		double bseiej=0.0;
+		for (int it = 0; it<NumbRotTimes;it++)
+		{
+			double seiejz=0.0;
+			double seiejx=0.0;
+			double seiejy=0.0;
+			double seiej=0.0;
+			for (int atom0=2; atom0<(NumbAtoms-3); atom0++)
+			{    
+				int atom1 = atom0+1;
+				int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+				int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+
+				int t0      = offset0 + it;
+				int t1      = offset1 + it;
+
+				double usum = 0.0;
+				for (int id = 0; id < NDIM; id++)
+				{    
+					usum += MCCosine[id][t0]*MCCosine[id][t1];
+				}
+				seiej += usum;
+				seiejx += MCCosine[AXIS_X][t0]*MCCosine[AXIS_X][t1];
+				seiejy += MCCosine[AXIS_Y][t0]*MCCosine[AXIS_Y][t1];
+				seiejz += MCCosine[AXIS_Z][t0]*MCCosine[AXIS_Z][t1];
+			}
+
+			bseiejx+=seiejx;
+			bseiejy+=seiejy;
+			bseiejz+=seiejz;
+			bseiej+=seiej;
+		}
+		eiej[AXIS_X]=bseiejx/(double)NumbRotTimes;
+		eiej[AXIS_Y]=bseiejy/(double)NumbRotTimes;
+		eiej[AXIS_Z]=bseiejz/(double)NumbRotTimes;
+		eiej[AXIS_Z+1]=bseiej/(double)NumbRotTimes;
+
+		double bsei[NDIM], sei[NDIM];
+		for (int id = 0; id<NDIM; id++)
+		{
+			bsei[id]=0.0;
+			for (int it=0; it<NumbRotTimes; it++)
+			{	
+				sei[id]=0.0;
+				for (int atom0=2; atom0<NumbAtoms-2; atom0++)
+				{    
+					int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+					int t0      = offset0 + it;
+
+					sei[id] += MCCosine[id][t0];
+				}
+				bsei[id] += sei[id];
+			}
+			ei[id]=bsei[id]/(double)NumbRotTimes;
+		}
+	}	
+}
+
+void GetOrderCorrPIGS(double *eiej, double *ei)
+{
+    const char *_proc_=__func__; 
+
+    // if user passed in a null pointer for array, bail out early!
+    if (!eiej)
+        return;
+    int it = (NumbRotTimes-1)/2;
+
+	if(MCAtom[IMTYPE].numb > 1)
+	{
+        double seiejz=0.0;
+        double seiejx=0.0;
+        double seiejy=0.0;
+        double seiej=0.0;
+    	for (int atom0=2; atom0<(NumbAtoms-3); atom0++)
+        {    
+    	    int atom1 = atom0+1;
+            int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+
+			int t0      = offset0 + it;
+			int t1      = offset1 + it;
+
+			double usum = 0.0;
+			for (int id = 0; id < NDIM; id++)
+			{    
+				usum += MCCosine[id][t0]*MCCosine[id][t1];
+			}
+			seiej += usum;
+			seiejx += MCCosine[AXIS_X][t0]*MCCosine[AXIS_X][t1];
+			seiejy += MCCosine[AXIS_Y][t0]*MCCosine[AXIS_Y][t1];
+			seiejz += MCCosine[AXIS_Z][t0]*MCCosine[AXIS_Z][t1];
+		}
+
+		eiej[AXIS_X]=seiejx;
+		eiej[AXIS_Y]=seiejy;
+		eiej[AXIS_Z]=seiejz;
+		eiej[AXIS_Z+1]=seiej;
+
+		for (int id = 0; id<NDIM; id++)
+		{
+			double sum = 0.0;
+    		for (int atom0=2; atom0<NumbAtoms-2; atom0++)
+        	{    
+           		int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+       			int t0      = offset0 + it;
+
+				sum += MCCosine[id][t0];
+			}
+			ei[id] += sum;
+		}
+	}
+}
+
 void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)
 {
     const char *_proc_=__func__; 
