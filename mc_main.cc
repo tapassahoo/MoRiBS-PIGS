@@ -132,7 +132,7 @@ fstream _fswap;
 void SaveEnergy    (const char [],double,long int); // block average
 void SaveSumEnergy (double,double);                 // accumulated average
 
-void SaveInstantAngularDOF(long int); 
+void SaveInstantDOFs(long int); 
 void SaveInstantEnergy ();                 // accumulated average
 
 #ifdef DDCORR
@@ -624,8 +624,6 @@ ParamsPotential();
        	{
         	passTotal++;  
 
-            //toby's printing
-            //cout<<blockCount<<" "<<passCount<<" "<<time<<endl;
            	for (int type=0;type<NumbTypes;type++)
            	if (WORM && (type == Worm.type)) 
            	{
@@ -662,7 +660,7 @@ ParamsPotential();
 #endif
 			if (blockCount > (NumberOfMCBlocks - NumbStep))
 			{
-		    	SaveInstantAngularDOF(totalStep);
+		    	SaveInstantDOFs(totalStep);
 			}
 #endif
 
@@ -871,16 +869,16 @@ void PIMCPass(int type,int time)
 	{
 #ifdef GAUSSIANMOVE
 		MCMolecularMoveGauss(type);
-#else
+#endif
 #ifdef PIGSTYPE
 		MCMolecularMoveNaive(type);
-		MCBisectionMovePIGS(type,time);
-#else
+//		MCBisectionMovePIGS(type,time);
+#endif
+#ifdef PIMCTYPE
 		if (time == 0)
 		MCMolecularMove(type);        
 // move the solvent particles
 		MCBisectionMove(type,time);
-#endif
 #endif
 	}
 
@@ -891,13 +889,7 @@ void PIMCPass(int type,int time)
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
     	MCRotations3D(type);
 	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)
-	{
-#ifdef CLUSTERMOVE
-    	MCRotationsMoveCL(type); //It doesn't work
-#else
     	MCRotationsMove(type);
-#endif
-	}
 }
 
 #ifdef PIMCTYPE
@@ -2111,7 +2103,7 @@ void SaveSumDipoleCorr(double acount, double numb)
 }
 #endif
 
-void SaveInstantAngularDOF(long int numb)
+void SaveInstantDOFs(long int numb)
 {
     const char *_proc_=__func__;
 

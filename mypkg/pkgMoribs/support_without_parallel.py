@@ -955,13 +955,16 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (numbbeads > 16):
-		thread     = 4
-	else:
-		thread     = 1
 	if (numbblocks <= 100):
 		walltime   = "00-00:30"
+		thread     = 1
 	else:
+		if (numbbeads >= 70):
+			thread     = 8
+		elif ((numbbeads >= 20) and (numbbeads < 70)):
+			thread     = 4
+		else:
+			thread     = 1
 		walltime   = "07-00:00"
 	
 	job_name       = file_name+str(value)
@@ -1516,3 +1519,23 @@ def GetRenamingFunc(dir_run_input_pimc, dir_input_pimc_renamed, dir_output, fold
 		#print(printingMessage)
 	os.chdir(src_dir)
 	#call(["pwd"])
+
+def RemoveFiles(TypeCal, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work):
+
+	col_block = genfromtxt(final_dir_in_work+"/results/output.eng",unpack=True, usecols=[0], skip_header=preskip, skip_footer=postskip)
+	if (int(len(col_block)) == numbblocks-(preskip+postskip)):
+	
+		temperature1 = "%8.6f" % temperature
+		if (RotorType == "LINEAR"):
+			file_rotdens = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
+			call(["rm", final_dir_in_work+"/"+file_rotdens])
+		else:
+			if (TypeCal == 'PIMC'):
+				numbbeads2 = int(numbbeads)
+			else:
+				numbbeads2 = int(numbbeads-1)
+			file_rotdens_mod = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
+			if (os.path.exists(final_dir_in_work+"/"+file_rotdens_mod+".rho") == True):
+				call(["rm", final_dir_in_work+"/"+file_rotdens_mod+".rho"])
+				call(["rm", final_dir_in_work+"/"+file_rotdens_mod+".eng"])
+				call(["rm", final_dir_in_work+"/"+file_rotdens_mod+".esq"])

@@ -646,6 +646,7 @@ for particleA in particleAList:
             if status == "analysis":
 
                 final_dir_in_work = dir_output + folder_run
+                support.RemoveFiles(TypeCal, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
                 try:
                     if TypeCal != "ENT":
                         fanalyzeEnergy.write(

@@ -565,12 +565,12 @@ void MCMolecularMoveNaive(int type)
 	int offset, gatom;
 
 #pragma omp parallel for reduction(+: MCTransChunkTot,MCTransChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int it=0;it<NumbTimes;it += 2)
+	for (int it=0;it<NumbTimes;it+=2)
 	{
 		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			offset=MCAtom[type].offset+(NumbTimes*atom0);   
+			gatom=offset/NumbTimes;    
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
@@ -585,12 +585,12 @@ void MCMolecularMoveNaive(int type)
 	MCTransChunkAcp = 0;
 
 #pragma omp parallel for reduction(+: MCTransChunkTot,MCTransChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int it = 1; it < NumbTimes; it += 2)
+	for (int it=1;it<NumbTimes;it+=2)
 	{
 		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			offset=MCAtom[type].offset+(NumbTimes*atom0);   
+			gatom=offset/NumbTimes;    
  			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
@@ -614,32 +614,18 @@ void MCTransLinStepPIGS(int it1, int offset, int gatom, int type, double step, d
 	int t1 = offset + it1;
 	int t2 = offset + it2;
 
-	for (int id=0; id<NDIM; id++)
-	{
-		newcoords[id][t1]  = MCCoords[id][t1];
-	}
-	newcoords[AXIS_X][t1] += step*(rand1-0.5);
-	newcoords[AXIS_Y][t1] += step*(rand2-0.5);
-	newcoords[AXIS_Z][t1] += step*(rand3-0.5);
+	for (int id=0;id<NDIM;id++) newcoords[id][t1]=MCCoords[id][t1];
+	newcoords[AXIS_X][t1]+=step*(rand1-0.5);
+	newcoords[AXIS_Y][t1]+=step*(rand2-0.5);
+	newcoords[AXIS_Z][t1]+=step*(rand3-0.5);
 
-	double dens_old;
-	dens_old=GetTransDensityPIGS(it1, t0, t1, t2, mclambda, MCCoords);
-
-	if (fabs(dens_old)<RZERO) dens_old = 0.0;
-
-	double pot_old=PotEnergy(gatom,MCCoords,it1);
-
-	double dens_new;
-	dens_new=GetTransDensityPIGS(it1, t0, t1, t2, mclambda, newcoords);
-
-	if (fabs(dens_new)<RZERO) dens_new = 0.0;
-
-	double pot_new=PotEnergy(gatom,newcoords,it1);
+	double dens_old=GetTransDensityPIGS(it1,t0,t1,t2,mclambda,MCCoords);
+	double pot_old=PotEnergyPIGS(gatom,MCCoords,it1);
+	double dens_new=GetTransDensityPIGS(it1,t0,t1,t2,mclambda,newcoords);
+	double pot_new=PotEnergyPIGS(gatom,newcoords,it1);
      
 	double rd;
-
-	if (dens_old>RZERO)
-	rd = dens_new/dens_old;
+	if (dens_old>RZERO) rd=dens_new/dens_old;
 	else rd = 1.0;
 	rd *= exp(-MCTau*(pot_new-pot_old));
 
@@ -648,40 +634,36 @@ void MCTransLinStepPIGS(int it1, int offset, int gatom, int type, double step, d
 	else if (rd>rand4) Accepted = true;
 
 	MCTransChunkTot +=1.0;
-      
 	if (Accepted)
 	{
 		MCTransChunkAcp +=1.0;
-		for (int id=0;id<NDIM;id++)
-		{
-			MCCoords[id][t1]=newcoords[id][t1];
-		}
+		for (int id=0;id<NDIM;id++) MCCoords[id][t1]=newcoords[id][t1];
 	}	      
 }
 
-double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, double **newcoords)
+double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, double **pos)
 {
 	double dr2, dens;
 	double dr[NDIM];
 	
-	double sigma=4.0*mclambda*MCTau;
-	if (it1 == 0)
+	//double sigma=4.0*mclambda*MCTau;
+	double sigma=2.0*MCTau;
+	if (it1==0)
 	{
 		dr2=0.0;
-		for (int id=0; id<NDIM; id++)
+		for (int id=0;id<NDIM;id++)
 		{
-			dr[id]=(newcoords[id][t1]-MCCoords[id][t2]);
+			dr[id]=(pos[id][t1]-MCCoords[id][t2]);
 			dr2+=(dr[id]*dr[id]);
 		}
-		 
 		dens=Gauss(dr2,sigma);
 	}
-	else if (it1 == (NumbRotTimes - 1))
+	else if (it1==(NumbRotTimes-1))
 	{
 		dr2=0.0;
-		for (int id=0; id<NDIM; id++)
+		for (int id=0;id<NDIM;id++)
 		{
-			dr[id]=(MCCoords[id][t0]-newcoords[id][t1]);
+			dr[id]=(MCCoords[id][t0]-pos[id][t1]);
 			dr2+=(dr[id]*dr[id]);
 		}
 		dens=Gauss(dr2,sigma);
@@ -689,21 +671,19 @@ double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, dou
 	else
 	{
 		dr2=0.0;
-		for (int id=0; id<NDIM; id++)
+		for (int id=0;id<NDIM;id++)
 		{
-			dr[id]=(MCCoords[id][t0]-newcoords[id][t1]);
+			dr[id]=(MCCoords[id][t0]-pos[id][t1]);
 			dr2+=(dr[id]*dr[id]);
 		}
-		 
 		dens=Gauss(dr2,sigma);
 
 		dr2=0.0;
 		for (int id=0; id<NDIM; id++)
 		{
-			dr[id]=(newcoords[id][t1]-MCCoords[id][t2]);
+			dr[id]=(pos[id][t1]-MCCoords[id][t2]);
 			dr2+=(dr[id]*dr[id]);
 		}
-		 
 		dens*=Gauss(dr2,sigma);
 	}
 	return dens;	
@@ -5347,9 +5327,9 @@ void CodeExit(int istop)
 
 double PotEnergyPIGS(int atom0, double **pos, int it)   
 {
-	int type0   = MCType[atom0];
-	int offset0 = NumbTimes*atom0;
-	int t0 = offset0 + it;
+	int type0=MCType[atom0];
+	int offset0=NumbTimes*atom0;
+	int t0=offset0+it;
 
 	double dr[NDIM];
 	double spot = 0.0;
@@ -5405,16 +5385,13 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 	}
 
 #ifdef HARMONIC
-    for (int id = 0; id < NDIM; id++)
-	{	
-        spot += 0.5*pos[id][t0]*pos[id][t0];
-    }
+    for (int id=0;id<NDIM;id++) spot+=0.5*pos[id][t0]*pos[id][t0];
 #endif
 
     double weight = 1.0;
 #ifndef PIMCTYPE
-    if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+    if ((it==0) || (it==(NumbTimes-1))) weight=0.5;
 #endif
-    spot = weight*spot;
+    spot=weight*spot;
    	return spot;
 }

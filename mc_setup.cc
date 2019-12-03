@@ -413,29 +413,16 @@ void MCInit(void)  // only undimensional parameters in this function
 	MCBeta   =  1.0/Temperature;
 #ifdef PIMCTYPE
 	MCTau    =  MCBeta/(double)NumbTimes;
-#endif
-//
-#ifdef PIGSTYPE
+#else
   	MCTau    =  MCBeta/((double)NumbTimes-1.0);
 #endif
 //
-#ifdef PIGSENTTYPE
-  	MCTau    =  MCBeta/((double)NumbTimes-1.0);
-#endif
-
   	if (ROTATION)
 	{
 #ifdef PIMCTYPE
     	MCRotTau =  MCBeta/(double)NumbRotTimes;
-#endif
-//
-#ifdef PIGSTYPE
+#else
     	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
-#endif
-//
-#ifdef PIGSENTTYPE
-    	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
-#endif
 	}
 
 	RotRatio  = 1;  // div_t quot - it's important for the area estimator
