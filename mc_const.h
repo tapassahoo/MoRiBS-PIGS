@@ -83,5 +83,6 @@ const char H2O[]     = "H2O";
 const char SO2[]     = "SO2";
 const char HCOOCH3[] = "HCOOCH3";
 const char HF[]      = "HF";
+const char CH3F[]      = "CH3F";
 
 #endif  //MC_const.h

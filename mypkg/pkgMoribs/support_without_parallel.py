@@ -8,6 +8,7 @@ from numpy import *
 import math
 import inputFile
 import mypkg.pkgAsymrho.support_asymrho as asym
+import mypkg.pkgSymrho.support_symrho as sym
 
 def error_message(number):
 	if(number<=1):
@@ -613,12 +614,17 @@ def fmtAverageEntropyRT(variable):
 	output    = '{0:5}{1:10}{2:10}{3:10}{4:10}{5:30}'.format('P', variable+'(1/K)', 'Purity', 'Entropy', 'ErrorPurity', '  ErrorEntropy')
 	return output
 
-def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove):
+def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
 	replace("temperature_input", str(temperature),            "qmc_run.input", "qmc2.input")
 	replace("numbbeads_input", str(numbbeads),                "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+	if (molecule_rot == "CH3F"):
+		replace("potread", "pesch3fph2-180",   "qmc2.input", "qmc3.input")
+	elif (molecule_rot == "H2O"):
+		replace("potread", "nopot",            "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	if TransMove:
@@ -631,6 +637,10 @@ def GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecule
 		replace("cal_type_input", "ROTATION", "qmc2.input", "qmc3.input")
 	else:
 		replace("cal_type_input", "#ROTATION", "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if RotMove:
+		replace("den_path_input", path_Density, "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	if Restart1:
@@ -834,12 +844,19 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 					numbbeads2 = int(numbbeads)
 				else:
 					numbbeads2 = int(numbbeads-1)
-				dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature, numbbeads2, iodevn, jmax)
+				if (molecule_rot == "H2O"):	
+					dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature, numbbeads2, iodevn, jmax)
+				if (molecule_rot == "CH3F"):	
+					dir_dens =  "/scratch/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
 			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature))+"t"+str(numbbeads2)
 			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
-			call(["cp", dir_dens+file_rotdens+".rho", dir_run_input_pimc+file_rotdens_mod+".rho"])
-			call(["cp", dir_dens+file_rotdens+".eng", dir_run_input_pimc+file_rotdens_mod+".eng"])
-			call(["cp", dir_dens+file_rotdens+".esq", dir_run_input_pimc+file_rotdens_mod+".esq"])
+			#call(["cp", dir_dens+file_rotdens+".rho", dir_run_input_pimc+file_rotdens_mod+".rho"])
+			#call(["cp", dir_dens+file_rotdens+".eng", dir_run_input_pimc+file_rotdens_mod+".eng"])
+			#call(["cp", dir_dens+file_rotdens+".esq", dir_run_input_pimc+file_rotdens_mod+".esq"])
+			call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
+			call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
+			call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
+			path_Density = dir_dens+"/"
 
 		if (crystal == True):
 			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
@@ -877,11 +894,14 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 						call(["mv", filemv, filemv+"_old"])
 
 		os.chdir(src_dir)
-	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove)
+	GetInput(temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density)
 
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
 	folder_run_path = dir_run_job + folder_run 
+
+	if (molecule_rot == "CH3F"):
+		call(["cp", "pesch3fph2-180.pot", dir_run_input_pimc])
 	
 	#job submission
 	fname         = 'job-for-P'+str(numbbeads)
@@ -955,8 +975,8 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (numbblocks <= 100):
-		walltime   = "00-00:30"
+	if (numbblocks <= 1000):
+		walltime   = "00-03:00"
 		thread     = 1
 	else:
 		if (numbbeads >= 70):
@@ -977,6 +997,12 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	input_file     = dir_run_input_pimc+"/qmcbeads"+str(value)+".input"
 	exe_file       = dir_run_input_pimc+"/pimc"
 	qmcinp         = "qmcbeads"+str(value)+".input"
+
+	if (molecule == "CH3F"):
+		potcp="cp "+dir_run_input_pimc+"/pesch3fph2-180.pot "+folder_run_path
+	else:
+		potcp=""
+
 	if (status_cagepot == True):
 		cagepot_file   = dir_run_input_pimc+"/hfc60.pot"
 		cagepot_cp     = "cp "+cagepot_file+" "+folder_run_path
@@ -1030,6 +1056,7 @@ export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
 %s
+%s
 mv %s %s
 mv %s %s
 mv %s %s
@@ -1040,7 +1067,7 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_cp, input_file, folder_run_path, file_rotdens, folder_run_path, "LatticeConfig.xyz", folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_cp, potcp, input_file, folder_run_path, file_rotdens, folder_run_path, "LatticeConfig.xyz", folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
 
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s

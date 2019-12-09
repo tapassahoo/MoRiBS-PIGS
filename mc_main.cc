@@ -407,7 +407,6 @@ ParamsPotential();
 			}
 		}   // END sum over atoms
 		cout<<" Caleng value "<<spot<<endl;
-		exit(100);
 #endif
 
 //--------------------------------------------------------

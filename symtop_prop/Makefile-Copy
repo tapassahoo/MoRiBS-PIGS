@@ -1,0 +1,35 @@
+#FC=ifort
+#FC=~pnroy/Dev/bin/gfortran
+
+#LDFLAGS=-L/opt/intel/mkl/lib/intel64 -llapack
+
+HOST=$(shell hostname)
+ifeq ($(HOST), gra-login3)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), gra-login2)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), gra-login1)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), feynman)
+	FC=gfortran
+	LDFLAGS=-llapack
+endif
+ifeq ($(HOST), nlogn)
+	FC=gfortran
+	LDFLAGS=-llapack
+endif
+
+symrho.x:	symrho.o
+		$(FC) -o $@ symrho.o 
+
+.f.o:
+	${FC} -O3 -c $<
+
+clean:
+	rm -f *.o symrho.x

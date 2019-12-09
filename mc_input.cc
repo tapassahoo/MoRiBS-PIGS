@@ -82,6 +82,7 @@ string OutputDir;
 string FNPrefix;
 
 string MCFileName;     // mc output file name (no extension)
+string PathToDensity;
  
 void IOReadParams(const char in_file[],int & mc_status)
 {
@@ -290,6 +291,7 @@ void IOReadParams(const char in_file[],int & mc_status)
 //      	inf>>_srot_dens;   //   [3] the file name with the rotational density
 
         	inf>> NumbRotTimes;//   [3]  number of rotational time slices     
+        	inf>> PathToDensity;//   [4]  Path of rotational desity matrics .rho, .eng, .esq     
  
         	ROTATION = true;
 

@@ -26,7 +26,7 @@ TEMPERATURE   temperature_input       #  Kelvin, for a PIGS simulation, this set
 #ATOM      H2  5   BOSE     0.14     3    parah2   PRIMITIVE     #    
 #TRANSLATION
 #LINEARROTORS  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   nopot    PRIMITIVE   #  
-type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   nopot    PRIMITIVE   #  
+type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   potread    PRIMITIVE   #  
 #PLANAR  H2 1   BOLTZMANN    0.08  3   h2n2ogr    PRIMITIVE   #  
 # comment molecule above for pure clusters
 
@@ -35,7 +35,7 @@ type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  l
 # parameters for rotational degrees of freedom of molecules, one line per molecule
 #         [type]  [MC steps for orient df]  [Number of time slices for rotations]
 
-cal_type_input   molecule_input    dstep_input   numbbeads_input 
+cal_type_input   molecule_input    dstep_input   numbbeads_input   den_path_input
 ROTDENSI  0  -1  0.0  27.877  14.512  9.285  1
 
 # parameters for the worm algorithm (C is redefined) 

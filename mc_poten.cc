@@ -3,6 +3,7 @@
 #include "mc_input.h"
 #include "mc_utils.h"
 #include "mc_setup.h"
+#include "mc_const.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -102,6 +103,7 @@ void InitPotentials(void)
 
   	for (int atype=0;atype<NumbTypes;atype++)
 	{
+		string stype = MCAtom[atype].type;
 		if (MCAtom[atype].fpot != PotentialRead)
 		{
    			if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)) 
@@ -125,13 +127,15 @@ void InitPotentials(void)
 	   				init_pot3D(atype);
 	    		// 	potred_(vtable);
 	  			}
-
+				if(MCAtom[atype].molecule == 2 && stype == CH3F)
+	  			{
+	   				init_pot3D(atype);
+	  			}
     		}
    			else                                                  // atoms
 			{
       			init_pot1D(atype);
 			}
-			cout<<"TS POT"<<endl;
 		}
 
 #ifdef CAGEPOTREAD
@@ -324,7 +328,7 @@ void init_pot3D(int atype) // read 3D potential from the file
 
     cout<<"potential in "<<fname<<endl;
 
-//  potred_(filnam,vtable);
+  //potred_(filnam,vtable);
 
     ifstream fid(fname.c_str(),ios::in);
 
@@ -546,11 +550,16 @@ void init_rot3D(int type)
    string fden = fname;
    string feng = fname;
    string fesq = fname;
+   string pathr = PathToDensity;
+   cout<<pathr.c_str()<<endl;
 
    fden += EXT_RHO;
    feng += IO_EXT_ENG;
    fesq += EXT_ESQ;
 
+	fden = pathr+fden;
+	feng = pathr+feng;
+	fesq = pathr+fesq;
    cout<<fden<<" "<<feng<<" "<<fesq<<endl;
 
    ifstream fid(fden.c_str(),ios::in);

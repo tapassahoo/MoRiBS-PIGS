@@ -3397,6 +3397,31 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 			}
 		}   // END sum over atoms
 	}
+
+	if ((MCAtom[type0].numb == 1) && (MCAtom[type0].molecule == 2))
+	{
+		int t0=offset0+it;
+		double RCOM[3];
+		double Rpt[3];
+		double vpot3d;
+		double radret;
+		double theret;
+		double chiret;
+		double hatx[3];
+		double haty[3];
+		double hatz[3];
+		int    ivcord = 0;
+		for (int id=0;id<NDIM;id++)
+		{
+			RCOM[id] = MCCoords[id][t0];
+		}
+		Rpt[AXIS_X]  = 0.0;
+		Rpt[AXIS_Y]  = 0.0;
+		Rpt[AXIS_Z]  = 1.0;
+
+		vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+		spot=vpot3d;
+	}
 #ifdef ONSITE
 	if (MCAtom[type0].numb == 1) 
 	{

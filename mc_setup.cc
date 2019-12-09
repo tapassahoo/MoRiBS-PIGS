@@ -368,16 +368,21 @@ void MCInitParams(void)
 			mass =(2.0*MASS_H1 + MASS_O16);
 		}
 		else
+		if (stype == CH3F)
+		{	
+		    mass=(MASS_C12+3.0*MASS_H1+MASS_F19);
+		}	
+		else 
 		if  (stype == SO2)
 			mass =(2.0*MASS_O16 + MASS_S32);
 		else
 		if  (stype == HCOOCH3)
 		    mass =(4.0*MASS_H1 + 2.0*MASS_O16 + 2.0*MASS_C12);
 		else 
-		if  (stype == HF)
+		if (stype == HF)
 		    mass =(MASS_H1 + MASS_F19);
 		else 
-		    nrerror(_proc_,"Unknown atom/molecule type");
+		nrerror(_proc_,"Unknown atom/molecule type");
 
       	MCAtom[atype].mass = mass;
       	MCAtom[atype].brot = brot;
@@ -423,6 +428,7 @@ void MCInit(void)  // only undimensional parameters in this function
     	MCRotTau =  MCBeta/(double)NumbRotTimes;
 #else
     	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
+#endif
 	}
 
 	RotRatio  = 1;  // div_t quot - it's important for the area estimator

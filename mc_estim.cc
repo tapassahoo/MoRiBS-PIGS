@@ -696,6 +696,38 @@ double GetPotEnergyPIGS(void)
         	}// loop over atoms1 
        	}// loop over atoms0 
     }
+
+    if ((MCAtom[IMTYPE].molecule==2) && (stype=="CH3F")) 
+    {
+		spot=0.0;
+		int offset0=0;
+		int tm;
+		double RCOM[3];
+		double Rpt[3];
+		double Eulang[3];
+		double vpot3d;
+		double radret;
+		double theret;
+		double chiret;
+		double hatx[3];
+		double haty[3];
+		double hatz[3];
+		int    ivcord = 0;
+		tm  = offset0 + it/RotRatio;
+		for (int id=0;id<NDIM;id++)
+		{
+			RCOM[id] = MCCoords[id][tm];
+		}
+		Rpt[AXIS_X]  = 0.0;
+		Rpt[AXIS_Y]  = 0.0;
+		Rpt[AXIS_Z]  = 1.0;
+		Eulang[PHI]=MCAngles[PHI][tm];
+		Eulang[CTH]=acos(MCAngles[CTH][tm]);
+		Eulang[CHI]=MCAngles[CHI][tm];
+		vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+		spot += vpot3d;
+	}
+
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
@@ -1399,7 +1431,7 @@ double GetTotalEnergy(void)
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
 	double Eulang0[NDIM],Eulang1[NDIM];
-	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) )
+	if ((MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) && (stype=="H2O"))
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
@@ -1438,6 +1470,43 @@ double GetTotalEnergy(void)
         	}// loop over atoms (molecules)
         }// loop over atoms (molecules)
     }
+
+    if ((MCAtom[IMTYPE].molecule==2) && (stype=="CH3F")) 
+    {
+		spot=0.0;
+		int offset0=0;
+		int tm;
+		double RCOM[3];
+		double Rpt[3];
+		double Eulang[3];
+		double vpot3d;
+		double radret;
+		double theret;
+		double chiret;
+		double hatx[3];
+		double haty[3];
+		double hatz[3];
+		int    ivcord = 0;
+		double spot_pair=0.0;
+		for (int it=0;it<NumbTimes;it+=(NumbTimes-1))
+		{
+			tm  = offset0 + it/RotRatio;
+			for (int id=0;id<NDIM;id++)
+			{
+				RCOM[id] = MCCoords[id][tm];
+			}
+			Rpt[AXIS_X]  = 0.0;
+			Rpt[AXIS_Y]  = 0.0;
+			Rpt[AXIS_Z]  = 1.0;
+			Eulang[PHI]=MCAngles[PHI][tm];
+			Eulang[CTH]=acos(MCAngles[CTH][tm]);
+			Eulang[CHI]=MCAngles[CHI][tm];
+			vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+			spot_pair += vpot3d;
+		}
+		spot += spot_pair;
+	}
+
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
