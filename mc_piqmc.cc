@@ -3345,6 +3345,9 @@ double PotRotE3D(int atom0, double *Eulang, int it)
 double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is PotRotE3D
 {
 	int type0   =  MCType[atom0];
+	string stype = MCAtom[type0].type;
+	int offset0 = atom0*NumbRotTimes;
+	double spot = 0.0;
 
 #ifdef DEBUG_PIMC
 	const char *_proc_=__func__;         //  PotRotEnergy()
@@ -3356,10 +3359,6 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 	nrerror(_proc_,"Too many non-linear rotors");
 #endif
 
-	double spot = 0.0;
-
-	int offset0 = atom0*NumbRotTimes;
-
 	if (MCAtom[type0].numb > 1)
 	{
 		for (int atom1=0; atom1<NumbAtoms; atom1++)
@@ -3368,14 +3367,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 			int offset1 = atom1*NumbRotTimes;
 			int type1   = MCType[atom1];
 
-#ifdef DEBUG_PIMC
-			//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
-			//nrerror(_proc_,"More then one molecular impurity type");
-			if(MCAtom[type1].molecule == 1)
-			nrerror(_proc_,"No support of non-linear-linear interaction yet");
-#endif
-
-			if (MCType[atom1] == IMTYPE)
+			if ((MCType[atom1] == IMTYPE) && (stype == H2O))
 			{
 				int t0 = offset0 + it;
 				int t1 = offset1 + it;
@@ -3398,7 +3390,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 		}   // END sum over atoms
 	}
 
-	if ((MCAtom[type0].numb == 1) && (MCAtom[type0].molecule == 2))
+	if (stype == CH3F)
 	{
 		int t0=offset0+it;
 		double RCOM[3];
@@ -3415,12 +3407,14 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 		{
 			RCOM[id] = MCCoords[id][t0];
 		}
-		Rpt[AXIS_X]  = 0.0;
-		Rpt[AXIS_Y]  = 0.0;
-		Rpt[AXIS_Z]  = 1.0;
+		Rpt[0] = 0.0;
+		Rpt[1] = 0.0;
+		Rpt[2] = 0.0;
 
 		vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
 		spot=vpot3d;
+		cout<<spot<<endl;
+		exit(111);
 	}
 #ifdef ONSITE
 	if (MCAtom[type0].numb == 1) 

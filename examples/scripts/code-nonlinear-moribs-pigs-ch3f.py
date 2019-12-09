@@ -39,7 +39,7 @@ for i in range(1):
 	#var = "tau"  # for fixed beta
 	#param = 0.1 # for fixed beta
 
-	rcom = 4.7+0.1*i
+	rcom = 3.7+0.1*i
 	rcom="{:3.1f}".format(rcom)
 	#field_strength = 20.0 # Unit inverse of Kelvin
 	nMolecule = 1
