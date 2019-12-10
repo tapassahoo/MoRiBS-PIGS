@@ -105,8 +105,6 @@ else:
 temperature = 1.0 / beta
 temperature = "%8.6f" % temperature
 
-# RUNDIR              = "work"
-RUNDIR = "scratch"
 extra_file_name = ""
 script_dir = os.getcwd()
 user_name = os.getlogin()
@@ -126,10 +124,10 @@ if TypeCal == "S":
 
 dir_name = sym.GetDirNameSubmission(rotor, temperature, numbbeads, iodevn, jmax)
 
-if RUNDIR == "scratch":
-    dir_job = "/scratch/" + user_name + "/"
 if NameOfServer == "graham":
     dir_job = "/scratch/" + user_name + "/" + dir_store + dir_name
+else:
+    dir_job = "/work/" + user_name + "/" + dir_store + dir_name
 
 if NameOfServer == "graham":
     dir_input = "/scratch/" + user_name + "/" + dir_store + dir_name
@@ -146,23 +144,6 @@ execution_file = src_dir_exe + "symrho.x"
 call(["cp", execution_file, dir_input])
 
 if TypeCal == "S":
-    sym.Submission(
-        RUNDIR,
-        dir_job,
-        script_dir,
-        execution_file,
-        numbbeads,
-        temperature,
-        rotor,
-        dir_input,
-        dir_output,
-        NameOfPartition,
-        user_name,
-        dir_store,
-        dir_name,
-        iodevn,
-        jmax,
-        NameOfServer,
-    )
+    sym.Submission( dir_job, script_dir, execution_file, numbbeads, temperature, rotor, dir_input, dir_output, NameOfPartition, user_name, dir_store, dir_name, iodevn, jmax, NameOfServer)
 else:
     sym.GetPackRotDens(src_dir_exe, dir_output, script_dir, rotor, temperature, numbbeads)

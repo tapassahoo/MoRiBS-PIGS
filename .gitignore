@@ -49,3 +49,8 @@ examples/scripts/fit.log
 examples/scripts/pesch3fph2-180.pot
 mypkg/pkgAsymrho/__pycache__/__init__.cpython-38.pyc
 mypkg/pkgAsymrho/__pycache__/support_asymrho.cpython-38.pyc
+mypkg/pkgAsymrho/__pycache__/__init__.cpython-36.pyc
+mypkg/pkgAsymrho/__pycache__/support_asymrho.cpython-36.pyc
+mypkg/pkgSymrho/__pycache__/__init__.cpython-36.pyc
+mypkg/pkgSymrho/__pycache__/support_symrho.cpython-36.pyc
+symtop_prop/symrho.x

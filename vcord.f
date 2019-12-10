@@ -45,7 +45,6 @@ c ... obtain WFF orientation directly from rotation
 
 c ... calculate thewff and chiwff
       thewff=dotang(hatz,RH2COM)
-	  write(6,*)thewff
 c     write(6,*)thewff*180d0/Pi
 c     write(6,*)(hatx(i),i=1,3),(rh2com(i),i=1,3),dotprd(RH2COM,hatx)
       if(abs(dotprd(RH2COM,hatx)).lt.small) then

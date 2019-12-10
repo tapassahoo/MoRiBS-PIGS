@@ -142,8 +142,8 @@ status = args.job
 #
 # Request to change
 # If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham""
-# NameOfServer		  = "nlogn"
-NameOfServer = "graham"
+NameOfServer  = "nlogn"
+#NameOfServer = "graham"
 NameOfPartition = args.partition
 #
 TypeCal = args.cal

@@ -837,22 +837,22 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
 		else:
-			if (NameOfServer == "graham"):
-				iodevn   = spin_isomer
-				jmax = 70
-				if (TypeCal == 'PIMC'):
-					numbbeads2 = int(numbbeads)
-				else:
-					numbbeads2 = int(numbbeads-1)
-				if (molecule_rot == "H2O"):	
+			iodevn   = spin_isomer
+			jmax = 70
+			if (TypeCal == 'PIMC'):
+				numbbeads2 = int(numbbeads)
+			else:
+				numbbeads2 = int(numbbeads-1)
+			if (molecule_rot == "H2O"):	
+				if (NameOfServer == "graham"):
 					dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature, numbbeads2, iodevn, jmax)
-				if (molecule_rot == "CH3F"):	
+			if (molecule_rot == "CH3F"):	
+				if (NameOfServer == "nlogn"):
+					dir_dens =  "/work/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
+				if (NameOfServer == "graham"):
 					dir_dens =  "/scratch/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
-			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature))+"t"+str(numbbeads2)
+			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature1))+"t"+str(numbbeads2)
 			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
-			#call(["cp", dir_dens+file_rotdens+".rho", dir_run_input_pimc+file_rotdens_mod+".rho"])
-			#call(["cp", dir_dens+file_rotdens+".eng", dir_run_input_pimc+file_rotdens_mod+".eng"])
-			#call(["cp", dir_dens+file_rotdens+".esq", dir_run_input_pimc+file_rotdens_mod+".esq"])
 			call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
 			call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
 			call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
@@ -1013,7 +1013,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 		CommandForMove = "mv "+folder_run_path+" "+dir_output
 	if (RUNDIR == "work"):
 		CommandForMove = " "
-	CommandForMove = " " #for graham
+	#CommandForMove = " " #for graham
 
 	if not PPA1:
 		CommandForPPA = "#"
@@ -1049,8 +1049,8 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-#SBATCH --account=rrg-pnroy
-#SBATCH --mem-per-cpu=1024mb
+###SBATCH --account=rrg-pnroy
+#SBATCH --mem-per-cpu=4096mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s

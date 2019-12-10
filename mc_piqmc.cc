@@ -3407,14 +3407,12 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 		{
 			RCOM[id] = MCCoords[id][t0];
 		}
-		Rpt[0] = 0.0;
-		Rpt[1] = 0.0;
-		Rpt[2] = 0.0;
+		Rpt[AXIS_X] = 0.0;
+		Rpt[AXIS_Y] = 0.0;
+		Rpt[AXIS_Z] = Distance;
 
 		vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
 		spot=vpot3d;
-		cout<<spot<<endl;
-		exit(111);
 	}
 #ifdef ONSITE
 	if (MCAtom[type0].numb == 1) 

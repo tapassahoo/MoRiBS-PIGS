@@ -697,7 +697,7 @@ double GetPotEnergyPIGS(void)
        	}// loop over atoms0 
     }
 
-    if ((MCAtom[IMTYPE].molecule==2) && (stype=="CH3F")) 
+    if ((MCAtom[IMTYPE].molecule==2) && (stype==CH3F)) 
     {
 		spot=0.0;
 		int offset0=0;
@@ -718,9 +718,9 @@ double GetPotEnergyPIGS(void)
 		{
 			RCOM[id] = MCCoords[id][tm];
 		}
-		Rpt[AXIS_X]  = 0.0;
-		Rpt[AXIS_Y]  = 0.0;
-		Rpt[AXIS_Z]  = 1.0;
+        Rpt[AXIS_X] = 0.0;
+        Rpt[AXIS_Y] = 0.0;
+        Rpt[AXIS_Z] = Distance;
 		Eulang[PHI]=MCAngles[PHI][tm];
 		Eulang[CTH]=acos(MCAngles[CTH][tm]);
 		Eulang[CHI]=MCAngles[CHI][tm];
@@ -1497,7 +1497,7 @@ double GetTotalEnergy(void)
 			}
 			Rpt[AXIS_X]  = 0.0;
 			Rpt[AXIS_Y]  = 0.0;
-			Rpt[AXIS_Z]  = 1.0;
+			Rpt[AXIS_Z]  = Distance;
 			Eulang[PHI]=MCAngles[PHI][tm];
 			Eulang[CTH]=acos(MCAngles[CTH][tm]);
 			Eulang[CHI]=MCAngles[CHI][tm];

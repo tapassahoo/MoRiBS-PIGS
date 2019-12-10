@@ -63,52 +63,16 @@ def GetABCconsts(rotor):
 	return abc
 
 
-def Submission(
-	RUNDIR,
-	dir_job,
-	script_dir,
-	execution_file,
-	numbbeads,
-	temperature,
-	molecule,
-	dir_input,
-	dir_output,
-	NameOfPartition,
-	user_name,
-	out_dir,
-	dir_name,
-	iodevn,
-	jmax,
-	NameOfServer,
-):
+def Submission( dir_job, script_dir, execution_file, numbbeads, temperature, molecule, dir_input, dir_output, NameOfPartition, user_name, out_dir, dir_name, iodevn, jmax, NameOfServer):
 	for theta in range(181):
-		folder_run = dir_name + "-theta" + str(theta)
-		if NameOfServer == "graham":
-			folder_run_path = dir_job + "/" + folder_run
-		else:
-			folder_run_path = dir_job + folder_run
+		folder_run = "theta" + str(theta)
+		folder_run_path = dir_job + "/" + folder_run
 		fname = dir_input + "/job-for-theta" + str(theta)
 		logfile = "t" + str(theta) + "P" + str(numbbeads) + "T" + str(temperature)
+		print(theta)
 
 		fwrite = open(fname, "w")
-		fwrite.write(
-			jobstring_sbatch(
-				logfile,
-				folder_run_path,
-				dir_input,
-				dir_output,
-				temperature,
-				numbbeads,
-				iodevn,
-				theta,
-				molecule,
-				jmax,
-				RUNDIR,
-				folder_run,
-				NameOfServer,
-			)
-		)
-
+		fwrite.write(jobstring(logfile,folder_run_path,dir_input, dir_output, temperature, numbbeads, iodevn, theta, molecule, jmax, folder_run, NameOfServer))
 		fwrite.close()
 
 		os.chdir(dir_input)
@@ -120,21 +84,7 @@ def Submission(
 		os.chdir(script_dir)
 
 
-def jobstring_sbatch(
-	logfile,
-	folder_run_path,
-	dir_input,
-	dir_output,
-	temperature,
-	numbbeads,
-	iodevn,
-	theta,
-	molecule,
-	jmax,
-	RUNDIR,
-	folder_run,
-	NameOfServer,
-):
+def jobstring(logfile,folder_run_path,dir_input,dir_output,temperature,numbbeads,iodevn,theta,molecule,jmax,folder_run,NameOfServer):
 	"""
 	This function creats jobstring for #SBATCH script
 	"""
@@ -144,41 +94,19 @@ def jobstring_sbatch(
 	aconst = GetABCconsts(molecule)["aconst"]
 	bconst = GetABCconsts(molecule)["bconst"]
 
-	command_execution = (
-		"./symrho.x  "
-		+ str(temperature)
-		+ " "
-		+ str(numbbeads)
-		+ " "
-		+ str(iodevn)
-		+ " "
-		+ str(theta)
-		+ " "
-		+ str(theta)
-		+ " "
-		+ str(aconst)
-		+ " "
-		+ str(bconst)
-		+ " "
-		+ str(jmax)
-	)
+	command_execution = ("./symrho.x  " + str(temperature) + " " + str(numbbeads) + " " + str(iodevn) + " " + str(theta) + " " + str(theta) + " " + str(aconst) + " " + str(bconst) + " " + str(jmax))
 
 	mvfiles = "mv " + dir_output + "/" + folder_run + "/* " + dir_input
 	rmfolder = "rm -rf " + dir_output + "/" + folder_run
 	if NameOfServer == "graham":
-		CommandForMove = " "
 		account = "#SBATCH --account=rrg-pnroy"
 	else:
-		if RUNDIR == "scratch":
-			CommandForMove = "mv " + folder_run_path + " " + dir_output
-		if RUNDIR == "work":
-			CommandForMove = " "
 		account = ""
 
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
-#SBATCH --time=0-00:30
+#SBATCH --time=0-03:00
 %s
 #SBATCH --mem-per-cpu=512mb
 #SBATCH --cpus-per-task=1
@@ -190,24 +118,8 @@ cp %s %s
 %s
 %s
 %s
-%s
-""" % (
-		logfile,
-		logpath,
-		account,
-		folder_run_path,
-		folder_run_path,
-		folder_run_path,
-		exe_file,
-		folder_run_path,
-		command_execution,
-		CommandForMove,
-		mvfiles,
-		rmfolder,
-	)
-
+""" % (logfile,logpath,account,folder_run_path,folder_run_path,folder_run_path,exe_file,folder_run_path,command_execution,mvfiles,rmfolder)
 	return job_string
-
 
 def GetPackRotDens(src_dir_exe, dir_output, script_dir, rotor, temperature, numbbeads):
 	cmd_cp = "cp " + src_dir_exe + "*.x " + dir_output
