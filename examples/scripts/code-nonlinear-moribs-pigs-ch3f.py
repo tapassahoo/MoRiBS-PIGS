@@ -33,21 +33,21 @@ for i in range(1):
 	rotor = "CH3F"
 	SpinIsomer = 1
 
-	var = "beta" # for fixed tau
-	param = 0.001 # for fixed tau
+	#var = "beta" # for fixed tau
+	#param = 0.001 # for fixed tau
 
-	#var = "tau"  # for fixed beta
-	#param = 0.1 # for fixed beta
+	var = "tau"  # for fixed beta
+	param = 0.1 # for fixed beta
 
 	rcom = 3.7+0.1*i
 	rcom="{:3.1f}".format(rcom)
 	#field_strength = 20.0 # Unit inverse of Kelvin
 	nMolecule = 1
-	nblocks = 1000
-	npass = 100
+	nblocks = 200000
+	npass = 200
 
 	if simType1 == "analysis":
-		cmd1 = "--preskip 0"
+		cmd1 = "--preskip 50000"
 	else:
 		cmd1 = ""
 

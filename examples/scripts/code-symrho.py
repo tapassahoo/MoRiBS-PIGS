@@ -11,12 +11,11 @@ file_sim = module_path + "script_submission_symrho.py"
 # Informations about the system
 simType = "A"
 rotor = "CH3F"
-param = "tau"
-value = 0.001
-#param = "beta"
-#value = 0.025
-nbeads = [4, 6, 8, 10, 12, 14, 16, 18, 20]#, 24, 30, 34, 40, 44, 50, 60, 70, 80, 90, 100]
-#nbeads = [20]
+#param = "tau"
+#value = 0.001
+param = "beta"
+value = 0.1
+nbeads = [10]
 Jmax = 70
 spin = 3
 
