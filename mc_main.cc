@@ -870,8 +870,10 @@ void PIMCPass(int type,int time)
 		MCMolecularMoveGauss(type);
 #endif
 #ifdef PIGSTYPE
-		MCMolecularMoveNaive(type);
-//		MCBisectionMovePIGS(type,time);
+		if (time == 0)
+		MCMolecularMovePIGS(type);        
+		MCBisectionMovePIGS(type,time);
+		//MCMolecularMoveNaive(type);
 #endif
 #ifdef PIMCTYPE
 		if (time == 0)

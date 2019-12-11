@@ -4,6 +4,7 @@
 #include "omprng.h"
 
 void MCMolecularMove(int);
+void MCMolecularMovePIGS(int);
 void MCMolecularMoveNaive(int);
 void MCTransLinStepPIGS(int,int,int,int,double,double,double,double,double,double, double &,double &);
 double GetTransDensityPIGS(int, int, int, int, double,double **);
@@ -44,6 +45,7 @@ void MCBisectionMoveExchange(int,int);
 
 double PotEnergy(int,double **);
 double PotEnergy(int,double **,int);
+double PotEnergyPIGS(int,double **);
 double PotEnergyPIGS(int,double **,int);
 
 double PotRotEnergy(int,double **,int it);   

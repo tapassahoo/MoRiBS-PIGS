@@ -140,10 +140,11 @@ RotMove = args.ROTMOVE
 #
 status = args.job
 #
-# Request to change
-# If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham""
-NameOfServer  = "nlogn"
-#NameOfServer = "graham"
+myhost = os.uname()[1]
+if (myhost == "gra-login1") or (myhost == "gra-login2") or (myhost == "gra-login3"):
+	NameOfServer = "graham"
+else:
+	NameOfServer = "nlogn"
 NameOfPartition = args.partition
 #
 TypeCal = args.cal

@@ -845,7 +845,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 				numbbeads2 = int(numbbeads-1)
 			if (molecule_rot == "H2O"):	
 				if (NameOfServer == "graham"):
-					dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature, numbbeads2, iodevn, jmax)
+					dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
 			if (molecule_rot == "CH3F"):	
 				if (NameOfServer == "nlogn"):
 					dir_dens =  "/work/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
@@ -853,9 +853,10 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 					dir_dens =  "/scratch/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
 			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature1))+"t"+str(numbbeads2)
 			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
-			call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
-			call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
-			call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
+			if os.path.isfile(dir_dens+file_rotdens_mod+".rho") == False:
+				call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
+				call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
+				call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
 			path_Density = dir_dens+"/"
 
 		if (crystal == True):
@@ -920,9 +921,9 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 		if RUNIN == "CPU":
 			fwrite.write(jobstring_scratch_cpu(argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, src_dir, Restart1, dir_run_job,status_cagepot, dir_output))
 		else:
-			fwrite.write(jobstring_sbatch(RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks))
+			fwrite.write(jobstring_sbatch(NameOfServer, RUNDIR, argument2,i,numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks))
 	else: 
-		fwrite.write(jobstring_sbatch(RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks))
+		fwrite.write(jobstring_sbatch(NameOfServer, RUNDIR, argument2, i, numbmolecules, folder_run_path, molecule_rot, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks))
 
 	fwrite.close()
 	call(["mv", fname, dir_run_input_pimc])
@@ -971,21 +972,28 @@ mv %s /work/tapas/linear_rotors
 """ % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks):
+def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks):
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
 	if (numbblocks <= 1000):
 		walltime   = "00-03:00"
 		thread     = 1
-	else:
-		if (numbbeads >= 70):
+		if (numbbeads >= 100):
 			thread     = 8
-		elif ((numbbeads >= 20) and (numbbeads < 70)):
+	else:
+		if (numbbeads >= 60):
+			thread     = 8
+			walltime   = "07-00:00"
+		elif ((numbbeads >= 40) and (numbbeads < 60)):
 			thread     = 4
+			walltime   = "07-00:00"
+		elif ((numbbeads >= 20) and (numbbeads < 40)):
+			thread     = 4
+			walltime   = "03-00:00"
 		else:
 			thread     = 1
-		walltime   = "07-00:00"
+			walltime   = "03-00:00"
 	
 	job_name       = file_name+str(value)
 	omp_thread     = str(thread)
@@ -1009,17 +1017,25 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 	else:
 		cagepot_cp     = ""
 
-	if (RUNDIR == "scratch"):
-		CommandForMove = "mv "+folder_run_path+" "+dir_output
-	if (RUNDIR == "work"):
-		CommandForMove = " "
-	#CommandForMove = " " #for graham
+	if NameOfServer == "graham":
+		CommandForMove = " " 
+	else:
+		if (RUNDIR == "scratch"):
+			CommandForMove = "mv "+folder_run_path+" "+dir_output
+		if (RUNDIR == "work"):
+			CommandForMove = " "
+
+	if NameOfServer == "graham":
+		account = "#SBATCH --account=rrg-pnroy"
+	else:
+		account = ""
 
 	if not PPA1:
 		CommandForPPA = "#"
 	else:
 		CommandForPPA = ""
 	file_PPA       = dir_run_input_pimc+"/PairDensity.txt"
+
 	print("")
 	print("")
 	print("")
@@ -1049,7 +1065,7 @@ def jobstring_sbatch(RUNDIR, file_name, value, thread, folder_run_path, molecule
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
 #SBATCH --time=%s
-###SBATCH --account=rrg-pnroy
+%s
 #SBATCH --mem-per-cpu=4096mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
@@ -1058,8 +1074,6 @@ mkdir -p %s
 %s
 %s
 mv %s %s
-mv %s %s
-mv %s %s
 cd %s
 cp %s qmc.input
 cp %s %s
@@ -1067,7 +1081,7 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_cp, potcp, input_file, folder_run_path, file_rotdens, folder_run_path, "LatticeConfig.xyz", folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_cp, potcp, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
 
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s

@@ -662,7 +662,7 @@ double GetPotEnergyPIGS(void)
    	int it = ((NumbRotTimes - 1)/2);
 	double spot = 0.0;
 	double Eulang0[NDIM], Eulang1[NDIM];
-	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) )
+	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) && (stype == H2O))
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
