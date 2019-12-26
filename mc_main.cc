@@ -2,8 +2,6 @@
 //         main()
 //
 
-#include <bits/stdc++.h> 
-#include <chrono> 
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -102,8 +100,8 @@ vector<double> _cdipoleX_total;
 vector<double> _cdipoleY_total;
 vector<double> _cdipoleZ_total;
 vector<double> _cdipoleXY_total;
-vector<double> _beiej;
-vector<double> _bei;
+double _beiej[4];
+double _bei[3];
 //
 double _bnm;
 double _bdm;
@@ -122,7 +120,6 @@ double _Cv_rot_total;    // rotational heat capacity, global average
 fstream _feng;      // save accumulated energy
 fstream _fdc;      // save accumulated energy
 fstream _fangins;      // save accumulated energy
-fstream _fanginsc;      // save accumulated energy
 fstream _fengins;      // save accumulated energy
 fstream _fentropy;
 fstream _fswap;
@@ -594,10 +591,6 @@ ParamsPotential();
    	//randomseed(); //set seed according to clock
 	//RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 
-	auto start = chrono::high_resolution_clock::now(); 
-  
-
-
 	//Monte Carlo simulation begins here//
    	long int blockCount = MCStartBlock;  
    	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
@@ -715,7 +708,6 @@ ParamsPotential();
                         //print the instantaneous xyz and prl info for the closed path
                     	if(PrintXYZprl)
                     	{
-#ifdef IOWRITE
 							stringstream bc;                // convert block # to string
 							bc.width(IO_BLOCKNUMB_WIDTH);
 							bc.fill('0');
@@ -723,7 +715,6 @@ ParamsPotential();
 							string fname = MCFileName + bc.str();  // file name prefix including block #
 							IOxyzAng(IOWrite,fname.c_str());
 							PrintXYZprl = 0;
-#endif
                     	}
                  	}
               	}
@@ -792,16 +783,15 @@ ParamsPotential();
 		//  CHECKPOINT: save status, rnd streams and configs ------
 	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
 
-		if (blockCount % 200 == 0)
-		{
-			stringstream bc;                // convert block # to string
-			bc.width(IO_BLOCKNUMB_WIDTH);
-			bc.fill('0');
-			bc<<blockCount;
-			string fname = MCFileName + bc.str();  // file name prefix including block #
-			IOxyzAng(IOWrite,fname.c_str());
-			PrintXYZprl = 0;
-		}
+		/*
+		stringstream bc;                // convert block # to string
+		bc.width(IO_BLOCKNUMB_WIDTH);
+		bc.fill('0');
+		bc<<blockCount;
+		string fname = MCFileName + bc.str();  // file name prefix including block #
+		IOxyzAng(IOWrite,fname.c_str());
+		PrintXYZprl = 0;
+		*/
 
 		MCStartBlock = blockCount; 
 
@@ -813,10 +803,6 @@ ParamsPotential();
 			IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
 			IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
 		}
-      
-		//string fname = MCFileName;// + IO_EXT_XYZ;
-		//IOxyzAng(IOWrite,fname.c_str());  // test output of initial config
-//PIMCRESTART ends // 
 
        	if (WORM)
        	{
@@ -845,18 +831,6 @@ ParamsPotential();
 
 	MFreeMCCounts();
 	MFreeQWCounts();
-
-    auto end = chrono::high_resolution_clock::now(); 
-  
-    // Calculating total time taken by the program. 
-    double time_taken =  
-      chrono::duration_cast<chrono::nanoseconds>(end - start).count(); 
-  
-    time_taken *= 1e-9; 
-  
-    cout << "Time taken by program is : " << fixed  
-         << time_taken << setprecision(9); 
-    cout << " sec" << endl; 
 
 	return 1; 
 }
@@ -943,9 +917,7 @@ void MCResetBlockAveragePIMC(void)
 #ifdef ORDERPARA	
 	if(MCAtom[IMTYPE].numb > 1)
 	{
-		_beiej.resize(NDIM+1);
-		_bei.resize(NDIM);
-		for (int id=0; id<(NDIM+1); id++){
+		for (int id=0; id<=NDIM; id++){
 			_beiej[id]=0.0;
 		}	
 		for (int id=0; id<NDIM; id++){
@@ -984,9 +956,7 @@ void MCResetBlockAveragePIGS(void)
 #ifdef ORDERPARA	
 	if(MCAtom[IMTYPE].numb > 1)
 	{
-		_beiej.resize(NDIM+1);
-		_bei.resize(NDIM);
-		for (int id=0; id<(NDIM+1); id++){
+		for (int id=0; id<=NDIM; id++){
 			_beiej[id]=0.0;
 		}	
 		for (int id=0; id<NDIM; id++){
@@ -1023,7 +993,7 @@ void MCResetBlockAveragePIGS(void)
 	_bCv_trans   = 0.0;
 	_bCv_rot     = 0.0;
 
-	PrintXYZprl = 1;
+	PrintXYZprl = 0;
 
 	PrintYrfl   = 1;
 	PrintXrfl   = 1;
@@ -1309,22 +1279,21 @@ void MCGetAveragePIGS(void)
 #endif		
 
 #ifdef ORDERPARA		
-		double eiej[NDIM+1];
-		double ei[NDIM];
-		for (int id=0; id<(NDIM+1); id++){
+		double eiej[4];
+		double ei[3];
+		for (int id=0; id<=NDIM; id++){
 			eiej[id]=0.0;
 		}
 		for (int id=0; id<NDIM; id++){
 			ei[id]=0.0;
 		}
 		GetOrderCorrPIGS(eiej, ei);
-		for (int id=0; id<(NDIM+1); id++){
-			_beiej[id]=eiej[id];
+		for (int id=0; id<=NDIM; id++){
+			_beiej[id]+=eiej[id];
 		}
 		for (int id=0; id<NDIM; id++){
-			_bei[id]=ei[id];
+			_bei[id]+=ei[id];
 		}
-
 #endif		
 
 #ifdef DDCORR
@@ -1465,7 +1434,7 @@ void MCGetAveragePIMC(void)
 	{
 #ifdef IOWRITE
 		double cosTheta   = 0.0;
-		double compxyz[NDIM];
+		double compxyz[3];
 		compxyz[0] = 0.0;
 		compxyz[1] = 0.0;
 		compxyz[2] = 0.0;
@@ -1488,20 +1457,20 @@ void MCGetAveragePIMC(void)
 #endif
 
 #ifdef ORDERPARA		
-		double eiej[NDIM+1];
-		double ei[NDIM];
-		for (int id=0; id<(NDIM+1); id++){
+		double eiej[4];
+		double ei[3];
+		for (int id=0; id<=NDIM; id++){
 			eiej[id]=0.0;
 		}
 		for (int id=0; id<NDIM; id++){
 			ei[id]=0.0;
 		}
 		GetOrderCorrPIMC(eiej, ei);
-		for (int id=0; id<(NDIM+1); id++){
-			_beiej[id]=eiej[id];
+		for (int id=0; id<=NDIM; id++){
+			_beiej[id]+=eiej[id];
 		}
 		for (int id=0; id<NDIM; id++){
-			_bei[id]=ei[id];
+			_bei[id]+=ei[id];
 		}
 
 #endif		
@@ -1933,7 +1902,7 @@ void SaveOrderCorr(const char fname [], double acount, long int blocknumb)
 	{
    		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
 
-		for (int id=0; id<(NDIM+1); id++){ 
+		for (int id=0; id<=NDIM; id++){ 
     		fid << setw(IO_WIDTH) << _beiej[id]/acount<< BLANK;
 		}
 		for (int id=0; id<NDIM; id++){ 

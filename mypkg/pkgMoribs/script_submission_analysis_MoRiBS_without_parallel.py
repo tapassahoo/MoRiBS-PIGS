@@ -382,7 +382,8 @@ for particleA in particleAList:
 		fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
 		fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
 		fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
-		fanalyzeCorr.write(support.fmtAverageOrientation(status, variableName))
+		fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
+		#fanalyzeCorr.write(support.fmtAverageOrientation(status, variableName))
 		fanalyzeTotalCorr = open(FileAnalysis.SaveTotalCorr, "a")
 		fanalyzeXCorr = open(FileAnalysis.SaveXCorr, "a")
 		fanalyzeYCorr = open(FileAnalysis.SaveYCorr, "a")
@@ -620,11 +621,7 @@ for particleA in particleAList:
 								numbblocks,
 							)
 						)
-						fanalyzeCorr.write(
-							support.GetAverageOrientation(
-								numbbeads, variable, final_dir_in_work, preskip, postskip
-							)
-						)
+						fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip))
 						"""
 						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 						fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))

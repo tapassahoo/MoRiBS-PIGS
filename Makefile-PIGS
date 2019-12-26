@@ -4,7 +4,8 @@
 options= -Ofast -fopenmp
 
 # CFLAGS for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DPIGSTYPE -DORDERPARA -DINSTANT
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DPIGSTYPE -DORDERPARA 
+#-DINSTANT
 #-DORDERPARA -DINSTANT
 # -DSHORTFORM -DONSITE
 #-DPROPOSED
@@ -22,9 +23,8 @@ LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran
 #-------------------------------------------------------------------------
 
 #CC=mpic++
-#CC=g++
 GCC = gcc
-CC=g++ -std=c++11
+CC=g++ 
 FC=gfortran
 #FC=/home/pnroy/Dev/bin/gfortran
 

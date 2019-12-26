@@ -62,7 +62,7 @@ void MCMolecularMove(int type)
 {
 	int numb = MCAtom[type].numb;  
 
-  	double disp[NDIM];
+  	double disp[3];
 
   	for (int atom = 0; atom < numb; atom++)
   	{
@@ -143,7 +143,7 @@ void MCMolecularMoveExchange(int type)
 #endif
 
   bool Accepted;
-  double disp[NDIM];
+  double disp[3];
 
   int numb = MCAtom[type].numb; 
  
@@ -2886,9 +2886,9 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	newcoords[CHI][t1] = chi;
 	newcoords[CTH][t1] = cost;
 
-	double Eulan0[NDIM];
-	double Eulan1[NDIM];
-	double Eulan2[NDIM];
+	double Eulan0[3];
+	double Eulan1[3];
+	double Eulan2[3];
 
 	Eulan0[PHI]=MCAngles[PHI][t0];
 	Eulan0[CTH]=acos(MCAngles[CTH][t0]);
@@ -3034,9 +3034,9 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 	newcoords[CHI][t1] = chi;
 	newcoords[CTH][t1] = cost;
 
-	double Eulan0[NDIM];
-	double Eulan1[NDIM];
-	double Eulan2[NDIM];
+	double Eulan0[3];
+	double Eulan1[3];
+	double Eulan2[3];
 
 	Eulan0[PHI]=MCAngles[PHI][t0];
 	Eulan0[CTH]=acos(MCAngles[CTH][t0]);
@@ -3367,10 +3367,10 @@ double PotRotE3D(int atom0, double *Eulang, int it)
 		{
 			int t0 = offset0 + it;
 			int t1 = offset1 + it;
-			double com_1[NDIM];
-			double com_2[NDIM];
-			double Eulang_1[NDIM];
-			double Eulang_2[NDIM];
+			double com_1[3];
+			double com_2[3];
+			double Eulang_1[3];
+			double Eulang_2[3];
 			double E_2H2O;
 			for (int id=0; id<NDIM; id++)
 			{
@@ -3421,9 +3421,9 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 			{
 				int t0 = offset0 + it;
 				int t1 = offset1 + it;
-				double com_1[NDIM];
-				double com_2[NDIM];
-				double Eulang_2[NDIM];
+				double com_1[3];
+				double com_2[3];
+				double Eulang_2[3];
 				double E_2H2O;
 				for (int id=0; id<NDIM; id++)
 				{
@@ -3534,10 +3534,10 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 		{
 			int offset1 = atom1*NumbRotTimes;
 			int t1 = offset1 + it;
-			double com_1[NDIM];
-			double com_2[NDIM];
-			double Eulang_1[NDIM];
-			double Eulang_2[NDIM];
+			double com_1[3];
+			double com_2[3];
+			double Eulang_1[3];
+			double Eulang_2[3];
 			double E_2H2O;
 			for (int id=0; id<NDIM; id++)
 			{
@@ -3614,10 +3614,10 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 	    		{
                 	int offsetSwap = NumbRotTimes*atomSwap;
                 	int tSwap  = offsetSwap + it;
-					double com_1[NDIM];
-					double com_2[NDIM];
-					double EulangSwap_1[NDIM];
-					double EulangSwap_2[NDIM];
+					double com_1[3];
+					double com_2[3];
+					double EulangSwap_1[3];
+					double EulangSwap_2[3];
 					double E_2H2O;
 					for (int id=0; id<NDIM; id++)
 					{
@@ -3651,7 +3651,7 @@ double PotEnergy(int atom0, double **pos)
 	int type0   = MCType[atom0];
    	int offset0 = NumbTimes*atom0;
 
-   	double dr[NDIM];
+   	double dr[3];
    	double spot =  0.0;
 
    	for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
@@ -3674,7 +3674,7 @@ double PotEnergy(int atom0, double **pos)
                 double s1 = 0.0;
                 double s2 = 0.0;
                 double dr2 = 0.0;
-				double dr[NDIM];
+				double dr[3];
 
                 for (int id = 0; id < NDIM; id++)
                 {
@@ -3689,9 +3689,9 @@ double PotEnergy(int atom0, double **pos)
                 double th1 = acos(s1/r);
                 double th2 = acos(s2/r);
 
-                double b1[NDIM];
-                double b2[NDIM];
-                double b3[NDIM];
+                double b1[3];
+                double b2[3];
+                double b3[3];
                 for (int id = 0; id < NDIM; id++)
                 {
                     b1[id] = MCCosine[id][t0];
@@ -3703,9 +3703,9 @@ double PotEnergy(int atom0, double **pos)
                 VectorNormalisation(b3);
 
                 //Calculation of dihedral angle 
-                double n1[NDIM];
-                double n2[NDIM];
-                double mm[NDIM];
+                double n1[3];
+                double n2[3];
+                double mm[3];
 
                 CrossProduct(b2, b1, n1);
                 CrossProduct(b2, b3, n2);
@@ -3914,11 +3914,11 @@ double PotEnergy(int atom0, double **pos)
    	{ 
    		int t0 = offset0 + it;
 
-		double Eulang[NDIM];
+		double Eulang[3];
    		Eulang[PHI]=MCAngles[PHI][t0];
    		Eulang[CTH]=acos(MCAngles[CTH][t0]);
    		Eulang[CHI]=MCAngles[CHI][t0];
-		double coordsXYZ[NDIM];
+		double coordsXYZ[3];
 		for (int id = 0; id < NDIM; id++) 
 		{
 			coordsXYZ[id] = pos[id][t0];
@@ -4356,7 +4356,7 @@ double PotEnergy(int atom0, double **pos, int it)
    	int offset0 = NumbTimes*atom0;
     int t0 = offset0 + it;
 
-   	double dr[NDIM];
+   	double dr[3];
    	double spot = 0.0;
 
    	for (int atom1=0;atom1<NumbAtoms;atom1++)
@@ -4541,7 +4541,7 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 	double spot = 0.0;
 
 #ifdef IOWRITE
-	double dr[NDIM];
+	double dr[3];
 
 	int offset0 =  atom0*NumbTimes;
 
@@ -4650,7 +4650,7 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
                 double s1 = 0.0;
                 double s2 = 0.0;
                 double dr2 = 0.0;
-				double dr[NDIM];
+				double dr[3];
 
                 for (int id=0;id<NDIM;id++)
                 {
@@ -4665,9 +4665,9 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
                 double th1 = acos(s1/r);
                 double th2 = acos(s2/r);
 
-                double b1[NDIM];
-                double b2[NDIM];
-                double b3[NDIM];
+                double b1[3];
+                double b2[3];
+                double b3[3];
                 for (int id=0;id<NDIM;id++)
                 {
                     b1[id] = cosine[id][t0];
@@ -4679,9 +4679,9 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
                 VectorNormalisation(b3);
 
                 //Calculation of dihedral angle 
-                double n1[NDIM];
-                double n2[NDIM];
-                double mm[NDIM];
+                double n1[3];
+                double n2[3];
+                double mm[3];
 
                 CrossProduct(b2, b1, n1);
                 CrossProduct(b2, b3, n2);
@@ -4724,7 +4724,7 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
             	} 
 #endif
 #endif
-				double Eulang1[NDIM];
+				double Eulang1[3];
 				Eulang1[PHI] = MCAngles[PHI][t1];
         		Eulang1[CTH] = acos(MCAngles[CTH][t1]);
         		Eulang1[CHI] = 0.0;
@@ -4763,7 +4763,7 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 	        	string stype = MCAtom[type0].type;
                 if (stype == HF )
                 {
-					double EulangSwap[NDIM];
+					double EulangSwap[3];
 					EulangSwap[PHI] = MCAngles[PHI][tSwap];
         			EulangSwap[CTH] = acos(MCAngles[CTH][tSwap]);
         			EulangSwap[CHI] = 0.0;
@@ -4820,7 +4820,7 @@ void MFreeMCCounts(void)
 #ifdef IOWRITE
 double MCQuaternions(double Aa, double Bb, double Cc, double Dd)
 {
-	double RMat[NDIM][NDIM];
+	double RMat[3][3];
 
 	RMat[0][0] = Aa*Aa+Bb*Bb-Cc*Cc-Dd*Dd;
 	RMat[0][1] = 2.0*Bb*Cc-2.0*Aa*Dd;
@@ -4904,7 +4904,7 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 					double s1 = 0.0;
 					double s2 = 0.0;
 					double dr2 = 0.0;
-					double dr[NDIM];
+					double dr[3];
 
 					for (int id=0;id<NDIM;id++)
 					{
@@ -4919,9 +4919,9 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 					double th1 = acos(s1/r);
 					double th2 = acos(s2/r);
 
-					double b1[NDIM];
-					double b2[NDIM];
-					double b3[NDIM];
+					double b1[3];
+					double b2[3];
+					double b3[3];
 					for (int id=0;id<NDIM;id++)
 					{
 						b1[id] = cosine[id][t0];
@@ -4933,9 +4933,9 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 					VectorNormalisation(b3);
 
 					//Calculation of dihedral angle 
-					double n1[NDIM];
-					double n2[NDIM];
-					double mm[NDIM];
+					double n1[3];
+					double n2[3];
+					double mm[3];
 
 					CrossProduct(b2, b1, n1);
 					CrossProduct(b2, b3, n2);
@@ -4959,7 +4959,7 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 
 				if (stype == HF )
 				{
-					double Eulang1[NDIM];
+					double Eulang1[3];
 					Eulang1[PHI] = MCAngles[PHI][t1];
 					Eulang1[CTH] = acos(MCAngles[CTH][t1]);
 					Eulang1[CHI] = 0.0;
@@ -5059,7 +5059,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	*/
 	double sintRef = sqrt(1.0 - costRef*costRef);
 
-   	double randomVector[NDIM];
+   	double randomVector[3];
 	randomVector[AXIS_X] = sintRef*cos(phiRef);
    	randomVector[AXIS_Y] = sintRef*sin(phiRef);
    	randomVector[AXIS_Z] = costRef;
@@ -5079,7 +5079,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	int offset0 = MCAtom[type].offset+(NumbRotTimes*atom0);  
 	int t0 = offset0 + it;
 
-	double vectorAtom0[NDIM];
+	double vectorAtom0[3];
 	for (int id=0;id<NDIM;id++) vectorAtom0[id]   = MCCosine[id][t0];
 	for (int id=0;id<NDIM;id++) newcoords[id][t0] = MCCosine[id][t0] - 2.0*DotProduct(vectorAtom0, randomVector)*randomVector[id];
 #ifdef TESTWRITE
@@ -5219,7 +5219,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 // density computation ends here
 
 // computation of interaction potential
-		double EulangCluster_old[NDIM], EulangCluster_new[NDIM];
+		double EulangCluster_old[3], EulangCluster_new[3];
 		EulangCluster_new[PHI] = atan2(newcoords[AXIS_Y][tCluster],newcoords[AXIS_X][tCluster]);
 		if (EulangCluster_new[PHI] < 0.0) EulangCluster_new[PHI] += 2.0*M_PI;
 		EulangCluster_new[CTH] = acos(newcoords[AXIS_Z][tCluster]);
@@ -5252,7 +5252,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 					int offsetAntiCluster = MCAtom[type].offset+(NumbRotTimes*atomAntiCluster);  
 					int tAntiCluster      = offsetAntiCluster + it;
 
-					double EulangAntiCluster[NDIM];
+					double EulangAntiCluster[3];
 					EulangAntiCluster[PHI] = MCAngles[PHI][tAntiCluster];
 					EulangAntiCluster[CTH] = acos(MCAngles[CTH][tAntiCluster]);
 					EulangAntiCluster[CHI] = MCAngles[CHI][tAntiCluster];
@@ -5307,7 +5307,7 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
 	int t1         = offset1 + it;
 
-	double Eulang0[NDIM], Eulang1[NDIM];
+	double Eulang0[3], Eulang1[3];
 	Eulang0[PHI]   = MCAngles[PHI][t0];
 	Eulang0[CTH]   = acos(MCAngles[CTH][t0]);
 	Eulang0[CHI]   = MCAngles[CHI][t0];
@@ -5335,7 +5335,7 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 	if (linkProb > rand5) activation = 1;
 	if (activation == 1) 
 	{
-		double vectorAtom1[NDIM];
+		double vectorAtom1[3];
 		for (int id=0;id<NDIM;id++) vectorAtom1[id]   = MCCosine[id][t1];
 		for (int id=0;id<NDIM;id++) newcoords[id][t1] = MCCosine[id][t1] - 2.0*DotProduct(vectorAtom1, randomVector)*randomVector[id]; 
 	}
@@ -5409,16 +5409,16 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
        int tm;
        if ((((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && ISPHER == 0) &&(MCAtom[type0].molecule != MCAtom[type1].molecule))
        {
-           double RCOM[NDIM];
-           double Rpt[NDIM];
-           double Eulang[NDIM];
+           double RCOM[3];
+           double Rpt[3];
+           double Eulang[3];
            double vpot3d;
            double radret;
            double theret;
            double chiret;
-           double hatx[NDIM];
-           double haty[NDIM];
-           double hatz[NDIM];
+           double hatx[3];
+           double haty[3];
+           double hatz[3];
            int    ivcord=0;
            if(MCAtom[type0].molecule==2)
            {
@@ -5447,10 +5447,10 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
        }
        else if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
        {
-           double com_1[NDIM];
-           double com_2[NDIM];
-           double Eulang_1[NDIM];
-           double Eulang_2[NDIM];
+           double com_1[3];
+           double com_2[3];
+           double Eulang_1[3];
+           double Eulang_2[3];
            double E_2H2O;
            int t0=offset0+it;
            int t1=offset1+it;

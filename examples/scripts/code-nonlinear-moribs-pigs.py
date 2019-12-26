@@ -8,7 +8,7 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-for i in range(1):
+for i in range(40):
 
 	space=" "
 
@@ -26,8 +26,8 @@ for i in range(1):
 	# Informations about the system
 	simType = "PIGS"
 
-	#simType1="submission "
-	simType1 = "analysis"
+	simType1="submission "
+	#simType1 = "analysis"
 
 	molecule = "H2O"
 	rotor = "H2O"
@@ -37,14 +37,14 @@ for i in range(1):
 	#param = 0.001 # for fixed tau
 
 	var = "tau"  # for fixed beta
-	param = 0.05 # for fixed beta
+	param = 0.1 # for fixed beta
 
-	rcom = 3.1+0.1*i
+	rcom = 5.1+0.1*i
 	rcom="{:3.1f}".format(rcom)
 	#field_strength = 20.0 # Unit inverse of Kelvin
-	nMolecule = 11
-	nblocks = 20000
-	npass = 100
+	nMolecule = 2
+	nblocks = 5000
+	npass = 200
 
 	if simType1 == "analysis":
 		cmd1 = "--preskip 0"

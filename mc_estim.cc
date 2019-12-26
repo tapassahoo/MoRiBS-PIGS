@@ -661,7 +661,7 @@ double GetPotEnergyPIGS(void)
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbRotTimes - 1)/2);
 	double spot = 0.0;
-	double Eulang0[NDIM], Eulang1[NDIM];
+	double Eulang0[3], Eulang1[3];
 	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) && (stype == H2O))
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
@@ -674,8 +674,8 @@ double GetPotEnergyPIGS(void)
             	int offset1 = NumbTimes*atom1;
             	int t1 = offset1 + it;
 
-				double Eulang0[NDIM],Eulang1[NDIM];
-				double com0[NDIM],com1[NDIM];
+				double Eulang0[3],Eulang1[3];
+				double com0[3],com1[3];
 				double E_2H2O;
 				for (int id=0;id<NDIM;id++)
 				{
@@ -1313,10 +1313,10 @@ double GetPotEnergy_Densities(void)
 				// [NON-LINEAR - NON-LINEAR from TIP4P/2005]
 				else if ((MCAtom[type0].molecule == 2) && (MCAtom[type1].molecule == 2)) 
 				{
-					double com_1[NDIM];
-					double com_2[NDIM];
-					double Eulang_1[NDIM];
-					double Eulang_2[NDIM];
+					double com_1[3];
+					double com_2[3];
+					double Eulang_1[3];
+					double Eulang_2[3];
 					double E_2H2O;
 					for (int id=0;id<NDIM;id++)
 					{
@@ -1430,7 +1430,7 @@ double GetTotalEnergy(void)
 {
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
-	double Eulang0[NDIM],Eulang1[NDIM];
+	double Eulang0[3],Eulang1[3];
 	if ((MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) && (stype=="H2O"))
 	{
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
@@ -1447,7 +1447,7 @@ double GetTotalEnergy(void)
                 	int t0 = offset0 + it;
                 	int t1 = offset1 + it;
 
-					double com0[NDIM],com1[NDIM];
+					double com0[3],com1[3];
 					double E_2H2O;
 					for (int id=0;id<NDIM;id++)
 					{
@@ -1531,7 +1531,7 @@ double GetTotalEnergy(void)
                     	double s1 = 0.0;
                     	double s2 = 0.0;
                     	double dr2 = 0.0;
-				    	double dr[NDIM];
+				    	double dr[3];
                     	for (int id=0;id<NDIM;id++)
                     	{
                         	dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
@@ -1545,9 +1545,9 @@ double GetTotalEnergy(void)
                     	double th1 = acos(s1/r);
                     	double th2 = acos(s2/r);
 
-                    	double b1[NDIM];
-                    	double b2[NDIM];
-                    	double b3[NDIM];
+                    	double b1[3];
+                    	double b2[3];
+                    	double b3[3];
                     	for (int id=0;id<NDIM;id++)
                     	{
                         	b1[id] = MCCosine[id][tm0];
@@ -1559,9 +1559,9 @@ double GetTotalEnergy(void)
                     	VectorNormalisation(b3);
 
                     	//Calculation of dihedral angle 
-                    	double n1[NDIM];
-                    	double n2[NDIM];
-                    	double mm[NDIM];
+                    	double n1[3];
+                    	double n2[3];
+                    	double mm[3];
 
                     	CrossProduct(b2, b1, n1);
                     	CrossProduct(b2, b3, n2);
@@ -1585,7 +1585,7 @@ double GetTotalEnergy(void)
 					*/
                 	if (stype == HF)
                 	{
-						double Eulang0[NDIM], Eulang1[NDIM];
+						double Eulang0[3], Eulang1[3];
    						Eulang0[PHI] = MCAngles[PHI][t0];
    						Eulang0[CTH] = acos(MCAngles[CTH][t0]);
    						Eulang0[CHI] = 0.0;
@@ -1663,11 +1663,11 @@ double GetTotalEnergy(void)
        	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 		{
         	int t0 = offset0 + it;
-			double Eulang0[NDIM];
+			double Eulang0[3];
         	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
         	Eulang0[PHI] = MCAngles[PHI][t0];
         	Eulang0[CHI] = 0.0;
-			double coordsXYZ[NDIM];
+			double coordsXYZ[3];
 			for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
     		spot_beads += PotFuncCage(coordsXYZ,Eulang0);
 		}
@@ -1723,7 +1723,7 @@ double GetTotalEnergyPIGSENT(void)
                     		double s1 = 0.0;
                     		double s2 = 0.0;
                     		double dr2 = 0.0;
-				    		double dr[NDIM];
+				    		double dr[3];
                     		for (int id=0;id<NDIM;id++)
                     		{
                         		dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
@@ -1737,9 +1737,9 @@ double GetTotalEnergyPIGSENT(void)
                     		double th1 = acos(s1/r);
                     		double th2 = acos(s2/r);
 
-                    		double b1[NDIM];
-                    		double b2[NDIM];
-                    		double b3[NDIM];
+                    		double b1[3];
+                    		double b2[3];
+                    		double b3[3];
                     		for (int id=0;id<NDIM;id++)
                     		{
                         		b1[id] = MCCosine[id][tm0];
@@ -1751,9 +1751,9 @@ double GetTotalEnergyPIGSENT(void)
                     		VectorNormalisation(b3);
 
                     		//Calculation of dihedral angle 
-                    		double n1[NDIM];
-                    		double n2[NDIM];
-                    		double mm[NDIM];
+                    		double n1[3];
+                    		double n2[3];
+                    		double mm[3];
 
                     		CrossProduct(b2, b1, n1);
                     		CrossProduct(b2, b3, n2);
@@ -1776,7 +1776,7 @@ double GetTotalEnergyPIGSENT(void)
                 		} //stype
                 		if (stype == HF)
                 		{
-							double Eulang0[NDIM], Eulang1[NDIM];
+							double Eulang0[3], Eulang1[3];
    							Eulang0[PHI] = MCAngles[PHI][t0];
    							Eulang0[CTH] = acos(MCAngles[CTH][t0]);
    							Eulang0[CHI] = 0.0;
@@ -1877,7 +1877,7 @@ void GetCosThetaPIMC(double &cosTheta, double *compxyz)
         return;
 
     double scosTheta;
-    double scompxyz[NDIM];
+    double scompxyz[3];
 
     if(MCAtom[IMTYPE].numb > 1)
     {
@@ -1935,7 +1935,7 @@ void GetCosThetaPIMC(double &cosTheta, double *compxyz)
         double cost1 = 1.0;
         double sint1 = sqrt(1.0 - cost1*cost1);
 
-        double uvec1[NDIM];
+        double uvec1[3];
         uvec1[0]     = sint1*cos(phi1);
         uvec1[1]     = sint1*sin(phi1);
         uvec1[2]     = cost1;
@@ -1977,7 +1977,7 @@ void GetCosThetaPIGS(double &cosTheta, double *abs_compxyz, double *compxyz)
     int it = (NumbRotTimes - 1)/2;
 
 	double scosTheta;
-	double scompxyz[NDIM];
+	double scompxyz[3];
 
 	if(MCAtom[IMTYPE].numb > 1)
 	{
@@ -2021,7 +2021,7 @@ void GetCosThetaPIGS(double &cosTheta, double *abs_compxyz, double *compxyz)
         double cost1 = 1.0;
         double sint1 = sqrt(1.0 - cost1*cost1);
 
-        double uvec1[NDIM];
+        double uvec1[3];
         uvec1[0]     = sint1*cos(phi1);
         uvec1[1]     = sint1*sin(phi1);
         uvec1[2]     = cost1;
@@ -2101,7 +2101,7 @@ void GetOrderCorrPIMC(double *eiej, double *ei)
 		eiej[AXIS_Z]=bseiejz/(double)NumbRotTimes;
 		eiej[AXIS_Z+1]=bseiej/(double)NumbRotTimes;
 
-		double bsei[NDIM], sei[NDIM];
+		double bsei[3], sei[3];
 		for (int id = 0; id<NDIM; id++)
 		{
 			bsei[id]=0.0;
@@ -2133,11 +2133,23 @@ void GetOrderCorrPIGS(double *eiej, double *ei)
 
 	if(MCAtom[IMTYPE].numb > 1)
 	{
-        double seiejz=0.0;
         double seiejx=0.0;
         double seiejy=0.0;
+        double seiejz=0.0;
         double seiej=0.0;
-    	for (int atom0=2; atom0<(NumbAtoms-3); atom0++)
+		int atomInit, atomFin;
+		if (NumbAtoms > 4)
+		{	
+			atomInit = 2;
+			atomFin  = (NumbAtoms-atomInit);
+		}
+		else if (NumbAtoms <= 4)
+		{
+			atomInit = 0;
+			atomFin  = NumbAtoms;
+		}		
+
+    	for (int atom0=atomInit; atom0<(atomFin-1); atom0++)
         {    
     	    int atom1 = atom0+1;
             int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
@@ -2160,19 +2172,19 @@ void GetOrderCorrPIGS(double *eiej, double *ei)
 		eiej[AXIS_X]=seiejx;
 		eiej[AXIS_Y]=seiejy;
 		eiej[AXIS_Z]=seiejz;
-		eiej[AXIS_Z+1]=seiej;
+		eiej[3]=seiej;
 
 		for (int id = 0; id<NDIM; id++)
 		{
 			double sum = 0.0;
-    		for (int atom0=2; atom0<NumbAtoms-2; atom0++)
+    		for (int atom0=atomInit; atom0<atomFin; atom0++)
         	{    
            		int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
        			int t0      = offset0 + it;
 
 				sum += MCCosine[id][t0];
 			}
-			ei[id] += sum;
+			ei[id] = sum;
 		}
 	}
 }
@@ -2193,9 +2205,9 @@ void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)
     int it = (NumbRotTimes - 1)/2;
 
 	double scosTheta_pair;
-	double scompxyz_pair[NDIM];
+	double scompxyz_pair[3];
 	double scosTheta_sector;
-	double scompxyz_sector[NDIM];
+	double scompxyz_sector[3];
 
 	if(MCAtom[IMTYPE].numb > 1)
 	{
@@ -2446,7 +2458,7 @@ double *GetCosThetaEntanglement()
 {
     const char *_proc_=__func__; 
 
-    double *cosTheta = new double [2*NumbAtoms*NDIM];
+    double *cosTheta = new double [2*NumbAtoms*3];
 	int BeadMminus1 = (((NumbRotTimes - 1)/2) - 1); 
     int BeadM       = ((NumbRotTimes - 1)/2);
 
@@ -4462,8 +4474,7 @@ void IOxyzAng(int tstatus, const char file_name[])
 
 	fstream fid(fdens.c_str(),mode);
 
-	if (!fid.good())
-	_io_error(_proc_,IO_ERR_FOPEN,file_name);
+	if (!fid.good()) _io_error(_proc_,IO_ERR_FOPEN,file_name);
 
 	io_setout(fid);
 

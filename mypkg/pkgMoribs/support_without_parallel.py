@@ -227,6 +227,46 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		output  += "\n"
 	return output
 
+def GetAverageOrderParam(numbbeads,variable,final_dir_in_work,preskip,postskip):
+	'''
+	See PRL 118, 027402 (2017) 
+	'''
+	col_block, col_eiejx, col_eiejy, col_eiejz, col_eiej, col_eix, col_eiy, col_eiz = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr", unpack=True, usecols=[0,1,2,3,4,5,6,7], skip_header=preskip, skip_footer=postskip)
+
+	workingNdim   = int(math.log(len(col_block))/math.log(2))
+	trunc         = int(len(col_block)-2**workingNdim)
+	
+	col_eiejx = col_eiejx[trunc:]
+	col_eiejy = col_eiejy[trunc:]
+	col_eiejz = col_eiejz[trunc:]
+	col_eiej = col_eiej[trunc:]
+
+	mean_eiejx = np.mean(col_eiejx)
+	mean_eiejy = np.mean(col_eiejy)
+	mean_eiejz = np.mean(col_eiejz)
+	mean_eiej = np.mean(col_eiej)
+
+	error_eiejx = maxError_byBining(mean_eiejx, col_eiejx, workingNdim-6)
+	error_eiejy = maxError_byBining(mean_eiejy, col_eiejy, workingNdim-6)
+	error_eiejz = maxError_byBining(mean_eiejz, col_eiejz, workingNdim-6)
+	error_eiej = maxError_byBining(mean_eiej, col_eiej, workingNdim-6)
+
+	col_eix = col_eix[trunc:]
+	col_eiy = col_eiy[trunc:]
+	col_eiz = col_eiz[trunc:]
+
+	mean_eix = np.mean(col_eix)
+	mean_eiy = np.mean(col_eiy)
+	mean_eiz = np.mean(col_eiz)
+
+	error_eix = maxError_byBining(mean_eix, col_eix, workingNdim-6)
+	error_eiy = maxError_byBining(mean_eiy, col_eiy, workingNdim-6)
+	error_eiz = maxError_byBining(mean_eiz, col_eiz, workingNdim-6)
+
+	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_eiejx, mean_eiejy, mean_eiejz, mean_eiej, mean_eix, mean_eiy, mean_eiz, error_eiejx, error_eiejy, error_eiejz, error_eiej, error_eix, error_eiy, error_eiz)
+	output  += "\n"
+	return output
+
 def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip):
 	'''
 	This function gives us the output 
@@ -268,19 +308,6 @@ def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip)
 	error_abs_compx= maxError_byBining(mean_abs_compx, col_abs_compx, workingNdim-6)
 	error_abs_compy= maxError_byBining(mean_abs_compy, col_abs_compy, workingNdim-6)
 	error_abs_compz= maxError_byBining(mean_abs_compz, col_abs_compz, workingNdim-6)
-
-
-	'''
-	col_sqcompx   = np.square(col_compx)
-	col_sqcompy   = np.square(col_compy)
-	col_sqcompz   = np.square(col_compz)
-	mean_sqcompx  = np.mean(col_sqcompx)
-	mean_sqcompy  = np.mean(col_sqcompy)
-	mean_sqcompz  = np.mean(col_sqcompz)
-	error_sqcompx = 2.0*mean_compx*error_compx
-	error_sqcompy = 2.0*mean_compy*error_compy
-	error_sqcompz = 2.0*mean_compz*error_compz
-	'''
 
 	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abs_compx, mean_abs_compy, mean_abs_compz, error_costheta, error_compx, error_compy, error_compz, error_abs_compx, error_abs_compy, error_abs_compz)
 	output  += "\n"
@@ -370,6 +397,27 @@ def fmtAverageOrientation(status,variable):
 		#output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
 		output    +="\n"
 		#output    += '{0:=<250}'.format('#')
+		output    += '{0:=<190}'.format('#')
+		output    +="\n"
+
+	return output
+
+def fmtAverageOrderParam(status,variable):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output     ="#"
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('Beads', variable, '<eiejx>', '<eiejy>', '<eiejz>', '<eiej>', '<eix>', '<eiy>', '<eiz>', 'Errors')
+		output    +="\n"
+		output    +="#"
+		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '')
+		output    +="\n"
 		output    += '{0:=<190}'.format('#')
 		output    +="\n"
 
@@ -976,7 +1024,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (numbblocks <= 1000):
+	if (numbblocks <= 100):
 		walltime   = "00-03:00"
 		thread     = 1
 		if (numbbeads >= 100):
@@ -1066,7 +1114,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 #SBATCH --output=%s.out
 #SBATCH --time=%s
 %s
-#SBATCH --mem-per-cpu=4096mb
+#SBATCH --mem-per-cpu=2048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s
