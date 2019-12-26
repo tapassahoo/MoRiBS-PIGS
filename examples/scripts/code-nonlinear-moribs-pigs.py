@@ -8,7 +8,7 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-for i in range(40):
+for i in range(1):
 
 	space=" "
 

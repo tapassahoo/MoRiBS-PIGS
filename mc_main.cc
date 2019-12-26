@@ -52,7 +52,6 @@ void MCGetAveragePIGSENT(void);
 void MCResetBlockAveragePIGSENT(void);
 
 void MCSaveBlockAverages(long int);
-void MCSaveBlockAveragesPIGSENT(long int);
 
 void MCSaveAcceptRatio(long int,long int,long int);
 
@@ -143,6 +142,7 @@ void SaveTrReducedDens(const char [], double , long int );
 
 void InitTotalAverage(void);
 void DoneTotalAverage(void);
+void SaveInstantConfig(const char [],long int); //Saving instataneous configurations
 
 //---------------- INITIAL MCCOORDS -----------
 
@@ -645,16 +645,6 @@ ParamsPotential();
 			{
 		    	PIMCPass(type,time);
 			}
-#ifdef INSTANT
-			totalStep++;
-#ifdef IOWRITE
-            SaveInstantEnergy (); 
-#endif
-			if (blockCount > (NumberOfMCBlocks - NumbStep))
-			{
-		    	SaveInstantDOFs(totalStep);
-			}
-#endif
 
    			if (blockCount>NumberOfEQBlocks)        // skip equilibration steps
    			{
@@ -742,11 +732,7 @@ ParamsPotential();
 
 		if (blockCount>NumberOfEQBlocks && avergCount)   // skip equilibration steps
 		{
-#ifdef PIGSENTTYPE
-   			MCSaveBlockAveragesPIGSENT(blockCount);
-#else
    			MCSaveBlockAverages(blockCount);
-#endif
 			// save accumulated interatomic distribution
 
 #ifdef HISTOGRAM
@@ -779,22 +765,13 @@ ParamsPotential();
 #endif
 		}
 
+		SaveInstantConfig(MCFileName.c_str(),blockCount);
+
 //PIMCRESTART begins // 
 		//  CHECKPOINT: save status, rnd streams and configs ------
-	// The below segment will save the data at each 1000 blocks interval. One may change the interval by changing blockCount%1000 with blockCount%any number//
-
-		/*
-		stringstream bc;                // convert block # to string
-		bc.width(IO_BLOCKNUMB_WIDTH);
-		bc.fill('0');
-		bc<<blockCount;
-		string fname = MCFileName + bc.str();  // file name prefix including block #
-		IOxyzAng(IOWrite,fname.c_str());
-		PrintXYZprl = 0;
-		*/
+	// The below segment will save the data at each 200 blocks interval. One may change the interval by changing blockCount%200 with blockCount%any number//
 
 		MCStartBlock = blockCount; 
-
 		if (blockCount % 200 == 0)
 		{
 			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
@@ -1706,6 +1683,7 @@ void MCSaveBlockAverages(long int blocknumb)
     	SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
 	}
 #endif
+#ifndef PIGSENTTYPE
 	SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
 
 	if(MCAtom[IMTYPE].numb > 1)
@@ -1720,6 +1698,18 @@ void MCSaveBlockAverages(long int blocknumb)
 		SaveOrderCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
 	}
+#endif
+
+#ifdef PIGSENTTYPE
+#ifdef PIGSENTBOTH
+	SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
+	SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
+#ifdef DDCORR
+	SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
+#endif
+#endif
+    SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
+#endif
 
 #ifdef IOWRITE
 	if (BOSONS) 
@@ -1742,29 +1732,6 @@ void MCSaveBlockAverages(long int blocknumb)
 #endif
 
 }
-
-#ifdef PIGSENTTYPE
-void MCSaveBlockAveragesPIGSENT(long int blocknumb) 
-{
-  	const char *_proc_=__func__;    //   MCSaveBlockAverages()
-
-  	stringstream bc;                // convert block # to string
-  	bc.width(IO_BLOCKNUMB_WIDTH); 
-  	bc.fill('0');
-  	bc<<blocknumb;
-
-  	string fname = MCFileName + bc.str();  // file name prefix including block #
-
-#ifdef PIGSENTBOTH
-	SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
-	SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
-#ifdef DDCORR
-	SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
-#endif
-#endif
-    SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
-}
-#endif
 
 void SaveEnergy (const char fname [], double acount, long int blocknumb)
 {
@@ -1827,6 +1794,49 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH) << _bCv_rot/avergCount << BLANK; // rotational heat capacity
     fid << endl;
 #endif
+    fid.close();
+}
+
+void SaveInstantConfig(const char fname [], long int blocknumb)
+{
+	const char *_proc_=__func__;   
+ 
+	fstream fid;
+	string fconfig;
+
+	fconfig  = fname; 
+	fconfig += IO_EXT_XYZ; 
+
+	fid.open(fconfig.c_str(),ios::app | ios::out);
+	io_setout(fid);
+
+	if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fconfig.c_str());
+
+	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+
+	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+	{
+		for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+		{
+        	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            int t0      = offset0 + it;
+
+			if (TRANSLATION)
+			{
+				fid << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+			}
+
+			if (ROTATION)
+			{
+				fid << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+			}
+        }
+    }
+	fid << endl;
     fid.close();
 }
 
@@ -2224,7 +2234,6 @@ void InitTotalAverage(void)  // DUMP
 	totalCountENT = 0.0;  // need to save in the status file 
 #endif
    	sumsCount = 0.0;  // counter for accum sums
-   	totalStep = 0.0;
 
 	_kin_total = 0.0;   // need a function to reset all global average
 	_pot_total = 0.0;
