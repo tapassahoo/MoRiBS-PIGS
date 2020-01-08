@@ -1030,13 +1030,13 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 		if (numbbeads >= 100):
 			thread     = 8
 	else:
-		if (numbbeads >= 60):
+		if (numbbeads >= 160):
+			thread     = 8
+			walltime   = "14-00:00"
+		elif ((numbbeads >= 60) and (numbbeads < 160)):
 			thread     = 8
 			walltime   = "07-00:00"
-		elif ((numbbeads >= 40) and (numbbeads < 60)):
-			thread     = 4
-			walltime   = "07-00:00"
-		elif ((numbbeads >= 20) and (numbbeads < 40)):
+		elif ((numbbeads >= 20) and (numbbeads < 60)):
 			thread     = 4
 			walltime   = "03-00:00"
 		else:
