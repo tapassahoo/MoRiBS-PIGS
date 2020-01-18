@@ -1621,7 +1621,7 @@ double GetTotalEnergy(void)
 #endif
 
 #ifdef ONSITE
-    if (MCAtom[IMTYPE].numb == 1)
+    if (NumbAtoms == 1)
     {
         int offset0 = 0;
 

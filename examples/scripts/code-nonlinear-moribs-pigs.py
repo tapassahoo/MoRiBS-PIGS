@@ -27,7 +27,7 @@ for i in range(21):
 	simType = "PIGS"
 
 	simType1="submission "
-	#simType1 = "analysis"
+	simType1 = "analysis"
 
 	molecule = "H2O"
 	rotor = "H2O"
