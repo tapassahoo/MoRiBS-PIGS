@@ -418,7 +418,8 @@ void MCInit(void)  // only undimensional parameters in this function
 	MCBeta   =  1.0/Temperature;
 #ifdef PIMCTYPE
 	MCTau    =  MCBeta/(double)NumbTimes;
-#else
+#endif
+#ifdef PIGSTYPE
   	MCTau    =  MCBeta/((double)NumbTimes-1.0);
 #endif
 //
@@ -426,7 +427,11 @@ void MCInit(void)  // only undimensional parameters in this function
 	{
 #ifdef PIMCTYPE
     	MCRotTau =  MCBeta/(double)NumbRotTimes;
-#else
+#endif
+#ifdef PIGSTYPE
+    	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
+#endif
+#ifdef PIGSENTTYPE
     	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
 #endif
 	}

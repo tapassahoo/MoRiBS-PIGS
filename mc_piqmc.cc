@@ -2485,20 +2485,19 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 #endif
 
 	double step   = MCAtom[type].rtstep; 
-	double MCRotChunkTot = 0.0;
-	double MCRotChunkAcp = 0.0;
+	MCRotChunkTot = 0.0;
+	MCRotChunkAcp = 0.0;
 
 	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 	double rand1,rand2,rand3,rand4;
-	int offset, gatom;
 
-	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int itrot = 0; itrot<NumbRotTimes; itrot = itrot+2)
+	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+	for (int itrot=0;itrot<NumbRotTimes;itrot=itrot+2)
 	{
-		for(int atom0 = 0; atom0<MCAtom[type].numb; atom0++)
+		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			int offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			int gatom  = offset/NumbTimes;    // and translational degrees of freedom
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
@@ -2520,16 +2519,16 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
-	MCRotChunkTot = 0;
-	MCRotChunkAcp = 0;
+	MCRotChunkTot = 0.0;
+	MCRotChunkAcp = 0.0;
 
-	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int itrot = 1; itrot<NumbRotTimes; itrot = itrot+2)
+	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
+	for (int itrot=1;itrot<NumbRotTimes;itrot=itrot+2)
 	{
-		for(int atom0 = 0; atom0<MCAtom[type].numb; atom0++)
+		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbTimes;    // and translational degrees of freedom
+			int offset=MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			int gatom=offset/NumbTimes;    // and translational degrees of freedom
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
@@ -2610,8 +2609,6 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
           cost = -2.0 - cost;    
 //        phi  = phi  + M_PI;
       }		  
-
-	double sint = sqrt(1.0 - cost*cost);
 
 	newcoords[PHI][t1] = phi;
 	newcoords[CHI][t1] = chi;
@@ -2765,7 +2762,7 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
     	if (dens_old>RZERO)
         rd = dens_new/dens_old;
         else rd = 1.0;
-        rd *= exp(- MCRotTau*(pot_new-pot_old));
+        rd *= exp(- MCTau*(pot_new-pot_old));
     }
     else if(RotDenType == 1)
    	{
@@ -2775,7 +2772,7 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 		//cout<<"in cc:"<<rhonew<<" "<<rhoold<<" "<<rd<<" "<<4.0*(MCRotTau/WNO2K)<<endl;
 		//rd = rhonew - rhoold;
 		//rd = exp(rd);
-		rd -= MCRotTau*(pot_new-pot_old);
+		rd -= MCTau*(pot_new-pot_old);
 	}
 
 	//rd *= exp(- MCRotTau*(pot_new-pot_old));   
@@ -2806,7 +2803,7 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 		MCAngles[PHI][t1] = phi;
 		MCAngles[CHI][t1] = chi; //toby adds
   
-		sint=sqrt(1.0-cost*cost);
+		double sint=sqrt(1.0-cost*cost);
 		MCCosine [AXIS_X][t1] = sint*cos(phi);
 		MCCosine [AXIS_Y][t1] = sint*sin(phi);
 		MCCosine [AXIS_Z][t1] = cost;
@@ -2868,15 +2865,15 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	phi = fmod(phi,2.0*M_PI);
 	chi = fmod(chi,2.0*M_PI);
 
-	if (cost >  1.0)
+	if (cost > 1.0)
 	{
-		cost = 2.0 - cost;    
+		cost=2.0-cost;    
 		//phi  = phi + M_PI;
 	}		 
 
 	if (cost < -1.0)
 	{
-		cost = -2.0 - cost;    
+		cost=-2.0-cost;    
 		//phi  = phi  + M_PI;
 	}		  
 
@@ -2916,7 +2913,7 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	int itr1 = itr0+RotRatio;     // translational time slices
 
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
-	pot_old+=(PotRotE3DPIGS(gatom,Eulan1,it));
+	pot_old+=PotRotE3DPIGS(gatom,Eulan1,it);
 	//Toby: pot_old can be calculated with MCAngles
 
 	Eulan1[PHI]=newcoords[PHI][t1];
@@ -2933,16 +2930,15 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 
 	double pot_new  = 0.0;
 	for (int it=itr0;it<itr1;it++) 
-	pot_new  += (PotRotE3DPIGS(gatom,Eulan1,it));
+	pot_new  += PotRotE3DPIGS(gatom,Eulan1,it);
      
 	double rd;
 
 	if(RotDenType == 0)
     {
-    	if (dens_old>RZERO)
-        rd = dens_new/dens_old;
+    	if (dens_old>RZERO) rd = dens_new/dens_old;
         else rd = 1.0;
-        rd *= exp(- MCRotTau*(pot_new-pot_old));
+		rd *= exp(-MCTau*(pot_new-pot_old));
     }
 
 	bool Accepted = false;
@@ -2964,10 +2960,10 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 		MCAngles[PHI][t1] = phi;
 		MCAngles[CHI][t1] = chi; //toby adds
   
-		sint=sqrt(1.0-cost*cost);
-		MCCosine [AXIS_X][t1] = sint*cos(phi);
-		MCCosine [AXIS_Y][t1] = sint*sin(phi);
-		MCCosine [AXIS_Z][t1] = cost;
+		double sint=sqrt(1.0-cost*cost);
+		MCCosine[AXIS_X][t1] = sint*cos(phi);
+		MCCosine[AXIS_Y][t1] = sint*sin(phi);
+		MCCosine[AXIS_Z][t1] = cost;
 		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
 		//and Ieff about and perpendicular to one molecule-ixed axis.
 	}	      
@@ -3027,8 +3023,6 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 		cost = -2.0 - cost;    
 		//phi  = phi  + M_PI;
 	}		  
-
-	double sint = sqrt(1.0 - cost*cost);
 
 	newcoords[PHI][t1] = phi;
 	newcoords[CHI][t1] = chi;
@@ -3142,7 +3136,7 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
     	if (dens_old>RZERO)
         rd = dens_new/dens_old;
         else rd = 1.0;
-        rd *= exp(- MCRotTau*(pot_new-pot_old));
+        rd *= exp(- MCTau*(pot_new-pot_old));
     }
 
 	bool Accepted = false;
@@ -3164,7 +3158,7 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 		MCAngles[PHI][t1] = phi;
 		MCAngles[CHI][t1] = chi; //toby adds
   
-		sint=sqrt(1.0-cost*cost);
+		double sint=sqrt(1.0-cost*cost);
 		MCCosine [AXIS_X][t1] = sint*cos(phi);
 		MCCosine [AXIS_Y][t1] = sint*sin(phi);
 		MCCosine [AXIS_Z][t1] = cost;
@@ -3396,7 +3390,8 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 {
 	int type0   =  MCType[atom0];
 	string stype = MCAtom[type0].type;
-	int offset0 = atom0*NumbRotTimes;
+	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+	int t0 = offset0 + it;
 	double spot = 0.0;
 
 #ifdef DEBUG_PIMC
@@ -3409,18 +3404,17 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 	nrerror(_proc_,"Too many non-linear rotors");
 #endif
 
-	if (MCAtom[type0].numb > 1)
+	if (NumbAtoms > 1)
 	{
 		for (int atom1=0; atom1<NumbAtoms; atom1++)
 		if (atom1 != atom0)                    // skip "self-interaction"
 		{	
-			int offset1 = atom1*NumbRotTimes;
 			int type1   = MCType[atom1];
+			int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+			int t1 = offset1 + it;
 
-			if ((MCType[atom1] == IMTYPE) && (stype == H2O))
+			if ((stype == H2O) && (MCType[atom1] == MCType[atom0]))
 			{
-				int t0 = offset0 + it;
-				int t1 = offset1 + it;
 				double com_1[3];
 				double com_2[3];
 				double Eulang_2[3];
@@ -3430,46 +3424,45 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 					com_1[id] = MCCoords[id][t0];
 					com_2[id] = MCCoords[id][t1];
 				}
-				int tm1=offset1 + it/RotRatio;
+				int tm1=offset1+it/RotRatio;
 				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
 				Eulang_2[PHI]=MCAngles[PHI][tm1];
 				Eulang_2[CHI]=MCAngles[CHI][tm1];
 				caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
 				spot += E_2H2O;
 			}
+
+			if (stype == CH3F)
+			{
+				double RCOM[3];
+				double Rpt[3];
+				double vpot3d;
+				double radret;
+				double theret;
+				double chiret;
+				double hatx[3];
+				double haty[3];
+				double hatz[3];
+				int    ivcord = 0;
+				for (int id=0;id<NDIM;id++)
+				{
+					RCOM[id] = MCCoords[id][t0];
+				}
+				Rpt[AXIS_X] = 0.0;
+				Rpt[AXIS_Y] = 0.0;
+				Rpt[AXIS_Z] = Distance;
+
+				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+				spot=vpot3d;
+			}
 		}   // END sum over atoms
 	}
 
-	if (stype == CH3F)
+	if (NumbAtoms == 1) 
 	{
-		int t0=offset0+it;
-		double RCOM[3];
-		double Rpt[3];
-		double vpot3d;
-		double radret;
-		double theret;
-		double chiret;
-		double hatx[3];
-		double haty[3];
-		double hatz[3];
-		int    ivcord = 0;
-		for (int id=0;id<NDIM;id++)
-		{
-			RCOM[id] = MCCoords[id][t0];
-		}
-		Rpt[AXIS_X] = 0.0;
-		Rpt[AXIS_Y] = 0.0;
-		Rpt[AXIS_Z] = Distance;
-
-		vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-		spot=vpot3d;
+		spot = PotFunc(Eulang);
 	}
-#ifdef ONSITE
-	if (MCAtom[type0].numb == 1) 
-	{
-        spot = PotFunc(Eulang);
-    }
-#endif
+
     double weight;
 	weight = 1.0;
     if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;

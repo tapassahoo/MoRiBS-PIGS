@@ -894,6 +894,8 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			if (molecule_rot == "H2O"):	
 				if (NameOfServer == "graham"):
 					dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
+				if (NameOfServer == "nlogn"):
+					dir_dens =  "/work/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
 			if (molecule_rot == "CH3F"):	
 				if (NameOfServer == "nlogn"):
 					dir_dens =  "/work/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
@@ -901,7 +903,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 					dir_dens =  "/scratch/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
 			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature1))+"t"+str(numbbeads2)
 			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
-			if os.path.isfile(dir_dens+file_rotdens_mod+".rho") == False:
+			if (os.path.isfile(dir_dens+file_rotdens_mod+".rho") == False):
 				call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
 				call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
 				call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])

@@ -110,7 +110,7 @@ def jobstring(logfile,folder_run_path,dir_input,dir_output,temperature,numbbeads
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
-#SBATCH --time=0-03:00
+#SBATCH --time=1-03:00
 %s
 #SBATCH --mem-per-cpu=512mb
 #SBATCH --cpus-per-task=1
