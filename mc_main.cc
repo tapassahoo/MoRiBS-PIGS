@@ -176,10 +176,10 @@ Distribution = "unSwap";
 	exit(11);
 #endif
    	randomseed(); //set seed according to clock
-//Tapas added
-#ifdef SWAPTOUNSWAP
-srand( time(NULL) );
-#endif
+	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+	{
+		srand( time(NULL) );
+	}
 #ifdef POTH2
    vinit_();
 #endif
@@ -542,8 +542,6 @@ ParamsPotential();
    }
 // MPI BLOCK 1 in MASTER done
 */
-
-
     InitMCEstims();
    	//InitTotalAverage();      // DUMP 
    
@@ -596,17 +594,9 @@ ParamsPotential();
    	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
    	{      
     	blockCount++; 
-#ifdef PIMCTYPE
-       	MCResetBlockAveragePIMC();
-#endif
-//
-#ifdef PIGSTYPE
-       	MCResetBlockAveragePIGS();
-#endif
-//
-#ifdef PIGSENTTYPE
-       	MCResetBlockAveragePIGSENT();
-#endif
+       	if (PIMC_SIM) MCResetBlockAveragePIMC();
+       	if (PIGS_SIM) MCResetBlockAveragePIGS();
+       	if (ENT_SIM) MCResetBlockAveragePIGSENT();
      
        	long int passCount = 0;        // BEGIN NEW MC PASS
        	long int passTotal = 0;        // total number of Moves = passCount*time 
@@ -676,22 +666,10 @@ ParamsPotential();
                 	}	   
                 	else
                  	{
-#ifdef IOWRITE
-                    	MCGetAverage();
-#endif
-//
-#ifdef PIMCTYPE
-                    	MCGetAveragePIMC();
-#endif
-//
-#ifdef PIGSTYPE
-                    	MCGetAveragePIGS();
-#endif
-//
-#ifdef PIGSENTTYPE
-                    	MCGetAveragePIGSENT();
-#endif
-//
+                    	//MCGetAverage();
+                    	if (PIMC_SIM) MCGetAveragePIMC();
+                    	if (PIGS_SIM) MCGetAveragePIGS();
+                    	if (ENT_SIM) MCGetAveragePIGSENT();
 					    //omp_set_num_threads(1);
 					    //MCGetAverage();
 					    //omp_set_num_threads(NThreads);
@@ -714,13 +692,16 @@ ParamsPotential();
               	if (passTotal % MCSKIP_TOTAL == 0 && avergCount)  
               	{
                		sumsCount += 1.0;                 
-#ifdef PIGSENTTYPE
+					if (ENT_SIM)
+					{
 #ifdef PIGSENTBOTH
-               		SaveSumEnergy (totalCountENT,sumsCount);
+						SaveSumEnergy (totalCountENT,sumsCount);
 #endif
-#else
-               		SaveSumEnergy (totalCount,sumsCount);
-#endif
+					}
+					else
+					{	
+						SaveSumEnergy (totalCount,sumsCount);
+					}
             	}
 			}  
           
@@ -759,10 +740,8 @@ ParamsPotential();
            	}
 
 #endif
-#ifdef PIMCTYPE
-			if (ROTATION)                  // DUMP  accumulated average
+			if (ROTATION && PIMC_SIM)                  // DUMP  accumulated average
 				SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
-#endif
 		}
 
 		SaveInstantConfig(MCFileName.c_str(),blockCount);
@@ -819,18 +798,22 @@ void PIMCPass(int type,int time)
 	{
 #ifdef GAUSSIANMOVE
 		MCMolecularMoveGauss(type);
-#endif
-#ifdef PIGSTYPE
-		if (time == 0)
-		MCMolecularMovePIGS(type);        
-		MCBisectionMovePIGS(type,time);
-		//MCMolecularMoveNaive(type);
-#endif
-#ifdef PIMCTYPE
-		if (time == 0)
-		MCMolecularMove(type);        
+#else
+		if (PIGS_SIM)
+		{	
+			if (time == 0)
+			MCMolecularMovePIGS(type);        
+			MCBisectionMovePIGS(type,time);
+			//MCMolecularMoveNaive(type);
+		}
+
+		if (PIMC_SIM)
+		{	
+			if (time == 0)
+			MCMolecularMove(type);        
 // move the solvent particles
-		MCBisectionMove(type,time);
+			MCBisectionMove(type,time);
+		}	
 #endif
 	}
 
@@ -844,7 +827,6 @@ void PIMCPass(int type,int time)
     	MCRotationsMove(type);
 }
 
-#ifdef PIMCTYPE
 void MCResetBlockAveragePIMC(void) 
 {
 	avergCount = 0.0;
@@ -908,9 +890,7 @@ void MCResetBlockAveragePIMC(void)
 	_ucompy     = 0.0;
 	_ucompz     = 0.0;
 }
-#endif
 
-#ifdef PIGSTYPE
 void MCResetBlockAveragePIGS(void) 
 {
 	avergCount = 0.0;
@@ -977,15 +957,14 @@ void MCResetBlockAveragePIGS(void)
 	PrintZrfl   = 1;
 
 }
-#endif
 
-#ifdef PIGSENTTYPE
 void MCResetBlockAveragePIGSENT(void) 
 {
-#ifdef SWAPTOUNSWAP
-    MCAccepSwap = 0.0;
-    MCAccepUnSwap = 0.0;
-#endif
+	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+	{
+		MCAccepSwap = 0.0;
+		MCAccepUnSwap = 0.0;
+	}
 	avergCount = 0.0;
 
 	ResetMCEstims();
@@ -998,33 +977,10 @@ void MCResetBlockAveragePIGSENT(void)
 
 #ifdef PIGSENTBOTH
 	avergCountENT = 0.0;
-    _dbpot     = 0.0;  //added by Hui Li
+    _dbpot     = 0.0;  
     _bpot      = 0.0;
     _btotal    = 0.0;
-    _bcostheta = 0.0;
-    _ucompx     = 0.0;
-    _ucompy     = 0.0;
-    _ucompz     = 0.0;
-#ifdef DDCORR
-	int NumbAtoms1 = NumbAtoms/2;
-	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
-    _cdipoleXYZ.resize(NDIMDP);
-    _cdipoleX.resize(NDIMDP);
-    _cdipoleY.resize(NDIMDP);
-    _cdipoleZ.resize(NDIMDP);
-    _cdipoleXY.resize(NDIMDP);
-
-    for (int idp = 0; idp < NDIMDP; idp++)
-    {
-        _cdipoleXYZ[idp] = 0.0;
-        _cdipoleX[idp] = 0.0;
-        _cdipoleY[idp] = 0.0;
-        _cdipoleZ[idp] = 0.0;
-        _cdipoleXY[idp] = 0.0;
-    }
-#endif
     _bkin        = 0.0;
-
     _brot        = 0.0;
     _brot1        = 0.0;
 #endif
@@ -1033,21 +989,23 @@ void MCResetBlockAveragePIGSENT(void)
 	PrintXrfl   = 1;
 	PrintZrfl   = 1;
 }
-#endif
 
-#ifdef PIGSENTTYPE
 void MCGetAveragePIGSENT(void) 
 {
 	avergCount       += 1.0;
 	totalCount       += 1.0;  
 
-#ifdef SWAPTOUNSWAP
-    double snm        = (double)MCAccepSwap/(double)((MCAccepSwap+MCAccepUnSwap));
-    double sdm        = (double)MCAccepUnSwap/((double)(MCAccepSwap+MCAccepUnSwap));
-#else
-    double snm        = GetEstimNM();
-    double sdm        = GetEstimDM();
-#endif
+	double snm, sdm;
+	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+	{
+		snm = (double)MCAccepSwap/(double)((MCAccepSwap+MCAccepUnSwap));
+		sdm = (double)MCAccepUnSwap/((double)(MCAccepSwap+MCAccepUnSwap));
+	}
+	else
+	{
+		snm = 0.0;//GetEstimNM();
+		sdm = 0.0;//GetEstimDM();
+	}
     _bnm             += snm;
     _bdm             += sdm;
 #ifdef SWAP
@@ -1204,9 +1162,7 @@ void MCGetAveragePIGSENT(void)
         RotSymConfig();
     }
 }
-#endif
 
-#ifdef PIGSTYPE
 void MCGetAveragePIGS(void) 
 {
 	avergCount       += 1.0;
@@ -1383,9 +1339,7 @@ void MCGetAveragePIGS(void)
         RotSymConfig();
     }
 }
-#endif
 
-#ifdef PIMCTYPE
 void MCGetAveragePIMC(void) 
 {
 	avergCount       += 1.0;
@@ -1629,7 +1583,6 @@ void MCGetAveragePIMC(void)
         RotSymConfig();
     }
 }
-#endif
 
 void MCWormAverageReset(void)
 {
@@ -1683,33 +1636,35 @@ void MCSaveBlockAverages(long int blocknumb)
     	SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
 	}
 #endif
-#ifndef PIGSENTTYPE
-	SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
-
-	if(MCAtom[IMTYPE].numb > 1)
+	if ((PIGS_SIM) || (PIMC_SIM))
 	{
+		SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
+
+		if(MCAtom[IMTYPE].numb > 1)
+		{
 #ifdef IOWRITE		
-		SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
+			SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
 #endif		
 #ifdef DDCORR
-		SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
+			SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
 #ifdef ORDERPARA
-		SaveOrderCorr(MCFileName.c_str(),avergCount,blocknumb);
+			SaveOrderCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
+		}
 	}
-#endif
 
-#ifdef PIGSENTTYPE
+	if (ENT_SIM)
+	{
 #ifdef PIGSENTBOTH
-	SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
-	SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
+		SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
+		SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
 #ifdef DDCORR
-	SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
+		SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
 #endif
 #endif
-    SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
-#endif
+		SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
+	}	
 
 #ifdef IOWRITE
 	if (BOSONS) 
@@ -1748,23 +1703,25 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 	if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
-#ifdef PIMCTYPE
-	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-	fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // potential anergy 2
-	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
-	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
-	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
-	fid << endl;
-#endif
-//
-#ifdef PIGSTYPE
-	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-	fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
-	fid << setw(IO_WIDTH) << _brot1*Units.energy/avergCount << BLANK;    // rot energy 5  
-	fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
-	fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
-	fid << endl;
-#endif
+	if (PIMC_SIM)
+	{	
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+		fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // potential anergy 2
+		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
+		fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+		fid << endl;
+	}	
+
+	if (PIGS_SIM)
+	{	
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _brot1*Units.energy/avergCount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
+		fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+		fid << endl;
+	}	
 //
 #ifdef PIGSENTBOTH
 	if (acount != 0.0)
@@ -1946,11 +1903,9 @@ void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
         fid << setw(IO_WIDTH) << _ucompx/acount << BLANK;
         fid << setw(IO_WIDTH) << _ucompy/acount << BLANK;
         fid << setw(IO_WIDTH) << _ucompz/acount << BLANK;
-#ifdef PIGSTYPE
         fid << setw(IO_WIDTH) << _abs_ucompx/acount << BLANK;
         fid << setw(IO_WIDTH) << _abs_ucompy/acount << BLANK;
         fid << setw(IO_WIDTH) << _abs_ucompz/acount << BLANK;
-#endif
         fid << endl;
 	}
     fid.close();
@@ -1983,21 +1938,22 @@ void SaveSumEnergy (double acount, double numb)  // global average
 {
 	const char *_proc_=__func__;    //  SaveSumEnergy()
  
-#ifdef PIMCTYPE
-	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
-	_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
-	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
-	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
-	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
-#endif
-//
-#ifdef PIGSTYPE
-	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
-	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
-	_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
-	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
-	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
-#endif
+    if (PIMC_SIM)
+	{	
+		_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
+		_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
+	}
+    if (PIGS_SIM)
+	{	
+		_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
+		_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
+		_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
+	}
 //
 #ifdef PIGSENTBOTH
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
@@ -2087,62 +2043,62 @@ void SaveInstantDOFs(long int numb)
 {
     const char *_proc_=__func__;
 
-#ifdef PIGSENTTYPE
-   	_fangins << setw(IO_WIDTH) << numb << BLANK;
-
-    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-    {
-        int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-   		for (int it = ((NumbRotTimes - 1)/2-1); it <= ((NumbRotTimes-1)/2); it++) 
-        {
-            int t0      = offset0 + it;
-
-			if (TRANSLATION)
-			{
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
-			}
-			
-			if (ROTATION)
-			{
-				_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
-			}
-        }
-    }
-	_fangins << endl;
-#endif
-
-#ifdef PIMCTYPE
-	for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+	if (ENT_SIM)
 	{
+		_fangins << setw(IO_WIDTH) << numb << BLANK;
+
 		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
-        	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-            int t0      = offset0 + it;
-
-			if (TRANSLATION)
+			int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+			for (int it = ((NumbRotTimes - 1)/2-1); it <= ((NumbRotTimes-1)/2); it++) 
 			{
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
-			}
+				int t0      = offset0 + it;
 
-			if (ROTATION)
-			{
-				_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+				if (TRANSLATION)
+				{
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+				}
+				
+				if (ROTATION)
+				{
+					_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+				}
 			}
-        }
+		}
 		_fangins << endl;
-    }
-#endif
+	}	
 
+	if (PIMC_SIM)
+	{	
+		for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+		{
+			for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+			{
+				int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+				int t0      = offset0 + it;
+
+				if (TRANSLATION)
+				{
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+				}
+
+				if (ROTATION)
+				{
+					_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+				}
+			}
+			_fangins << endl;
+		}
+	}
 /*
-#ifdef PIGSTYPE
 #ifdef BINARY
 	double instArray[5];
 	instArray[0] = numb;
@@ -2169,35 +2125,35 @@ void SaveInstantDOFs(long int numb)
    	_fangins << setw(IO_WIDTH) << compxyz[1] << BLANK;
    	_fangins << setw(IO_WIDTH) << compxyz[2] << BLANK;
     _fangins << endl;
-#else
 */
-#ifdef PIGSTYPE
-   	_fangins << setw(IO_WIDTH) << numb << BLANK;
+	if (PIGS_SIM)
+	{	
+		_fangins << setw(IO_WIDTH) << numb << BLANK;
 
-    for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-    {
-        int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-        for (int it = 0; it < NumbRotTimes; it += ((NumbRotTimes-1)/2)) // Rotational Time slices, P
-        {
-            int t0      = offset0 + it;
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+		{
+			int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+			for (int it = 0; it < NumbRotTimes; it += ((NumbRotTimes-1)/2)) // Rotational Time slices, P
+			{
+				int t0      = offset0 + it;
 
-			if (TRANSLATION)
-			{
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+				if (TRANSLATION)
+				{
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+				}
+				
+				if (ROTATION)
+				{
+					_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+					_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+				}
 			}
-			
-			if (ROTATION)
-			{
-				_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-				_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
-			}
-        }
-    }
-	_fangins << endl;
-#endif
+		}
+		_fangins << endl;
+	}
 }
 
 void SaveInstantEnergy()
@@ -2207,17 +2163,18 @@ void SaveInstantEnergy()
     double srotinst, spotinst, stotalinst;
     if (MCAtom[IMTYPE].molecule == 4)
     {
-#ifdef PIGSTYPE
-		srotinst   = GetRotEnergyPIGS();
-		spotinst   = GetPotEnergyPIGS(); 
-		stotalinst = GetTotalEnergy();
-#endif
-//
-#ifdef PIMCTYPE
-		srotinst   = GetRotPlanarEnergy(); 
-		spotinst   = GetPotEnergy_Densities(); 
-		stotalinst = 0.0;
-#endif
+		if (PIGS_SIM)
+		{	
+			srotinst   = GetRotEnergyPIGS();
+			spotinst   = GetPotEnergyPIGS(); 
+			stotalinst = GetTotalEnergy();
+		}	
+		if (PIMC_SIM)
+		{	
+			srotinst   = GetRotPlanarEnergy(); 
+			spotinst   = GetPotEnergy_Densities(); 
+			stotalinst = 0.0;
+		}	
     }
     _fengins << setw(IO_WIDTH) << spotinst << BLANK;
     _fengins << setw(IO_WIDTH) << stotalinst << BLANK;
@@ -2280,21 +2237,22 @@ void InitTotalAverage(void)  // DUMP
 	// open files for output
 	// ENERGY
 //
-#ifndef PIGSENTTYPE
-	string fenergy;
+	if ((PIGS_SIM) || (PIMC_SIM))
+	{
+		string fenergy;
 
-	fenergy  = MCFileName + IO_SUM; 
-	fenergy += IO_EXT_ENG; 
- 
-	if (FileExist(fenergy.c_str()))   // backup the output of previous simulations 
-	IOFileBackUp(fenergy.c_str());
+		fenergy  = MCFileName + IO_SUM; 
+		fenergy += IO_EXT_ENG; 
+	 
+		if (FileExist(fenergy.c_str()))   // backup the output of previous simulations 
+		IOFileBackUp(fenergy.c_str());
 
-	_feng.open(fenergy.c_str(), ios::out);
-	io_setout(_feng);
+		_feng.open(fenergy.c_str(), ios::out);
+		io_setout(_feng);
 
-	if (!_feng.is_open())
-	_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
-#endif
+		if (!_feng.is_open())
+		_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
+	}
 
 //
 #ifdef INSTANT

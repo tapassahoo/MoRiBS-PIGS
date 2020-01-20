@@ -50,6 +50,12 @@ double DipoleMoment;
 double DipoleMomentAU2;
 double RR;
 int RefAtom;
+bool PIGS_SIM = false;
+bool PIMC_SIM = false;
+bool ENT_SIM = false;
+string ENT_ENSMBL;
+string ENT_ALGR;
+
 #ifdef EWALDSUM
 double prefSelf, prefBfun, alpha, alpha2, prefUk1, prefUk2, prefUk3, boxLength;
 int    KMAX;
@@ -416,24 +422,14 @@ void MCInit(void)  // only undimensional parameters in this function
 	BoxSize  =  pow((double)(NUMB_ATOMS+NUMB_MOLCS)/Density,1.0/(double)NDIM);
 
 	MCBeta   =  1.0/Temperature;
-#ifdef PIMCTYPE
-	MCTau    =  MCBeta/(double)NumbTimes;
-#endif
-#ifdef PIGSTYPE
-  	MCTau    =  MCBeta/((double)NumbTimes-1.0);
-#endif
-//
+
+	if (PIMC_SIM) MCTau = MCBeta/(double)NumbTimes;
+	else	      MCTau = MCBeta/((double)NumbTimes-1.0);
+
   	if (ROTATION)
 	{
-#ifdef PIMCTYPE
-    	MCRotTau =  MCBeta/(double)NumbRotTimes;
-#endif
-#ifdef PIGSTYPE
-    	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
-#endif
-#ifdef PIGSENTTYPE
-    	MCRotTau =  MCBeta/((double)NumbRotTimes-1.0);
-#endif
+    	if (PIMC_SIM) MCRotTau = MCBeta/(double)NumbRotTimes;
+    	else          MCRotTau = MCBeta/((double)NumbRotTimes-1.0);
 	}
 
 	RotRatio  = 1;  // div_t quot - it's important for the area estimator
@@ -723,11 +719,8 @@ void initChain_config(double **pos)
     }
 
 	int NumbAtoms1;
-#ifdef PIGSENTTYPE
-    NumbAtoms1 = NumbAtoms/2;
-#else
-	NumbAtoms1 = NumbAtoms;
-#endif
+	if (ENT_SIM) NumbAtoms1 = NumbAtoms/2;
+	else NumbAtoms1 = NumbAtoms;
 
 	double LatticeTheta = 0.0; //0.25*M_PI;
 	double LatticePhi   = 0.25*M_PI;
@@ -746,45 +739,43 @@ void initChain_config(double **pos)
 		shift[1] += Distance*sin(LatticeTheta)*sin(LatticePhi);
 		shift[2] += Distance*cos(LatticeTheta);
     }
-#ifdef PIGSENTTYPE
-    for (int id = 0; id < NDIM; id++)
-    {
-	    shift[id] = 0.0;
-    }
+	if (ENT_SIM)
+	{
+		for (int id = 0; id < NDIM; id++) shift[id] = 0.0;
 
-    for (int atom = NumbAtoms1; atom < NumbAtoms; atom++)
-    {
-        for (int it = 0; it < NumbTimes; it++)
-        {
-            int ii = it + atom*NumbTimes;
-   		    for (int id = 0; id < NDIM; id++)   // set the center of the box at the origin
-    	    {
-	            pos[id][ii] = shift[id];
-	        }
-        }
-		shift[0] += Distance*sin(LatticeTheta)*cos(LatticePhi);
-		shift[1] += Distance*sin(LatticeTheta)*sin(LatticePhi);
-		shift[2] += Distance*cos(LatticeTheta);
-    }
+		for (int atom = NumbAtoms1; atom < NumbAtoms; atom++)
+		{
+			for (int it = 0; it < NumbTimes; it++)
+			{
+				int ii = it + atom*NumbTimes;
+				for (int id = 0; id < NDIM; id++)   // set the center of the box at the origin
+				{
+					pos[id][ii] = shift[id];
+				}
+			}
+			shift[0] += Distance*sin(LatticeTheta)*cos(LatticePhi);
+			shift[1] += Distance*sin(LatticeTheta)*sin(LatticePhi);
+			shift[2] += Distance*cos(LatticeTheta);
+		}
 
-	shift[0] -= Distance*sin(LatticeTheta)*cos(LatticePhi);
-	shift[1] -= Distance*sin(LatticeTheta)*sin(LatticePhi);
-	shift[2] -= Distance*cos(LatticeTheta);
-    for (int atom = 0; atom < NumbAtoms1; atom++)
-    {
-        for (int it = 0; it < NumbTimes; it++)
-        {
-            int ii = it + atom*NumbTimes;
-   		    for (int id = 0; id < NDIM; id++)   // set the center of the box at the origin
-    	    {
-	            pos[id][ii] = shift[id];
-	        }
-        }
 		shift[0] -= Distance*sin(LatticeTheta)*cos(LatticePhi);
 		shift[1] -= Distance*sin(LatticeTheta)*sin(LatticePhi);
 		shift[2] -= Distance*cos(LatticeTheta);
-    }
-#endif
+		for (int atom = 0; atom < NumbAtoms1; atom++)
+		{
+			for (int it = 0; it < NumbTimes; it++)
+			{
+				int ii = it + atom*NumbTimes;
+				for (int id = 0; id < NDIM; id++)   // set the center of the box at the origin
+				{
+					pos[id][ii] = shift[id];
+				}
+			}
+			shift[0] -= Distance*sin(LatticeTheta)*cos(LatticePhi);
+			shift[1] -= Distance*sin(LatticeTheta)*sin(LatticePhi);
+			shift[2] -= Distance*cos(LatticeTheta);
+		}
+	}	
 }
 
 #ifdef PROPOSED

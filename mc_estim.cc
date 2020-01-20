@@ -2605,7 +2605,6 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
     return spot;
 }
 
-#ifdef NORATIOTRICK
 double GetEstimNM(void)
 {
     int atom0, atom1;
@@ -2729,10 +2728,8 @@ double GetEstimDM(void)
     double estimDM = dens*potEstimDM;
     return estimDM;
 }
-#endif
 
-#ifdef RATIOTRICK
-double GetEstimNM(void)
+double GetEstimNM_Ratio(void)
 {
     int atom0, atom1;
     int type          = IMTYPE;
@@ -2820,7 +2817,7 @@ double GetEstimNM(void)
     return estimNM;
 }
 
-double GetEstimDM(void)
+double GetEstimDM_Ratio(void)
 {
     int type          = IMTYPE;
 
@@ -2894,7 +2891,6 @@ double GetEstimDM(void)
 	double estimDM = dens*potEstimDM;
     return estimDM;
 }
-#endif
 
 double GetPotEnergy(void)
 // should be compatible with PotEnergy() from mc_piqmc.cc

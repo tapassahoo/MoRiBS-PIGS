@@ -81,6 +81,12 @@ extern int    NumbRotLim; // limit of number of one type of rotors
 extern int NumbAtoms; // total number of atoms and molecules
 extern int NumbTypes; // Number of particles' types
 
+extern bool PIMC_SIM;
+extern bool PIGS_SIM;
+extern bool ENT_SIM;
+extern string ENT_ALGR;
+extern string ENT_ENSMBL;
+
 struct TParticle
 {
    int    numb;                    // number of atoms/molecule of this type  

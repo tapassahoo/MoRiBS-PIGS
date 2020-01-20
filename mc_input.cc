@@ -75,6 +75,11 @@ const char IO_DISTANCE[]       = "DISTANCE";
 const char IO_DIPOLEMOMENT[]   = "DIPOLEMOMENT";
 const char IO_NUMBPARTICLE[]   = "NUMBPARTICLE";
 const char IO_TRANSLATION[]    = "TRANSLATION";
+
+const char IO_PIMC_SIM[]       = "PIMC_SIM";
+const char IO_PIGS_SIM[]       = "PIGS_SIM";
+const char IO_ENT_SIM[]        = "ENT_SIM";
+
 string PotentialRead = "nopot";
 
 string MasterDir;
@@ -125,6 +130,10 @@ void IOReadParams(const char in_file[],int & mc_status)
 	InitMCCoords = 0;
 
 	MCStartBlock = 0;
+
+	PIMC_SIM = false;
+	PIGS_SIM = false;
+	ENT_SIM = false;
    
 	string params;
   	while (inf>>params)
@@ -361,6 +370,23 @@ void IOReadParams(const char in_file[],int & mc_status)
         	inf >> DipoleMoment;
      	} 
      	else
+     	if (params==IO_PIGS_SIM)
+     	{
+        	PIGS_SIM = true;
+     	} 
+     	else
+     	if (params==IO_PIMC_SIM)
+     	{
+        	PIMC_SIM = true;
+     	} 
+     	else
+     	if (params==IO_ENT_SIM)
+     	{
+        	ENT_SIM = true;
+			inf >> ENT_ALGR;
+			inf >> ENT_ENSMBL;
+     	} 
+     	else
      	{}
 
      	getline(inf,params,'\n');  // skip comments at the end of the line 
@@ -563,15 +589,18 @@ void StatusIO(int tstatus, const char file_name[])
         fid<<totalStep<<endl;
         fid<<sumsCount<<endl;
         fid<<totalCount<<endl;
-#ifdef PIGSENTTYPE
-        fid<<Distribution<<endl;
-#else
-        fid<<_total<<endl;
-        fid<<_kin_total<<endl;
-        fid<<_pot_total<<endl;
-        fid<<_rot_total<<endl;
-        fid<<_rot_total1<<endl;
-#endif
+		if (ENT_SIM)
+		{	
+			fid<<Distribution<<endl;
+		}	
+		else
+		{	
+			fid<<_total<<endl;
+			fid<<_kin_total<<endl;
+			fid<<_pot_total<<endl;
+			fid<<_rot_total<<endl;
+			fid<<_rot_total1<<endl;
+		}
          break;
       case IORead: 
          while (fid>>status)
@@ -581,15 +610,18 @@ void StatusIO(int tstatus, const char file_name[])
             fid>>totalStep;
             fid>>sumsCount;
             fid>>totalCount;
-#ifdef PIGSENTTYPE
-        	fid>>Distribution;
-#else
-            fid>>_total;
-            fid>>_kin_total;
-            fid>>_pot_total;
-            fid>>_rot_total;
-            fid>>_rot_total1;
-#endif
+			if (ENT_SIM)
+			{	
+				fid>>Distribution;
+			}	
+			else
+			{	
+				fid>>_total;
+				fid>>_kin_total;
+				fid>>_pot_total;
+				fid>>_rot_total;
+				fid>>_rot_total1;
+			}		
  
             getline(fid,status,'\n');  // skip comments 
          }

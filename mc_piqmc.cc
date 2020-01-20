@@ -774,21 +774,25 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
-#ifdef PIMCTYPE
-			MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-#endif
-//
-#ifdef PIGSTYPE
-			MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-#endif
-//
-#ifdef PIGSENTTYPE
-#ifdef SWAPTOUNSWAP
-			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
-#else
-			MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#endif
+			if (PIMC_SIM)
+			{		
+				MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			}	
+			if (PIGS_SIM)
+			{		
+				MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			}	
+			if (ENT_SIM)
+			{		
+				if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+				{
+					MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
+				}
+				if (ENT_ENSMBL == "BROKENPATH")
+				{
+					MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+				}
+			}
 		}
 	}
 
@@ -808,43 +812,48 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
  			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
-#ifdef PIMCTYPE
-			MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-#endif
-//
-#ifdef PIGSTYPE
-			MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-#endif
-//
-#ifdef PIGSENTTYPE
-#ifdef SWAPTOUNSWAP
-			MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
-#else
-			MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#endif
+			if (PIMC_SIM)
+			{		
+				MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			}	
+			if (PIGS_SIM)
+			{		
+				MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			}	
+			if (ENT_SIM)
+			{		
+				if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+				{
+					MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
+				}
+				if (ENT_ENSMBL == "BROKENPATH")
+				{
+					MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+				}
+			}
 		}
 	}
 
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
-#ifdef SWAPTOUNSWAP
-    double rand4 = runif(Rng);
-    MCSwap(rand4, Distribution);
-    if (Distribution == "Swap") 
+	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
 	{
-		MCAccepSwap += 1;
-		iSwap = 1;
-		iUnSwap = 0;
+		double rand4 = runif(Rng);
+		MCSwap(rand4, Distribution);
+		if (Distribution == "Swap") 
+		{
+			MCAccepSwap += 1;
+			iSwap = 1;
+			iUnSwap = 0;
+		}
+		else
+		{
+			MCAccepUnSwap += 1;
+			iSwap = 0;
+			iUnSwap = 1;
+		}
 	}
-    else
-	{
-		MCAccepUnSwap += 1;
-		iSwap = 0;
-		iUnSwap = 1;
-	}
-#endif
 }
 
 void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
@@ -1401,9 +1410,10 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 	int particleA2Min = 0;
 	int particleA2Max = 0;
 	int iRefAtom = RefAtom;
-#ifdef RATIOTRICK
-	if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
-#endif
+	if (ENT_ALGR == "RATIOTRICK")
+	{
+		if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
+	}
 	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
 // the old density
@@ -1429,17 +1439,20 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 	int beadM       = ((NumbRotTimes - 1)/2);
 	if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 	{
-#ifdef RATIOTRICK
-		if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+		if (ENT_ALGR == "RATIOTRICK")
 		{
-			dens_old = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, MCCosine);
+			if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+			{
+				dens_old = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, MCCosine);
+			}
 		}
-#else
-		if (Distribution == "Swap")
+		else
 		{
-			dens_old = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, MCCosine);
+			if (Distribution == "Swap")
+			{
+				dens_old = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, MCCosine);
+			}
 		}
-#endif
 	}
 //
    	if (fabs(dens_old)<RZERO) dens_old = 0.0;
@@ -1486,17 +1499,20 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
 
 	if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 	{
-#ifdef RATIOTRICK
-		if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+		if (ENT_ALGR == "RATIOTRICK")
 		{
-			dens_new = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, newcoords);
+			if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+			{
+				dens_new = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, newcoords);
+			}
 		}
-#else
-		if (Distribution == "Swap")
+		else
 		{
-			dens_new = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, newcoords);
+			if (Distribution == "Swap")
+			{
+				dens_new = GetDensityENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, p0, p1, newcoords);
+			}
 		}
-#endif
 	}
 //
 	if (fabs(dens_new)<RZERO) dens_new = 0.0;
@@ -1650,11 +1666,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
                 Eulang1[CHI] = 0.0;
 
 				weight1 = 1.0;
-#ifdef RATIOTRICK
 				if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2))) 
-#else
-				if (Distribution == "Swap")
-#endif
 				{
 					if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
             		{
@@ -1675,11 +1687,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
             }  //stype
         } //loop over atom1 (molecules)
 		spotSwap = 0.0;
-#ifdef RATIOTRICK
 		if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2)))
-#else
-		if (Distribution == "Swap")
-#endif
 		{
 			if (it == ((NumbRotTimes - 1)/2))
 			{
@@ -1737,19 +1745,20 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
     return spotReturn;
 }
 
-#ifdef SWAPTOUNSWAP
 void MCSwap(double rand4, string &Distribution)
 {
     double rd;
 
     if (Distribution == "unSwap")
     {
-        rd = GetEstimNM()/GetEstimDM();
+		if (ENT_ALGR == "RATIOTRICK") rd = GetEstimNM_Ratio()/GetEstimDM_Ratio();
+		else rd = GetEstimNM()/GetEstimDM();
     }
 
     if (Distribution == "Swap")
     {
-        rd = GetEstimDM()/GetEstimNM();
+        if (ENT_ALGR == "RATIOTRICK") rd = GetEstimDM_Ratio()/GetEstimNM_Ratio();
+		else rd = GetEstimDM()/GetEstimNM();
     }
 
     bool Accepted = false;
@@ -1763,7 +1772,6 @@ void MCSwap(double rand4, string &Distribution)
         if (DistributionInit == "Swap" ) Distribution = "unSwap";
     }
 }
-#endif
 
 #ifdef IOWRITE
 void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
@@ -2502,17 +2510,22 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 			rand2=runif(Rng);
 			rand3=runif(Rng);
 			rand4=runif(Rng);
-#ifdef PIMCTYPE
-			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSTYPE
-			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSENTTYPE
-#ifdef SWAPTOUNSWAP
-			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#endif
+
+			if (PIMC_SIM)
+			{
+				 MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+			}
+			if (PIGS_SIM)
+			{	
+				MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+			}
+			if (ENT_SIM)
+			{	
+				if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+				{
+					MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp, Distribution);
+				}
+			}
 		}
 	}
 
@@ -2525,7 +2538,7 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 	#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,rand4)
 	for (int itrot=1;itrot<NumbRotTimes;itrot=itrot+2)
 	{
-		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
+		for (int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
 			int offset=MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
 			int gatom=offset/NumbTimes;    // and translational degrees of freedom
@@ -2533,22 +2546,45 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 			rand2=runif(Rng);
 			rand3=runif(Rng);
 			rand4=runif(Rng);
-#ifdef PIMCTYPE
-			MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSTYPE
-			MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#ifdef PIGSENTTYPE
-#ifdef SWAPTOUNSWAP
-			MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
-#endif
-#endif
+
+			if (PIMC_SIM)
+			{
+				MCRot3Dstep(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+			}
+			if (PIGS_SIM)
+			{	
+				MCRot3DstepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+			}
+			if (ENT_SIM)
+			{	
+				if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+				{
+					MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp, Distribution);
+				}
+			}	
 		}
 	}
 
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
+
+	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+	{
+		double rand_ensmbl = runif(Rng);
+		MCSwap(rand_ensmbl, Distribution);
+		if (Distribution == "Swap") 
+		{
+			MCAccepSwap += 1;
+			iSwap = 1;
+			iUnSwap = 0;
+		}
+		else
+		{
+			MCAccepUnSwap += 1;
+			iSwap = 0;
+			iUnSwap = 1;
+		}
+	}
 }
 
 void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp)
@@ -2877,8 +2913,6 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 		//phi  = phi  + M_PI;
 	}		  
 
-	double sint = sqrt(1.0 - cost*cost);
-
 	newcoords[PHI][t1] = phi;
 	newcoords[CHI][t1] = chi;
 	newcoords[CTH][t1] = cost;
@@ -3050,34 +3084,37 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 	int particleA2Min = 0;
 	int particleA2Max = 0;
 	int iRefAtom = RefAtom;
-#ifdef RATIOTRICK
-	if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
-#endif
+	if (ENT_ALGR == "RATIOTRICK")
+	{
+		if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
+	}
 	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
-	int beadMminus1 = (((NumbRotTimes - 1)/2) - 1);
-	int beadM       = ((NumbRotTimes - 1)/2);
+	int beadMminus1 = (((NumbRotTimes-1)/2)-1);
+	int beadM       = ((NumbRotTimes-1)/2);
 
 	double dens_old;
 	if (RotDenType == 0) 
 	{
 		dens_old = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
 
-		if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
+		if (((it1==beadM) || (it1==beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 		{
-#ifdef RATIOTRICK
-			if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+			if (ENT_ALGR == "RATIOTRICK")
 			{
-				dens_old = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+				{
+					dens_old = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				}
 			}
-#else
-			if (Distribution == "Swap")
+			else
 			{
-				dens_old = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				if (Distribution == "Swap")
+				{
+					dens_old = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				}
 			}
-#endif
 		}
-	
 	}
 
 	if (fabs(dens_old)<RZERO) dens_old = 0.0;
@@ -3105,17 +3142,20 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 
 		if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 		{
-#ifdef RATIOTRICK
-			if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+			if (ENT_ALGR == "RATIOTRICK")
 			{
-				dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				if (((Distribution == "unSwap") && (RefAtom >= 2)) || (Distribution == "Swap"))
+				{
+					dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				}
 			}
-#else
-			if (Distribution == "Swap")
+			else
 			{
-				dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				if (Distribution == "Swap")
+				{
+					dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+				}
 			}
-#endif
 		}
 
 	}
@@ -3159,9 +3199,9 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 		MCAngles[CHI][t1] = chi; //toby adds
   
 		double sint=sqrt(1.0-cost*cost);
-		MCCosine [AXIS_X][t1] = sint*cos(phi);
-		MCCosine [AXIS_Y][t1] = sint*sin(phi);
-		MCCosine [AXIS_Z][t1] = cost;
+		MCCosine[AXIS_X][t1]=sint*cos(phi);
+		MCCosine[AXIS_Y][t1]=sint*sin(phi);
+		MCCosine[AXIS_Z][t1]=cost;
 		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
 		//and Ieff about and perpendicular to one molecule-ixed axis.
 	}	      
@@ -3176,23 +3216,23 @@ double GetDensity3DPIGS(int it1, double *Eulan0, double *Eulan1, double *Eulan2)
 	int istop=0;
 	double dens;
 	
-	if (it1 == 0)
+	if (it1==0)
 	{
 		rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 		CodeExit(istop);
-		dens = rho;
+		dens=rho;
 	}
-	else if (it1 == (NumbRotTimes - 1))
+	else if (it1==(NumbRotTimes-1))
 	{
 		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 		CodeExit(istop);
-		dens = rho;
+		dens=rho;
 	}
 	else
 	{
 		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 		CodeExit(istop);
-		dens = rho;
+		dens=rho;
 		rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 		CodeExit(istop);
 		dens *= rho;
@@ -3548,11 +3588,7 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
 
 			weight1 = 1.0;
-#ifdef RATIOTRICK
 			if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2))) 
-#else
-			if (Distribution == "Swap")
-#endif
 			{
 				if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
 				{
@@ -3573,11 +3609,7 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 		} //loop over atom1 (molecules)
 
 		spotSwap = 0.0;
-#ifdef RATIOTRICK
 		if ((Distribution == "Swap") || ((Distribution == "unSwap") && (RefAtom >= 2)))
-#else
-		if (Distribution == "Swap")
-#endif
 		{
 			if (it == ((NumbRotTimes - 1)/2))
 			{
@@ -4596,9 +4628,10 @@ double PotRotEnergy(int atom0, double *Eulang0, int it)
 	double spotSwap = 0.0;
     double weight, weight1;
 	weight = 1.0;
-#ifdef PIGSTYPE
-    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
-#endif
+	if (PIGS_SIM)
+	{	
+		if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
+	}
 
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
 	{
