@@ -84,5 +84,8 @@ const char SO2[]     = "SO2";
 const char HCOOCH3[] = "HCOOCH3";
 const char HF[]      = "HF";
 const char CH3F[]      = "CH3F";
+const char RATIOTRICK[]= "RATIOTRICK";
+const char BROKENPATH[]= "BROKENPATH";
+const char EXTENDED_ENSMBL[]= "EXTENDED_ENSMBL";
 
 #endif  //MC_const.h

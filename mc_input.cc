@@ -383,8 +383,8 @@ void IOReadParams(const char in_file[],int & mc_status)
      	if (params==IO_ENT_SIM)
      	{
         	ENT_SIM = true;
-			inf >> ENT_ALGR;
 			inf >> ENT_ENSMBL;
+			inf >> ENT_ALGR;
      	} 
      	else
      	{}
@@ -552,6 +552,13 @@ void IOReadParams(const char in_file[],int & mc_status)
 #ifdef ROTS_TEST
    cout << "   <<<<<<  Free rotor test [ROTS_TEST 1]  >>>>>>>   " << endl;
 #endif
+
+	cout<<" ENT_SIM "<<ENT_SIM<<endl;
+	if (ENT_SIM)
+	{
+		cout<<ENT_ENSMBL<<endl;
+		cout<<ENT_ALGR<<endl;
+	}
 
    cout << endl;
    cout << endl;

@@ -37,10 +37,10 @@ double GetPhi();
 double GetPotEnergy(void);
 double GetKinEnergy(void);
 double GetPotEnergy_Entanglement(int atom0, int atom1);
-double GetEstimNM(void);
-double GetEstimDM(void);
-double GetEstimNM_Ratio(void);
-double GetEstimDM_Ratio(void);
+double GetEstimNM(int);
+double GetEstimDM(int);
+double GetEstimNM_Ratio(int);
+double GetEstimDM_Ratio(int);
 void GetIndex(int , int , int &, int &, int &, int &);
 double *GetCosThetaEntanglement();
 double *GetPhiEntanglement();
@@ -118,4 +118,5 @@ double C_fun(double );
 double Ureal(int , int , double *, double *, double *);
 double Uk(double *, double *, double *);
 #endif
+void CodeExit(int );
 #endif  // mc_estim.h

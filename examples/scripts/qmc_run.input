@@ -65,3 +65,4 @@ distanceArg_input    distance_input
 dipolemomentArg_input     dipolemoment_input
 NUMBPARTICLE    numbparticle_input
 read_input
+sim_input  sim_ensmbl_input  sim_algr_input

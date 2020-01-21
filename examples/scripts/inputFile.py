@@ -9,9 +9,9 @@ import math
 def Getbeads(TypeCal, variableName):
 	if (TypeCal == "ENT"):
 		if (variableName == "tau"):
-			list_nb = [4,8,12,16,20,24,28,32,36,40]
+			list_nb = [10, 20]
 		if (variableName == "beta"):
-			list_nb = [4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40]
+			list_nb = [10, 20]
 
 	if (TypeCal == "PIMC"):
 		if (variableName == "tau"):
@@ -47,6 +47,11 @@ class GetStepAndLevel:
 				#self.step       = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0] #list_nb = [4, 10, 14, 20, 24, 30] beta = 0.2
 				#self.step       = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0] #list_nb = [5, 10, 20, 30, 40, 50, 60] beta = 0.32
 				self.level      = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+
+			if (self.molecule_rot == "H2O"):
+				self.step_trans = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
+				self.step       = [2.0, 0.4, 0.3, 0.25, 0.20, 0.20, 0.18, 0.15, 0.15, 0.15, 0.14, 0.12, 0.10, 0.10, 0.10]
+				self.level      = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 		if ((self.variableName == "tau") and (self.TypeCal == "PIGS")):
 			if (self.molecule_rot == "H2"):

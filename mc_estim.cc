@@ -2587,42 +2587,72 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
 {
 	const char *_proc_=__func__;
 
-    int it       = (NumbRotTimes - 1)/2;
+    int it       = (NumbRotTimes-1)/2;
+	int type0   = MCType[atom0];
+	int type1   = MCType[atom1];
+	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+	int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+	string stype = MCAtom[type0].type;
 
-    int offset0  = NumbRotTimes*atom0;
-    int offset1  = NumbRotTimes*atom1;
     int t0       = offset0 + it;
     int t1       = offset1 + it;
+		
+	double spot=0.0;
 
-	double Eulang0[NDIM], Eulang1[NDIM];
-   	Eulang0[PHI] = MCAngles[PHI][t0];
-   	Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-   	Eulang0[CHI] = 0.0;
-   	Eulang1[PHI] = MCAngles[PHI][t1];
-   	Eulang1[CTH] = acos(MCAngles[CTH][t1]);
-   	Eulang1[CHI] = 0.0;
-    double spot  = 0.5*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+	if ((stype == HF) && (MCType[atom1] == MCType[atom0]))
+	{
+		double Eulang0[NDIM], Eulang1[NDIM];
+		Eulang0[PHI] = MCAngles[PHI][t0];
+		Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+		Eulang0[CHI] = 0.0;
+		Eulang1[PHI] = MCAngles[PHI][t1];
+		Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+		Eulang1[CHI] = 0.0;
+		spot  = 0.5*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+	}
+
+	if ((stype == H2O) && (MCType[atom1] == MCType[atom0]))
+	{
+		double com1[3];
+		double com2[3];
+		double Eulang1[3];
+		double Eulang2[3];
+		double E_2H2O;
+		for (int id=0; id<NDIM; id++)
+		{
+			com1[id] = MCCoords[id][t0];
+			com2[id] = MCCoords[id][t1];
+		}
+		int tm0=offset0+it/RotRatio;
+		int tm1=offset1+it/RotRatio;
+		Eulang1[CTH]=acos(MCAngles[CTH][tm0]);
+		Eulang1[PHI]=MCAngles[PHI][tm0];
+		Eulang1[CHI]=MCAngles[CHI][tm0];
+		Eulang2[CTH]=acos(MCAngles[CTH][tm1]);
+		Eulang2[PHI]=MCAngles[PHI][tm1];
+		Eulang2[CHI]=MCAngles[CHI][tm1];
+		caleng_(com1, com2, &E_2H2O, Eulang1, Eulang2);
+		spot = 0.5*E_2H2O;
+	}
     return spot;
 }
 
-double GetEstimNM(void)
+double GetEstimNM(int type)
 {
     int atom0, atom1;
-    int type        = IMTYPE;
-
    	int particleA1Min = 0;
    	int particleA1Max = 0;
    	int particleA2Min = 0;
    	int particleA2Max = 0;
 	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
-    double spot    = 0.0;
+    double spot = 0.0;
 
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
     {
         for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
         {
-            spot      += GetPotEnergyEntanglement(atom0, atom1);
+            spot += GetPotEnergyEntanglement(atom0, atom1);
 		}
     }
 
@@ -2630,7 +2660,7 @@ double GetEstimNM(void)
     {
     	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
     	{
-        	spot      += GetPotEnergyEntanglement(atom0, atom1);
+        	spot += GetPotEnergyEntanglement(atom0, atom1);
     	}
 	}
     double potEstimNM = exp(-MCRotTau*spot);
@@ -2642,18 +2672,24 @@ double GetEstimNM(void)
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
 	{
     	int atom1 = particleA2Max - (atom0 - particleA1Min);
-    	int offset0 = NumbRotTimes*atom0;
-    	int offset1 = NumbRotTimes*atom1;
+
+		int type0   = MCType[atom0];
+		int type1   = MCType[atom1];
+		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
 
     	int t1M1 = offset0 + it0;
     	int t1M = offset1 + it1;
 
-    	double p0   = 0.0;
-    	for (int id = 0;id<NDIM;id++)
-   	 	{
-        	p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
-    	}
-    	dens1 *= SRotDens(p0,type);
+		if (MCAtom[type].molecule == 4)
+		{
+			double p0   = 0.0;
+			for (int id = 0;id<NDIM;id++)
+			{
+				p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+			}
+			dens1 *= SRotDens(p0,type);
+		}
 	}
 
     double dens2 = 1.0;
@@ -2661,40 +2697,43 @@ double GetEstimNM(void)
 	{
     	int atom1 = particleA1Max - (atom0 - particleA2Min);
 
-    	int offset0 = NumbRotTimes*atom0;
-    	int offset1 = NumbRotTimes*atom1;
+		int type0   = MCType[atom0];
+		int type1   = MCType[atom1];
+		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
 
     	int t1M1 = offset0 + it0;
     	int t1M = offset1 + it1;
 
-    	double p0   = 0.0;
-    	for (int id = 0;id<NDIM;id++)
-   	 	{
-        	p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
-    	}
-    	dens2 *= SRotDens(p0,type);
+		if (MCAtom[type].molecule == 4)
+		{
+			double p0   = 0.0;
+			for (int id = 0;id<NDIM;id++)
+			{
+				p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
+			}
+			dens2 *= SRotDens(p0,type);
+		}
 	}
   	double estimNM = dens1*dens2*potEstimNM;
     return estimNM;
 }
 
-double GetEstimDM(void)
+double GetEstimDM(int type)
 {
-    int type       = IMTYPE;
-
    	int particleA1Min = 0;
    	int particleA1Max = 0;
    	int particleA2Min = 0;
    	int particleA2Max = 0;
 	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
-    double spot    = 0.0;
+    double spot = 0.0;
 
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
 	{
     	for (int atom1 = 0; atom1 < particleA1Min; atom1++)
     	{
-        	spot      += GetPotEnergyEntanglement(atom0, atom1);
+        	spot += GetPotEnergyEntanglement(atom0, atom1);
     	}
 	}
 
@@ -2702,7 +2741,7 @@ double GetEstimDM(void)
 	{
     	for (int atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
     	{
-        	spot      += GetPotEnergyEntanglement(atom0, atom1);
+        	spot += GetPotEnergyEntanglement(atom0, atom1);
     	}
 	}
     double potEstimDM = exp(-MCRotTau*spot);
@@ -2713,26 +2752,29 @@ double GetEstimDM(void)
         int it0 = (((NumbRotTimes - 1)/2)-1);
         int it1 = ((NumbRotTimes - 1)/2);
 
-        int offset0 = NumbRotTimes*atom0;
+		int type0   = MCType[atom0];
+		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
 
         int t0 = offset0 + it0;
         int t1 = offset0 + it1;
 
-        double p0   = 0.0;
-        for (int id = 0;id<NDIM;id++)
-        {
-            p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
-        }
-        dens *= SRotDens(p0,type);
+		if (MCAtom[type].molecule == 4)
+		{
+			double p0   = 0.0;
+			for (int id = 0;id<NDIM;id++)
+			{
+				p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+			}
+			dens *= SRotDens(p0,type);
+		}
     }
     double estimDM = dens*potEstimDM;
     return estimDM;
 }
 
-double GetEstimNM_Ratio(void)
+double GetEstimNM_Ratio(int type)
 {
     int atom0, atom1;
-    int type          = IMTYPE;
 
    	int particleA1Min = 0;
    	int particleA1Max = 0;
@@ -2746,13 +2788,13 @@ double GetEstimNM_Ratio(void)
 	    atom0 = particleA1Min;
        	for (atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
 	    {
-            spot  += GetPotEnergyEntanglement(atom0, atom1);
+            spot += GetPotEnergyEntanglement(atom0, atom1);
 	    }
 
 	    atom0 = particleA2Max;
   		for (atom1 = 0; atom1 < particleA1Min; atom1++)
   		{
-      		spot  += GetPotEnergyEntanglement(atom0, atom1);
+      		spot += GetPotEnergyEntanglement(atom0, atom1);
 		}
 	}
 	else
@@ -2760,67 +2802,95 @@ double GetEstimNM_Ratio(void)
 	    atom0 = particleA1Min;
 		for (atom1 = (particleA1Min+1); atom1 <= particleA1Max; atom1++)
 		{
-   	    	spot  += GetPotEnergyEntanglement(atom0, atom1);
+   	    	spot += GetPotEnergyEntanglement(atom0, atom1);
 		}
 
        	for (atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
         {
-   	        spot  += GetPotEnergyEntanglement(atom0, atom1);
+   	        spot += GetPotEnergyEntanglement(atom0, atom1);
 		}
 
 	    atom0 = particleA2Max;
 		for (atom1 = particleA2Min; atom1 < particleA2Max; atom1++)
 		{
-   	    	spot  += GetPotEnergyEntanglement(atom0, atom1);
+   	    	spot += GetPotEnergyEntanglement(atom0, atom1);
 		}
 
    		for (int atom1 = 0; atom1 < particleA1Min; atom1++)
    	 	{
-   	   		spot  += GetPotEnergyEntanglement(atom0, atom1);
+   	   		spot += GetPotEnergyEntanglement(atom0, atom1);
     	}
 	}
    	double potEstimNM = exp(-MCRotTau*spot);
 
 	//
-   	int it0  = (((NumbRotTimes - 1)/2)-1);
-   	int it1  = ((NumbRotTimes - 1)/2);
+   	int it0 = (((NumbRotTimes-1)/2)-1);
+   	int it1 = ((NumbRotTimes-1)/2);
 
-	int offset0, offset1;
-   	offset0  = NumbRotTimes*particleA1Min;
-   	offset1  = NumbRotTimes*particleA2Max;
+	int type0 = MCType[particleA1Min];
+	int type1 = MCType[particleA2Max];
+	int offset0 = MCAtom[type0].offset+particleA1Min*NumbTimes;
+	int offset1 = MCAtom[type1].offset+particleA2Max*NumbTimes;
 
-	int t0, t1;
-   	t0       = offset0 + it0;
-   	t1       = offset1 + it1;
+	double dens = 1.0;
+	int t0, t1, t0p, t1p;
+   	t0 = offset0 + it0;
+   	t1 = offset1 + it1;
+   	t0p = offset1 + it0;
+   	t1p = offset0 + it1;
 
-   	double p0;
-	p0       = 0.0;
-   	for (int id  = 0;id<NDIM;id++)
-   	{
-   		p0  += (MCCosine[id][t0]*MCCosine[id][t1]);
-   	}
-   	double dens1 = SRotDens(p0,type);
+	if (MCAtom[type].molecule == 4)
+	{
+		double p0, p0p;
+		p0 = 0.0;
+		p0p = 0.0;
+		for (int id=0;id<NDIM;id++)
+		{
+			p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+			p0p += (MCCosine[id][t0]*MCCosine[id][t1]);
+		}
+		dens=SRotDens(p0,type0)*SRotDens(p0p,type1);
+	}
+	if (MCAtom[type].molecule == 2)
+	{
+		double rho = 0.0;
+		double erot = 0.0;
+		double esq  = 0.0;
+		double Eulrel[3];
+		int istop=0;
+		double Eulan0[3], Eulan1[3];
 
-	//
-   	t1       = offset0 + it1;
-   	t0       = offset1 + it0;
+		Eulan0[PHI]=MCAngles[PHI][t0];
+		Eulan0[CTH]=acos(MCAngles[CTH][t0]);
+		Eulan0[CHI]=MCAngles[CHI][t0];
 
-   	p0       = 0.0;
-   	for (int id = 0;id<NDIM;id++)
-   	{
-   		p0  += (MCCosine[id][t0]*MCCosine[id][t1]);
-   	}
-   	double dens2 = SRotDens(p0,type);
-	//
+		Eulan1[PHI]=MCAngles[PHI][t1];
+		Eulan1[CTH]=acos(MCAngles[CTH][t1]);
+		Eulan1[CHI]=MCAngles[CHI][t1];
 
-  	double estimNM = dens1*dens2*potEstimNM;
+		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+		CodeExit(istop);
+		dens = rho;
+
+		Eulan0[PHI]=MCAngles[PHI][t0p];
+		Eulan0[CTH]=acos(MCAngles[CTH][t0p]);
+		Eulan0[CHI]=MCAngles[CHI][t0p];
+
+		Eulan1[PHI]=MCAngles[PHI][t1p];
+		Eulan1[CTH]=acos(MCAngles[CTH][t1p]);
+		Eulan1[CHI]=MCAngles[CHI][t1p];
+
+		rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+		CodeExit(istop);
+		dens *= rho;
+	}
+
+  	double estimNM = dens*potEstimNM;
     return estimNM;
 }
 
-double GetEstimDM_Ratio(void)
+double GetEstimDM_Ratio(int type)
 {
-    int type          = IMTYPE;
-
    	int particleA1Min = 0;
    	int particleA1Max = 0;
    	int particleA2Min = 0;
@@ -2873,20 +2943,45 @@ double GetEstimDM_Ratio(void)
 	double dens = 1.0;
 	for (atom0 = particleA1Min; atom0 <= particleA2Max; atom0 += (2*RefAtom-1))
 	{
-		int it0 = (((NumbRotTimes - 1)/2)-1);
-		int it1 = ((NumbRotTimes - 1)/2);
+		int it0 = (((NumbRotTimes-1)/2)-1);
+		int it1 = ((NumbRotTimes-1)/2);
 
-		int offset0 = NumbRotTimes*atom0;
+		int type0 = MCType[atom0];
+		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
 
 		int t0 = offset0 + it0;
 		int t1 = offset0 + it1;
 
-		double p0   = 0.0;
-		for (int id = 0;id<NDIM;id++)
+		if (MCAtom[type].molecule == 4)
 		{
-			p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+			double p0   = 0.0;
+			for (int id = 0;id<NDIM;id++)
+			{
+				p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+			}
+			dens *= SRotDens(p0,type);
 		}
-		dens *= SRotDens(p0,type);
+		if (MCAtom[type].molecule == 2)
+		{
+			double rho = 0.0;
+			double erot = 0.0;
+			double esq  = 0.0;
+			double Eulrel[3];
+			int istop=0;
+			double Eulan0[3], Eulan1[3];
+
+			Eulan0[PHI]=MCAngles[PHI][t0];
+			Eulan0[CTH]=acos(MCAngles[CTH][t0]);
+			Eulan0[CHI]=MCAngles[CHI][t0];
+
+			Eulan1[PHI]=MCAngles[PHI][t1];
+			Eulan1[CTH]=acos(MCAngles[CTH][t1]);
+			Eulan1[CHI]=MCAngles[CHI][t1];
+
+			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			CodeExit(istop);
+			dens *= rho;
+		}
 	}
 	double estimDM = dens*potEstimDM;
     return estimDM;
@@ -5705,3 +5800,13 @@ void GetIndex(int particle, int type, int &particleA1Min, int &particleA1Max, in
     particleA2Min = particleA1Max + 1;
     particleA2Max = particleA2Min + particle - 1;
 }
+
+void CodeExit(int istop)
+{
+    if(istop == 1)
+    {
+        cerr<<"large matrix test error"<<endl;
+        exit(0);
+    }
+}
+

@@ -48,7 +48,7 @@ void MCGetAveragePIMC(void);
 void MCResetBlockAveragePIMC(void);
 void MCGetAveragePIGS(void);
 void MCResetBlockAveragePIGS(void);
-void MCGetAveragePIGSENT(void);
+void MCGetAveragePIGSENT(int);
 void MCResetBlockAveragePIGSENT(void);
 
 void MCSaveBlockAverages(long int);
@@ -157,8 +157,6 @@ extern "C" void prtper_(int *PIndex,int *NBoson,long int *blockCount);
 extern "C" void vinit_();
 double MCAccepSwap;
 double MCAccepUnSwap;
-int iSwap;
-int iUnSwap;
 #ifdef PROPOSED
 int iChooseOld = 0;
 int iChooseNew;
@@ -176,7 +174,7 @@ Distribution = "unSwap";
 	exit(11);
 #endif
    	randomseed(); //set seed according to clock
-	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+	if (ENT_ENSMBL == EXTENDED_ENSMBL)
 	{
 		srand( time(NULL) );
 	}
@@ -669,7 +667,7 @@ ParamsPotential();
                     	//MCGetAverage();
                     	if (PIMC_SIM) MCGetAveragePIMC();
                     	if (PIGS_SIM) MCGetAveragePIGS();
-                    	if (ENT_SIM) MCGetAveragePIGSENT();
+						if (ENT_SIM && (ENT_ENSMBL == BROKENPATH)) MCGetAveragePIGSENT(IMTYPE);
 					    //omp_set_num_threads(1);
 					    //MCGetAverage();
 					    //omp_set_num_threads(NThreads);
@@ -686,6 +684,7 @@ ParamsPotential();
                     	}
                  	}
               	}
+				if (ENT_SIM && (ENT_ENSMBL == EXTENDED_ENSMBL)) MCGetAveragePIGSENT(IMTYPE);
 
 // DUMP, save global average. if avergCount = 0, then MCGetAverage is never called in this block.  All Saving steps are skipped.
 
@@ -960,7 +959,7 @@ void MCResetBlockAveragePIGS(void)
 
 void MCResetBlockAveragePIGSENT(void) 
 {
-	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+	if (ENT_ENSMBL == EXTENDED_ENSMBL)
 	{
 		MCAccepSwap = 0.0;
 		MCAccepUnSwap = 0.0;
@@ -977,12 +976,6 @@ void MCResetBlockAveragePIGSENT(void)
 
 #ifdef PIGSENTBOTH
 	avergCountENT = 0.0;
-    _dbpot     = 0.0;  
-    _bpot      = 0.0;
-    _btotal    = 0.0;
-    _bkin        = 0.0;
-    _brot        = 0.0;
-    _brot1        = 0.0;
 #endif
 	PrintXYZprl = 1;
 	PrintYrfl   = 1;
@@ -990,21 +983,21 @@ void MCResetBlockAveragePIGSENT(void)
 	PrintZrfl   = 1;
 }
 
-void MCGetAveragePIGSENT(void) 
+void MCGetAveragePIGSENT(int type) 
 {
 	avergCount       += 1.0;
 	totalCount       += 1.0;  
 
 	double snm, sdm;
-	if (ENT_ENSMBL == "EXTENDED_ENSMBL")
+	if (ENT_ENSMBL == EXTENDED_ENSMBL)
 	{
-		snm = (double)MCAccepSwap/(double)((MCAccepSwap+MCAccepUnSwap));
-		sdm = (double)MCAccepUnSwap/((double)(MCAccepSwap+MCAccepUnSwap));
+		snm = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
+		sdm = MCAccepUnSwap/(MCAccepSwap+MCAccepUnSwap);
 	}
 	else
 	{
-		snm = 0.0;//GetEstimNM();
-		sdm = 0.0;//GetEstimDM();
+		snm = GetEstimNM(type);
+		sdm = GetEstimDM(type);
 	}
     _bnm             += snm;
     _bdm             += sdm;
@@ -1016,104 +1009,7 @@ void MCGetAveragePIGSENT(void)
 	_trOfDensitySq   += snm/sdm;
 	_trOfDensitySq_total += snm/sdm;
 #endif
-#ifdef PIGSENTBOTH
-	if (Distribution == "unSwap")
-	{
-		avergCountENT    += 1.0;
-		totalCountENT    += 1.0;  
 
-		double spot       = GetPotEnergyPIGSENT();//GetPotEnergyPIGS(); // pot energy and density distributions
-		_bpot            += spot;                     // block average for pot energy
-		_pot_total       += spot;
-		double stotal     = GetTotalEnergyPIGSENT();//GetTotalEnergy();         // Total energy
-		_btotal          += stotal;                   // kin+pot
-		_total           += stotal;
-		double srot1      = (stotal - spot);
-		_brot1           += srot1;
-		_rot_total1      += srot1;
-
-		double cosTheta   = 0.0;
-		double compxyz[NDIM];
-		compxyz[0] = 0.0;
-		compxyz[1] = 0.0;
-		compxyz[2] = 0.0;
-
-		GetCosThetaPIGSENT(cosTheta, compxyz);
-		double scostheta  = cosTheta;
-		double scompx     = compxyz[0];
-		double scompy     = compxyz[1];
-		double scompz     = compxyz[2];
-
-		_bcostheta       += scostheta; 
-		_costheta_total  += scostheta;
-
-		_ucompx          += scompx;
-		_ucompy          += scompy;
-		_ucompz          += scompz;
-		_ucompx_total    += scompx;
-		_ucompy_total    += scompy;
-		_ucompz_total    += scompz;
-#ifdef DDCORR
-		int NumbAtoms1 = NumbAtoms/2;
-		int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
-    	double DipoleCorrXYZ[NDIMDP];
-    	double DipoleCorrX[NDIMDP];
-    	double DipoleCorrY[NDIMDP];
-    	double DipoleCorrZ[NDIMDP];
-    	double DipoleCorrXY[NDIMDP];
-
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			DipoleCorrXYZ[idp] = 0.0;
-			DipoleCorrX[idp]   = 0.0;
-			DipoleCorrY[idp]   = 0.0;
-			DipoleCorrZ[idp]   = 0.0;
-			DipoleCorrXY[idp]  = 0.0;
-		}
-
-		GetDipoleCorrelationPIGSENT(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
-
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
-			_cdipoleX[idp]   += DipoleCorrX[idp];
-			_cdipoleY[idp]   += DipoleCorrY[idp];
-			_cdipoleZ[idp]   += DipoleCorrZ[idp];
-			_cdipoleXY[idp]  += DipoleCorrXY[idp];
-			_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
-			_cdipoleX_total[idp]   += DipoleCorrX[idp];
-			_cdipoleY_total[idp]   += DipoleCorrY[idp];
-			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
-			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
-		}
-#endif
-		double srot;
-		if (ROTATION)
-		{
-			if(MCAtom[IMTYPE].molecule == 1)
-			{
-				srot      = GetRotEnergy();           // kin energy
-			}
-
-			if(MCAtom[IMTYPE].molecule == 3)
-			{
-				srot      = GetRotPlanarEnergy();     // kin energy
-			}
-
-			if(MCAtom[IMTYPE].molecule == 3)
-			{
-				srot          = GetRotE3D();
-			}
-        
-			if(MCAtom[IMTYPE].molecule == 4)
-			{
-				srot      = GetRotEnergyPIGS();           // kin energy
-			}
-			_brot        += srot;
-			_rot_total   += srot;
-		}
-	}
-#endif
 //  reflect for MF molecule
 	if(IREFLY == 1)
 	{
@@ -1927,9 +1823,12 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;
-    fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
-    fid << setw(IO_WIDTH) << _trOfDensitySq/avergCount << BLANK;
+	fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
+	fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
+	if (ENT_ENSMBL == BROKENPATH)
+	{
+		fid << setw(IO_WIDTH) << _trOfDensitySq/avergCount << BLANK;
+	}
     fid << endl;
     fid.close();
 }
@@ -1954,14 +1853,6 @@ void SaveSumEnergy (double acount, double numb)  // global average
 		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
 		_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
 	}
-//
-#ifdef PIGSENTBOTH
-	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
-	_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
-	_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
-	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
-	_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
-#endif
 //
 #ifdef IOWRITE
 	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
@@ -2345,6 +2236,8 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
    {
       double ratio_rotat = MCAccep[IMTYPE][MCROTAT]/MCTotal[IMTYPE][MCROTAT];
       cout<<BLANK<< "Rot: ";
+      cout<<BLANK<< MCAccep[IMTYPE][MCROTAT]<<BLANK;
+      cout<<BLANK<< MCTotal[IMTYPE][MCROTAT]<<BLANK;
       cout<<setw(w)<<ratio_rotat<<BLANK;       // accept ratio for "molecular" move
    }
 

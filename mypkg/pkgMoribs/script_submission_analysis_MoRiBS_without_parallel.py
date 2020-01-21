@@ -44,8 +44,8 @@ parser.add_argument(
 parser.add_argument(
 	"--scal",
 	help="subtype of calculations - must be defined as a string in case of ENT.",
-	default="SWAPTOUNSWAP",
-	choices=["SWAPTOUNSWAP", "BROKENPATH"],
+	default="EXTENDED_ENSMBL",
+	choices=["EXTENDED_ENSMBL", "BROKENPATH"],
 )
 parser.add_argument(
 	"--RATIO",
@@ -187,6 +187,7 @@ else:
 RotorType = args.Type
 
 ENT_TYPE = args.scal
+ENT_ALGR = args.RATIO
 
 extra_file_name = extraName
 
@@ -400,7 +401,7 @@ for particleA in particleAList:
 	iStep = 0
 	for i in list_nb:
 
-		if TypeCal == "PIMC":
+		if (TypeCal == "PIMC"):
 
 			if (i%2==0):
 				value = i
@@ -424,9 +425,7 @@ for particleA in particleAList:
 					PPA1 = True
 					lmax = args.lmax
 					ltotalmax = args.ltotalmax
-					support.GetTwoBodyDensity(
-						Rpt, dipolemoment, numbbeads, lmax, ltotalmax, tau, molecule_rot
-					)
+					support.GetTwoBodyDensity(Rpt,dipolemoment,numbbeads,lmax,ltotalmax,tau,molecule_rot)
 					call(["mv", "PairDensity.txt", dir_run_input_pimc])
 				else:
 					PPA1 = False
@@ -436,123 +435,19 @@ for particleA in particleAList:
 				else:
 					Restart1 = False
 
-				support.Submission(
-					NameOfServer,
-					status,
-					TransMove,
-					RotMove,
-					RUNDIR,
-					dir_run_job,
-					folder_run,
-					src_dir,
-					execution_file,
-					Rpt,
-					numbbeads,
-					i,
-					step_rot,
-					step_COM,
-					level_bisection,
-					temperature,
-					numbblocks,
-					numbpass,
-					molecule_rot,
-					numbmolecules,
-					gfact,
-					dipolemoment,
-					TypeCal,
-					dir_output,
-					dir_run_input_pimc,
-					RUNIN,
-					particleA,
-					NameOfPartition,
-					status_cagepot,
-					iStep,
-					PPA1,
-					user_name,
-					out_dir,
-					source_dir_exe,
-					Restart1,
-					numbblocks_Restart1,
-					crystal,
-					RotorType,
-					spin_isomer,
-				)
+				support.Submission(NameOfServer,status,TransMove,RotMove,RUNDIR,dir_run_job,folder_run,src_dir,execution_file,Rpt,numbbeads,i,step_rot,step_COM,level_bisection,temperature,numbblocks,numbpass,molecule_rot,numbmolecules,gfact,dipolemoment,TypeCal,ENT_TYPE, ENT_ALGR, dir_output,dir_run_input_pimc,RUNIN,particleA,NameOfPartition,status_cagepot,iStep,PPA1,user_name,out_dir,source_dir_exe,Restart1,numbblocks_Restart1,crystal,RotorType,spin_isomer)
 
 			if status == "analysis":
 
 				final_dir_in_work = dir_output + folder_run
 				try:
-					fanalyzeEnergy.write(
-						support.GetAverageEnergy(
-							TypeCal,
-							numbbeads,
-							variable,
-							final_dir_in_work,
-							preskip,
-							postskip,
-							numbblocks,
-						)
-					)
-					fanalyzeCorr.write(
-						support.GetAverageOrientation(
-							numbbeads, variable, final_dir_in_work, preskip, postskip
-						)
-					)
-					fanalyzeTotalCorr.write(
-						support.GetAverageCorrelation(
-							"TotalCorr",
-							numbmolecules,
-							numbbeads,
-							variable,
-							final_dir_in_work,
-							preskip,
-							postskip,
-						)
-					)
-					fanalyzeXCorr.write(
-						support.GetAverageCorrelation(
-							"XCorr",
-							numbmolecules,
-							numbbeads,
-							variable,
-							final_dir_in_work,
-							preskip,
-							postskip,
-						)
-					)
-					fanalyzeYCorr.write(
-						support.GetAverageCorrelation(
-							"YCorr",
-							numbmolecules,
-							numbbeads,
-							variable,
-							final_dir_in_work,
-							preskip,
-							postskip,
-						)
-					)
-					fanalyzeZCorr.write(
-						support.GetAverageCorrelation(
-							"ZCorr",
-							numbmolecules,
-							numbbeads,
-							variable,
-							final_dir_in_work,
-							preskip,
-							postskip,
-						)
-					)
-					fanalyzeXYCorr.write(
-						support.GetAverageCorrelation(
-							"XYCorr",
-							numbmolecules,
-							numbbeads,
-							variable,
-							final_dir_in_work,
-							preskip,
-							postskip,
-						)
-					)
+					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
+					fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 				except:
 					pass
 		else:
@@ -575,14 +470,7 @@ for particleA in particleAList:
 
 			if status == "rename":
 				folder_rename = file2_name + str(numbbeads)
-				support.GetRenamingFunc(
-					dir_run_input_pimc,
-					dir_input_pimc_renamed,
-					dir_output,
-					folder_run,
-					folder_rename,
-					src_dir,
-				)
+				support.GetRenamingFunc(dir_run_input_pimc,dir_input_pimc_renamed,dir_output,folder_run,folder_rename,src_dir)
 
 			if status == "submission":
 
@@ -590,9 +478,7 @@ for particleA in particleAList:
 					PPA1 = True
 					lmax = args.lmax
 					ltotalmax = args.ltotalmax
-					support.GetTwoBodyDensity(
-						Rpt, dipolemoment, numbbeads, lmax, ltotalmax, tau, molecule_rot
-					)
+					support.GetTwoBodyDensity(Rpt,dipolemoment,numbbeads,lmax,ltotalmax,tau,molecule_rot)
 					call(["mv", "PairDensity.txt", dir_run_input_pimc])
 				else:
 					PPA1 = False
@@ -602,7 +488,7 @@ for particleA in particleAList:
 				else:
 					Restart1 = False
 
-				support.Submission(NameOfServer,status,TransMove,RotMove,RUNDIR,dir_run_job,folder_run,src_dir,execution_file,Rpt,numbbeads,i,step_rot,step_COM,level_bisection,temperature,numbblocks,numbpass,molecule_rot,numbmolecules,gfact,dipolemoment,TypeCal, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal, RotorType, spin_isomer)
+				support.Submission(NameOfServer,status,TransMove,RotMove,RUNDIR,dir_run_job,folder_run,src_dir,execution_file,Rpt,numbbeads,i,step_rot,step_COM,level_bisection,temperature,numbblocks,numbpass,molecule_rot,numbmolecules,gfact,dipolemoment,TypeCal, ENT_TYPE, ENT_ALGR, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1, numbblocks_Restart1, crystal, RotorType, spin_isomer)
 
 			if status == "analysis":
 
@@ -610,17 +496,7 @@ for particleA in particleAList:
 				#support.RemoveFiles(TypeCal, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
 				try:
 					if TypeCal != "ENT":
-						fanalyzeEnergy.write(
-							support.GetAverageEnergy(
-								TypeCal,
-								numbbeads,
-								variable,
-								final_dir_in_work,
-								preskip,
-								postskip,
-								numbblocks,
-							)
-						)
+						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
 						fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip))
 						"""
 						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
