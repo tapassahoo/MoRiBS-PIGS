@@ -1895,25 +1895,28 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 
 	if(RotDenType == 0)
 	{
-#ifdef PIGSTYPE
-        if (it1 == 0 || it1 == (NumbRotTimes - 1))
-        {
-            if (it1 == 0)
-            {
-                dens_old = SRotDens(p1, type);
-            }
-            else
-            {
-                dens_old = SRotDens(p0, type);
-            }
-        }
-        else
-        {
-            dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-        }
-#else
-        dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-#endif
+		if (PIGS_SIM)
+		{
+			if (it1 == 0 || it1 == (NumbRotTimes - 1))
+			{
+				if (it1 == 0)
+				{
+					dens_old = SRotDens(p1, type);
+				}
+				else
+				{
+					dens_old = SRotDens(p0, type);
+				}
+			}
+			else
+			{
+				dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+			}
+		}
+		else if (PIMC_SIM)
+		{
+			dens_old = SRotDens(p0,type)*SRotDens(p1,type);
+		}
 	}
     else if(RotDenType == 1)
     {
@@ -1957,25 +1960,28 @@ void MCRotLinStep(int it1,int offset,int gatom,int type,double step,double rand1
 
 	if(RotDenType == 0)
 	{
-#ifdef PIGSTYPE
-        if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
-        {
-            if (it1 == 0)
-            {
-                dens_new = SRotDens(p1, type);
-            }
-            else
-            {
-                dens_new = SRotDens(p0, type);
-            }
-        }
-        else
-        {
-            dens_new = SRotDens(p0,type)*SRotDens(p1,type);
-        }
-#else
-        dens_new = SRotDens(p0,type)*SRotDens(p1,type);
-#endif
+		if (PIGS_SIM)
+		{
+			if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
+			{
+				if (it1 == 0)
+				{
+					dens_new = SRotDens(p1, type);
+				}
+				else
+				{
+					dens_new = SRotDens(p0, type);
+				}
+			}
+			else
+			{
+				dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+			}
+		}
+		else if (PIMC_SIM)
+		{
+			dens_new = SRotDens(p0,type)*SRotDens(p1,type);
+		}
 	}
 	else if(RotDenType == 1)
 	{

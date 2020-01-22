@@ -38,27 +38,14 @@ def maxError_byBining(mean, data, workingNdim):
 	return np.max(error)
 
 def makeexecutionfile(src_dir,TypeCal,ENT_TYPE, source_dir_exe):
-	print("#-----------------------Compilation started--------------------#")
 	execution_file_dir  = source_dir_exe
 	os.chdir(execution_file_dir)
+	call(["cp", "Makefile-Copy", "Makefile"])
 	call(["make", "clean"])
-	if (TypeCal == "PIGS"):
-		call(["cp", "Makefile-PIGS", "Makefile"])
-	if (TypeCal == "ENT"):
-		if (ENT_TYPE == "SWAPTOUNSWAP"):
-			call(["cp", "Makefile-PIGSENT", "Makefile"])
-		if (ENT_TYPE == "BROKENPATH"):
-			call(["cp", "Makefile-PIGSENTBROKENPATH", "Makefile"])
-		if (ENT_TYPE == "SWAP"):
-			call(["cp", "Makefile-PIGSENTSWAP", "Makefile"])
-	if (TypeCal == "PIMC"):
-		call(["cp", "Makefile-PIMC", "Makefile"])
 	call(["make"])
-	print("#-----------------------Compilation ended here--------------------#")
 	print("")
 	print("")
-	print("")
-	print("")
+	print(".............................Compilation done!")
 	print("")
 	print("")
 	os.chdir(src_dir)

@@ -2236,8 +2236,6 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
    {
       double ratio_rotat = MCAccep[IMTYPE][MCROTAT]/MCTotal[IMTYPE][MCROTAT];
       cout<<BLANK<< "Rot: ";
-      cout<<BLANK<< MCAccep[IMTYPE][MCROTAT]<<BLANK;
-      cout<<BLANK<< MCTotal[IMTYPE][MCROTAT]<<BLANK;
       cout<<setw(w)<<ratio_rotat<<BLANK;       // accept ratio for "molecular" move
    }
 
