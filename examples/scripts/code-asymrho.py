@@ -9,7 +9,7 @@ space = " "
 file_sim = module_path + "script_submission_asymrho.py"
 
 # Informations about the system
-simType = "S"
+simType = "A"
 rotor = "H2O"
 #param = "tau"
 #value = 0.001
