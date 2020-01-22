@@ -681,8 +681,10 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 	replace("sim_ensmbl_input", ENT_TYPE, "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if (ENT_ALGR):
+	if (ENT_ALGR == "WR"):
 		replace("sim_algr_input", "RATIOTRICK", "qmc2.input", "qmc3.input")
+	elif (ENT_ALGR == "WOR"):
+		replace("sim_algr_input", "NORATIOTRICK", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	if TransMove:

@@ -50,7 +50,8 @@ parser.add_argument(
 parser.add_argument(
 	"--RATIO",
 	help="subtype of calculations - must be defined as a string in case of ENT. It applies ratio trick algorithm.",
-	action="store_true",
+	default="WR",
+	choices=["WR", "WOR"],
 )
 parser.add_argument("-N", help="Number of Molecules. It must be an integer.", type=int)
 parser.add_argument("-Block", help="Number of Blocks. It must be an integer", type=int)
@@ -541,34 +542,9 @@ for particleA in particleAList:
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
 # END ========
 
-if (status == "analysis") and (TypeCal == "ENT"):
+if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WR"))):
 	print("Final Entropy obtained by employing Ratio Trick")
-	support.GetAverageEntropyRT(
-		particleAList,
-		TypeCal,
-		molecule_rot,
-		TransMove,
-		RotMove,
-		variableName,
-		Rpt,
-		gfact,
-		dipolemoment,
-		parameterName,
-		parameter,
-		numbblocks,
-		numbpass,
-		numbmolecules1,
-		molecule,
-		ENT_TYPE,
-		preskip,
-		postskip,
-		extra_file_name,
-		dir_output,
-		variable,
-		crystal,
-		final_results_path,
-	)
-	exit()
+	support.GetAverageEntropyRT(particleAList,TypeCal,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,dir_output,variable,crystal,final_results_path)
 	"""
 	support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
 	"""
