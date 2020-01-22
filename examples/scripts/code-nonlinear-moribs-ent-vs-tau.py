@@ -8,9 +8,9 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-rmin = 10.0
+rmin = 6.0
 rmax =10.0
-dr = 0.1
+dr = 0.5
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
 print(nr)
@@ -32,8 +32,8 @@ for i in range(nr):
 	# Informations about the system
 	simType = "ENT"
 
-	simType1="submission "
-	#simType1 = "analysis"
+	#simType1="submission "
+	simType1 = "analysis"
 
 	molecule = "H2O"
 	rotor = "H2O"
@@ -49,11 +49,11 @@ for i in range(nr):
 	rcom="{:3.1f}".format(rcom)
 	#field_strength = 20.0 # Unit inverse of Kelvin
 	nMolecule = 4
-	nblocks = 10
+	nblocks = 5000
 	npass = 100
 
 	if simType1 == "analysis":
-		cmd1 = "--preskip 5000"
+		cmd1 = "--preskip 0"
 	else:
 		cmd1 = ""
 
@@ -81,7 +81,7 @@ for i in range(nr):
 		+ str(param)+space
 		+ "-spin"+space
 		+ str(SpinIsomer)+space
-		+ " --RATIO"+space
+		+ " --RATIO WR"+space
 	) 
 	print(cmd_run)
 	os.system(cmd_run)

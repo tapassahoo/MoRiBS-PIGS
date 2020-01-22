@@ -9,7 +9,7 @@ import math
 def Getbeads(TypeCal, variableName):
 	if (TypeCal == "ENT"):
 		if (variableName == "tau"):
-			list_nb = [10, 20]
+			list_nb = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 		if (variableName == "beta"):
 			list_nb = [10, 20]
 
