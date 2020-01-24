@@ -35,10 +35,8 @@ void MCWormAverage(void);
 void MCWormAverageReset(void);
 
 double avergCount;   // # of calls of get_estim inside a block
-#ifdef PIGSENTBOTH
 double avergCountENT;   // # of calls of get_estim inside a block
 double totalCountENT;
-#endif
 
 void PIMCPass(int,int);
 
@@ -693,9 +691,7 @@ ParamsPotential();
                		sumsCount += 1.0;                 
 					if (ENT_SIM)
 					{
-#ifdef PIGSENTBOTH
-						SaveSumEnergy (totalCountENT,sumsCount);
-#endif
+						//SaveSumEnergy (totalCountENT,sumsCount);
 					}
 					else
 					{	
@@ -959,24 +955,22 @@ void MCResetBlockAveragePIGS(void)
 
 void MCResetBlockAveragePIGSENT(void) 
 {
-	if (ENT_ENSMBL == EXTENDED_ENSMBL)
-	{
-		MCAccepSwap = 0.0;
-		MCAccepUnSwap = 0.0;
-	}
 	avergCount = 0.0;
 
 	ResetMCEstims();
 	ResetMCCounts();
 	ResetQWCounts();
 
+	if (ENT_ENSMBL == EXTENDED_ENSMBL)
+	{
+		MCAccepSwap = 0.0;
+		MCAccepUnSwap = 0.0;
+	}
     _bnm       = 0.0;
     _bdm       = 0.0;
 	_trOfDensitySq = 0.0;
 
-#ifdef PIGSENTBOTH
-	avergCountENT = 0.0;
-#endif
+	if (ENT_SIM) avergCountENT = 0.0;
 	PrintXYZprl = 1;
 	PrintYrfl   = 1;
 	PrintXrfl   = 1;
@@ -1538,9 +1532,7 @@ void MCSaveBlockAverages(long int blocknumb)
 
 		if(MCAtom[IMTYPE].numb > 1)
 		{
-#ifdef IOWRITE		
-			SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
-#endif		
+			//SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
 #ifdef DDCORR
 			SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
 #endif
@@ -1552,13 +1544,9 @@ void MCSaveBlockAverages(long int blocknumb)
 
 	if (ENT_SIM)
 	{
-#ifdef PIGSENTBOTH
-		SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
-		SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
-#ifdef DDCORR
-		SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
-#endif
-#endif
+		//SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
+		//SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
+		//SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
 		SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
 	}	
 
@@ -1619,7 +1607,7 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 		fid << endl;
 	}	
 //
-#ifdef PIGSENTBOTH
+	/*
 	if (acount != 0.0)
 	{
 		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
@@ -1629,7 +1617,7 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 		fid << setw(IO_WIDTH) << _btotal*Units.energy/acount << BLANK;  //total energy including rot energy 
 	    fid << endl;
 	}
-#endif
+	*/
 //
 #ifdef IOWRITE
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
@@ -1712,11 +1700,8 @@ void SaveDipoleCorr(const char fname [], double acount, long int blocknumb)
 	if (acount != 0)
 	{
    		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
-#ifdef PIGSENTBOTH
-		int NumbAtoms1 = NumbAtoms/2;
-#else
-		int NumbAtoms1 = NumbAtoms;
-#endif
+		if (ENT_SIM) int NumbAtoms1 = NumbAtoms/2;
+		else int NumbAtoms1 = NumbAtoms;
 		int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
 
 		for (int idp = 0; idp < NDIMDP; idp++)
@@ -1899,11 +1884,8 @@ void SaveSumDipoleCorr(double acount, double numb)
     const char *_proc_=__func__;
 
     _fdc << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-#ifdef PIGSENTBOTH
-	int NumbAtoms1 = NumbAtoms/2;
-#else
-	int NumbAtoms1 = NumbAtoms;
-#endif
+	if (ENT_SIM) int NumbAtoms1 = NumbAtoms/2;
+	else int NumbAtoms1 = NumbAtoms;
 	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
 
 	for (int idp = 0; idp < NDIMDP; idp++)
@@ -2078,14 +2060,13 @@ void InitTotalAverage(void)  // DUMP
 	const char *_proc_=__func__;    
 
 	totalCount = 0.0;  // need to save in the status file 
-#ifdef PIGSENTBOTH
-	totalCountENT = 0.0;  // need to save in the status file 
-#endif
+	if (ENT_SIM) totalCountENT = 0.0;  // need to save in the status file 
    	sumsCount = 0.0;  // counter for accum sums
 
 	_kin_total = 0.0;   // need a function to reset all global average
 	_pot_total = 0.0;
 	_total = 0.0;
+
 	_costheta_total= 0.0;
 	_ucompx_total  = 0.0;
 	_ucompy_total  = 0.0;
@@ -2093,11 +2074,10 @@ void InitTotalAverage(void)  // DUMP
 	_abs_ucompx_total  = 0.0;
 	_abs_ucompy_total  = 0.0;
 	_abs_ucompz_total  = 0.0;
-#ifdef PIGSENTBOTH
-	int NumbAtoms1 = NumbAtoms/2;
-#else
-	int NumbAtoms1 = NumbAtoms;
-#endif
+
+	int NumbAtoms1;
+	if (ENT_SIM) NumbAtoms1 = NumbAtoms/2;
+	else NumbAtoms1 = NumbAtoms;
 	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
 
     _cdipoleXYZ_total.resize(NDIMDP);

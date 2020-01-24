@@ -1821,11 +1821,9 @@ double GetTotalEnergyPIGSENT(void)
 
 double GetRotEnergyPIGS(void)
 {
-#ifdef PIGSENTBOTH
-	int atomStart = NumbAtoms/2;
-#else
-	int atomStart = 0;
-#endif
+	int atomStart;
+	if (ENT_SIM) atomStart = NumbAtoms/2;
+	if (PIGS_SIM) atomStart = 0;
 
     double srot = 0.0;
     int type  = IMTYPE;
@@ -2196,11 +2194,8 @@ void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)
     // if user passed in a null pointer for array, bail out early!
     if (!compxyz)
         return;
-#ifdef PIGSENTBOTH
-	int atomStart = NumbAtoms/2;
-#else
-	int atomStart = 0;
-#endif
+	if (ENT_SIM) int atomStart = NumbAtoms/2;
+	else int atomStart = 0;
 
     int it = (NumbRotTimes - 1)/2;
 
@@ -2665,13 +2660,13 @@ double GetEstimNM(int type)
 	}
     double potEstimNM = exp(-MCRotTau*spot);
 
-    int it0  = (((NumbRotTimes - 1)/2)-1);
-    int it1  = ((NumbRotTimes - 1)/2);
+    int it0  = (((NumbRotTimes-1)/2)-1);
+    int it1  = ((NumbRotTimes-1)/2);
 
     double dens1 = 1.0;
     for (int atom0 = particleA1Min; atom0 <= particleA1Max; atom0++)
 	{
-    	int atom1 = particleA2Max - (atom0 - particleA1Min);
+    	int atom1 = particleA2Max-(atom0-particleA1Min);
 
 		int type0   = MCType[atom0];
 		int type1   = MCType[atom1];
@@ -2690,12 +2685,34 @@ double GetEstimNM(int type)
 			}
 			dens1 *= SRotDens(p0,type);
 		}
+
+		if (MCAtom[type].molecule == 2)
+		{
+			double rho = 0.0;
+			double erot = 0.0;
+			double esq  = 0.0;
+			double Eulrel[3];
+			int istop=0;
+			double Eulan0[3], Eulan1[3];
+
+			Eulan0[PHI]=MCAngles[PHI][t1M1];
+			Eulan0[CTH]=acos(MCAngles[CTH][t1M1]);
+			Eulan0[CHI]=MCAngles[CHI][t1M1];
+
+			Eulan1[PHI]=MCAngles[PHI][t1M];
+			Eulan1[CTH]=acos(MCAngles[CTH][t1M]);
+			Eulan1[CHI]=MCAngles[CHI][t1M];
+
+			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			CodeExit(istop);
+			dens1 *= rho;
+		}
 	}
 
     double dens2 = 1.0;
     for (int atom0 = particleA2Min; atom0 <= particleA2Max; atom0++)
 	{
-    	int atom1 = particleA1Max - (atom0 - particleA2Min);
+    	int atom1 = particleA1Max-(atom0-particleA2Min);
 
 		int type0   = MCType[atom0];
 		int type1   = MCType[atom1];
@@ -2713,6 +2730,28 @@ double GetEstimNM(int type)
 				p0 += (MCCosine[id][t1M1]*MCCosine[id][t1M]);
 			}
 			dens2 *= SRotDens(p0,type);
+		}
+
+		if (MCAtom[type].molecule == 2)
+		{
+			double rho = 0.0;
+			double erot = 0.0;
+			double esq  = 0.0;
+			double Eulrel[3];
+			int istop=0;
+			double Eulan0[3], Eulan1[3];
+
+			Eulan0[PHI]=MCAngles[PHI][t1M1];
+			Eulan0[CTH]=acos(MCAngles[CTH][t1M1]);
+			Eulan0[CHI]=MCAngles[CHI][t1M1];
+
+			Eulan1[PHI]=MCAngles[PHI][t1M];
+			Eulan1[CTH]=acos(MCAngles[CTH][t1M]);
+			Eulan1[CHI]=MCAngles[CHI][t1M];
+
+			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			CodeExit(istop);
+			dens2 *= rho;
 		}
 	}
   	double estimNM = dens1*dens2*potEstimNM;
@@ -2749,8 +2788,8 @@ double GetEstimDM(int type)
     double dens = 1.0;
     for (int atom0 = particleA1Min; atom0 <= particleA2Max; atom0++)
     {
-        int it0 = (((NumbRotTimes - 1)/2)-1);
-        int it1 = ((NumbRotTimes - 1)/2);
+        int it0 = (((NumbRotTimes-1)/2)-1);
+        int it1 = ((NumbRotTimes-1)/2);
 
 		int type0   = MCType[atom0];
 		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
@@ -2766,6 +2805,28 @@ double GetEstimDM(int type)
 				p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
 			}
 			dens *= SRotDens(p0,type);
+		}
+
+		if (MCAtom[type].molecule == 2)
+		{
+			double rho = 0.0;
+			double erot = 0.0;
+			double esq  = 0.0;
+			double Eulrel[3];
+			int istop=0;
+			double Eulan0[3], Eulan1[3];
+
+			Eulan0[PHI]=MCAngles[PHI][t0];
+			Eulan0[CTH]=acos(MCAngles[CTH][t0]);
+			Eulan0[CHI]=MCAngles[CHI][t0];
+
+			Eulan1[PHI]=MCAngles[PHI][t1];
+			Eulan1[CTH]=acos(MCAngles[CTH][t1]);
+			Eulan1[CHI]=MCAngles[CHI][t1];
+
+			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			CodeExit(istop);
+			dens *= rho;
 		}
     }
     double estimDM = dens*potEstimDM;

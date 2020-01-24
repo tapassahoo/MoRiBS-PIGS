@@ -8,9 +8,34 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-rmin = 6.0
+# Informations about the system
+simType = "ENT"
+simType1="submission "
+#simType1 = "analysis"
+
+molecule = "H2O"
+rotor = "H2O"
+SpinIsomer = 0
+
+var = "beta" # for fixed tau
+param = 0.001 # for fixed tau
+
+#var = "tau"  # for fixed beta
+#param = 0.2 # for fixed beta
+
+#field_strength = 20.0 # Unit inverse of Kelvin
+nMolecule = 2
+nblocks = 10
+npass = 100
+
+if simType1 == "analysis":
+	cmd1 = "--preskip 0"
+else:
+	cmd1 = ""
+
+rmin = 8.0
 rmax =10.0
-dr = 0.5
+dr = 1.0
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
 print(nr)
@@ -23,39 +48,14 @@ for i in range(nr):
 	fileName2 = "script_submission_analysis_MoRiBS1.py"
 	support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
-	stringName2 = '"Ratio-Trick-"'
+	stringName2 = '""'
 	#stringName2 = '"TIP4P-2005-"'
 	fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
 	support.replace("extraName", stringName2, fileName2, fileName3)
 	call(["rm", fileName2])
 
-	# Informations about the system
-	simType = "ENT"
-
-	#simType1="submission "
-	simType1 = "analysis"
-
-	molecule = "H2O"
-	rotor = "H2O"
-	SpinIsomer = 0
-
-	#var = "beta" # for fixed tau
-	#param = 0.001 # for fixed tau
-
-	var = "tau"  # for fixed beta
-	param = 0.2 # for fixed beta
-
 	rcom = rmin+dr*i
 	rcom="{:3.1f}".format(rcom)
-	#field_strength = 20.0 # Unit inverse of Kelvin
-	nMolecule = 4
-	nblocks = 5000
-	npass = 100
-
-	if simType1 == "analysis":
-		cmd1 = "--preskip 0"
-	else:
-		cmd1 = ""
 
 	cmd_run = (
 		"python"+space
@@ -81,7 +81,7 @@ for i in range(nr):
 		+ str(param)+space
 		+ "-spin"+space
 		+ str(SpinIsomer)+space
-		+ " --RATIO WR"+space
+		+ " --RATIO WOR"+space
 	) 
 	print(cmd_run)
 	os.system(cmd_run)
