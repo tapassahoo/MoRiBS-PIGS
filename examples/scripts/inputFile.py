@@ -11,7 +11,7 @@ def Getbeads(TypeCal, variableName):
 		if (variableName == "tau"):
 			list_nb = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 		if (variableName == "beta"):
-			list_nb = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200]
+			list_nb = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 	if (TypeCal == "PIMC"):
 		if (variableName == "tau"):

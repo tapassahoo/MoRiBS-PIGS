@@ -988,7 +988,7 @@ void MCGetAveragePIGSENT(int type)
 		snm = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
 		sdm = MCAccepUnSwap/(MCAccepSwap+MCAccepUnSwap);
 	}
-	else
+	if (ENT_ENSMBL == EXTENDED_ENSMBL)
 	{
 		snm = GetEstimNM(type);
 		sdm = GetEstimDM(type);
@@ -1810,7 +1810,7 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;
 	fid << setw(IO_WIDTH) << _bnm/avergCount << BLANK;
 	fid << setw(IO_WIDTH) << _bdm/avergCount << BLANK;
-	if (ENT_ENSMBL == BROKENPATH)
+	if ((ENT_ENSMBL != BROKENPATH) && (ENT_ENSMBL != EXTENDED_ENSMBL))
 	{
 		fid << setw(IO_WIDTH) << _trOfDensitySq/avergCount << BLANK;
 	}
