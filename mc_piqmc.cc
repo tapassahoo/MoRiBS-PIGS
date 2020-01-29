@@ -3281,10 +3281,6 @@ void MCRot3DstepBrokenPath(int it1, int offset, int gatom, int type, double step
 	int particleA2Min = 0;
 	int particleA2Max = 0;
 	int iRefAtom = RefAtom;
-	if (ENT_ALGR == RATIOTRICK)
-	{
-		if ((Distribution == "unSwap") && (RefAtom >= 2)) iRefAtom = RefAtom-1;
-	}
 	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
 
 	int beadMminus1 = (((NumbRotTimes-1)/2)-1);
@@ -3323,12 +3319,10 @@ void MCRot3DstepBrokenPath(int it1, int offset, int gatom, int type, double step
 	if(RotDenType == 0)
 	{
 		dens_new = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
-
-		if (((it1 == beadM) || (it1 == beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
+		if (((it1==beadM) || (it1==beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
 		{
 			dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
 		}
-
 	}
 
 	if (fabs(dens_new)<RZERO) dens_new = 0.0;

@@ -988,7 +988,7 @@ void MCGetAveragePIGSENT(int type)
 		snm = MCAccepSwap/(MCAccepSwap+MCAccepUnSwap);
 		sdm = MCAccepUnSwap/(MCAccepSwap+MCAccepUnSwap);
 	}
-	if (ENT_ENSMBL == EXTENDED_ENSMBL)
+	if (ENT_ENSMBL == BROKENPATH)
 	{
 		snm = GetEstimNM(type);
 		sdm = GetEstimDM(type);
