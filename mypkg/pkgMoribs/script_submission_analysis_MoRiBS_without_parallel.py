@@ -182,48 +182,12 @@ else:
 # particleAList = [9]
 
 for particleA in particleAList:
-	# ==================================Generating files for submission================#
-	file1_name = support.GetFileNameSubmission(
-		TypeCal,
-		molecule_rot,
-		TransMove,
-		RotMove,
-		Rpt,
-		gfact,
-		dipolemoment,
-		parameterName,
-		parameter,
-		numbblocks,
-		numbpass,
-		numbmolecules1,
-		molecule,
-		ENT_TYPE,
-		particleA,
-		extra_file_name,
-		crystal,
-	)
+	# Generating files for submission
+	file1_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal)
 
 	if status == "rename":
 		numbblocks_rename = args.NR
-		file2_name = support.GetFileNameSubmission(
-			TypeCal,
-			molecule_rot,
-			TransMove,
-			RotMove,
-			Rpt,
-			gfact,
-			dipolemoment,
-			parameterName,
-			parameter,
-			numbblocks_rename,
-			numbpass,
-			numbmolecules1,
-			molecule,
-			ENT_TYPE,
-			particleA,
-			extra_file_name,
-			crystal,
-		)
+		file2_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks_rename,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal)
 
 		if NameOfServer == "graham":
 			dir_run_input_pimc = "/scratch/" + user_name + "/" + out_dir + file1_name + "PIMC"
@@ -262,51 +226,34 @@ for particleA in particleAList:
 				support.cagepot(source_dir_exe)
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
-	if (status == "analysis") and (TypeCal != "ENT"):
-		FileAnalysis = support.GetFileNameAnalysis(
-			TypeCal,
-			False,
-			molecule_rot,
-			TransMove,
-			RotMove,
-			variableName,
-			Rpt,
-			gfact,
-			dipolemoment,
-			parameterName,
-			parameter,
-			numbblocks,
-			numbpass,
-			numbmolecules1,
-			molecule,
-			ENT_TYPE,
-			preskip,
-			postskip,
-			extra_file_name,
-			final_results_path,
-			particleA,
-		)
+	if (status == "analysis"):
+		FileAnalysis = support.GetFileNameAnalysis(TypeCal,False,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,final_results_path,particleA)
 
-		if preskip >= numbblocks:
-			print("")
-			print("Warning!!!!!!!")
-			print("============================================================================")
-			print("Number of Blocks = " + str(numbblocks))
-			print("Number of preskip= " + str(preskip))
-			print("Error message: Number of preskip data must be less than Number of Blocks")
-			print("============================================================================")
-			exit()
+		if (TypeCal != "ENT"):
+			if preskip >= numbblocks:
+				print("")
+				print("Warning!!!!!!!")
+				print("============================================================================")
+				print("Number of Blocks = " + str(numbblocks))
+				print("Number of preskip= " + str(preskip))
+				print("Error message: Number of preskip data must be less than Number of Blocks")
+				print("============================================================================")
+				exit()
 
-		fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
-		fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
-		fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
-		fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
-		#fanalyzeCorr.write(support.fmtAverageOrientation(status, variableName))
-		fanalyzeTotalCorr = open(FileAnalysis.SaveTotalCorr, "a")
-		fanalyzeXCorr = open(FileAnalysis.SaveXCorr, "a")
-		fanalyzeYCorr = open(FileAnalysis.SaveYCorr, "a")
-		fanalyzeZCorr = open(FileAnalysis.SaveZCorr, "a")
-		fanalyzeXYCorr = open(FileAnalysis.SaveXYCorr, "a")
+			fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
+			fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
+			fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
+			fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
+			#fanalyzeCorr.write(support.fmtAverageOrientation(status, variableName))
+			fanalyzeTotalCorr = open(FileAnalysis.SaveTotalCorr, "a")
+			fanalyzeXCorr = open(FileAnalysis.SaveXCorr, "a")
+			fanalyzeYCorr = open(FileAnalysis.SaveYCorr, "a")
+			fanalyzeZCorr = open(FileAnalysis.SaveZCorr, "a")
+			fanalyzeXYCorr = open(FileAnalysis.SaveXYCorr, "a")
+
+		if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
+			fanalyzeEntropy = open(FileAnalysis.SaveEntropy, "a")
+			fanalyzeEntropy.write(support.fmtAverageEntropy(status, variableName, ENT_TYPE))
 
 	if TypeCal == "ENT":
 		numbmolecules = 2 * numbmolecules1
@@ -412,7 +359,9 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output + folder_run
 				#support.RemoveFiles(TypeCal, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
 				try:
-					if TypeCal != "ENT":
+					if (TypeCal == "ENT"):
+						fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE))
+					if (TypeCal != "ENT"):
 						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
 						fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip))
 						"""
@@ -456,13 +405,18 @@ for particleA in particleAList:
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
 		SavedFile = FileAnalysis.SaveXYCorr
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-# END ========
 
-#if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WR"))):
-if ((status == "analysis") and (TypeCal == "ENT")):
+	if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
+		fanalyzeEntropy.close()
+		call(["cat", FileAnalysis.SaveEntropy])
+		print("")
+		print("")
+		SavedFile = FileAnalysis.SaveEntropy
+		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
+
+if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_TYPE == "EXTENDED_ENSMBL") and (ENT_ALGR == "WR"))):
 	print("Final Entropy obtained by employing Ratio Trick")
 	support.GetAverageEntropyRT(particleAList,TypeCal,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,dir_output,variable,crystal,final_results_path)
 	"""
 	support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
 	"""
-

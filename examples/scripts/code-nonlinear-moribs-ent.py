@@ -10,23 +10,23 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "ENT"
-simType1="submission "
-#simType1 = "analysis"
+#simType1="submission "
+simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-var = "beta" # for fixed tau
-param = 0.001 # for fixed tau
+#var = "beta" # for fixed tau
+#param = 0.001 # for fixed tau
 
-#var = "tau"  # for fixed beta
-#param = 0.2 # for fixed beta
+var = "tau"  # for fixed beta
+param = 0.2 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 20000
-npass = 200
+nblocks = 10000
+npass = 100
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"
@@ -82,7 +82,7 @@ for i in range(nr):
 		+ "-spin"+space
 		+ str(SpinIsomer)+space
 		+ " --RATIO WOR"+space
-		+ " --scal BROKENPATH"+space
+		#+ " --scal BROKENPATH"+space
 	) 
 	print(cmd_run)
 	os.system(cmd_run)
