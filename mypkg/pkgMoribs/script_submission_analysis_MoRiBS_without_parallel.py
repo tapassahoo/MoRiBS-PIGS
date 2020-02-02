@@ -12,120 +12,36 @@ from numpy import *
 import inputFile
 import mypkg.pkgMoribs.support_without_parallel as support
 
-parser = argparse.ArgumentParser(
-	description="It is a script file, written in Python, used to submit jobs in a queue as well as analyze output data files. Note: Module support.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo. User can easily modify module inputFile.py to generate lists of beads (see Getbeads function), step lengths for rotational and translational motions, and levels for Bisection move (see class GetStepAndLevel) as needed."
+parser = argparse.ArgumentParser( description="It is a script file, written in Python, used to submit jobs in a queue as well as analyze output data files. Note: Module support.py consists of many functions and it is not permitted to modify without consulting the developer - Dr. Tapas Sahoo. User can easily modify module inputFile.py to generate lists of beads (see Getbeads function), step lengths for rotational and translational motions, and levels for Bisection move (see class GetStepAndLevel) as needed."
 )
-parser.add_argument(
-	"-d",
-	"--DipoleMoment",
-	type=float,
-	help="Dipole Moment of a bipolar molecule in Debye.",
-	default=-1.0,
-)
-parser.add_argument(
-	"-g", "--gFactor", type=float, help="It defines interaction strength.", default=-1.0
-)
+parser.add_argument( "-d", "--DipoleMoment", type=float, help="Dipole Moment of a bipolar molecule in Debye.", default=-1.0)
+parser.add_argument( "-g", "--gFactor", type=float, help="It defines interaction strength.", default=-1.0)
 parser.add_argument("-R", "--Rpt", type=float, help="Inter molecular spacing.", default=-1.0)
-parser.add_argument(
-	"variable",
-	help="Name of a variable: either beta or tau. It must be a string. Note: for finite temperature computations only the variable tau is needed.",
-	choices=["tau", "beta"],
-)
-parser.add_argument(
-	"job",
-	help="Type of a job: submission of new jobs or analyzing output files. It must be a string.",
-	choices=["submission", "analysis", "rename"],
-)
-parser.add_argument(
-	"cal",
-	help="Type of calculation - it is a string: a) PIMC - Finite Temperature calculation by Path Integral Monte Carlo b) PIGS - Ground State Path Integral c) ENT - Entanglement by replica algorithm based on PIGS.",
-	choices=["PIMC", "PIGS", "ENT"],
-)
-parser.add_argument(
-	"--scal",
-	help="subtype of calculations - must be defined as a string in case of ENT.",
-	default="EXTENDED_ENSMBL",
-	choices=["EXTENDED_ENSMBL", "BROKENPATH"],
-)
-parser.add_argument(
-	"--RATIO",
-	help="subtype of calculations - must be defined as a string in case of ENT. It applies ratio trick algorithm.",
-	default="WR",
-	choices=["WR", "WOR"],
-)
+parser.add_argument( "variable", help="Name of a variable: either beta or tau. It must be a string. Note: for finite temperature computations only the variable tau is needed.", choices=["tau", "beta"])
+parser.add_argument( "job", help="Type of a job: submission of new jobs or analyzing output files. It must be a string.", choices=["submission", "analysis", "rename"])
+parser.add_argument("cal", help="Type of calculation - it is a string: a) PIMC - Finite Temperature calculation by Path Integral Monte Carlo b) PIGS - Ground State Path Integral c) ENT - Entanglement by replica algorithm based on PIGS.", choices=["PIMC", "PIGS", "ENT"])
+parser.add_argument("--scal", help="subtype of calculations - must be defined as a string in case of ENT.", default="EXTENDED_ENSMBL", choices=["EXTENDED_ENSMBL", "BROKENPATH"])
+parser.add_argument("--RATIO", help="subtype of calculations - must be defined as a string in case of ENT. It applies ratio trick algorithm.", default="WR", choices=["WR", "WOR"])
 parser.add_argument("-N", help="Number of Molecules. It must be an integer.", type=int)
 parser.add_argument("-Block", help="Number of Blocks. It must be an integer", type=int)
 parser.add_argument("-Pass", help="Number of Passes. It must be an integer", type=int)
-parser.add_argument(
-	"--MOVECOM",
-	action="store_true",
-	help="It allows translational motions of molecules or particles.",
-)
-parser.add_argument(
-	"--ROTMOVE", action="store_true", help="It allows rotational motions of molecules or particles."
-)
-parser.add_argument(
-	"--partition",
-	help="allows to submit jobs in a specific cpu. It is a string. User does not need it.",
-	default="ntapas",
-)
+parser.add_argument( "--MOVECOM", action="store_true", help="It allows translational motions of molecules or particles.")
+parser.add_argument( "--ROTMOVE", action="store_true", help="It allows rotational motions of molecules or particles.")
+parser.add_argument( "--partition", help="allows to submit jobs in a specific cpu. It is a string. User does not need it.", default="ntapas")
 parser.add_argument("Molecule", help="Name of molecular system. E.g. - H2O, FCC-H2O, H2O@c60")
-parser.add_argument(
-	"--PPA",
-	action="store_true",
-	help="Inclussion of Pair Product Approximation. It is in the developing condition.",
-)
-parser.add_argument(
-	"-lmax",
-	"--lmaxloop,max",
-	help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.",
-	default=0,
-)
-parser.add_argument(
-	"-ltotalmax",
-	"--ltotalmax",
-	help="Maximum lmax quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.",
-	default=0,
-)
-parser.add_argument(
-	"Rotor", help="Name of rotor. E.g. - HF, H2O. It is needed to save rotational density matrix."
-)
+parser.add_argument( "--PPA", action="store_true", help="Inclussion of Pair Product Approximation. It is in the developing condition.")
+parser.add_argument( "-lmax", "--lmaxloop,max", help="Maximum l quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default=0)
+parser.add_argument( "-ltotalmax", "--ltotalmax", help="Maximum lmax quantum number. It is needed for exact computations of Energy and Entropy of linear rotors in pinned to a chain.", default=0)
+parser.add_argument( "Rotor", help="Name of rotor. E.g. - HF, H2O. It is needed to save rotational density matrix.")
 parser.add_argument("param", type=float, help="Fixed value of beta or tau.")
-parser.add_argument(
-	"--preskip",
-	type=int,
-	help="skips # of lines from the begining of an output file. It can be needed while analysis flag is open!",
-	default=0,
-)
-parser.add_argument(
-	"--postskip",
-	type=int,
-	help="skips # of lines from the end of an output file. It can be needed while analysis flag is open!",
-	default=0,
-)
-parser.add_argument(
-	"-C",
-	"--compiler",
-	action="store_true",
-	help="User can use it if the execution file (pimc) is already generated.",
-)
+parser.add_argument( "--preskip", type=int, help="skips # of lines from the begining of an output file. It can be needed while analysis flag is open!", default=0)
+parser.add_argument( "--postskip", type=int, help="skips # of lines from the end of an output file. It can be needed while analysis flag is open!", default=0)
+parser.add_argument( "-C", "--compiler", action="store_true", help="User can use it if the execution file (pimc) is already generated.")
 parser.add_argument("--RESTART", action="store_true", help="It is used to restart the code.")
 parser.add_argument("-NR", type=int, help="Number of blocks extended by uesr.", default=0)
-parser.add_argument(
-	"--CRYSTAL",
-	action="store_true",
-	help="Reads Lattice configurations and the corresponding dipolemoments.",
-)
-parser.add_argument(
-	"--Type", default="LINEAR", help="Specify your rotor type: LINEAR or NONLINEAR."
-)
-parser.add_argument(
-	"-spin",
-	"--SpinIsomer",
-	type=int,
-	help="It hvae three values -1, 0, 1 for spinless, para and ortho isomers.",
-	default=-1,
-)
+parser.add_argument( "--CRYSTAL", action="store_true", help="Reads Lattice configurations and the corresponding dipolemoments.")
+parser.add_argument( "--Type", default="LINEAR", help="Specify your rotor type: LINEAR or NONLINEAR.")
+parser.add_argument( "-spin", "--SpinIsomer", type=int, help="It hvae three values -1, 0, 1 for spinless, para and ortho isomers.", default=-1)
 args = parser.parse_args()
 
 # ===============================================================================
@@ -266,48 +182,12 @@ else:
 # particleAList = [9]
 
 for particleA in particleAList:
-	# ==================================Generating files for submission================#
-	file1_name = support.GetFileNameSubmission(
-		TypeCal,
-		molecule_rot,
-		TransMove,
-		RotMove,
-		Rpt,
-		gfact,
-		dipolemoment,
-		parameterName,
-		parameter,
-		numbblocks,
-		numbpass,
-		numbmolecules1,
-		molecule,
-		ENT_TYPE,
-		particleA,
-		extra_file_name,
-		crystal,
-	)
+	# Generating files for submission
+	file1_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal)
 
 	if status == "rename":
 		numbblocks_rename = args.NR
-		file2_name = support.GetFileNameSubmission(
-			TypeCal,
-			molecule_rot,
-			TransMove,
-			RotMove,
-			Rpt,
-			gfact,
-			dipolemoment,
-			parameterName,
-			parameter,
-			numbblocks_rename,
-			numbpass,
-			numbmolecules1,
-			molecule,
-			ENT_TYPE,
-			particleA,
-			extra_file_name,
-			crystal,
-		)
+		file2_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks_rename,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal)
 
 		if NameOfServer == "graham":
 			dir_run_input_pimc = "/scratch/" + user_name + "/" + out_dir + file1_name + "PIMC"
@@ -346,51 +226,34 @@ for particleA in particleAList:
 				support.cagepot(source_dir_exe)
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
-	if (status == "analysis") and (TypeCal != "ENT"):
-		FileAnalysis = support.GetFileNameAnalysis(
-			TypeCal,
-			False,
-			molecule_rot,
-			TransMove,
-			RotMove,
-			variableName,
-			Rpt,
-			gfact,
-			dipolemoment,
-			parameterName,
-			parameter,
-			numbblocks,
-			numbpass,
-			numbmolecules1,
-			molecule,
-			ENT_TYPE,
-			preskip,
-			postskip,
-			extra_file_name,
-			final_results_path,
-			particleA,
-		)
+	if (status == "analysis"):
+		FileAnalysis = support.GetFileNameAnalysis(TypeCal,False,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,final_results_path,particleA)
 
-		if preskip >= numbblocks:
-			print("")
-			print("Warning!!!!!!!")
-			print("============================================================================")
-			print("Number of Blocks = " + str(numbblocks))
-			print("Number of preskip= " + str(preskip))
-			print("Error message: Number of preskip data must be less than Number of Blocks")
-			print("============================================================================")
-			exit()
+		if (TypeCal != "ENT"):
+			if preskip >= numbblocks:
+				print("")
+				print("Warning!!!!!!!")
+				print("============================================================================")
+				print("Number of Blocks = " + str(numbblocks))
+				print("Number of preskip= " + str(preskip))
+				print("Error message: Number of preskip data must be less than Number of Blocks")
+				print("============================================================================")
+				exit()
 
-		fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
-		fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
-		fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
-		fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
-		#fanalyzeCorr.write(support.fmtAverageOrientation(status, variableName))
-		fanalyzeTotalCorr = open(FileAnalysis.SaveTotalCorr, "a")
-		fanalyzeXCorr = open(FileAnalysis.SaveXCorr, "a")
-		fanalyzeYCorr = open(FileAnalysis.SaveYCorr, "a")
-		fanalyzeZCorr = open(FileAnalysis.SaveZCorr, "a")
-		fanalyzeXYCorr = open(FileAnalysis.SaveXYCorr, "a")
+			fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
+			fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
+			fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
+			fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
+			#fanalyzeCorr.write(support.fmtAverageOrientation(status, variableName))
+			fanalyzeTotalCorr = open(FileAnalysis.SaveTotalCorr, "a")
+			fanalyzeXCorr = open(FileAnalysis.SaveXCorr, "a")
+			fanalyzeYCorr = open(FileAnalysis.SaveYCorr, "a")
+			fanalyzeZCorr = open(FileAnalysis.SaveZCorr, "a")
+			fanalyzeXYCorr = open(FileAnalysis.SaveXYCorr, "a")
+
+		if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
+			fanalyzeEntropy = open(FileAnalysis.SaveEntropy, "a")
+			fanalyzeEntropy.write(support.fmtAverageEntropy(status, variableName, ENT_TYPE))
 
 	if TypeCal == "ENT":
 		numbmolecules = 2 * numbmolecules1
@@ -496,7 +359,9 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output + folder_run
 				#support.RemoveFiles(TypeCal, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
 				try:
-					if TypeCal != "ENT":
+					if (TypeCal == "ENT"):
+						fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE))
+					if (TypeCal != "ENT"):
 						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
 						fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip))
 						"""
@@ -540,12 +405,18 @@ for particleA in particleAList:
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
 		SavedFile = FileAnalysis.SaveXYCorr
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-# END ========
 
-if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WR"))):
+	if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
+		fanalyzeEntropy.close()
+		call(["cat", FileAnalysis.SaveEntropy])
+		print("")
+		print("")
+		SavedFile = FileAnalysis.SaveEntropy
+		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
+
+if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_TYPE == "EXTENDED_ENSMBL") and (ENT_ALGR == "WR"))):
 	print("Final Entropy obtained by employing Ratio Trick")
 	support.GetAverageEntropyRT(particleAList,TypeCal,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,dir_output,variable,crystal,final_results_path)
 	"""
 	support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
 	"""
-

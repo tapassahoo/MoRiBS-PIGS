@@ -17,15 +17,15 @@ molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-var = "beta" # for fixed tau
-param = 0.001 # for fixed tau
+#var = "beta" # for fixed tau
+#param = 0.001 # for fixed tau
 
-#var = "tau"  # for fixed beta
-#param = 0.2 # for fixed beta
+var = "tau"  # for fixed beta
+param = 0.2 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 10
+nblocks = 10000
 npass = 100
 
 if simType1 == "analysis":
@@ -33,7 +33,7 @@ if simType1 == "analysis":
 else:
 	cmd1 = ""
 
-rmin = 8.0
+rmin = 3.0
 rmax =10.0
 dr = 1.0
 nr = int(((rmax-rmin)+dr*0.5)/dr)
@@ -82,6 +82,7 @@ for i in range(nr):
 		+ "-spin"+space
 		+ str(SpinIsomer)+space
 		+ " --RATIO WOR"+space
+		#+ " --scal BROKENPATH"+space
 	) 
 	print(cmd_run)
 	os.system(cmd_run)

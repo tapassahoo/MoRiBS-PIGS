@@ -2521,6 +2521,10 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 				{
 					MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp, Distribution);
 				}
+				if (ENT_ENSMBL == BROKENPATH)
+				{
+					MCRot3DstepBrokenPath(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
+				}
 			}
 		}
 	}
@@ -2556,6 +2560,10 @@ void MCRotations3D(int type) // update all time slices for rotational degrees of
 				if (ENT_ENSMBL == EXTENDED_ENSMBL)
 				{
 					MCRot3DstepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp, Distribution);
+				}
+				if (ENT_ENSMBL == BROKENPATH)
+				{
+					MCRot3DstepBrokenPath(itrot,offset,gatom,type,step,rand1,rand2,rand3,rand4,IROTSYM,NFOLD_ROT,MCRotChunkTot,MCRotChunkAcp);
 				}
 			}	
 		}
@@ -3192,6 +3200,177 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step,doubl
 	}	      
 }
 
+void MCRot3DstepBrokenPath(int it1, int offset, int gatom, int type, double step,double rand1,double rand2,double rand3,double rand4,int IROTSYM, int NFOLD_ROT,double &MCRotChunkTot,double &MCRotChunkAcp) //Original function is MCRot3Dstep()
+{
+	int it0 = (it1 - 1);
+	int it2 = (it1 + 1);
+
+	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
+	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+	  
+	int t0 = offset + it0;
+	int t1 = offset + it1;
+	int t2 = offset + it2;
+
+	double cost = MCAngles[CTH][t1];
+	double phi  = MCAngles[PHI][t1];
+	double chi  = MCAngles[CHI][t1];
+
+	//cost += (step*(rnd1()-0.5));
+	cost += (step*(rand1-0.5));
+	//phi += 2.0*M_PI*(step*(rnd1()-0.5));
+	//chi += 2.0*M_PI*(step*(rnd1()-0.5));
+	phi += 2.0*M_PI*(step*(rand2-0.5));
+	chi += 2.0*M_PI*(step*(rand3-0.5));
+/*
+	//axial symmetry of the molecule controlled by IROTSYM and NFOLD_ROT. use rand1 to judge whether rotate or not
+	if( IROTSYM == 1 )
+	{
+		//if(rand1 < 1.0/3.0)
+		//chi += 2.0*M_PI/(double)NFOLD_ROT;
+
+		 if(rand1 < 2.0/3.0 && rand1 >= 1.0/3.0)
+		 chi += 2.0*M_PI/(double)NFOLD_ROT;
+
+		 if(rand1 >= 2.0/3.0 )
+		 chi -= 2.0*M_PI/(double)NFOLD_ROT;
+	  }
+*/
+	//get to the positive values of phi and chi
+	if(phi<0.0) phi = 2.0*M_PI + phi;
+	if(chi<0.0) chi = 2.0*M_PI + chi;
+	//Toby needs to recover the [0:2*Pi] range for phi and chi
+	phi = fmod(phi,2.0*M_PI);
+	chi = fmod(chi,2.0*M_PI);
+
+	if (cost >  1.0)
+	{
+		cost = 2.0 - cost;    
+		//phi  = phi + M_PI;
+	}		 
+
+	if (cost < -1.0)
+	{
+		cost = -2.0 - cost;    
+		//phi  = phi  + M_PI;
+	}		  
+
+	newcoords[PHI][t1] = phi;
+	newcoords[CHI][t1] = chi;
+	newcoords[CTH][t1] = cost;
+
+	double Eulan0[3];
+	double Eulan1[3];
+	double Eulan2[3];
+
+	Eulan0[PHI]=MCAngles[PHI][t0];
+	Eulan0[CTH]=acos(MCAngles[CTH][t0]);
+	Eulan0[CHI]=MCAngles[CHI][t0];
+
+	Eulan1[PHI]=MCAngles[PHI][t1];
+	Eulan1[CTH]=acos(MCAngles[CTH][t1]);
+	Eulan1[CHI]=MCAngles[CHI][t1];
+
+	Eulan2[PHI]=MCAngles[PHI][t2];
+	Eulan2[CTH]=acos(MCAngles[CTH][t2]);
+	Eulan2[CHI]=MCAngles[CHI][t2];
+
+// Rotors partitioning
+	int particleA1Min = 0;
+	int particleA1Max = 0;
+	int particleA2Min = 0;
+	int particleA2Max = 0;
+	int iRefAtom = RefAtom;
+	GetIndex(iRefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
+	int beadMminus1 = (((NumbRotTimes-1)/2)-1);
+	int beadM       = ((NumbRotTimes-1)/2);
+
+	double dens_old;
+	if (RotDenType == 0) 
+	{
+		dens_old = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
+
+		if (((it1==beadM) || (it1==beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
+		{
+			dens_old = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+		}
+	}
+
+	if (fabs(dens_old)<RZERO) dens_old = 0.0;
+	//if (dens_old<0.0) nrerror("Rotational Moves: ","Negative rot density");
+	//toby's temporary treatment for negative rho of paraH2O
+	if (dens_old<0.0) dens_old=fabs(dens_old);
+
+	double pot_old  = 0.0;
+
+	int itr0 = it1*RotRatio;     // interval to average over
+	int itr1 = itr0+RotRatio;     // translational time slices
+
+	for (int it=itr0;it<itr1;it++)  // average over tr time slices
+	pot_old+=(PotRotE3DBrokenPath(iRefAtom,gatom,Eulan1,it));
+	//Toby: pot_old can be calculated with MCAngles
+
+	Eulan1[PHI]=newcoords[PHI][t1];
+	Eulan1[CTH]=acos(newcoords[CTH][t1]);
+	Eulan1[CHI]=newcoords[CHI][t1];
+
+	double dens_new;
+	if(RotDenType == 0)
+	{
+		dens_new = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
+		if (((it1==beadM) || (it1==beadMminus1)) && ((gatom >= particleA1Min) && (gatom <= particleA2Max)))
+		{
+			dens_new = GetDensity3DENT(Distribution, gatom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max, it0, it1, it2, t1, t0, t2, Eulan0, Eulan1, Eulan2);
+		}
+	}
+
+	if (fabs(dens_new)<RZERO) dens_new = 0.0;
+	//if (dens_new<0.0) nrerror("Rotational Moves: ","Negative rot density");
+	//toby's temporary treatment for negative rho of paraH2O
+	if (dens_new<0.0) dens_new=fabs(dens_new);
+
+	double pot_new  = 0.0;
+	for (int it=itr0;it<itr1;it++) 
+	pot_new  += (PotRotE3DBrokenPath(iRefAtom,gatom,Eulan1,it));
+     
+	double rd;
+
+	if(RotDenType == 0)
+    {
+    	if (dens_old>RZERO) rd = dens_new/dens_old;
+        else rd = 1.0;
+        rd *= exp(- MCTau*(pot_new-pot_old));
+    }
+
+	bool Accepted = false;
+	if(RotDenType == 0)
+	{
+		if (rd>1.0)         Accepted = true;
+		else if (rd>rand4) Accepted = true;
+    }
+
+	//MCTotal[type][MCROTAT] += 1.0;  
+	MCRotChunkTot +=1.0;
+      
+	if (Accepted)
+	{
+		//MCAccep[type][MCROTAT] += 1.0;
+		MCRotChunkAcp +=1.0;
+
+		MCAngles[CTH][t1] = cost;
+		MCAngles[PHI][t1] = phi;
+		MCAngles[CHI][t1] = chi; //toby adds
+  
+		double sint=sqrt(1.0-cost*cost);
+		MCCosine[AXIS_X][t1]=sint*cos(phi);
+		MCCosine[AXIS_Y][t1]=sint*sin(phi);
+		MCCosine[AXIS_Z][t1]=cost;
+		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
+		//and Ieff about and perpendicular to one molecule-ixed axis.
+	}	      
+}
+
 double GetDensity3DPIGS(int it1, double *Eulan0, double *Eulan1, double *Eulan2)
 {
 	double rho = 0.0;
@@ -3235,77 +3414,101 @@ double GetDensity3DENT(string Distribution, int gatom, int type, int particleA1M
 	int istop=0;
 	double dens;
 	
-	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
+	if (ENT_ENSMBL == EXTENDED_ENSMBL)
 	{
-		int gatomSwap=particleA2Max-(gatom-particleA1Min);
-		int offsetSwap=MCAtom[type].offset+NumbTimes*gatomSwap;
-
-		if (it1 == (((NumbRotTimes-1)/2)-1))
+		if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
 		{
-			int tSwap = offsetSwap + it2;
-			EulanSwap[PHI]=MCAngles[PHI][tSwap];
-			EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
-			EulanSwap[CHI]=MCAngles[CHI][tSwap];
+			int gatomSwap=particleA2Max-(gatom-particleA1Min);
+			int offsetSwap=MCAtom[type].offset+NumbTimes*gatomSwap;
 
-			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens = rho;
-			rotden_(Eulan1,EulanSwap,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens *= rho;
-		}
+			if (it1 == (((NumbRotTimes-1)/2)-1))
+			{
+				int tSwap = offsetSwap + it2;
+				EulanSwap[PHI]=MCAngles[PHI][tSwap];
+				EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
+				EulanSwap[CHI]=MCAngles[CHI][tSwap];
 
-		if (it1 == ((NumbRotTimes-1)/2))
+				rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens = rho;
+				rotden_(Eulan1,EulanSwap,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens *= rho;
+			}
+
+			if (it1 == ((NumbRotTimes-1)/2))
+			{
+				int tSwap = offsetSwap + it0;
+				EulanSwap[PHI]=MCAngles[PHI][tSwap];
+				EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
+				EulanSwap[CHI]=MCAngles[CHI][tSwap];
+
+				rotden_(EulanSwap,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens = rho;
+				rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens *= rho;
+			}
+		}	
+
+		if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
 		{
-			int tSwap = offsetSwap + it0;
-			EulanSwap[PHI]=MCAngles[PHI][tSwap];
-			EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
-			EulanSwap[CHI]=MCAngles[CHI][tSwap];
+			int gatomSwap = particleA1Max-(gatom-particleA2Min);
+			int offsetSwap = MCAtom[type].offset+NumbTimes*gatomSwap;
 
-			rotden_(EulanSwap,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens = rho;
-			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens *= rho;
-		}
-	}	
+			if (it1 == (((NumbRotTimes-1)/2)-1))
+			{
+				int tSwap = offsetSwap + it2;
+				EulanSwap[PHI]=MCAngles[PHI][tSwap];
+				EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
+				EulanSwap[CHI]=MCAngles[CHI][tSwap];
 
-	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
-	{
-		int gatomSwap = particleA1Max-(gatom-particleA2Min);
-		int offsetSwap = MCAtom[type].offset+NumbTimes*gatomSwap;
+				rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens = rho;
+				rotden_(Eulan1,EulanSwap,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens *= rho;
+			}
 
-		if (it1 == (((NumbRotTimes-1)/2)-1))
-		{
-			int tSwap = offsetSwap + it2;
-			EulanSwap[PHI]=MCAngles[PHI][tSwap];
-			EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
-			EulanSwap[CHI]=MCAngles[CHI][tSwap];
+			if (it1 == ((NumbRotTimes-1)/2))
+			{
+				int tSwap = offsetSwap + it0;
+				EulanSwap[PHI]=MCAngles[PHI][tSwap];
+				EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
+				EulanSwap[CHI]=MCAngles[CHI][tSwap];
 
-			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens = rho;
-			rotden_(Eulan1,EulanSwap,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens *= rho;
-		}
-
-		if (it1 == ((NumbRotTimes-1)/2))
-		{
-			int tSwap = offsetSwap + it0;
-			EulanSwap[PHI]=MCAngles[PHI][tSwap];
-			EulanSwap[CTH]=acos(MCAngles[CTH][tSwap]);
-			EulanSwap[CHI]=MCAngles[CHI][tSwap];
-
-			rotden_(EulanSwap,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens = rho;
-			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-			CodeExit(istop);
-			dens *= rho;
+				rotden_(EulanSwap,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens = rho;
+				rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens *= rho;
+			}
 		}
 	}
+
+	if (ENT_ENSMBL == BROKENPATH)
+	{
+		if ((gatom >= particleA1Min) && (gatom <= particleA2Max))
+		{
+			if (it1 == (((NumbRotTimes-1)/2)-1))
+			{
+				rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens = rho;
+			}
+
+			if (it1 == ((NumbRotTimes-1)/2))
+			{
+				rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+				CodeExit(istop);
+				dens = rho;
+			}
+		}	
+	}
+	
 	return dens;
 }
 
@@ -3636,6 +3839,93 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 	}
 	double spotReturn = spot + spotSwap;
 	return spotReturn;
+}
+
+double PotRotE3DBrokenPath(int iRefAtom, int atom0, double *Eulang, int it)   
+{
+
+	const char *_proc_=__func__;        
+	if (NumbAtoms < 2) nrerror(_proc_,"Nedd many non-linear rotors");
+
+	int type0   =  MCType[atom0];
+	string stype = MCAtom[type0].type;
+	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+	int t0 = offset0 + it;
+
+#ifdef DEBUG_PIMC
+	//const char *_proc_=__func__;         //  PotRotEnergy()
+
+	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
+	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
+
+	if (MCAtom[type0].numb > NumbRotLim)
+	nrerror(_proc_,"Too many non-linear rotors");
+#endif
+
+	double spot;
+
+    double weight, weight1;
+	weight = 1.0;
+    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
+
+	int atom1Init, NumbAtoms1;
+	int particleA1Min = 0;
+	int particleA1Max = 0;
+	int particleA2Min = 0;
+	int particleA2Max = 0;
+	GetIndex(iRefAtom, type0, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
+
+	if (atom0 <= particleA1Max)
+	{
+		atom1Init  = 0;
+		NumbAtoms1 = (particleA1Max+1);
+	}
+	else
+	{
+		atom1Init  = particleA2Min;
+		NumbAtoms1 = NumbAtoms;
+	}
+
+	spot = 0.0;
+	for (int atom1 = atom1Init; atom1 < NumbAtoms1; atom1++)
+	if (atom1 != atom0)                    // skip "self-interaction"
+	{	
+		int type1   = MCType[atom1];
+		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+		int t1 = offset1 + it;
+
+		if ((stype == H2O) && (MCType[atom1] == MCType[atom0]))
+		{
+			double com1[3];
+			double com2[3];
+			double Eulang2[3];
+			double E_2H2O;
+			for (int id=0; id<NDIM; id++)
+			{
+				com1[id] = MCCoords[id][t0];
+				com2[id] = MCCoords[id][t1];
+			}
+			int tm0=offset0 + it/RotRatio;
+			int tm1=offset1 + it/RotRatio;
+			Eulang2[PHI]=MCAngles[PHI][tm1];
+			Eulang2[CTH]=acos(MCAngles[CTH][tm1]);
+			Eulang2[CHI]=MCAngles[CHI][tm1];
+			caleng_(com1, com2, &E_2H2O, Eulang, Eulang2);
+
+			weight1 = 1.0;
+			if (((atom0 < particleA1Min) || (atom0 > particleA2Max)) && ((atom1 >= particleA1Min) && (atom1 <= particleA2Max)))
+			{
+				if (it == ((NumbRotTimes-1)/2)) weight1 = 0.5;
+			} 
+			if (((atom0 >= particleA1Min) && (atom0 <= particleA2Max)) && ((atom1 < particleA1Min) || (atom1 > particleA2Max)))
+			{
+				if (it == ((NumbRotTimes-1)/2)) weight1 = 0.5;
+			} 
+			spot += weight*weight1*E_2H2O;
+		} 
+	}//loop over atom1 (molecules)
+
+	return spot;
 }
 
 double PotEnergy(int atom0, double **pos)   

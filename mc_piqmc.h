@@ -26,15 +26,17 @@ void MCRotLinStepSwapBroken(int,int,int,int,double,double,double,double,double &
 void MCSwap(int, double, string &);
 double PotRotEnergyPIMC(int, double *,int );   
 double PotRotEnergyPIGS(int, double *,int , int );   
-double PotRotEnergySwap(int,int,const double *,int it, string);   
-double PotRotE3DSwap(int,int,double *,int it, string);   
-double PotRotEnergySwapBroken(int, double *,int it);   
+double PotRotEnergySwap(int,int,const double *,int , string);   
+double PotRotE3DSwap(int,int,double *,int , string);   
+double PotRotE3DBrokenPath(int,int,double *,int);   
+double PotRotEnergySwapBroken(int, double *,int);   
 //double PotRotEnergySwap(int,double **,int it, int );   
 // Toby adds rotation move for nonlinear rotor
 void MCRotations3D(int);
 void MCRot3Dstep(int, int, int, int, double,double,double,double,double,int, int, double &, double &);
 void MCRot3DstepPIGS(int, int, int, int, double,double,double,double,double,int, int, double &, double &);
 void MCRot3DstepSwap(int, int, int, int, double,double,double,double,double,int, int, double &, double &, string);
+void MCRot3DstepBrokenPath(int, int, int, int, double,double,double,double,double,int, int, double &, double &);
 void Reflect_MF_XZ(void);
 void Reflect_MF_YZ(void);
 void Reflect_MF_XY(void);
