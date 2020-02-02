@@ -8,8 +8,8 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-rmin=8.0
-rmax=10.0
+rmin=7.0
+rmax=7.9
 dr=0.1
 nr=int(((rmax-rmin)+0.5*dr)/dr)
 nr=nr+1
@@ -32,8 +32,8 @@ for i in range(nr):
 	# Informations about the system
 	simType = "PIGS"
 
-	#simType1="submission "
-	simType1 = "analysis"
+	simType1="submission "
+	#simType1 = "analysis"
 
 	molecule = "H2O"
 	rotor = "H2O"
