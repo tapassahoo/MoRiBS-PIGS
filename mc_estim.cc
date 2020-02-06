@@ -2063,17 +2063,29 @@ void GetOrderCorrPIMC(double *eiej, double *ei)
 		double bseiejx=0.0;
 		double bseiejy=0.0;
 		double bseiej=0.0;
-		for (int it = 0; it<NumbRotTimes;it++)
+		int atomInit, atomFin;
+		if (NumbAtoms > 4)
+		{	
+			atomInit = 2;
+			atomFin  = (NumbAtoms-atomInit);
+		}
+		else if (NumbAtoms <= 4)
+		{
+			atomInit = 0;
+			atomFin  = NumbAtoms;
+		}		
+
+		for (int it=0; it<NumbRotTimes; it++)
 		{
 			double seiejz=0.0;
 			double seiejx=0.0;
 			double seiejy=0.0;
 			double seiej=0.0;
-			for (int atom0=2; atom0<(NumbAtoms-3); atom0++)
+			for (int atom0=atomInit; atom0<(atomFin-1); atom0++)
 			{    
 				int atom1 = atom0+1;
-				int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-				int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+				int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
+				int offset1 = MCAtom[IMTYPE].offset + NumbTimes*atom1;
 
 				int t0      = offset0 + it;
 				int t1      = offset1 + it;
@@ -2106,9 +2118,9 @@ void GetOrderCorrPIMC(double *eiej, double *ei)
 			for (int it=0; it<NumbRotTimes; it++)
 			{	
 				sei[id]=0.0;
-				for (int atom0=2; atom0<NumbAtoms-2; atom0++)
+				for (int atom0=atomInit; atom0<atomFin; atom0++)
 				{    
-					int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+					int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
 					int t0      = offset0 + it;
 
 					sei[id] += MCCosine[id][t0];
@@ -2129,7 +2141,7 @@ void GetOrderCorrPIGS(double *eiej, double *ei)
         return;
     int it = (NumbRotTimes-1)/2;
 
-	if(MCAtom[IMTYPE].numb > 1)
+	if (MCAtom[IMTYPE].numb > 1)
 	{
         double seiejx=0.0;
         double seiejy=0.0;
@@ -2150,8 +2162,8 @@ void GetOrderCorrPIGS(double *eiej, double *ei)
     	for (int atom0=atomInit; atom0<(atomFin-1); atom0++)
         {    
     	    int atom1 = atom0+1;
-            int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-            int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+            int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
+            int offset1 = MCAtom[IMTYPE].offset + NumbTimes*atom1;
 
 			int t0      = offset0 + it;
 			int t1      = offset1 + it;
@@ -2177,7 +2189,7 @@ void GetOrderCorrPIGS(double *eiej, double *ei)
 			double sum = 0.0;
     		for (int atom0=atomInit; atom0<atomFin; atom0++)
         	{    
-           		int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+           		int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
        			int t0      = offset0 + it;
 
 				sum += MCCosine[id][t0];
