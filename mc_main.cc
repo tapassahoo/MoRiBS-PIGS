@@ -819,7 +819,7 @@ void MCResetBlockAveragePIMC(void)
 	_bCv_trans   = 0.0;
 	_bCv_rot     = 0.0;
 
-	PrintXYZprl = 1;
+	PrintXYZprl = 0;
 
 	PrintYrfl   = 1;
 	PrintXrfl   = 1;

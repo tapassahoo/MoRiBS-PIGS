@@ -39,6 +39,7 @@ dr = 0.5
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
 print(nr)
+nr=1
 for i in range(nr):
 
 	space=" "

@@ -790,7 +790,7 @@ def GetTwoBodyDensity(Rpt, DipoleMoment, numbbeads, lmax, ltotalmax, tau, molecu
 	command_line = "python script_PairDensityGenerator.py -d 1.0 -R 10.05 -P 20 -l-max 2 tau HF 0.2"
 	system(command_line)
 	'''
-	srcCodePath         = "/home/tapas/DipoleChain.jl-master/examples/"
+	srcCodePath         = os.path.expanduser("~")+"/DipoleChain.jl-master/examples/"
 	Units               = GetUnitConverter()
 	BConstant           = GetBconst(molecule)  # in wavenumber
 	BConstantK          = BConstant*Units.CMRECIP2KL
@@ -892,14 +892,14 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 				numbbeads2 = int(numbbeads-1)
 			if (molecule_rot == "H2O"):	
 				if (NameOfServer == "graham"):
-					dir_dens =  "/scratch/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
+					dir_dens =  "/scratch/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
 				if (NameOfServer == "nlogn"):
-					dir_dens =  "/work/tapas/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
+					dir_dens =  "/work/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
 			if (molecule_rot == "CH3F"):	
 				if (NameOfServer == "nlogn"):
-					dir_dens =  "/work/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
+					dir_dens =  "/work/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
 				if (NameOfServer == "graham"):
-					dir_dens =  "/scratch/tapas/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
+					dir_dens =  "/scratch/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
 			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature1))+"t"+str(numbbeads2)
 			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
 			if (os.path.isfile(dir_dens+file_rotdens_mod+".rho") == False):
@@ -986,8 +986,8 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 		system(command_pimc_run)
 	else:
 		#call(["qsub", fname])
-		if (NameOfPartition == 'tapas'):
-			call(["sbatch", "-p", "tapas", fname])
+		if (NameOfPartition == user_name):
+			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
 

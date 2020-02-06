@@ -138,11 +138,12 @@ numbblocks_Restart1 = args.NR
 
 # Request to change
 # User should change the following 5 lines as developer already have explained in the README file.
-user_name = "tapas"
+user_name = os.getlogin()
+input_dir = os.getcwd()+"/"
+home = os.path.expanduser("~")
 source_dir = "MoRiBS-PIGS/"
 out_dir = "NameOfOutputDirectory/"
-input_dir = "/home/tapas/MoRiBS-PIGS/examples/scripts/"
-final_results_path = "/home/" + user_name + "/ResultsOf" + TypeCal + "/"
+final_results_path = home + "/ResultsOf" + TypeCal + "/"
 dir = os.path.dirname(final_results_path)
 if not os.path.exists(dir):
 	os.makedirs(dir)

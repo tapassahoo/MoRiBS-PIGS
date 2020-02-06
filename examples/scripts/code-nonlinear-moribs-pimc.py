@@ -8,7 +8,39 @@ import mypkg.pkgMoribs
 module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
-for i in range(1):
+# Informations about the system
+simType = "PIMC"
+#simType1="submission "
+simType1 = "analysis"
+
+molecule = "H2O"
+rotor = "H2O"
+SpinIsomer = -1
+
+#var = "beta" # for fixed tau
+#param = 0.001 # for fixed tau
+
+var = "tau"  # for fixed beta
+param = 0.2 # for fixed beta
+
+#field_strength = 20.0 # Unit inverse of Kelvin
+nMolecule = 11
+nblocks = 10000
+npass = 100
+
+if simType1 == "analysis":
+	cmd1 = "--preskip 5000"
+else:
+	cmd1 = ""
+
+rmin = 2.5
+rmax =10.0
+dr = 0.1
+nr = int(((rmax-rmin)+dr*0.5)/dr)
+nr = nr+1
+print(nr)
+
+for i in range(nr):
 
 	space=" "
 
@@ -23,33 +55,9 @@ for i in range(1):
 	support.replace("extraName", stringName2, fileName2, fileName3)
 	call(["rm", fileName2])
 
-	# Informations about the system
-	simType = "PIMC"
-
-	#simType1="submission "
-	simType1 = "analysis"
-
-	molecule = "H2O"
-	rotor = "H2O"
-	SpinIsomer = -1
-
-	var = "beta" # for fixed tau
-	param = 0.001 # for fixed tau
-
-	#var = "tau"  # for fixed beta
-	#param = 0.2 # for fixed beta
-
-	rcom = 2.8+0.1*i
+	rcom = rmin+dr*i
 	rcom="{:3.1f}".format(rcom)
 	#field_strength = 20.0 # Unit inverse of Kelvin
-	nMolecule = 11
-	nblocks = 20000
-	npass = 100
-
-	if simType1 == "analysis":
-		cmd1 = "--preskip 15000"
-	else:
-		cmd1 = ""
 
 	cmd_run = (
 		"python"+space
