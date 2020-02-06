@@ -438,7 +438,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numb
 		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
 		output  += "\n"
 
-	if ENT_TYPE == 'BROKENPATH':
+	if (ENT_TYPE == 'BROKENPATH'):
 		col_block, col_nm, col_dm = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
 		trunc        = int(len(col_nm)-2**workingNdim)
@@ -456,7 +456,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numb
 		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
 		output  += "\n"
 
-	if ENT_TYPE == "SWAP":
+	if (ENT_TYPE == "SWAP"):
 		col_block, col_nm, col_dm, col_TrInv = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
 		trunc        = int(len(col_nm)-2**workingNdim)
@@ -478,7 +478,7 @@ def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numb
 		output  = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
 		output  += "\n"
 
-	if ENT_TYPE == "UNSWAP":
+	if (ENT_TYPE == "UNSWAP"):
 		col_block, col_nm, col_dm, col_Tr = genfromtxt(final_dir_in_work+"/results/output.rden",unpack=True, usecols=[0,1,2,3], skip_header=preskip, skip_footer=postskip)
 		workingNdim  = int(math.log(len(col_nm))/math.log(2))
 		trunc        = int(len(col_nm)-2**workingNdim)

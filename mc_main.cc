@@ -69,7 +69,6 @@ double _bCv_rot;   //  rotational heat capacity, block average
 
 double _dpot_total;  // potential energy differences, global average  added by Hui Li
 double _bcostheta;
-double _costheta_total;
 #
 double _ucompx;
 double _ucompy;
@@ -79,24 +78,11 @@ double _abs_ucompx;
 double _abs_ucompy;
 double _abs_ucompz;
 #
-double _ucompx_total;
-double _ucompy_total;
-double _ucompz_total;
-#
-double _abs_ucompx_total;
-double _abs_ucompy_total;
-double _abs_ucompz_total;
-#
 vector<double> _cdipoleXYZ;
 vector<double> _cdipoleX;
 vector<double> _cdipoleY;
 vector<double> _cdipoleZ;
 vector<double> _cdipoleXY;
-vector<double> _cdipoleXYZ_total;
-vector<double> _cdipoleX_total;
-vector<double> _cdipoleY_total;
-vector<double> _cdipoleZ_total;
-vector<double> _cdipoleXY_total;
 double _beiej[4];
 double _bei[3];
 //
@@ -172,10 +158,7 @@ Distribution = "unSwap";
 	exit(11);
 #endif
    	randomseed(); //set seed according to clock
-	if (ENT_ENSMBL == EXTENDED_ENSMBL)
-	{
-		srand( time(NULL) );
-	}
+	if (ENT_ENSMBL == EXTENDED_ENSMBL) srand(time(NULL));
 #ifdef POTH2
    vinit_();
 #endif
@@ -665,7 +648,7 @@ ParamsPotential();
                     	//MCGetAverage();
                     	if (PIMC_SIM) MCGetAveragePIMC();
                     	if (PIGS_SIM) MCGetAveragePIGS();
-						if (ENT_SIM && (ENT_ENSMBL == BROKENPATH)) MCGetAveragePIGSENT(IMTYPE);
+						if (ENT_ENSMBL == BROKENPATH) MCGetAveragePIGSENT(IMTYPE);
 					    //omp_set_num_threads(1);
 					    //MCGetAverage();
 					    //omp_set_num_threads(NThreads);
@@ -682,21 +665,15 @@ ParamsPotential();
                     	}
                  	}
               	}
-				if (ENT_SIM && (ENT_ENSMBL == EXTENDED_ENSMBL)) MCGetAveragePIGSENT(IMTYPE);
+				if (ENT_ENSMBL == EXTENDED_ENSMBL) MCGetAveragePIGSENT(IMTYPE);
 
 // DUMP, save global average. if avergCount = 0, then MCGetAverage is never called in this block.  All Saving steps are skipped.
 
               	if (passTotal % MCSKIP_TOTAL == 0 && avergCount)  
               	{
                		sumsCount += 1.0;                 
-					if (ENT_SIM)
-					{
-						//SaveSumEnergy (totalCountENT,sumsCount);
-					}
-					else
-					{	
-						SaveSumEnergy (totalCount,sumsCount);
-					}
+					//if (ENT_SIM) //SaveSumEnergy (totalCountENT,sumsCount);
+					if (!ENT_SIM) SaveSumEnergy (totalCount,sumsCount);
             	}
 			}  
           
@@ -812,13 +789,13 @@ void PIMCPass(int type,int time)
 #endif
 	}
 
-	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 1)  // rotational degrees of freedom
+	if ((type == IMTYPE) && ROTATION && (MCAtom[type].molecule == 1))  // rotational degrees of freedom
     	MCRotationsMove(type);
-   	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 3)  // rotational degrees of freedom
+   	if ((type == IMTYPE) && ROTATION && (MCAtom[type].molecule == 3))  // rotational degrees of freedom
     	MCRotationsMove(type);
-	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 2)  // non-linear rotor rotation added by Toby
+	if ((type == IMTYPE) && ROTATION && (MCAtom[type].molecule == 2))  // non-linear rotor rotation added by Toby
     	MCRotations3D(type);
-	if ((type == IMTYPE) && ROTATION && MCAtom[type].molecule == 4)
+	if ((type == IMTYPE) && ROTATION && (MCAtom[type].molecule == 4))
     	MCRotationsMove(type);
 }
 
@@ -961,8 +938,7 @@ void MCResetBlockAveragePIGSENT(void)
 	ResetMCCounts();
 	ResetQWCounts();
 
-	if (ENT_ENSMBL == EXTENDED_ENSMBL)
-	{
+	if (ENT_ENSMBL == EXTENDED_ENSMBL) {
 		MCAccepSwap = 0.0;
 		MCAccepUnSwap = 0.0;
 	}
@@ -971,7 +947,7 @@ void MCResetBlockAveragePIGSENT(void)
 	_trOfDensitySq = 0.0;
 
 	if (ENT_SIM) avergCountENT = 0.0;
-	PrintXYZprl = 1;
+	PrintXYZprl = 0;
 	PrintYrfl   = 1;
 	PrintXrfl   = 1;
 	PrintZrfl   = 1;
@@ -1084,21 +1060,14 @@ void MCGetAveragePIGS(void)
 		double abs_scompz = abs_compxyz[2];
 
 		_bcostheta       += scostheta; 
-		_costheta_total  += scostheta;
 
 		_ucompx          += scompx;
 		_ucompy          += scompy;
 		_ucompz          += scompz;
-		_ucompx_total    += scompx;
-		_ucompy_total    += scompy;
-		_ucompz_total    += scompz;
 
 		_abs_ucompx          += abs_scompx;
 		_abs_ucompy          += abs_scompy;
 		_abs_ucompz          += abs_scompz;
-		_abs_ucompx_total    += abs_scompx;
-		_abs_ucompy_total    += abs_scompy;
-		_abs_ucompz_total    += abs_scompz;
 #endif		
 
 #ifdef ORDERPARA		
@@ -2067,33 +2036,6 @@ void InitTotalAverage(void)  // DUMP
 	_pot_total = 0.0;
 	_total = 0.0;
 
-	_costheta_total= 0.0;
-	_ucompx_total  = 0.0;
-	_ucompy_total  = 0.0;
-	_ucompz_total  = 0.0;
-	_abs_ucompx_total  = 0.0;
-	_abs_ucompy_total  = 0.0;
-	_abs_ucompz_total  = 0.0;
-
-	int NumbAtoms1;
-	if (ENT_SIM) NumbAtoms1 = NumbAtoms/2;
-	else NumbAtoms1 = NumbAtoms;
-	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
-
-    _cdipoleXYZ_total.resize(NDIMDP);
-    _cdipoleX_total.resize(NDIMDP);
-    _cdipoleY_total.resize(NDIMDP);
-    _cdipoleZ_total.resize(NDIMDP);
-  	_cdipoleXY_total.resize(NDIMDP);
-	
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{
-		 _cdipoleXYZ_total[idp] = 0.0;
-		 _cdipoleX_total[idp] = 0.0;
-		 _cdipoleY_total[idp] = 0.0;
-		 _cdipoleZ_total[idp] = 0.0;
-		 _cdipoleXY_total[idp] = 0.0;
-	}
 	_dpot_total = 0.0;  //added by Hui Li
 
 	_rot_total = 0.0;

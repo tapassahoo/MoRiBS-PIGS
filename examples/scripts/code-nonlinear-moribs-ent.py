@@ -17,16 +17,16 @@ molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-#var = "beta" # for fixed tau
-#param = 0.001 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.005 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.2 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.2 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 10000
-npass = 100
+nblocks = 40000
+npass = 200
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"
@@ -35,7 +35,7 @@ else:
 
 rmin = 3.0
 rmax =10.0
-dr = 1.0
+dr = 0.5
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
 print(nr)

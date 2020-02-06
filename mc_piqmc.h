@@ -79,7 +79,7 @@ void CrossProduct(double *, double *, double *);
 int myRand(double *, double );
 int findCeil(double *, double);
 double GetDensityENT(string, int, int, int, int, int, int, int, int, int, int, int, int, double, double, double **);
-double GetDensity3DENT(string, int, int, int, int, int, int, int, int, int, int, int, int, double *, double *, double *);
+double GetDensity3DENT(string, int, int, int, int, int, int, int, int, int, double *, double *, double *);
 double GetDensity3DPIGS(int, double *, double *, double *);
 void CodeExit(int );
 #endif  //mc_pimc.h

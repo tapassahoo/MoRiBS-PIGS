@@ -9,18 +9,19 @@ space = " "
 file_sim = module_path + "script_submission_asymrho.py"
 
 # Informations about the system
-simType = "A"
+simType = "S"
 rotor = "H2O"
 param = "tau"
-value = 0.001
+value = 0.002
 #param = "beta"
 #value = 0.2
-nbeads = [4, 6, 8, 14, 24]
+nbeads = [4, 6, 8, 10, 14, 20]
+#nbeads = [24]
 #nbeads = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 #nbeads = [120, 140, 160, 180, 200]
 #nbeads += [200, 250, 300, 350]
 #nbeads += [400]
-Jmax = 70
+Jmax = 66
 spin = 0#int(-1)
 
 # Run the "cmd_run" in python interpreter

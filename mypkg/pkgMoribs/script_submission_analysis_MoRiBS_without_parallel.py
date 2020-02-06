@@ -359,7 +359,7 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output + folder_run
 				#support.RemoveFiles(TypeCal, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
 				try:
-					if (TypeCal == "ENT"):
+					if ((TypeCal == "ENT") and (ENT_ALGR == "WOR")):
 						fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE))
 					if (TypeCal != "ENT"):
 						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))

@@ -36,7 +36,7 @@ print("")
 
 plt.plot(col, NMCumSum, color = 'black', ls = '-', linewidth=1,  marker = 'None', markersize = 9, label = 'NM')
 plt.plot(col, DMCumSum, color = 'red',   ls = '-', linewidth=1,  marker = 'None', markersize = 9, label = 'DM')
-plt.ylim(0.3, 0.7)
+plt.ylim(0.0, 1.0)
 plt.xlabel('Number of blocks')
 plt.ylabel('Cumulative sum')
 

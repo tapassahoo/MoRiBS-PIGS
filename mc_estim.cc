@@ -2582,7 +2582,7 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
 {
 	const char *_proc_=__func__;
 
-    int it       = (NumbRotTimes-1)/2;
+    int it      = (NumbRotTimes-1)/2;
 	int type0   = MCType[atom0];
 	int type1   = MCType[atom1];
 	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
@@ -2618,14 +2618,12 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
 			com1[id] = MCCoords[id][t0];
 			com2[id] = MCCoords[id][t1];
 		}
-		int tm0=offset0+it/RotRatio;
-		int tm1=offset1+it/RotRatio;
-		Eulang1[CTH]=acos(MCAngles[CTH][tm0]);
-		Eulang1[PHI]=MCAngles[PHI][tm0];
-		Eulang1[CHI]=MCAngles[CHI][tm0];
-		Eulang2[CTH]=acos(MCAngles[CTH][tm1]);
-		Eulang2[PHI]=MCAngles[PHI][tm1];
-		Eulang2[CHI]=MCAngles[CHI][tm1];
+		Eulang1[PHI]=MCAngles[PHI][t0];
+		Eulang1[CHI]=MCAngles[CHI][t0];
+		Eulang1[CTH]=acos(MCAngles[CTH][t0]);
+		Eulang2[PHI]=MCAngles[PHI][t1];
+		Eulang2[CHI]=MCAngles[CHI][t1];
+		Eulang2[CTH]=acos(MCAngles[CTH][t1]);
 		caleng_(com1, com2, &E_2H2O, Eulang1, Eulang2);
 		spot = 0.5*E_2H2O;
 	}
@@ -2696,12 +2694,12 @@ double GetEstimNM(int type)
 			double Eulan0[3], Eulan1[3];
 
 			Eulan0[PHI]=MCAngles[PHI][t1M1];
-			Eulan0[CTH]=acos(MCAngles[CTH][t1M1]);
 			Eulan0[CHI]=MCAngles[CHI][t1M1];
+			Eulan0[CTH]=acos(MCAngles[CTH][t1M1]);
 
 			Eulan1[PHI]=MCAngles[PHI][t1M];
-			Eulan1[CTH]=acos(MCAngles[CTH][t1M]);
 			Eulan1[CHI]=MCAngles[CHI][t1M];
+			Eulan1[CTH]=acos(MCAngles[CTH][t1M]);
 
 			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 			CodeExit(istop);
@@ -2742,12 +2740,12 @@ double GetEstimNM(int type)
 			double Eulan0[3], Eulan1[3];
 
 			Eulan0[PHI]=MCAngles[PHI][t1M1];
-			Eulan0[CTH]=acos(MCAngles[CTH][t1M1]);
 			Eulan0[CHI]=MCAngles[CHI][t1M1];
+			Eulan0[CTH]=acos(MCAngles[CTH][t1M1]);
 
 			Eulan1[PHI]=MCAngles[PHI][t1M];
-			Eulan1[CTH]=acos(MCAngles[CTH][t1M]);
 			Eulan1[CHI]=MCAngles[CHI][t1M];
+			Eulan1[CTH]=acos(MCAngles[CTH][t1M]);
 
 			rotden_(Eulan0,Eulan1,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
 			CodeExit(istop);
@@ -5864,8 +5862,7 @@ void GetIndex(int particle, int type, int &particleA1Min, int &particleA1Max, in
 
 void CodeExit(int istop)
 {
-    if(istop == 1)
-    {
+    if(istop == 1) {
         cerr<<"large matrix test error"<<endl;
         exit(0);
     }

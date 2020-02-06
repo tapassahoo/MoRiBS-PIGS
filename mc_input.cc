@@ -596,10 +596,7 @@ void StatusIO(int tstatus, const char file_name[])
         fid<<totalStep<<endl;
         fid<<sumsCount<<endl;
         fid<<totalCount<<endl;
-		if (ENT_SIM)
-		{	
-			fid<<Distribution<<endl;
-		}	
+		if (ENT_SIM) fid<<Distribution<<endl;
 		else
 		{	
 			fid<<_total<<endl;
@@ -617,10 +614,7 @@ void StatusIO(int tstatus, const char file_name[])
             fid>>totalStep;
             fid>>sumsCount;
             fid>>totalCount;
-			if (ENT_SIM)
-			{	
-				fid>>Distribution;
-			}	
+			if (ENT_SIM) fid>>Distribution;
 			else
 			{	
 				fid>>_total;
