@@ -307,12 +307,13 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output + folder_run
 				try:
 					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
-					fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip))
+					#fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
+					#fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					#fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					#fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					#fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					#fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
 				except:
 					pass
 		else:
