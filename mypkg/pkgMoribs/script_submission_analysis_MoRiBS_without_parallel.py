@@ -171,13 +171,13 @@ else:
 	dir_output = "/work/" + user_name + "/" + out_dir
 
 
-if TypeCal == "ENT":
-	maxloop = int(numbmolecules1 / 2)
+if (TypeCal == "ENT"):
+	maxloop = int(numbmolecules1/2)
 else:
 	maxloop = 1
 
 if args.RATIO:
-	particleAList = np.arange(1, maxloop + 1)
+	particleAList = np.arange(1, maxloop+1)
 else:
 	particleAList = [maxloop]
 # particleAList = [9]
@@ -228,7 +228,7 @@ for particleA in particleAList:
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
 	if (status == "analysis"):
-		FileAnalysis = support.GetFileNameAnalysis(TypeCal,False,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,final_results_path,particleA)
+		FileAnalysis = support.GetFileNameAnalysis(TypeCal,False,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,final_results_path,particleA, ENT_ALGR)
 
 		if (TypeCal != "ENT"):
 			if preskip >= numbblocks:

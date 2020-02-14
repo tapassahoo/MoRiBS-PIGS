@@ -775,8 +775,8 @@ void PIMCPass(int type,int time)
 		{	
 			if (time == 0)
 			MCMolecularMovePIGS(type);        
-			MCBisectionMovePIGS(type,time);
-			//MCMolecularMoveNaive(type);
+			//MCBisectionMovePIGS(type,time);
+			MCMolecularMoveNaive(type);
 		}
 
 		if (PIMC_SIM)

@@ -1034,10 +1034,10 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 		if (numbbeads >= 160):
 			thread     = 8
 			walltime   = "14-00:00"
-		elif ((numbbeads >= 60) and (numbbeads < 160)):
+		elif ((numbbeads >= 50) and (numbbeads < 160)):
 			thread     = 8
 			walltime   = "07-00:00"
-		elif ((numbbeads >= 20) and (numbbeads < 60)):
+		elif ((numbbeads >= 20) and (numbbeads < 50)):
 			thread     = 4
 			walltime   = "03-00:00"
 		else:
@@ -1230,7 +1230,7 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact,
 	return file1_name
 
 class GetFileNameAnalysis:
-	def __init__(self, TypeCal1,TypeCal2, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1):
+	def __init__(self, TypeCal1,TypeCal2, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1, ENT_ALGR):
 		self.TypeCal      = TypeCal1
 		self.molecule_rot = molecule_rot1
 		self.TransMove    = TransMove1
@@ -1251,9 +1251,8 @@ class GetFileNameAnalysis:
 		self.extra        = extra1
 		self.src_dir      = src_dir1
 		self.particleA    = particleA1
-		print("#------------------------------------------------------------------------#")
-		print("Final analyzed results are being stored in the below mentioned directory - ")
-
+		print("#-------------------------------------#")
+		print("Final analyzed results are stored in - ")
 
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"+self.extra
@@ -1335,7 +1334,11 @@ class GetFileNameAnalysis:
 			print(self.src_dir)
 			print("")
 			print("Final results - Entropy vs "+str(self.variableName))
-			print(self.SaveEntropyRT)
+			if (ENT_ALGR == "WR"):
+				print(self.SaveEntropyRT)
+			else:
+				print(self.SaveEntropy)
+				
 			print("#------------------------------------------------------------------------#")
 
 class GetFileNamePlot:
