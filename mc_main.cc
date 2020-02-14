@@ -771,18 +771,16 @@ void PIMCPass(int type,int time)
 #ifdef GAUSSIANMOVE
 		MCMolecularMoveGauss(type);
 #else
-		if (PIGS_SIM)
+		if (PIGS_SIM || ENT_SIM)
 		{	
-			if (time == 0)
-			MCMolecularMovePIGS(type);        
-			//MCBisectionMovePIGS(type,time);
-			MCMolecularMoveNaive(type);
+			if (time == 0) { MCMolecularMovePIGS(type); }        
+			MCBisectionMovePIGS(type,time);
+			//MCMolecularMoveNaive(type);
 		}
 
 		if (PIMC_SIM)
 		{	
-			if (time == 0)
-			MCMolecularMove(type);        
+			if (time == 0) MCMolecularMove(type);        
 // move the solvent particles
 			MCBisectionMove(type,time);
 		}	

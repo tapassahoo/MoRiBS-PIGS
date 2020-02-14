@@ -333,15 +333,16 @@ void MCMolecularMovePIGS(int type)
 {
 	int numb = MCAtom[type].numb;  
 
-  	double disp[NDIM];
+  	double disp[3];
 
   	for (int atom = 0; atom < numb; atom++)
   	{
     	int offset = MCAtom[type].offset + NumbTimes*atom;
     	int gatom  = offset/NumbTimes;
 
-    	for (int id = 0; id < NDIM; id++)	  // MOVE
-    	disp[id] = MCAtom[type].mcstep*(rnd1()-0.5);
+    	for (int id = 0; id < NDIM; id++){
+			disp[id] = MCAtom[type].mcstep*(rnd1()-0.5);
+		}
 
     	for (int id = 0; id < NDIM; id++)	  // MOVE
     	{
@@ -360,8 +361,7 @@ void MCMolecularMovePIGS(int type)
     	bool Accepted = false;
 
     	if (deltav<0.0)             Accepted = true;
-    	else if
-    	(exp(-deltav*MCRotTau)>rnd2()) Accepted = true;
+    	else if (exp(-deltav*MCTau)>rnd2()) Accepted = true;
 
     	MCTotal[type][MCMOLEC] += 1.0;  
       
@@ -372,8 +372,7 @@ void MCMolecularMovePIGS(int type)
        		for (int id = 0; id < NDIM; id++)       // save accepted configuration	
        		{
        			#pragma omp parallel for
-       			for (int it = 0; it < NumbTimes; it++)
-       			MCCoords[id][offset+it] = newcoords[id][offset+it];
+       			for (int it = 0; it < NumbTimes; it++) MCCoords[id][offset+it] = newcoords[id][offset+it];
        		}
     	}	     
   	}   
@@ -696,10 +695,9 @@ double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, dou
 	double dr2, dens;
 	double dr[NDIM];
 	
-	//double sigma=4.0*mclambda*MCTau;
-	double sigma=2.0*MCTau;
-	if (it1==0)
-	{
+	double sigma=4.0*mclambda*MCTau;
+	//double sigma=2.0*MCTau;
+	if (it1==0) {
 		dr2=0.0;
 		for (int id=0;id<NDIM;id++)
 		{
@@ -708,8 +706,7 @@ double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, dou
 		}
 		dens=Gauss(dr2,sigma);
 	}
-	else if (it1==(NumbRotTimes-1))
-	{
+	else if (it1==(NumbRotTimes-1)) {
 		dr2=0.0;
 		for (int id=0;id<NDIM;id++)
 		{
@@ -718,8 +715,7 @@ double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, dou
 		}
 		dens=Gauss(dr2,sigma);
 	}
-	else
-	{
+	else {
 		dr2=0.0;
 		for (int id=0;id<NDIM;id++)
 		{
@@ -5622,7 +5618,7 @@ void CodeExit(int istop)
 double PotEnergyPIGS(int atom0, double **pos, int it)   
 {
    	int type0   = MCType[atom0];
-   	int offset0 = MCAtom[type0].offset;
+   	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
     int t0 = offset0 + it;
 
    	double spot=0.0;
@@ -5630,7 +5626,7 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
    	if (atom1 != atom0)                    // skip "self-interaction"
    	{	
      	int type1   = MCType[atom1];
-		int offset1 = MCAtom[type1].offset;
+		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
         int t1 = offset1 + it;
 
        int tm;
@@ -5688,12 +5684,15 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
            }
            int tm0=offset0+it/RotRatio;
            int tm1=offset1+it/RotRatio;
+
            Eulang_1[PHI]=MCAngles[PHI][tm0];
-           Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
            Eulang_1[CHI]=MCAngles[CHI][tm0];
+           Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+
            Eulang_2[PHI]=MCAngles[PHI][tm1];
-           Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
            Eulang_2[CHI]=MCAngles[CHI][tm1];
+           Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+
            caleng_(com_1,com_2,&E_2H2O,Eulang_1,Eulang_2);
            spot+=E_2H2O;
 		}
@@ -5713,7 +5712,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 {
 	int type0=MCType[atom0];
 	string stype0 = MCAtom[type0].type;
-   	int offset0=MCAtom[type0].offset;
+   	int offset0=MCAtom[type0].offset+atom0*NumbTimes;
 
    	double spot=0.0;
    	for (int atom1=0; atom1<NumbAtoms; atom1++)
@@ -5721,7 +5720,7 @@ double PotEnergyPIGS(int atom0, double **pos)
    	{	    
        	int type1=MCType[atom1];
 		string stype1 = MCAtom[type1].type;
-       	int offset1=MCAtom[type1].offset; 
+       	int offset1=MCAtom[type1].offset+atom1*NumbTimes; 
 
        	double spot_pair=0.0;
        	#pragma omp parallel for reduction(+: spot_pair)
@@ -5779,8 +5778,6 @@ double PotEnergyPIGS(int atom0, double **pos)
 				double Eulang_1[3];
 				double Eulang_2[3];
 				double E_2H2O;
-				int t0 = offset0 + it;
-				int t1 = offset1 + it;
 				for (int id=0;id<NDIM;id++)
 				{
 					com_1[id] = pos[id][t0];
@@ -5788,12 +5785,15 @@ double PotEnergyPIGS(int atom0, double **pos)
 				}
 				int tm0=offset0 + it/RotRatio;
 				int tm1=offset1 + it/RotRatio;
+
 				Eulang_1[PHI]=MCAngles[PHI][tm0];
-				Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
 				Eulang_1[CHI]=MCAngles[CHI][tm0];
+				Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+
 				Eulang_2[PHI]=MCAngles[PHI][tm1];
-				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
 				Eulang_2[CHI]=MCAngles[CHI][tm1];
+				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+
 				caleng_(com_1, com_2, &E_2H2O, Eulang_1, Eulang_2);
 				spot_pair += weight*E_2H2O;
 			}
