@@ -231,12 +231,7 @@ void MCBisectionMove(int type, int time)  // multilevel Metropolis
    	int    seg_size = MCAtom[type].mlsegm;  // segmen size  
 
 // initialize the end points
-#ifndef PIMCTYPE
-   	int pit = (time+seg_size);  // No periodicity in time for PIGS     	//Tapas modified for PIGS
-	if (pit > (NumbTimes-1)) return;                              
-#else
    	int pit = (time+seg_size) % NumbTimes;  // periodicity in time 	       	
-#endif
 
    	for (int atom=0;atom<numb;atom++)         // one atom to move only
    	{

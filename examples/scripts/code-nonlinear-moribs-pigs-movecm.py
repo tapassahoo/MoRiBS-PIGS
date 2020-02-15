@@ -21,20 +21,20 @@ SpinIsomer = 0
 #param = 0.001 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.2 # for fixed beta
+param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 100
-npass = 100
+nblocks = 40000
+npass = 200
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 5000"
+	cmd1 = "--preskip 30000"
 else:
 	cmd1 = ""
 
-rmin = 2.8
-rmax =2.8
+rmin = 3.0
+rmax =3.0
 dr = 0.1
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
