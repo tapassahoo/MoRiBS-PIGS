@@ -1,18 +1,16 @@
-#!/usr/bin/python
 import os
 import sys
 from subprocess import call
+import math
+from math import *
 import numpy as np
 from numpy import *
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
+import matplotlib.mlab as mlab
 from itertools import cycle
 import itertools
-import math
-from math import *
- 
-import matplotlib.mlab as mlab
 
 fig = plt.figure()
 
