@@ -1622,28 +1622,36 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
 
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
 
-	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+	for (int type=0;type<NumbTypes;type++) 
 	{
-		for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
-        	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-            int t0      = offset0 + it;
-
 			if (TRANSLATION)
 			{
-				fid << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-				fid << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-				fid << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+				for (int it = 0; it < NumbTimes; it++) 
+				{
+					int offset0 = MCAtom[type].offset + NumbTimes*atom0;
+					int t0      = offset0 + it;
+
+					fid << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+					fid << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+					fid << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
+				}
 			}
 
 			if (ROTATION)
 			{
-				fid << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-				fid << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-				fid << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+				for (int it = 0; it < NumbRotTimes; it++) 
+				{
+					int offset0 = MCAtom[type].offset + NumbTimes*atom0;
+					int t0      = offset0 + it;
+					fid << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+					fid << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+					fid << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
+				}
 			}
-        }
-    }
+		}
+	}
 	fid << endl;
     fid.close();
 }
