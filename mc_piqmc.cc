@@ -4113,9 +4113,9 @@ double PotEnergy(int atom0, double **pos)
             spot3d += 0.5*MCCoords[id][t0]*MCCoords[id][t0];
         }
 		double weight = 1.0;
-#ifndef PIMCTYPE
-		if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
-#endif
+		if (!PIMC_SIM) { 
+			if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+		}
         spot_beads   += weight*spot3d;
 	}
 	spot = spot_beads;
@@ -4140,9 +4140,9 @@ double PotEnergy(int atom0, double **pos)
 		}
 
 		double weight = 1.0;
-#ifndef PIMCTYPE
-		if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
-#endif
+		if (!PIMC_SIM) { 
+			if (it == 0 || it == (NumbTimes-1)) weight = 0.5;
+		}
    		spot_beads += weight*PotFuncCage(coordsXYZ,Eulang);
 	}
 	spot = spot_beads;
@@ -5402,16 +5402,14 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 			p1 += (MCCosine[id][tCluster]*MCCosine[id][tpCluster]);
 		}
 
-#ifndef PIMCTYPE
-		if (it == 0 || it == (NumbRotTimes - 1))
-		{
-			if (it == 0) dens_old *= SRotDens(p1, type);
-			else         dens_old *= SRotDens(p0, type);
+		if (PIGS_SIM) { 
+			if (it == 0 || it == (NumbRotTimes - 1)) {
+				if (it == 0) dens_old *= SRotDens(p1, type);
+				else         dens_old *= SRotDens(p0, type);
+			}
+			else             dens_old *= SRotDens(p0,type)*SRotDens(p1,type);
 		}
-		else             dens_old *= SRotDens(p0,type)*SRotDens(p1,type);
-#else
-		dens_old *= SRotDens(p0,type)*SRotDens(p1,type);
-#endif
+		if (PIMC_SIM) dens_old *= SRotDens(p0,type)*SRotDens(p1,type);
 
 // Computation of product of new rotational densities over cluster
 		p0 = 0.0;
@@ -5422,16 +5420,15 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 			p1 += (newcoords[id][tCluster]*MCCosine[id][tpCluster]);
 		}
 
-#ifndef PIMCTYPE
-		if ((it == 0) || (it == (NumbRotTimes - 1)))
-		{
-			if (it == 0) dens_new *= SRotDens(p1, type);
-			else         dens_new *= SRotDens(p0, type);
+		if (PIGS_SIM) { 
+			if ((it == 0) || (it == (NumbRotTimes - 1)))
+			{
+				if (it == 0) dens_new *= SRotDens(p1, type);
+				else         dens_new *= SRotDens(p0, type);
+			}
+			else             dens_new *= SRotDens(p0,type)*SRotDens(p1,type);
 		}
-		else             dens_new *= SRotDens(p0,type)*SRotDens(p1,type);
-#else
-		dens_new *= SRotDens(p0,type)*SRotDens(p1,type);
-#endif
+		if (PIGS_SIM) dens_new *= SRotDens(p0,type)*SRotDens(p1,type);
 // density computation ends here
 
 // computation of interaction potential
@@ -5490,9 +5487,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	else rd = 1.0;
 
 	double pot_diff = pot_new-pot_old;
-#ifndef PIMCTYPE
-	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
-#endif
+	if (PIGS_SIM) if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
 	rd *= exp(- MCRotTau*pot_diff);
 	bool Accepted = false;
 	if (rd>rand4) Accepted = true;
@@ -5541,9 +5536,7 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 	double pot_new = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
 
 	double pot_diff = pot_old-pot_new;
-#ifndef PIMCTYPE
-	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
-#endif
+	if (PIGS_SIM) if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
 	double exponent = -MCRotTau*pot_diff;
 	double linkProb = (exponent < 0.0) ? (1.0-exp(exponent)) : 0.0;
    	double rand5   = runif(Rng);
@@ -5587,9 +5580,9 @@ int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int i
 	double pot_new = PotFunc(atom0, atom1, Eulang0, Eulang1, it);
 
 	double pot_diff = pot_old-pot_new;
-#ifndef PIMCTYPE
-	if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
-#endif
+	if (PIGS_SIM) {
+		if ((it == 0) || (it == (NumbRotTimes - 1))) pot_diff = 0.5*pot_diff;
+	}
 	double exponent = -MCRotTau*pot_diff;
 	double linkProb = (exponent < 0.0) ? (1.0-exp(exponent)) : 0.0;
    	double rand5   = runif(Rng);

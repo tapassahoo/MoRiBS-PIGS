@@ -272,5 +272,4 @@ void print_matrix( char *desc, int m, int n, double* a, int lda );
 void diag(double *a, double *w, int N);
 extern double ** gausscoords;  // buffer for new coordinates
 #endif
-extern int NumbStep;
 #endif  //MM_setup.h
