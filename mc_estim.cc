@@ -659,12 +659,12 @@ double GetPotEnergyPIGS(void)
 #endif
 
     string stype = MCAtom[IMTYPE].type;
-   	int it = ((NumbRotTimes - 1)/2);
+   	int it = ((NumbTimes-1)/2);
 	double spot = 0.0;
 	double Eulang0[3], Eulang1[3];
-	if ( (MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) && (stype == H2O))
+	if ((MCAtom[IMTYPE].molecule==2) && (MCAtom[IMTYPE].numb>1) && (stype==H2O))
 	{
-        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+        for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
 		{
            	int offset0 = NumbTimes*atom0;
            	int t0 = offset0 + it;
@@ -685,12 +685,13 @@ double GetPotEnergyPIGS(void)
 				int tm0=offset0 + it/RotRatio;
 				int tm1=offset1 + it/RotRatio;
 				Eulang0[PHI]=MCAngles[PHI][tm0];
-				Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
 				Eulang0[CHI]=MCAngles[CHI][tm0];
+				Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
 
 				Eulang1[PHI]=MCAngles[PHI][tm1];
-				Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
 				Eulang1[CHI]=MCAngles[CHI][tm1];
+				Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
+
 				caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
 				spot += E_2H2O;
         	}// loop over atoms1 
@@ -1431,18 +1432,18 @@ double GetTotalEnergy(void)
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
 	double Eulang0[3],Eulang1[3];
-	if ((MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb > 1) && (stype=="H2O"))
+	if ((MCAtom[IMTYPE].molecule==2) && (MCAtom[IMTYPE].numb>1) && (stype=="H2O"))
 	{
-        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+        for (int atom0=0; atom0<(NumbAtoms-1); atom0++)
 		{
-           	int offset0 = NumbTimes*atom0;
+           	int offset0=NumbTimes*atom0;
 
-        	for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
+        	for (int atom1=(atom0+1); atom1<NumbAtoms; atom1++)
         	{
-            	int offset1 = NumbTimes*atom1;
+            	int offset1=NumbTimes*atom1;
 
         		double spot_pair=0.0;
-            	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
+            	for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
 				{
                 	int t0 = offset0 + it;
                 	int t1 = offset1 + it;
@@ -1457,12 +1458,13 @@ double GetTotalEnergy(void)
 					int tm0=offset0 + it/RotRatio;
 					int tm1=offset1 + it/RotRatio;
 					Eulang0[PHI]=MCAngles[PHI][tm0];
-					Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
 					Eulang0[CHI]=MCAngles[CHI][tm0];
+					Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
 
 					Eulang1[PHI]=MCAngles[PHI][tm1];
-					Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
 					Eulang1[CHI]=MCAngles[CHI][tm1];
+					Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
+
 					caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
 					spot_pair += E_2H2O;
 				}//loop over beads

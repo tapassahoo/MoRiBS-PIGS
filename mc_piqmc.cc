@@ -330,44 +330,44 @@ void MCMolecularMovePIGS(int type)
 
   	double disp[3];
 
-  	for (int atom = 0; atom < numb; atom++)
+  	for (int atom=0; atom<numb; atom++)
   	{
-    	int offset = MCAtom[type].offset + NumbTimes*atom;
-    	int gatom  = offset/NumbTimes;
+    	int offset=MCAtom[type].offset+NumbTimes*atom;
+    	int gatom=offset/NumbTimes;
 
-    	for (int id = 0; id < NDIM; id++){
-			disp[id] = MCAtom[type].mcstep*(rnd1()-0.5);
+    	for (int id=0; id<NDIM; id++) {
+			disp[id]=MCAtom[type].mcstep*(rnd1()-0.5);
 		}
 
-    	for (int id = 0; id < NDIM; id++)	  // MOVE
+    	for (int id=0; id<NDIM; id++)	  // MOVE
     	{
     		#pragma omp parallel for
-    		for (int it = 0; it < NumbTimes; it++)
+    		for (int it=0; it<NumbTimes; it++)
     		{ 
-       			newcoords[id][offset+it]  =  MCCoords[id][offset+it];
-       			newcoords[id][offset+it] +=  disp[id];
+       			newcoords[id][offset+it]=MCCoords[id][offset+it];
+       			newcoords[id][offset+it]+=disp[id];
     		}
     	}
 
-    	double deltav = 0.0;         // ACCEPT/REJECT
+    	double deltav=0.0;         // ACCEPT/REJECT
     
-    	deltav += (PotEnergyPIGS(gatom,newcoords)-PotEnergyPIGS(gatom,MCCoords));
+    	deltav+=(PotEnergyPIGS(gatom,newcoords)-PotEnergyPIGS(gatom,MCCoords));
 
-    	bool Accepted = false;
+    	bool Accepted=false;
 
-    	if (deltav<0.0)             Accepted = true;
-    	else if (exp(-deltav*MCTau)>rnd2()) Accepted = true;
+    	if (deltav<0.0) Accepted=true;
+    	else if (exp(-deltav*MCTau)>rnd2()) Accepted=true;
 
-    	MCTotal[type][MCMOLEC] += 1.0;  
+    	MCTotal[type][MCMOLEC]+=1.0;  
       
     	if (Accepted)
     	{
-       		MCAccep[type][MCMOLEC] += 1.0; 
+       		MCAccep[type][MCMOLEC]+=1.0; 
 
-       		for (int id = 0; id < NDIM; id++)       // save accepted configuration	
+       		for (int id=0; id<NDIM; id++)       // save accepted configuration	
        		{
        			#pragma omp parallel for
-       			for (int it = 0; it < NumbTimes; it++) MCCoords[id][offset+it] = newcoords[id][offset+it];
+       			for (int it=0; it<NumbTimes; it++) MCCoords[id][offset+it]=newcoords[id][offset+it];
        		}
     	}	     
   	}   
@@ -5617,71 +5617,30 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
         int t1 = offset1 + it;
 
-       int tm;
-       if ((((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && ISPHER == 0) &&(MCAtom[type0].molecule != MCAtom[type1].molecule))
+       if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
        {
-           double RCOM[3];
-           double Rpt[3];
-           double Eulang[3];
-           double vpot3d;
-           double radret;
-           double theret;
-           double chiret;
-           double hatx[3];
-           double haty[3];
-           double hatz[3];
-           int    ivcord=0;
-           if(MCAtom[type0].molecule==2)
-           {
-              tm  = offset0 + it/RotRatio;
-              for (int id=0;id<NDIM;id++)
-              {
-                 RCOM[id] = pos[id][t0];
-                 Rpt[id]  = MCCoords[id][t1];
-              }
-           }
-           else
-           {
-              tm  = offset1 + it/RotRatio;
-              for (int id=0;id<NDIM;id++)
-              {
-                 Rpt[id]  = pos[id][t0];
-                 RCOM[id] = MCCoords[id][t1];
-              }
-           }
-           Eulang[PHI]=MCAngles[PHI][tm];
-           Eulang[CTH]=acos(MCAngles[CTH][tm]);
-           Eulang[CHI]=MCAngles[CHI][tm];
-
-           vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-           spot += vpot3d;
-       }
-       else if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
-       {
-           double com_1[3];
-           double com_2[3];
-           double Eulang_1[3];
-           double Eulang_2[3];
+           double com1[3];
+           double com2[3];
+           double Eulang1[3];
+           double Eulang2[3];
            double E_2H2O;
-           int t0=offset0+it;
-           int t1=offset1+it;
            for (int id=0;id<NDIM;id++)
            {
-                com_1[id]=pos[id][t0];
-                com_2[id]=MCCoords[id][t1];
+                com1[id]=pos[id][t0];
+                com2[id]=MCCoords[id][t1];
            }
            int tm0=offset0+it/RotRatio;
            int tm1=offset1+it/RotRatio;
 
-           Eulang_1[PHI]=MCAngles[PHI][tm0];
-           Eulang_1[CHI]=MCAngles[CHI][tm0];
-           Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+           Eulang1[PHI]=MCAngles[PHI][tm0];
+           Eulang1[CHI]=MCAngles[CHI][tm0];
+           Eulang1[CTH]=acos(MCAngles[CTH][tm0]);
 
-           Eulang_2[PHI]=MCAngles[PHI][tm1];
-           Eulang_2[CHI]=MCAngles[CHI][tm1];
-           Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+           Eulang2[PHI]=MCAngles[PHI][tm1];
+           Eulang2[CHI]=MCAngles[CHI][tm1];
+           Eulang2[CTH]=acos(MCAngles[CTH][tm1]);
 
-           caleng_(com_1,com_2,&E_2H2O,Eulang_1,Eulang_2);
+           caleng_(com1,com2,&E_2H2O,Eulang1,Eulang2);
            spot+=E_2H2O;
 		}
 	}   
@@ -5707,7 +5666,7 @@ double PotEnergyPIGS(int atom0, double **pos)
    	if (atom1 != atom0)                      // skip "self-interaction"
    	{	    
        	int type1=MCType[atom1];
-		string stype1 = MCAtom[type1].type;
+		string stype1=MCAtom[type1].type;
        	int offset1=MCAtom[type1].offset+atom1*NumbTimes; 
 
        	double spot_pair=0.0;
@@ -5720,69 +5679,30 @@ double PotEnergyPIGS(int atom0, double **pos)
 			double weight=1.0;
 			if ((it==0)||(it==(NumbTimes-1))) weight=0.5;
 
-			int tm;
-			if ((((MCAtom[type0].molecule==2)||(MCAtom[type1].molecule==2)) && ISPHER==0) && (MCAtom[type0].molecule != MCAtom[type1].molecule)) // 3D interaction
+			if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
 			{
-				double RCOM[3];
-				double Rpt[3];
-				double Eulang[3];
-				double vpot3d;
-				double radret;
-				double theret;
-				double chiret;
-				double hatx[3];
-				double haty[3];
-				double hatz[3];
-				int    ivcord=0;
-				if(MCAtom[type0].molecule == 2)
-				{
-					tm=offset0+it/RotRatio;
-					for (int id=0;id<NDIM;id++)
-					{
-						RCOM[id]=pos[id][t0];
-						Rpt[id]=MCCoords[id][t1];
-					}
-				}
-				else
-				{
-					tm=offset1+it/RotRatio;
-					for (int id=0;id<NDIM;id++)
-					{
-						Rpt[id]=pos[id][t0];
-						RCOM[id]=MCCoords[id][t1];
-					}
-				}
-				Eulang[PHI]=MCAngles[PHI][tm];
-				Eulang[CTH]=acos(MCAngles[CTH][tm]);
-				Eulang[CHI]=MCAngles[CHI][tm];
-
-				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-				spot_pair+=vpot3d*weight;
-			}
-			else if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
-			{
-				double com_1[3];
-				double com_2[3];
-				double Eulang_1[3];
-				double Eulang_2[3];
+				double com1[3];
+				double com2[3];
+				double Eulang1[3];
+				double Eulang2[3];
 				double E_2H2O;
 				for (int id=0;id<NDIM;id++)
 				{
-					com_1[id] = pos[id][t0];
-					com_2[id] = MCCoords[id][t1];
+					com1[id]=pos[id][t0];
+					com2[id]=MCCoords[id][t1];
 				}
-				int tm0=offset0 + it/RotRatio;
-				int tm1=offset1 + it/RotRatio;
+				int tm0=offset0+it/RotRatio;
+				int tm1=offset1+it/RotRatio;
 
-				Eulang_1[PHI]=MCAngles[PHI][tm0];
-				Eulang_1[CHI]=MCAngles[CHI][tm0];
-				Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+				Eulang1[PHI]=MCAngles[PHI][tm0];
+				Eulang1[CHI]=MCAngles[CHI][tm0];
+				Eulang1[CTH]=acos(MCAngles[CTH][tm0]);
 
-				Eulang_2[PHI]=MCAngles[PHI][tm1];
-				Eulang_2[CHI]=MCAngles[CHI][tm1];
-				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+				Eulang2[PHI]=MCAngles[PHI][tm1];
+				Eulang2[CHI]=MCAngles[CHI][tm1];
+				Eulang2[CTH]=acos(MCAngles[CTH][tm1]);
 
-				caleng_(com_1, com_2, &E_2H2O, Eulang_1, Eulang_2);
+				caleng_(com1, com2, &E_2H2O, Eulang1, Eulang2);
 				spot_pair += weight*E_2H2O;
 			}
        	} 
