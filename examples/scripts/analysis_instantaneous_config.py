@@ -11,7 +11,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
  
 dir_read = sys.argv[1]
-#sim_type = sys.argv[2]
+particle_index = int(sys.argv[2])
+axis_plot = sys.argv[3]
+axis_index = {"cost":0, "phi":1, "chi":2}
 
 file_read = dir_read + 'results/output.xyz'
 string1 =dir_read[dir_read.find("PIGS"):-1]
@@ -47,20 +49,10 @@ if (dofs_read == "TransAndRot"):
 	vec_dist=np.sqrt(np.sum(np.square(distance),axis=0))
 	print('Average lattics spacing = '+str(np.mean(vec_dist))+" Angstrom")
  
-#cost = loadtxt(file_read, unpack=True, usecols=[ncol+1])
+vec_plot = save_data[particle_index,axis_index[axis_plot],:]
 #pyplot calling first
 fig = plt.figure()
-#plt.grid(True)
-
-# Normalize density
 num_bins = 20
-#kwargs = dict(alpha=0.5, bins='auto', density=True, stacked=True)
-
-vec_dist = save_data[1,0,:]
-#Histogram plot
-plt.hist(vec_dist, bins='auto', normed=True, color='b', label='""')
-#plt.hist(cost, bins='auto', normed=True, color='b', label='""')
-
+plt.hist(vec_plot, bins='auto', density=True, color='b', label='""')
 plt.ylabel('Density')
-
 plt.show()
