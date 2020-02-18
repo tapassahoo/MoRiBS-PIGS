@@ -25,7 +25,7 @@ param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 40000
+nblocks = 10000
 npass = 200
 
 if simType1 == "analysis":
@@ -33,8 +33,8 @@ if simType1 == "analysis":
 else:
 	cmd1 = ""
 
-rmin = 2.8
-rmax =3.0
+rmin = 10.0
+rmax = 10.0
 dr = 0.2
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1

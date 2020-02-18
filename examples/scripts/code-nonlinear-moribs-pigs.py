@@ -21,7 +21,7 @@ SpinIsomer = 0
 #param = 0.001 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.2 # for fixed beta
+param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 11

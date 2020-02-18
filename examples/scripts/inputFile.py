@@ -11,7 +11,7 @@ def Getbeads(TypeCal, variableName):
 		if (variableName == "tau"):
 			list_nb = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200]
 		if (variableName == "beta"):
-			list_nb = [4, 6, 8, 10, 14, 20, 24, 30, 40, 50, 60, 70, 80, 90, 100]#, 120, 140, 160, 180, 200]
+			list_nb = [4, 6, 8, 10, 14, 20, 24, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200]
 
 	if (TypeCal == "PIMC"):
 		if (variableName == "tau"):
@@ -21,9 +21,9 @@ def Getbeads(TypeCal, variableName):
 
 	if (TypeCal == "PIGS"):
 		if (variableName == "tau"):
-			list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]#, 120, 140, 160, 180, 200, 250, 300, 350, 400]
+			list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200]#, 250, 300, 350, 400]
 		if (variableName == "beta"):
-			list_nb  = [4, 6, 8, 10, 12, 14, 16, 18, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+			list_nb  = [4, 6, 8, 10, 14, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 	return list_nb
 
@@ -67,8 +67,8 @@ class GetStepAndLevel:
 
 			if (self.molecule_rot == "H2O"):
 				self.step_trans = [0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15]
-				self.step       = [0.15,0.15,0.15,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12]
-				self.level      = [1,2,2,2,2,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+				self.step       = [0.15,0.15,0.15,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.10,0.10,0.10,0.08,0.08]
+				self.level      = [1,2,2,2,2,3,3,3,3,3,3,4,4,4,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
 
 			if (self.molecule_rot == "CH3F"):
 				self.step_trans = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
@@ -99,9 +99,9 @@ class GetStepAndLevel:
 				self.level       = [1   for i in range(100)]
 
 			if (self.molecule_rot == "H2O"):
-				self.step_trans  = [0.3 for i in range(100)]
+				self.step_trans  = [2.0, 0.6, 0.5, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.15, 0.12, 0.12]
 				self.step        = [0.1 for i in range(20)]
-				self.level       = [1 for i in range(100)]
+				self.level       = [1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 
 			if (self.molecule_rot == "CH3F"):
 				self.step_trans  = [0.3 for i in range(100)]
