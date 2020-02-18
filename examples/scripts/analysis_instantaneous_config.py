@@ -62,15 +62,15 @@ print(save_data[particle_index,axis_index[axis_plot],:])
 if (dofs_read == "Rot"):
 	data_plot = save_data[particle_index,axis_index[axis_plot],:]
 
-	if (axis_index == 0):
+	if (axis_index[axis_plot] == 0):
 		plt.xlabel('Bins of '+r'$\cos(\theta)$')
 		plt.xlim(-1.0,1.0)
-	elif (axis_index == 1):
+	elif (axis_index[axis_plot] == 1):
 		plt.xlabel('Bins of '+r'$\phi$')
-		plt.xlim(0.0,math.pi)
+		plt.xlim(0.0,2.0*math.pi)
 	else:
 		plt.xlabel('Bins of '+r'$\chi$')
-		plt.xlim(0.0,math.pi)
+		plt.xlim(0.0,2.0*math.pi)
 
 plt.hist(data_plot, bins='auto', normed=1, color='green', alpha=0.75, edgecolor='black', label='""')
 plt.ylabel('Density')
