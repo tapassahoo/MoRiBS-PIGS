@@ -8,7 +8,6 @@ from numpy import *
 from scipy.optimize import curve_fit
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
  
 dir_read = sys.argv[1]
 particle_index = int(sys.argv[2])
@@ -32,6 +31,8 @@ else:
 	ndofs=3
 
 data_len = len(loadtxt(file_read, unpack=True, usecols=[0]))
+workingNdim = int(math.log(data_len)/math.log(2))
+trunc = int(data_len-2**workingNdim)
 save_data = np.zeros((numb_particle,3,data_len))
 for i in range(numb_particle):
 	ncol1 = beads_pos+i*numb_beads
@@ -49,10 +50,28 @@ if (dofs_read == "TransAndRot"):
 	vec_dist=np.sqrt(np.sum(np.square(distance),axis=0))
 	print('Average lattics spacing = '+str(np.mean(vec_dist))+" Angstrom")
  
-vec_plot = save_data[particle_index,axis_index[axis_plot],:]
+#vec_plot = save_data[particle_index,axis_index[axis_plot],:]
 #pyplot calling first
 fig = plt.figure()
 num_bins = 20
-plt.hist(vec_plot, bins='auto', density=True, color='b', label='""')
+if (dofs_read == "TransAndRot"):
+	plt.xlabel('Bins of lattice spacing ('+r'$\AA$'+')')
+	data_plot = vec_dist[trunc:]
+
+print(save_data[particle_index,axis_index[axis_plot],:])
+if (dofs_read == "Rot"):
+	data_plot = save_data[particle_index,axis_index[axis_plot],:]
+
+	if (axis_index == 0):
+		plt.xlabel('Bins of '+r'$\cos(\theta)$')
+		plt.xlim(-1.0,1.0)
+	elif (axis_index == 1):
+		plt.xlabel('Bins of '+r'$\phi$')
+		plt.xlim(0.0,math.pi)
+	else:
+		plt.xlabel('Bins of '+r'$\chi$')
+		plt.xlim(0.0,math.pi)
+
+plt.hist(data_plot, bins='auto', normed=1, color='green', alpha=0.75, edgecolor='black', label='""')
 plt.ylabel('Density')
 plt.show()
