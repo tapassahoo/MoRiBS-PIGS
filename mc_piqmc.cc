@@ -1227,7 +1227,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)   
 {
-	int offset0 =  MCAtom[type].offset+NumbRotTimes*atom0;
+	int offset0 =  NumbTimes*atom0;
 	int t0  = offset0 + it;
 
 	double spot = 0.0;
@@ -1241,7 +1241,7 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
         for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
         if (atom1 != atom0)                    
         {
-            int offset1 = MCAtom[type].offset + NumbRotTimes*atom1;
+            int offset1 = NumbTimes*atom1;
             int t1  = offset1 + it;
 
 	        string stype = MCAtom[type].type;
@@ -1544,7 +1544,7 @@ double GetDensityENT(string Distribution, int gatom, int type, int particleA1Min
 	if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
 	{
 		int gatomSwap = particleA2Max - (gatom - particleA1Min);
-		int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
+		int offsetSwap = NumbTimes*gatomSwap;
 
 		if (it1 == (((NumbRotTimes - 1)/2) - 1))
 		{
@@ -1572,7 +1572,7 @@ double GetDensityENT(string Distribution, int gatom, int type, int particleA1Min
 	if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
 	{
 		int gatomSwap = particleA1Max - (gatom - particleA2Min);
-		int offsetSwap = MCAtom[type].offset+NumbRotTimes*gatomSwap;
+		int offsetSwap = NumbTimes*gatomSwap;
 
 		if (it1 == (((NumbRotTimes - 1)/2) - 1))
 		{
@@ -1610,7 +1610,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
 
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
 	{
-	    int offset0 =  atom0*NumbRotTimes;
+	    int offset0 =  atom0*NumbTimes;
         int t0  = offset0 + it;
 
 		int atom1Init, NumbAtoms1;
@@ -1635,7 +1635,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
         for (int atom1 = atom1Init; atom1 < NumbAtoms1; atom1++)
         if (atom1 != atom0)                    
         {
-            int offset1 = atom1*NumbRotTimes;
+            int offset1 = atom1*NumbTimes;
             int t1  = offset1 + it;
 
 	        string stype = MCAtom[type0].type;
@@ -1696,7 +1696,7 @@ double PotRotEnergySwap(int iRefAtom, int atom0, const double *Eulang0, int it, 
 				spotSwap = 0.0;
      			for (int atomSwap = atomSwapMin; atomSwap < atomSwapMax; atomSwap++)
 	    		{
-                	int offsetSwap = NumbRotTimes*atomSwap;
+                	int offsetSwap = NumbTimes*atomSwap;
                 	int tSwap  = offsetSwap + it;
 	        		string stype = MCAtom[type0].type;
                 	if (stype == HF )
@@ -2364,7 +2364,7 @@ double PotRotEnergySwapBroken(int atom0, double *Eulang0, int it)
 
 	if ( (MCAtom[type0].molecule == 4) && (MCAtom[type0].numb > 1) )
 	{
-	    int offset0 =  atom0*NumbRotTimes;
+	    int offset0 =  atom0*NumbTimes;
         int t0  = offset0 + it;
 
 		int particleA1Min = 0;
@@ -3377,13 +3377,13 @@ double GetDensity3DENT(string Distribution, int gatom, int type, int particleA1M
 		if ((gatom >= particleA1Min) && (gatom <= particleA1Max))
 		{
 			gatomSwap=particleA2Max-(gatom-particleA1Min);
-			offsetSwap=MCAtom[type].offset+NumbTimes*gatomSwap;
+			offsetSwap=NumbTimes*gatomSwap;
 		}
 
 		if ((gatom >= particleA2Min) && (gatom <= particleA2Max))
 		{
-			gatomSwap = particleA1Max-(gatom-particleA2Min);
-			offsetSwap = MCAtom[type].offset+NumbTimes*gatomSwap;
+			gatomSwap=particleA1Max-(gatom-particleA2Min);
+			offsetSwap=NumbTimes*gatomSwap;
 		}
 
 		if (it1==(((NumbRotTimes-1)/2)-1))
@@ -3456,12 +3456,12 @@ double PotRotE3D(int atom0, double *Eulang, int it)
 
 	double spot = 0.0;
 
-	int offset0 = atom0*NumbRotTimes;
+	int offset0 = atom0*NumbTimes;
 
 	for (int atom1=0; atom1<NumbAtoms; atom1++)
 	if (atom1 != atom0)                    // skip "self-interaction"
 	{	
-		int offset1 = atom1*NumbRotTimes;
+		int offset1 = atom1*NumbTimes;
 		int type1   = MCType[atom1];
 
 #ifdef DEBUG_PIMC
@@ -3545,7 +3545,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 {
 	int type0   =  MCType[atom0];
 	string stype = MCAtom[type0].type;
-	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+	int offset0 = atom0*NumbTimes;
 	int t0 = offset0 + it;
 	double spot = 0.0;
 
@@ -3565,7 +3565,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 		if (atom1 != atom0)                    // skip "self-interaction"
 		{	
 			int type1   = MCType[atom1];
-			int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+			int offset1 = atom1*NumbTimes;
 			int t1 = offset1 + it;
 
 			if ((stype == H2O) && (MCType[atom1] == MCType[atom0]))
@@ -3632,7 +3632,7 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 
 	int type0   =  MCType[atom0];
 	string stype = MCAtom[type0].type;
-	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+	int offset0 = atom0*NumbTimes;
 	int t0 = offset0 + it;
 
 #ifdef DEBUG_PIMC
@@ -3674,7 +3674,7 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 	if (atom1 != atom0)                    // skip "self-interaction"
 	{	
 		int type1   = MCType[atom1];
-		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+		int offset1 = atom1*NumbTimes;
 		int t1 = offset1 + it;
 
 		if ((stype == H2O) && (MCType[atom1] == MCType[atom0]))
@@ -3742,7 +3742,7 @@ double PotRotE3DSwap(int iRefAtom, int atom0, double *Eulang, int it, string Dis
 			for (int atomSwap = atomSwapMin; atomSwap < atomSwapMax; atomSwap++)
 			{
 				int typeSwap   = MCType[atomSwap];
-				int offsetSwap = MCAtom[typeSwap].offset+NumbTimes*atomSwap;
+				int offsetSwap = NumbTimes*atomSwap;
 				int tSwap  = offsetSwap + it;
 				if ((stype == H2O) && (MCType[atomSwap] == MCType[atom0]))
 				{
@@ -3778,7 +3778,7 @@ double PotRotE3DBrokenPath(int iRefAtom, int atom0, double *Eulang, int it)
 
 	int type0   =  MCType[atom0];
 	string stype = MCAtom[type0].type;
-	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+	int offset0 = atom0*NumbTimes;
 	int t0 = offset0 + it;
 
 #ifdef DEBUG_PIMC
@@ -3820,7 +3820,7 @@ double PotRotE3DBrokenPath(int iRefAtom, int atom0, double *Eulang, int it)
 	if (atom1 != atom0)                    // skip "self-interaction"
 	{	
 		int type1   = MCType[atom1];
-		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+		int offset1 = atom1*NumbTimes;
 		int t1 = offset1 + it;
 
 		if ((stype == H2O) && (MCType[atom1] == MCType[atom0]))
@@ -5292,7 +5292,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	cluster.push_back(atom0);
 	buffer.push_back(atom0);
 
-	int offset0 = MCAtom[type].offset+(NumbRotTimes*atom0);  
+	int offset0 = NumbTimes*atom0;  
 	int t0 = offset0 + it;
 
 	double vectorAtom0[3];
@@ -5388,7 +5388,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 	for (int iAtom0 = 0; iAtom0 < cluster.size(); iAtom0++)
 	{
 		int atomCluster = cluster[iAtom0];
-		int offsetCluster = MCAtom[type].offset+(NumbRotTimes*atomCluster);  
+		int offsetCluster = NumbTimes*atomCluster;  
 		int tmCluster = offsetCluster + itm;
 		int tCluster  = offsetCluster + it;
 		int tpCluster = offsetCluster + itp;
@@ -5462,7 +5462,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 				int atomAntiCluster = antiCluster[iAtom1];
 				if (abs(atomCluster - atomAntiCluster)>1)
 				{
-					int offsetAntiCluster = MCAtom[type].offset+(NumbRotTimes*atomAntiCluster);  
+					int offsetAntiCluster = NumbRotTimes*atomAntiCluster;  
 					int tAntiCluster      = offsetAntiCluster + it;
 
 					double EulangAntiCluster[3];
@@ -5500,7 +5500,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 		for (int iAtom0 = 0; iAtom0 < cluster.size(); iAtom0++)
 		{
 			int atomCluster   = cluster[iAtom0];
-			int offsetCluster = MCAtom[type].offset+(NumbRotTimes*atomCluster);  
+			int offsetCluster = NumbTimes*atomCluster;  
 			int tCluster      = offsetCluster + it;
 
 			for (int id=0;id<NDIM;id++) MCCosine[id][tCluster] = newcoords[id][tCluster];
@@ -5515,7 +5515,7 @@ void MCRotLinStepCL(int it,int type,double step,double rand1,double rand2,int ra
 
 int ClusterGrowth(int type,double *randomVector,int atom0,int atom1,int t0,int it,RngStream *Rng, double **newcoords)
 {
-	int offset1    = MCAtom[type].offset+(NumbRotTimes*atom1);  
+	int offset1    = NumbRotTimes*atom1;  
 	int t1         = offset1 + it;
 
 	double Eulang0[3], Eulang1[3];
@@ -5606,7 +5606,7 @@ void CodeExit(int istop)
 double PotEnergyPIGS(int atom0, double **pos, int it)   
 {
    	int type0   = MCType[atom0];
-   	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+   	int offset0 = atom0*NumbTimes;
     int t0 = offset0 + it;
 
    	double spot=0.0;
@@ -5614,7 +5614,7 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
    	if (atom1 != atom0)                    // skip "self-interaction"
    	{	
      	int type1   = MCType[atom1];
-		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+		int offset1 = atom1*NumbTimes;
         int t1 = offset1 + it;
 
        if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
@@ -5659,7 +5659,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 {
 	int type0=MCType[atom0];
 	string stype0 = MCAtom[type0].type;
-   	int offset0=MCAtom[type0].offset+atom0*NumbTimes;
+   	int offset0=atom0*NumbTimes;
 
    	double spot=0.0;
    	for (int atom1=0; atom1<NumbAtoms; atom1++)
@@ -5667,7 +5667,7 @@ double PotEnergyPIGS(int atom0, double **pos)
    	{	    
        	int type1=MCType[atom1];
 		string stype1=MCAtom[type1].type;
-       	int offset1=MCAtom[type1].offset+atom1*NumbTimes; 
+       	int offset1=atom1*NumbTimes; 
 
        	double spot_pair=0.0;
        	#pragma omp parallel for reduction(+: spot_pair)

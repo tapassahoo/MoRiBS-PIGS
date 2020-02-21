@@ -112,7 +112,6 @@ fstream _fswap;
 void SaveEnergy    (const char [],double,long int); // block average
 void SaveSumEnergy (double,double);                 // accumulated average
 
-void SaveInstantDOFs(long int); 
 void SaveInstantEnergy ();                 // accumulated average
 
 #ifdef DDCORR
@@ -1622,33 +1621,30 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
 
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
 
-	for (int type=0;type<NumbTypes;type++) 
+	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 	{
-		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+		if (TRANSLATION)
 		{
-			if (TRANSLATION)
+			for (int it = 0; it < NumbTimes; it++) 
 			{
-				for (int it = 0; it < NumbTimes; it++) 
-				{
-					int offset0 = MCAtom[type].offset + NumbTimes*atom0;
-					int t0      = offset0 + it;
+				int offset0 = NumbTimes*atom0;
+				int t0      = offset0 + it;
 
-					fid << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-					fid << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-					fid << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
-				}
+				fid << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
 			}
+		}
 
-			if (ROTATION)
+		if (ROTATION)
+		{
+			for (int it = 0; it < NumbRotTimes; it++) 
 			{
-				for (int it = 0; it < NumbRotTimes; it++) 
-				{
-					int offset0 = MCAtom[type].offset + NumbTimes*atom0;
-					int t0      = offset0 + it;
-					fid << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-					fid << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-					fid << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
-				}
+				int offset0 = NumbTimes*atom0;
+				int t0      = offset0 + it;
+				fid << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
+				fid << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
 			}
 		}
 	}
@@ -1886,123 +1882,6 @@ void SaveSumDipoleCorr(double acount, double numb)
     _fdc << endl;
 }
 #endif
-
-void SaveInstantDOFs(long int numb)
-{
-    const char *_proc_=__func__;
-
-	if (ENT_SIM)
-	{
-		_fangins << setw(IO_WIDTH) << numb << BLANK;
-
-		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-		{
-			int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-			for (int it = ((NumbRotTimes - 1)/2-1); it <= ((NumbRotTimes-1)/2); it++) 
-			{
-				int t0      = offset0 + it;
-
-				if (TRANSLATION)
-				{
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
-				}
-				
-				if (ROTATION)
-				{
-					_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
-				}
-			}
-		}
-		_fangins << endl;
-	}	
-
-	if (PIMC_SIM)
-	{	
-		for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
-		{
-			for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-			{
-				int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-				int t0      = offset0 + it;
-
-				if (TRANSLATION)
-				{
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
-				}
-
-				if (ROTATION)
-				{
-					_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
-				}
-			}
-			_fangins << endl;
-		}
-	}
-/*
-#ifdef BINARY
-	double instArray[5];
-	instArray[0] = numb;
-	double cosTheta   = 0.0;
-	double compxyz[NDIM];
-	GetCosThetaPIGS(cosTheta, compxyz);
-	instArray[1] = cosTheta;
-	instArray[2] = compxyz[0];
-	instArray[3] = compxyz[1];
-	instArray[4] = compxyz[2];
-	_fangins.write((char*)instArray, 5*sizeof(double));
-#else
-#ifndef GAUSSIANMOVE
-   	_fangins << setw(IO_WIDTH) << numb << BLANK;
-	double cosTheta   = 0.0;
-	double compxyz[NDIM];
-	compxyz[0] = 0.0;
-	compxyz[1] = 0.0;
-	compxyz[2] = 0.0;
-
-	GetCosThetaPIGS(cosTheta, compxyz);
-   	_fangins << setw(IO_WIDTH) << cosTheta << BLANK;
-   	_fangins << setw(IO_WIDTH) << compxyz[0] << BLANK;
-   	_fangins << setw(IO_WIDTH) << compxyz[1] << BLANK;
-   	_fangins << setw(IO_WIDTH) << compxyz[2] << BLANK;
-    _fangins << endl;
-*/
-	if (PIGS_SIM)
-	{	
-		_fangins << setw(IO_WIDTH) << numb << BLANK;
-
-		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-		{
-			int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-			for (int it = 0; it < NumbRotTimes; it += ((NumbRotTimes-1)/2)) // Rotational Time slices, P
-			{
-				int t0      = offset0 + it;
-
-				if (TRANSLATION)
-				{
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
-				}
-				
-				if (ROTATION)
-				{
-					_fangins << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
-					_fangins << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
-				}
-			}
-		}
-		_fangins << endl;
-	}
-}
 
 void SaveInstantEnergy()
 {

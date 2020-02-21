@@ -1171,7 +1171,7 @@ double GetPotEnergy_Densities(void)
 #pragma omp parallel for reduction(+: spot_beads)
 	    for (int it = 0; it < NumbTimes; it++) 	  
         {  
-            int t0       = MCAtom[IMTYPE].offset + it;
+            int t0       = it;
 			Eulang0[PHI] = MCAngles[PHI][t0];
             Eulang0[CTH] = acos(MCAngles[CTH][t0]);
 			Eulang0[CHI] = 0.0;
@@ -1889,8 +1889,8 @@ void GetCosThetaPIMC(double &cosTheta, double *compxyz)
 	            double sum_beads = 0.0;
     	    	for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
         	    {
-                	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-                    int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+                	int offset0 = NumbTimes*atom0;
+                    int offset1 = NumbTimes*atom1;
 
                     int t0      = offset0 + it;
                     int t1      = offset1 + it;
@@ -1916,7 +1916,7 @@ void GetCosThetaPIMC(double &cosTheta, double *compxyz)
             double sum_beadsz = 0.0;
             for (int it = 0; it < NumbRotTimes; it++) // Rotational Time slices, P
             {
-                int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+                int offset0 = NumbTimes*atom0;
                 int t0      = offset0 + it;
 
                 sum_beadsx += MCCosine[0][t0];
@@ -1942,7 +1942,7 @@ void GetCosThetaPIMC(double &cosTheta, double *compxyz)
 
         int atom0    = 0;
         int type0    = MCType[atom0];
-        int offset0  = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+        int offset0  = NumbTimes*atom0;
         double sum_beads = 0.0;
         for (int it = 0; it < NumbRotTimes; it++)
         {
@@ -1984,10 +1984,10 @@ void GetCosThetaPIGS(double &cosTheta, double *abs_compxyz, double *compxyz)
         scosTheta    = 0.0;
     	for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
         {    
-            int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            int offset0 = NumbTimes*atom0;
     	    for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
     	    {
-        	    int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+        	    int offset1 = NumbTimes*atom1;
 
        		    int t0      = offset0 + it;
         	    int t1      = offset1 + it;
@@ -2006,7 +2006,7 @@ void GetCosThetaPIGS(double &cosTheta, double *abs_compxyz, double *compxyz)
 			double sum = 0.0;
     		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
         	{    
-           		int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+           		int offset0 = NumbTimes*atom0;
        			int t0      = offset0 + it;
 
 				sum += MCCosine[id][t0];
@@ -2028,7 +2028,7 @@ void GetCosThetaPIGS(double &cosTheta, double *abs_compxyz, double *compxyz)
 
 		int atom0    = 0;
      	int type0    = MCType[atom0];
-       	int offset0  = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+       	int offset0  = NumbTimes*atom0;
         int tm0      = offset0 + it/RotRatio;
 
         double cst   = 0.0;
@@ -2086,8 +2086,8 @@ void GetOrderCorrPIMC(double *eiej, double *ei)
 			for (int atom0=atomInit; atom0<(atomFin-1); atom0++)
 			{    
 				int atom1 = atom0+1;
-				int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
-				int offset1 = MCAtom[IMTYPE].offset + NumbTimes*atom1;
+				int offset0 = NumbTimes*atom0;
+				int offset1 = NumbTimes*atom1;
 
 				int t0      = offset0 + it;
 				int t1      = offset1 + it;
@@ -2122,7 +2122,7 @@ void GetOrderCorrPIMC(double *eiej, double *ei)
 				sei[id]=0.0;
 				for (int atom0=atomInit; atom0<atomFin; atom0++)
 				{    
-					int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
+					int offset0 = NumbTimes*atom0;
 					int t0      = offset0 + it;
 
 					sei[id] += MCCosine[id][t0];
@@ -2164,8 +2164,8 @@ void GetOrderCorrPIGS(double *eiej, double *ei)
     	for (int atom0=atomInit; atom0<(atomFin-1); atom0++)
         {    
     	    int atom1 = atom0+1;
-            int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
-            int offset1 = MCAtom[IMTYPE].offset + NumbTimes*atom1;
+            int offset0 = NumbTimes*atom0;
+            int offset1 = NumbTimes*atom1;
 
 			int t0      = offset0 + it;
 			int t1      = offset1 + it;
@@ -2191,7 +2191,7 @@ void GetOrderCorrPIGS(double *eiej, double *ei)
 			double sum = 0.0;
     		for (int atom0=atomInit; atom0<atomFin; atom0++)
         	{    
-           		int offset0 = MCAtom[IMTYPE].offset + NumbTimes*atom0;
+           		int offset0 = NumbTimes*atom0;
        			int t0      = offset0 + it;
 
 				sum += MCCosine[id][t0];
@@ -2239,8 +2239,8 @@ void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)
         	{    
     	    	for (int atom1 = (atom0+1); atom1 < atomEnd; atom1++)
     	    	{
-        	    	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-        	    	int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+        	    	int offset0 = NumbTimes*atom0;
+        	    	int offset1 = NumbTimes*atom1;
 
        		    	int t0      = offset0 + it;
         	    	int t1      = offset1 + it;
@@ -2260,7 +2260,7 @@ void GetCosThetaPIGSENT(double &cosTheta, double *compxyz)
 
     		for (int atom0 = atomStart; atom0 < atomEnd; atom0++)
         	{    
-            	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
+            	int offset0 = NumbTimes*atom0;
        			int t0      = offset0 + it;
 
 				scompxyz_pair[0] += MCCosine[0][t0];
@@ -2292,8 +2292,8 @@ void GetDipoleCorrelationPIMC(double *DipoleCorrXYZ, double *DipoleCorrX, double
         {    
     	    for (int atom1 = (atom0 + 1); atom1 < NumbAtoms; atom1++)
     	    {
-            	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-            	int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+            	int offset0 = NumbTimes*atom0;
+            	int offset1 = NumbTimes*atom1;
 
             	totalCorr   = 0.0;
 				xyCorr      = 0.0;
@@ -2350,8 +2350,8 @@ void GetDipoleCorrelationPIGS(double *DipoleCorrXYZ, double *DipoleCorrX, double
         {    
     	    for (int atom1 = atom0; atom1 < NumbAtoms; atom1++)
     	    {
-            	int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-            	int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+            	int offset0 = NumbTimes*atom0;
+            	int offset1 = NumbTimes*atom1;
 
        	    	int t0      = offset0 + it;
             	int t1      = offset1 + it;
@@ -2409,8 +2409,8 @@ void GetDipoleCorrelationPIGSENT(double *DipoleCorrXYZ, double *DipoleCorrX, dou
         	{    
     	    	for (int atom1 = atom0; atom1 < atomEnd; atom1++)
     	    	{
-            		int offset0 = MCAtom[IMTYPE].offset + NumbRotTimes*atom0;
-            		int offset1 = MCAtom[IMTYPE].offset + NumbRotTimes*atom1;
+            		int offset0 = NumbTimes*atom0;
+            		int offset1 = NumbTimes*atom1;
 
        	    		int t0      = offset0 + it;
             		int t1      = offset1 + it;
@@ -2455,7 +2455,7 @@ double *GetPhiEntanglement()
 		for (int atom = 0; atom < NumbAtoms; atom++)
    		{
 			int kk = atom + (it - BeadMminus1)*NumbAtoms;
-    		int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
+    		int offset      = NumbTimes*atom;
        		int tt          = offset + it;
        		phiInstant[kk] = MCAngles[PHI][tt];
 		}
@@ -2479,7 +2479,7 @@ double *GetCosThetaEntanglement()
 			for (int atom = 0; atom < NumbAtoms; atom++)
    			{
 				int kk = atom + jj*NumbAtoms;
-	    		int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
+	    		int offset      = NumbRotTimes*atom;
         		int tt          = offset + it;
         		cosTheta[kk] = MCCosine[id][tt];
 			}
@@ -2503,7 +2503,7 @@ double *GetProdUvec12()
 			if (it0 == (NumbRotTimes - 1)) it1 = 0;
 			else it1 = it0+1;
 
-	   		int offset      = MCAtom[IMTYPE].offset + (NumbRotTimes*atom);
+	   		int offset      = NumbTimes*atom;
        		int t0          = offset + it0;
        		int t1          = offset + it1;
 			
@@ -2599,8 +2599,8 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
     int it      = (NumbRotTimes-1)/2;
 	int type0   = MCType[atom0];
 	int type1   = MCType[atom1];
-	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
-	int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+	int offset0 = atom0*NumbTimes;
+	int offset1 = atom1*NumbTimes;
 	string stype = MCAtom[type0].type;
 
     int t0       = offset0 + it;
@@ -2682,8 +2682,8 @@ double GetEstimNM(int type)
 
 		int type0   = MCType[atom0];
 		int type1   = MCType[atom1];
-		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
-		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+		int offset0 = atom0*NumbTimes;
+		int offset1 = atom1*NumbTimes;
 
     	int t1M1 = offset0 + it0;
     	int t1M = offset1 + it1;
@@ -2728,8 +2728,8 @@ double GetEstimNM(int type)
 
 		int type0   = MCType[atom0];
 		int type1   = MCType[atom1];
-		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
-		int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+		int offset0 = atom0*NumbTimes;
+		int offset1 = atom1*NumbTimes;
 
     	int t1M1 = offset0 + it0;
     	int t1M = offset1 + it1;
@@ -2804,7 +2804,7 @@ double GetEstimDM(int type)
         int it1 = ((NumbRotTimes-1)/2);
 
 		int type0   = MCType[atom0];
-		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+		int offset0 = atom0*NumbTimes;
 
         int t0 = offset0 + it0;
         int t1 = offset0 + it1;
@@ -2902,8 +2902,8 @@ double GetEstimNM_Ratio(int type)
 
 	int type0 = MCType[particleA1Min];
 	int type1 = MCType[particleA2Max];
-	int offset0 = MCAtom[type0].offset+particleA1Min*NumbTimes;
-	int offset1 = MCAtom[type1].offset+particleA2Max*NumbTimes;
+	int offset0 = particleA1Min*NumbTimes;
+	int offset1 = particleA2Max*NumbTimes;
 
 	double dens = 1.0;
 	int t0, t1, t0p, t1p;
@@ -3020,7 +3020,7 @@ double GetEstimDM_Ratio(int type)
 		int it1 = ((NumbRotTimes-1)/2);
 
 		int type0 = MCType[atom0];
-		int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
+		int offset0 = atom0*NumbTimes;
 
 		int t0 = offset0 + it0;
 		int t1 = offset0 + it1;

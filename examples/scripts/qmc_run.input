@@ -13,7 +13,7 @@ FILENAMEPREFIX   output
 
 DIMENSION     3 
 # in the multicomponent system:  the total density for all atoms (molecules excluded)                    
-DENSITY       0.02      #  Angstrom^-3  Used to define the BoxLength
+DENSITY       0.021818      #  Angstrom^-3  Used to define the BoxLength
 TEMPERATURE   temperature_input       #  Kelvin, for a PIGS simulation, this sets the value of beta
 
 # LIMITATION:  only one molecular impurity! 
@@ -25,6 +25,7 @@ TEMPERATURE   temperature_input       #  Kelvin, for a PIGS simulation, this set
 # with buck and PRIMTIVE above, the potentional filename should be  buck.pot with values in Angstroms and Kelvin
 #ATOM      H2  5   BOSE     0.14     3    parah2   PRIMITIVE     #    
 #TRANSLATION
+ATOM         H2    1   BOSE          0.25      4         isoH2H208         PRIMITIVE    #        
 #LINEARROTORS  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   nopot    PRIMITIVE   #  
 type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   potread    PRIMITIVE   #  
 #PLANAR  H2 1   BOLTZMANN    0.08  3   h2n2ogr    PRIMITIVE   #  
@@ -36,7 +37,7 @@ type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  l
 #         [type]  [MC steps for orient df]  [Number of time slices for rotations]
 
 cal_type_input   molecule_input    dstep_input   numbbeads_input   den_path_input
-ROTDENSI  0  -1  0.0  27.877  14.512  9.285  1
+#ROTDENSI  0  -1  0.0  27.877  14.512  9.285  1
 
 # parameters for the worm algorithm (C is redefined) 
 #        [type]  [C]   [~m should be < NUMBEROFSLICES > 1]
@@ -45,6 +46,7 @@ ROTDENSI  0  -1  0.0  27.877  14.512  9.285  1
 # atom type above is anticipating mixtures
 # without WORM, we use MLMMC
 
+ROTSYM 3
 
 #MINIMAGE                      # periodic boundary conditions
 
