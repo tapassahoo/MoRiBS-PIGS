@@ -25,9 +25,9 @@ TEMPERATURE   temperature_input       #  Kelvin, for a PIGS simulation, this set
 # with buck and PRIMTIVE above, the potentional filename should be  buck.pot with values in Angstroms and Kelvin
 #ATOM      H2  5   BOSE     0.14     3    parah2   PRIMITIVE     #    
 #TRANSLATION
-ATOM         H2    1   BOSE          0.25      4         isoH2H208         PRIMITIVE    #        
 #LINEARROTORS  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   nopot    PRIMITIVE   #  
-type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   potread    PRIMITIVE   #  
+#type_impurity  molecule_impurity numbmolecules_impurity  stat_impurity dstep_tr_impurity level_impurity  potread_impurity    PRIMITIVE   #  
+type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   potread_input    PRIMITIVE   #  
 #PLANAR  H2 1   BOLTZMANN    0.08  3   h2n2ogr    PRIMITIVE   #  
 # comment molecule above for pure clusters
 
@@ -46,7 +46,7 @@ cal_type_input   molecule_input    dstep_input   numbbeads_input   den_path_inpu
 # atom type above is anticipating mixtures
 # without WORM, we use MLMMC
 
-ROTSYM 3
+#ROTSYM 3
 
 #MINIMAGE                      # periodic boundary conditions
 

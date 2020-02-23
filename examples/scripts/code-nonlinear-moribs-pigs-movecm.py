@@ -76,14 +76,15 @@ for i in range(nr):
 		+ "--MOVECOM"+space
 		+ cmd1+space
 		+ "--Type NONLINEAR"+space
-		+ var+space
-		+ simType1+space
+		+ "-spin"+space
+		+ str(SpinIsomer)+space
+		#+ "-IM"+space+"ATOM"+space+"H2"+space+"1"+space
 		+ simType+space
+		+ simType1+space
 		+ molecule+space
 		+ rotor+space
 		+ str(param)+space
-		+ "-spin"+space
-		+ str(SpinIsomer)+space
+		+ var+space
 	) 
 	print(cmd_run)
 	os.system(cmd_run)

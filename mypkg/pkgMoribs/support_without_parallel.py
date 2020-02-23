@@ -560,7 +560,7 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 		contition = False
 		iPartition = 0
 		for partition in particleAList:
-			file1_name = GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, partition, extra_file_name, crystal)
+			file1_name = GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, partition, extra_file_name, crystal, impurity)
 			folder_run = file1_name+str(numbbeads)
 			final_dir_in_work = dir_output+folder_run
 			if os.path.isdir(final_dir_in_work):
@@ -649,7 +649,7 @@ def fmtAverageEntropyRT(variable):
 	output    = '{0:5}{1:10}{2:10}{3:10}{4:10}{5:30}'.format('P', variable+'(1/K)', 'Purity', 'Entropy', 'ErrorPurity', '  ErrorEntropy')
 	return output
 
-def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density):
+def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,distance,level,step,step_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density,impurity,step_trans1, level1):
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
@@ -657,7 +657,7 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 	replace("numbbeads_input", str(numbbeads), "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 	if (molecule_rot == "CH3F"):
-		replace("potread", "pesch3fph2-180", "qmc2.input", "qmc3.input")
+		replace("potread_input", "pesch3fph2-180", "qmc2.input", "qmc3.input")
 	elif (molecule_rot == "H2O"):
 		replace("potread", "nopot", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
@@ -767,6 +767,29 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 	else:
 		replace("job_input", "START",                         "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
+
+	if (len(impurity) == 4):
+		replace("#type_impurity", impurity[0], "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+
+		replace("molecule_impurity", impurity[1], "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+
+		replace("numbmolecules_impurity", str(impurity[2]), "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+
+		replace("stat_impurity", impurity[3], "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+
+		replace("dstep_tr_impurity", str(step_trans1), "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+
+		replace("level_impurity", str(level1), "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+
+		replace("potread_impurity", "isoH2H208.pot", "qmc2.input", "qmc3.input")
+		call(["mv", "qmc3.input", "qmc2.input"])
+		
 	call(["mv", "qmc2.input", "qmc.input"])
 
 def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
@@ -853,11 +876,13 @@ mv %s /work/tapas/linear_rotors
 """ % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, ENT_TYPE, ENT_ALGR, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType, spin_isomer):
+def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, folder_run, src_dir, execution_file, Rpt, numbbeads, i, step, step_trans, level, temperature, numbblocks, numbpass, molecule_rot, numbmolecules, gfact, dipolemoment, TypeCal, ENT_TYPE, ENT_ALGR, dir_output, dir_run_input_pimc, RUNIN, particleA, NameOfPartition, status_cagepot, iStep, PPA1, user_name, out_dir, source_dir_exe, Restart1,numbblocks_Restart1,crystal,RotorType, spin_isomer,impurity, step_trans_impurity, level_impurity):
 	argument1     = Rpt
+	step1_trans   = step_trans[iStep]
 	level1        = level[iStep]
 	step1         = step[iStep]
-	step1_trans   = step_trans[iStep]
+	step_trans_impurity1   = step_trans_impurity[iStep]
+	level_impurity1        = level_impurity[iStep]
 	final_dir_in_work = dir_output + folder_run
 
 	if not Restart1:
@@ -944,7 +969,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 						call(["mv", filemv, filemv+"_old"])
 
 		os.chdir(src_dir)
-	GetInput(TypeCal,ENT_TYPE,ENT_ALGR, temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density)
+	GetInput(TypeCal,ENT_TYPE,ENT_ALGR, temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density,impurity, step_trans_impurity1, level_impurity1)
 
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
@@ -978,6 +1003,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 	call(["mv", fname, dir_run_input_pimc])
 	os.chdir(dir_run_input_pimc)
 
+	'''
 	if (RUNIN == "CPU"):
 		call(["chmod", "755", fname])
 		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
@@ -990,6 +1016,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
+	'''
 
 	os.chdir(src_dir)
 
@@ -1173,14 +1200,17 @@ def GetAvgRotEnergy(molecule,beta):
 	AvgEnergy = Nsum*CMRECIP2KL/Zsum
 	return AvgEnergy
 
-def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal):
+def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal,impurity):
 	#add                     = "-NumTimes"
 	add                     = ""
 	if (TypeCal == "ENT"):
 		add1                = "-ParticleA"+str(particleA)
 		add2                = "-"
 	else:
-		add1                = ""
+		if (len(impurity) == 4):
+			add1            = "-"+str(impurity[2])+"-"+impurity[1]
+		else:
+			add1            = ""
 		add2                = ""
 
 	if (crystal == True):
