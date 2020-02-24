@@ -25,7 +25,7 @@ param = 0.05 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 10000
+nblocks = 100
 npass = 500
 
 if simType1 == "analysis":

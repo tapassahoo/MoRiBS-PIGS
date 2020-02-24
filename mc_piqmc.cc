@@ -3587,10 +3587,11 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 				spot += E_2H2O;
 			}
 
-			if (stype == CH3F)
+			if ((stype == CH3F) && (MCAtom[type0].molecule != MCAtom[type1].molecule)) // 3D interaction
 			{
 				double RCOM[3];
 				double Rpt[3];
+				double Eulang[3];
 				double vpot3d;
 				double radret;
 				double theret;
@@ -3598,17 +3599,14 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 				double hatx[3];
 				double haty[3];
 				double hatz[3];
-				int    ivcord = 0;
+				int    ivcord=0;
 				for (int id=0;id<NDIM;id++)
 				{
 					RCOM[id] = MCCoords[id][t0];
+					Rpt[id]  = MCCoords[id][t1];
 				}
-				Rpt[AXIS_X] = 0.0;
-				Rpt[AXIS_Y] = 0.0;
-				Rpt[AXIS_Z] = Distance;
-
 				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-				spot=vpot3d;
+				spot += vpot3d;
 			}
 		}   // END sum over atoms
 	}
@@ -5643,7 +5641,46 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
            caleng_(com1,com2,&E_2H2O,Eulang1,Eulang2);
            spot+=E_2H2O;
 		}
-	}   
+		if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule)) // 3D interaction
+		{
+			double RCOM[3];
+			double Rpt[3];
+			double Eulang[3];
+			double vpot3d;
+			double radret;
+			double theret;
+			double chiret;
+			double hatx[3];
+			double haty[3];
+			double hatz[3];
+			int    ivcord=0;
+			int tm;
+			if(MCAtom[type0].molecule == 2)
+			{
+				tm  = offset0 + it/RotRatio;
+				for (int id=0;id<NDIM;id++)
+				{
+					RCOM[id] = pos[id][t0];
+					Rpt[id]  = MCCoords[id][t1];
+				}
+			}
+			else
+			{
+				tm  = offset1 + it/RotRatio;
+				for (int id=0;id<NDIM;id++)
+				{
+					Rpt[id]  = pos[id][t0];
+					RCOM[id] = MCCoords[id][t1];
+				}
+			}
+			Eulang[PHI]=MCAngles[PHI][tm];
+			Eulang[CTH]=acos(MCAngles[CTH][tm]);
+			Eulang[CHI]=MCAngles[CHI][tm];
+
+			vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+			spot += vpot3d;
+		}
+	}
 
 #ifdef HARMONIC
     for (int id=0;id<NDIM;id++) spot+=0.5*pos[id][t0]*pos[id][t0];
@@ -5704,6 +5741,45 @@ double PotEnergyPIGS(int atom0, double **pos)
 
 				caleng_(com1, com2, &E_2H2O, Eulang1, Eulang2);
 				spot_pair += weight*E_2H2O;
+			}
+			if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule)) // 3D interaction
+			{
+				double RCOM[3];
+				double Rpt[3];
+				double Eulang[3];
+				double vpot3d;
+				double radret;
+				double theret;
+				double chiret;
+				double hatx[3];
+				double haty[3];
+				double hatz[3];
+				int    ivcord=0;
+				int tm;
+				if(MCAtom[type0].molecule == 2)
+				{
+					tm = offset0 + it/RotRatio;
+					for (int id=0;id<NDIM;id++)
+					{
+						RCOM[id] = pos[id][t0];
+						Rpt[id]  = MCCoords[id][t1];
+					}
+				}
+				else
+				{
+					tm  = offset1 + it/RotRatio;
+					for (int id=0;id<NDIM;id++)
+					{
+						Rpt[id]  = pos[id][t0];
+						RCOM[id] = MCCoords[id][t1];
+					}
+				}
+				Eulang[PHI]=MCAngles[PHI][tm];
+				Eulang[CTH]=acos(MCAngles[CTH][tm]);
+				Eulang[CHI]=MCAngles[CHI][tm];
+
+				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+				spot_pair += weight*vpot3d;
 			}
        	} 
       	spot += spot_pair;

@@ -15,8 +15,8 @@ rotor = "CH3F"
 #value = 0.001
 param = "beta"
 value = 0.1
-nbeads = [10]
-Jmax = 70
+nbeads = [10, 20, 30, 40, 50]
+Jmax = 66
 spin = 3
 
 # Run the "cmd_run" in python interpreter
