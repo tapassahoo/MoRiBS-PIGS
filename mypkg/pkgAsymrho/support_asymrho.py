@@ -102,7 +102,6 @@ def jobstring(logfile,folder_run_path,dir_input,dir_output,temperature,numbbeads
 	mvfiles = "mv " + dir_output + "/" + folder_run + "/* " + dir_input
 	rmfolder = "rm -rf " + dir_output + "/" + folder_run
 	if NameOfServer == "graham":
-		CommandForMove = " "
 		account = "#SBATCH --account=rrg-pnroy"
 	else:
 		account = ""
@@ -110,7 +109,7 @@ def jobstring(logfile,folder_run_path,dir_input,dir_output,temperature,numbbeads
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
-#SBATCH --time=1-03:00
+#SBATCH --time=1-00:00
 %s
 #SBATCH --mem-per-cpu=512mb
 #SBATCH --cpus-per-task=1

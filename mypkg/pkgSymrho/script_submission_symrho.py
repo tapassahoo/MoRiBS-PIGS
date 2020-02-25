@@ -120,7 +120,7 @@ dir_store = "rot-dens-symmetric-top/"
 
 src_dir_exe = dir_user + moribs_dir + symrho_dir
 if TypeCal == "S":
-    sym.MakeExecutable(script_dir, src_dir_exe)
+	sym.MakeExecutable(script_dir, src_dir_exe)
 
 dir_name = sym.GetDirNameSubmission(rotor, temperature, numbbeads, iodevn, jmax)
 

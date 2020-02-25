@@ -55,3 +55,7 @@ mypkg/pkgAsymrho/__pycache__/support_asymrho.cpython-36.pyc
 mypkg/pkgSymrho/__pycache__/__init__.cpython-36.pyc
 mypkg/pkgSymrho/__pycache__/support_symrho.cpython-36.pyc
 symtop_prop/symrho.x
+**/rho.den[0-9][0-9][0-9]
+**/rho.den[0-9][0-9][0-9]_eng
+**/rho.den[0-9][0-9][0-9]_esq
+**/rho.den[0-9][0-9][0-9]_rho

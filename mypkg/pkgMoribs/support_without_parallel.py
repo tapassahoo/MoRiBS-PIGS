@@ -787,7 +787,7 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 		replace("level_impurity", str(level1), "qmc2.input", "qmc3.input")
 		call(["mv", "qmc3.input", "qmc2.input"])
 
-		replace("potread_impurity", "isoH2H208.pot", "qmc2.input", "qmc3.input")
+		replace("potread_impurity", "nopot", "qmc2.input", "qmc3.input")
 		call(["mv", "qmc3.input", "qmc2.input"])
 		
 	call(["mv", "qmc2.input", "qmc.input"])
@@ -1003,7 +1003,6 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 	call(["mv", fname, dir_run_input_pimc])
 	os.chdir(dir_run_input_pimc)
 
-	'''
 	if (RUNIN == "CPU"):
 		call(["chmod", "755", fname])
 		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
@@ -1016,7 +1015,6 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
-	'''
 
 	os.chdir(src_dir)
 
@@ -1142,7 +1140,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 #SBATCH --output=%s.out
 #SBATCH --time=%s
 %s
-#SBATCH --mem-per-cpu=2048mb
+#SBATCH --mem-per-cpu=4048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s

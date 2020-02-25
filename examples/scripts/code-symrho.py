@@ -9,14 +9,14 @@ space = " "
 file_sim = module_path + "script_submission_symrho.py"
 
 # Informations about the system
-simType = "A"
+simType = "S"
 rotor = "CH3F"
-#param = "tau"
-#value = 0.001
-param = "beta"
-value = 0.1
-nbeads = [10, 20, 30, 40, 50]
-Jmax = 66
+param = "tau"
+value = 0.01
+#param = "beta"
+#value = 0.2
+nbeads = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+Jmax = 800
 spin = 3
 
 # Run the "cmd_run" in python interpreter
