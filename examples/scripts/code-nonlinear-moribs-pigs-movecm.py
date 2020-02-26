@@ -33,8 +33,8 @@ if simType1 == "analysis":
 else:
 	cmd1 = ""
 
-rmin = 6.0
-rmax = 6.0
+rmin = 3.0
+rmax = 3.0
 dr = 0.2
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1

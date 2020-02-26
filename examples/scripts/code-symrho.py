@@ -9,10 +9,10 @@ space = " "
 file_sim = module_path + "script_submission_symrho.py"
 
 # Informations about the system
-simType = "S"
+simType = "A"
 rotor = "CH3F"
 param = "tau"
-value = 0.01
+value = 1.0
 #param = "beta"
 #value = 0.2
 nbeads = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]

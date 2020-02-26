@@ -673,7 +673,7 @@ double GetPotEnergyPIGS(void)
 			int offset1 = NumbTimes*atom1;
 			int t1 = offset1 + it;
 
-			if ((MCAtom[type0].molecule==2) && (MCAtom[type1].numb>1) && (stype==H2O))
+			if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (NumbAtoms > 1) && (stype==H2O))
 			{
 				double Eulang0[3],Eulang1[3];
 				double com0[3],com1[3];
@@ -697,7 +697,7 @@ double GetPotEnergyPIGS(void)
 				spot += E_2H2O;
         	}
 
-			else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) ) // 3D interaction, no density is calculated now
+			else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1)) // 3D interaction, no density is calculated now
 			{
 
 				int tm;
@@ -1460,7 +1460,7 @@ double GetTotalEnergy(void)
 				int t0 = offset0 + it;
 				int t1 = offset1 + it;
 
-				if ((MCAtom[type0].molecule==2) && (MCAtom[type1].numb>1) && (stype=="H2O"))
+				if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (stype=="H2O") && (NumbAtoms > 1))
 				{
 					double Eulang0[3],Eulang1[3];
 					double com0[3],com1[3];
@@ -1484,7 +1484,7 @@ double GetTotalEnergy(void)
 					spot_pair += E_2H2O;
 				}
 
-				else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) ) // 3D interaction, no density is calculated now
+				else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1)) // 3D interaction, no density is calculated now
 				{
 
 					int tm;

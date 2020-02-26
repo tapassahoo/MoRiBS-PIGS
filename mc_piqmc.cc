@@ -2877,16 +2877,16 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	double Eulan2[3];
 
 	Eulan0[PHI]=MCAngles[PHI][t0];
-	Eulan0[CTH]=acos(MCAngles[CTH][t0]);
 	Eulan0[CHI]=MCAngles[CHI][t0];
+	Eulan0[CTH]=acos(MCAngles[CTH][t0]);
 
 	Eulan1[PHI]=MCAngles[PHI][t1];
-	Eulan1[CTH]=acos(MCAngles[CTH][t1]);
 	Eulan1[CHI]=MCAngles[CHI][t1];
+	Eulan1[CTH]=acos(MCAngles[CTH][t1]);
 
 	Eulan2[PHI]=MCAngles[PHI][t2];
-	Eulan2[CTH]=acos(MCAngles[CTH][t2]);
 	Eulan2[CHI]=MCAngles[CHI][t2];
+	Eulan2[CTH]=acos(MCAngles[CTH][t2]);
 
 	double dens_old;
 	if (RotDenType == 0) dens_old = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
@@ -2906,8 +2906,8 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	//Toby: pot_old can be calculated with MCAngles
 
 	Eulan1[PHI]=newcoords[PHI][t1];
-	Eulan1[CTH]=acos(newcoords[CTH][t1]);
 	Eulan1[CHI]=newcoords[CHI][t1];
+	Eulan1[CTH]=acos(newcoords[CTH][t1]);
 
 	double dens_new;
 	if(RotDenType == 0) dens_new = GetDensity3DPIGS(it1, Eulan0, Eulan1, Eulan2);
@@ -3568,7 +3568,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 			int offset1 = atom1*NumbTimes;
 			int t1 = offset1 + it;
 
-			if ((stype == H2O) && (MCType[atom1] == MCType[atom0]))
+			if ((stype == H2O) && (MCType[atom1] == MCType[atom0]) && (MCAtom[IMTYPE].numb>1))
 			{
 				double com_1[3];
 				double com_2[3];
@@ -3587,7 +3587,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 				spot += E_2H2O;
 			}
 
-			if ((stype == CH3F) && (MCAtom[type0].molecule != MCAtom[type1].molecule)) // 3D interaction
+			if ((stype == CH3F) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (MCAtom[IMTYPE].numb==1)) // 3D interaction
 			{
 				double RCOM[3];
 				double Rpt[3];
@@ -5615,7 +5615,7 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 		int offset1 = atom1*NumbTimes;
         int t1 = offset1 + it;
 
-       if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
+       if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (NumbAtoms > 1) && (MCAtom[IMTYPE].numb>1))
        {
            double com1[3];
            double com2[3];
@@ -5641,7 +5641,7 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
            caleng_(com1,com2,&E_2H2O,Eulang1,Eulang2);
            spot+=E_2H2O;
 		}
-		if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule)) // 3D interaction
+		if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1) && (MCAtom[IMTYPE].numb==1)) // 3D interaction
 		{
 			double RCOM[3];
 			double Rpt[3];
@@ -5674,8 +5674,8 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 				}
 			}
 			Eulang[PHI]=MCAngles[PHI][tm];
-			Eulang[CTH]=acos(MCAngles[CTH][tm]);
 			Eulang[CHI]=MCAngles[CHI][tm];
+			Eulang[CTH]=acos(MCAngles[CTH][tm]);
 
 			vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
 			spot += vpot3d;
@@ -5716,7 +5716,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 			double weight=1.0;
 			if ((it==0)||(it==(NumbTimes-1))) weight=0.5;
 
-			if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (MCAtom[IMTYPE].numb>1))
+			if (((MCAtom[type0].molecule==2) && (MCAtom[type1].molecule==2)) && (NumbAtoms > 1) && (MCAtom[IMTYPE].numb>1))
 			{
 				double com1[3];
 				double com2[3];
@@ -5742,7 +5742,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 				caleng_(com1, com2, &E_2H2O, Eulang1, Eulang2);
 				spot_pair += weight*E_2H2O;
 			}
-			if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule)) // 3D interaction
+			if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1) && (MCAtom[IMTYPE].numb==1)) // 3D interaction
 			{
 				double RCOM[3];
 				double Rpt[3];
@@ -5756,7 +5756,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 				double hatz[3];
 				int    ivcord=0;
 				int tm;
-				if(MCAtom[type0].molecule == 2)
+				if (MCAtom[type0].molecule == 2)
 				{
 					tm = offset0 + it/RotRatio;
 					for (int id=0;id<NDIM;id++)

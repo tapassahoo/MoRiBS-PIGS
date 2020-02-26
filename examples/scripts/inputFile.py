@@ -24,7 +24,7 @@ def Getbeads(TypeCal, variableName):
 			list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]#, 120, 140, 180, 200]#, 250, 300, 350, 400]
 		if (variableName == "beta"):
 			#list_nb  = [4, 6, 8, 10, 14, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-			list_nb  = [50]#, 14, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+			list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 	return list_nb
 
@@ -107,11 +107,11 @@ class GetStepAndLevel:
 				self.level       = [1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 
 			if (self.molecule_rot == "CH3F"):
-				self.step_trans  = [0.4 ]
-				self.level       = [5 ]
-				self.step_trans1 = [0.4,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
-				self.level1      = [5,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-				self.step        = [0.05 for i in range(20)]
+				self.step_trans1 = [1.0, 0.6, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+				self.level1      = [  2,   2,   2,   2,   2,   2,   3,   3,   3,   3, 2, 2]
+				self.step_trans  = [1.0, 0.6, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+				self.level       = [  2,   3,   3,   3,   3,   3,   3,   3,   3,   3, 2, 2]
+				self.step        = [0.1 for i in range(20)]
 
 		if ((self.variableName == "beta") and (self.TypeCal == "PIMC")):
 			if (self.molecule_rot == "H2O"):
