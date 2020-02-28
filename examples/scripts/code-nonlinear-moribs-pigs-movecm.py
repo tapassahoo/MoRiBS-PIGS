@@ -29,7 +29,7 @@ nblocks = 10000
 npass = 500
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 0"
+	cmd1 = "--preskip 5000"
 else:
 	cmd1 = ""
 

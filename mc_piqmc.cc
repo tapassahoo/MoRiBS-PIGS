@@ -597,6 +597,7 @@ void MCBisectionMoveExchange(int type, int time0)  // multilevel Metropolis
   }  // END loop over time slices/atoms
 }
 
+/*
 void MCMolecularMoveNaive(int type)
 {
 	double mclambda = MCAtom[type].lambda;    
@@ -735,6 +736,7 @@ double Gauss(double mean2, double sigma)
 	double valr=exp(-mean2/sigma);
 	return valr;	
 }	
+*/
 
 void MCRotationsMove(int type) // update all time slices for rotational degrees of freedom
 {
@@ -3548,7 +3550,6 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 	int offset0 = atom0*NumbTimes;
 	int t0 = offset0 + it;
 	double spot = 0.0;
-
 #ifdef DEBUG_PIMC
 	const char *_proc_=__func__;         //  PotRotEnergy()
 
@@ -3568,7 +3569,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 			int offset1 = atom1*NumbTimes;
 			int t1 = offset1 + it;
 
-			if ((stype == H2O) && (MCType[atom1] == MCType[atom0]) && (MCAtom[IMTYPE].numb>1))
+			if ((stype == H2O) && (type0 == type1) && (MCAtom[IMTYPE].numb>1))
 			{
 				double com_1[3];
 				double com_2[3];
@@ -3587,11 +3588,10 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 				spot += E_2H2O;
 			}
 
-			if ((stype == CH3F) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (MCAtom[IMTYPE].numb==1)) // 3D interaction
+			if ((stype == CH3F) && (type0 != type1) && (MCAtom[IMTYPE].numb ==1))
 			{
 				double RCOM[3];
 				double Rpt[3];
-				double Eulang[3];
 				double vpot3d;
 				double radret;
 				double theret;

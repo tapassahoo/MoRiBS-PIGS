@@ -18,15 +18,15 @@ rotor = "CH3F"
 SpinIsomer = 1
 
 var = "beta" # for fixed tau
-param = 0.1 # for fixed tau
+param = 0.01 # for fixed tau
 
 #var = "tau"  # for fixed beta
 #param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 1
-nblocks = 10000
-npass = 500
+nblocks = 100
+npass = 1000
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"
