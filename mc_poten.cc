@@ -99,103 +99,68 @@ void init_pot3D(int atype);
 
 void InitPotentials(void)
 {
-  	const char *_proc_=__func__;    // "InitPotentials"; 
+	const char *_proc_=__func__;    // "InitPotentials"; 
 
-  	for (int atype=0;atype<NumbTypes;atype++)
+	for (int atype=0;atype<NumbTypes;atype++)
 	{
-		string stype = MCAtom[atype].type;
 		if (MCAtom[atype].fpot != PotentialRead)
 		{
-   			if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2)||(MCAtom[atype].molecule == 3)) 
-   			{
-				if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)))
-  				nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
+			if ((MCAtom[atype].molecule == 1)||(MCAtom[atype].molecule == 2))                            // molecules
+			{
+				if ((MCAtom[atype].molecule == 1) && ((MCAtom[atype].numb  > 1) || (MCAtom[atype].numb  < 0)) )
+				nrerror(_proc_,"No more than one linear dopant molecule so far"); // check potential energy
 
 				if ((MCAtom[atype].molecule == 2) && ((MCAtom[atype].numb  > NumbRotLim) || (MCAtom[atype].numb  < 0)) )
-  				nrerror(_proc_,"Weird # of non-linear rotors"); // check # of non-linear rotors
+				nrerror(_proc_,"Weird # of non-linear rotors"); // check # of non-linear rotors
 
-				if (MCAtom[atype].molecule == 1)
-  				init_pot2D(atype);
-	//  		init_dpot2D(atype);   //revised by Hui Li
-				if(MCAtom[atype].molecule == 3)
-	  			init_pot2D(atype);
-	//  		init_dpot2D(atype);   //revised by Hui Li
-
+				if(MCAtom[atype].molecule == 1)
+				init_pot2D(atype);
+				//      init_dpot2D(atype);   //revised by Hui Li
 
 				if(MCAtom[atype].molecule == 2 && NumbTypes > 1)
-	  			{
-	   				init_pot3D(atype);
-	    		// 	potred_(vtable);
-	  			}
-				if(MCAtom[atype].molecule == 2 && stype == CH3F)
-	  			{
-	   				init_pot3D(atype);
-	  			}
-    		}
-   			else                                                  // atoms
-			{
-      			init_pot1D(atype);
+				{
+					init_pot3D(atype);
+					//    potred_(vtable);
+				}
 			}
+			else                                                  // atoms
+			init_pot1D(atype);
 		}
-
-#ifdef CAGEPOTREAD
-   		if (MCAtom[atype].molecule == 4) 
-		{
-  			init_pot2D(atype);
-		}
-#endif
 	}
 }
 
 void DonePotentials(void)
 {
-  	for (int atype=0;atype<NumbTypes;atype++)
-    if (MCAtom[atype].molecule == 1)              // molecules
-    {
-		delete [] _rgrid2D[atype];
-		delete [] _cgrid2D[atype];
- 
-	//       delete [] _drgrid2D[atype];     //add by Hui Li  
-	//       delete [] _dcgrid2D[atype];     //add by Hui Li
 
-    
-		free_doubleMatrix(_poten2D[atype]);  // atoms 
+	for (int atype=0;atype<NumbTypes;atype++)
+	{
+		if (MCAtom[atype].fpot != PotentialRead)
+		{
+			if (MCAtom[atype].molecule == 1)              // molecules
+			{
+				delete [] _rgrid2D[atype];
+				delete [] _cgrid2D[atype];
 
-	//       free_doubleMatrix(_dpoten2D[atype]);  // atoms revised by Hui Li 
-    }
-    else if (MCAtom[atype].molecule == 3)              // molecules
-    {
-		delete [] _rgrid2D[atype];
-		delete [] _cgrid2D[atype];
- 
-	//       delete [] _drgrid2D[atype];     //add by Hui Li  
-	//       delete [] _dcgrid2D[atype];     //add by Hui Li
+				//       delete [] _drgrid2D[atype];     //add by Hui Li  
+				//       delete [] _dcgrid2D[atype];     //add by Hui Li
 
-    
-		free_doubleMatrix(_poten2D[atype]);  // atoms 
 
-	//       free_doubleMatrix(_dpoten2D[atype]);  // atoms revised by Hui Li 
-    }
-    else if (MCAtom[atype].molecule == 4)              // molecules
-    {
-#ifdef CAGEPOTREAD
-		delete [] _cgrid2D[atype];
-		delete [] _pgrid2D[atype];
- 
-		free_doubleMatrix(_poten2D[atype]);  // atoms 
+				free_doubleMatrix(_poten2D[atype]);  // atoms 
 
-#endif
-    }
-    else if (MCAtom[atype].molecule == 2)
-    {
-		delete [] vtable;
-    }
-    else
-    { 
-		delete [] _pgrid1D[atype];
-		delete [] _poten1D[atype];
-		delete [] _pderiv2[atype];  
-    }
+				//       free_doubleMatrix(_dpoten2D[atype]);  // atoms revised by Hui Li 
+			}
+			else if (MCAtom[atype].molecule == 2)
+			{
+				delete [] vtable;
+			}
+			else
+			{ 
+				delete [] _pgrid1D[atype];
+				delete [] _poten1D[atype];
+				delete [] _pderiv2[atype];  
+			}
+		}
+	}
 }
 
 void InitRotDensity(void)
@@ -320,7 +285,8 @@ void init_pot3D(int atype) // read 3D potential from the file
     else
     nrerror(_proc_,"Unknown model of interaction");
 
-    string fname    =  (MCAtom[atype].fpot+fextn);   // file name
+	//string fnamedir = "/home/tapas/MoRiBS-PIGS/examples/scripts/";
+    string fname    =  PathToPot+(MCAtom[atype].fpot+fextn);   // file name
 
     char filnam[100];
 

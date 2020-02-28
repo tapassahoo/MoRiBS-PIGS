@@ -653,6 +653,8 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
+	src_dir = os.getcwd()+"/"
+
 	replace("temperature_input", str(temperature), "qmc_run.input", "qmc2.input")
 	replace("numbbeads_input", str(numbbeads), "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
@@ -660,6 +662,9 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 		replace("potread_input", "pesch3fph2-180", "qmc2.input", "qmc3.input")
 	elif (molecule_rot == "H2O"):
 		replace("potread", "nopot", "qmc2.input", "qmc3.input")
+	call(["mv", "qmc3.input", "qmc2.input"])
+
+	replace("PathToPot", src_dir, "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	replace("sim_input", TypeCal+"_SIM", "qmc2.input", "qmc3.input")
@@ -1080,11 +1085,6 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 	exe_file       = dir_run_input_pimc+"/pimc"
 	qmcinp         = "qmcbeads"+str(value)+".input"
 
-	if (molecule == "CH3F"):
-		potcp="cp "+dir_run_input_pimc+"/pesch3fph2-180.pot "+folder_run_path
-	else:
-		potcp=""
-
 	if (status_cagepot == True):
 		cagepot_file   = dir_run_input_pimc+"/hfc60.pot"
 		cagepot_cp     = "cp "+cagepot_file+" "+folder_run_path
@@ -1145,8 +1145,6 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 export OMP_NUM_THREADS=%s
 rm -rf %s
 mkdir -p %s
-%s
-%s
 mv %s %s
 cd %s
 cp %s qmc.input
@@ -1155,7 +1153,7 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, cagepot_cp, potcp, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
 
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s

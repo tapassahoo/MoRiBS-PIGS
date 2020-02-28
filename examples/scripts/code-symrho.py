@@ -15,8 +15,8 @@ param = "tau"
 value = 0.01
 #param = "beta"
 #value = 0.2
-nbeads = [50]#, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-Jmax = 200
+nbeads = [100]#, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+Jmax = 400
 spin = 3
 
 # Run the "cmd_run" in python interpreter

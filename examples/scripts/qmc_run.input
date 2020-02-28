@@ -27,7 +27,7 @@ TEMPERATURE   temperature_input       #  Kelvin, for a PIGS simulation, this set
 #TRANSLATION
 #LINEARROTORS  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   nopot    PRIMITIVE   #  
 #type_impurity  molecule_impurity numbmolecules_impurity  stat_impurity dstep_tr_impurity level_impurity  potread_impurity    PRIMITIVE   #  
-type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   potread_input    PRIMITIVE   #  
+type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  level_input   potread_input    PRIMITIVE   PathToPot #  
 #PLANAR  H2 1   BOLTZMANN    0.08  3   h2n2ogr    PRIMITIVE   #  
 # comment molecule above for pure clusters
 

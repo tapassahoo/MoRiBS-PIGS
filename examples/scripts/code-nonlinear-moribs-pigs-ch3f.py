@@ -25,8 +25,8 @@ param = 0.01 # for fixed tau
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 1
-nblocks = 100
-npass = 1000
+nblocks = 10000
+npass = 500
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"

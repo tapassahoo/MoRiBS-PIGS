@@ -88,6 +88,7 @@ string FNPrefix;
 
 string MCFileName;     // mc output file name (no extension)
 string PathToDensity;
+string PathToPot;
  
 void IOReadParams(const char in_file[],int & mc_status)
 {
@@ -203,6 +204,9 @@ void IOReadParams(const char in_file[],int & mc_status)
        		string smod;                     // model of interaction 
        		int    pmod; 
        		inf>>smod;                       // [7]
+	
+			if (MCAtom[type].fpot != PotentialRead) 
+			inf>>PathToPot;
 
        		if      (smod == PMODEL[PRIMITIVE]) pmod = PRIMITIVE; 
        		else if (smod == PMODEL[EFFECTIVE]) pmod = EFFECTIVE; 

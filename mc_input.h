@@ -36,6 +36,7 @@ extern string FNPrefix;
 extern string MCFileName;                // OutputDir+FNPrefix 
 extern string PotentialRead;
 extern string PathToDensity;
+extern string PathToPot;
  
 //----IO errors----------------------------------------------
 
