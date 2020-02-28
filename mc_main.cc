@@ -1621,9 +1621,9 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
 
 	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
 
-	for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+	if (TRANSLATION)
 	{
-		if (TRANSLATION)
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
 			for (int it = 0; it < NumbTimes; it++) 
 			{
@@ -1635,8 +1635,11 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
 				fid << setw(IO_WIDTH) << MCCoords[AXIS_Z][t0] << BLANK;
 			}
 		}
+	}
 
-		if (ROTATION)
+	if (ROTATION)
+	{
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
 			for (int it = 0; it < NumbRotTimes; it++) 
 			{

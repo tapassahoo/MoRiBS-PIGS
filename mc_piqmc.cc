@@ -5775,8 +5775,8 @@ double PotEnergyPIGS(int atom0, double **pos)
 					}
 				}
 				Eulang[PHI]=MCAngles[PHI][tm];
-				Eulang[CTH]=acos(MCAngles[CTH][tm]);
 				Eulang[CHI]=MCAngles[CHI][tm];
+				Eulang[CTH]=acos(MCAngles[CTH][tm]);
 
 				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
 				spot_pair += weight*vpot3d;
