@@ -774,7 +774,7 @@ void PIMCPass(int type,int time)
 		{	
 			if (time == 0) { MCMolecularMovePIGS(type); }        
 			MCBisectionMovePIGS(type,time);
-			//MCMolecularMoveNaive(type);
+			MCMolecularMoveNaive(type);
 		}
 
 		if (PIMC_SIM)
@@ -2038,6 +2038,10 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 
       		cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
       		cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
+			if (PIGS_SIM) {
+				double ratio_end_beads = MCAccepEndBeads[type][MCMOLEC]/MCTotalEndBeads[type][MCMOLEC];
+				cout<<setw(w)<<ratio_end_beads<<BLANK;       // accept ratio for multilevel move 
+			}
 #endif
    		}
 	}

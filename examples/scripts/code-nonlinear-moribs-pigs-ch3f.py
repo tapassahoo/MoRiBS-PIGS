@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-simType1="submission "
-#simType1 = "analysis"
+#simType1="submission "
+simType1 = "analysis"
 
 molecule = "CH3F"
 rotor = "CH3F"
@@ -25,7 +25,7 @@ param = 0.01 # for fixed tau
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 1
-nblocks = 10000
+nblocks = 2000
 npass = 500
 
 if simType1 == "analysis":
@@ -33,8 +33,8 @@ if simType1 == "analysis":
 else:
 	cmd1 = ""
 
-rmin = 4.0
-rmax = 4.0
+rmin = 6.0
+rmax = 6.0
 dr = 0.2
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
@@ -50,7 +50,7 @@ for i in range(nr):
 	support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
 	stringName2 = '""'
-	#stringName2 = '"TIP4P-2005-"'
+	#stringName2 = '"Bisection-and-Naive-moves-"'
 	fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
 	support.replace("extraName", stringName2, fileName2, fileName3)
 	call(["rm", fileName2])

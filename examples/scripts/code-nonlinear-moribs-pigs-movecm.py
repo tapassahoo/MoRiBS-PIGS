@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-#simType1="submission "
-simType1 = "analysis"
+simType1="submission "
+#simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
@@ -33,8 +33,8 @@ if simType1 == "analysis":
 else:
 	cmd1 = ""
 
-rmin = 3.0
-rmax = 3.0
+rmin = 5.0
+rmax = 5.0
 dr = 0.2
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1

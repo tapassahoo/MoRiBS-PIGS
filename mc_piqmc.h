@@ -6,8 +6,8 @@
 void MCMolecularMove(int);
 void MCMolecularMovePIGS(int);
 void MCMolecularMoveNaive(int);
-void MCTransLinStepPIGS(int,int,int,int,double,double,double,double,double,double, double &,double &);
-double GetTransDensityPIGS(int, int, int, int, double,double **);
+void MCTransLinStepPIGS(int,int,int,int,double,double,double,double,double &,double &);
+double GetTransDensityPIGS(int, int, int, int, int, double **);
 double Gauss(double, double);	
 #ifdef GAUSSIANMOVE
 void MCMolecularMoveGauss(int);
@@ -57,6 +57,10 @@ double PotRotE3DHF(int,double **,int it);
 
 extern double  **MCTotal;  // MC counters (total number of moves)
 extern double  **MCAccep;  // MC counters (number of accepted moves)
+extern double  **MCTotalEndBeads; 
+extern double  **MCAccepEndBeads; 
+extern double MCTransChunkAcp;    // total number of translational moves for one chunk loop
+extern double MCTransChunkTot;    // total accept number of translational moves for one chunk loop
 
 // counters for parallel 3d rotation move.  They are supposed to be declared for all CPUs
 extern double MCRotChunkAcp;    // total number of rotational moves for one chunk loop

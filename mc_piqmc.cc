@@ -26,6 +26,10 @@
 
 double ** MCTotal;   // MC counters (total number of moves)
 double ** MCAccep;   // MC counters (number of accepted moves)
+double ** MCTotalEndBeads;  
+double ** MCAccepEndBeads; 
+double MCTransChunkAcp;    
+double MCTransChunkTot;   
 
 // counters for parallel 3d rotation move.  They are supposed to be declared for all CPUs
 double MCRotChunkAcp;    // total number of rotational moves for one chunk loop
@@ -597,11 +601,8 @@ void MCBisectionMoveExchange(int type, int time0)  // multilevel Metropolis
   }  // END loop over time slices/atoms
 }
 
-/*
 void MCMolecularMoveNaive(int type)
 {
-	double mclambda = MCAtom[type].lambda;    
-   	double step = MCAtom[type].mcstep; 
    	double MCTransChunkTot = 0.0;
    	double MCTransChunkAcp = 0.0;
 
@@ -609,8 +610,7 @@ void MCMolecularMoveNaive(int type)
    	double rand1,rand2,rand3,rand4;
 	int offset, gatom;
 
-#pragma omp parallel for reduction(+: MCTransChunkTot,MCTransChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int it=0;it<NumbTimes;it+=2)
+	for (int it=0;it<NumbTimes;it+=(NumbTimes-1))
 	{
 		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
@@ -619,35 +619,16 @@ void MCMolecularMoveNaive(int type)
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
-			MCTransLinStepPIGS(it,offset,gatom,type,step,rand1,rand2,rand3,rand4,mclambda,MCTransChunkTot,MCTransChunkAcp);
+			rand4=runif(Rng);
+			MCTransLinStepPIGS(it,offset,gatom,type,rand1,rand2,rand3,rand4,MCTransChunkTot,MCTransChunkAcp);
 		}
 	}
 
-	MCTotal[type][MCMOLEC] += MCTransChunkTot;
-	MCAccep[type][MCMOLEC] += MCTransChunkAcp;
-
-	MCTransChunkTot = 0;
-	MCTransChunkAcp = 0;
-
-#pragma omp parallel for reduction(+: MCTransChunkTot,MCTransChunkAcp) private(rand1,rand2,rand3,rand4,offset,gatom)
-	for (int it=1;it<NumbTimes;it+=2)
-	{
-		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
-		{
-			offset=MCAtom[type].offset+(NumbTimes*atom0);   
-			gatom=offset/NumbTimes;    
- 			rand1=runif(Rng);
-			rand2=runif(Rng);
-			rand3=runif(Rng);
-			MCTransLinStepPIGS(it,offset,gatom,type,step,rand1,rand2,rand3,rand4,mclambda,MCTransChunkTot,MCTransChunkAcp);
-		}
-	}
-
-	MCTotal[type][MCMOLEC] += MCTransChunkTot;
-	MCAccep[type][MCMOLEC] += MCTransChunkAcp;
+	MCTotalEndBeads[type][MCMOLEC] += MCTransChunkTot;
+	MCAccepEndBeads[type][MCMOLEC] += MCTransChunkAcp;
 }
 
-void MCTransLinStepPIGS(int it1, int offset, int gatom, int type, double step, double rand1, double rand2, double rand3, double rand4, double mclambda, double &MCTransChunkTot, double &MCTransChunkAcp)
+void MCTransLinStepPIGS(int it1, int offset, int gatom, int type, double rand1, double rand2, double rand3, double rand4, double &MCTransChunkTot, double &MCTransChunkAcp)
 {
 	int it0=(it1-1);
 	int it2=(it1+1);
@@ -659,14 +640,15 @@ void MCTransLinStepPIGS(int it1, int offset, int gatom, int type, double step, d
 	int t1 = offset + it1;
 	int t2 = offset + it2;
 
+   	double step = MCAtom[type].mcstep; 
 	for (int id=0;id<NDIM;id++) newcoords[id][t1]=MCCoords[id][t1];
 	newcoords[AXIS_X][t1]+=step*(rand1-0.5);
 	newcoords[AXIS_Y][t1]+=step*(rand2-0.5);
 	newcoords[AXIS_Z][t1]+=step*(rand3-0.5);
 
-	double dens_old=GetTransDensityPIGS(it1,t0,t1,t2,mclambda,MCCoords);
+	double dens_old=GetTransDensityPIGS(it1,t0,t1,t2,type,MCCoords);
 	double pot_old=PotEnergyPIGS(gatom,MCCoords,it1);
-	double dens_new=GetTransDensityPIGS(it1,t0,t1,t2,mclambda,newcoords);
+	double dens_new=GetTransDensityPIGS(it1,t0,t1,t2,type,newcoords);
 	double pot_new=PotEnergyPIGS(gatom,newcoords,it1);
      
 	double rd;
@@ -686,13 +668,14 @@ void MCTransLinStepPIGS(int it1, int offset, int gatom, int type, double step, d
 	}	      
 }
 
-double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, double **pos)
+double GetTransDensityPIGS(int it1, int t0, int t1, int t2, int type,  double **pos)
 {
-	double dr2, dens;
+	double dr2;
+	double dens=1.0;
 	double dr[NDIM];
 	
+	double mclambda = MCAtom[type].lambda;    
 	double sigma=4.0*mclambda*MCTau;
-	//double sigma=2.0*MCTau;
 	if (it1==0) {
 		dr2=0.0;
 		for (int id=0;id<NDIM;id++)
@@ -702,7 +685,7 @@ double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, dou
 		}
 		dens=Gauss(dr2,sigma);
 	}
-	else if (it1==(NumbRotTimes-1)) {
+	else if (it1==(NumbTimes-1)) {
 		dr2=0.0;
 		for (int id=0;id<NDIM;id++)
 		{
@@ -733,10 +716,8 @@ double GetTransDensityPIGS(int it1, int t0, int t1, int t2, double mclambda, dou
 
 double Gauss(double mean2, double sigma)
 {
-	double valr=exp(-mean2/sigma);
-	return valr;	
+	return exp(-mean2/sigma);	
 }	
-*/
 
 void MCRotationsMove(int type) // update all time slices for rotational degrees of freedom
 {
@@ -5016,6 +4997,8 @@ void ResetMCCounts(void)
    {
       MCTotal[type][im] = 0;
       MCAccep[type][im] = 0;
+      MCTotalEndBeads[type][im] = 0;
+      MCAccepEndBeads[type][im] = 0;
    }
 }
 
@@ -5023,12 +5006,16 @@ void MemAllocMCCounts(void)
 {
    MCTotal = doubleMatrix(NumbTypes,MCMAXMOVES);
    MCAccep = doubleMatrix(NumbTypes,MCMAXMOVES);
+   MCTotalEndBeads = doubleMatrix(NumbTypes,MCMAXMOVES);
+   MCAccepEndBeads = doubleMatrix(NumbTypes,MCMAXMOVES);
 }
 
 void MFreeMCCounts(void)
 {
    free_doubleMatrix(MCTotal);
    free_doubleMatrix(MCAccep);
+   free_doubleMatrix(MCTotalEndBeads);
+   free_doubleMatrix(MCAccepEndBeads);
 }
 
 #ifdef IOWRITE
@@ -5805,4 +5792,3 @@ double PotEnergyPIGS(int atom0, double **pos)
 #endif
     return spot;
 }
-

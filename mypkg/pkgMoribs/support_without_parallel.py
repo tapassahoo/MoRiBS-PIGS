@@ -980,9 +980,6 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
 	folder_run_path = dir_run_job + folder_run 
 
-	if (molecule_rot == "CH3F"):
-		call(["cp", "pesch3fph2-180.pot", dir_run_input_pimc])
-	
 	#job submission
 	fname         = 'job-for-P'+str(numbbeads)
 	if (TypeCal == 'PIGS'):
