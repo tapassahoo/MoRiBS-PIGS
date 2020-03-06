@@ -10,8 +10,8 @@ import matplotlib
 import matplotlib.pyplot as plt
  
 dir_read = sys.argv[1]
-particle_index = int(sys.argv[2])
-axis_plot = sys.argv[3]
+#particle_index = int(sys.argv[2])
+#axis_plot = sys.argv[3]
 axis_index = {"cost":0, "phi":1, "chi":2}
 
 file_read = dir_read + 'results/output.xyz'
@@ -23,8 +23,8 @@ sim_read = string1[string1.find("PIGS"):string1.find("PIGS")+4]
 dofs_read = string1[string1.find("moves")+6:string1.find("DOFs")]
 
 if (sim_read == "PIGS"):
-	#beads_pos = int((numb_beads-1)/2)
-	beads_pos = 0#numb_beads-1
+	beads_pos = int((numb_beads-1)/2)
+	#beads_pos = numb_beads-1
 
 	#if (dofs_read == "TransAndRot"):
 	#	ndofs=3
@@ -62,6 +62,14 @@ col_block = np.arange(numb_blocks)
 data_plot = vec_dist
 
 plt.plot(col_block, data_plot)
+plt.show()
 
-#plt.hist(data_plot, bins='auto', normed=1, color='green', alpha=0.75, edgecolor='black', label='""')
+fig = plt.figure()
+num_bins = 20
+if (dofs_read == "TransAndRot"):
+	plt.xlabel('Bins of lattice spacing ('+r'$\AA$'+')')
+	data_plot = vec_dist[trunc:]
+
+plt.hist(data_plot, bins='auto', normed=1, color='green', alpha=0.75, edgecolor='black', label='""')
+plt.ylabel('Density')
 plt.show()

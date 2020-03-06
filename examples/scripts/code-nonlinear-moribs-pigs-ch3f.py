@@ -17,15 +17,15 @@ molecule = "CH3F"
 rotor = "CH3F"
 SpinIsomer = 1
 
-var = "beta" # for fixed tau
-param = 0.01 # for fixed tau
+#var = "beta" # for fixed tau
+#param = 0.01 # for fixed tau
 
-#var = "tau"  # for fixed beta
-#param = 0.1 # for fixed beta
+var = "tau"  # for fixed beta
+param = 0.5 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 1
-nblocks = 2000
+nblocks = 10000
 npass = 500
 
 if simType1 == "analysis":
@@ -50,7 +50,7 @@ for i in range(nr):
 	support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
 	stringName2 = '""'
-	#stringName2 = '"Bisection-and-Naive-moves-"'
+	#stringName2 = '"MolecularMove-and-Bisection-moves-"'
 	fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
 	support.replace("extraName", stringName2, fileName2, fileName3)
 	call(["rm", fileName2])
