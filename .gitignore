@@ -1,6 +1,5 @@
 #ignore all object files
 *.o
-*--pycache__*
 #ignore executable
 modify*
 pimc*
@@ -44,16 +43,9 @@ examples/scripts/support_without_parallel_original.py
 /sprng/SRC/*
 /nmv_prop/asymrho.x
 Makefile
-/mypkg/__pycache__/
-mypkg/pkgMoribs/__pycache__/
+**/__pycache__
 examples/scripts/fit.log
 examples/scripts/pesch3fph2-180.pot
-mypkg/pkgAsymrho/__pycache__/__init__.cpython-38.pyc
-mypkg/pkgAsymrho/__pycache__/support_asymrho.cpython-38.pyc
-mypkg/pkgAsymrho/__pycache__/__init__.cpython-36.pyc
-mypkg/pkgAsymrho/__pycache__/support_asymrho.cpython-36.pyc
-mypkg/pkgSymrho/__pycache__/__init__.cpython-36.pyc
-mypkg/pkgSymrho/__pycache__/support_symrho.cpython-36.pyc
 symtop_prop/symrho.x
 **/rho.den[0-9][0-9][0-9]
 **/rho.den[0-9][0-9][0-9]_eng
