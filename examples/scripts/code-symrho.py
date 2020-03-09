@@ -14,10 +14,10 @@ rotor = "CH3F"
 #param = "tau"
 #value = 0.001
 param = "beta"
-value = 0.5
-#nbeads = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-nbeads = [120, 140, 160, 180, 200]
-Jmax = 200
+value = 0.25
+nbeads = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+nbeads += [120, 140, 160, 180, 200]
+Jmax = 400
 spin = 3
 
 # Run the "cmd_run" in python interpreter

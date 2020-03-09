@@ -21,7 +21,7 @@ SpinIsomer = 1
 #param = 0.01 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.5 # for fixed beta
+param = 0.25 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 1
@@ -29,7 +29,7 @@ nblocks = 10000
 npass = 500
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 0"
+	cmd1 = "--preskip 5000"
 else:
 	cmd1 = ""
 
