@@ -7,6 +7,8 @@ void MCMolecularMove(int);
 void MCMolecularMovePIGS(int);
 void MCMolecularMoveNaive(int);
 void MCTransLinStepPIGS(int,int,int,int,double,double,double,double,double &,double &);
+void MCMolecularMoveNaiveNorm(int);
+void MCTransLinStepPIGSNorm(int,int,int,int,double,double &,double &);
 double GetTransDensityPIGS(int, int, int, int, int, double **);
 double Gauss(double, double);	
 #ifdef GAUSSIANMOVE

@@ -17,11 +17,11 @@ molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-#var = "beta" # for fixed tau
-#param = 0.001 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.001 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.05 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.05 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
@@ -29,9 +29,13 @@ nblocks = 10000
 npass = 500
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 5000"
+	cmd1 = "--preskip 0"
 else:
 	cmd1 = ""
+
+#stringName2 = '""'
+#stringName2 = '"COM-and-Bisection-moves-"'
+stringName2 = '"COM-Bisection-Norm-moves-"'
 
 rmin = 6.0
 rmax = 6.0
@@ -49,8 +53,6 @@ for i in range(nr):
 	fileName2 = "script_submission_analysis_MoRiBS1.py"
 	support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
-	stringName2 = '""'
-	#stringName2 = '"TIP4P-2005-"'
 	fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
 	support.replace("extraName", stringName2, fileName2, fileName3)
 	call(["rm", fileName2])

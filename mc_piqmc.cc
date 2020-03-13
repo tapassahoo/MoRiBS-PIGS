@@ -601,6 +601,79 @@ void MCBisectionMoveExchange(int type, int time0)  // multilevel Metropolis
   }  // END loop over time slices/atoms
 }
 
+void MCMolecularMoveNaiveNorm(int type)
+{
+   	double MCTransChunkTot = 0.0;
+   	double MCTransChunkAcp = 0.0;
+
+   	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+   	double rand1;
+	int offset, gatom;
+
+	for (int it=0;it<NumbTimes;it+=(NumbTimes-1))
+	{
+		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
+		{
+			offset=MCAtom[type].offset+(NumbTimes*atom0);
+			gatom=offset/NumbTimes;    
+			rand1=runif(Rng);
+			MCTransLinStepPIGSNorm(it,offset,gatom,type,rand1,MCTransChunkTot,MCTransChunkAcp);
+		}
+	}
+
+	MCTotalEndBeads[type][MCMOLEC] += MCTransChunkTot;
+	MCAccepEndBeads[type][MCMOLEC] += MCTransChunkAcp;
+}
+
+void MCTransLinStepPIGSNorm(int it1, int offset, int gatom, int type, double rand1, double &MCTransChunkTot, double &MCTransChunkAcp)
+{
+	int it0=(it1-1);
+	int it2=(it1+1);
+
+	if (it0<0)          it0 += NumbTimes; // NumbTimes - 1
+	if (it2>=NumbTimes) it2 -= NumbTimes; // 0
+	  
+	int t0 = offset + it0;
+	int t1 = offset + it1;
+	int t2 = offset + it2;
+
+    RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+	double mclambda = MCAtom[type].lambda;    
+	double sigma= sqrt(2.0*mclambda*MCTau);
+	double muX, muY, muZ;
+
+	if (it1 == 0){
+		muX=MCCoords[AXIS_X][t2];
+		muY=MCCoords[AXIS_Y][t2];
+		muZ=MCCoords[AXIS_Z][t2];
+	}
+	else if (it1 == (NumbTimes-1)){
+		muX=MCCoords[AXIS_X][t0];
+		muY=MCCoords[AXIS_Y][t0];
+		muZ=MCCoords[AXIS_Z][t0];
+	}
+
+	newcoords[AXIS_X][t1]=rnorm(Rng, muX, sigma);
+	newcoords[AXIS_Y][t1]=rnorm(Rng, muY, sigma);
+	newcoords[AXIS_Z][t1]=rnorm(Rng, muZ, sigma);
+
+	double pot_old=PotEnergyPIGS(gatom,MCCoords,it1);
+	double pot_new=PotEnergyPIGS(gatom,newcoords,it1);
+     
+	double rd = exp(-MCTau*(pot_new-pot_old));
+
+	bool Accepted = false;
+	if (rd>1.0)        Accepted = true;
+	else if (rd>rand1) Accepted = true;
+
+	MCTransChunkTot +=1.0;
+	if (Accepted)
+	{
+		MCTransChunkAcp +=1.0;
+		for (int id=0;id<NDIM;id++) MCCoords[id][t1]=newcoords[id][t1];
+	}	      
+}
+
 void MCMolecularMoveNaive(int type)
 {
    	double MCTransChunkTot = 0.0;
