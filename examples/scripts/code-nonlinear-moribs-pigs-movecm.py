@@ -25,7 +25,7 @@ param = 0.05 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 1000
+nblocks = 10000
 npass = 500
 
 if simType1 == "analysis":
@@ -36,7 +36,8 @@ else:
 #stringName2 = '""'
 #stringName2 = '"COM-and-Bisection-moves-"'
 #stringName2 = '"COM-Bisection-Norm-moves-"'
-stringName2 = '"qTIP4PF-"'
+#stringName2 = '"qTIP4PF-"'
+stringName2 = '"qspcfw-"'
 
 rmin = 6.0
 rmax = 6.0

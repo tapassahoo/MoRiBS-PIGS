@@ -17,3 +17,4 @@ pause -1 "Hit Enter to continue"
 
 #Example
 #gnuplot -e "filename='< tail -8 ~/ResultsOfPIGS/PIGS-TransAndRotDOFs-Rpt6.0Angstrom-Energy-vs-tau-fixed-beta0.25Kinv-Blocks10000-Passes500-System1-o-CH3F-preskip0-postskip0.txt'" gnuplot_fitting
+#gnuplot -e "filename='< tail -8 ~/ResultsOfPIGS/PIGS-qTIP4PF-TransAndRotDOFs-Rpt6.0Angstrom-Energy-vs-tau-fixed-beta0.05Kinv-Blocks10000-Passes500-System2-p-H2O-preskip0-postskip0.txt'" gnuplot_fitting

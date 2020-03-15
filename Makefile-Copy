@@ -31,7 +31,7 @@ FC=gfortran
 #-------------------------------------------------------------------------
 # objects for QMC
  
-pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_qtip4p_rigid.o omprng.o rngstream.o vh2h2.o h2oc60.o hfc60.o plgndr.o 
+pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_qspcfw_rigid.o omprng.o rngstream.o vh2h2.o h2oc60.o hfc60.o plgndr.o 
  
 #----------------------------------------- PIMC --------------------------
 
