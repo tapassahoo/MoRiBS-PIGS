@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-simType1="submission "
-#simType1 = "analysis"
+#simType1="submission "
+simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
@@ -29,7 +29,7 @@ nblocks = 10000
 npass = 500
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 0"
+	cmd1 = "--preskip 8000"
 else:
 	cmd1 = ""
 
