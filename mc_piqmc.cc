@@ -809,36 +809,22 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 
    	RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
    	double rand1,rand2,rand3;
-	int offset, gatom;
 
-#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,offset,gatom)
-	for (int itrot=0;itrot<NumbRotTimes;itrot += 2)
+#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3)
+	for (int itrot=0;itrot<NumbRotTimes;itrot+=2)
 	{
 		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbRotTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbRotTimes;    // and translational degrees of freedom
+			int offset = MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			int gatom  = offset/NumbTimes;    // and translational degrees of freedom
 			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
-			if (PIMC_SIM)
-			{		
-				MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-			}	
-			if (PIGS_SIM)
-			{		
-				MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-			}	
-			if (ENT_SIM)
-			{		
-				if (ENT_ENSMBL == EXTENDED_ENSMBL)
-				{
-					MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
-				}
-				if (ENT_ENSMBL == BROKENPATH)
-				{
-					MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-				}
+			if (PIMC_SIM) MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			if (PIGS_SIM) MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			if (ENT_SIM) {		
+				if (ENT_ENSMBL==EXTENDED_ENSMBL) MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
+				if (ENT_ENSMBL==BROKENPATH) MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 			}
 		}
 	}
@@ -849,34 +835,21 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 	MCRotChunkTot = 0;
 	MCRotChunkAcp = 0;
 
-#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3,offset,gatom)
-	for (int itrot = 1; itrot < NumbRotTimes; itrot += 2)
+#pragma omp parallel for reduction(+: MCRotChunkTot,MCRotChunkAcp) private(rand1,rand2,rand3)
+	for (int itrot=1;itrot<NumbRotTimes;itrot+=2)
 	{
 		for(int atom0=0;atom0<MCAtom[type].numb;atom0++)
 		{
-			offset = MCAtom[type].offset+(NumbRotTimes*atom0);   // the same offset for rotational
-			gatom  = offset/NumbRotTimes;    // and translational degrees of freedom
+			int offset=MCAtom[type].offset+(NumbTimes*atom0);   // the same offset for rotational
+			int gatom  = offset/NumbTimes;    // and translational degrees of freedom
  			rand1=runif(Rng);
 			rand2=runif(Rng);
 			rand3=runif(Rng);
-			if (PIMC_SIM)
-			{		
-				MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-			}	
-			if (PIGS_SIM)
-			{		
-				MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-			}	
-			if (ENT_SIM)
-			{		
-				if (ENT_ENSMBL == EXTENDED_ENSMBL)
-				{
-					MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
-				}
-				if (ENT_ENSMBL == BROKENPATH)
-				{
-					MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
-				}
+			if (PIMC_SIM) MCRotLinStepPIMC(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			if (PIGS_SIM) MCRotLinStepPIGS(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
+			if (ENT_SIM) {		
+				if (ENT_ENSMBL==EXTENDED_ENSMBL) MCRotLinStepSwap(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp,Distribution);
+				if (ENT_ENSMBL==BROKENPATH) MCRotLinStepSwapBroken(itrot,offset,gatom,type,step,rand1,rand2,rand3,MCRotChunkTot,MCRotChunkAcp);
 			}
 		}
 	}
@@ -884,8 +857,7 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 	MCTotal[type][MCROTAT] += MCRotChunkTot;
 	MCAccep[type][MCROTAT] += MCRotChunkAcp;
 
-	if (ENT_ENSMBL == EXTENDED_ENSMBL)
-	{
+	if (ENT_ENSMBL == EXTENDED_ENSMBL) {
 		double rand_ensmbl = runif(Rng);
 		MCSwap(type, rand_ensmbl, Distribution);
 		if (Distribution == "Swap") MCAccepSwap += 1.0;
@@ -1415,15 +1387,9 @@ void MCRotLinStepSwap(int it1,int offset,int gatom,int type,double step,double r
    	cost += (step*(rand1-0.5));
    	phi  += (step*(rand2-0.5));
 
-   	if (cost >  1.0)
-   	{
-      	cost = 2.0 - cost;
-   	}
+   	if (cost >  1.0) cost = 2.0 - cost;
 
-   	if (cost < -1.0)
-   	{
-       	cost = -2.0 - cost;
-   	}
+   	if (cost < -1.0) cost = -2.0 - cost;
 
 	if (abs(cost) > 2.0) 
 	{

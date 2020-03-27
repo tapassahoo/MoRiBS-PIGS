@@ -1,35 +1,47 @@
 import os
-from os import system
-import support_without_parallel as support
 from subprocess import call
+import numpy as np
 
-#stringName1  = "test-no-ratio-trick"
-stringName1  = "test-ratio-trick"
-fileName1    = "script_submission_analysis_MoRiBS_without_parallel.py"
-fileName2    = "script_submission_analysis_MoRiBS1.py"
-support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
+import mypkg.pkgMoribs.support_without_parallel as support
+import mypkg.pkgMoribs
 
-#stringName2   = '"test-"'
-stringName2   = '""'
-#stringName2   = '"NoRatio-Trick-"'
-#stringName2   = '"Ratio-Trick-"'
-fileName3    = "script_submission_analysis_MoRiBS-"+stringName1+".py"
-support.replace("extraName", stringName2, fileName2, fileName3)
-call(["rm", fileName2])
+module_path = mypkg.pkgMoribs.__file__
+module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
-molecule     = "HF"
-nMolecule    = 2
-RCOM         = 10.05
+simType = "ENT"
+simType1="submission "
+#simType1 = "analysis"
+
+molecule = "HF"
+rotor = "HF"
+SpinIsomer = -1
+
+#var = "beta" # for fixed tau
+#param = 0.002 # for fixed tau
+
+var = "tau"  # for fixed beta
+param = 0.2 # for fixed beta
+
+nMolecule = 2
+nblocks = 80
+npass = 100
+
+stringName2 = '""'
+#stringName2 = '"TIP4P-2005-"'
+
+if simType1 == "analysis":
+	cmd1 = "--preskip 0"
+else:
+	cmd1 = ""
+
+stringName1 = "linear-rotors"
+rcom = 10.05
+rcom="{:3.2f}".format(rcom)
+
 if (nMolecule == 2):
-	#gFactorList  = [0.5+0.1*i for i in range(76)]
-<<<<<<< HEAD
-	#gFactorList  = [1.0+1.0*i for i in range(20)]
-=======
-	gFactorList  = [11.0+1.0*i for i in range(10)]
->>>>>>> bed5bc07d5572f2b385af05d4bd0f1da30293913
-	#gFactorList  = [9.0+1.0*i for i in range(12)]
-	gFactorList  = [10.0+1.0*i for i in range(11)]
+	#gFactorList  = [0.5+0.5*i for i in range(16)]
+	gFactorList  = [9.0+1.0*i for i in range(12)]
 if (nMolecule == 4):
 	#gFactorList  = [0.5+0.1*i for i in range(31)]
 	gFactorList = [3.5+0.25*i for i in range(11)]
@@ -42,11 +54,7 @@ if (nMolecule == 32):
 	gFactorList  = [0.75+0.05*i for i in range(10)]
 	#gFactorList  = [0.5+0.05*i for i in range(15)]
 	#gFactorList  = [0.7]
-#print(gFactorList)
-#exit()
-#beta         = 0.32
-beta         = 0.2
-Simulation   = "ENT"
+print(gFactorList)
 
 for gFactor in gFactorList:
 	#DipoleMoment = support.GetDipoleMomentFromGFactor(molecule, RCOM, gFactor)
@@ -58,26 +66,46 @@ for gFactor in gFactorList:
 	#output  = '{:1.4f}'.format(DipoleMoment)
 	gFactor = '{:03.2f}'.format(gFactor)
 
-######For SWAPUNSWAP with Ratio Trick######
-<<<<<<< HEAD
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RATIO"
-	command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 101000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RESTART -NR 101000 --RATIO"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 100000 -Pass 100 --ROTMOVE tau rename "+Simulation+" HF HF "+str(beta)+" -NR 101000 --RATIO"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 100000 -Pass 100 --ROTMOVE tau analysis   --preskip 95000 "+Simulation+" HF HF "+str(beta)+" --RATIO"
-=======
-	command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RATIO"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 20000 -Pass 100 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RESTART -NR 20000 --RATIO"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau rename "+Simulation+" HF HF "+str(beta)+" -NR 21000 --RATIO"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 21000 -Pass 100 --ROTMOVE tau analysis   --preskip 0 "+Simulation+" HF HF "+str(beta)+" --RATIO"
->>>>>>> bed5bc07d5572f2b385af05d4bd0f1da30293913
-######For BROKENPATH######
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 200 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --scal BROKENPATH"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 200 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RESTART -NR 50000 --scal BROKENPATH"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 100 --ROTMOVE tau rename         "+Simulation+" HF HF "+str(beta)+" -NR 100000 --scal BROKENPATH"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 100000 -Pass 100 --ROTMOVE tau analysis   --preskip 95000 "+Simulation+" HF HF "+str(beta)+" --scal BROKENPATH"
-######For SWAPUNSWAP without Ratio Trick######
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 200 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 200 --ROTMOVE tau submission -C "+Simulation+" HF HF "+str(beta)+" --RESTART -NR 50000"
-	#command_line = "python "+fileName3+" -g "+str(gFactor)+" -R "+str(RCOM)+" -N "+str(nMolecule)+" -Block 50000 -Pass 200 --ROTMOVE tau analysis --preskip 0 "+Simulation+" HF HF "+str(beta)
-	system(command_line)
-call(["rm", fileName3])
+	space=" "
+
+	fileName1 = module_path+"script_submission_analysis_MoRiBS_without_parallel.py"
+	fileName2 = "script_submission_analysis_MoRiBS1.py"
+	support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
+
+	fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
+	support.replace("extraName", stringName2, fileName2, fileName3)
+	call(["rm", fileName2])
+
+	cmd_run = (
+		"python"+space
+		+ fileName3+space
+		+ "-R"+space
+		+ str(rcom)+space
+		+ "-g"+space
+		+ str(gFactor)+space
+		+ "-N"+space
+		+ str(nMolecule)+space
+		+ "-Block"+space
+		+ str(nblocks)+space
+		+ "-Pass"+space
+		+ str(npass)+space
+		+ "--ROTMOVE"+space
+		#+ "--MOVECOM"+space
+		+ cmd1+space
+		+ "--Type LINEAR"+space
+		+ "-spin"+space
+		+ str(SpinIsomer)+space
+		#+ "-IM"+space+"ATOM"+space+"H2"+space+"1"+space
+		+ simType+space
+		+ simType1+space
+		+ molecule+space
+		+ rotor+space
+		+ str(param)+space
+		+ var+space
+		+ " --RATIO WOR"+space
+		#+ " --scal BROKENPATH"+space
+	) 
+
+	print(cmd_run)
+	os.system(cmd_run)
+	call(["rm", fileName3])

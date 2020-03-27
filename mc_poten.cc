@@ -588,10 +588,13 @@ void init_rotdens(int type)
 
     stringstream time; time << NumbRotTimes;                  // number of time slices 
 //    stringstream temp; temp << Temperature*Units.temperature; // temperature
-    stringstream temp; temp << std::fixed << std::setprecision(3)<<Temperature*Units.temperature; // temperature
+    stringstream temp; temp << std::fixed << std::setprecision(6)<<Temperature*Units.temperature; // temperature
 
     fname += ("_T" + temp.str() + "t" + time.str()); 
+   string pathr = PathToDensity;
     fname += EXT_ROTD;
+	fname = pathr+fname;
+   cout<<fname<<endl;
 
 //  string fname  = (MCAtom[IMTYPE].rdens + (string) EXT_ROTD);   // file name
  

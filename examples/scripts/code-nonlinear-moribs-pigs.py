@@ -17,25 +17,30 @@ molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-#var = "beta" # for fixed tau
-#param = 0.001 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.002 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.1 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 11
 nblocks = 10000
-npass = 100
+npass = 500
+
+#stringName2 = '""'
+#stringName2 = '"TIP4P-2005-"'
+stringName2 = '"qTIP4PF-"'
+#stringName2 = '"qSPCFw-"'
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 5000"
+	cmd1 = "--preskip 0"
 else:
 	cmd1 = ""
 
 rmin = 2.5
 rmax =10.0
-dr = 0.1
+dr = 0.5
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
 print(nr)
@@ -49,8 +54,6 @@ for i in range(nr):
 	fileName2 = "script_submission_analysis_MoRiBS1.py"
 	support.replace("NameOfOutputDirectory", stringName1, fileName1, fileName2)
 
-	stringName2 = '""'
-	#stringName2 = '"TIP4P-2005-"'
 	fileName3 = "script_submission_analysis_MoRiBS-" + stringName1 + ".py"
 	support.replace("extraName", stringName2, fileName2, fileName3)
 	call(["rm", fileName2])
@@ -73,17 +76,20 @@ for i in range(nr):
 		+ "-Pass"+space
 		+ str(npass)+space
 		+ "--ROTMOVE"+space
+		#+ "--MOVECOM"+space
 		+ cmd1+space
 		+ "--Type NONLINEAR"+space
-		+ var+space
-		+ simType1+space
+		+ "-spin"+space
+		+ str(SpinIsomer)+space
+		#+ "-IM"+space+"ATOM"+space+"H2"+space+"1"+space
 		+ simType+space
+		+ simType1+space
 		+ molecule+space
 		+ rotor+space
 		+ str(param)+space
-		+ "-spin"+space
-		+ str(SpinIsomer)+space
+		+ var+space
 	) 
+
 	print(cmd_run)
 	os.system(cmd_run)
 	call(["rm", fileName3])

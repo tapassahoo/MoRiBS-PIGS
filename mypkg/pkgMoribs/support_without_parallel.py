@@ -662,6 +662,8 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 		replace("potread_input", "pesch3fph2-180", "qmc2.input", "qmc3.input")
 	elif (molecule_rot == "H2O"):
 		replace("potread", "nopot", "qmc2.input", "qmc3.input")
+	elif (molecule_rot == "HF"):
+		replace("potread_input", "nopot", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	replace("PathToPot", src_dir, "qmc2.input", "qmc3.input")
@@ -802,7 +804,7 @@ def rotmat(TypeCal,molecule,temperature,numbbeads,source_dir_exe):
 	This function generates rotational density matrix - linden.dat
 	'''
 	#temperature1    = dropzeros(temperature)
-	temperature1    = "%5.3f" % temperature
+	temperature1    = "%8.6f" % temperature
 	if (TypeCal == 'PIMC'):
 		numbbeads1		= numbbeads
 	else:
@@ -853,7 +855,6 @@ def jobstring_scratch(file_name, value, thread, run_dir, molecule, temperature, 
 	omp_thread     = str(thread)
 	output_dir     = run_dir+"/results"
 	temperature1   = "%5.3f" % temperature
-	file_rotdens   = dir_run_input_pimc+"/"+molecule+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 	logpath        = final_dir+"/"
 
 	input_file     = dir_run_input_pimc+"/qmc"+file_name+str(value)+".input"
@@ -909,10 +910,11 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 
 			#call(["rm", "-rf", folder_run])
 		
-		temperature1    = "%8.6f" % temperature
 		if (RotorType == "LINEAR"):
+			temperature1    = "%8.6f" % temperature
 			file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
+			path_Density = dir_run_input_pimc+"/"
 		else:
 			iodevn   = spin_isomer
 			jmax = 70
