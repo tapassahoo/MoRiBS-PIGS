@@ -9,12 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.axes
 # matplotlib.use('eps')
-import matplotlib.ticker as mtick
-import matplotlib.ticker as mticker
-#from matplotlib.backends.backend_pdf import PdfPages
-from matplotlib.ticker import ScalarFormatter
 from pylab import *
-from scipy.optimize import curve_fit
 import mypkg.pkgMoribs.support_without_parallel as support
 
 rc('text', usetex=True)
@@ -32,28 +27,29 @@ plt.rcParams["font.family"] = "serif"
 plt.rcParams["mathtext.fontset"] = "dejavuserif"
 
 dir_read = sys.argv[1]
-numb_particle = int(sys.argv[2])
-dofs_read1 = int(sys.argv[3])
+mc_read = sys.argv[2]
+numb_particle = int(sys.argv[3])
+dofs_read1 = int(sys.argv[4])
 #particle_index = int(sys.argv[2])
 #axis_plot = sys.argv[3]
 axis_index = {"cost":0, "phi":1, "chi":2}
 dofs_read = {0:"TransAndRot", 1:"Rot", 2:"Trans"} 
 
 file_read = dir_read + 'results/output.xyz'
-string1 =dir_read[dir_read.find("PIGS"):-1]
+string1 =dir_read[dir_read.find(mc_read):-1]
 numb_beads = int(string1[string1.find("beads")+5:])
 numb_blocks = int(string1[string1.find("Blocks")+6:string1.find("-Passes")])
-sim_read = string1[string1.find("PIGS"):string1.find("PIGS")+4]
-extra_file_name=string1[string1.find("PIGS")+5:string1.find(dofs_read[dofs_read1])]
+sim_read = string1[string1.find(mc_read):string1.find(mc_read)+4]
+extra_file_name=string1[string1.find(mc_read)+5:string1.find(dofs_read[dofs_read1])]
 #dofs_read = string1[string1.find("moves")+6:string1.find("DOFs")]
 #numb_particle = int(string1[string1.find("System")+6:string1.find("-p-H2O")])
 
 ndofs=3
-if (sim_read == "PIGS"):
+if (sim_read != "PIMC"):
 	beads_pos = int((numb_beads-1)/2)
 	#beads_pos = numb_beads-1
 
-preskip = 5000
+preskip = 0
 postskip = 0
 data_len = len(genfromtxt(file_read, unpack=True, usecols=[0], skip_header=preskip, skip_footer=postskip))
 workingNdim = int(math.log(data_len)/math.log(2))
@@ -120,7 +116,7 @@ plt.ylim(0.0,4.51)
 plt.subplots_adjust(top=0.99,bottom=0.13,left=0.1,right=0.99,hspace=0.0,wspace=0.0)
 plt.legend(numpoints=1,loc=('upper right'))
 
-FilePlotDensity="/home/tapas/ResultsOfPIGS"+dir_read[28:-1]+"-histogram-r-preskip"+str(preskip)+"-postskip"+str(postskip)+".eps"
+FilePlotDensity="/home/tapas/ResultsOf"+mc_read+dir_read[28:-1]+"-histogram-r-preskip"+str(preskip)+"-postskip"+str(postskip)+".eps"
 print(FilePlotDensity)
 plt.savefig(FilePlotDensity, dpi=50, format='eps')
 plt.show()

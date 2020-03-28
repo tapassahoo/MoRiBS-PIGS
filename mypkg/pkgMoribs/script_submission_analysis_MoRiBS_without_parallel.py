@@ -195,10 +195,12 @@ else:
 
 if (TypeCal == "ENT"):
 	maxloop = int(numbmolecules1/2)
+	ext_ent=args.RATIO
 else:
 	maxloop = 1
+	ext_ent=""
 
-if args.RATIO:
+if (args.RATIO == "WR"):
 	particleAList = np.arange(1, maxloop+1)
 else:
 	particleAList = [maxloop]
@@ -206,11 +208,11 @@ else:
 
 for particleA in particleAList:
 	# Generating files for submission
-	file1_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal,impurity)
+	file1_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal,impurity,ext_ent)
 
 	if status == "rename":
 		numbblocks_rename = args.NR
-		file2_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks_rename,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal,impurity)
+		file2_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks_rename,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal,impurity,ext_ent)
 
 		if NameOfServer == "graham":
 			dir_run_input_pimc = "/scratch/" + user_name + "/" + out_dir + file1_name + "PIMC"

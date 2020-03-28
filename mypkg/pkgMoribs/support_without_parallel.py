@@ -1195,7 +1195,7 @@ def GetAvgRotEnergy(molecule,beta):
 	AvgEnergy = Nsum*CMRECIP2KL/Zsum
 	return AvgEnergy
 
-def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal,impurity):
+def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules, molecule, ENT_TYPE, particleA, extra, crystal,impurity,ext_ent):
 	#add                     = "-NumTimes"
 	add                     = ""
 	if (TypeCal == "ENT"):
@@ -1250,7 +1250,7 @@ def GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact,
 
 	file1_name      = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+mainFileName
 	if (TypeCal == "ENT"):
-		file1_name += ENT_TYPE
+		file1_name += ENT_TYPE+"-"+ext_ent+"-"
 	
 	return file1_name
 
