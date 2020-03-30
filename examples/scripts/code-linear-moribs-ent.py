@@ -41,7 +41,7 @@ rcom="{:3.2f}".format(rcom)
 
 if (nMolecule == 2):
 	gFactorList  = [0.5+0.5*i for i in range(16)]
-	#gFactorList  = [9.0+1.0*i for i in range(12)]
+	gFactorList  += [9.0+1.0*i for i in range(12)]
 if (nMolecule == 4):
 	#gFactorList  = [0.5+0.1*i for i in range(31)]
 	gFactorList = [3.5+0.25*i for i in range(11)]

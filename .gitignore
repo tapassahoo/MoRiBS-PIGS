@@ -43,7 +43,7 @@ examples/scripts/support_without_parallel_original.py
 /sprng/SRC/*
 /nmv_prop/asymrho.x
 Makefile
-**__pycache__
+**__pycache__*
 examples/scripts/fit.log
 examples/scripts/pesch3fph2-180.pot
 symtop_prop/symrho.x
