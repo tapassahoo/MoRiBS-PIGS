@@ -69,7 +69,10 @@ data_len=int(numb_blocks-(preskip+trunc))
 save_data = np.zeros((numb_particle,data_len))
 
 label_panel = "(a)"
-gFactList=[2.0, 4.0, 8.0, 16.0]
+if (numb_particle == 4):
+	gFactList=[2.0, 4.0, 8.0, 16.0]
+elif (numb_particle == 16):
+	gFactList=[0.5, 1.0, 1.5, 2.0]
 colorList=["yellow", "green", "red", "magenta"]
 j=axis_index[axis_read]
 ig=0
@@ -83,7 +86,7 @@ for g in gFactList:
 		print(str(ncol)+'th column')
 		save_data[i,:] = genfromtxt(file_read, unpack=True, usecols=[ncol], skip_header=preskip+trunc, skip_footer=0)
 
-	label_str="g="+str(g)	
+	label_str=r'$g$='+str(g)	
 
 	#for i in range(numb_particle):
 	vec_plot = np.reshape(save_data, numb_particle*data_len)
@@ -95,13 +98,13 @@ for g in gFactList:
 #
 if (mc_read == "ENT"):
 	numb_label=int(numb_particle/2)
-plt.xlabel(r'$\mathrm{bins \ of \ z=\cos(\theta)}$', labelpad=5)
+plt.xlabel(r'$\mathrm{bins \ of \ \cos(\theta)}$', labelpad=5)
 plt.ylabel(r'$\mathrm{Density}$',labelpad=10)
 plt.xlim(-1.01,1.01)
 xmin,xmax=plt.xlim()
 ymin,ymax=plt.ylim()
 plt.text(xmin+(xmax-xmin)*0.01,ymax-(ymax-ymin)*0.05,label_panel)
-plt.text(xmin+0.48*(xmax-xmin),ymin+0.95*(ymax-ymin),'N='+str(numb_label))
+plt.text(xmin+0.48*(xmax-xmin),ymin+0.95*(ymax-ymin),r'$N$='+str(numb_label))
 plt.subplots_adjust(top=0.99,bottom=0.13,left=0.11,right=0.98,hspace=0.0,wspace=0.0)
 plt.legend(numpoints=1,loc=('upper right'))
 
@@ -109,9 +112,11 @@ plt.legend(numpoints=1,loc=('upper right'))
 index_cut=dir_read.find(mc_read)
 home = os.path.expanduser("~")
 final_results_path = home + "/ResultsOf" + mc_read + "/"
-FilePlotDensity=final_results_path+first_fragment[index_cut:-1]+last_fragment[:-1]+"-histogram-of-"+axis_read+"-vs-gFactor-preskip"+str(preskip)+"-postskip"+str(postskip)+".eps"
+FilePlotDensity=final_results_path+first_fragment[index_cut:-1]+last_fragment[:-1]+"-histogram-of-"+axis_read+"-vs-gFactor-preskip"+str(preskip)+"-postskip"+str(postskip)+".pdf"
 print(FilePlotDensity)
 
 #FilePlotDensity="/home/tapas/ResultsOf"+mc_read+dir_read[28:-1]+"-histogram-r-preskip"+str(preskip)+"-postskip"+str(postskip)+".eps"
-plt.savefig(FilePlotDensity, dpi=200, format='eps')
+plt.savefig(FilePlotDensity, dpi=200, format='pdf')
 plt.show()
+
+#python analysis_instantaneous_angles.py /scratch/tapas/linear-rotors/ENT-RotDOFs-Rpt10.05Angstrom-gFactor10.0-beta0.2Kinv-Blocks80000-Passes100-System2HF-ParticleA1-e0vsbeads-EXTENDED_ENSMBL41/ ENT 4 1 cost 41 0 

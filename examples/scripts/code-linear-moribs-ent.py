@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "ENT"
-simType1="submission "
-#simType1 = "analysis"
+#simType1="submission "
+simType1 = "analysis"
 
 molecule = "HF"
 rotor = "HF"
@@ -23,7 +23,7 @@ SpinIsomer = -1
 var = "tau"  # for fixed beta
 param = 0.2 # for fixed beta
 
-nMolecule = 8
+nMolecule = 2
 nblocks = 80000
 npass = 100
 

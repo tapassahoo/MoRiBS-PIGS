@@ -1282,7 +1282,7 @@ class GetFileNameAnalysis:
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"+self.extra
 			add1                  = "-ParticleA"+str(self.particleA)
-			add2                  = "-"+self.ENT_TYPE
+			add2                  = "-"+self.ENT_TYPE+"-"+ENT_ALGR
 		else:
 			frontName             = self.TypeCal+"-"+self.extra
 			add1                  = ""
