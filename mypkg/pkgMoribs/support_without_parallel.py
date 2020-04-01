@@ -1050,7 +1050,7 @@ mv %s /work/tapas/linear_rotors
 """ % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
-def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks):
+def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, folder_run_path, molecule, temperature, numbbeads, final_dir_in_work, dir_run_input_pimc, PPA1, user_name, out_dir, Restart1, dir_run_job,status_cagepot, dir_output, numbblocks):
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
@@ -1066,9 +1066,13 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, thread, folder_run_
 		elif ((numbbeads >= 50) and (numbbeads < 160)):
 			thread     = 8
 			walltime   = "07-00:00"
+			if (numbmolecules >= 16):
+				walltime   = "14-00:00"
 		elif ((numbbeads >= 20) and (numbbeads < 50)):
 			thread     = 4
 			walltime   = "03-00:00"
+			if (numbmolecules >= 16):
+				walltime   = "07-00:00"
 		else:
 			thread     = 1
 			walltime   = "03-00:00"
