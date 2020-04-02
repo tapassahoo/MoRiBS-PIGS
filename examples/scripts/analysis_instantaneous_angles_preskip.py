@@ -70,22 +70,18 @@ label_panel_list = {4:"(a)", 16:"(b)"}
 print("#Look at the below line")
 for numb_particle in numb_particle_list:
 	plt.subplot(2, 1, isubplot)
-	preskip = 27000
+	preskip = 70000
 	postskip = 0
-	maxrows=20000
 
 	file1=file_read.replace(system_replaced, system_replaced_by[numb_particle])
 	file2=file1.replace(particleA_replaced, particleA_replaced_by[numb_particle])
 	if (numb_particle == 4):
 		file2=file2.replace("-WOR-", "")
 	
-	'''
-	data_len = len(genfromtxt(file2, unpack=True, usecols=[0], max_rows=maxrows, skip_header=preskip, skip_footer=postskip))
+	data_len = len(genfromtxt(file2, unpack=True, usecols=[0], skip_header=preskip, skip_footer=postskip))
 	workingNdim = int(math.log(data_len)/math.log(2))
 	trunc = int(data_len-2**workingNdim)
 	data_len=int(numb_blocks-(preskip+trunc))
-	'''
-	data_len=maxrows
 	save_data = np.zeros((numb_particle,data_len))
 
 	label_panel = label_panel_list[numb_particle]
@@ -104,8 +100,7 @@ for numb_particle in numb_particle_list:
 			ncol = j+ncol1*ndofs
 			ncol = ncol+1
 			print(str(ncol)+'th column')
-			#save_data[i,:] = genfromtxt(file3, unpack=True, usecols=[ncol], skip_header=preskip+trunc, skip_footer=postskip)
-			save_data[i,:] = genfromtxt(file3, unpack=True, usecols=[ncol], max_rows=maxrows, skip_header=preskip, skip_footer=postskip)
+			save_data[i,:] = genfromtxt(file3, unpack=True, usecols=[ncol], skip_header=preskip+trunc, skip_footer=postskip)
 
 		label_str=r'$g$='+str(g)	
 

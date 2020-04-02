@@ -23,8 +23,8 @@ SpinIsomer = -1
 var = "tau"  # for fixed beta
 param = 0.2 # for fixed beta
 
-nMolecule = 8
-nblocks = 80000
+nMolecule = 16
+nblocks = 1000
 npass = 100
 
 stringName2 = '""'
@@ -46,11 +46,11 @@ if (nMolecule == 4):
 	#gFactorList  = [0.5+0.1*i for i in range(31)]
 	gFactorList = [3.5+0.25*i for i in range(11)]
 if (nMolecule == 8):
-	#gFactorList  = [0.5+0.5*i for i in range(4)]
-	gFactorList  = [2.5+0.5*i for i in range(4)]
+	gFactorList  = [0.5+0.5*i for i in range(8)]
 	#gFactorList += [2.1+0.1*i for i in range(10)]
 if (nMolecule == 16):
-	gFactorList  = [0.5+0.1*i for i in range(11)]
+	#gFactorList  = [0.5+0.1*i for i in range(11)]
+	gFactorList  = [0.5+0.2*i for i in range(1)]
 if (nMolecule == 32):
 	gFactorList  = [0.75+0.05*i for i in range(10)]
 	#gFactorList  = [0.5+0.05*i for i in range(15)]

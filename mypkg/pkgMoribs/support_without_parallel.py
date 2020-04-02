@@ -1054,8 +1054,8 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (numbblocks <= 100):
-		walltime   = "00-03:00"
+	if (numbblocks <= 1000):
+		walltime   = "03-00:00"
 		thread     = 1
 		if (numbbeads >= 100):
 			thread     = 8
