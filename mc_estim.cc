@@ -2629,7 +2629,7 @@ double GetPotEnergyEntanglement(int atom0, int atom1)
 		
 	double spot=0.0;
 
-	if ((stype == HF) && (MCType[atom1] == MCType[atom0]))
+	if ((MCAtom[type0].molecule == 4) && (stype == HF) && (MCType[atom1] == MCType[atom0]))
 	{
 		double Eulang0[NDIM], Eulang1[NDIM];
 		Eulang0[PHI] = MCAngles[PHI][t0];
@@ -2885,7 +2885,7 @@ double GetEstimNM_Ratio(int type)
             spot += GetPotEnergyEntanglement(atom0, atom1);
 	    }
 
-	    atom0 = particleA2Max;
+	    atom0 = particleA2Min;
   		for (atom1 = 0; atom1 < particleA1Min; atom1++)
   		{
       		spot += GetPotEnergyEntanglement(atom0, atom1);
@@ -2941,7 +2941,7 @@ double GetEstimNM_Ratio(int type)
 		for (int id=0;id<NDIM;id++)
 		{
 			p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
-			p0p += (MCCosine[id][t0]*MCCosine[id][t1]);
+			p0p += (MCCosine[id][t0p]*MCCosine[id][t1p]);
 		}
 		dens=SRotDens(p0,type0)*SRotDens(p0p,type1);
 	}
@@ -2985,25 +2985,25 @@ double GetEstimNM_Ratio(int type)
 
 double GetEstimDM_Ratio(int type)
 {
-   	int particleA1Min = 0;
-   	int particleA1Max = 0;
-   	int particleA2Min = 0;
-   	int particleA2Max = 0;
+   	int particleA1Min=0;
+   	int particleA1Max=0;
+   	int particleA2Min=0;
+   	int particleA2Max=0;
 	GetIndex(RefAtom, type, particleA1Min, particleA1Max, particleA2Min, particleA2Max);
   
-	double spot = 0.0;
+	double spot=0.0;
 
 	int atom0, atom1;
 	if (RefAtom == 1)
 	{
 		atom0 = particleA1Min;
-   		for (atom1 = 0; atom1 < particleA1Min; atom1++)
+   		for (atom1=0; atom1<particleA1Min; atom1++)
    		{
-   			spot  += GetPotEnergyEntanglement(atom0, atom1);
+   			spot += GetPotEnergyEntanglement(atom0, atom1);
 		}
 
-		atom0 = particleA2Max;
-		for (atom1 = (particleA2Max+1); atom1 < NumbAtoms; atom1++)
+		atom0 = particleA2Min;
+		for (atom1=(particleA2Max+1); atom1<NumbAtoms; atom1++)
 		{
 			spot  += GetPotEnergyEntanglement(atom0, atom1);
 		}
@@ -5585,11 +5585,10 @@ void CrossProduct(double *v, double *w, double *cross)
     cross[2] = w[0] * v[1] - w[1] * v[0];
 }
 
-#ifndef EWALDSUM
 double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang1, int it)
 {
-	int offset0 = NumbRotTimes*atom0;
-	int offset1 = NumbRotTimes*atom1;
+	int offset0 = NumbTimes*atom0;
+	int offset1 = NumbTimes*atom1;
    	int t0 = offset0 + it;
    	int t1 = offset1 + it;
 
@@ -5614,7 +5613,7 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 #ifdef SHORTFORM
 	double R3         = R2*RCOM; 
     double PreFactor  = DipoleMomentInAU*DipoleMomentInAU/R3;
-    double potential = PreFactor*(sin(Eulang0[CTH])*sin(Eulang1[CTH])*cos(Eulang0[PHI] - Eulang1[PHI]) - 2.0*cos(Eulang0[CTH])*cos(Eulang1[CTH]));
+    double potential = PreFactor*(sin(Eulang0[CTH])*sin(Eulang1[CTH])*cos(Eulang0[PHI]-Eulang1[PHI])-2.0*cos(Eulang0[CTH])*cos(Eulang1[CTH]));
 #else
 	double dm[NDIM];
 	dm[0] = 0.0;
@@ -5677,7 +5676,6 @@ double PotFunc(const double *Eulang0)
 #endif
     return PotReturn;
 }
-#endif
 
 #ifdef CAGEPOT
 double PotFuncCage(double *coordsXYZ, const double *Eulang0)
@@ -5728,6 +5726,7 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 }
 #endif
 
+/*
 #ifdef EWALDSUM
 double Uself(double *U_moment0)
 {
@@ -5862,6 +5861,7 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
     return PotReturn;
 }    
 #endif
+*/
 
 void UnitVectors(const double *Eulang, double *RotMat)
 {

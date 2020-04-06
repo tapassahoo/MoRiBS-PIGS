@@ -442,7 +442,7 @@ for particleA in particleAList:
 
 if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_TYPE == "EXTENDED_ENSMBL") and (ENT_ALGR == "WR"))):
 	print("Final Entropy obtained by employing Ratio Trick")
-	support.GetAverageEntropyRT(particleAList,TypeCal,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,dir_output,variable,crystal,final_results_path)
+	support.GetAverageEntropyRT(particleAList,TypeCal,molecule_rot,TransMove,RotMove,variableName,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,preskip,postskip,extra_file_name,dir_output,variable,crystal,final_results_path,impurity,ext_ent)
 	"""
 	support.GetEntropyRT(status, maxloop, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
 	"""

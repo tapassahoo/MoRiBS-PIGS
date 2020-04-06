@@ -524,7 +524,7 @@ def fmtAverageEntropy(status,variable,ENT_TYPE):
 		output    +="\n"
 		return output
 
-def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal, final_results_path):
+def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal, final_results_path,impurity, ext_ent):
 	'''
 	This function gives us Renyi entropy of a many-rotors system simulated by Ratio trick algorithm.
 	'''
@@ -560,7 +560,7 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 		contition = False
 		iPartition = 0
 		for partition in particleAList:
-			file1_name = GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, partition, extra_file_name, crystal, impurity)
+			file1_name = GetFileNameSubmission(TypeCal, molecule_rot, TransMove, RotMove, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, partition, extra_file_name, crystal, impurity, ext_ent)
 			folder_run = file1_name+str(numbbeads)
 			final_dir_in_work = dir_output+folder_run
 			if os.path.isdir(final_dir_in_work):
@@ -634,7 +634,7 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
 			ii = ii+1
 
 	#extra_file_name = 'Ratio-Trick-'	
-	FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, partition)
+	FileAnalysis = GetFileNameAnalysis(TypeCal, True, molecule_rot, TransMove, RotMove, variableName, Rpt, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, partition, ext_ent)
 	headerString = fmtAverageEntropyRT('tau')
 	np.savetxt(FileAnalysis.SaveEntropyRT, np.transpose([col_beads[:ii], col_var[:ii], purity_combo[:ii], entropy_combo[:ii], err_purity_combo[:ii], err_entropy_combo[:ii]]), fmt=['%4d','%10.6f', '%10.6f', '%10.6f', '%10.6f', '%10.6f'],header=headerString)
 	SavedFile = FileAnalysis.SaveEntropyRT
