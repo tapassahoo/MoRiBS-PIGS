@@ -1054,8 +1054,8 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (numbblocks <= 1000):
-		walltime   = "03-00:00"
+	if (numbblocks <= 100):
+		walltime   = "00-03:00"
 		thread     = 1
 		if (numbbeads >= 100):
 			thread     = 8
@@ -1066,13 +1066,17 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 		elif ((numbbeads >= 50) and (numbbeads < 160)):
 			thread     = 8
 			walltime   = "07-00:00"
+			'''
 			if (numbmolecules >= 16):
 				walltime   = "14-00:00"
+			'''
 		elif ((numbbeads >= 20) and (numbbeads < 50)):
 			thread     = 4
 			walltime   = "03-00:00"
+			'''
 			if (numbmolecules >= 16):
 				walltime   = "07-00:00"
+			'''
 		else:
 			thread     = 1
 			walltime   = "03-00:00"
@@ -1280,8 +1284,6 @@ class GetFileNameAnalysis:
 		self.extra        = extra1
 		self.src_dir      = src_dir1
 		self.particleA    = particleA1
-		print("#-------------------------------------#")
-		print("Final analyzed results are stored in - ")
 
 		if (self.TypeCal == "ENT"):
 			frontName             = "ENT-"+self.extra
@@ -1318,7 +1320,7 @@ class GetFileNameAnalysis:
 			FragmentGFactor       = ""
 
 		mainFileName  = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
-		mainFileName += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
+		mainFileName += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+add2+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 
 		file_output1  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Energy-"	
 		file_output2  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"correlation-"
@@ -1349,6 +1351,8 @@ class GetFileNameAnalysis:
 			if os.path.exists(self.SaveXYCorr):    os.remove(self.SaveXYCorr)
 
 		if (self.TypeCal != "ENT"):
+			print("#-------------------------------------#")
+			print("Final analyzed results are stored in - ")
 			print(self.src_dir)
 			print("")
 			print("Final results - Energy vs "+str(self.variableName))
@@ -1357,18 +1361,17 @@ class GetFileNameAnalysis:
 
 		if (self.TypeCal == "ENT"):
 			mainFileNameRT    = "vs-"+str(self.variableName)+"-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
-			mainFileNameRT   += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
+			mainFileNameRT   += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+add2+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
 
 			self.SaveEntropyRT= self.src_dir+file_output8+mainFileNameRT+".txt"
-			print(self.src_dir)
-			print("")
-			print("Final results - Entropy vs "+str(self.variableName))
-			if (ENT_ALGR == "WR"):
-				print(self.SaveEntropyRT)
-			else:
+			if (ENT_ALGR != "WR"):
+				#print(self.SaveEntropyRT)
+				print(self.src_dir)
+				print("")
+				print("Final results - Entropy vs "+str(self.variableName))
 				print(self.SaveEntropy)
 				
-			print("#------------------------------------------------------------------------#")
+				print("#------------------------------------------------------------------------#")
 
 class GetFileNamePlot:
 	def __init__(self, TypeCal1, molecule_rot1, TransMove1, RotMove1, variableName1, Rpt1, gfact1, dipolemoment1, parameterName1, parameter1, numbblocks1, numbpass1, numbmolecules1, molecule1, ENT_TYPE1, preskip1, postskip1, extra1, src_dir1, particleA1, var1):
