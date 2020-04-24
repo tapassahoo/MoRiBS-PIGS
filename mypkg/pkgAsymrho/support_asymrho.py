@@ -166,4 +166,4 @@ def RemoveAllFiles(dir_output, rotor, temperature, numbbeads):
 
 
 if __name__ == "__main__":
-	print("Tapas, I am here!")
+	print("Hi, I am here!")
