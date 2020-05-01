@@ -910,8 +910,8 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 
 			#call(["rm", "-rf", folder_run])
 		
+		temperature1    = "%8.6f" % temperature
 		if (RotorType == "LINEAR"):
-			temperature1    = "%8.6f" % temperature
 			file_rotdens    = molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)+".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
 			path_Density = dir_run_input_pimc+"/"
@@ -956,11 +956,13 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			return
 		else:
 			os.chdir(dir_output+folder_run+"/results")
+			'''
 			col_data_new = genfromtxt("output.rden")
 			lastIndex = int(col_data_new[-1,0])
 			if ((numbblocks-lastIndex) <= 0):
 				print(dir_output+folder_run+"          Done!")
 				return
+			'''
 			print(dir_output+folder_run+"         Resubmitted!")
 			if (TypeCal == "ENT"):
 				fileList = ["output.rden", "output.xyz"]
@@ -976,6 +978,32 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 						call(["mv", filemv, filemv+"_old"])
 
 		os.chdir(src_dir)
+		temperature1    = "%8.6f" % temperature
+		if (RotorType != "LINEAR"):
+			iodevn   = spin_isomer
+			jmax = 70
+			if (TypeCal == 'PIMC'):
+				numbbeads2 = int(numbbeads)
+			else:
+				numbbeads2 = int(numbbeads-1)
+			if (molecule_rot == "H2O"):	
+				if (NameOfServer == "graham"):
+					dir_dens =  "/scratch/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
+				if (NameOfServer == "nlogn"):
+					dir_dens =  "/work/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
+			if (molecule_rot == "CH3F"):	
+				if (NameOfServer == "nlogn"):
+					dir_dens =  "/work/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
+				if (NameOfServer == "graham"):
+					dir_dens =  "/scratch/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
+			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature1))+"t"+str(numbbeads2)
+			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
+			if (os.path.isfile(dir_dens+file_rotdens_mod+".rho") == False):
+				call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
+				call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
+				call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
+			path_Density = dir_dens+"/"
+
 	GetInput(TypeCal,ENT_TYPE,ENT_ALGR, temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density,impurity, step_trans_impurity1, level_impurity1)
 
 	input_file    = "qmcbeads"+str(i)+".input"
@@ -1066,17 +1094,9 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 		elif ((numbbeads >= 50) and (numbbeads < 160)):
 			thread     = 8
 			walltime   = "07-00:00"
-			'''
-			if (numbmolecules >= 16):
-				walltime   = "14-00:00"
-			'''
 		elif ((numbbeads >= 20) and (numbbeads < 50)):
 			thread     = 4
 			walltime   = "03-00:00"
-			'''
-			if (numbmolecules >= 16):
-				walltime   = "07-00:00"
-			'''
 		else:
 			thread     = 1
 			walltime   = "03-00:00"
@@ -1122,18 +1142,18 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 	print("")
 	print("*****************Important Notice***********************")
 	print("")
-	print("Full path of the directory where the submitted jobs are running - ")
+	print("Full path of the directory where the submitted job is running - ")
 	print(folder_run_path)
 	print("")
-	print("Full path of the directory where all the outputs of MoRiBs packege are stored - ")
+	print("Full path of the directory where all the outputs of MoRiBs are stored - ")
 	print(output_dir)
 	print("")
-	print("Informations about all types of acceptance ratios of Monte Carlo simulations are saved in - ")
+	print("Informations about all types of acceptance ratios of Monte Carlo simulations are saved at - ")
 	print(logpath+".out")
 	print("")
 	print("Number of OpenMP thread used = "+str(thread))
 	print("")
-	print("After completion of a job, the directory where the job was running will be moved to - ")
+	print("After the job is completed successfully, the directory where the job was running is moved to - ")
 	print(final_dir_in_work)
 	print("")
 	print("********************************************************")

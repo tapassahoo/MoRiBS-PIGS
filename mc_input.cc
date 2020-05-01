@@ -575,146 +575,148 @@ void IOReadParams(const char in_file[],int & mc_status)
 void StatusIO(int tstatus, const char file_name[]) 
 // read/wrire status of MC run
 {
-   const char *_proc_=__func__;    // "MCStatus()"; 
+	const char *_proc_=__func__;    // "MCStatus()"; 
 
-   ios::openmode mode;
+	ios::openmode mode;
 
-   switch (tstatus)
-   {
-      case IOWrite: mode=ios::out;   break;
-      case IORead : mode=ios::in;    break;
-      default     :
-      nrerror (_proc_,IO_ERR_WMODE); break;      
-   } 
+	switch (tstatus)
+	{
+		case IOWrite: mode=ios::out;   break;
+		case IORead : mode=ios::in;    break;
+		default     :
+		nrerror (_proc_,IO_ERR_WMODE); break;      
+	} 
 
-   fstream fid(file_name,mode);
+	fstream fid(file_name,mode);
 
-   if (!fid.good())
-   _io_error(_proc_,IO_ERR_FOPEN,file_name);
+	if (!fid.good())
+	_io_error(_proc_,IO_ERR_FOPEN,file_name);
 
-   string status;
-   switch (tstatus)
-   {
-      case IOWrite: 
-        fid<<STATUS_STARTBLOCK<<" "<<MCStartBlock<<endl;
+	string status;
+	switch (tstatus)
+	{
+		case IOWrite: 
+		fid<<STATUS_STARTBLOCK<<" "<<MCStartBlock<<endl;
         fid<<totalStep<<endl;
         fid<<sumsCount<<endl;
         fid<<totalCount<<endl;
-		if (ENT_SIM) fid<<Distribution<<endl;
-		else
-		{	
+		if (ENT_SIM) {
+			fid<<Distribution<<endl;
+		}
+		else {	
 			fid<<_total<<endl;
 			fid<<_kin_total<<endl;
 			fid<<_pot_total<<endl;
 			fid<<_rot_total<<endl;
 			fid<<_rot_total1<<endl;
 		}
-         break;
-      case IORead: 
-         while (fid>>status)
-         {  
-            if (status==STATUS_STARTBLOCK)
-            fid>>MCStartBlock;
-            fid>>totalStep;
-            fid>>sumsCount;
-            fid>>totalCount;
-			if (ENT_SIM) fid>>Distribution;
-			else
-			{	
+		break;
+		case IORead: 
+		while (fid>>status)
+		{  
+			if (status==STATUS_STARTBLOCK)
+			fid>>MCStartBlock;
+			fid>>totalStep;
+			fid>>sumsCount;
+			fid>>totalCount;
+			if (ENT_SIM) {
+				fid>>Distribution;
+			}
+			else {	
 				fid>>_total;
 				fid>>_kin_total;
 				fid>>_pot_total;
 				fid>>_rot_total;
 				fid>>_rot_total1;
 			}		
- 
-            getline(fid,status,'\n');  // skip comments 
-         }
-         break;
-      default :  
-         nrerror (_proc_,IO_ERR_WMODE);
-         break;      
-   } 
+
+			getline(fid,status,'\n');  // skip comments 
+		}
+		break;
+		default :  
+			nrerror (_proc_,IO_ERR_WMODE);
+			break;      
+	} 
   
-   fid.close();
+	fid.close();
 }
 
 void ConfigIO(int tstatus, const char file_name[]) 
 // read/wrire initial configuration 
 {
-   const char *_proc_=__func__;    // "MCStatus()"; 
+	const char *_proc_=__func__;    // "MCStatus()"; 
 
-   ios::openmode mode;
+	ios::openmode mode;
 
-   switch (tstatus)
-   {
-      case IOWrite: mode = ios::out; break;
-      case IORead : mode = ios::in;  break;
-      default     :
-      nrerror (_proc_,IO_ERR_WMODE); break;      
-   } 
+	switch (tstatus)
+	{
+		case IOWrite: mode = ios::out; break;
+		case IORead : mode = ios::in;  break;
+		default     :
+		nrerror (_proc_,IO_ERR_WMODE); break;      
+	} 
 
-   //fstream fid(file_name,mode);
-   fstream fid(file_name,mode | ios::binary);
+	//fstream fid(file_name,mode);
+	fstream fid(file_name,mode | ios::binary);
 
-   if (!fid.good())
-   _io_error(_proc_,IO_ERR_FOPEN,file_name);
+	if (!fid.good())
+	_io_error(_proc_,IO_ERR_FOPEN,file_name);
 
-   io_setout(fid);  //added by Hui Li
+	io_setout(fid);  //added by Hui Li
 
-   streamsize size;         
-   switch (tstatus)
-   {
-      case IOWrite: 
-         size=sizeof(double)*NumbAtoms*NumbTimes;
-         fid.write((char *)&size,sizeof(streamsize));
-         fid.write((char *)MCCoords[0],size);
-         fid.write((char *)MCAngles[PHI],size);
-         fid.write((char *)MCCoords[1],size);
-         fid.write((char *)MCAngles[CTH],size);
-         fid.write((char *)MCCoords[2],size);
-         fid.write((char *)MCAngles[CHI],size);
-         break;
-      case IORead:
-         fid.read((char *)&size,sizeof(streamsize));
-         fid.read((char *)MCCoords[0],size);
-         fid.read((char *)MCAngles[PHI],size);
-         fid.read((char *)MCCoords[1],size);
-         fid.read((char *)MCAngles[CTH],size);
-         fid.read((char *)MCCoords[2],size);
-         fid.read((char *)MCAngles[CHI],size);
-         break;
-      default :  
-         nrerror (_proc_,IO_ERR_WMODE);
-         break;      
-   } 
+	streamsize size;         
+	switch (tstatus)
+	{
+		case IOWrite: 
+			size=sizeof(double)*NumbAtoms*NumbTimes;
+			fid.write((char *)&size,sizeof(streamsize));
+			fid.write((char *)MCCoords[0],size);
+			fid.write((char *)MCAngles[PHI],size);
+			fid.write((char *)MCCoords[1],size);
+			fid.write((char *)MCAngles[CTH],size);
+			fid.write((char *)MCCoords[2],size);
+			fid.write((char *)MCAngles[CHI],size);
+			break;
+		case IORead:
+			fid.read((char *)&size,sizeof(streamsize));
+			fid.read((char *)MCCoords[0],size);
+			fid.read((char *)MCAngles[PHI],size);
+			fid.read((char *)MCCoords[1],size);
+			fid.read((char *)MCAngles[CTH],size);
+			fid.read((char *)MCCoords[2],size);
+			fid.read((char *)MCAngles[CHI],size);
+			break;
+		default :  
+			nrerror (_proc_,IO_ERR_WMODE);
+			break;      
+	} 
   
-   fid.close();
+	fid.close();
 }
 
 void SeedIO(int tstatus, const char file_name[]) 
 // read/wrire initial seeds for omprng
 {
-   	const char *_proc_=__func__;    // "MCStatus()"; 
+	const char *_proc_=__func__;    // "MCStatus()"; 
 
-   	int NSEED = 6;
-   	ios::openmode mode;
+	int NSEED = 6;
+	ios::openmode mode;
 
-   	switch (tstatus)
-   	{
-      	case IOWrite: mode = ios::out; break;
-      	case IORead : mode = ios::in;  break;
-      	default     :
-      	nrerror (_proc_,IO_ERR_WMODE); break;      
-   	} 
+	switch (tstatus)
+	{
+		case IOWrite: mode = ios::out; break;
+		case IORead : mode = ios::in;  break;
+		default     :
+		nrerror (_proc_,IO_ERR_WMODE); break;      
+	} 
 
-   	//fstream fid(file_name,mode);
-   	fstream fid(file_name,mode | ios::binary);
+	//fstream fid(file_name,mode);
+	fstream fid(file_name,mode | ios::binary);
 
-   	if (!fid.good())
-   	_io_error(_proc_,IO_ERR_FOPEN,file_name);
+	if (!fid.good())
+	_io_error(_proc_,IO_ERR_FOPEN,file_name);
 
-   	io_setout(fid);  //added by Hui Li
+	io_setout(fid);  //added by Hui Li
 
    	streamsize size;         
    	switch (tstatus)
@@ -733,7 +735,7 @@ void SeedIO(int tstatus, const char file_name[])
          	break;      
    	} 
   
-   fid.close();
+	fid.close();
 }
 
 void TablesIO(int tstatus, const char file_name[]) 
