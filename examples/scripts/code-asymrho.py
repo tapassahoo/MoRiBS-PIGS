@@ -9,13 +9,13 @@ space = " "
 file_sim = module_path + "script_submission_asymrho.py"
 
 # Informations about the system
-simType = "S" # "S" - submits 181 jobs in a queue for a particular temperature (or beta) for all theta values from 0-180 degrees. "A"- executes compile.x to collect all the values of all thetas." 
+simType = "A" # "S" - submits 181 jobs in a queue for a particular temperature (or beta) for all theta values from 0-180 degrees. "A"- executes compile.x to collect all the values of all thetas." 
 rotor = "H2O"
 #param = "tau" 
 #value = 0.0005
 param = "beta" # beta=1/T K^-1
-value = 0.05
-nbeads = [160, 180, 200]
+value = 0.1
+nbeads = [4, 6, 8, 14, 24]
 Jmax = 66
 spin = 0#int(-1)
 

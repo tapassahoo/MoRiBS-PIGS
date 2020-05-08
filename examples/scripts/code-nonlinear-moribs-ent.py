@@ -19,7 +19,7 @@ rotor = "H2O"
 SpinIsomer = 0
 
 #var = "beta" # for fixed tau
-#param = 0.001 # for fixed tau
+#param = 0.0005 # for fixed tau
 
 var = "tau"  # for fixed beta
 param = 0.1 # for fixed beta
@@ -30,12 +30,12 @@ nblocks = 20000
 npass = 200
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 0"
+	cmd1 = "--preskip 10000"
 else:
 	cmd1 = ""
 
 rmin = 5.0
-rmax = 8.0
+rmax = 10.0
 dr = 0.2
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1

@@ -2996,14 +2996,12 @@ void MCRot3DstepSwap(int it1, int offset, int gatom, int type, double step, doub
 	phi = fmod(phi,2.0*M_PI);
 	chi = fmod(chi,2.0*M_PI);
 
-	if (cost >  1.0)
-	{
+	if (cost >  1.0) {
 		cost = 2.0 - cost;    
 		//phi  = phi + M_PI;
 	}		 
 
-	if (cost < -1.0)
-	{
+	if (cost < -1.0) {
 		cost = -2.0 - cost;    
 		//phi  = phi  + M_PI;
 	}		  
