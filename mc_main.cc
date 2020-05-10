@@ -1557,20 +1557,20 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 	if (PIMC_SIM)
 	{	
 		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-		fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // potential anergy 2
-		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
-		fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+		fid << setw(IO_WIDTH) << _bkin*Units.energy/acount << BLANK;    // potential anergy 2
+		fid << setw(IO_WIDTH) << _brot*Units.energy/acount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/acount << BLANK;    // potential anergy 2
+		fid << setw(IO_WIDTH) << _btotal*Units.energy/acount << BLANK;  //total energy including rot energy 
 		fid << endl;
 	}	
 
 	if (PIGS_SIM)
 	{	
 		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _brot1*Units.energy/avergCount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 2
-		fid << setw(IO_WIDTH) << _btotal*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+		fid << setw(IO_WIDTH) << _brot*Units.energy/acount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _brot1*Units.energy/acount << BLANK;    // rot energy 5  
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/acount << BLANK;    // potential anergy 2
+		fid << setw(IO_WIDTH) << _btotal*Units.energy/acount << BLANK;  //total energy including rot energy 
 		fid << endl;
 	}	
 //
