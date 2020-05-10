@@ -150,16 +150,13 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 				aa = col_data_new[:,0]
 				final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
 			elif ((os.path.isfile(file_new) == True) and (os.path.isfile(file_old_1) == False)):
+				print(final_dir_in_work + " -- Restarted data")
 				col_data_new = genfromtxt(final_dir_in_work+"/results/output.eng")
 				index = int(col_data_new[0,0])
 				col_data_old = genfromtxt(final_dir_in_work+"/results/output.eng_old")
 				marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
 				aa = col_data_new[:,0]
-				print(aa)
-				exit()
 				final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
-				print(final_data_set)
-				exit()
 			elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
 				final_data_set = genfromtxt(final_dir_in_work+"/results/output.eng_old", skip_header=preskip, skip_footer=postskip)
 		else:

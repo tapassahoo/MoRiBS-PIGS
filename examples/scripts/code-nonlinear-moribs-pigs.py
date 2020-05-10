@@ -24,7 +24,7 @@ param = 0.002 # for fixed tau
 #param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 2
+nMolecule = 11
 nblocks = 20000
 npass = 200
 
@@ -39,7 +39,7 @@ else:
 	cmd1 = ""
 
 rmin = 3.0
-rmax = 3.0
+rmax = 5.0
 dr = 0.2
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
