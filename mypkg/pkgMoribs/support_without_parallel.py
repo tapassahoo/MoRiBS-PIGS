@@ -127,6 +127,30 @@ def beads(tau,beta):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
+def file_operations(TypeCal,final_dir_in_work):
+
+	if (TypeCal == "ENT"):
+		fileList = ["output.rden", "output.xyz"]
+		file_old = final_dir_in_work+"/results/output.rden_old"
+	else:
+		fileList = ["output.eng", "outputOrderPara.corr", "output.xyz", "output_sum.eng"]
+		file_old = final_dir_in_work+"/results/output.eng_old"
+
+	flag = False
+	if (os.path.isfile(final_dir_in_work+"/results/"+fileList[0]) == True):
+		flag = True
+		if (os.path.isfile(file_old) == True):
+			for filecat in fileList:
+				col_data_new = genfromtxt(final_dir_in_work+"/results/"+filecat)
+				index = int(col_data_new[0,0])
+				col_data_old = genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
+				marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+				np.savetxt(final_dir_in_work+"/results/"+filecat+"_old1", marged_data.T)
+		else:
+			for filemv in fileList:
+				call(["mv", final_dir_in_work+"/results/"+filemv, final_dir_in_work+"/results/"+filemv+"_old"])
+	return flag
+
 def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip, numbblocks):
 	'''
 	This function gives us the output 
@@ -906,6 +930,14 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 	level_impurity1        = level_impurity[iStep]
 	final_dir_in_work = dir_output + folder_run
 
+	if (TypeCal == 'PIGS'):
+		argument2     = "pgR"+str(Rpt)+'n'+str(numbmolecules)+"b"
+	if (TypeCal == 'PIMC'):
+		argument2     = "pm"+str(numbmolecules)+"b"
+	if (TypeCal == 'ENT'):
+		argument2     = "et"+str(numbmolecules)+"a"+str(particleA)+"b"
+	job_name       = argument2+str(i)+".out"
+
 	if not Restart1:
 		os.chdir(dir_output)
 		if (os.path.isdir(folder_run) == True):
@@ -959,45 +991,65 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
 	else:
 		os.chdir(dir_output)
+
+
+		#
 		if (os.path.isdir(folder_run) == False):
 			print("")
 			print("")
 			print("Error message")
 			print("")
 			print("")
-			printingMessage = str(dir_output)+str(folder_run)+" directory is absent."
+			printingMessage = dir_output+folder_run+"  --- This directory is absent."
 			print(printingMessage)
 			os.chdir(src_dir)
 			return
-		else:
-			if ((TypeCal == 'PIGS') or (TypeCal == "PIMC")):
-				file_count = "output.eng"
-			if (TypeCal == 'ENT'):
-				file_count = "output.rden"
-			os.chdir(dir_output+folder_run+"/results")
+
+		
+		#
+		logout_file = dir_run_input_pimc+"/"+job_name
+
+		if not "real" in open(logout_file).read():
+			printingMessage = dir_output+folder_run+"  --- This job is running."
+			print(printingMessage)
+			os.chdir(src_dir)
+			return
+
+
+		#
+		if ((TypeCal == 'PIGS') or (TypeCal == "PIMC")):
+			file_count = "output.eng"
+		if (TypeCal == 'ENT'):
+			file_count = "output.rden"
+
+
+		#
+		os.chdir(dir_output+folder_run+"/results")
+		if (os.path.isfile(file_count) == True):
 			col_data_new = genfromtxt(file_count)
 			lastIndex = int(col_data_new[-1,0])
 			if ((numbblocks-lastIndex) <= 0):
-				print(dir_output+folder_run+"          Done!")
+				print(dir_output+folder_run)
+				print(" Done. Do not need to resubmit it.")
+				os.chdir(src_dir)
 				return
-			print(dir_output+folder_run+"         Resubmitted!")
-			if (TypeCal == "ENT"):
-				fileList = ["output.rden", "output.xyz"]
-				file_old = final_dir_in_work+"/results/output.rden_old"
-			else:
-				fileList = ["output.eng", "outputOrderPara.corr", "output.xyz", "output_sum.eng"]
-				file_old = final_dir_in_work+"/results/output.eng_old"
-			if (os.path.isfile(file_old) == True):
-				print("The job has already been resubmitted!")
-				return
-				for filemv in fileList:
-					call(["mv", filemv, filemv+"_old_1"])
-					#call(["rm", filemv])
-			else:
-				for filemv in fileList:
-					call(["mv", filemv, filemv+"_old"])
 
+
+		#
 		os.chdir(src_dir)
+
+		flag=file_operations(TypeCal,final_dir_in_work)
+		if (flag == False):
+			print(dir_output+folder_run)
+			print("Already resubmitted.")
+			return
+
+
+		print(dir_output+folder_run)
+		print(" Just resubmitted.")
+
+
+		# Rotational density matrices
 		temperature1    = "%8.6f" % temperature
 		if (RotorType != "LINEAR"):
 			iodevn   = spin_isomer
@@ -1006,41 +1058,35 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 				numbbeads2 = int(numbbeads)
 			else:
 				numbbeads2 = int(numbbeads-1)
-			if (molecule_rot == "H2O"):	
-				if (NameOfServer == "graham"):
-					dir_dens =  "/scratch/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
-				if (NameOfServer == "nlogn"):
-					dir_dens =  "/work/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
-			if (molecule_rot == "CH3F"):	
-				if (NameOfServer == "nlogn"):
-					dir_dens =  "/work/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
-				if (NameOfServer == "graham"):
-					dir_dens =  "/scratch/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
-			file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature1))+"t"+str(numbbeads2)
-			file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
-			if (os.path.isfile(dir_dens+file_rotdens_mod+".rho") == False):
-				call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
-				call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
-				call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
-			path_Density = dir_dens+"/"
+		if (molecule_rot == "H2O"):	
+			if (NameOfServer == "graham"):
+				dir_dens =  "/scratch/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
+			if (NameOfServer == "nlogn"):
+				dir_dens =  "/work/"+user_name+"/rot-dens-asymmetric-top/"+asym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, iodevn, jmax)
+		if (molecule_rot == "CH3F"):	
+			if (NameOfServer == "nlogn"):
+				dir_dens =  "/work/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
+			if (NameOfServer == "graham"):
+				dir_dens =  "/scratch/"+user_name+"/rot-dens-symmetric-top/"+sym.GetDirNameSubmission(molecule_rot,temperature1, numbbeads2, 3, jmax)
+		file_rotdens = "/"+molecule_rot+"_T"+str(dropzeros(temperature1))+"t"+str(numbbeads2)
+		file_rotdens_mod = "/"+molecule_rot+"_T"+str(temperature1)+"t"+str(numbbeads)
+		if (os.path.isfile(dir_dens+file_rotdens_mod+".rho") == False):
+			call(["cp", dir_dens+file_rotdens+".rho", dir_dens+file_rotdens_mod+".rho"])
+			call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
+			call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
+		path_Density = dir_dens+"/"
 
+		
+	# For qmc.imput
 	GetInput(TypeCal,ENT_TYPE,ENT_ALGR, temperature,numbbeads,numbblocks,numbpass,molecule_rot,numbmolecules,argument1,level1,step1,step1_trans,gfact,dipolemoment,particleA, Restart1, numbblocks_Restart1, crystal, RotorType, TransMove, RotMove, path_Density,impurity, step_trans_impurity1, level_impurity1)
 
 	input_file    = "qmcbeads"+str(i)+".input"
 	call(["mv", "qmc.input", dir_run_input_pimc+"/"+input_file])
 	folder_run_path = dir_run_job + folder_run 
 
+
 	#job submission
 	fname         = 'job-for-P'+str(numbbeads)
-	if (TypeCal == 'PIGS'):
-		argument2     = "pgR"+str(Rpt)+'n'+str(numbmolecules)+"b"
-	if (TypeCal == 'PIMC'):
-		argument2     = "pm"+str(numbmolecules)+"b"
-	if (TypeCal == 'ENT'):
-		argument2     = "et"+str(numbmolecules)+"a"+str(particleA)+"b"
-		if(Restart1):
-			argument2 += "Restart"
-
 	fwrite        = open(fname, 'w')
 
 	if RUNDIR == "scratch":
@@ -1055,6 +1101,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 	call(["mv", fname, dir_run_input_pimc])
 	os.chdir(dir_run_input_pimc)
 
+	'''
 	if (RUNIN == "CPU"):
 		call(["chmod", "755", fname])
 		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
@@ -1067,6 +1114,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
+	'''
 
 	os.chdir(src_dir)
 
