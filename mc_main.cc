@@ -443,7 +443,7 @@ ParamsPotential();
    		RandomIO(IORead,FRANDOM);  // load rnd streams 
 		SeedIO(IORead,FSEED);
       	string fname = MCFileName;
-      	IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
+      	//IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 	}
 //PIMCRESTART ends here//
     for (int it=0;it<NumbAtoms*NumbTimes;it++)
@@ -671,8 +671,7 @@ ParamsPotential();
               	if (passTotal % MCSKIP_TOTAL == 0 && avergCount)  
               	{
                		sumsCount += 1.0;                 
-					//if (ENT_SIM) //SaveSumEnergy (totalCountENT,sumsCount);
-					if (!ENT_SIM) SaveSumEnergy (totalCount,sumsCount);
+					//if (!ENT_SIM) SaveSumEnergy (totalCount,sumsCount);
             	}
 			}  
           
@@ -873,13 +872,6 @@ void MCResetBlockAveragePIGS(void)
 	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
 	_btotal    = 0.0;
-	_bcostheta = 0.0;
-	_ucompx     = 0.0;
-	_ucompy     = 0.0;
-	_ucompz     = 0.0;
-	_abs_ucompx     = 0.0;
-	_abs_ucompy     = 0.0;
-	_abs_ucompz     = 0.0;
 #ifdef ORDERPARA	
 	if(MCAtom[IMTYPE].numb > 1)
 	{
@@ -891,26 +883,6 @@ void MCResetBlockAveragePIGS(void)
 		}	
 	}
 #endif	
-#ifdef DDCORR
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-		_cdipoleXYZ.resize(NDIMDP);
-		_cdipoleX.resize(NDIMDP);
-		_cdipoleY.resize(NDIMDP);
-		_cdipoleZ.resize(NDIMDP);
-		_cdipoleXY.resize(NDIMDP);
-		
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			_cdipoleXYZ[idp] = 0.0;
-			_cdipoleX[idp] = 0.0;
-			_cdipoleY[idp] = 0.0;
-			_cdipoleZ[idp] = 0.0;
-			_cdipoleXY[idp] = 0.0;
-		}
-	}
-#endif
 	_bkin        = 0.0;
 
 	_brot        = 0.0;
@@ -1034,92 +1006,28 @@ void MCGetAveragePIGS(void)
 
 	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
-	_pot_total       += spot;
 	double stotal     = GetTotalEnergy();         // Total energy
 	_btotal          += stotal;                   // kin+pot
-	_total           += stotal;
 	double srot1      = (stotal - spot);
 	_brot1           += srot1;
-	_rot_total1      += srot1;
-
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-#ifdef IOWRITE
-		double cosTheta   = 0.0;
-		double compxyz[NDIM];
-		double abs_compxyz[NDIM];
-		GetCosThetaPIGS(cosTheta, abs_compxyz, compxyz);
-		double scostheta  = cosTheta;
-		double scompx     = compxyz[0];
-		double scompy     = compxyz[1];
-		double scompz     = compxyz[2];
-		double abs_scompx = abs_compxyz[0];
-		double abs_scompy = abs_compxyz[1];
-		double abs_scompz = abs_compxyz[2];
-
-		_bcostheta       += scostheta; 
-
-		_ucompx          += scompx;
-		_ucompy          += scompy;
-		_ucompz          += scompz;
-
-		_abs_ucompx          += abs_scompx;
-		_abs_ucompy          += abs_scompy;
-		_abs_ucompz          += abs_scompz;
-#endif		
 
 #ifdef ORDERPARA		
-		double eiej[4];
-		double ei[3];
-		for (int id=0; id<=NDIM; id++){
-			eiej[id]=0.0;
-		}
-		for (int id=0; id<NDIM; id++){
-			ei[id]=0.0;
-		}
-		GetOrderCorrPIGS(eiej, ei);
-		for (int id=0; id<=NDIM; id++){
-			_beiej[id]+=eiej[id];
-		}
-		for (int id=0; id<NDIM; id++){
-			_bei[id]+=ei[id];
-		}
-#endif		
-
-#ifdef DDCORR
-		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-		double DipoleCorrXYZ[NDIMDP];
-		double DipoleCorrX[NDIMDP];
-		double DipoleCorrY[NDIMDP];
-		double DipoleCorrZ[NDIMDP];
-		double DipoleCorrXY[NDIMDP];
-
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			DipoleCorrXYZ[idp] = 0.0;
-			DipoleCorrX[idp]   = 0.0;
-			DipoleCorrY[idp]   = 0.0;
-			DipoleCorrZ[idp]   = 0.0;
-			DipoleCorrXY[idp]  = 0.0;
-		}
-
-		GetDipoleCorrelationPIGS(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
-
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
-			_cdipoleX[idp]   += DipoleCorrX[idp];
-			_cdipoleY[idp]   += DipoleCorrY[idp];
-			_cdipoleZ[idp]   += DipoleCorrZ[idp];
-			_cdipoleXY[idp]  += DipoleCorrXY[idp];
-			_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
-			_cdipoleX_total[idp]   += DipoleCorrX[idp];
-			_cdipoleY_total[idp]   += DipoleCorrY[idp];
-			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
-			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
-		}
-#endif
+	double eiej[4];
+	double ei[3];
+	for (int id=0; id<=NDIM; id++){
+		eiej[id]=0.0;
 	}
+	for (int id=0; id<NDIM; id++){
+		ei[id]=0.0;
+	}
+	GetOrderCorrPIGS(eiej, ei);
+	for (int id=0; id<=NDIM; id++){
+		_beiej[id]+=eiej[id];
+	}
+	for (int id=0; id<NDIM; id++){
+		_bei[id]+=ei[id];
+	}
+#endif		
 
 	double srot;
 	if (ROTATION)
@@ -1145,7 +1053,6 @@ void MCGetAveragePIGS(void)
 			srot      = GetRotEnergyPIGS();           // kin energy
 		}
 		_brot        += srot;
-		_rot_total   += srot;
 	}
 
 //  reflect for MF molecule
@@ -1218,32 +1125,6 @@ void MCGetAveragePIMC(void)
 	_pot_total       += spot;
 
 
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-#ifdef IOWRITE
-		double cosTheta   = 0.0;
-		double compxyz[3];
-		compxyz[0] = 0.0;
-		compxyz[1] = 0.0;
-		compxyz[2] = 0.0;
-
-		GetCosThetaPIMC(cosTheta, compxyz);
-		double scostheta  = cosTheta;
-		double scompx     = compxyz[0];
-		double scompy     = compxyz[1];
-		double scompz     = compxyz[2];
-
-		_bcostheta       += scostheta;
-		_costheta_total  += scostheta;
-
-		_ucompx          += scompx;
-		_ucompy          += scompy;
-		_ucompz          += scompz;
-		_ucompx_total    += scompx;
-		_ucompy_total    += scompy;
-		_ucompz_total    += scompz;
-#endif
-
 #ifdef ORDERPARA		
 		double eiej[4];
 		double ei[3];
@@ -1262,41 +1143,6 @@ void MCGetAveragePIMC(void)
 		}
 
 #endif		
-
-#ifdef DDCORR
-		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-		double DipoleCorrXYZ[NDIMDP];
-		double DipoleCorrX[NDIMDP];
-		double DipoleCorrY[NDIMDP];
-		double DipoleCorrZ[NDIMDP];
-		double DipoleCorrXY[NDIMDP];
-
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			DipoleCorrXYZ[idp] = 0.0;
-			DipoleCorrX[idp]   = 0.0;
-			DipoleCorrY[idp]   = 0.0;
-			DipoleCorrZ[idp]   = 0.0;
-			DipoleCorrXY[idp]  = 0.0;
-		}
-
-		GetDipoleCorrelationPIMC(DipoleCorrXYZ, DipoleCorrX, DipoleCorrY, DipoleCorrZ, DipoleCorrXY);
-
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			_cdipoleXYZ[idp] += DipoleCorrXYZ[idp];
-			_cdipoleX[idp]   += DipoleCorrX[idp];
-			_cdipoleY[idp]   += DipoleCorrY[idp];
-			_cdipoleZ[idp]   += DipoleCorrZ[idp];
-			_cdipoleXY[idp]  += DipoleCorrXY[idp];
-			_cdipoleXYZ_total[idp] += DipoleCorrXYZ[idp];
-			_cdipoleX_total[idp]   += DipoleCorrX[idp];
-			_cdipoleY_total[idp]   += DipoleCorrY[idp];
-			_cdipoleZ_total[idp]   += DipoleCorrZ[idp];
-			_cdipoleXY_total[idp]  += DipoleCorrXY[idp];
-		}
-#endif
-	}
 
 	double srot;
 	if (ROTATION)
@@ -1656,55 +1502,6 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
     fid.close();
 }
 
-#ifdef DDCORR
-void SaveDipoleCorr(const char fname [], double acount, long int blocknumb)
-{
-    const char *_proc_=__func__;    
-
-    fstream fid;
-    string fenergy;
-
-    fenergy  = fname;
-    fenergy += "Dipole.corr";
-
-    fid.open(fenergy.c_str(),ios::app | ios::out);
-    io_setout(fid);
-
-    if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
-	
-	if (acount != 0)
-	{
-   		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
-		if (ENT_SIM) int NumbAtoms1 = NumbAtoms/2;
-		else int NumbAtoms1 = NumbAtoms;
-		int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
-
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{ 
-    		fid << setw(IO_WIDTH) << _cdipoleXYZ[idp]/acount<< BLANK;
-		}
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{ 
-    		fid << setw(IO_WIDTH) << _cdipoleX[idp]/acount<< BLANK;
-		}
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{ 
-    		fid << setw(IO_WIDTH) << _cdipoleY[idp]/acount<<BLANK;
-		}
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{ 
-    		fid << setw(IO_WIDTH) << _cdipoleZ[idp]/acount<< BLANK;
-		}
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{ 
-    		fid << setw(IO_WIDTH) << _cdipoleXY[idp]/acount<< BLANK;
-		}
-    	fid << endl;
-	}
-    fid.close();
-}
-#endif
-
 #ifdef ORDERPARA
 void SaveOrderCorr(const char fname [], double acount, long int blocknumb)
 {
@@ -1737,36 +1534,6 @@ void SaveOrderCorr(const char fname [], double acount, long int blocknumb)
 }
 #endif
 
-void SaveAngularDOF(const char fname [], double acount, long int blocknumb)
-{
-    const char *_proc_=__func__;    
-
-    fstream fid;
-    string fenergy;
-
-    fenergy  = fname;
-    fenergy += ".dof";
-
-    fid.open(fenergy.c_str(),ios::app | ios::out);
-    io_setout(fid);
-
-    if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
-
-	if (acount != 0)
-	{
-        fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
-        fid << setw(IO_WIDTH) << _bcostheta/acount << BLANK;
-        fid << setw(IO_WIDTH) << _ucompx/acount << BLANK;
-        fid << setw(IO_WIDTH) << _ucompy/acount << BLANK;
-        fid << setw(IO_WIDTH) << _ucompz/acount << BLANK;
-        fid << setw(IO_WIDTH) << _abs_ucompx/acount << BLANK;
-        fid << setw(IO_WIDTH) << _abs_ucompy/acount << BLANK;
-        fid << setw(IO_WIDTH) << _abs_ucompz/acount << BLANK;
-        fid << endl;
-	}
-    fid.close();
-}
-
 void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
 {
     const char *_proc_=__func__;
@@ -1792,100 +1559,6 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     fid << endl;
     fid.close();
 }
-
-void SaveSumEnergy (double acount, double numb)  // global average
-{
-	const char *_proc_=__func__;    //  SaveSumEnergy()
- 
-    if (PIMC_SIM)
-	{	
-		_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
-		_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
-		_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
-		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
-		_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
-	}
-    if (PIGS_SIM)
-	{	
-		_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
-		_feng << setw(IO_WIDTH) << _rot_total*Units.energy/acount << BLANK;   
-		_feng << setw(IO_WIDTH) << _rot_total1*Units.energy/acount << BLANK;   
-		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
-		_feng << setw(IO_WIDTH) << _total*Units.energy/acount << BLANK;   
-	}
-//
-#ifdef IOWRITE
-	_feng << setw(IO_WIDTH_BLOCK) << numb <<BLANK;    
-	_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
-	_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
-	_feng << setw(IO_WIDTH) <<(_kin_total+_pot_total)*Units.energy/acount << BLANK;   
-
-// if (ROTATION)
-	{
-		_feng << setw(IO_WIDTH) <<_rot_total*Units.energy/acount << BLANK;   
-		_feng << setw(IO_WIDTH) <<_rotsq_total*(Units.energy*Units.energy)/acount << BLANK;   
-	}
-//_feng << setw(IO_WIDTH) << _dpot_total*Units.energy/acount << BLANK;   //added by Hui Li 
-	_feng << setw(IO_WIDTH) <<(_kin_total+_pot_total+_rot_total)*Units.energy/acount << BLANK;  //total energy including rot  
-// Cv
-	double Cv = 0.5*(double)(NDIM*NumbAtoms*NumbTimes*Temperature)-(_kin_total+_pot_total+_rot_total)*Units.energy/acount;
-	Cv = Cv*Cv + _Cv_total*Units.energy*Units.energy/acount;
-	Cv = -Cv*MCBeta/Temperature;
-	_feng << setw(IO_WIDTH) <<Cv << BLANK;
-
-	double Cv_trans = 0.5*(double)(NDIM*NumbAtoms*NumbTimes*Temperature)-_kin_total*Units.energy/acount;
-	Cv_trans = Cv_trans*Cv_trans+ _Cv_trans_total*Units.energy*Units.energy/acount;
-	Cv_trans = -Cv_trans*MCBeta/Temperature;
-	_feng << setw(IO_WIDTH) <<Cv_trans << BLANK;
-
-// if (ROTATION)
-	{
-		double Cv_rot = -_rot_total*Units.energy/acount;
-		Cv_rot = Cv_rot*Cv_rot+ _Cv_rot_total*Units.energy*Units.energy/acount;
-		Cv_rot = -Cv_rot*MCBeta/Temperature;
-		_feng << setw(IO_WIDTH) <<Cv_rot << BLANK;
-	}
-#endif
-
-//_feng << setw(IO_WIDTH) << _Cv_trans_1_total*Units.energy*Units.energy/acount << BLANK;
-//_feng << setw(IO_WIDTH) << _Cv_trans_2_total*Units.energy*Units.energy/acount << BLANK;
-
-	_feng << endl;
-}
-
-#ifdef DDCORR
-void SaveSumDipoleCorr(double acount, double numb)
-{
-    const char *_proc_=__func__;
-
-    _fdc << setw(IO_WIDTH_BLOCK) << numb <<BLANK;
-	if (ENT_SIM) int NumbAtoms1 = NumbAtoms/2;
-	else int NumbAtoms1 = NumbAtoms;
-	int NDIMDP = NumbAtoms1*(NumbAtoms1+1)/2;
-
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{ 
-    	_fdc << setw(IO_WIDTH) << _cdipoleXYZ_total[idp]/acount << BLANK;
-	}
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{ 
-    	_fdc << setw(IO_WIDTH) << _cdipoleX_total[idp]/acount << BLANK;
-	}
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{ 
-    	_fdc << setw(IO_WIDTH) << _cdipoleY_total[idp]/acount << BLANK;
-	}
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{ 
-    	_fdc << setw(IO_WIDTH) << _cdipoleZ_total[idp]/acount << BLANK;
-	}
-	for (int idp = 0; idp < NDIMDP; idp++)
-	{ 
-    	_fdc << setw(IO_WIDTH) << _cdipoleXY_total[idp]/acount << BLANK;
-	}
-    _fdc << endl;
-}
-#endif
 
 void SaveInstantEnergy()
 {

@@ -39,7 +39,7 @@ else:
 	cmd1 = ""
 
 rmin = 3.0
-rmax = 3.0
+rmax = 10.0
 dr = 1.0
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1

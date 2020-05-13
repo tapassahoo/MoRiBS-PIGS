@@ -133,7 +133,8 @@ def file_operations(TypeCal,final_dir_in_work):
 		fileList = ["output.rden", "output.xyz"]
 		file_old = final_dir_in_work+"/results/output.rden_old"
 	else:
-		fileList = ["output.eng", "outputOrderPara.corr", "output.xyz", "output_sum.eng"]
+		#fileList = ["output.eng", "output.xyz", "outputOrderPara.corr"]
+		fileList = ["output.eng", "outputOrderPara.corr"]
 		file_old = final_dir_in_work+"/results/output.eng_old"
 
 	flag = False
@@ -141,11 +142,16 @@ def file_operations(TypeCal,final_dir_in_work):
 		flag = True
 		if (os.path.isfile(file_old) == True):
 			for filecat in fileList:
-				col_data_new = genfromtxt(final_dir_in_work+"/results/"+filecat)
+				col_data_new = np.genfromtxt(final_dir_in_work+"/results/"+filecat)
 				index = int(col_data_new[0,0])
-				col_data_old = genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
-				marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
-				np.savetxt(final_dir_in_work+"/results/"+filecat+"_old1", marged_data.T)
+				col_data_old = np.genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
+				#print(col_data_old[:index-1])
+				merged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+				if (filecat == "output.eng"):
+					np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%d    %.6e    %.6e    %.6e    %.6e')
+				else:
+					np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%.6e', delimiter='    ')
+				call(["rm", final_dir_in_work+"/results/"+filecat])
 		else:
 			for filemv in fileList:
 				call(["mv", final_dir_in_work+"/results/"+filemv, final_dir_in_work+"/results/"+filemv+"_old"])
@@ -1009,11 +1015,12 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 		#
 		logout_file = dir_run_input_pimc+"/"+job_name
 
-		if not "real" in open(logout_file).read():
-			printingMessage = dir_output+folder_run+"  --- This job is running."
-			print(printingMessage)
-			os.chdir(src_dir)
-			return
+		if not "slurmstepd" in open(logout_file).read():
+			if not "real" in open(logout_file).read():
+				printingMessage = dir_output+folder_run+"  --- This job is running."
+				print(printingMessage)
+				os.chdir(src_dir)
+				return
 
 
 		#
@@ -1101,7 +1108,6 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 	call(["mv", fname, dir_run_input_pimc])
 	os.chdir(dir_run_input_pimc)
 
-	'''
 	if (RUNIN == "CPU"):
 		call(["chmod", "755", fname])
 		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
@@ -1114,7 +1120,6 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
-	'''
 
 	os.chdir(src_dir)
 
@@ -1235,7 +1240,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 #SBATCH --output=%s.out
 #SBATCH --time=%s
 %s
-#SBATCH --mem-per-cpu=2048mb
+#SBATCH --mem-per-cpu=4096mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s
@@ -1255,7 +1260,7 @@ time ./pimc
 #SBATCH --output=%s.out
 #SBATCH --time=%s
 %s
-#SBATCH --mem-per-cpu=2048mb
+#SBATCH --mem-per-cpu=4096mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 mv %s %s
