@@ -127,14 +127,13 @@ def beads(tau,beta):
 		numbbeads2 = numbbeads2 + 1
 	return numbbeads2
 
-def file_operations(TypeCal,final_dir_in_work):
+def file_operations(TypeCal,final_dir_in_work,numbmolecules,numbbeads):
 
 	if (TypeCal == "ENT"):
 		fileList = ["output.rden", "output.xyz"]
 		file_old = final_dir_in_work+"/results/output.rden_old"
 	else:
-		#fileList = ["output.eng", "output.xyz", "outputOrderPara.corr"]
-		fileList = ["output.eng", "outputOrderPara.corr"]
+		fileList = ["output.eng", "output.xyz", "outputOrderPara.corr"]
 		file_old = final_dir_in_work+"/results/output.eng_old"
 
 	flag = False
@@ -145,8 +144,15 @@ def file_operations(TypeCal,final_dir_in_work):
 				col_data_new = np.genfromtxt(final_dir_in_work+"/results/"+filecat)
 				index = int(col_data_new[0,0])
 				col_data_old = np.genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
-				#print(col_data_old[:index-1])
 				merged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+
+				if (filecat == "output.xyz"):
+					preskip = int(numbmolecules*numbbeads)
+					col_data_new = np.genfromtxt(final_dir_in_work+"/results/"+filecat, skip_header=preskip)
+					index = int(col_data_new[0,0])
+					col_data_old = np.genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
+					merged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+
 				if (filecat == "output.eng"):
 					np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%d    %.6e    %.6e    %.6e    %.6e')
 				else:
@@ -1045,7 +1051,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
 		#
 		os.chdir(src_dir)
 
-		flag=file_operations(TypeCal,final_dir_in_work)
+		flag=file_operations(TypeCal,final_dir_in_work,numbmolecules,numbbeads)
 		if (flag == False):
 			print(dir_output+folder_run)
 			print("Already resubmitted.")
