@@ -10,21 +10,21 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-simType1="submission "
-#simType1 = "analysis"
+#simType1="submission "
+simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-var = "beta" # for fixed tau
-param = 0.002 # for fixed tau
+#var = "beta" # for fixed tau
+#param = 0.002 # for fixed tau
 
-#var = "tau"  # for fixed beta
-#param = 0.1 # for fixed beta
+var = "tau"  # for fixed beta
+param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 11
+nMolecule = 2
 nblocks = 20000
 npass = 200
 
@@ -39,8 +39,8 @@ else:
 	cmd1 = ""
 
 rmin = 3.0
-rmax = 10.0
-dr = 1.0
+rmax = 4.0
+dr = 0.1
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
 print(nr)

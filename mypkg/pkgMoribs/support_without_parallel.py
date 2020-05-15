@@ -1542,6 +1542,9 @@ class GetFileNamePlot:
 		file_output7  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"XandY-component-correlation-function-"
 		file_output8  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Chemical-Potential-"
 		file_output9  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Entropy-"
+		file_output10 = frontName+FragmentDipoleMoment+FragmentGFactor+"Energy-vs-R-"
+		mainFileNameFitvsR  = "-fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
+		mainFileNameFitvsR += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
 		self.SaveEnergy       = self.src_dir+file_output1+mainFileName
 		self.SaveCorr         = self.src_dir+file_output2+mainFileName
@@ -1552,6 +1555,7 @@ class GetFileNamePlot:
 		self.SaveXYCorr       = self.src_dir+file_output7+mainFileName
 		self.SaveChemPot      = self.src_dir+file_output8+mainFileName
 		self.SaveEntropy      = self.src_dir+file_output9+mainFileName
+		self.SaveEnergyFitvsR = self.src_dir+file_output1+mainFileNameFitvsR
 
 #---------------------------------------------------------------------------#
 #	special cases                                                           #
