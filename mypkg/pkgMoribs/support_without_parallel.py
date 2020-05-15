@@ -1555,7 +1555,7 @@ class GetFileNamePlot:
 		self.SaveXYCorr       = self.src_dir+file_output7+mainFileName
 		self.SaveChemPot      = self.src_dir+file_output8+mainFileName
 		self.SaveEntropy      = self.src_dir+file_output9+mainFileName
-		self.SaveEnergyFitvsR = self.src_dir+file_output1+mainFileNameFitvsR
+		self.SaveEnergyFitvsR = self.src_dir+file_output10+mainFileNameFitvsR
 
 #---------------------------------------------------------------------------#
 #	special cases                                                           #
