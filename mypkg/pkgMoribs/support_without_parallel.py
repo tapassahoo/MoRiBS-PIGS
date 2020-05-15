@@ -1640,6 +1640,7 @@ class GetUnitConverter:
 		self.AMU   = 1.6605402;  			#  (10^-27 kg)     atomic mass unit
 		self.K_B   = 1.380658;   			#  (10^-23 JK^-1)  Boltzmann constant
 		self.WNO2K = 0.6950356; 				# conversion from CM-1 to K
+		self.kcalmoleinvToKelvin = 503.228
 
 def GetrAndgFactor(molecule, RCOM, DipoleMoment):
 	'''
