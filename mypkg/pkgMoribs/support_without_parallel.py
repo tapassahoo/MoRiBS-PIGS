@@ -163,6 +163,32 @@ def file_operations(TypeCal,final_dir_in_work,numbmolecules,numbbeads):
 				call(["mv", final_dir_in_work+"/results/"+filemv, final_dir_in_work+"/results/"+filemv+"_old"])
 	return flag
 
+def fmtAverageEnergy(TypeCal,status,variable):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output     ="# Unit of all kind of energies is expessed in Kelvin."
+		output  += "\n"
+		output    +="# "
+		output  += "\n"
+		output    +="# "
+		if (TypeCal == "PIMC"):
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Translational', 'Avg. rotational', 'Avg. Potential', 'Avg. Total', 'Error of Translational', 'Error of Rotational', 'Error of Potential', 'Error of Total')
+		if (TypeCal == "PIGS"):
+			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{er1:^12}{er2:^12}{er3:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<E-V>', pot='<V>', tot='<E>', er1='Err-(E-V)', er2='Err-V', er3='Err-E')
+		if (TypeCal == "ENT"):
+			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
+		output    +="\n"
+		output    += '{0:=<115}'.format('#')
+		output    +="\n"
+		return output
+
 def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip, numbblocks):
 	'''
 	This function gives us the output 
@@ -232,7 +258,6 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		output  += "\n"
 
 	if (TypeCal == "PIGS"):
-		#col_block, col_rot, col_pot, col_tot = genfromtxt(final_dir_in_work+"/results/output.eng",unpack=True, usecols=[0,2,3,4], skip_header=preskip, skip_footer=postskip)
 		col_block = final_data_set[:,0] 
 		col_rot   = final_data_set[:,2]
 		col_pot   = final_data_set[:,3]
@@ -263,14 +288,74 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 
 	return output
 	
-def GetAverageOrderParam(numbbeads,variable,final_dir_in_work,preskip,postskip):
+def fmtAverageOrderParam(status,variable):
+	'''
+	This function gives us the output 
+	'''
+	if variable == "Rpt":
+		unit = "(Angstrom)"
+	else:
+		unit = "(1/K)"
+
+	if status == "analysis":
+		output    ="# "
+		output    += '{blocks:^10}{beads:^10}{var:^10}{eiejx:^12}{eiejy:^12}{eiejz:^12}{eiej:^12}{eix:^12}{eiy:^12}{eiz:^12}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er5:^12}{er6:^12}{er7:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', eiejx='<eiejx>', eiejy='<eiejy>', eiejz='<eiejz>', eiej='<eiej>', eix='<eix>', eiy='<eiy>', eiz='<eiz>', er1='Err-eiejx', er2='Err-eiejy', er3='Err-eiejz', er4='Err-eiej', er5='Err-eix', er6='Err-eiy', er7='Err-eiz')
+		output    +="\n"
+		output    += '{0:=<200}'.format('#')
+		output    +="\n"
+		return output
+
+def GetAverageOrderParam(numbbeads,variable,final_dir_in_work,preskip,postskip, numbblocks):
 	'''
 	See PRL 118, 027402 (2017) 
 	'''
-	col_block, col_eiejx, col_eiejy, col_eiejz, col_eiej, col_eix, col_eiy, col_eiz = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr", unpack=True, usecols=[0,1,2,3,4,5,6,7], skip_header=preskip, skip_footer=postskip)
+	if (os.path.isdir(final_dir_in_work)):
+		condition = True
 
-	workingNdim   = int(math.log(len(col_block))/math.log(2))
-	trunc         = int(len(col_block)-2**workingNdim)
+		file_old = final_dir_in_work+"/results/outputOrderPara.corr_old"
+		if (os.path.isfile(file_old) == True):
+			file_old_1 = final_dir_in_work+"/results/outputOrderPara.corr_old_1"
+			file_new = final_dir_in_work+"/results/outputOrderPara.corr"
+			if (os.path.isfile(file_old_1) == True):
+				col_data_new = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old_1")
+				index = int(col_data_new[0,0])
+				col_data_old = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old")
+				marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+
+				col_data_new = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr")
+				index = int(col_data_new[0,0])
+				marged_data  = np.concatenate((marged_data[:index-1], col_data_new), axis=0)
+				aa = col_data_new[:,0]
+				final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
+			elif ((os.path.isfile(file_new) == True) and (os.path.isfile(file_old_1) == False)):
+				print(final_dir_in_work + " -- Restarted data")
+				col_data_new = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr")
+				index = int(col_data_new[0,0])
+				col_data_old = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old")
+				marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+				aa = col_data_new[:,0]
+				final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
+			elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
+				final_data_set = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old", skip_header=preskip, skip_footer=postskip)
+		else:
+			final_data_set = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr", skip_header=preskip, skip_footer=postskip)
+
+	col_block = final_data_set[:,0] 
+	col_eiejx = final_data_set[:,1] 
+	col_eiejy = final_data_set[:,2] 
+	col_eiejz = final_data_set[:,3] 
+	col_eiej  = final_data_set[:,4] 
+	col_eix   = final_data_set[:,5] 
+	col_eiy   = final_data_set[:,6] 
+	col_eiz   = final_data_set[:,7] 
+
+	ncol_block = len(col_block)
+	if (int(len(col_block)) != numbblocks-(preskip+postskip)):
+		print(len(col_block))
+		print(final_dir_in_work)
+
+	workingNdim   = int(math.log(len(col_eiz))/math.log(2))
+	trunc         = int(len(col_eiz)-2**workingNdim)
 	
 	col_eiejx = col_eiejx[trunc:]
 	col_eiejy = col_eiejy[trunc:]
@@ -299,165 +384,8 @@ def GetAverageOrderParam(numbbeads,variable,final_dir_in_work,preskip,postskip):
 	error_eiy = maxError_byBining(mean_eiy, col_eiy, workingNdim-6)
 	error_eiz = maxError_byBining(mean_eiz, col_eiz, workingNdim-6)
 
-	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_eiejx, mean_eiejy, mean_eiejz, mean_eiej, mean_eix, mean_eiy, mean_eiz, error_eiejx, error_eiejy, error_eiejz, error_eiej, error_eix, error_eiy, error_eiz)
+	output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
 	output  += "\n"
-	return output
-
-def GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip):
-	'''
-	This function gives us the output 
-	'''
-	col_block, col_costheta, col_compx, col_compy, col_compz, col_abs_compx, col_abs_compy, col_abs_compz = genfromtxt(final_dir_in_work+"/results/output.dof",unpack=True, usecols=[0,1,2,3,4,5,6,7], skip_header=preskip, skip_footer=postskip)
-	'''
-	fd             = open(final_dir_in_work+'/results/output_instant.dof', 'rb')
-	shape          = (-1,5) 
-	dataBin        = np.fromfile(file=fd, count = -1, dtype=np.float64).reshape(shape)
-	col_block      = dataBin[:,0]
-	col_costheta   = dataBin[:,1]
-	col_compx      = dataBin[:,2]
-	col_compy      = dataBin[:,3]
-	col_compz      = dataBin[:,4]
-	'''
-	workingNdim   = int(math.log(len(col_block))/math.log(2))
-	trunc         = int(len(col_block)-2**workingNdim)
-	
-	col_costheta  = col_costheta[trunc:]
-	col_compx     = col_compx[trunc:]
-	col_compy     = col_compy[trunc:]
-	col_compz     = col_compz[trunc:]
-
-	mean_costheta  = np.mean(col_costheta)
-	mean_compx     = np.mean(col_compx)
-	mean_compy     = np.mean(col_compy)
-	mean_compz     = np.mean(col_compz)
-	error_costheta = maxError_byBining(mean_costheta, col_costheta, workingNdim-6)
-	error_compx    = maxError_byBining(mean_compx, col_compx, workingNdim-6)
-	error_compy    = maxError_byBining(mean_compy, col_compy, workingNdim-6)
-	error_compz    = maxError_byBining(mean_compz, col_compz, workingNdim-6)
-
-	col_abs_compx  = col_abs_compx[trunc:]
-	col_abs_compy  = col_abs_compy[trunc:]
-	col_abs_compz  = col_abs_compz[trunc:]
-	mean_abs_compx = np.mean(col_abs_compx)
-	mean_abs_compy = np.mean(col_abs_compy)
-	mean_abs_compz = np.mean(col_abs_compz)
-	error_abs_compx= maxError_byBining(mean_abs_compx, col_abs_compx, workingNdim-6)
-	error_abs_compy= maxError_byBining(mean_abs_compy, col_abs_compy, workingNdim-6)
-	error_abs_compz= maxError_byBining(mean_abs_compz, col_abs_compz, workingNdim-6)
-
-	output  = '{0:10d}{1:15.5f}{2:15.5f}{3:15.5f}{4:15.5f}{5:15.5f}{6:15.5f}{7:15.5f}{8:15.5f}{9:15.5f}{10:15.5f}{11:15.5f}{12:15.5f}{13:15.5f}{14:15.5f}{15:15.5f}'.format(numbbeads, variable, mean_costheta, mean_compx, mean_compy, mean_compz, mean_abs_compx, mean_abs_compy, mean_abs_compz, error_costheta, error_compx, error_compy, error_compz, error_abs_compx, error_abs_compy, error_abs_compz)
-	output  += "\n"
-	return output
-
-def GetAverageCorrelation(CORRELATION,numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip):
-	'''
-	This function gives us the output 
-	'''
-	ndim              = int(numbmolecules*(numbmolecules+1)/2)
-	output            = '{0:10d}{1:15.5f}'.format(numbbeads, variable)
-
-	if (CORRELATION == "TotalCorr"):
-		loopStart     = 1
-
-	if (CORRELATION == "XCorr"):
-		loopStart     = ndim+1
-
-	if (CORRELATION == "YCorr"):
-		loopStart     = 2*ndim+1
-
-	if (CORRELATION == "ZCorr"):
-		loopStart     = 3*ndim+1
-
-	if (CORRELATION == "XYCorr"):
-		loopStart     = 4*ndim+1
-
-	for i in range(ndim):
-		col           = loopStart+i
-		print(col)
-		comp          = genfromtxt(final_dir_in_work+"/results/outputDipole.corr",unpack=True, usecols=[col], skip_header=preskip, skip_footer=postskip)
-
-		workingNdim   = int(math.log(len(comp))/math.log(2))
-		trunc         = int(len(comp)-2**workingNdim)
-	
-		comp          = comp[trunc:]
-
-		mean_comp  = np.mean(comp)
-		error_comp = maxError_byBining(mean_comp, comp, workingNdim-6)
-		output 		 += '     '+str(mean_comp)+'     '+str(error_comp)
-
-	output  		 += "\n"
-	return output
-
-def fmtAverageEnergy(TypeCal,status,variable):
-	'''
-	This function gives us the output 
-	'''
-	if variable == "Rpt":
-		unit = "(Angstrom)"
-	else:
-		unit = "(1/K)"
-
-	if status == "analysis":
-		output     ="# Unit of all kind of energies is expessed in Kelvin."
-		output  += "\n"
-		output    +="# "
-		output  += "\n"
-		output    +="# "
-		if (TypeCal == "PIMC"):
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Translational', 'Avg. rotational', 'Avg. Potential', 'Avg. Total', 'Error of Translational', 'Error of Rotational', 'Error of Potential', 'Error of Total')
-		if (TypeCal == "PIGS"):
-			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{er1:^12}{er2:^12}{er3:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<E-V>', pot='<V>', tot='<E>', er1='Err-(E-V)', er2='Err-V', er3='Err-E')
-		if (TypeCal == "ENT"):
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
-		output    +="\n"
-		output    += '{0:=<115}'.format('#')
-		output    +="\n"
-		return output
-
-def fmtAverageOrientation(status,variable):
-	'''
-	This function gives us the output 
-	'''
-	if variable == "Rpt":
-		unit = "(Angstrom)"
-	else:
-		unit = "(1/K)"
-
-	if status == "analysis":
-		output     ="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('Beads', variable, '<sum of ei.ej>', '< x >', '< y >', '< z >', '< |x| >', '< |y| >', '< |z| >', 'Errors')
-		output    +="\n"
-		output    +="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '')
-		#output    +="\n"
-		#output    +="#"
-		#output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}{10:^15}{11:^15}{12:^15}{13:^15}{14:^15}{15:^15}'.format('(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(7)', '(8)', '(9)', '(10)', '(11)', '(12)', '(13)', '(14)', '(15)', '(16)')
-		output    +="\n"
-		#output    += '{0:=<250}'.format('#')
-		output    += '{0:=<190}'.format('#')
-		output    +="\n"
-
-	return output
-
-def fmtAverageOrderParam(status,variable):
-	'''
-	This function gives us the output 
-	'''
-	if variable == "Rpt":
-		unit = "(Angstrom)"
-	else:
-		unit = "(1/K)"
-
-	if status == "analysis":
-		output     ="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('Beads', variable, '<eiejx>', '<eiejy>', '<eiejz>', '<eiej>', '<eix>', '<eiy>', '<eiz>', 'Errors')
-		output    +="\n"
-		output    +="#"
-		output    += '{0:^15}{1:^15}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}{8:^15}{9:^15}'.format('', (str(unit)), '', '', '', '', '', '', '', '')
-		output    +="\n"
-		output    += '{0:=<190}'.format('#')
-		output    +="\n"
-
 	return output
 
 def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE):
@@ -1432,22 +1360,12 @@ class GetFileNameAnalysis:
 
 		self.SaveEnergy       = self.src_dir+file_output1+mainFileName+".txt"
 		self.SaveCorr         = self.src_dir+file_output2+mainFileName+".txt"
-		self.SaveTotalCorr    = self.src_dir+file_output3+mainFileName+".txt"
-		self.SaveXCorr        = self.src_dir+file_output4+mainFileName+".txt"
-		self.SaveYCorr        = self.src_dir+file_output5+mainFileName+".txt"
-		self.SaveZCorr        = self.src_dir+file_output6+mainFileName+".txt"
-		self.SaveXYCorr       = self.src_dir+file_output7+mainFileName+".txt"
 		self.SaveEntropy      = self.src_dir+file_output8+mainFileName+".txt"
 
 		if (TypeCal2 == False):
 			if os.path.exists(self.SaveEntropy):   os.remove(self.SaveEntropy)
 			if os.path.exists(self.SaveEnergy):    os.remove(self.SaveEnergy)
 			if os.path.exists(self.SaveCorr):      os.remove(self.SaveCorr)
-			if os.path.exists(self.SaveTotalCorr): os.remove(self.SaveTotalCorr)
-			if os.path.exists(self.SaveXCorr):     os.remove(self.SaveXCorr)
-			if os.path.exists(self.SaveYCorr):     os.remove(self.SaveYCorr)
-			if os.path.exists(self.SaveZCorr):     os.remove(self.SaveZCorr)
-			if os.path.exists(self.SaveXYCorr):    os.remove(self.SaveXYCorr)
 
 		if (self.TypeCal != "ENT"):
 			print("#-------------------------------------#")
@@ -1548,14 +1466,10 @@ class GetFileNamePlot:
 
 		self.SaveEnergy       = self.src_dir+file_output1+mainFileName
 		self.SaveCorr         = self.src_dir+file_output2+mainFileName
-		self.SaveTotalCorr    = self.src_dir+file_output3+mainFileName
-		self.SaveXCorr        = self.src_dir+file_output4+mainFileName
-		self.SaveYCorr        = self.src_dir+file_output5+mainFileName
-		self.SaveZCorr        = self.src_dir+file_output6+mainFileName
-		self.SaveXYCorr       = self.src_dir+file_output7+mainFileName
 		self.SaveChemPot      = self.src_dir+file_output8+mainFileName
 		self.SaveEntropy      = self.src_dir+file_output9+mainFileName
 		self.SaveEnergyFitvsR = self.src_dir+file_output10+mainFileNameFitvsR
+		self.SaveCorrFitvsR   = self.src_dir+file_output3+mainFileNameFitvsR
 
 #---------------------------------------------------------------------------#
 #	special cases                                                           #

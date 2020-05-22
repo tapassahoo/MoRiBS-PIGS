@@ -269,12 +269,6 @@ for particleA in particleAList:
 			fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
 			fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
 			fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
-			#fanalyzeCorr.write(support.fmtAverageOrientation(status, variableName))
-			fanalyzeTotalCorr = open(FileAnalysis.SaveTotalCorr, "a")
-			fanalyzeXCorr = open(FileAnalysis.SaveXCorr, "a")
-			fanalyzeYCorr = open(FileAnalysis.SaveYCorr, "a")
-			fanalyzeZCorr = open(FileAnalysis.SaveZCorr, "a")
-			fanalyzeXYCorr = open(FileAnalysis.SaveXYCorr, "a")
 
 		if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
 			fanalyzeEntropy = open(FileAnalysis.SaveEntropy, "a")
@@ -331,13 +325,7 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output + folder_run
 				try:
 					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
-					fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip))
-					#fanalyzeCorr.write(support.GetAverageOrientation(numbbeads,variable,final_dir_in_work,preskip,postskip))
-					#fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					#fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					#fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					#fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-					#fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr",numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
+					fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip,numbblocks))
 				except:
 					pass
 		else:
@@ -389,14 +377,7 @@ for particleA in particleAList:
 						fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE))
 					if (TypeCal != "ENT"):
 						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
-						fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip))
-						"""
-						fanalyzeTotalCorr.write(support.GetAverageCorrelation("TotalCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeXCorr.write(support.GetAverageCorrelation("XCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeYCorr.write(support.GetAverageCorrelation("YCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeZCorr.write(support.GetAverageCorrelation("ZCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						fanalyzeXYCorr.write(support.GetAverageCorrelation("XYCorr", numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip))
-						"""
+						fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip, numbblocks))
 				except:
 					pass
 		iStep = iStep + 1
@@ -404,32 +385,16 @@ for particleA in particleAList:
 	if (status == "analysis") and (TypeCal != "ENT"):
 		fanalyzeEnergy.close()
 		fanalyzeCorr.close()
-		fanalyzeTotalCorr.close()
-		fanalyzeXCorr.close()
-		fanalyzeYCorr.close()
-		fanalyzeZCorr.close()
-		fanalyzeXYCorr.close()
 		call(["cat", FileAnalysis.SaveEnergy])
 		print("")
 		print("")
-		# call(["cat",FileAnalysis.SaveCorr])
-		# print("")
-		# print("")
-		# call(["cat",FileAnalysis.SaveTotalCorr])
+		#call(["cat",FileAnalysis.SaveCorr])
+		#print("")
+		#print("")
 		# =========================File Checking===============================#
 		SavedFile = FileAnalysis.SaveEnergy
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
 		SavedFile = FileAnalysis.SaveCorr
-		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-		SavedFile = FileAnalysis.SaveTotalCorr
-		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-		SavedFile = FileAnalysis.SaveXCorr
-		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-		SavedFile = FileAnalysis.SaveYCorr
-		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-		SavedFile = FileAnalysis.SaveZCorr
-		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-		SavedFile = FileAnalysis.SaveXYCorr
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
 
 	if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):

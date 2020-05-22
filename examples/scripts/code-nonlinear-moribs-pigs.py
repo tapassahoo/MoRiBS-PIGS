@@ -28,6 +28,10 @@ nMolecule = 2
 nblocks = 20000
 npass = 200
 
+rmin = 2.7
+rmax = 5.0
+dr = 0.1
+
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
 stringName2 = '"qTIP4P-"'
@@ -38,9 +42,6 @@ if simType1 == "analysis":
 else:
 	cmd1 = ""
 
-rmin = 3.0
-rmax = 4.0
-dr = 0.1
 nr = int(((rmax-rmin)+dr*0.5)/dr)
 nr = nr+1
 print(nr)
@@ -88,8 +89,8 @@ for i in range(nr):
 		+ rotor+space
 		+ str(param)+space
 		+ var+space
-		+ " --RESTART"+space
-		+ " -NR 20000"+space
+		#+ " --RESTART"+space
+		#+ " -NR 20000"+space
 	) 
 
 	print(cmd_run)
