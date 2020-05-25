@@ -78,7 +78,7 @@ def Submission(dir_job, script_dir, execution_file, numbbeads, temperature, mole
 		fwrite.close()
 
 		os.chdir(dir_input)
-		if NameOfPartition == "tapas":
+		if (NameOfPartition == "tapas"):
 			call(["sbatch", "-p", "tapas", fname])
 		else:
 			call(["sbatch", fname])
@@ -109,9 +109,9 @@ def jobstring(logfile,folder_run_path,dir_input,dir_output,temperature,numbbeads
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.out
-#SBATCH --time=0-12:00
+#SBATCH --time=0-01:00
 %s
-#SBATCH --mem-per-cpu=512mb
+#SBATCH --mem-per-cpu=256mb
 #SBATCH --cpus-per-task=1
 export OMP_NUM_THREADS=1
 rm -rf %s

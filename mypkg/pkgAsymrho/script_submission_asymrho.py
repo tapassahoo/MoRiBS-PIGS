@@ -84,7 +84,9 @@ args = parser.parse_args()
 # Argparser ends here
 
 myhost = os.uname()[1]
-if (myhost == "gra-login1") or (myhost == "gra-login2") or (myhost == "gra-login3"):
+if ((myhost == "gra-login1") or (myhost == "gra-login2") or (myhost == "gra-login3")):
+    NameOfServer = "graham"
+elif ((myhost == "cedar1.cedar.computecanada.ca") or (myhost == "cedar2.cedar.computecanada.ca") or (myhost == "cedar3.cedar.computecanada.ca") or (myhost == "cedar4.cedar.computecanada.ca") or (myhost == "cedar5.cedar.computecanada.ca")):
     NameOfServer = "graham"
 else:
     NameOfServer = "nlogn"

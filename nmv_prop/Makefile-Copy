@@ -14,6 +14,26 @@ ifeq ($(HOST), gra-login1)
 	FC=ifort
 	LDFLAGS=-mkl=sequential
 endif
+ifeq ($(HOST), cedar1.cedar.computecanada.ca)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), cedar2.cedar.computecanada.ca)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), cedar3.cedar.computecanada.ca)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), cedar4.cedar.computecanada.ca)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
+ifeq ($(HOST), cedar5.cedar.computecanada.ca)
+	FC=ifort
+	LDFLAGS=-mkl=sequential
+endif
 ifeq ($(HOST), feynman)
 	FC=gfortran
 	LDFLAGS=-llapack

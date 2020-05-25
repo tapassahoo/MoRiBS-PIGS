@@ -15,7 +15,7 @@ rotor = "H2O"
 #value = 0.0005
 param = "beta" # beta=1/T K^-1
 value = 0.2
-nbeads = [90, 100, 120, 140]
+nbeads = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200]
 Jmax = 66
 spin = 0#int(-1)
 
