@@ -68,23 +68,6 @@ double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
 
 double _dpot_total;  // potential energy differences, global average  added by Hui Li
-double _bcostheta;
-#
-double _ucompx;
-double _ucompy;
-double _ucompz;
-#
-double _abs_ucompx;
-double _abs_ucompy;
-double _abs_ucompz;
-#
-vector<double> _cdipoleXYZ;
-vector<double> _cdipoleX;
-vector<double> _cdipoleY;
-vector<double> _cdipoleZ;
-vector<double> _cdipoleXY;
-double _beiej[4];
-double _bei[3];
 //
 double _bnm;
 double _bdm;
@@ -104,23 +87,14 @@ fstream _feng;      // save accumulated energy
 fstream _fdc;      // save accumulated energy
 fstream _fangins;      // save accumulated energy
 fstream _fengins;      // save accumulated energy
-fstream _fentropy;
-fstream _fswap;
 
 //---------------- ESTIMATORS ---------------
 
 void SaveEnergy    (const char [],double,long int); // block average
-void SaveSumEnergy (double,double);                 // accumulated average
+//void SaveSumEnergy (double,double);                 // accumulated average
 
 void SaveInstantEnergy ();                 // accumulated average
 
-#ifdef DDCORR
-void SaveDipoleCorr(const char [],double,long int);
-#endif
-#ifdef ORDERPARA
-void SaveOrderCorr(const char fname [], double acount, long int blocknumb);
-#endif
-void SaveAngularDOF(const char [],double,long int);
 void SaveTrReducedDens(const char [], double , long int );
 
 void InitTotalAverage(void);
@@ -821,43 +795,6 @@ void MCResetBlockAveragePIMC(void)
 	PrintYrfl   = 1;
 	PrintXrfl   = 1;
 	PrintZrfl   = 1;
-#ifdef DDCORR
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-		int NDIMDP = NumbAtoms*(NumbAtoms+1)/2;
-		_cdipoleXYZ.resize(NDIMDP);
-		_cdipoleX.resize(NDIMDP);
-		_cdipoleY.resize(NDIMDP);
-		_cdipoleZ.resize(NDIMDP);
-		_cdipoleXY.resize(NDIMDP);
-		
-		for (int idp = 0; idp < NDIMDP; idp++)
-		{
-			_cdipoleXYZ[idp] = 0.0;
-			_cdipoleX[idp] = 0.0;
-			_cdipoleY[idp] = 0.0;
-			_cdipoleZ[idp] = 0.0;
-			_cdipoleXY[idp] = 0.0;
-		}
-	}
-#endif
-
-#ifdef ORDERPARA	
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-		for (int id=0; id<=NDIM; id++){
-			_beiej[id]=0.0;
-		}	
-		for (int id=0; id<NDIM; id++){
-			_bei[id]=0.0;
-		}	
-	}
-#endif	
-
-	_bcostheta = 0.0;
-	_ucompx     = 0.0;
-	_ucompy     = 0.0;
-	_ucompz     = 0.0;
 }
 
 void MCResetBlockAveragePIGS(void) 
@@ -872,17 +809,6 @@ void MCResetBlockAveragePIGS(void)
 	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
 	_btotal    = 0.0;
-#ifdef ORDERPARA	
-	if(MCAtom[IMTYPE].numb > 1)
-	{
-		for (int id=0; id<=NDIM; id++){
-			_beiej[id]=0.0;
-		}	
-		for (int id=0; id<NDIM; id++){
-			_bei[id]=0.0;
-		}	
-	}
-#endif	
 	_bkin        = 0.0;
 
 	_brot        = 0.0;
@@ -1011,24 +937,6 @@ void MCGetAveragePIGS(void)
 	double srot1      = (stotal - spot);
 	_brot1           += srot1;
 
-#ifdef ORDERPARA		
-	double eiej[4];
-	double ei[3];
-	for (int id=0; id<=NDIM; id++){
-		eiej[id]=0.0;
-	}
-	for (int id=0; id<NDIM; id++){
-		ei[id]=0.0;
-	}
-	GetOrderCorrPIGS(eiej, ei);
-	for (int id=0; id<=NDIM; id++){
-		_beiej[id]+=eiej[id];
-	}
-	for (int id=0; id<NDIM; id++){
-		_bei[id]+=ei[id];
-	}
-#endif		
-
 	double srot;
 	if (ROTATION)
 	{
@@ -1123,26 +1031,6 @@ void MCGetAveragePIMC(void)
 	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
-
-
-#ifdef ORDERPARA		
-		double eiej[4];
-		double ei[3];
-		for (int id=0; id<=NDIM; id++){
-			eiej[id]=0.0;
-		}
-		for (int id=0; id<NDIM; id++){
-			ei[id]=0.0;
-		}
-		GetOrderCorrPIMC(eiej, ei);
-		for (int id=0; id<=NDIM; id++){
-			_beiej[id]+=eiej[id];
-		}
-		for (int id=0; id<NDIM; id++){
-			_bei[id]+=ei[id];
-		}
-
-#endif		
 
 	double srot;
 	if (ROTATION)
@@ -1342,24 +1230,10 @@ void MCSaveBlockAverages(long int blocknumb)
 	if ((PIGS_SIM) || (PIMC_SIM))
 	{
 		SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
-
-		if(MCAtom[IMTYPE].numb > 1)
-		{
-			//SaveAngularDOF(MCFileName.c_str(),avergCount,blocknumb);
-#ifdef DDCORR
-			SaveDipoleCorr(MCFileName.c_str(),avergCount,blocknumb);
-#endif
-#ifdef ORDERPARA
-			SaveOrderCorr(MCFileName.c_str(),avergCount,blocknumb);
-#endif
-		}
 	}
 
 	if (ENT_SIM)
 	{
-		//SaveEnergy(MCFileName.c_str(),avergCountENT,blocknumb);
-		//SaveAngularDOF(MCFileName.c_str(),avergCountENT,blocknumb);
-		//SaveDipoleCorr(MCFileName.c_str(),avergCountENT,blocknumb);
 		SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
 	}	
 
@@ -1502,38 +1376,6 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
     fid.close();
 }
 
-#ifdef ORDERPARA
-void SaveOrderCorr(const char fname [], double acount, long int blocknumb)
-{
-    const char *_proc_=__func__;    
-
-    fstream fid;
-    string fenergy;
-
-    fenergy  = fname;
-    fenergy += "OrderPara.corr";
-
-    fid.open(fenergy.c_str(),ios::app | ios::out);
-    io_setout(fid);
-
-    if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
-	
-	if (acount != 0)
-	{
-   		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;   
-
-		for (int id=0; id<=NDIM; id++){ 
-    		fid << setw(IO_WIDTH) << _beiej[id]/acount<< BLANK;
-		}
-		for (int id=0; id<NDIM; id++){ 
-    		fid << setw(IO_WIDTH) << _bei[id]/acount<< BLANK;
-		}
-    	fid << endl;
-	}
-    fid.close();
-}
-#endif
-
 void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
 {
     const char *_proc_=__func__;
@@ -1612,6 +1454,7 @@ void InitTotalAverage(void)  // DUMP
 	// open files for output
 	// ENERGY
 //
+/*
 	if ((PIGS_SIM) || (PIMC_SIM))
 	{
 		string fenergy;
@@ -1628,6 +1471,7 @@ void InitTotalAverage(void)  // DUMP
 		if (!_feng.is_open())
 		_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 	}
+*/
 
 //
 #ifdef INSTANT

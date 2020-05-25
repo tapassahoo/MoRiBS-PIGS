@@ -24,16 +24,6 @@ double GetPotEnergy_Densities(void);
 double GetPotEnergyPIGS(void);
 double GetPotEnergyCage(const double *);
 double GetTotalEnergy(void);
-#ifdef DDCORR
-void GetDipoleCorrelationPIMC(double *, double *, double *, double *, double *);
-void GetDipoleCorrelationPIGSENT(double *, double *, double *, double *, double *);
-void GetDipoleCorrelationPIGS(double *, double *, double *, double *, double *);
-#endif
-void GetCosThetaPIGS(double &, double *, double *);
-void GetOrderCorrPIGS(double *, double *);
-void GetOrderCorrPIMC(double *, double *);
-void GetCosThetaPIMC(double &, double *);
-double GetPhi();
 double GetPotEnergy(void);
 double GetKinEnergy(void);
 double GetPotEnergy_Entanglement(int atom0, int atom1);
@@ -42,9 +32,6 @@ double GetEstimDM(int);
 double GetEstimNM_Ratio(int);
 double GetEstimDM_Ratio(int);
 void GetIndex(int , int , int &, int &, int &, int &);
-double *GetCosThetaEntanglement();
-double *GetPhiEntanglement();
-double *GetProdUvec12();
 
 double GetConfPoten_Densities(void); // HA test
 
@@ -103,7 +90,6 @@ double PotFuncCage(double *, const double *);
 
 double GetPotEnergyPIGSENT(void);
 double GetTotalEnergyPIGSENT(void);
-void GetCosThetaPIGSENT(double &, double *);
 #ifdef HISTOGRAM
 void GetDensities(void);
 #endif

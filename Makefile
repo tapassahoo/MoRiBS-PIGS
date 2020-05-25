@@ -4,7 +4,7 @@
 options= -Ofast -fopenmp
 
 # CFLAGS for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DORDERPARA -DSHORTFORM
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM
 # -DSHORTFORM -DONSITE
 #-DPROPOSED
 #-DCAGEPOT

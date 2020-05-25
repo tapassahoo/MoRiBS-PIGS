@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-#simType1="submission "
-simType1 = "analysis"
+simType1="submission "
+#simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
@@ -21,16 +21,16 @@ SpinIsomer = 0
 #param = 0.002 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.1 # for fixed beta
+param = 0.2 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
 nblocks = 20000
 npass = 200
 
-rmin = 2.7
-rmax = 5.0
-dr = 0.1
+rmin = 7.0
+rmax = 10.0
+dr = 0.2
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
@@ -38,7 +38,7 @@ stringName2 = '"qTIP4P-"'
 #stringName2 = '"qSPCFw-"'
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 0"
+	cmd1 = "--preskip 15000"
 else:
 	cmd1 = ""
 
