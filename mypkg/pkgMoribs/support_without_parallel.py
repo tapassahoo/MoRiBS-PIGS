@@ -141,22 +141,31 @@ def file_operations(TypeCal,final_dir_in_work,numbmolecules,numbbeads):
 		flag = True
 		if (os.path.isfile(file_old) == True):
 			for filecat in fileList:
-				col_data_new = np.genfromtxt(final_dir_in_work+"/results/"+filecat)
-				index = int(col_data_new[0,0])
-				col_data_old = np.genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
-				merged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
-
-				if (filecat == "output.xyz"):
-					preskip = int(numbmolecules*numbbeads)
-					col_data_new = np.genfromtxt(final_dir_in_work+"/results/"+filecat, skip_header=preskip)
+				if (filecat != "output.xyz"):
+					col_data_new = np.genfromtxt(final_dir_in_work+"/results/"+filecat)
 					index = int(col_data_new[0,0])
 					col_data_old = np.genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
 					merged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
 
-				if (filecat == "output.eng"):
-					np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%d    %.6e    %.6e    %.6e    %.6e')
-				else:
+					if (filecat == "output.eng"):
+						np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%d    %.6e    %.6e    %.6e    %.6e')
+					else:
+						np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%.6e', delimiter='    ')
+
+				if (filecat == "output.xyz"):
+					if "H2O1" in open(file_new).read():
+						rmstr = int(numb_particle*numb_beads+3)
+						cmd1="tail -n +"+str(rmstr)+" "+final_dir_in_work+"results/"+filecat+">bb"
+						os.system(cmd1)
+						col_data_new = np.genfromtxt("bb")
+						call(["rm", "bb"])
+					else:
+						col_data_new = np.genfromtxt(final_dir_in_work+"results/"+filecat)
+					index = int(col_data_new[0,0])
+					col_data_old = np.genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
+					marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
 					np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%.6e', delimiter='    ')
+
 				call(["rm", final_dir_in_work+"/results/"+filecat])
 		else:
 			for filemv in fileList:
