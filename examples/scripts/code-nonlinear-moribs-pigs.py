@@ -21,16 +21,16 @@ SpinIsomer = 0
 #param = 0.002 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.2 # for fixed beta
+param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 11
 nblocks = 20000
 npass = 200
 
-rmin = 7.0
-rmax = 10.0
-dr = 0.2
+rmin = 2.6
+rmax = 2.6
+dr = 0.1
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
@@ -89,7 +89,7 @@ for i in range(nr):
 		+ rotor+space
 		+ str(param)+space
 		+ var+space
-		+ " --RESTART"+space
+		+ " -C --RESTART"+space
 		+ " -NR 20000"+space
 	) 
 
