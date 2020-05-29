@@ -133,7 +133,7 @@ def file_operations(TypeCal,final_dir_in_work,numbmolecules,numbbeads):
 		fileList = ["output.rden", "output.xyz"]
 		file_old = final_dir_in_work+"/results/output.rden_old"
 	else:
-		fileList = ["output.eng", "output.xyz", "outputOrderPara.corr"]
+		fileList = ["output.eng", "output.xyz"]
 		file_old = final_dir_in_work+"/results/output.eng_old"
 
 	flag = False

@@ -70,6 +70,8 @@ status = args.job
 myhost = os.uname()[1]
 if (myhost == "gra-login1") or (myhost == "gra-login2") or (myhost == "gra-login3"):
 	NameOfServer = "graham"
+elif ((myhost == "cedar1.cedar.computecanada.ca") or (myhost == "cedar2.cedar.computecanada.ca") or (myhost == "cedar3.cedar.computecanada.ca") or (myhost == "cedar4.cedar.computecanada.ca") or (myhost == "cedar5.cedar.computecanada.ca")):
+    NameOfServer = "graham"
 else:
 	NameOfServer = "nlogn"
 NameOfPartition = args.partition
@@ -239,7 +241,6 @@ for particleA in particleAList:
 
 		if not args.RESTART:
 			call(["cp", execution_file, dir_run_input_pimc])
-		call(["cp", execution_file, dir_run_input_pimc])
 
 		if RotorType == "LINEAR":
 			if not args.RESTART:
@@ -388,9 +389,9 @@ for particleA in particleAList:
 		call(["cat", FileAnalysis.SaveEnergy])
 		print("")
 		print("")
-		#call(["cat",FileAnalysis.SaveCorr])
-		#print("")
-		#print("")
+		call(["cat",FileAnalysis.SaveCorr])
+		print("")
+		print("")
 		# =========================File Checking===============================#
 		SavedFile = FileAnalysis.SaveEnergy
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
