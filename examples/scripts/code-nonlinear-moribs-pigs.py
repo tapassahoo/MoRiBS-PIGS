@@ -24,7 +24,7 @@ var = "tau"  # for fixed beta
 param = 0.2 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 2
+nMolecule = 11
 nblocks = 20000
 npass = 200
 
@@ -38,7 +38,7 @@ stringName2 = '"qTIP4P-"'
 #stringName2 = '"qSPCFw-"'
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 15000"
+	cmd1 = "--preskip 0"
 else:
 	cmd1 = ""
 
@@ -89,8 +89,8 @@ for i in range(nr):
 		+ rotor+space
 		+ str(param)+space
 		+ var+space
-		#+ " --RESTART"+space
-		#+ " -NR 20000"+space
+		+ " --RESTART"+space
+		+ " -NR 20000"+space
 	) 
 
 	print(cmd_run)
