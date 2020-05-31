@@ -99,6 +99,10 @@ To analyze the output data -
 
 Read the outputs printed on the screen. Final output files will be saved in directory final_results_path.
 
+4. **Short discussion on restarting a job
+
+  [x] Keep the same number of threads in the restarted job as you used in the finished job. 
+
 
 ***N.B.: Don't hesitate to email to the developer if you face any problem to submit your jobs or analyze the output files by the scripts.***
 
