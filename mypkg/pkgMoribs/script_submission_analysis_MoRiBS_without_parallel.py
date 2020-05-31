@@ -212,7 +212,7 @@ for particleA in particleAList:
 	# Generating files for submission
 	file1_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal,impurity,ext_ent)
 
-	if status == "rename":
+	if (status == "rename"):
 		numbblocks_rename = args.NR
 		file2_name = support.GetFileNameSubmission(TypeCal,molecule_rot,TransMove,RotMove,Rpt,gfact,dipolemoment,parameterName,parameter,numbblocks_rename,numbpass,numbmolecules1,molecule,ENT_TYPE,particleA,extra_file_name,crystal,impurity,ext_ent)
 
@@ -268,8 +268,8 @@ for particleA in particleAList:
 
 			fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
 			fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
-			fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
-			fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
+			#fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
+			#fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
 
 		if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
 			fanalyzeEntropy = open(FileAnalysis.SaveEntropy, "a")
@@ -326,7 +326,7 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output + folder_run
 				try:
 					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
-					fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip,numbblocks))
+					#fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip,numbblocks))
 				except:
 					pass
 		else:
@@ -347,11 +347,11 @@ for particleA in particleAList:
 			numbbeads = value
 			folder_run = file1_name + str(numbbeads)
 
-			if status == "rename":
+			if (status=="rename"):
 				folder_rename = file2_name + str(numbbeads)
 				support.GetRenamingFunc(dir_run_input_pimc,dir_input_pimc_renamed,dir_output,folder_run,folder_rename,src_dir)
 
-			if status == "submission":
+			if (status=="submission"):
 
 				if args.PPA:
 					PPA1 = True
@@ -378,25 +378,25 @@ for particleA in particleAList:
 						fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE))
 					if (TypeCal != "ENT"):
 						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
-						fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip, numbblocks))
+						#fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip, numbblocks))
 				except:
 					pass
 		iStep = iStep + 1
 
 	if (status == "analysis") and (TypeCal != "ENT"):
 		fanalyzeEnergy.close()
-		fanalyzeCorr.close()
+		#fanalyzeCorr.close()
 		call(["cat", FileAnalysis.SaveEnergy])
 		print("")
 		print("")
-		call(["cat",FileAnalysis.SaveCorr])
-		print("")
-		print("")
+		#call(["cat",FileAnalysis.SaveCorr])
+		#print("")
+		#print("")
 		# =========================File Checking===============================#
 		SavedFile = FileAnalysis.SaveEnergy
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-		SavedFile = FileAnalysis.SaveCorr
-		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
+		#SavedFile = FileAnalysis.SaveCorr
+		#support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
 
 	if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
 		fanalyzeEntropy.close()

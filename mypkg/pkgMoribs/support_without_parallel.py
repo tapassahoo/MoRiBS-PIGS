@@ -1098,9 +1098,9 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (numbblocks <= 100):
+	if (numbblocks <= 1000):
 		walltime   = "00-03:00"
-		thread     = 1
+		thread     = 4
 		if (numbbeads >= 100):
 			thread     = 8
 	else:
@@ -1658,19 +1658,18 @@ def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
 	print(printingmessage)
 
 def GetRenamingFunc(dir_run_input_pimc, dir_input_pimc_renamed, dir_output, folder_run, folder_renamed, src_dir):
-	final_dir_in_work = dir_output + folder_run
+	#final_dir_in_work = dir_output + folder_run
 
-	#call(["rm", "-rf", dir_run_input_pimc])
-	call(["cp", "-R", dir_run_input_pimc, dir_input_pimc_renamed])
+	call(["mkdir", "-p", dir_input_pimc_renamed])
+	cmd_run= "cp -r "+dir_run_input_pimc+"/*  "+dir_input_pimc_renamed+"/"
+	os.system(cmd_run)
 	os.chdir(dir_output)
 	if (os.path.isdir(folder_run) == True):
-		call(["cp", "-R", folder_run, folder_renamed])
-		#call(["rm", "-rf", folder_run])
-		#print(dir_run_input_pimc)
-		#printingMessage = "move "+str(dir_output)+str(folder_run)
-		#print(printingMessage)
+		call(["mv", folder_run, folder_renamed])
+		print(dir_input_pimc_renamed)
+		printingMessage = "move "+str(dir_output)+str(folder_run)
+		print(printingMessage)
 	os.chdir(src_dir)
-	#call(["pwd"])
 
 def RemoveFiles(TypeCal, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work):
 
