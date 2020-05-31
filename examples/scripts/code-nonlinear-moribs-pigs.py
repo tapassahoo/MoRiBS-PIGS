@@ -12,6 +12,7 @@ module_path=module_path.replace('__init__.py', '')
 simType = "PIGS"
 #simType1="submission "
 simType1 = "analysis"
+#simType1="rename "
 
 molecule = "H2O"
 rotor = "H2O"
@@ -26,11 +27,11 @@ param = 0.1 # for fixed beta
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 11
 nblocks = 20000
-npass = 200
+npass = 20
 
-rmin = 2.7
-rmax = 5.0
-dr = 0.1
+rmin = 7.0
+rmax = 10.0
+dr = 0.2
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
