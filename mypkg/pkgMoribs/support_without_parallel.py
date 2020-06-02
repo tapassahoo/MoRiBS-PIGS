@@ -153,8 +153,8 @@ def file_operations(TypeCal,final_dir_in_work,numbmolecules,numbbeads):
 						np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%.6e', delimiter='    ')
 
 				if (filecat == "output.xyz"):
-					if "H2O1" in open(file_new).read():
-						rmstr = int(numb_particle*numb_beads+3)
+					if "H2O1" in open(filecat).read():
+						rmstr = int(numbmolecules*numbbeads+3)
 						cmd1="tail -n +"+str(rmstr)+" "+final_dir_in_work+"results/"+filecat+">bb"
 						os.system(cmd1)
 						col_data_new = np.genfromtxt("bb")
