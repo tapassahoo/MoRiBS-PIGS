@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-simType1="submission "
-#simType1 = "analysis"
+#simType1="submission "
+simType1 = "analysis"
 #simType1="rename "
 
 molecule = "H2O"
@@ -25,12 +25,12 @@ var = "tau"  # for fixed beta
 param = 0.1 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 11
+nMolecule = 2
 nblocks = 20000
 npass = 200
 
-rmin = 2.62
-rmax = 2.62
+rmin = 2.75
+rmax = 2.75
 dr = 0.02
 
 #stringName2 = '""'

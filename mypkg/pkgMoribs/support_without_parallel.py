@@ -314,10 +314,64 @@ def fmtAverageOrderParam(status,variable):
 		output    +="\n"
 		return output
 
-def GetAverageOrderParam(numbbeads,variable,final_dir_in_work,preskip,postskip, numbblocks):
+def GetAverageOrderParam(TypeCal,numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks):
 	'''
 	See PRL 118, 027402 (2017) 
 	'''
+	if (TypeCal != 'PIMC'):
+		axis_index = {"cost":0, "phi":1, "chi":2}
+		axis_read = "cost"
+		ndofs = 3
+		beads_pos = int((numbbeads-1)/2)
+		collist=[0]
+		for i in range(numbmolecules):
+			ncol1 = beads_pos+i*numbbeads
+			ncol = axis_index[axis_read]+ncol1*ndofs
+			ncol = ncol+1
+			collist.append(ncol)
+			#print(str(ncol)+'th column')
+		col=tuple(collist)
+
+		if (os.path.isdir(final_dir_in_work)):
+			file_old = final_dir_in_work+"/results/output.xyz_old"
+			if (os.path.isfile(file_old) == True):
+				file_new = final_dir_in_work+"/results/output.xyz"
+				if (os.path.isfile(file_new) == True):
+					print(final_dir_in_work + " -- Restarted data")
+					col_data_new = np.genfromtxt(final_dir_in_work+"/results/output.xyz",usecols = col)
+					index = int(col_data_new[0,0])
+					col_data_old = np.genfromtxt(final_dir_in_work+"/results/output.xyz_old",usecols = col)
+					marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+					aa = col_data_new[:,0]
+					final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
+				elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
+					final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz_old", usecols = col, skip_header=preskip, skip_footer=postskip)
+			else:
+				final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz", usecols = col, skip_header=preskip, skip_footer=postskip)
+
+	ncol_block = len(final_data_set[:,0])
+	if (int(ncol_block) != numbblocks-(preskip+postskip)):
+		print(ncol_block)
+		print(final_dir_in_work)
+
+
+	workingNdim   = int(math.log(ncol_block)/math.log(2))
+	trunc         = int(ncol_block-2**workingNdim)
+	eiz=np.delete(final_data_set, 0, 1)
+	eiz=np.absolute(np.reshape(eiz[trunc:,],eiz[trunc:,].size))
+
+	mean_eiz = np.mean(eiz)/numbmolecules
+
+	error_eiz = maxError_byBining(mean_eiz, eiz, workingNdim-6)/numbmolecules
+
+	#output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
+	output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{er1:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiz=mean_eiz, er1=error_eiz)
+	output  += "\n"
+	return output
+
+'''
+def GetAverageOrderParam(TypeCal,numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks):
+	#See PRL 118, 027402 (2017) 
 	if (os.path.isdir(final_dir_in_work)):
 		condition = True
 
@@ -348,6 +402,37 @@ def GetAverageOrderParam(numbbeads,variable,final_dir_in_work,preskip,postskip, 
 				final_data_set = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old", skip_header=preskip, skip_footer=postskip)
 		else:
 			final_data_set = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr", skip_header=preskip, skip_footer=postskip)
+	if (TypeCal != 'PIMC'):
+		if (os.path.isdir(final_dir_in_work)):
+			condition = True
+
+			file_old = final_dir_in_work+"/results/output.xyz_old"
+			if (os.path.isfile(file_old) == True):
+				file_new = final_dir_in_work+"/results/output.xyz"
+				if (os.path.isfile(file_new) == True):
+					print(final_dir_in_work + " -- Restarted data")
+					col_data_new = genfromtxt(final_dir_in_work+"/results/output.xyz")
+					index = int(col_data_new[0,0])
+					col_data_old = genfromtxt(final_dir_in_work+"/results/output.xyz_old")
+					marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+					aa = col_data_new[:,0]
+					final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
+				elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
+					final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz_old", skip_header=preskip, skip_footer=postskip)
+			else:
+				final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz", skip_header=preskip, skip_footer=postskip)
+
+
+	axis_index = {"cost":0, "phi":1, "chi":2}
+	axis_read = "cost"
+	ndofs = 3
+	beads_pos = int((numbbeads-1)/2)
+	for i in range(numbmolecules):
+		ncol1 = beads_pos+i*numbbeads
+		ncol = axis_index[axis_read]+ncol1*ndofs
+		ncol = ncol+1
+		#print(str(ncol)+'th column')
+		save_data[i,:] = final_data_set[(preskip+trunc):(nlen-postskip),ncol]
 
 	col_block = final_data_set[:,0] 
 	col_eiejx = final_data_set[:,1] 
@@ -396,6 +481,7 @@ def GetAverageOrderParam(numbbeads,variable,final_dir_in_work,preskip,postskip, 
 	output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
 	output  += "\n"
 	return output
+'''
 
 def GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE):
 	'''

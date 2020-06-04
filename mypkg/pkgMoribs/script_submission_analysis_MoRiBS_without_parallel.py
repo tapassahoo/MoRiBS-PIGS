@@ -268,8 +268,8 @@ for particleA in particleAList:
 
 			fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
 			fanalyzeEnergy.write(support.fmtAverageEnergy(TypeCal, status, variableName))
-			#fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
-			#fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
+			fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
+			fanalyzeCorr.write(support.fmtAverageOrderParam(status, variableName))
 
 		if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
 			fanalyzeEntropy = open(FileAnalysis.SaveEntropy, "a")
@@ -326,7 +326,7 @@ for particleA in particleAList:
 				final_dir_in_work = dir_output + folder_run
 				try:
 					fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
-					#fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip,numbblocks))
+					fanalyzeCorr.write(support.GetAverageOrderParam(TypeCal,numbmolecules,numbbeads, variable, final_dir_in_work, preskip, postskip,numbblocks))
 				except:
 					pass
 		else:
@@ -378,25 +378,25 @@ for particleA in particleAList:
 						fanalyzeEntropy.write(support.GetAverageEntropy(numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks,ENT_TYPE))
 					if (TypeCal != "ENT"):
 						fanalyzeEnergy.write(support.GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks))
-						#fanalyzeCorr.write(support.GetAverageOrderParam(numbbeads, variable, final_dir_in_work, preskip, postskip, numbblocks))
+						fanalyzeCorr.write(support.GetAverageOrderParam(TypeCal,numbmolecules,numbbeads, variable, final_dir_in_work, preskip, postskip, numbblocks))
 				except:
 					pass
 		iStep = iStep + 1
 
 	if (status == "analysis") and (TypeCal != "ENT"):
 		fanalyzeEnergy.close()
-		#fanalyzeCorr.close()
-		call(["cat", FileAnalysis.SaveEnergy])
-		print("")
-		print("")
-		#call(["cat",FileAnalysis.SaveCorr])
+		fanalyzeCorr.close()
+		#call(["cat", FileAnalysis.SaveEnergy])
 		#print("")
 		#print("")
+		call(["cat",FileAnalysis.SaveCorr])
+		print("")
+		print("")
 		# =========================File Checking===============================#
 		SavedFile = FileAnalysis.SaveEnergy
 		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
-		#SavedFile = FileAnalysis.SaveCorr
-		#support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
+		SavedFile = FileAnalysis.SaveCorr
+		support.FileCheck(TypeCal, list_nb, variableName, SavedFile)
 
 	if ((status == "analysis") and ((TypeCal == "ENT") and (ENT_ALGR == "WOR"))):
 		fanalyzeEntropy.close()
