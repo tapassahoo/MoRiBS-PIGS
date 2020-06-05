@@ -308,9 +308,9 @@ def fmtAverageOrderParam(status,variable):
 
 	if status == "analysis":
 		output    ="# "
-		output    += '{blocks:^10}{beads:^10}{var:^10}{eiejx:^12}{eiejy:^12}{eiejz:^12}{eiej:^12}{eix:^12}{eiy:^12}{eiz:^12}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er5:^12}{er6:^12}{er7:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', eiejx='<eiejx>', eiejy='<eiejy>', eiejz='<eiejz>', eiej='<eiej>', eix='<eix>', eiy='<eiy>', eiz='<eiz>', er1='Err-eiejx', er2='Err-eiejy', er3='Err-eiejz', er4='Err-eiej', er5='Err-eix', er6='Err-eiy', er7='Err-eiz')
+		output    += '{blocks:^10}{beads:^10}{var:^10}{eiz:^12}{eiejz:^12}{er1:^12}{er2:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', eiz='<eiz>', eiejz='<eiejz>', er1='Err-eiz', er2='Err-eiejz')
 		output    +="\n"
-		output    += '{0:=<200}'.format('#')
+		output    += '{0:=<80}'.format('#')
 		output    +="\n"
 		return output
 
@@ -338,14 +338,22 @@ def GetAverageOrderParam(TypeCal,numbmolecules,numbbeads,variable,final_dir_in_w
 				file_new = final_dir_in_work+"/results/output.xyz"
 				if (os.path.isfile(file_new) == True):
 					print(final_dir_in_work + " -- Restarted data")
-					col_data_new = np.genfromtxt(final_dir_in_work+"/results/output.xyz",usecols = col)
+					if "H2O1" in open(file_new).read():
+						file_temp = final_dir_in_work+"/results/output_temp.xyz"
+						rmstr = int(numbmolecules*numbbeads+3)
+						cmd1="tail -n +"+str(rmstr)+" "+file_new+">"+file_temp
+						os.system(cmd1)
+						col_data_new = np.genfromtxt(file_temp, usecols = col)
+						call(["rm", file_temp])
+					else:
+						col_data_new = np.genfromtxt(file_new, usecols = col)
 					index = int(col_data_new[0,0])
-					col_data_old = np.genfromtxt(final_dir_in_work+"/results/output.xyz_old",usecols = col)
+					col_data_old = np.genfromtxt(file_old,usecols = col)
 					marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
 					aa = col_data_new[:,0]
 					final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
 				elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
-					final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz_old", usecols = col, skip_header=preskip, skip_footer=postskip)
+					final_data_set = genfromtxt(file_old, usecols = col, skip_header=preskip, skip_footer=postskip)
 			else:
 				final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz", usecols = col, skip_header=preskip, skip_footer=postskip)
 
@@ -357,15 +365,30 @@ def GetAverageOrderParam(TypeCal,numbmolecules,numbbeads,variable,final_dir_in_w
 
 	workingNdim   = int(math.log(ncol_block)/math.log(2))
 	trunc         = int(ncol_block-2**workingNdim)
-	eiz=np.delete(final_data_set, 0, 1)
-	eiz=np.absolute(np.reshape(eiz[trunc:,],eiz[trunc:,].size))
+	raw_data=np.delete(final_data_set, 0, 1)
 
-	mean_eiz = np.mean(eiz)/numbmolecules
+	if (numbmolecules == 2):
+		eiz=np.absolute(np.reshape(raw_data[trunc:,],raw_data[trunc:,].size))
+		pairList = [i for i in range(numbmolecules)]
+	if (numbmolecules == 11):
+		eiz=np.absolute(np.reshape(raw_data[trunc:,2:numbmolecules-3],raw_data[trunc:,2:numbmolecules-3].size))
+		pairList = [i for i in range(2,numbmolecules-3)]
+	norm_eiz = len(pairList)
+	mean_eiz = np.mean(eiz)/norm_eiz
+	error_eiz = maxError_byBining(mean_eiz, eiz, workingNdim-6)/norm_eiz
 
-	error_eiz = maxError_byBining(mean_eiz, eiz, workingNdim-6)/numbmolecules
+	if (numbmolecules == 2):
+		pairList = [i for i in range(numbmolecules-1)]
+	if (numbmolecules == 11):
+		pairList = [i for i in range(2,numbmolecules-4)]
+	norm_eiejz = len(pairList)
+	eiejz=np.zeros(ncol_block,dtype=float)
+	for i in pairList:
+		eiejz = np.sum([eiejz[trunc:],np.multiply(raw_data[trunc:,i],raw_data[trunc:,i+1])],axis=0)
+	mean_eiejz = np.mean(eiejz)/norm_eiejz
+	error_eiejz = maxError_byBining(mean_eiejz, eiejz, workingNdim-6)/norm_eiejz
 
-	#output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
-	output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{er1:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiz=mean_eiz, er1=error_eiz)
+	output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiz=mean_eiz,eiejz=mean_eiejz,er1=error_eiz,er2=error_eiejz)
 	output  += "\n"
 	return output
 

@@ -29,9 +29,9 @@ nMolecule = 2
 nblocks = 20000
 npass = 200
 
-rmin = 2.75
-rmax = 2.75
-dr = 0.02
+rmin = 2.7
+rmax = 5.0
+dr = 0.1
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'

@@ -386,9 +386,9 @@ for particleA in particleAList:
 	if (status == "analysis") and (TypeCal != "ENT"):
 		fanalyzeEnergy.close()
 		fanalyzeCorr.close()
-		#call(["cat", FileAnalysis.SaveEnergy])
-		#print("")
-		#print("")
+		call(["cat", FileAnalysis.SaveEnergy])
+		print("")
+		print("")
 		call(["cat",FileAnalysis.SaveCorr])
 		print("")
 		print("")
