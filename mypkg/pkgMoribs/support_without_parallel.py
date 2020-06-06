@@ -153,17 +153,18 @@ def file_operations(TypeCal,final_dir_in_work,numbmolecules,numbbeads):
 						np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%.6e', delimiter='    ')
 
 				if (filecat == "output.xyz"):
-					if "H2O1" in open(filecat).read():
+					if "H2O1" in open(final_dir_in_work+"/results/"+filecat).read():
 						rmstr = int(numbmolecules*numbbeads+3)
-						cmd1="tail -n +"+str(rmstr)+" "+final_dir_in_work+"results/"+filecat+">bb"
+						file_temp = final_dir_in_work+"/results/"+filecat+"_temp"
+						cmd1="tail -n +"+str(rmstr)+" "+final_dir_in_work+"/results/"+filecat+">"+file_temp
 						os.system(cmd1)
-						col_data_new = np.genfromtxt("bb")
-						call(["rm", "bb"])
+						col_data_new = np.genfromtxt(file_temp)
+						call(["rm", file_temp])
 					else:
-						col_data_new = np.genfromtxt(final_dir_in_work+"results/"+filecat)
+						col_data_new = np.genfromtxt(final_dir_in_work+"/results/"+filecat)
 					index = int(col_data_new[0,0])
 					col_data_old = np.genfromtxt(final_dir_in_work+"/results/"+filecat+"_old")
-					marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
+					merged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
 					np.savetxt(final_dir_in_work+"/results/"+filecat+"_old", merged_data, fmt='%.6e', delimiter='    ')
 
 				call(["rm", final_dir_in_work+"/results/"+filecat])
