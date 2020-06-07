@@ -353,7 +353,7 @@ def GetAverageOrderParam(TypeCal,numbmolecules,numbbeads,variable,final_dir_in_w
 					marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
 					aa = col_data_new[:,0]
 					final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
-				elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
+				else:
 					final_data_set = genfromtxt(file_old, usecols = col, skip_header=preskip, skip_footer=postskip)
 			else:
 				final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz", usecols = col, skip_header=preskip, skip_footer=postskip)
@@ -373,19 +373,19 @@ def GetAverageOrderParam(TypeCal,numbmolecules,numbbeads,variable,final_dir_in_w
 		pairList = [i for i in range(numbmolecules)]
 	if (numbmolecules == 11):
 		eiz=np.absolute(np.reshape(raw_data[trunc:,2:numbmolecules-3],raw_data[trunc:,2:numbmolecules-3].size))
-		pairList = [i for i in range(2,numbmolecules-3)]
+		pairList = [i for i in range(2,numbmolecules-2)]
 	norm_eiz = len(pairList)
 	mean_eiz = np.mean(eiz)/norm_eiz
 	error_eiz = maxError_byBining(mean_eiz, eiz, workingNdim-6)/norm_eiz
 
 	if (numbmolecules == 2):
-		pairList = [i for i in range(numbmolecules-1)]
+		paireiej = [i for i in range(numbmolecules-1)]
 	if (numbmolecules == 11):
-		pairList = [i for i in range(2,numbmolecules-4)]
-	norm_eiejz = len(pairList)
-	eiejz=np.zeros(ncol_block,dtype=float)
-	for i in pairList:
-		eiejz = np.sum([eiejz[trunc:],np.multiply(raw_data[trunc:,i],raw_data[trunc:,i+1])],axis=0)
+		paireiej = [i for i in range(2,numbmolecules-3)]
+	norm_eiejz = len(paireiej)
+	eiejz=np.zeros(ncol_block-trunc,dtype=float)
+	for i in paireiej:
+		eiejz += np.multiply(raw_data[trunc:,i],raw_data[trunc:,i+1])
 	mean_eiejz = np.mean(eiejz)/norm_eiejz
 	error_eiejz = maxError_byBining(mean_eiejz, eiejz, workingNdim-6)/norm_eiejz
 
