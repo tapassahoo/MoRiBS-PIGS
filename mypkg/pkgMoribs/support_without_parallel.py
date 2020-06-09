@@ -1580,7 +1580,7 @@ class GetFileNamePlot:
 		file_output8  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Chemical-Potential-"
 		file_output9  = frontName+FragmentRpt+FragmentDipoleMoment+FragmentGFactor+"Entropy-"
 		file_output10 = frontName+FragmentDipoleMoment+FragmentGFactor+"Energy-vs-R-"
-		file_output11 = frontName+FragmentDipoleMoment+FragmentGFactor+"Order-parameters-"
+		file_output11 = frontName+FragmentDipoleMoment+FragmentGFactor+"Order-parameters-vs-R-"
 		mainFileNameFitvsR  = "fixed-"+self.parameterName+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
 		mainFileNameFitvsR += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)+add2
 
