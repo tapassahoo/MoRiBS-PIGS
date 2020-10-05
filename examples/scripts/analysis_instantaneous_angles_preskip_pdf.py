@@ -76,7 +76,7 @@ for isubplot in range(10):
 
 	rptList=rptdict[isubplot]
 	print(rptList)
-	colorList=["yellow", "green"]
+	colorList=["red", "green"]
 	lsList=["dashed", "dashdot"]
 	j=axis_index[axis_read]
 	ig=0
@@ -85,7 +85,8 @@ for isubplot in range(10):
 		rpt_exact = "{:3.2f}".format(rpt)
 		#file_exact1 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax2-Rpt'+rpt_exact+'Angstrom-grid-24-12-niter100.txt'
 		#data_exact1 = np.genfromtxt(file_exact1)
-		file_exact2 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax4-Rpt'+rpt_exact+'Angstrom-grid-20-20-niter200.txt'
+		#file_exact2 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax4-Rpt'+rpt_exact+'Angstrom-grid-20-20-niter200.txt'
+		file_exact2 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax6-Rpt'+rpt_exact+'Angstrom-grid-20-28-niter400.txt'
 		data_exact2 = np.genfromtxt(file_exact2)
 
 		file1=file_read.replace(system_replaced, system_replaced_by[numb_particle])
@@ -142,16 +143,25 @@ for isubplot in range(10):
 		if (numb_particle == 11):
 			vec_plot = np.reshape(save_data[2:(numb_particle-2),:], (numb_particle-4)*data_len)
 		if (numb_particle == 2):
+			for k in range(numb_particle):
+				vec_plot = np.reshape(save_data[k,:], (numb_particle-1)*data_len)
+				data_plot = vec_plot
+				hist = np.histogram(data_plot, bins=100)
+				hist_dist = scipy.stats.rv_histogram(hist)
+				x = np.linspace(-0.999, 0.999, 100)
+				plt.plot(x, hist_dist.pdf(x), ls=lsList[k], color=colorList[k], label='rotor'+str(k+1),zorder=k*5)
+				#plt.plot(x, -hist_dist.logpdf(x), label=r'$-\log(p(\cos(\theta)))$')
+
 			#Combined distribution
 			vec_plotc = np.reshape(save_data, numb_particle*data_len)
 			data_plotc = vec_plotc
 			histc = np.histogram(data_plotc, bins=100)
 			hist_distc = scipy.stats.rv_histogram(histc)
 			xc = np.linspace(-0.999, 0.999, 100)
-			#plt.plot(xc, hist_distc.pdf(xc), ls='solid',color='black',label='both rotors')
-			plt.plot(xc, -hist_distc.logpdf(xc), ls='solid',color='black',label='both rotors')
-
-			#plt.hist(data_plotc, bins=50, density=True, alpha=0.5, stacked=True, color='magenta', edgecolor='black', label='both rotors')
+			plt.plot(xc, hist_distc.pdf(xc), ls='solid',color='black',label='both rotors',zorder=10)
+			#plt.plot(data_exact1[:,0],data_exact1[:,1],color='black',ls='-.',label='Lanczos iter. '+r'$J=2$')
+			plt.plot(data_exact2[:,0],data_exact2[:,1],color='blue',ls='dashed',label='Lanczos: '+r'$J=6$', zorder=15)
+		#plt.hist(data_plot, bins=50, density=True, alpha=0.5, stacked=True, color=colorList[ig], edgecolor='black', label=label_str+r'$\mathrm{\AA}$')
 		ig=ig+1
 
 	#
@@ -160,20 +170,21 @@ for isubplot in range(10):
 	xmin,xmax=plt.xlim()
 	ymin,ymax=plt.ylim()
 	plt.text(xmin+(xmax-xmin)*0.04,ymax-(ymax-ymin)*0.1,label_panel)
-	plt.text(xmin+0.4*(xmax-xmin),ymin+0.3*(ymax-ymin),r'$N$='+str(numb_label)+'; '+label_str+r'$\mathrm{\AA}$')
+	plt.text(xmin+0.4*(xmax-xmin),ymin+0.9*(ymax-ymin),r'$N$='+str(numb_label)+'; '+label_str+r'$\mathrm{\AA}$')
 
-	plt.ylabel(r'$-\log(p(\cos(\theta)))$',labelpad=5)
+	plt.ylabel(r'$p(\cos(\theta))$',labelpad=5)
 
 	if ((isubplot == 8) or (isubplot == 9)):
+		#plt.xlabel(r'$\mathrm{bins \ of \ \cos(\theta)}$', labelpad=5)
 		plt.xlabel(r'$\mathrm{\cos(\theta)}$', labelpad=5)
 	else:
 		frame1 = plt.gca()
 		frame1.axes.xaxis.set_ticklabels([])
 
 	if (numb_particle == 2):
-		plt.subplots_adjust(top=0.99,bottom=0.03,left=0.08,right=0.99,hspace=0.06,wspace=0.23)
+		plt.subplots_adjust(top=0.99,bottom=0.03,left=0.06,right=0.99,hspace=0.06,wspace=0.17)
 	if (numb_particle == 11):
-		plt.subplots_adjust(top=0.99,bottom=0.03,left=0.08,right=0.99,hspace=0.06,wspace=0.23)
+		plt.subplots_adjust(top=0.99,bottom=0.03,left=0.06,right=0.99,hspace=0.06,wspace=0.17)
 	ax.tick_params(right=True,top=True,left=True,bottom=True)
 	plt.legend(numpoints=1,loc='center')
 	plt.minorticks_on()
@@ -184,7 +195,7 @@ for isubplot in range(10):
 index_cut=dir_read.find(mc_read)
 home = os.path.expanduser("~")
 final_results_path = home + "/ResultsOf" + mc_read + "/"
-FilePlotDensity=final_results_path+first_fragment[index_cut:-1]+last_fragment[:-1]+"-logpdf-of-"+axis_read+"-vs-gFactor-preskip"+str(preskip)+"-postskip"+str(postskip)+"-Rpt"+str(rptdict[0][0])+"-"+str(rptdict[9][0])+"Angstrom.pdf"
+FilePlotDensity=final_results_path+first_fragment[index_cut:-1]+last_fragment[:-1]+"-pdf-of-"+axis_read+"-vs-gFactor-preskip"+str(preskip)+"-postskip"+str(postskip)+"-Rpt"+str(rptdict[0][0])+"-"+str(rptdict[9][0])+"Angstrom.pdf"
 print(FilePlotDensity)
 
 plt.savefig(FilePlotDensity, dpi=100, format='pdf')

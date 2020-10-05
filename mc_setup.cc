@@ -17,6 +17,9 @@ bool    WORM     = false;      // use the worm algorithm
 
 bool    IMPURITY = false;    // set true if there is a molecule in the system
 bool    MINIMAGE = false;    // set true to apply minimum image convention 
+bool    CRYSTAL = false;     // set true to use crystal geometry
+bool    FCC = false;
+bool    HCP = false;
 
 int     IMTYPE   = -1;       // atom type for dopant molecule (rotational degrees of freedom)
 
@@ -62,7 +65,9 @@ int    KMAX;
 #endif
 
 double  Density;
-double  BoxSize;
+double *BoxSize;             // size of the entire box (in NDIM dimensions)
+double  UnitCell[3];         // size of a single crystal unit cell (containing 4 atoms)
+int     N1d[3];      
 
 double  MCBeta;
 double  MCTau;      // imaginary time step 
@@ -175,19 +180,20 @@ void replInitial_config(double **);
 
 void MCMemAlloc(void)  // allocate  memmory 
 {
+	BoxSize   = new double [NDIM];
+
   MCCoords  = doubleMatrix (NDIM,NumbAtoms*NumbTimes);  
   newcoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
-  DipoleCoords  = doubleMatrix (NDIM,NumbAtoms);  
+  //DipoleCoords  = doubleMatrix (NDIM,NumbAtoms);  
 
   // TZMAT = doubleMatrix (NDIM,NDIM);
  
   atom_list = new int [NumbAtoms];
 
-  // MCCosine  = doubleMatrix (NDIM,NumbAtoms*NumbTimes);  
-  MCCosine  = doubleMatrix (3,NumbAtoms*NumbTimes); 
-  MCCosinex  = doubleMatrix (3,NumbAtoms*NumbTimes); 
-  MCCosiney  = doubleMatrix (3,NumbAtoms*NumbTimes); 
-  MCAngles  = doubleMatrix (3,NumbAtoms*NumbTimes); 
+  MCCosine  = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
+  //MCCosinex  = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
+  //MCCosiney  = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
+  MCAngles  = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
 
   MCCooInit = new double [NDIM*NumbAtoms*NumbTimes];
   MCAngInit = new double [NDIM*NumbAtoms*NumbTimes];
@@ -203,11 +209,13 @@ void MCMemAlloc(void)  // allocate  memmory
   PIndex    = new int [NumbAtoms];
   RIndex    = new int [NumbAtoms];
 
+/*
 #ifdef PROPOSED
   	tempcoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
 	costProposed = new double [NCOST*NPHI];
 	phiProposed  = new double [NCOST*NPHI];
 #endif
+*/
 #ifdef GAUSSIANMOVE
   	gausscoords = doubleMatrix (NDIM,NumbAtoms*NumbTimes); 
 	AMat    = new double [NumbTimes*NumbTimes];
@@ -217,13 +225,14 @@ void MCMemAlloc(void)  // allocate  memmory
 
 void MCMemFree(void)  //  free memory
 {
+	delete [] BoxSize;
   free_doubleMatrix(MCCoords);  
   free_doubleMatrix(newcoords); 
-  free_doubleMatrix(DipoleCoords);  
+  //free_doubleMatrix(DipoleCoords);  
 
   free_doubleMatrix(MCCosine); 
-  free_doubleMatrix(MCCosinex); 
-  free_doubleMatrix(MCCosiney); 
+  //free_doubleMatrix(MCCosinex); 
+  //free_doubleMatrix(MCCosiney); 
   free_doubleMatrix(MCAngles); 
 
   delete [] atom_list;
@@ -237,11 +246,13 @@ void MCMemFree(void)  //  free memory
   delete [] PIndex;
   delete [] RIndex;
 
+/*
 #ifdef PROPOSED
   	free_doubleMatrix(tempcoords); 
 	delete [] costProposed;
 	delete [] phiProposed;
 #endif
+*/
 #ifdef GAUSSIANMOVE
   	free_doubleMatrix(gausscoords); 
 	delete [] AMat;
@@ -418,7 +429,36 @@ void MCInit(void)  // only undimensional parameters in this function
 	// BoxSize  =  pow((double)NumbAtoms/Density,1.0/(double)NDIM); 
 	// define a box size based on number of atoms only (molecules excluded)
   
-	BoxSize  =  pow((double)(NUMB_ATOMS+NUMB_MOLCS)/Density,1.0/(double)NDIM);
+   double volume = (double)(NUMB_ATOMS+NUMB_MOLCS)/Density;
+   if(CRYSTAL)
+   {
+      if(FCC)
+      {
+         UnitCell[0] = pow(volume/N1d[0]/N1d[1]/N1d[2], 1.0/NDIM);
+         UnitCell[1] = UnitCell[0];
+         UnitCell[2] = UnitCell[0];
+      }
+      else if(HCP)
+      {
+         UnitCell[0] = pow(volume/N1d[0]/N1d[1]/N1d[2]/sqrt(8.0), 1.0/NDIM);
+         UnitCell[1] = sqrt(3.0)*UnitCell[0];
+         UnitCell[2] = sqrt(8.0/3.0)*UnitCell[0];
+      }
+      cout<<"UnitCell: "<<UnitCell[0]<<" "<<UnitCell[1]<<" "<<UnitCell[2]<<endl;
+
+      for(int id=0;id<NDIM;id++)
+      BoxSize[id] = UnitCell[id]*N1d[id];
+   }
+   else
+   {
+      for (int id=0;id<NDIM;id++)
+      BoxSize[id] = pow(volume, 1.0/NDIM);
+   }
+   cout<<"BoxSize: "<<BoxSize[0];
+   for (int id=1;id<NDIM;id++)
+   cout<<" "<<BoxSize[id];
+   cout<<endl;
+
 
 	MCBeta   =  1.0/Temperature;
 
@@ -544,12 +584,14 @@ void MCConfigInit(void)
 		MCCosine[AXIS_X][it] = sint*cos(phi);
 		MCCosine[AXIS_Y][it] = sint*sin(phi);
 		MCCosine[AXIS_Z][it] = cost;
+		/*
 		MCCosinex[AXIS_X][it] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
 		MCCosinex[AXIS_Y][it] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
 		MCCosinex[AXIS_Z][it] = -sint*cos(chi);
 		MCCosiney[AXIS_X][it] = -cost*cos(phi)*sin(chi)-sin(phi)*cos(chi);
 		MCCosiney[AXIS_Y][it] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
 		MCCosiney[AXIS_Z][it] = sint*sin(chi);
+		*/
 	}
 }
 

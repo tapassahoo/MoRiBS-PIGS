@@ -12,8 +12,8 @@ import mypkg.pkgMoribs.support_without_parallel as support
 
 rc('text', usetex=True)
 size=24
-params = {'legend.fontsize': size*0.5,
-	'figure.figsize': (16,30),
+params = {'legend.fontsize': size*0.6,
+	'figure.figsize': (16,12),
 	'axes.labelsize': size,
 	'axes.titlesize': size,
 	'xtick.labelsize': size*0.75,
@@ -64,13 +64,13 @@ label_panel_list = {0:"(a)", 1:"(b)", 2:"(c)", 3:"(d)",4:"(e)", 5:"(f)", 6:"(g)"
 #rptdict = {0:[2.9],1:[3.0],2:[3.1],3:[3.2]}
 #rptdict = {0:[3.1],1:[3.2],2:[3.3],3:[3.4],4:[3.5],5:[3.6],6:[3.7],7:[3.8],8:[3.9],9:[4.0]}
 #rptdict = {0:[4.1],1:[4.2],2:[4.3],3:[4.4],4:[4.5],5:[4.6],6:[4.7],7:[4.8],8:[4.9],9:[5.0]}
-rptdict = {0:[5.2],1:[5.4],2:[5.6],3:[5.8],4:[6.0],5:[6.2],6:[6.4],7:[6.6],8:[6.8],9:[7.0]}
-#rptdict = {0:[4.0],1:[4.5],2:[5.0],3:[6.0]}
+#rptdict = {0:[5.2],1:[5.4],2:[5.6],3:[5.8],4:[6.0],5:[6.2],6:[6.4],7:[6.6],8:[6.8],9:[7.0]}
+rptdict = {0:[3.0],1:[4.0],2:[5.0],3:[6.0]}
 #rptdict = {0:[7.0],1:[8.0],2:[9.0],3:[10.0]}
 
-for isubplot in range(10):
+for isubplot in range(4):
 	label_panel = label_panel_list[isubplot]
-	plt.subplot(5, 2, isubplot+1)
+	plt.subplot(2, 2, isubplot+1)
 	preskip = 0
 	postskip = 0
 
@@ -83,10 +83,14 @@ for isubplot in range(10):
 	for rpt in rptList:
 
 		rpt_exact = "{:3.2f}".format(rpt)
-		#file_exact1 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax2-Rpt'+rpt_exact+'Angstrom-grid-24-12-niter100.txt'
-		#data_exact1 = np.genfromtxt(file_exact1)
-		file_exact2 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax4-Rpt'+rpt_exact+'Angstrom-grid-20-20-niter200.txt'
-		data_exact2 = np.genfromtxt(file_exact2)
+		if (numb_particle <= 2):
+			#file_exact1 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax2-Rpt'+rpt_exact+'Angstrom-grid-24-12-niter100.txt'
+			#data_exact1 = np.genfromtxt(file_exact1)
+			if (float(rpt_exact) <= 5.0):
+				file_exact2 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax8-Rpt'+rpt_exact+'Angstrom-grid-20-20-niter600.txt'
+			else:
+				file_exact2 = '/home/tapas/ResultsOfExact/ground-state-theta-distribution-lanc-2-p-H2O-jmax6-Rpt'+rpt_exact+'Angstrom-grid-20-28-niter400.txt'
+			data_exact2 = np.genfromtxt(file_exact2)
 
 		file1=file_read.replace(system_replaced, system_replaced_by[numb_particle])
 		file2=file1.replace(rpt_read,"Rpt"+str(rpt))
@@ -135,23 +139,30 @@ for isubplot in range(10):
 			ncol = ncol+1
 			print(str(ncol)+'th column')
 			save_data[i,:] = final_data_set[(preskip+trunc):(nlen-postskip),ncol]
+			if (i==1):
+				save_data[i,:] = -save_data[i,:]
 			
 
-		label_str=r'$r$='+str(rpt)	
+		label_str=r'$r='+str(rpt)+'$'
 
 		if (numb_particle == 11):
 			vec_plot = np.reshape(save_data[2:(numb_particle-2),:], (numb_particle-4)*data_len)
+
+			#Combined distribution
+			data_plotc = vec_plot
+			plt.hist(data_plotc, bins=50, density=True, alpha=0.5, stacked=True, color='magenta', edgecolor='black')
 		if (numb_particle == 2):
+			for k in range(numb_particle):
+				vec_plot = np.reshape(save_data[k,:], (numb_particle-1)*data_len)
+				data_plot = vec_plot
+				plt.hist(data_plot, bins=50, density=True, alpha=0.5, stacked=True, color=colorList[k], edgecolor='black', label='rotor'+str(k+1))
+
 			#Combined distribution
 			vec_plotc = np.reshape(save_data, numb_particle*data_len)
 			data_plotc = vec_plotc
-			histc = np.histogram(data_plotc, bins=100)
-			hist_distc = scipy.stats.rv_histogram(histc)
-			xc = np.linspace(-0.999, 0.999, 100)
-			#plt.plot(xc, hist_distc.pdf(xc), ls='solid',color='black',label='both rotors')
-			plt.plot(xc, -hist_distc.logpdf(xc), ls='solid',color='black',label='both rotors')
-
-			#plt.hist(data_plotc, bins=50, density=True, alpha=0.5, stacked=True, color='magenta', edgecolor='black', label='both rotors')
+			plt.hist(data_plotc, bins=50, density=True, alpha=0.5, stacked=True, color='magenta', edgecolor='black', label='both rotors')
+			if (numb_particle <= 2):
+				plt.plot(data_exact2[:,0],data_exact2[:,1],color='blue',ls='-',label='Lanczos: '+r'$J=6$', zorder=15)
 		ig=ig+1
 
 	#
@@ -160,20 +171,20 @@ for isubplot in range(10):
 	xmin,xmax=plt.xlim()
 	ymin,ymax=plt.ylim()
 	plt.text(xmin+(xmax-xmin)*0.04,ymax-(ymax-ymin)*0.1,label_panel)
-	plt.text(xmin+0.4*(xmax-xmin),ymin+0.3*(ymax-ymin),r'$N$='+str(numb_label)+'; '+label_str+r'$\mathrm{\AA}$')
+	plt.text(xmin+0.4*(xmax-xmin),ymin+0.9*(ymax-ymin),r'$N='+str(numb_label)+'$; '+label_str+r'$\mathrm{\AA}$')
 
-	plt.ylabel(r'$-\log(p(\cos(\theta)))$',labelpad=5)
+	plt.ylabel(r'$p(\cos(\theta))$',labelpad=10)
 
-	if ((isubplot == 8) or (isubplot == 9)):
-		plt.xlabel(r'$\mathrm{\cos(\theta)}$', labelpad=5)
+	if ((isubplot == 2) or (isubplot == 3)):
+		plt.xlabel(r'$\cos(\theta)$', labelpad=10)
 	else:
 		frame1 = plt.gca()
 		frame1.axes.xaxis.set_ticklabels([])
 
 	if (numb_particle == 2):
-		plt.subplots_adjust(top=0.99,bottom=0.03,left=0.08,right=0.99,hspace=0.06,wspace=0.23)
+		plt.subplots_adjust(top=0.99,bottom=0.08,left=0.07,right=0.99,hspace=0.06,wspace=0.2)
 	if (numb_particle == 11):
-		plt.subplots_adjust(top=0.99,bottom=0.03,left=0.08,right=0.99,hspace=0.06,wspace=0.23)
+		plt.subplots_adjust(top=0.99,bottom=0.08,left=0.07,right=0.99,hspace=0.06,wspace=0.2)
 	ax.tick_params(right=True,top=True,left=True,bottom=True)
 	plt.legend(numpoints=1,loc='center')
 	plt.minorticks_on()
@@ -184,7 +195,7 @@ for isubplot in range(10):
 index_cut=dir_read.find(mc_read)
 home = os.path.expanduser("~")
 final_results_path = home + "/ResultsOf" + mc_read + "/"
-FilePlotDensity=final_results_path+first_fragment[index_cut:-1]+last_fragment[:-1]+"-logpdf-of-"+axis_read+"-vs-gFactor-preskip"+str(preskip)+"-postskip"+str(postskip)+"-Rpt"+str(rptdict[0][0])+"-"+str(rptdict[9][0])+"Angstrom.pdf"
+FilePlotDensity=final_results_path+first_fragment[index_cut:-1]+last_fragment[:-1]+"-histogram-of-"+axis_read+"-vs-gFactor-preskip"+str(preskip)+"-postskip"+str(postskip)+"-Rpt"+str(rptdict[0][0])+"-"+str(rptdict[3][0])+"Angstrom.pdf"
 print(FilePlotDensity)
 
 plt.savefig(FilePlotDensity, dpi=100, format='pdf')

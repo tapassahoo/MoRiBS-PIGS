@@ -1,10 +1,10 @@
 #.SUFFIXES: .o .cxx
 
 #options= -Ofast -march=native -fopenmp
-options= -Ofast -fopenmp
+options= -Ofast -march=native -fopenmp
 
 # CFLAGS for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM -DONSITE
 # -DSHORTFORM -DONSITE
 #-DPROPOSED
 #-DCAGEPOT
@@ -14,17 +14,27 @@ CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM
 #LDFLAGS=-L/home/pnroy/Dev/lib64/ -lm -L./sprng/lib -llcg -L/home/pnroy/Dev/lib64/ -lgfortran  -L/opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
 #below is the LDFLAGS with minimum flags
 #LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran -lblas -llapack
-LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran 
+#LDFLAGS= -lm -L./sprng/lib -llcg -lgfortran 
  
 #-------------------------------------------------------------------------
 #  Compilers
 #-------------------------------------------------------------------------
 
 #CC=mpic++
-GCC = gcc
 CC=g++ 
-FC=gfortran
+FC=ifort
 #FC=/home/pnroy/Dev/bin/gfortran
+
+LDFLAGS = -lm -L./sprng/lib -llcg -lifcore
+
+#ifeq ($(FC),gfortran)
+#        LDFLAGS += -lgfortran
+#endif
+#ifeq ($(FC),ifort)
+#        LDFLAGS += -lifcore
+#endif
+
+
 
 #-------------------------------------------------------------------------
 # objects for QMC
@@ -79,9 +89,6 @@ wipe:
 
 .f.o:
 	${FC} -O3 -c $<
-
-.c.o:
-	${GCC} -O3 -c $<
 #---------------------------------------------------------------------------
 # %.o: %.cxx
 # $(CC) $(options) -c  $(CFLAGS) $(CPPFLAGS) $< -o $@

@@ -1,11 +1,12 @@
 #include "mc_utils.h"
 #include "mc_confg.h"
 
-#include <math.h>
+#include <cmath>
 #include <assert.h>
 #include <stdlib.h>
 
 //------------ memory allocation ----------------
+
 double **doubleMatrix(long row, long col)
 // based on nrutils.c dmatrix 
 {

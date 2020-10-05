@@ -18,36 +18,82 @@ molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0
 
-#var = "beta" # for fixed tau
-#param = 0.002 # for fixed tau
-
-var = "tau"  # for fixed beta
-param = 0.1 # for fixed beta
-
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 11
+nMolecule = 2
 nblocks = 20000
 npass = 200
 
-rmin = 5.2
-rmax = 10.0
-dr = 0.2
+var = "beta" # for fixed tau
+param = 0.001 # for fixed tau
+
+#var = "tau"  # for fixed beta
+#param = 0.2 # for fixed beta
+
+
+if (simType1 == "submission"):
+	rmin = 2.8
+	rmax = 7.0
+	dr = 0.1
+	nr = int(((rmax-rmin)+dr*0.5)/dr)
+	nr = nr+1
+	print(nr)
+	RList += [rmin+dr*i for i in range(nr)]
+	print(RList)
+
+if (simType1 == "analysis"):
+	if ((param == 0.1) and (var == "tau")):
+		rmin = 2.5
+		rmax = 2.7
+		dr = 0.02
+		nr = int(((rmax-rmin)+dr*0.5)/dr)
+		nr += 1
+		RList = [rmin+dr*i for i in range(nr)]
+		RList += [2.75]
+		rmin = 2.8
+		rmax = 5.0
+		dr = 0.1
+		nr = int(((rmax-rmin)+dr*0.5)/dr)
+		nr += 1
+		RList += [rmin+dr*i for i in range(nr)]
+		rmin = 5.2
+		rmax = 7.0
+		dr = 0.2
+		nr = int(((rmax-rmin)+dr*0.5)/dr)
+		nr += 1
+		print(nr)
+		RList += [rmin+dr*i for i in range(nr)]
+		print(RList)
+
+	if ((param == 0.2) and (var == "tau")):
+		rmin = 7.0
+		rmax = 10.0
+		dr = 0.2
+		nr = int(((rmax-rmin)+dr*0.5)/dr)
+		nr += 1
+		RList = [rmin+dr*i for i in range(nr)]
+
+	if (var == "beta"):
+		rmin = 3.0
+		rmax = 10.0
+		dr = 1.0
+		nr = int(((rmax-rmin)+dr*0.5)/dr)
+		nr += 1
+		RList = [rmin+dr*i for i in range(nr)]
+
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
-stringName2 = '"qTIP4P-"'
+#stringName2 = '"qTIP4P-"'
+stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
 #stringName2 = '"qSPCFw-"'
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 0"
+	cmd1 = "--preskip 10000"
 else:
 	cmd1 = ""
 
-nr = int(((rmax-rmin)+dr*0.5)/dr)
-nr = nr+1
-print(nr)
 
-for i in range(nr):
+for rcom in RList:
 
 	space=" "
 
@@ -60,7 +106,6 @@ for i in range(nr):
 	support.replace("extraName", stringName2, fileName2, fileName3)
 	call(["rm", fileName2])
 
-	rcom = rmin+dr*i
 	rcom="{:3.2f}".format(rcom)
 	#field_strength = 20.0 # Unit inverse of Kelvin
 
@@ -90,8 +135,8 @@ for i in range(nr):
 		+ rotor+space
 		+ str(param)+space
 		+ var+space
-		+ " -C --RESTART"+space
-		+ " -NR 20000"+space
+		#+ " -C --RESTART"+space
+		#+ " -NR 20000"+space
 	) 
 
 	print(cmd_run)

@@ -10,7 +10,7 @@
 #include <sstream>
 #include <iomanip>
 #include <math.h>
-#include <vector>
+//#include <vector>
 
 #include "mc_confg.h"
 #include "mc_setup.h"
@@ -83,10 +83,10 @@ double _Cv_trans_1_total;    // translational heat capacity, global average
 double _Cv_trans_2_total;    // translational heat capacity, global average
 double _Cv_rot_total;    // rotational heat capacity, global average
 
-fstream _feng;      // save accumulated energy
-fstream _fdc;      // save accumulated energy
-fstream _fangins;      // save accumulated energy
-fstream _fengins;      // save accumulated energy
+//fstream _feng;      // save accumulated energy
+//fstream _fdc;      // save accumulated energy
+//fstream _fangins;      // save accumulated energy
+//fstream _fengins;      // save accumulated energy
 
 //---------------- ESTIMATORS ---------------
 
@@ -130,7 +130,7 @@ Distribution = "unSwap";
 	cout<<"TAPAS"<<endl;
 	exit(11);
 #endif
-   	randomseed(); //set seed according to clock
+   	//randomseed(); //set seed according to clock
 	if (ENT_ENSMBL == EXTENDED_ENSMBL) srand(time(NULL));
 #ifdef POTH2
    vinit_();
@@ -494,11 +494,11 @@ ParamsPotential();
    }
 // MPI BLOCK 1 in MASTER done
 */
-    InitMCEstims();
+    //InitMCEstims();
    	//InitTotalAverage();      // DUMP 
    
-   	ResetMCCounts();
-   	ResetQWCounts();
+   	//ResetMCCounts();
+   	//ResetQWCounts();
 
 /*
 // 	try openmp for loop
@@ -669,6 +669,7 @@ ParamsPotential();
 			SaveGraSum(MCFileName.c_str(),totalCount);
 #endif
 
+/*
 #ifdef IOWRITE
 			if(IMPURITY && MCAtom[IMTYPE].molecule == 1)
 	    	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
@@ -684,6 +685,7 @@ ParamsPotential();
            	}
 
 #endif
+*/
 			if (ROTATION && PIMC_SIM)                  // DUMP  accumulated average
 				SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
 		}
@@ -720,7 +722,7 @@ ParamsPotential();
 	if (WORM)
 		MCWormDone();
 
-	DoneMCEstims();
+	//DoneMCEstims();
 	DonePotentials();
 
 	if (ROTATION)
@@ -774,10 +776,10 @@ void MCResetBlockAveragePIMC(void)
 {
 	avergCount = 0.0;
 
-	ResetMCEstims();
+	//ResetMCEstims();
 
 	ResetMCCounts();
-	ResetQWCounts();
+	//ResetQWCounts();
 
 	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
@@ -801,22 +803,21 @@ void MCResetBlockAveragePIGS(void)
 {
 	avergCount = 0.0;
 
-	ResetMCEstims();
-
+	//ResetMCEstims();
 	ResetMCCounts();
-	ResetQWCounts();
+	//ResetQWCounts();
 
 	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
 	_btotal    = 0.0;
-	_bkin        = 0.0;
+	_bkin      = 0.0;
 
-	_brot        = 0.0;
-	_brot1        = 0.0;
-	_brotsq      = 0.0;
-	_bCv         = 0.0;
-	_bCv_trans   = 0.0;
-	_bCv_rot     = 0.0;
+	_brot      = 0.0;
+	_brot1     = 0.0;
+	_brotsq    = 0.0;
+	_bCv       = 0.0;
+	_bCv_trans = 0.0;
+	_bCv_rot   = 0.0;
 
 	PrintXYZprl = 0;
 
@@ -830,9 +831,9 @@ void MCResetBlockAveragePIGSENT(void)
 {
 	avergCount = 0.0;
 
-	ResetMCEstims();
+	//ResetMCEstims();
 	ResetMCCounts();
-	ResetQWCounts();
+	//ResetQWCounts();
 
 	if (ENT_ENSMBL == EXTENDED_ENSMBL) {
 		MCAccepSwap = 0.0;
@@ -1198,6 +1199,7 @@ void MCSaveBlockAverages(long int blocknumb)
   	// densities
 
   	// toby temporarily by-pass the density save for the non-linear rotor
+/*
 #ifdef IOWRITE 
   	if( IMPURITY && MCAtom[IMTYPE].molecule == 1)
     {
@@ -1227,6 +1229,7 @@ void MCSaveBlockAverages(long int blocknumb)
     	SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
 	}
 #endif
+*/
 	if ((PIGS_SIM) || (PIMC_SIM))
 	{
 		SaveEnergy(MCFileName.c_str(),avergCount,blocknumb);
@@ -1237,6 +1240,7 @@ void MCSaveBlockAverages(long int blocknumb)
 		SaveTrReducedDens(MCFileName.c_str(),avergCount,blocknumb);
 	}	
 
+/*
 #ifdef IOWRITE
 	if (BOSONS) 
     SaveExchangeLength (MCFileName.c_str(),avergCount,blocknumb);
@@ -1256,6 +1260,7 @@ void MCSaveBlockAverages(long int blocknumb)
       	SaveAreaEstim3D (MCFileName.c_str(),avergCount,blocknumb,iframe);
     }
 #endif
+*/
 
 }
 
@@ -1402,6 +1407,7 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
     fid.close();
 }
 
+/*
 void SaveInstantEnergy()
 {
     const char *_proc_=__func__;
@@ -1427,6 +1433,7 @@ void SaveInstantEnergy()
     _fengins << setw(IO_WIDTH) << srotinst << BLANK;
     _fengins << endl;
 }
+*/
 
 void InitTotalAverage(void)  // DUMP
 {
@@ -1474,6 +1481,7 @@ void InitTotalAverage(void)  // DUMP
 */
 
 //
+/*
 #ifdef INSTANT
     string fangularins;
 
@@ -1493,11 +1501,14 @@ void InitTotalAverage(void)  // DUMP
     if (!_fangins.is_open())
     _io_error(_proc_,IO_ERR_FOPEN,fangularins.c_str());
 #endif
+*/
 }
 
 void DoneTotalAverage(void)
 {
-  _feng.close();
+  //_feng.close();
+  //_fangins.close();
+  //_fengins.close();
 }
 
 void MCSaveAcceptRatio(long int step,long int pass,long int block)
@@ -1508,6 +1519,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 	cout << "PASS:"  << setw(w) << pass  << BLANK;
 	cout << "STEP:"  << setw(w) << step  << BLANK;
 
+	/*
 	if(TRANSLATION)
 	{
 		for (int type=0;type<NumbTypes;type++)
@@ -1563,6 +1575,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 #endif
    		}
 	}
+*/
 
    if (ROTATION)
    {

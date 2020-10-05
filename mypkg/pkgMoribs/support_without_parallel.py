@@ -40,7 +40,7 @@ def maxError_byBining(mean, data, workingNdim):
 def makeexecutionfile(src_dir,TypeCal,ENT_TYPE, source_dir_exe):
 	execution_file_dir  = source_dir_exe
 	os.chdir(execution_file_dir)
-	call(["cp", "Makefile-Copy", "Makefile"])
+	call(["cp", "Makefile-gnu-Intel", "Makefile"])
 	call(["make", "clean"])
 	call(["make"])
 	print("")
@@ -191,11 +191,13 @@ def fmtAverageEnergy(TypeCal,status,variable):
 		if (TypeCal == "PIMC"):
 			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Translational', 'Avg. rotational', 'Avg. Potential', 'Avg. Total', 'Error of Translational', 'Error of Rotational', 'Error of Potential', 'Error of Total')
 		if (TypeCal == "PIGS"):
-			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{er1:^12}{er2:^12}{er3:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<E-V>', pot='<V>', tot='<E>', er1='Err-(E-V)', er2='Err-V', er3='Err-E')
+			#output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{er1:^12}{er2:^12}{er3:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<E-V>', pot='<V>', tot='<E>', er1='Err-(E-V)', er2='Err-V', er3='Err-E')
+			output    += '{blocks:^10}{beads:^10}{var:^10}{pot:^16}{tot:^16}{er1:^12}{er2:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', pot='<V>', tot='<E>', er1='Err-V', er2='Err-E')
 		if (TypeCal == "ENT"):
 			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
 		output    +="\n"
-		output    += '{0:=<115}'.format('#')
+		#output    += '{0:=<115}'.format('#')
+		output    += '{0:=<90}'.format('#')
 		output    +="\n"
 		return output
 
@@ -269,9 +271,11 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 
 	if (TypeCal == "PIGS"):
 		col_block = final_data_set[:,0] 
-		col_rot   = final_data_set[:,2]
-		col_pot   = final_data_set[:,3]
-		col_tot   = final_data_set[:,4]
+		#col_rot   = final_data_set[:,2]
+		#col_pot   = final_data_set[:,3]
+		#col_tot   = final_data_set[:,4]
+		col_pot   = final_data_set[:,1]
+		col_tot   = final_data_set[:,2]
 
 		ncol_block = len(col_block)
 		if (int(len(col_block)) != numbblocks-(preskip+postskip)):
@@ -281,19 +285,20 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		workingNdim   = int(math.log(len(col_tot))/math.log(2))
 		trunc         = int(len(col_tot)-2**workingNdim)
 	
-		col_rot       = col_rot[trunc:]
+		#col_rot       = col_rot[trunc:]
 		col_pot       = col_pot[trunc:]
 		col_tot       = col_tot[trunc:]
 
-		mean_rot      = np.mean(col_rot)
+		#mean_rot      = np.mean(col_rot)
 		mean_pot      = np.mean(col_pot)
 		mean_tot      = np.mean(col_tot)
 
-		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
+		#error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
 		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
 		error_tot     = maxError_byBining(mean_tot, col_tot, workingNdim-6)
 
-		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, er1=error_rot, er2=error_pot, er3=error_tot)
+		#output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, er1=error_rot, er2=error_pot, er3=error_tot)
+		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, pot=mean_pot, tot=mean_tot, er1=error_pot, er2=error_tot)
 		output  += "\n"
 
 	return output
@@ -369,8 +374,8 @@ def GetAverageOrderParam(TypeCal,numbmolecules,numbbeads,variable,final_dir_in_w
 	raw_data=np.delete(final_data_set, 0, 1)
 
 	if (numbmolecules == 2):
-		eiz=np.absolute(np.reshape(raw_data[trunc:,],raw_data[trunc:,].size))
-		pairList = [i for i in range(numbmolecules)]
+		eiz=np.absolute(np.reshape(raw_data[trunc:,0],raw_data[trunc:,0].size))
+		pairList = [i for i in range(numbmolecules-1)]
 	if (numbmolecules == 11):
 		eiz=np.absolute(np.reshape(raw_data[trunc:,2:numbmolecules-3],raw_data[trunc:,2:numbmolecules-3].size))
 		pairList = [i for i in range(2,numbmolecules-2)]
@@ -853,7 +858,7 @@ def GetInput(TypeCal, ENT_TYPE, ENT_ALGR, temperature,numbbeads,numbblocks,numbp
 	replace("mskip_input", str(mcskip),                       "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	mcskip_avg = numbpass
+	mcskip_avg = numbbeads*numbpass
 	replace("mskip_avg_input", str(mcskip_avg),               "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
@@ -1210,18 +1215,18 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 	'''
 	if (numbblocks <= 1000):
 		walltime   = "00-03:00"
-		thread     = 4
+		thread     = 1
 		if (numbbeads >= 100):
-			thread     = 8
+			thread     = 1
 	else:
 		if (numbbeads >= 160):
-			thread     = 4
+			thread     = 1
 			walltime   = "7-00:00"
 		elif ((numbbeads >= 50) and (numbbeads < 160)):
-			thread     = 4
+			thread     = 1
 			walltime   = "07-00:00"
 		elif ((numbbeads >= 20) and (numbbeads < 50)):
-			thread     = 4
+			thread     = 1
 			walltime   = "03-00:00"
 		else:
 			thread     = 1
@@ -1293,7 +1298,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 #SBATCH --output=%s.out
 #SBATCH --time=%s
 %s
-#SBATCH --mem-per-cpu=4096mb
+#SBATCH --mem-per-cpu=1024mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 rm -rf %s
@@ -1303,7 +1308,7 @@ cd %s
 cp %s qmc.input
 cp %s %s
 %s cp %s %s
-####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc 
+#valgrind --tool=memcheck --leak-check=yes --show-reachable=yes ./pimc
 time ./pimc 
 %s
 """ % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
@@ -1313,7 +1318,7 @@ time ./pimc
 #SBATCH --output=%s.out
 #SBATCH --time=%s
 %s
-#SBATCH --mem-per-cpu=4096mb
+#SBATCH --mem-per-cpu=8192mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 mv %s %s

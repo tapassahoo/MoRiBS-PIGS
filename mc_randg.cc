@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 
 //Toby set SEED as 985456376 + rank to make different SEEDs for different CPUs
@@ -36,7 +36,7 @@ void RandomFree(void) // free memory used by sprng
 void RandomIO(int tstatus, const char file_name[]) // check point for sprng streams
 {
   const char *_proc_=__func__;    // "RandIO()";
-  const char *fop="r";                  // file operation
+  const char *fop="r";            // file operation
 
   switch (tstatus)
   {

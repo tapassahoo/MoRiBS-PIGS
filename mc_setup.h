@@ -12,6 +12,9 @@ extern bool    WORM;              // use the worm algorithm
 
 extern bool    IMPURITY;     // set true if there is a molecule in the system
 extern bool    MINIMAGE;     // set true to apply minimum image convention 
+extern bool    CRYSTAL;      // set true to use crystal geometry
+extern bool    FCC;          // set true if CRYSTAL and FCC structure
+extern bool    HCP;          // set true if CRYSTAL and HCP structure
 
 extern bool    BOSONS;       // true if there're bosons in the system
 extern int     BSTYPE;       // atom type for bosons
@@ -62,7 +65,8 @@ extern double  Distance;
 extern double DipoleMoment;
 extern int     RefAtom;
 extern double  Density;
-extern double  BoxSize;
+extern double *BoxSize;
+extern int     N1d[3];
 
 extern double  MCBeta;     // imaginary time step 
 extern double  MCTau;      // imaginary time step 

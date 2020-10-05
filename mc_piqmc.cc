@@ -3604,7 +3604,8 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 
 	if (NumbAtoms == 1) 
 	{
-		spot = PotFunc(Eulang);
+		//spot = PotFunc(Eulang);
+		spot = -100.0*MCAngles[CTH][t0];
 	}
 
     double weight;

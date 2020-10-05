@@ -3,7 +3,7 @@ a=-2500.
 b=-10000000.0
 c=-10000000000.0
 set fit errorvariables
-fit f(x) filename using 3:6:9 yerrors via a, b, c
+fit f(x) filename using 3:5:7 yerrors via a, b, c
 set print "fit_parameters.txt"
 print a,a_err
 print b,b_err
@@ -12,7 +12,7 @@ set print
 set xrange[0:]
 set ylabel "Ground state energy (Kelvin)"
 set xlabel "Imaginary time (tau) (Kelvin-1)"
-plot filename using 3:6 w lp, '' u 3:6:9 w yerr, f(x)
+plot filename using 3:5 w lp, '' u 3:5:7 w yerr, f(x)
 pause -1 "Hit Enter to continue" 
 
 #Example
