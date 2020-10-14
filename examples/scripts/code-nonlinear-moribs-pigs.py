@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-#simType1="submission "
-simType1 = "analysis"
+simType1="submission"
+#simType1 = "analysis"
 #simType1="rename "
 
 molecule = "H2O"
@@ -19,25 +19,25 @@ rotor = "H2O"
 SpinIsomer = 0
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 2
-nblocks = 20000
-npass = 200
+nMolecule = 11
+nblocks = 1000
+npass = 100
 
-var = "beta" # for fixed tau
-param = 0.001 # for fixed tau
+#var = "beta" # for fixed tau
+#param = 0.001 # for fixed tau
 
-#var = "tau"  # for fixed beta
-#param = 0.2 # for fixed beta
+var = "tau"  # for fixed beta
+param = 0.2 # for fixed beta
 
 
 if (simType1 == "submission"):
-	rmin = 2.8
-	rmax = 7.0
+	rmin = 10.0
+	rmax = 10.0
 	dr = 0.1
 	nr = int(((rmax-rmin)+dr*0.5)/dr)
 	nr = nr+1
 	print(nr)
-	RList += [rmin+dr*i for i in range(nr)]
+	RList = [rmin+dr*i for i in range(nr)]
 	print(RList)
 
 if (simType1 == "analysis"):
@@ -65,7 +65,7 @@ if (simType1 == "analysis"):
 		print(RList)
 
 	if ((param == 0.2) and (var == "tau")):
-		rmin = 7.0
+		rmin = 10.0
 		rmax = 10.0
 		dr = 0.2
 		nr = int(((rmax-rmin)+dr*0.5)/dr)
@@ -84,11 +84,12 @@ if (simType1 == "analysis"):
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
 #stringName2 = '"qTIP4P-"'
-stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
+#stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
 #stringName2 = '"qSPCFw-"'
+stringName2 = '"qTIP4P-thread4-"'
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 10000"
+	cmd1 = "--preskip 0"
 else:
 	cmd1 = ""
 

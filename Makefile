@@ -1,10 +1,10 @@
 #.SUFFIXES: .o .cxx
 
 #options= -Ofast -march=native -fopenmp
-options= -Ofast -march=native -fopenmp
+options= -O3 -fopenmp
 
 # CFLAGS for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM -DONSITE
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM
 # -DSHORTFORM -DONSITE
 #-DPROPOSED
 #-DCAGEPOT
@@ -21,11 +21,12 @@ CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DCHAINCONFIG -DSHORTFORM
 #-------------------------------------------------------------------------
 
 #CC=mpic++
-CC=g++ 
-FC=ifort
+CC=g++
+FC=gfortran
 #FC=/home/pnroy/Dev/bin/gfortran
 
-LDFLAGS = -lm -L./sprng/lib -llcg -lifcore
+#LDFLAGS = -lm -L./sprng/lib -llcg -lifcore
+LDFLAGS = -lm -L./sprng/lib -llcg -lgfortran
 
 #ifeq ($(FC),gfortran)
 #        LDFLAGS += -lgfortran

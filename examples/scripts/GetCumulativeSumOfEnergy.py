@@ -27,7 +27,7 @@ else:
 	merged_data=np.genfromtxt(file1)
 
 col=merged_data[:,0]
-x=merged_data[:,4]
+x=merged_data[:,3]
 engCumSum=np.cumsum(x)
 Norm=np.arange(1,int(len(engCumSum)+1),dtype = 'float')
 engCumSum=np.divide(engCumSum,Norm)
