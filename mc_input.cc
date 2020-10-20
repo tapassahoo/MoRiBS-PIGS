@@ -18,10 +18,9 @@
 long int totalStep;
 double sumsCount;
 double totalCount;
-double _total;
+//double _tot_total;
 double _pot_total;
 double _rot_total;
-double _rot_total1;
 double _kin_total;
 std::string Distribution;
 // FILE NAMES
@@ -604,11 +603,10 @@ void StatusIO(int tstatus, const char file_name[])
 			fid<<Distribution<<endl;
 		}
 		else {	
-			fid<<_total<<endl;
+			fid<<_tot_total<<endl;
 			fid<<_kin_total<<endl;
 			fid<<_pot_total<<endl;
 			fid<<_rot_total<<endl;
-			fid<<_rot_total1<<endl;
 		}
 		break;
 		case IORead: 
@@ -623,11 +621,10 @@ void StatusIO(int tstatus, const char file_name[])
 				fid>>Distribution;
 			}
 			else {	
-				fid>>_total;
+				fid>>_tot_total;
 				fid>>_kin_total;
 				fid>>_pot_total;
 				fid>>_rot_total;
-				fid>>_rot_total1;
 			}		
 
 			getline(fid,status,'\n');  // skip comments 

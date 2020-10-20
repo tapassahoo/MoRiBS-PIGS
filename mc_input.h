@@ -19,7 +19,7 @@ extern double _total;
 extern double _kin_total;
 extern double _pot_total;
 extern double _rot_total;
-extern double _rot_total1;
+extern double _tot_total;
 extern std::string Distribution;
 
 void IOReadParams (const char [],int &);  

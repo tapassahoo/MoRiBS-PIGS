@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-#simType1="submission"
-simType1 = "analysis"
+simType1="submission"
+#simType1 = "analysis"
 #simType1="rename "
 
 molecule = "H2O"
@@ -19,7 +19,7 @@ rotor = "H2O"
 SpinIsomer = 0
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 11
+nMolecule = 2
 nblocks = 1000
 npass = 100
 
@@ -86,7 +86,7 @@ if (simType1 == "analysis"):
 #stringName2 = '"qTIP4P-"'
 #stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
 #stringName2 = '"qSPCFw-"'
-stringName2 = '"qTIP4P-thread4-"'
+stringName2 = '"qTIP4P-thread1-"'
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"

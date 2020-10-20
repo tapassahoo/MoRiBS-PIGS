@@ -40,7 +40,8 @@ def maxError_byBining(mean, data, workingNdim):
 def makeexecutionfile(src_dir,TypeCal,ENT_TYPE, source_dir_exe):
 	execution_file_dir  = source_dir_exe
 	os.chdir(execution_file_dir)
-	call(["cp", "Makefile-gnu-Intel", "Makefile"])
+	#call(["cp", "Makefile-gnu-Intel", "Makefile"])
+	call(["cp", "Makefile-Copy", "Makefile"])
 	call(["make", "clean"])
 	call(["make"])
 	print("")
@@ -1215,7 +1216,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 	'''
 	if (numbblocks <= 1000):
 		walltime   = "01-00:00"
-		thread     = 4
+		thread     = 1
 		if (numbbeads >= 100):
 			thread     = 1
 	else:

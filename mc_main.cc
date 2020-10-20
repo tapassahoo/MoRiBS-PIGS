@@ -61,20 +61,22 @@ extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eu
 
 double _dbpot;       // potential energy differencies, block average  added by Hui Li
 double _bpot;       // kinetic   energy, block average
-double _btotal;
+double _btot;
 double _bkin;       // potential energy, block average
 double _bCv;        // heat capacity, block average
 double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
-
-double _dpot_total;  // potential energy differences, global average  added by Hui Li
 //
 double _bnm;
 double _bdm;
 double _trOfDensitySq;
 
+//double _pot_total;  // kinetic   energy, global average // defined in mc_input.cc
+//double _kin_total;  // potential energy, global average //defined in mc_input.cc
+double _dpot_total;  // potential energy differences, global average  added by Hui Li
+double _tot_total;  // kinetic   energy, global average
+
 double _brot;       // rotational kin energy, block average
-double _brot1;       // rotational kin energy, block average
 double _brotsq;     // rotational energy square, block average
 double _rotsq_total; // rotational energy square, global average
 double _Cv_total;    // heat capacity, global average
@@ -83,7 +85,7 @@ double _Cv_trans_1_total;    // translational heat capacity, global average
 double _Cv_trans_2_total;    // translational heat capacity, global average
 double _Cv_rot_total;    // rotational heat capacity, global average
 
-//fstream _feng;      // save accumulated energy
+fstream _feng;      // save accumulated energy
 //fstream _fdc;      // save accumulated energy
 //fstream _fangins;      // save accumulated energy
 //fstream _fengins;      // save accumulated energy
@@ -91,7 +93,7 @@ double _Cv_rot_total;    // rotational heat capacity, global average
 //---------------- ESTIMATORS ---------------
 
 void SaveEnergy    (const char [],double,long int); // block average
-//void SaveSumEnergy (double,double);                 // accumulated average
+void SaveSumEnergy (double,double);                 // accumulated average
 
 void SaveInstantEnergy ();                 // accumulated average
 
@@ -127,8 +129,8 @@ int main(int argc, char *argv[])
 Distribution = "unSwap";
 #ifdef PAIRDENSITY
 	readPairDensity();
-	cout<<"TAPAS"<<endl;
-	exit(11);
+	cout<<"Pair density implemented"<<endl;
+	exit(111);
 #endif
    	//randomseed(); //set seed according to clock
 	if (ENT_ENSMBL == EXTENDED_ENSMBL) srand(time(NULL));
@@ -494,11 +496,11 @@ ParamsPotential();
    }
 // MPI BLOCK 1 in MASTER done
 */
-    //InitMCEstims();
+    InitMCEstims();
    	//InitTotalAverage();      // DUMP 
    
-   	//ResetMCCounts();
-   	//ResetQWCounts();
+   	ResetMCCounts();
+   	ResetQWCounts();
 
 /*
 // 	try openmp for loop
@@ -645,7 +647,7 @@ ParamsPotential();
               	if (passTotal % MCSKIP_TOTAL == 0 && avergCount)  
               	{
                		sumsCount += 1.0;                 
-					//if (!ENT_SIM) SaveSumEnergy (totalCount,sumsCount);
+					if (!ENT_SIM) SaveSumEnergy (totalCount,sumsCount);
             	}
 			}  
           
@@ -722,7 +724,7 @@ ParamsPotential();
 	if (WORM)
 		MCWormDone();
 
-	//DoneMCEstims();
+	DoneMCEstims();
 	DonePotentials();
 
 	if (ROTATION)
@@ -776,14 +778,14 @@ void MCResetBlockAveragePIMC(void)
 {
 	avergCount = 0.0;
 
-	//ResetMCEstims();
+	ResetMCEstims();
 
 	ResetMCCounts();
-	//ResetQWCounts();
+	ResetQWCounts();
 
-	_dbpot     = 0.0;  //added by Hui Li
-	_bpot      = 0.0;
-	_btotal    = 0.0;
+	_dbpot       = 0.0;  //added by Hui Li
+	_bpot        = 0.0;
+	_btot    	 = 0.0;
 	_bkin        = 0.0;
 
 	_brot        = 0.0;
@@ -803,17 +805,16 @@ void MCResetBlockAveragePIGS(void)
 {
 	avergCount = 0.0;
 
-	//ResetMCEstims();
+	ResetMCEstims();
 	ResetMCCounts();
-	//ResetQWCounts();
+	ResetQWCounts();
 
 	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
-	_btotal    = 0.0;
+	_btot    = 0.0;
 	_bkin      = 0.0;
 
 	_brot      = 0.0;
-	_brot1     = 0.0;
 	_brotsq    = 0.0;
 	_bCv       = 0.0;
 	_bCv_trans = 0.0;
@@ -831,9 +832,9 @@ void MCResetBlockAveragePIGSENT(void)
 {
 	avergCount = 0.0;
 
-	//ResetMCEstims();
+	ResetMCEstims();
 	ResetMCCounts();
-	//ResetQWCounts();
+	ResetQWCounts();
 
 	if (ENT_ENSMBL == EXTENDED_ENSMBL) {
 		MCAccepSwap = 0.0;
@@ -933,10 +934,10 @@ void MCGetAveragePIGS(void)
 
 	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
+	_pot_total       += spot;
 	double stotal     = GetTotalEnergy();         // Total energy
-	_btotal          += stotal;                   // kin+pot
-	double srot1      = (stotal - spot);
-	_brot1           += srot1;
+	_btot            += stotal;                   // kin+pot
+	_tot_total       += stotal;
 
 	double srot;
 	if (ROTATION)
@@ -1022,10 +1023,7 @@ void MCGetAveragePIMC(void)
 #endif
 
     double skin       = 0.;
-	if(TRANSLATION)
-	{
-		skin          = GetKinEnergy();           // kin energy
-	}
+	if (TRANSLATION) skin = GetKinEnergy();           // kin energy
 	_bkin            += skin;                     // block average for kin energy
 	_kin_total       += skin;                     // accumulated average 
 
@@ -1048,7 +1046,7 @@ void MCGetAveragePIMC(void)
 
 		if(MCAtom[IMTYPE].molecule == 2)
 		{
-			srot          = GetRotE3D();
+			srot      = GetRotE3D();
 		}
         
 		if(MCAtom[IMTYPE].molecule == 4)
@@ -1066,38 +1064,57 @@ void MCGetAveragePIMC(void)
 	}
 
 	double stotal     = skin + srot + spot;
-	_btotal          += stotal;                   // kin+pot
-	_total           += stotal;
+	_btot            += stotal;                   // kin+pot
+	_tot_total       += stotal;
 
-#ifdef IOWRITE
-// accumulate terms for Cv
-   double sCv;
-   sCv = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
-         -((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)
-         + (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin) + Erot_termSQ - ErotSQ;
+	if (TRANSLATION && ROTATION)
+	{
+		// accumulate terms for Cv
+		double sCv;
+		sCv = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
+			-((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin - spot - srot)
+			+ (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin) + Erot_termSQ - ErotSQ;
 
-   _bCv += sCv;
-   _Cv_total += sCv;
+		_bCv += sCv;
+		_Cv_total += sCv;
 
-// accumulate terms for translational Cv
-   double sCv_trans;
-   double sCv_trans_1=-((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin);
-   double sCv_trans_2=(2.0/MCBeta)*0.5*(double)(NDIM*NumbAtoms)/MCTau - skin;
-   sCv_trans = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
-         -((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)
-         + (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin);
+		// accumulate terms for translational Cv
+		double sCv_trans;
+		double sCv_trans_1=-((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin);
+		double sCv_trans_2=(2.0/MCBeta)*0.5*(double)(NDIM*NumbAtoms)/MCTau - skin;
+		sCv_trans = -0.5*(double)(NDIM*NumbAtoms)/(MCBeta*MCTau)
+		-((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)*((double)(NDIM*NumbAtoms)*0.5/MCTau - skin)
+		+ (2.0/MCBeta)*(0.5*(double)(NDIM*NumbAtoms)/MCTau - skin);
 
-   _bCv_trans += sCv_trans;
-   _Cv_trans_total += sCv_trans;
-   _Cv_trans_1_total += sCv_trans_1;
-   _Cv_trans_2_total += sCv_trans_2;
+		_bCv_trans += sCv_trans;
+		_Cv_trans_total += sCv_trans;
+		_Cv_trans_1_total += sCv_trans_1;
+		_Cv_trans_2_total += sCv_trans_2;
 
-// accumulate terms for rotational Cv
-   double sCv_rot;
-   sCv_rot = -srot*srot + Erot_termSQ - ErotSQ;
+		// accumulate terms for rotational Cv
+		double sCv_rot;
+		sCv_rot = -srot*srot + Erot_termSQ - ErotSQ;
 
-   _bCv_rot += sCv_rot;
-   _Cv_rot_total += sCv_rot;
+		_bCv_rot += sCv_rot;
+		_Cv_rot_total += sCv_rot;
+	}
+
+	if (!TRANSLATION && ROTATION)
+	{
+		// accumulate terms for Cv
+		double sCv;
+		sCv = -(spot + srot)*(spot + srot) + Erot_termSQ - ErotSQ;
+
+		_bCv += sCv;
+		_Cv_total += sCv;
+
+		// accumulate terms for rotational Cv
+		double sCv_rot;
+		sCv_rot = -srot*srot + Erot_termSQ - ErotSQ;
+
+		_bCv_rot += sCv_rot;
+		_Cv_rot_total += sCv_rot;
+	}
 
 // check whether there're bosons in the system
 
@@ -1125,7 +1142,6 @@ void MCGetAveragePIMC(void)
 		int iframe = 1;
 		GetAreaEstim3D(iframe);
 	}
-#endif
 
 //  reflect for MF molecule
 	if(IREFLY == 1)
@@ -1279,55 +1295,105 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 	if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 
-	if (PIMC_SIM)
-	{	
-		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-		fid << setw(IO_WIDTH) << _bkin*Units.energy/acount << BLANK;    // potential anergy 2
-		fid << setw(IO_WIDTH) << _brot*Units.energy/acount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/acount << BLANK;    // potential anergy 2
-		fid << setw(IO_WIDTH) << _btotal*Units.energy/acount << BLANK;  //total energy including rot energy 
-		fid << endl;
-	}	
-
-	if (PIGS_SIM)
-	{	
-		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-		fid << setw(IO_WIDTH) << _brot*Units.energy/acount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _brot1*Units.energy/acount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/acount << BLANK;    // potential anergy 2
-		fid << setw(IO_WIDTH) << _btotal*Units.energy/acount << BLANK;  //total energy including rot energy 
-		fid << endl;
-	}	
-//
-	/*
-	if (acount != 0.0)
+	if (PIMC_SIM && TRANSLATION && ROTATION)
 	{
-		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-		fid << setw(IO_WIDTH) << _brot*Units.energy/acount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _brot1*Units.energy/acount << BLANK;    // rot energy 5  
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/acount << BLANK;    // potential anergy 2
-		fid << setw(IO_WIDTH) << _btotal*Units.energy/acount << BLANK;  //total energy including rot energy 
-	    fid << endl;
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number
+		fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // kinetic energy
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
+		fid << setw(IO_WIDTH) <<(_bkin+_bpot)*Units.energy/avergCount << BLANK;   
+
+		// if (ROTATION)
+		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy
+		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
+		// fid << setw(IO_WIDTH) << _dbpot*Units.energy/avergCount << BLANK;    // potential differencies added by Hui Li 
+		fid << setw(IO_WIDTH) <<(_bkin+_bpot+_brot)*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+		fid << setw(IO_WIDTH) << _bCv/avergCount << BLANK; // heat capacity
+		fid << setw(IO_WIDTH) << _bCv_trans/avergCount << BLANK; // translational heat capacity
+		fid << setw(IO_WIDTH) << _bCv_rot/avergCount << BLANK; // rotational heat capacity
+		fid << endl;
 	}
-	*/
-//
-#ifdef IOWRITE
-    fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
-    fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // kinetic energy 2
-    fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy 3
-    fid << setw(IO_WIDTH) <<(_bkin+_bpot)*Units.energy/avergCount << BLANK;  // 4
-   
-    // if (ROTATION)
-    fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy 5
-    fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
-    // fid << setw(IO_WIDTH) << _dbpot*Units.energy/avergCount << BLANK;    // potential differencies added by Hui Li 
-    fid << setw(IO_WIDTH) <<(_bkin+_bpot+_brot)*Units.energy/avergCount << BLANK;  //total energy including rot energy 
-    fid << setw(IO_WIDTH) << _bCv/avergCount << BLANK; // heat capacity
-    fid << setw(IO_WIDTH) << _bCv_trans/avergCount << BLANK; // translational heat capacity
-    fid << setw(IO_WIDTH) << _bCv_rot/avergCount << BLANK; // rotational heat capacity
-    fid << endl;
-#endif
+	else if (PIMC_SIM && !TRANSLATION && ROTATION)
+	{
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number
+		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
+		fid << setw(IO_WIDTH) <<(_bpot+_brot)*Units.energy/avergCount << BLANK;  //total energy including rot energy 
+		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
+		fid << setw(IO_WIDTH) << _bCv/avergCount << BLANK; // heat capacity
+		fid << setw(IO_WIDTH) << _bCv_rot/avergCount << BLANK; // rotational heat capacity
+		fid << endl;
+	}
+	else if (PIGS_SIM)
+	{
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
+		fid << setw(IO_WIDTH) << _btot*Units.energy/avergCount << BLANK;    // rot energy
+		fid << endl;
+	}
+
     fid.close();
+}
+
+void SaveSumEnergy (double acount, double numb)  // global average
+{
+	const char *_proc_=__func__;    //  SaveSumEnergy()
+
+	if (PIMC_SIM && TRANSLATION && ROTATION)
+	{
+		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;    
+		_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) <<(_kin_total+_pot_total)*Units.energy/acount << BLANK;   
+
+		_feng << setw(IO_WIDTH) <<_rot_total*Units.energy/acount << BLANK;   
+		_feng << setw(IO_WIDTH) <<_rotsq_total*(Units.energy*Units.energy)/acount << BLANK;   
+		//_feng << setw(IO_WIDTH) << _dpot_total*Units.energy/acount << BLANK;   //added by Hui Li 
+		_feng << setw(IO_WIDTH) <<(_kin_total+_pot_total+_rot_total)*Units.energy/acount << BLANK;  //total energy including rot  
+		// Cv
+		double Cv = 0.5*(double)(NDIM*NumbAtoms*NumbTimes*Temperature)-(_kin_total+_pot_total+_rot_total)*Units.energy/acount;
+		Cv = Cv*Cv + _Cv_total*Units.energy*Units.energy/acount;
+		Cv = -Cv*MCBeta/Temperature;
+		_feng << setw(IO_WIDTH) <<Cv << BLANK;
+
+		double Cv_trans = 0.5*(double)(NDIM*NumbAtoms*NumbTimes*Temperature)-_kin_total*Units.energy/acount;
+		Cv_trans = Cv_trans*Cv_trans+ _Cv_trans_total*Units.energy*Units.energy/acount;
+		Cv_trans = -Cv_trans*MCBeta/Temperature;
+		_feng << setw(IO_WIDTH) <<Cv_trans << BLANK;
+
+		double Cv_rot = -_rot_total*Units.energy/acount;
+		Cv_rot = Cv_rot*Cv_rot+ _Cv_rot_total*Units.energy*Units.energy/acount;
+		Cv_rot = -Cv_rot*MCBeta/Temperature;
+		_feng << setw(IO_WIDTH) <<Cv_rot << BLANK;
+
+		//_feng << setw(IO_WIDTH) << _Cv_trans_1_total*Units.energy*Units.energy/acount << BLANK;
+		//_feng << setw(IO_WIDTH) << _Cv_trans_2_total*Units.energy*Units.energy/acount << BLANK;
+	}
+	else if (PIMC_SIM && !TRANSLATION && ROTATION)
+	{
+		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;    
+		_feng << setw(IO_WIDTH) <<_rot_total*Units.energy/acount << BLANK;   
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) <<(_pot_total+_rot_total)*Units.energy/acount << BLANK;  //total energy including rot  
+		_feng << setw(IO_WIDTH) <<_rotsq_total*(Units.energy*Units.energy)/acount << BLANK;   
+		// Cv
+		double Cv = -(_pot_total+_rot_total)*Units.energy/acount;
+		Cv = Cv*Cv + _Cv_total*Units.energy*Units.energy/acount;
+		Cv = -Cv*MCBeta/Temperature;
+		_feng << setw(IO_WIDTH) <<Cv << BLANK;
+
+		double Cv_rot = -_rot_total*Units.energy/acount;
+		Cv_rot = Cv_rot*Cv_rot+ _Cv_rot_total*Units.energy*Units.energy/acount;
+		Cv_rot = -Cv_rot*MCBeta/Temperature;
+		_feng << setw(IO_WIDTH) <<Cv_rot << BLANK;
+	}
+	else if (PIGS_SIM)
+	{
+		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;    
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) <<_tot_total*Units.energy/acount << BLANK;   
+	}
+
+_feng << endl;
 }
 
 void SaveInstantConfig(const char fname [], long int blocknumb)
@@ -1445,12 +1511,10 @@ void InitTotalAverage(void)  // DUMP
 
 	_kin_total = 0.0;   // need a function to reset all global average
 	_pot_total = 0.0;
-	_total = 0.0;
-
+	_tot_total = 0.0;
 	_dpot_total = 0.0;  //added by Hui Li
 
 	_rot_total = 0.0;
-	_rot_total1 = 0.0;
 	_rotsq_total = 0.0;
 	_Cv_total = 0.0;
 	_Cv_trans_total = 0.0;
@@ -1461,7 +1525,6 @@ void InitTotalAverage(void)  // DUMP
 	// open files for output
 	// ENERGY
 //
-/*
 	if ((PIGS_SIM) || (PIMC_SIM))
 	{
 		string fenergy;
@@ -1478,7 +1541,6 @@ void InitTotalAverage(void)  // DUMP
 		if (!_feng.is_open())
 		_io_error(_proc_,IO_ERR_FOPEN,fenergy.c_str());
 	}
-*/
 
 //
 /*
@@ -1506,7 +1568,7 @@ void InitTotalAverage(void)  // DUMP
 
 void DoneTotalAverage(void)
 {
-  //_feng.close();
+  _feng.close();
   //_fangins.close();
   //_fengins.close();
 }
@@ -1519,7 +1581,6 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 	cout << "PASS:"  << setw(w) << pass  << BLANK;
 	cout << "STEP:"  << setw(w) << step  << BLANK;
 
-	/*
 	if(TRANSLATION)
 	{
 		for (int type=0;type<NumbTypes;type++)
@@ -1575,7 +1636,6 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 #endif
    		}
 	}
-*/
 
    if (ROTATION)
    {
