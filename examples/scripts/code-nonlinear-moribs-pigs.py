@@ -9,19 +9,19 @@ module_path = mypkg.pkgMoribs.__file__
 module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
-simType = "PIGS"
+simType="PIGS"
 simType1="submission"
-#simType1 = "analysis"
+#simType1="analysis"
 #simType1="rename "
 
-molecule = "H2O"
-rotor = "H2O"
-SpinIsomer = 0
+molecule="H2O"
+rotor="H2O"
+SpinIsomer=0
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 2
-nblocks = 1000
-npass = 100
+nMolecule=2
+nblocks=1000
+npass=100
 
 #var = "beta" # for fixed tau
 #param = 0.001 # for fixed tau
