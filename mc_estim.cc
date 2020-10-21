@@ -2967,97 +2967,96 @@ double GetRotPlanarEnergy(void)
 
 double GetRotE3D(void)
 {
-  int type = IMTYPE;
+	int type = IMTYPE;
+	int offset = MCAtom[type].offset;
 
-  int offset = MCAtom[type].offset;
+	double ERot3D=0.0;
+	ErotSQ=0.0;
+	Erot_termSQ=0.0;
 
-  double ERot3D=0.0;
-
-  ErotSQ=0.0;
-  Erot_termSQ=0.0;
-
-  for(int atom  = 0;atom<MCAtom[type].numb;atom++)                   // multi molecular impurtiy
+	for(int atom=0;atom<MCAtom[type].numb;atom++)                   // multi molecular impurtiy
     {
-      offset   = NumbTimes*atom;
-      int gatom = offset/NumbTimes;    // the same offset for rot and trans degrees
-       
-      double srot = 0.0;
-      double sesq = 0.0;
-      double se_termsq=0.0;
+		offset   = NumbTimes*atom;
+		int gatom = offset/NumbTimes;    // the same offset for rot and trans degrees
 
-      int RNskip;
-      if(RotDenType == 0)
-	{
-	  RNskip = 1;
-	}
-      else if(RotDenType == 1)
-	{
-	  RNskip = RNratio;
-	}
+		double srot = 0.0;
+		double sesq = 0.0;
+		double se_termsq=0.0;
+
+		int RNskip;
+		if(RotDenType == 0)
+		{
+			RNskip = 1;
+		}
+		else if(RotDenType == 1)
+		{
+			RNskip = RNratio;
+		}
    
 #pragma omp parallel for reduction(+: srot,sesq) // TOBY question: why not include se_termsq in deduction?
-      for (int it0=0;it0<NumbRotTimes;it0=it0+RNskip)
-	{
-	  int t0 = offset +  it0;
-	  int t1 = offset + (it0 + RNskip) % NumbRotTimes;
-	  //    Given the two sets of Euler angles at t0 and t1, Toby calculates srot and sesq
-	  double rho;
-	  double erot;
-	  double esq;
-	  int istop=0;
-	  double Eulan1[3];
-	  double Eulan2[3];
-	  double Eulrel[3];
-	  double therel,phirel,chirel;
+		for (int it0=0;it0<NumbRotTimes;it0=it0+RNskip)
+		{
+			int t0 = offset +  it0;
+			int t1 = offset + (it0 + RNskip) % NumbRotTimes;
+			//    Given the two sets of Euler angles at t0 and t1, Toby calculates srot and sesq
+			double rho;
+			double erot;
+			double esq;
+			int istop=0;
+			double Eulan1[3];
+			double Eulan2[3];
+			double Eulrel[3];
+			double therel,phirel,chirel;
 
-	  Eulan1[0]=MCAngles[PHI][t0];
-	  Eulan1[1]=acos(MCAngles[CTH][t0]);
-	  Eulan1[2]=MCAngles[CHI][t0];
-	  Eulan2[0]=MCAngles[PHI][t1];
-	  Eulan2[1]=acos(MCAngles[CTH][t1]);
-	  Eulan2[2]=MCAngles[CHI][t1];
-	   
-	  rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
-	  phirel=Eulrel[0];
-	  therel=Eulrel[1];
-	  chirel=Eulrel[2];	   
-	  int bin_t    = (int)floor(therel/_delta_theta);
-	  if ((bin_t<MC_BINST) && (bin_t>=0))
-	    _relthe_sum[bin_t] +=(double)RNskip;	   
-	  int bin_p = (int)floor(phirel/_delta_chi);
-	  if ((bin_p<MC_BINSC) && (bin_p>=0))
-	    _relphi_sum[bin_p] +=(double)RNskip;	   
-	  int bin_c = (int)floor(chirel/_delta_chi);
-	  if ((bin_c<MC_BINSC) && (bin_c>=0))
-	    _relchi_sum[bin_c] +=(double)RNskip;	   
-	  //    Rattle Shake rotational energy
-	  if(RotDenType == 1 && RNratio == 1)
-	    rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
-	  //    srot += erot;
-	  if(RotDenType == 1 && RNratio == 1)
-	    {
-	      srot += rho;
-	    }
-	  else
-	    srot += erot;	   
-	  sesq += esq;
-	  se_termsq += erot*erot;	   
-	}       
-      srot = srot / ((double)(NumbRotTimes/RNskip));
-      sesq = sesq / ((double)(NumbRotTimes/RNskip)*(double)(NumbRotTimes/RNskip));
-      se_termsq = se_termsq/ ((double)(NumbRotTimes/RNskip)*(double)(NumbRotTimes/RNskip));
-      
-      ERot3D += srot;
-      ErotSQ += sesq;
-      Erot_termSQ += se_termsq;       
-      if(RotDenType == 1 && RNratio == 1)      // Rattle Shake rotational energy
-	{
-	  ERot3D = ERot3D/(4.0*(MCRotTau/WNO2K)*(MCRotTau/WNO2K)); 
-	  ERot3D += 0.25*(X_Rot+Y_Rot+Z_Rot) + 1.5/(MCRotTau/WNO2K);	   
-	  ERot3D = ERot3D/WNO2K;
+			Eulan1[0]=MCAngles[PHI][t0];
+			Eulan1[1]=acos(MCAngles[CTH][t0]);
+			Eulan1[2]=MCAngles[CHI][t0];
+			Eulan2[0]=MCAngles[PHI][t1];
+			Eulan2[1]=acos(MCAngles[CTH][t1]);
+			Eulan2[2]=MCAngles[CHI][t1];
+
+			rotden_(Eulan1,Eulan2,Eulrel,&rho,&erot,&esq,rhoprp,erotpr,erotsq,&istop);
+			phirel=Eulrel[0];
+			therel=Eulrel[1];
+			chirel=Eulrel[2];	   
+			int bin_t = (int)floor(therel/_delta_theta);
+			if ((bin_t<MC_BINST) && (bin_t>=0))
+				_relthe_sum[bin_t] +=(double)RNskip;	   
+			int bin_p = (int)floor(phirel/_delta_chi);
+			if ((bin_p<MC_BINSC) && (bin_p>=0))
+				_relphi_sum[bin_p] +=(double)RNskip;	   
+			int bin_c = (int)floor(chirel/_delta_chi);
+			if ((bin_c<MC_BINSC) && (bin_c>=0))
+				_relchi_sum[bin_c] +=(double)RNskip;	   
+			//    Rattle Shake rotational energy
+			if(RotDenType == 1 && RNratio == 1)
+				rsrot_(Eulan1,Eulan2,&X_Rot,&Y_Rot,&Z_Rot,&MCRotTau,&RotOdEvn,&RotEoff,&rho,&erot);
+			//    srot += erot;
+			if(RotDenType == 1 && RNratio == 1)
+			{
+				srot += rho;
+			}
+			else
+				srot += erot;	   
+			sesq += esq;
+			se_termsq += erot*erot;	   
+		}       
+		srot=srot/((double)(NumbRotTimes/RNskip));
+		sesq=sesq/((double)(NumbRotTimes/RNskip)*(double)(NumbRotTimes/RNskip));
+		se_termsq=se_termsq/ ((double)(NumbRotTimes/RNskip)*(double)(NumbRotTimes/RNskip));
+
+		ERot3D += srot;
+		ErotSQ += sesq;
+		Erot_termSQ += se_termsq;       
+
+		if(RotDenType == 1 && RNratio == 1)      // Rattle Shake rotational energy
+		{
+			ERot3D = ERot3D/(4.0*(MCRotTau/WNO2K)*(MCRotTau/WNO2K)); 
+			ERot3D += 0.25*(X_Rot+Y_Rot+Z_Rot) + 1.5/(MCRotTau/WNO2K);	   
+			ERot3D = ERot3D/WNO2K;
+		}  
 	}  
-    }  
-  return (ERot3D);
+	return (ERot3D);
 }
 
 /* reactive */

@@ -10,8 +10,8 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIMC"
-simType1="submission"
-#simType1 = "analysis"
+#simType1="submission"
+simType1 = "analysis"
 #simType1="rename "
 
 molecule = "H2O"
@@ -27,7 +27,7 @@ npass = 200
 #param = 0.001 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.0125 # for fixed beta
+param = 0.05 # for fixed beta
 
 
 if (simType1 == "submission"):
@@ -40,6 +40,18 @@ if (simType1 == "submission"):
 	RList = [rmin+dr*i for i in range(nr)]
 	print(RList)
 
+if (simType1 == "analysis"):
+	rmin = 10.0
+	rmax = 10.0
+	dr = 0.1
+	nr = int(((rmax-rmin)+dr*0.5)/dr)
+	nr = nr+1
+	print(nr)
+	RList = [rmin+dr*i for i in range(nr)]
+	print(RList)
+
+
+'''
 if (simType1 == "analysis"):
 	if ((param == 0.1) and (var == "tau")):
 		rmin = 2.5
@@ -71,15 +83,7 @@ if (simType1 == "analysis"):
 		nr = int(((rmax-rmin)+dr*0.5)/dr)
 		nr += 1
 		RList = [rmin+dr*i for i in range(nr)]
-
-	if (var == "beta"):
-		rmin = 3.0
-		rmax = 10.0
-		dr = 1.0
-		nr = int(((rmax-rmin)+dr*0.5)/dr)
-		nr += 1
-		RList = [rmin+dr*i for i in range(nr)]
-
+'''
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'

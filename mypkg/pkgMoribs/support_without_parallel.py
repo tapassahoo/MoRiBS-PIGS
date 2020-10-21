@@ -178,22 +178,21 @@ def fmtAverageEnergy(TypeCal,status,variable):
 	'''
 	This function gives us the output 
 	'''
-	if variable == "Rpt":
+	if (variable == "Rpt"):
 		unit = "(Angstrom)"
 	else:
 		unit = "(1/K)"
 
-	if status == "analysis":
+	if (status == "analysis"):
 		output     ="# Unit of all kind of energies is expessed in Kelvin."
 		output  += "\n"
 		output    +="# "
 		output  += "\n"
 		output    +="# "
 		if (TypeCal == "PIMC"):
-			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. Translational', 'Avg. rotational', 'Avg. Potential', 'Avg. Total', 'Error of Translational', 'Error of Rotational', 'Error of Potential', 'Error of Total')
+			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{rotsq:^16}{cv:^16}{cvR:^16}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er4:^12}{er6:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<K>', pot='<V>', tot='<E>', rotsq='<Ksq>', cv='<Cv>', cvR='<CvR>', er1='Err-K', er2='Err-V', er3='Err-E', er4='Err-Ksq', er5='Err-Cv',er6='Err-CvR',)
 		if (TypeCal == "PIGS"):
-			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{er1:^12}{er2:^12}{er3:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<E-V>', pot='<V>', tot='<E>', er1='Err-(E-V)', er2='Err-V', er3='Err-E')
-			#output    += '{blocks:^10}{beads:^10}{var:^10}{pot:^16}{tot:^16}{er1:^12}{er2:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', pot='<V>', tot='<E>', er1='Err-V', er2='Err-E')
+			output    += '{blocks:^10}{beads:^10}{var:^10}{pot:^16}{tot:^16}{er1:^12}{er2:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', pot='<V>', tot='<E>', er1='Err-V', er2='Err-E')
 		if (TypeCal == "ENT"):
 			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
 		output    +="\n"
@@ -239,10 +238,12 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 
 	if (TypeCal == "PIMC"):
 		col_block = final_data_set[:,0] 
-		col_kin   = final_data_set[:,1] 
-		col_rot   = final_data_set[:,2] 
-		col_pot   = final_data_set[:,3] 
-		col_tot   = final_data_set[:,4] 
+		col_rot   = final_data_set[:,1] 
+		col_pot   = final_data_set[:,2] 
+		col_tot   = final_data_set[:,3] 
+		col_rotsq = final_data_set[:,4] 
+		col_Cv    = final_data_set[:,5] 
+		col_CvR   = final_data_set[:,6] 
 
 		ncol_block = len(col_block)
 		if (int(len(col_block)) != numbblocks-(preskip+postskip)):
@@ -252,31 +253,34 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		workingNdim   = int(math.log(len(col_tot))/math.log(2))
 		trunc         = int(len(col_tot)-2**workingNdim)
 	
-		col_kin       = col_kin[trunc:]
 		col_rot       = col_rot[trunc:]
 		col_pot       = col_pot[trunc:]
 		col_tot       = col_tot[trunc:]
+		col_rotsq     = col_rotsq[trunc:]
+		col_Cv        = col_Cv[trunc:]
+		col_CvR       = col_CvR[trunc:]
 
-		mean_kin      = np.mean(col_kin)
 		mean_rot      = np.mean(col_rot)
 		mean_pot      = np.mean(col_pot)
 		mean_tot      = np.mean(col_tot)
+		mean_rotsq    = np.mean(col_rotsq)
+		mean_Cv       = np.mean(col_Cv)
+		mean_CvR      = np.mean(col_CvR)
 
-		error_kin     = maxError_byBining(mean_kin, col_kin, workingNdim-6)
 		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
 		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
 		error_tot     = maxError_byBining(mean_tot, col_tot, workingNdim-6)
+		error_rotsq   = maxError_byBining(mean_rotsq, col_rotsq, workingNdim-6)
+		error_Cv      = maxError_byBining(mean_Cv, col_Cv, workingNdim-6)
+		error_CvR     = maxError_byBining(mean_CvR, col_CvR, workingNdim-6)
 
-		output  = '{blocks:^8d}{beads:^10d}{var:^10.6f}{kin:^12.6f}{rot:^12.6f}{pot:^12.6f}{tot:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, kin=mean_kin, rot=mean_rot, pot=mean_pot, tot=mean_tot, er1=error_kin, er2=error_rot, er3=error_pot, er4=error_tot)
+		output  = '{blocks:^8d}{beads:^10d}{var:^10.6f}{rot:^12.6f}{pot:^12.6f}{tot:^12.6f}{rotsq:^12.6f}{Cv:^12.6f}{CvR:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, CvR=mean_CvR, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv, er6=error_CvR)
 		output  += "\n"
 
 	if (TypeCal == "PIGS"):
 		col_block = final_data_set[:,0] 
-		col_rot   = final_data_set[:,2]
-		col_pot   = final_data_set[:,3]
-		col_tot   = final_data_set[:,4]
-		#col_pot   = final_data_set[:,1]
-		#col_tot   = final_data_set[:,2]
+		col_pot   = final_data_set[:,1]
+		col_tot   = final_data_set[:,2]
 
 		ncol_block = len(col_block)
 		if (int(len(col_block)) != numbblocks-(preskip+postskip)):
@@ -286,20 +290,16 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		workingNdim   = int(math.log(len(col_tot))/math.log(2))
 		trunc         = int(len(col_tot)-2**workingNdim)
 	
-		col_rot       = col_rot[trunc:]
 		col_pot       = col_pot[trunc:]
 		col_tot       = col_tot[trunc:]
 
-		mean_rot      = np.mean(col_rot)
 		mean_pot      = np.mean(col_pot)
 		mean_tot      = np.mean(col_tot)
 
-		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
 		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
 		error_tot     = maxError_byBining(mean_tot, col_tot, workingNdim-6)
 
-		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, er1=error_rot, er2=error_pot, er3=error_tot)
-		#output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, pot=mean_pot, tot=mean_tot, er1=error_pot, er2=error_tot)
+		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, pot=mean_pot, tot=mean_tot, er1=error_pot, er2=error_tot)
 		output  += "\n"
 
 	return output
@@ -1217,8 +1217,6 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 	if (numbblocks <= 1000):
 		walltime   = "01-00:00"
 		thread     = 1
-		if (numbbeads >= 100):
-			thread     = 1
 	else:
 		if (numbbeads >= 160):
 			thread     = 1
