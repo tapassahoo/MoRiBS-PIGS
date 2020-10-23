@@ -1,109 +1,80 @@
-Here are few instructions that will help a user to modify script files before submitting jobs in queue. The source codes can be downloaded directly from github by typing the following line on the terminal:
+	MoRiBS-PIGS: It is derived from the MoRiBS-PIMC (see Computer Physics Communications vol. 204, pp. 170–188, yr 2016) to estimate ground state properties of many-body quantum systems based on Path Integral Ground State (PIGS) approach. 
+	-----------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------
 
-```git clone git@github.com:tapassahoo/MoRiBS-PIGS.git```
+	* Disclaimer: We disclaim any and all warranties concerning the enclosed program. *
 
-> It is important to note that PotFunc() function in mc_estim.cc file includes analytic potential like dipole-dipole interaction and the unit of energy is Kelvin.
+The source codes of MoRiBS-PIGS are mainly written by Tapas Sahoo and Pierre-Nicholas Roy, University of Waterloo, Canada. If you encounter any problem with respect to compiling or running the program, please contact Tapas Sahoo by email (tsahoo@uwaterloo.ca or tapascuchem@gmail.com).
 
-First, the author must read README file placed in MoRiBS-PIGS/ directory and follow the instructions.
+					************************
+					**    COMPILATION     **
+					************************
 
-In the source directory, there are many Makefiles. Makefile-PIMC and Makefile-PIGS are the makefiles that a user needs to compile the source codes for finite temperature (PIMC) and ground state (PIGS) canculations, respectively. To compile the source codes, first copy Makefile-PIMC of Makefile-PIGS to Makefile and use the following command:
+Users should not change the directory structure after they unzip the distributed file. We label the main directory, where the source codes (*.cc, *.h, and *.f) are, as $MAIN. Please note that we have provided example configuration files like makefile with the distribution and one may just adjust the files according to the architecture of his/her computer. There is no need to create new configuration files. The compilation procedure of MoRiBS-PIGS contains the following steps:
 
-```
-make clean
-make
-```
-
-But the user does not need to compile the source codes manually if the user wish to submit jobs by script files. The script files are in dir: MoRiBS-PIGS/examples/scripts). There are three python scripts:
-
-- [x] script_submission_analysis_MoRiBS.py
-
-- [x] support.py
-
-- [x] inputFile.py
-
-The user are suggested to make the following modifications in the scripts before running MoRiBs successfully:
-
-1. In **script_submission_analysis_MoRiBS.py**
-
-   - If user wish to run MoRiBs in graham.computecanada.ca, just replace "NameOfServer = "nlogn"" by "NameOfServer = "graham"". "NameOfServer = "nlogn"" when jobs will be submitted in feynman or nlogn server.
-
-   - If the user wish to include cage potential, he/she should use "status_cagepot = True", otherwise, "status_cagepot = False".
-
-   - Keep the same directotory-tree as as the developer used - /home/user_name/source_dir/input_dir. The user may change the names of the directories. As for example, the developer used
-
-```
-user_name           = "tapas"
-source_dir          = "Moribs-pigs/MoRiBS-PIMC/"                    #Path of the source directory#
-out_dir             = "nonlinear-molecule/"                         #This directory will automatically be created in /work or in /scratch if it does not exits.      
-input_dir           = "examples/nonlinear-molecule/"                #Where all the input and scripts are
-final_results_path  = "/home/"+user_name+"/ResultsOf"+TypeCal+"/"   #Where all the final results will be stored after analyzing the MoRiBs outputs.
-```
-
-   - but the user may change these as
-
-```
-user_name           = "user_name" excluding "/"
-source_dir          = "MoRiBS-PIMC/"
-out_dir             = "PIMC-H2O/"
-input_dir           = "INPUT/"
-final_results_path  = "/home/tapas/ResultsOf"+TypeCal+"/"
-```
-
-2. In **support.py**
-
-   - Update system dependent rotational B constant in **GetBconst()** function. It is needed only for linear rotor.
-
-   - In **jobstring_sbatch()** function, adjust thread and walltime format.
-   
-```
-thread         = Number of thread. 
-walltime       = "40-00:00" 
-```
-
-   - In case of feynman, user must comment out the following #SBATCH command in the above mentioned function
-   
-```   
-#SBATCH --account=rrg-pnroy
-```
-
-   - In the same function, change **CommandForMove**
-
-3. In **inputFile.py**
-
-   - Make a list of beads in Getbeads() function. List of beads is defined by list_nb. Here basically same beades will be used for rotational and translational motions. If the user wish to use different set of beads, the user should consult with the developer.
-
-   - Make three lists for step_trans, level, step in GetStepAndLevel() function. step_trans and step are the translational and rotational Monte Carlo step size. level is used in Monte Carlo bisection move for translational motion and it is integer in nature. Be careful, the function always needs the lists of step_trans, level, stepi, even if the user does not allow translation or rotational motions simultaneously. As for example, for the rotational motions only, the acceptance ration will be affected by the list of step (defined for rotational motion) only. Therefor, the user could fill up the step_trans, level lists by any real and integer numbers, respectively.
+	1: `cd $MAIN/spring` and open make.CHOICES. One should specify the platform of his/her computer by uncommenting the correct line, i.e., PLAT = LINUX;
+	2: `cd $MAIN/spring/SRC` and open make.${PLAT}. With the above choice, it should be make.LINUX. In make.${PLAT}, one should specify the fortran and C/C++ compilers that are installed in his/her computer. Note that only the non-MPI compilation of SPRNG has been tested with MoRiBS-PIGS;
+	3: at $MAIN/spring/SRC, `make clean` and `make`. The generated libraries are in $MAIN/spring/lib. Make sure $MAIN/spring/lib is empty before `make`. Sometimes, `make clean` may not clean up $MAIN/spring/lib completely. Steps 1-3 are to compile the sprng libraries that are needed by the main code;
+	4: at $MAIN, open makefile, and specify options, CFLAGS, LDFLAGS, CC and FC. Those are the optimization options, C/C++ compilation flags, link flags, C/C++ compiler, and Fortran compiler respectively;
+	5: at $MAIN, `make clean` and `make`. If there is no error message, the generated executable is called pimc.
 
 
+					************************
+					**   BEFORE RUNNING   **
+					************************
 
-Now the script files are ready to submit your jobs. To know the command line arguments, just type the following command in terminal
+Please note that one should delete the following files before each simulation run:
+	1: yw001.*;
+	2: permutation,
+Otherwise, the simulation will bomb out.
 
-python script_submission_analysis_MoRiBS.py -h
+Remember to use asymrho.x (in nmv_prop/), symrho.x (in symtop_prop/) or linden.x (in linear_prop/) to generate the needed files for PIMC sampling of asymmetric top, symmetric top, or linear rotors. Users should read the respective README files in those directories carefully before compiling and running those programs. Users should carefully name the resultant files in accordance to the rules explained in Computer Physics Communications vol. 204, pp. 170–188, yr 2016.
 
-Examples of command line arguments to submit the jobs are given below:
+N.B.: For the MoRiBS-PIGS simulations of the nonlinear rotors, the user should always use an odd number of beads, and the name of all *.rho, *.eng, *.esq files must be of the format - {rotor name}_T{temperature}t{# of rotational beads}.rho/eng/esq. Remember, the {temperature} string's total width must be of six digits after the decimal point.
 
-        python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE tau submission PIMC H2O H2O 0.0333333333"
+As for Example:
 
-                -d       dipole moment value
-                -R       Inter molecular distance
-                -N       Number of rotors
-                -Block   Number of Blocks
-                -Pass    Number of Pass
-                last value corresponds to the fixed beta value 1/T;
+	H2O_T10.000000t101.rho	
+	H2O_T10.000000t101.eng
+	H2O_T10.000000t101.esq
 
-Read the outputs printed on the screen.
+To generate the above files by asymrho.f, P-1 beads are used in MoRiBS-PIGS simulations instead of P beads used in the MoRiBS-PIMC simulations. Imaginary time (tau) is defined as (beta/P-1), where P is the number of beads.
 
-To analyze the output data -
+The name of the working directory to submit jobs is ~/MoRiBS-PIGS/examples/pigs-simulations-for-para-Water. To execute the simulations, the user must have the following files -
+	1: qmc.input
+	2: *.rho, *.eng, *.esq files
 
-        python script_submission_analysis_MoRiBS.py -d 1.0 -R 6.0 -N 2 -Block 100000 -Pass 100 --ROTMOVE --preskip 10000 tau analysis PIMC H2O H2O 0.0333333333"
+The user is advised to read Computer Physics Communications vol. 204, pp. 170–188, yr 2016, to set up the input (qmc.input).
 
-Read the outputs printed on the screen. Final output files will be saved in directory final_results_path.
+One may compile the code, move the resultant executable "pimc" to examples/MF_8He_0.37K_512_128 or examples/N2O_5pH2_512_128, and try running the respective simulations. One may also look at the files in those two example directories to have a sense of how many files are needed and their formats. Some of these examples are discussed in our associated paper.
 
-4. **Short discussion on restarting a job
+					************************
+					**   OUTPUT SUMMARY   **
+					************************
 
-  [x] Keep the same number of threads in the restarted job as you used in the finished job. 
+There are two relevant directories for a MoRiBS-PIGS run, the working directory and the output directory. The former is the directory where the program executable is and the latter is specified in qmc.input. In below we simply call the two directories $WORK and $OUTPUT. And we also use $FILNAM to specify the FILENAMEPREFIX that is specified in qmc.input.
 
+************
+   energy
+************
+All energy outputs are stored in the following two files:
 
-***N.B.: Don't hesitate to email to the developer if you face any problem to submit your jobs or analyze the output files by the scripts.***
+	$OUTPUT/$FILNAM_sum.eng and $OUTPUT/$FILNAM.eng.
 
-Email: tapascuchem@gmail.com
+The first contains the energy components averaged on the fly while the latter contains the block-averaged quantities for every block. In $OUTPUT/$FILNAM_sum.eng, column
+	1: counting indices of punching out the energy components;
+	2: potential energy;
+	3: total energy (rotational + potential);
+
+In $OUTPUT/$FILNAM.eng, column
+	1: block index;
+	2: block averaged potential energy;
+	3: block averaged total energy (rotational + potential);
+
+All energy quantities have the unit of K.
+
+*******************
+   distribution
+*******************
+
+Another important output is output.xyz where all the instantaneous values of rotational degrees of freedom are stored.
