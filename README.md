@@ -79,4 +79,12 @@ All energy quantities have the unit of K.
    distribution
 *******************
 
-Another important output is output.xyz where all the instantaneous values of rotational degrees of freedom are stored.
+Another important output is output.xyz where all the instantaneous values of rotational degrees of freedom in the space-fixed frame are stored. For better understanding, the user can see the SaveInstantConfig() function in mc_main.cc.
+
+	loop over rotors' index
+		loop over rotational beads
+			loop over (cos(theta),phi,chi)
+
+The output.xyz file is required to plot order parameters, angular distribution functions and <O-H..O distributions.
+ 
+
