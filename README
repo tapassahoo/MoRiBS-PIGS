@@ -77,28 +77,4 @@ All energy quantities have the unit of K.
    distribution
 *******************
 
-Whenever there are point-like particles, the $OUTPUT/$FILNAM_sum.gra contains pair radial distribution between point-like particles. The first column has radius and the second the rho(r). It follows the convention that integrating r from 0 to infinity rho(r)*dr gives 1. In practice, the density is made by binning in a finite grid, which is also normalized to 1.
-
-If there is a linear rotor, the $OUTPUT/$FILNAM_sum.g2d file contains the 2-D distribution of the point-like particles around the rotor. The 2 dimensions are radius and polar-angle. The file has three columns, where column
-
-	1: polar angles in degree;
-	2: radius in Angstrom;
-	3: density rho(r, theta).
-
-The density follows the following normalization:
-
-	Integrating from 0 to pi for theta and from 0 to infinity for r rho(r,theta)dr dtheta = 1.
-
-For a non-linear rotor, there are three files:
-
-	$OUTPUT/$FILNAM_sum.gri;
-	$OUTPUT/$FILNAM_sum.grt;
-	$OUTPUT/$FILNAM_sum.grc
-
-which contain the radial (r), polar angle (theta), and azimuthal angle (chi) distributions of the point-like particles in the molecu-fixed frame (MFF) of the rotor. The MFF is the same as the one used in the definition of Eular angles. The densities follow the following normalizations:
-
-	Integrating r from 0 to infinity rho(r) dr = number of point like particles;
-	Integrating theta from 0 to pi rho(theta) dtheta = 1;
-	Integrating chi from 0 to 2*pi rho(chi) dchi =1.
-
-In addition, at the beginning of each block, the program punches out a $OUTPUT/$FILNAM###.xyz file to record the path configuration of the system. The file has N*P+2 lines, where N is the number of all particles (point-like + rotor) and P is the number of translational beads. Line one contains the permutational table for the configuration snapshot and line two is a comment line. The rest lines loop over all particles, point-like first and rotor second, and for each particle loop over all beads and punch out the corresponding configurations. Column 1 has the particle name, columns 2, 4, and 6 the x, y, and z coordinates in the space-fixed frame respectively, and columns 3, 5, 7 the phi, cos(theta), and chi angle coordinates. For linear rotors, phi and theta are the azimuthal and polar angles. For a top, phi, theta, and chi are the Eular angles defined in Figure 3.1, page 78 of Zare (Angular Momentum, 1988, John Wiley & Sons, Inc). When the number of rotational beads (Q) is a fraction of P, only the first Q lines of each particle block contains the meaningful angular coordinates.
+Another important output is output.xyz where all the instantaneous values of rotational degrees of freedom are stored.
