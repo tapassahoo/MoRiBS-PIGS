@@ -191,14 +191,22 @@ def fmtAverageEnergy(TypeCal,status,variable):
 		output    +="# "
 		if (TypeCal == "PIMC"):
 			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{rotsq:^16}{cv:^16}{cvR:^16}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er4:^12}{er6:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<K>', pot='<V>', tot='<E>', rotsq='<Ksq>', cv='<Cv>', cvR='<CvR>', er1='Err-K', er2='Err-V', er3='Err-E', er4='Err-Ksq', er5='Err-Cv',er6='Err-CvR',)
+			output    +="\n"
+			output    += '{0:=<200}'.format('#')
+			output    +="\n"
+
 		if (TypeCal == "PIGS"):
 			output    += '{blocks:^10}{beads:^10}{var:^10}{pot:^16}{tot:^16}{er1:^12}{er2:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', pot='<V>', tot='<E>', er1='Err-V', er2='Err-E')
+			output    +="\n"
+			output    += '{0:=<90}'.format('#')
+			output    +="\n"
+
 		if (TypeCal == "ENT"):
 			output    += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format('Beads', variable, 'Avg. rotational', 'Avg. (E - V)', 'Avg. Potential', 'Avg. Total', 'Error of Rotational', 'Error of (E - V)', 'Error of Potential', 'Error of Total')
-		output    +="\n"
-		#output    += '{0:=<115}'.format('#')
-		output    += '{0:=<90}'.format('#')
-		output    +="\n"
+			output    +="\n"
+			output    += '{0:=<90}'.format('#')
+			output    +="\n"
+
 		return output
 
 def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postskip, numbblocks):
@@ -274,7 +282,7 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		error_Cv      = maxError_byBining(mean_Cv, col_Cv, workingNdim-6)
 		error_CvR     = maxError_byBining(mean_CvR, col_CvR, workingNdim-6)
 
-		output  = '{blocks:^8d}{beads:^10d}{var:^10.6f}{rot:^12.6f}{pot:^12.6f}{tot:^12.6f}{rotsq:^12.6f}{Cv:^12.6f}{CvR:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, CvR=mean_CvR, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv, er6=error_CvR)
+		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{rotsq:^16.6f}{Cv:^16.6f}{CvR:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, CvR=mean_CvR, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv, er6=error_CvR)
 		output  += "\n"
 
 	if (TypeCal == "PIGS"):

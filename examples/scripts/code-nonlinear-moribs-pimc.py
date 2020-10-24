@@ -27,7 +27,7 @@ npass = 200
 #param = 0.001 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.05 # for fixed beta
+param = 0.2 # for fixed beta
 
 
 if (simType1 == "submission"):

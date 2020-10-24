@@ -1101,14 +1101,12 @@ void MCGetAveragePIMC(void)
 
 	if (!TRANSLATION && ROTATION)
 	{
-		// accumulate terms for Cv
 		double sCv;
 		sCv = -(spot + srot)*(spot + srot) + Erot_termSQ - ErotSQ;
 
 		_bCv += sCv;
 		_Cv_total += sCv;
 
-		// accumulate terms for rotational Cv
 		double sCv_rot;
 		sCv_rot = -srot*srot + Erot_termSQ - ErotSQ;
 
