@@ -30,6 +30,7 @@ Makefile
 examples/scripts/test*
 /examples/*/
 !/examples/scripts
+!/examples/pigs-simulations-for-para-Water
 /examples/scripts/*.pyc
 /examples/scripts/*new*
 /examples/scripts/*old*
