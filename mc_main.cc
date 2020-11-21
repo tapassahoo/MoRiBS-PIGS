@@ -66,7 +66,6 @@ double _bkin;       // potential energy, block average
 double _bCv;        // heat capacity, block average
 double _bCv1;        // heat capacity, block average
 double _bCv2;        // heat capacity, block average
-double _bCv3;        // heat capacity, block average
 double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
 //
@@ -799,7 +798,6 @@ void MCResetBlockAveragePIMC(void)
 	_bCv         = 0.0;
 	_bCv1        = 0.0;
 	_bCv2        = 0.0;
-	_bCv3        = 0.0;
 	_bCv_trans   = 0.0;
 	_bCv_rot     = 0.0;
 
@@ -1115,14 +1113,11 @@ void MCGetAveragePIMC(void)
 		double sCv3;
 		sCv1 = (spot + srot)*(spot + srot); //
 		sCv2 = Erot_termSQ - ErotSQ;// Works well
-		sCv3 = spot*spot+2.0*srot*spot+ErotSQ; //It does not work
 
 		_bCv1 += sCv1;
 		_bCv2 += sCv2;
-		_bCv3 += sCv3;
 		_Cv1_total += sCv1;
 		_Cv2_total += sCv2;
-		_Cv3_total += sCv3;
 	}
 
 // check whether there're bosons in the system
@@ -1330,7 +1325,6 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
 		fid << setw(IO_WIDTH) << _bCv1*(Units.energy*Units.energy)/avergCount << BLANK; // heat capacity
 		fid << setw(IO_WIDTH) << _bCv2*(Units.energy*Units.energy)/avergCount << BLANK; // rotational heat capacity
-		fid << setw(IO_WIDTH) << _bCv3*(Units.energy*Units.energy)/avergCount << BLANK; // rotational heat capacity
 		fid << endl;
 	}
 	else if (PIGS_SIM)
