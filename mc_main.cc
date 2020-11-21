@@ -64,6 +64,9 @@ double _bpot;       // kinetic   energy, block average
 double _btot;
 double _bkin;       // potential energy, block average
 double _bCv;        // heat capacity, block average
+double _bCv1;        // heat capacity, block average
+double _bCv2;        // heat capacity, block average
+double _bCv3;        // heat capacity, block average
 double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
 //
@@ -80,6 +83,9 @@ double _brot;       // rotational kin energy, block average
 double _brotsq;     // rotational energy square, block average
 double _rotsq_total; // rotational energy square, global average
 double _Cv_total;    // heat capacity, global average
+double _Cv1_total;    // heat capacity, global average
+double _Cv2_total;    // heat capacity, global average
+double _Cv3_total;    // heat capacity, global average
 double _Cv_trans_total;    // translational heat capacity, global average
 double _Cv_trans_1_total;    // translational heat capacity, global average
 double _Cv_trans_2_total;    // translational heat capacity, global average
@@ -791,6 +797,9 @@ void MCResetBlockAveragePIMC(void)
 	_brot        = 0.0;
 	_brotsq      = 0.0;
 	_bCv         = 0.0;
+	_bCv1        = 0.0;
+	_bCv2        = 0.0;
+	_bCv3        = 0.0;
 	_bCv_trans   = 0.0;
 	_bCv_rot     = 0.0;
 
@@ -1099,19 +1108,21 @@ void MCGetAveragePIMC(void)
 		_Cv_rot_total += sCv_rot;
 	}
 
-	if (!TRANSLATION && ROTATION)
+	if ((TRANSLATION == false) && (ROTATION == true))
 	{
-		double sCv;
-		sCv = -(spot + srot)*(spot + srot) + Erot_termSQ - ErotSQ;
+		double sCv1;
+		double sCv2;
+		double sCv3;
+		sCv1 = (spot + srot)*(spot + srot); //
+		sCv2 = Erot_termSQ - ErotSQ;// Works well
+		sCv3 = spot*spot+2.0*srot*spot+ErotSQ; //It does not work
 
-		_bCv += sCv;
-		_Cv_total += sCv;
-
-		double sCv_rot;
-		sCv_rot = -srot*srot + Erot_termSQ - ErotSQ;
-
-		_bCv_rot += sCv_rot;
-		_Cv_rot_total += sCv_rot;
+		_bCv1 += sCv1;
+		_bCv2 += sCv2;
+		_bCv3 += sCv3;
+		_Cv1_total += sCv1;
+		_Cv2_total += sCv2;
+		_Cv3_total += sCv3;
 	}
 
 // check whether there're bosons in the system
@@ -1317,8 +1328,9 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
 		fid << setw(IO_WIDTH) <<(_bpot+_brot)*Units.energy/avergCount << BLANK;  //total energy including rot energy 
 		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
-		fid << setw(IO_WIDTH) << _bCv/avergCount << BLANK; // heat capacity
-		fid << setw(IO_WIDTH) << _bCv_rot/avergCount << BLANK; // rotational heat capacity
+		fid << setw(IO_WIDTH) << _bCv1*(Units.energy*Units.energy)/avergCount << BLANK; // heat capacity
+		fid << setw(IO_WIDTH) << _bCv2*(Units.energy*Units.energy)/avergCount << BLANK; // rotational heat capacity
+		fid << setw(IO_WIDTH) << _bCv3*(Units.energy*Units.energy)/avergCount << BLANK; // rotational heat capacity
 		fid << endl;
 	}
 	else if (PIGS_SIM)
@@ -1374,6 +1386,7 @@ void SaveSumEnergy (double acount, double numb)  // global average
 		_feng << setw(IO_WIDTH) <<(_pot_total+_rot_total)*Units.energy/acount << BLANK;  //total energy including rot  
 		_feng << setw(IO_WIDTH) <<_rotsq_total*(Units.energy*Units.energy)/acount << BLANK;   
 		// Cv
+		/*
 		double Cv = -(_pot_total+_rot_total)*Units.energy/acount;
 		Cv = Cv*Cv + _Cv_total*Units.energy*Units.energy/acount;
 		Cv = -Cv*MCBeta/Temperature;
@@ -1383,6 +1396,10 @@ void SaveSumEnergy (double acount, double numb)  // global average
 		Cv_rot = Cv_rot*Cv_rot+ _Cv_rot_total*Units.energy*Units.energy/acount;
 		Cv_rot = -Cv_rot*MCBeta/Temperature;
 		_feng << setw(IO_WIDTH) <<Cv_rot << BLANK;
+		*/
+		_feng << setw(IO_WIDTH) <<_Cv1_total*(Units.energy*Units.energy)/acount << BLANK;
+		_feng << setw(IO_WIDTH) <<_Cv2_total*(Units.energy*Units.energy)/acount << BLANK;
+		_feng << setw(IO_WIDTH) <<_Cv3_total*(Units.energy*Units.energy)/acount << BLANK;
 	}
 	else if (PIGS_SIM)
 	{
@@ -1515,6 +1532,9 @@ void InitTotalAverage(void)  // DUMP
 	_rot_total = 0.0;
 	_rotsq_total = 0.0;
 	_Cv_total = 0.0;
+	_Cv1_total = 0.0;
+	_Cv2_total = 0.0;
+	_Cv3_total = 0.0;
 	_Cv_trans_total = 0.0;
 	_Cv_trans_1_total = 0.0;
 	_Cv_trans_2_total = 0.0;

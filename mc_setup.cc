@@ -573,7 +573,7 @@ void MCConfigInit(void)
 	for (int it=0;it<(NumbAtoms*NumbTimes);it++)
     {
 		MCAngles[PHI][it] = 0.0;
-		MCAngles[CTH][it] = 1.0;
+		MCAngles[CTH][it] = -1.0;
 		MCAngles[CHI][it] = 0.0;
 
 		double phi  = MCAngles[PHI][it];

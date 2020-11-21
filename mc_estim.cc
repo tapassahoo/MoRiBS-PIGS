@@ -1222,21 +1222,11 @@ double GetPotEnergy_Densities(void)
 	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
 	{
         spot = 0.0;
-#ifndef EWALDSUM
         for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
 		{
-#else
-        for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-		{
-#endif
            	int offset0 = NumbTimes*atom0;
-#ifndef EWALDSUM
         	for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
         	{
-#else
-        	for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
-        	{
-#endif
             	int offset1 = NumbTimes*atom1;
 
 		    	double spot_pair = 0.0;
@@ -1536,6 +1526,49 @@ double GetPotEnergy_Densities(void)
 			}  // LOOP OVER TIME SLICES
 			spot += spot_pair;
 		}     // LOOP OVER ATOM PAIRS
+	}
+
+    if ((MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb == 1))
+	{
+		int atom0   = 0;
+		int type0   = MCType[atom0];
+		int offset0 = NumbTimes*atom0;
+
+		double spot_pair=0.0;
+		#pragma omp parallel for reduction(+: spot_pair)
+		for (int it=0;it<NumbTimes;it++) 	    
+		{  
+			double dr[NDIM];
+			int t0 = offset0 + it;
+
+			double dr2 = 0.0;  		 
+			double com_2[3]={0.0, 0.0, Distance};
+			for (int id=0;id<NDIM;id++)
+			{
+				dr[id]  = (MCCoords[id][t0] - com_2[id]);
+				dr2    += (dr[id]*dr[id]);
+			}
+			double r = sqrt(dr2);
+
+			double com_1[3];
+			double Eulang_1[3];
+			double Eulang_2[3];
+			double E_2H2O;
+			for (int id=0;id<NDIM;id++)
+			{
+				com_1[id] = MCCoords[id][t0];
+			}
+			int tm0=offset0 + it/RotRatio;
+			Eulang_1[PHI]=MCAngles[PHI][tm0];
+			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+			Eulang_1[CHI]=MCAngles[CHI][tm0];
+			Eulang_2[PHI]=0.0;
+			Eulang_2[CTH]=acos(-1.0);
+			Eulang_2[CHI]=0.0;
+			caleng_(com_1, com_2, &E_2H2O, Eulang_1, Eulang_2);
+			spot_pair += E_2H2O;
+		}  // LOOP OVER TIME SLICES
+		spot = spot_pair;
 	}
 
     double spot_cage = 0.0;
@@ -2993,7 +3026,7 @@ double GetRotE3D(void)
 			RNskip = RNratio;
 		}
    
-#pragma omp parallel for reduction(+: srot,sesq) // TOBY question: why not include se_termsq in deduction?
+#pragma omp parallel for reduction(+: srot,sesq,se_termsq) // TOBY question: why not include se_termsq in deduction?
 		for (int it0=0;it0<NumbRotTimes;it0=it0+RNskip)
 		{
 			int t0 = offset +  it0;

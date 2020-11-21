@@ -3451,90 +3451,116 @@ double PotRotE3D(int atom0, double *Eulang, int it)
 
 	int offset0 = atom0*NumbTimes;
 
-	for (int atom1=0; atom1<NumbAtoms; atom1++)
-	if (atom1 != atom0)                    // skip "self-interaction"
-	{	
-		int offset1 = atom1*NumbTimes;
-		int type1   = MCType[atom1];
-
-#ifdef DEBUG_PIMC
-		//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
-		//nrerror(_proc_,"More then one molecular impurity type");
-		if(MCAtom[type1].molecule == 1)
-		nrerror(_proc_,"No support of non-linear-linear interaction yet");
-#endif
-
-		if (type1 != IMTYPE) // atom-rotor interaction
-		{
-			bool wline = true;                  // skip if the time slice between ira and masha
-
-			if (WORM && Worm.exists && (Worm.type == type1))  
-			wline = WorldLine((atom1-MCAtom[type1].offset/NumbTimes), it);
-    
-			if (wline)
-			{  
-				int t0 = offset0 + it;
-				int t1 = offset1 + it;
-
-				double RCOM[3];
-				double Rpt[3];
-				double vpot3d;
-				double radret;
-				double theret;
-				double chiret;
-				double hatx[3];
-				double haty[3];
-				double hatz[3];
-				int    ivcord = 0;
-				for (int id=0;id<NDIM;id++)
-				{
-					RCOM[id] = MCCoords[id][t0];
-					Rpt[id]  = MCCoords[id][t1];
-				}
-
-				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-
-//				for(int id=0;id<NDIM;id++)
-/*
-				Toby's printing
-				cout<<Eulang[id]<<" "<<RCOM[id]<<" "<<Rpt[id]<<endl;
-				cout<<vpot3d<<endl;
-*/
-
-				spot += vpot3d;
- 
-			} // END sum over time slices 	   
-		}
-		else if (MCType[atom1] == IMTYPE)
+	if (MCAtom[type0].numb == 1)  
+	{
+		if (MCAtom[type0].molecule == 2)
 		{
 			int t0 = offset0 + it;
-			int t1 = offset1 + it;
 			double com_1[3];
-			double com_2[3];
+			double com_2[3]={0.0, 0.0, Distance};
 			double Eulang_1[3];
 			double Eulang_2[3];
 			double E_2H2O;
-			for (int id=0; id<NDIM; id++)
-			{
-				com_1[id] = MCCoords[id][t0];
-				com_2[id] = MCCoords[id][t1];
-			}
+			for (int id=0; id<NDIM; id++) com_1[id] = MCCoords[id][t0];
 			int tm0=offset0 + it/RotRatio;
-			int tm1=offset1 + it/RotRatio;
 			Eulang_1[PHI]=MCAngles[PHI][tm0];
 			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
 			Eulang_1[CHI]=MCAngles[CHI][tm0];
-			Eulang_2[PHI]=MCAngles[PHI][tm1];
-			Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
-			Eulang_2[CHI]=MCAngles[CHI][tm1];
+			Eulang_2[PHI]=0.0;
+			Eulang_2[CTH]=acos(-1.0);
+			Eulang_2[CHI]=0.0;
 			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
-			spot += E_2H2O;
-		}
-	}   // END sum over atoms
+			spot = E_2H2O;
+		}  
+	}
+
+	if (MCAtom[type0].numb > 1)  
+	{
+		for (int atom1=0; atom1<NumbAtoms; atom1++)
+		if (atom1 != atom0)                    // skip "self-interaction"
+		{	
+			int offset1 = atom1*NumbTimes;
+			int type1   = MCType[atom1];
+
+#ifdef DEBUG_PIMC
+			//if ((MCAtom[type1].molecule == 1) || (MCAtom[type1].molecule == 2) )
+			//nrerror(_proc_,"More then one molecular impurity type");
+			if(MCAtom[type1].molecule == 1)
+			nrerror(_proc_,"No support of non-linear-linear interaction yet");
+#endif
+
+			if (type1 != IMTYPE) // atom-rotor interaction
+			{
+				bool wline = true;                  // skip if the time slice between ira and masha
+
+				if (WORM && Worm.exists && (Worm.type == type1))  
+				wline = WorldLine((atom1-MCAtom[type1].offset/NumbTimes), it);
+		
+				if (wline)
+				{  
+					int t0 = offset0 + it;
+					int t1 = offset1 + it;
+
+					double RCOM[3];
+					double Rpt[3];
+					double vpot3d;
+					double radret;
+					double theret;
+					double chiret;
+					double hatx[3];
+					double haty[3];
+					double hatz[3];
+					int    ivcord = 0;
+					for (int id=0;id<NDIM;id++)
+					{
+						RCOM[id] = MCCoords[id][t0];
+						Rpt[id]  = MCCoords[id][t1];
+					}
+
+					vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+
+	//				for(int id=0;id<NDIM;id++)
+	/*
+					Toby's printing
+					cout<<Eulang[id]<<" "<<RCOM[id]<<" "<<Rpt[id]<<endl;
+					cout<<vpot3d<<endl;
+	*/
+
+					spot += vpot3d;
+	 
+				} // END sum over time slices 	   
+			}
+			else if (MCType[atom1] == IMTYPE)
+			{
+				int t0 = offset0 + it;
+				int t1 = offset1 + it;
+				double com_1[3];
+				double com_2[3];
+				double Eulang_1[3];
+				double Eulang_2[3];
+				double E_2H2O;
+				for (int id=0; id<NDIM; id++)
+				{
+					com_1[id] = MCCoords[id][t0];
+					com_2[id] = MCCoords[id][t1];
+				}
+				int tm0=offset0 + it/RotRatio;
+				int tm1=offset1 + it/RotRatio;
+				Eulang_1[PHI]=MCAngles[PHI][tm0];
+				Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
+				Eulang_1[CHI]=MCAngles[CHI][tm0];
+				Eulang_2[PHI]=MCAngles[PHI][tm1];
+				Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
+				Eulang_2[CHI]=MCAngles[CHI][tm1];
+				caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
+				spot += E_2H2O;
+			}
+		}// END sum over atoms
+	}   
 	return (spot);
 }
 
-double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is PotRotE3D
+double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is PotRotE3DPIGS
 {
 	int type0   =  MCType[atom0];
 	string stype = MCAtom[type0].type;

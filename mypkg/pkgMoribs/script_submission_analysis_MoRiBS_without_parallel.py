@@ -121,13 +121,13 @@ ENT_ALGR = args.RATIO
 extra_file_name = extraName
 
 src_dir = os.getcwd()
-if variableName == "tau":
+if (variableName == "tau"):
 	parameterName = "beta"
 	beta = args.param
 	parameter = beta
 	temperature = 1.0 / beta
 
-if variableName == "beta":
+if (variableName == "beta"):
 	parameterName = "tau"
 	tau = args.param
 	parameter = tau
@@ -287,16 +287,13 @@ for particleA in particleAList:
 
 		if (TypeCal == "PIMC"):
 
-			if (i%2==0):
-				value = i
-			else:
-				value = i + 1
+			value = i
 
 			if (variableName == "beta"):
 				beta = tau*value
 				temperature=1.0/beta
 				variable=beta
-			if variableName == "tau":
+			if (variableName == "tau"):
 				tau=beta/value
 				variable=tau
 

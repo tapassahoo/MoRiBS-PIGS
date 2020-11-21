@@ -190,9 +190,9 @@ def fmtAverageEnergy(TypeCal,status,variable):
 		output  += "\n"
 		output    +="# "
 		if (TypeCal == "PIMC"):
-			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{rotsq:^16}{cv:^16}{cvR:^16}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er4:^12}{er6:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<K>', pot='<V>', tot='<E>', rotsq='<Ksq>', cv='<Cv>', cvR='<CvR>', er1='Err-K', er2='Err-V', er3='Err-E', er4='Err-Ksq', er5='Err-Cv',er6='Err-CvR',)
+			output    += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{rotsq:^16}{cv:^16}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er5:^12}'.format(blocks='nBlocks',beads='nBeads', var=variable+' invK', rot='<K>', pot='<V>', tot='<E>', rotsq='<Ksq>', cv='<Cv>', er1='Err-K', er2='Err-V', er3='Err-E', er4='Err-Ksq', er5='Err-Cv',)
 			output    +="\n"
-			output    += '{0:=<200}'.format('#')
+			output    += '{0:=<170}'.format('#')
 			output    +="\n"
 
 		if (TypeCal == "PIGS"):
@@ -250,8 +250,9 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		col_pot   = final_data_set[:,2] 
 		col_tot   = final_data_set[:,3] 
 		col_rotsq = final_data_set[:,4] 
-		col_Cv    = final_data_set[:,5] 
-		col_CvR   = final_data_set[:,6] 
+		col_Cv1   = final_data_set[:,5] 
+		col_Cv2   = final_data_set[:,6] 
+		col_Cv3   = final_data_set[:,7] 
 
 		ncol_block = len(col_block)
 		if (int(len(col_block)) != numbblocks-(preskip+postskip)):
@@ -265,24 +266,31 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		col_pot       = col_pot[trunc:]
 		col_tot       = col_tot[trunc:]
 		col_rotsq     = col_rotsq[trunc:]
-		col_Cv        = col_Cv[trunc:]
-		col_CvR       = col_CvR[trunc:]
+		col_Cv1       = col_Cv1[trunc:]
+		col_Cv2       = col_Cv2[trunc:]
+		col_Cv3       = col_Cv3[trunc:]
 
 		mean_rot      = np.mean(col_rot)
 		mean_pot      = np.mean(col_pot)
 		mean_tot      = np.mean(col_tot)
 		mean_rotsq    = np.mean(col_rotsq)
-		mean_Cv       = np.mean(col_Cv)
-		mean_CvR      = np.mean(col_CvR)
+		mean_Cv1      = np.mean(col_Cv1)
+		mean_Cv2      = np.mean(col_Cv2)
+		mean_Cv3      = np.mean(col_Cv3)
+		mcbeta        = variable*numbbeads
+		mean_Cv       = mcbeta*mcbeta*(mean_Cv1-mean_Cv2-mean_tot*mean_tot)
+		mean_Cvv       = mcbeta*mcbeta*(mean_Cv3-mean_tot*mean_tot)
+		print(mean_Cvv)
 
 		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
 		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
 		error_tot     = maxError_byBining(mean_tot, col_tot, workingNdim-6)
 		error_rotsq   = maxError_byBining(mean_rotsq, col_rotsq, workingNdim-6)
-		error_Cv      = maxError_byBining(mean_Cv, col_Cv, workingNdim-6)
-		error_CvR     = maxError_byBining(mean_CvR, col_CvR, workingNdim-6)
+		error_Cv1     = maxError_byBining(mean_Cv1, col_Cv1, workingNdim-6)
+		error_Cv2     = maxError_byBining(mean_Cv2, col_Cv2, workingNdim-6)
+		error_Cv      = mcbeta*mcbeta*(math.sqrt(error_Cv1*error_Cv1+error_Cv2*error_Cv2+4.0*mean_tot*mean_tot*error_tot*error_tot))
 
-		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{rotsq:^16.6f}{Cv:^16.6f}{CvR:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, CvR=mean_CvR, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv, er6=error_CvR)
+		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{rotsq:^16.6f}{Cv:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv)
 		output  += "\n"
 
 	if (TypeCal == "PIGS"):
@@ -1229,11 +1237,11 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 		if (numbbeads >= 160):
 			thread     = 1
 			walltime   = "7-00:00"
-		elif ((numbbeads >= 50) and (numbbeads < 160)):
-			thread     = 1
+		elif ((numbbeads >= 70) and (numbbeads < 160)):
+			thread     = 4
 			walltime   = "07-00:00"
-		elif ((numbbeads >= 20) and (numbbeads < 50)):
-			thread     = 1
+		elif ((numbbeads >= 30) and (numbbeads < 70)):
+			thread     = 4
 			walltime   = "03-00:00"
 		else:
 			thread     = 1
