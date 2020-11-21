@@ -16,23 +16,27 @@ simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
-SpinIsomer = 0
+SpinIsomer = -1
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 2
+nMolecule = 1
 nblocks = 20000
-npass = 200
+npass = 500
 
 #var = "beta" # for fixed tau
 #param = 0.001 # for fixed tau
 
 var = "tau"  # for fixed beta
-param = 0.2 # for fixed beta
+#param = 0.2 # for fixed beta
+
+#nbeads = np.array([18, 16, 14, 12, 8, 6])
+nbeads = 6
+param = 0.01*nbeads
 
 
 if (simType1 == "submission"):
-	rmin = 10.0
-	rmax = 10.0
+	rmin = 20.0
+	rmax = 20.0
 	dr = 0.1
 	nr = int(((rmax-rmin)+dr*0.5)/dr)
 	nr = nr+1
@@ -41,8 +45,8 @@ if (simType1 == "submission"):
 	print(RList)
 
 if (simType1 == "analysis"):
-	rmin = 10.0
-	rmax = 10.0
+	rmin = 20.0
+	rmax = 20.0
 	dr = 0.1
 	nr = int(((rmax-rmin)+dr*0.5)/dr)
 	nr = nr+1
@@ -87,8 +91,8 @@ if (simType1 == "analysis"):
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
-stringName2 = '"qTIP4P-"'
-#stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
+#stringName2 = '"qTIP4P-"'
+stringName2 = '"qTIP4P-one-rotor-fixed-cost-1-"'
 #stringName2 = '"qSPCFw-"'
 #stringName2 = '"qTIP4P-thread4-"'
 #stringName2 = '"qTIP4P-test-"'

@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from subprocess import call
 
 import mypkg.pkgAsymrho
@@ -14,41 +15,20 @@ rotor = "H2O"
 #param = "tau" 
 #value = 0.002
 param = "beta" # beta=1/T K^-1
-value = 0.2
-#nbeads = [50, 100]
-nbeads = [10, 20, 30, 40, 60, 70, 80, 90]
+#value = 0.02
+nbeads = np.array([18, 16, 14, 12, 8, 6])
+tau = 0.01
+#nbeads = [20, 40]
 Jmax = 66
-spin = 0#int(-1)
+spin = int(-1)
 
 # Run the "cmd_run" in python interpreter
 for bead in nbeads:
-    cmd_run = (
-        "python"
-        + space
-        + file_sim
-        + space
-        + rotor
-        + space
-        + param
-        + space
-        + str(value)
-        + space
-        + "-P"
-        + space
-        + str(bead)
-        + space
-        + "-iodevn"
-        + space
-        + str(spin)
-        + space
-        + "-J"
-        + space
-        + str(Jmax)
-        + space
-        + "-job"
-        + space
-        + simType
-        + space
-    )
 
-    os.system(cmd_run)
+	value = bead*tau
+	print(value)
+	print(1/value)
+
+	cmd_run = ( "python" + space + file_sim + space + rotor + space + param + space + str(value) + space + "-P" + space + str(bead) + space + "-iodevn" + space + str(spin) + space + "-J" + space + str(Jmax) + space + "-job" + space + simType + space)
+
+	os.system(cmd_run)
