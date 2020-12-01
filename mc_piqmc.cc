@@ -3467,7 +3467,7 @@ double PotRotE3D(int atom0, double *Eulang, int it)
 			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
 			Eulang_1[CHI]=MCAngles[CHI][tm0];
 			Eulang_2[PHI]=0.0;
-			Eulang_2[CTH]=acos(-1.0);
+			Eulang_2[CTH]=0.0;//acos(1.0);
 			Eulang_2[CHI]=0.0;
 			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
 			spot = E_2H2O;

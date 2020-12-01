@@ -252,7 +252,6 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		col_rotsq = final_data_set[:,4] 
 		col_Cv1   = final_data_set[:,5] 
 		col_Cv2   = final_data_set[:,6] 
-		col_Cv3   = final_data_set[:,7] 
 
 		ncol_block = len(col_block)
 		if (int(len(col_block)) != numbblocks-(preskip+postskip)):
@@ -268,7 +267,6 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		col_rotsq     = col_rotsq[trunc:]
 		col_Cv1       = col_Cv1[trunc:]
 		col_Cv2       = col_Cv2[trunc:]
-		col_Cv3       = col_Cv3[trunc:]
 
 		mean_rot      = np.mean(col_rot)
 		mean_pot      = np.mean(col_pot)
@@ -276,11 +274,8 @@ def GetAverageEnergy(TypeCal,numbbeads,variable,final_dir_in_work,preskip,postsk
 		mean_rotsq    = np.mean(col_rotsq)
 		mean_Cv1      = np.mean(col_Cv1)
 		mean_Cv2      = np.mean(col_Cv2)
-		mean_Cv3      = np.mean(col_Cv3)
 		mcbeta        = variable*numbbeads
 		mean_Cv       = mcbeta*mcbeta*(mean_Cv1-mean_Cv2-mean_tot*mean_tot)
-		mean_Cvv       = mcbeta*mcbeta*(mean_Cv3-mean_tot*mean_tot)
-		print(mean_Cvv)
 
 		error_rot     = maxError_byBining(mean_rot, col_rot, workingNdim-6)
 		error_pot     = maxError_byBining(mean_pot, col_pot, workingNdim-6)
@@ -1235,7 +1230,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 		thread     = 1
 	else:
 		if (numbbeads >= 160):
-			thread     = 1
+			thread     = 8
 			walltime   = "7-00:00"
 		elif ((numbbeads >= 70) and (numbbeads < 160)):
 			thread     = 4

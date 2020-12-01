@@ -15,19 +15,20 @@ rotor = "H2O"
 #param = "tau" 
 #value = 0.002
 param = "beta" # beta=1/T K^-1
-#value = 0.02
-nbeads = np.array([18, 16, 14, 12, 8, 6])
-tau = 0.01
-#nbeads = [20, 40]
+value = 1.0/3.0
+#nbeads = np.array([2,4,8,16,32,64,128,256])
+#tau = 0.005
+#nbeads = [2,4,8,16,32,64,128,256]
+nbeads = [512,1024]
 Jmax = 66
 spin = int(-1)
 
 # Run the "cmd_run" in python interpreter
 for bead in nbeads:
 
-	value = bead*tau
-	print(value)
-	print(1/value)
+	#value = bead*tau
+	#print(value)
+	#print(1/value)
 
 	cmd_run = ( "python" + space + file_sim + space + rotor + space + param + space + str(value) + space + "-P" + space + str(bead) + space + "-iodevn" + space + str(spin) + space + "-J" + space + str(Jmax) + space + "-job" + space + simType + space)
 

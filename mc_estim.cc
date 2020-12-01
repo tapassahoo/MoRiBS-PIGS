@@ -1563,7 +1563,7 @@ double GetPotEnergy_Densities(void)
 			Eulang_1[CTH]=acos(MCAngles[CTH][tm0]);
 			Eulang_1[CHI]=MCAngles[CHI][tm0];
 			Eulang_2[PHI]=0.0;
-			Eulang_2[CTH]=acos(-1.0);
+			Eulang_2[CTH]=0.0;//acos(-1.0);
 			Eulang_2[CHI]=0.0;
 			caleng_(com_1, com_2, &E_2H2O, Eulang_1, Eulang_2);
 			spot_pair += E_2H2O;
@@ -3070,13 +3070,20 @@ double GetRotE3D(void)
 				srot += rho;
 			}
 			else
+			{
+				if (fabs(rho)>RZERO)            // need to find asymptotic for small rot dens   
 				srot += erot;	   
-			sesq += esq;
-			se_termsq += erot*erot;	   
+			}
+
+			if  (fabs(rho)>RZERO)               // need to find asymptotic for small rot dens
+			{
+				sesq += esq;
+				se_termsq += erot*erot;	   
+			}
 		}       
 		srot=srot/((double)(NumbRotTimes/RNskip));
 		sesq=sesq/((double)(NumbRotTimes/RNskip)*(double)(NumbRotTimes/RNskip));
-		se_termsq=se_termsq/ ((double)(NumbRotTimes/RNskip)*(double)(NumbRotTimes/RNskip));
+		se_termsq=se_termsq/((double)(NumbRotTimes/RNskip)*(double)(NumbRotTimes/RNskip));
 
 		ERot3D += srot;
 		ErotSQ += sesq;
