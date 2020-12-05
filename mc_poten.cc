@@ -35,6 +35,10 @@ int       _dcsize2D [MAX_NUMBER_INTER]; // number of cost grid points for 2D pot
 
 double    _ddelta_r [MAX_NUMBER_INTER]; //  delta r    for 2D potential
 double    _ddelta_c [MAX_NUMBER_INTER]; //  delat cost for 2D potential
+double ** _cosg_indices [MAX_NUMBER_INTER]; // tabulated 2D potentials
+double ** _rotden_indices [MAX_NUMBER_INTER]; // tabulated 2D potentials
+double ** _rotderv_indices [MAX_NUMBER_INTER]; // tabulated 2D potentials
+double ** _rotesqr_indices [MAX_NUMBER_INTER]; // tabulated 2D potentials
 
 
 //2D 
@@ -58,6 +62,7 @@ double    _delta_p [MAX_NUMBER_INTER]; //  delat phi for 2D potential
 double * vtable ;//= new double [SizePotTab];            //  3D potential table added by Toby
 int      Rgrd;  // # of radial grid points to store 3D potential
 int      THgrd; // # of theta grid points to store 3D potential. It should be 181 at this moment.
+int      PHgrd; // # of theta grid points to store 3D potential. It should be 181 at this moment.
 int      CHgrd; // # of chi grid points to store 3D potential. It should be 91, 181, or 361 at this moment.
 double   Rvmax; // maximum radius for 3D potential extrapolation
 double   Rvmin; // minimum radius for 3D potential extrapolation
@@ -76,11 +81,16 @@ double * _rotdens_drv2 [MAX_NUMBER_ROTDN]; // second derivatives for spline
 double * _rotderv_drv2 [MAX_NUMBER_ROTDN]; // second derivatives for spline
 double * _rotesqr_drv2 [MAX_NUMBER_ROTDN]; // second derivatives for spline
 
+double *cost_indices;
+double *phi_indices;
+int *MCIndices;
+
 extern "C" void rotred_(double *rhoprp,double *erotpr);
 
 extern "C" void potred_(char *fname,double *vtable);
 
 void init_rotdens(int type);
+void init_rotdensIndex(int type);
 void init_rot3D(int type);
 
 // --------------------------------------------------------------
@@ -173,8 +183,14 @@ void InitRotDensity(void)
    if(MCAtom[IMTYPE].molecule == 3 && RotDenType == 0)
      init_rotdens(IMTYPE);
 
-   if(MCAtom[IMTYPE].molecule == 4 && RotDenType == 0)
-     init_rotdens(IMTYPE);
+	if(MCAtom[IMTYPE].molecule == 4 && RotDenType == 0)
+	{
+#ifndef INDEXMC
+		 init_rotdens(IMTYPE);
+#else
+		 init_rotdensIndex(IMTYPE);
+#endif
+	}
 
    if(MCAtom[IMTYPE].molecule == 2 && RotDenType == 0)
    {
@@ -186,17 +202,25 @@ void InitRotDensity(void)
 
 void DoneRotDensity(void)
 {  
-   for (int atype=0;atype<MAX_NUMBER_ROTDN;atype++)
-   {
-      delete [] _rotgrid [atype];    
-      delete [] _rotdens [atype];    
-      delete [] _rotderv [atype];   
-      delete [] _rotesqr [atype];   
+	for (int atype=0;atype<MAX_NUMBER_ROTDN;atype++)
+	{
+		delete [] _rotgrid [atype];    
+		delete [] _rotdens [atype];    
+		delete [] _rotderv [atype];   
+		delete [] _rotesqr [atype];   
 
-      delete [] _rotdens_drv2 [atype]; 
-      delete [] _rotderv_drv2 [atype]; 
-      delete [] _rotesqr_drv2 [atype]; 
-   }
+		delete [] _rotdens_drv2 [atype]; 
+		delete [] _rotderv_drv2 [atype]; 
+		delete [] _rotesqr_drv2 [atype]; 
+		free_doubleMatrix(_cosg_indices[atype]);  // atoms 
+		free_doubleMatrix(_rotden_indices[atype]);  // atoms 
+		free_doubleMatrix(_rotderv_indices[atype]);  // atoms 
+		free_doubleMatrix(_rotesqr_indices[atype]);  // atoms 
+
+	}
+	delete [] cost_indices;
+	delete [] phi_indices;
+	delete [] MCIndices;
 }
 
 /*
@@ -613,9 +637,11 @@ void init_rotdens(int type)
 //  read_datafile(fname.c_str(),_rotgrid[type],_rotdens[type],_rotderv[type]);
     read_datafile(fname.c_str(),_rotgrid[type],_rotdens[type],_rotderv[type],_rotesqr[type]);
 
+#ifndef INDEXMC
     init_spline(_rotgrid[type],_rotdens[type],_rotdens_drv2[type],_rotsize[type]);
     init_spline(_rotgrid[type],_rotderv[type],_rotderv_drv2[type],_rotsize[type]);
     init_spline(_rotgrid[type],_rotesqr[type],_rotesqr_drv2[type],_rotsize[type]);
+#endif
 }
 
 double SRotDens(double gamma,int type)   // rotational density matrix 
@@ -1031,3 +1057,124 @@ void readPairDensity(void)
     delete[] densityMatrix;
 }
 #endif
+
+void init_rotdensIndex(int type)
+//
+//  read/initialize rotational density matrix for IMTYPE type molecule
+//                             
+{
+	const char *_proc_=__func__;    // "init_rotdens"; 
+
+	if (type>=MAX_NUMBER_ROTDN)
+	nrerror(_proc_,ERR_INDEX_EXCEED);
+
+	string  fname = MCAtom[type].type;
+
+	stringstream time; time << NumbRotTimes;                  // number of time slices 
+	//    stringstream temp; temp << Temperature*Units.temperature; // temperature
+	stringstream temp; temp << std::fixed << std::setprecision(6)<<Temperature*Units.temperature; // temperature
+
+	fname += ("_T" + temp.str() + "t" + time.str()); 
+	string pathr = PathToDensity;
+	fname += EXT_ROTD;
+	fname = pathr+fname;
+	cout<<fname<<endl;
+
+	ifstream fid(fname.c_str(),ios::in);
+
+	if (!fid.good())
+	_io_error(_proc_,IO_ERR_FOPEN,fname.c_str());
+
+//---- read  grid information -------------------------------------
+    fid >> THgrd;
+    fid >> PHgrd;
+
+	cout<<"Rotational density matrix elements are read!"<<endl;
+    cout<<"THgrd="<<THgrd<<" PHgrd="<<PHgrd<<endl;
+
+	_cosg_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+	_rotden_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+	_rotderv_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+	_rotesqr_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+
+	int ii, jj;
+	double cc, dd;
+	for (int i=0; i<THgrd; i++) {
+		for (int j=0; j<PHgrd; j++) {
+			ii = j+i*PHgrd;
+			for (int k=0; k<THgrd; k++) {
+				for (int l=0; l<PHgrd; l++) {
+					jj = l+k*PHgrd;
+					fid >> _cosg_indices[type][ii][jj]>>_rotden_indices[type][ii][jj]>>_rotderv_indices[type][ii][jj]>>_rotesqr_indices[type][ii][jj]; 
+					//cout<<_cosg_indices[type][ii][jj]<<" "<<_rotden_indices[type][ii][jj]<<_rotderv_indices[type][ii][jj]<<_rotesqr_indices[type][ii][jj]<<endl;
+				}
+			}
+		}
+	}
+
+    fid.close();
+
+	double cost,phi;
+	double cstep=2.0/(double)(THgrd-1.0);
+    double pstep=2.0*M_PI/(double)(PHgrd-1.0);
+	cost_indices = new double [THgrd*PHgrd];
+	phi_indices = new double [THgrd*PHgrd];
+
+	for (int i=0; i<THgrd; i++) {
+		cost = i*cstep-1.0;
+		for (int j=0; j<PHgrd; j++) {
+			phi = j*pstep;
+			ii=j+i*PHgrd;
+			cost_indices[ii] = cost;
+			phi_indices[ii] = phi;
+		}
+	}
+
+	MCIndices = new int [NumbTimes*NumbAtoms]; 
+	for (int it=0; it<NumbTimes*NumbAtoms; it++) {
+		MCIndices[it]=0;
+	} 
+}
+
+int GetRotDensIndex(int ind0, int ind2, int type, double randu)   // rotational density matrix 
+{
+	double hh[THgrd*PHgrd];
+	double sum=0.0;
+	for (int i=0; i<THgrd*PHgrd; i++) {
+		hh[i]=_rotden_indices[type][ind0][i]*_rotden_indices[type][i][ind2];
+		sum += hh[i];
+	}
+	double norm = sum;
+	for (int i=0; i<THgrd*PHgrd; i++) 
+	{
+		hh[i]=hh[i]/norm;
+	}
+
+	double cdf[THgrd*PHgrd];
+	double tmp=0.0;
+	for (int i=0; i<THgrd*PHgrd; i++) {
+		tmp += hh[i];
+		cdf[i] = tmp;
+	}
+
+	for (int i=0; i<THgrd*PHgrd; i++) {
+		if (cdf[i] > randu) {
+			return i;
+		}
+	}
+}
+
+double GetRotDens(int index_ii, int index_jj, int type)
+{
+	return _rotden_indices[type][index_ii][index_jj];
+}
+
+double GetRotDensDerv(int index_ii, int index_jj, int type)
+{
+	return _rotderv_indices[type][index_ii][index_jj];
+}
+
+double GetRotDensEsqr(int index_ii, int index_jj, int type)
+{
+	return _rotesqr_indices[type][index_ii][index_jj];
+}

@@ -12,6 +12,10 @@ void     DoneRotDensity(void);
 double SRotDens(double gamma,int atype);       // rotational density matrix 
 double SRotDensDeriv(double gamma ,int atype); // the derivs of the rotational density matrix 
 double SRotDensEsqrt(double gamma ,int atype); // the 2nd derivs of the rotational density matrix 
+int GetRotDensIndex(int ind0, int ind2, int type, double randu);
+double GetRotDens(int index_ii, int index_jj, int type);
+double GetRotDensDerv(int index_ii, int index_jj, int type);
+double GetRotDensEsqr(int index_ii, int index_jj, int type);
 
 double   SPot1D(double,int);        // spline interpolation for 1D potentials
 double   LPot2D(double,double,int); // linear interpolation for 2D potentials
@@ -36,10 +40,14 @@ const char EXT_ESQ[] = ".esq";  // data file, asymmetric top rotational energy s
 extern double * vtable;          // the table that contains 3D potential, added by Toby
 extern int      Rgrd;  // # of radial grid points to store 3D potential
 extern int      THgrd; // # of theta grid points to store 3D potential. It should be 181 at this moment.
+extern int      PHgrd; // # of theta grid points to store 3D potential. It should be 181 at this moment.
 extern int      CHgrd; // # of chi grid points to store 3D potential. It should be 91, 181, or 361 at this moment.
 extern double   Rvmax; // maximum radius for 3D potential extrapolation
 extern double   Rvmin; // minimum radius for 3D potential extrapolation
 extern double   Rvstep; // radial increment for 3D potential extrapolation
+extern int *MCIndices;
+extern double *cost_indices;
+extern double *phi_indices;
 
 #ifdef PAIRDENSITY
 void readPairDensity();

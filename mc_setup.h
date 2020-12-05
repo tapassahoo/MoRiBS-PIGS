@@ -213,6 +213,7 @@ extern double ** MCCosinex;   // orientational cosines
 extern double ** MCCosiney;   // orientational cosines
 extern double ** MCAngles;   // cost and phi
 extern double ** DipoleCoords;
+extern double ** hh;
 #ifdef MOLECULEINCAGE
 extern double ** MCCosinex;  //orientational cosine for x axis
 extern double ** MCCosiney;  //orientational cosine for y axis

@@ -776,7 +776,11 @@ void PIMCPass(int type,int time)
 	if ((type == IMTYPE) && ROTATION && (MCAtom[type].molecule == 2))  // non-linear rotor rotation added by Toby
     	MCRotations3D(type);
 	if ((type == IMTYPE) && ROTATION && (MCAtom[type].molecule == 4))
+#ifndef INDEXMC
     	MCRotationsMove(type);
+#else
+    	MCRotationsMoveIndex(type);
+#endif
 }
 
 void MCResetBlockAveragePIMC(void) 

@@ -2936,6 +2936,37 @@ double GetRotEnergy(void)
    return (srot);	      
 }
 
+double GetRotEnergyIndex(int index)
+{
+	int type = IMTYPE; 
+
+	int offset = MCAtom[type].offset;
+
+	int atom  = 0;                   // only one molecular impurtiy
+	offset   = NumbTimes*atom;
+	int gatom = offset/NumbTimes;    // the same offset for rot and trans degrees
+
+	double srot = 0.0;
+	ErotSQ=0.0; // a global variable
+	Erot_termSQ=0.0; // a global variable
+
+	for (int it0=0;it0<NumbRotTimes;it0++)
+	{
+		int t0 = offset +  it0;
+		int t1 = offset + (it0 + 1) % NumbRotTimes;
+
+		double rdens = GetRotDens(MCIndices[t0], MCIndices[t1], type);
+
+		if (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
+		{
+			srot += (GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens);
+			Erot_termSQ += (GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens)*(GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens);
+			ErotSQ += GetRotDensEsqr(MCIndices[t0], MCIndices[t1], type)/rdens;
+		}
+	}
+	return (srot);	      
+}
+
 double GetRotPlanarEnergy(void)
 {
     if(RotDenType != 0) {cerr<<"only SOS rho"<<endl; exit(0);}
