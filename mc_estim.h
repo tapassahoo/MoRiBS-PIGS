@@ -57,6 +57,7 @@ void GetPermutation(void);
 // Rotations
 
 double GetRotEnergy(void);
+double GetRotEnergyIndex(void);
 double GetRotEnergyPIGS(void);
 double GetRotEnergyCage(void);
 double GetRotPlanarEnergy(void);

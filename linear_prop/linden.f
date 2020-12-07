@@ -47,7 +47,7 @@ c======================================================================c
         call exarho(cost,lmax,maxl,pl,rho,erot1,tau,bconst,iodevn,
      +       nslice,erotsq)
         erotf = erot1/rho
-        write(7,'(1p,7(1x,E15.8))')cost,rho,erotf,erotsq
+        write(7,'(1p,7(1x,E15.8))')cost,rho,erot1,erotsq
       enddo
       close(7,status='keep')
 

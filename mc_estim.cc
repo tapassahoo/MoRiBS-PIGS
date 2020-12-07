@@ -838,82 +838,85 @@ double GetPotEnergyPIGS(void)
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbTimes-1)/2);
 	double spot = 0.0;
-	for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
+	if (NumbAtoms > 1)
 	{
-		int type0   = MCType[atom0];
-		int offset0 = NumbTimes*atom0;
-		int t0 = offset0 + it;
-
-		for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
+		for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
 		{
-			int type1   = MCType[atom1];
-			int offset1 = NumbTimes*atom1;
-			int t1 = offset1 + it;
+			int type0   = MCType[atom0];
+			int offset0 = NumbTimes*atom0;
+			int t0 = offset0 + it;
 
-			if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (NumbAtoms > 1) && (stype==H2O))
+			for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
 			{
-				double Eulang0[3],Eulang1[3];
-				double com0[3],com1[3];
-				double E_2H2O;
-				for (int id=0;id<NDIM;id++)
+				int type1   = MCType[atom1];
+				int offset1 = NumbTimes*atom1;
+				int t1 = offset1 + it;
+
+				if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (NumbAtoms > 1) && (stype==H2O))
 				{
-					com0[id] = MCCoords[id][t0];
-					com1[id] = MCCoords[id][t1];
-				}
-				int tm0=offset0 + it/RotRatio;
-				int tm1=offset1 + it/RotRatio;
-				Eulang0[PHI]=MCAngles[PHI][tm0];
-				Eulang0[CHI]=MCAngles[CHI][tm0];
-				Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
-
-				Eulang1[PHI]=MCAngles[PHI][tm1];
-				Eulang1[CHI]=MCAngles[CHI][tm1];
-				Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
-
-				caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
-				spot += E_2H2O;
-        	}
-
-			else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1)) // 3D interaction, no density is calculated now
-			{
-
-				int tm;
-
-				double RCOM[3];
-				double Rpt[3];
-				double Eulang[3];
-				double vpot3d;
-				double radret;
-				double theret;
-				double chiret;
-				double hatx[3];
-				double haty[3];
-				double hatz[3];
-				int    ivcord = 0;
-				if(MCAtom[type0].molecule == 2)
-				{
-					tm  = offset0 + it/RotRatio;
+					double Eulang0[3],Eulang1[3];
+					double com0[3],com1[3];
+					double E_2H2O;
 					for (int id=0;id<NDIM;id++)
 					{
-						RCOM[id] = MCCoords[id][t0];
-						Rpt[id]  = MCCoords[id][t1];
-					}	
-				}
-				else
-				{
-					tm  = offset1 + it/RotRatio;
-					for (int id=0;id<NDIM;id++)
-					{
-						Rpt[id]  = MCCoords[id][t0];
-						RCOM[id] = MCCoords[id][t1];
+						com0[id] = MCCoords[id][t0];
+						com1[id] = MCCoords[id][t1];
 					}
-				}
-				Eulang[PHI]=MCAngles[PHI][tm];
-				Eulang[CTH]=acos(MCAngles[CTH][tm]);
-				Eulang[CHI]=MCAngles[CHI][tm];
+					int tm0=offset0 + it/RotRatio;
+					int tm1=offset1 + it/RotRatio;
+					Eulang0[PHI]=MCAngles[PHI][tm0];
+					Eulang0[CHI]=MCAngles[CHI][tm0];
+					Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
 
-				vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-				spot += vpot3d;
+					Eulang1[PHI]=MCAngles[PHI][tm1];
+					Eulang1[CHI]=MCAngles[CHI][tm1];
+					Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
+
+					caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
+					spot += E_2H2O;
+				}
+
+				else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1)) // 3D interaction, no density is calculated now
+				{
+
+					int tm;
+
+					double RCOM[3];
+					double Rpt[3];
+					double Eulang[3];
+					double vpot3d;
+					double radret;
+					double theret;
+					double chiret;
+					double hatx[3];
+					double haty[3];
+					double hatz[3];
+					int    ivcord = 0;
+					if(MCAtom[type0].molecule == 2)
+					{
+						tm  = offset0 + it/RotRatio;
+						for (int id=0;id<NDIM;id++)
+						{
+							RCOM[id] = MCCoords[id][t0];
+							Rpt[id]  = MCCoords[id][t1];
+						}	
+					}
+					else
+					{
+						tm  = offset1 + it/RotRatio;
+						for (int id=0;id<NDIM;id++)
+						{
+							Rpt[id]  = MCCoords[id][t0];
+							RCOM[id] = MCCoords[id][t1];
+						}
+					}
+					Eulang[PHI]=MCAngles[PHI][tm];
+					Eulang[CTH]=acos(MCAngles[CTH][tm]);
+					Eulang[CHI]=MCAngles[CHI][tm];
+
+					vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+					spot += vpot3d;
+				}
 			}
 		}
 	}
@@ -1022,18 +1025,12 @@ double GetPotEnergyPIGS(void)
     }
 #endif
 
-#ifdef ONSITE
     if (MCAtom[IMTYPE].numb == 1) 
     {
         int offset0 = 0;
         int t0  = offset0 + it;
-		//Eulang0[PHI] = MCAngles[PHI][t0];
-		//Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-		//Eulang0[CHI] = MCAngles[CHI][t0];
-        //spot    = PotFunc(Eulang0);
-		spot = -100.0*MCAngles[CTH][t0];
+		spot = -DipoleMoment*MCAngles[CTH][t0];
     }
-#endif
 
 #ifdef HARMONIC
     if (MCAtom[IMTYPE].numb==1)
@@ -1655,89 +1652,92 @@ double GetTotalEnergy(void)
 {
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
-	for (int atom0=0; atom0<(NumbAtoms-1); atom0++)
+	if (NumbAtoms > 1) 
 	{
-		int type0   = MCType[atom0];
-		int offset0=NumbTimes*atom0;
-
-		for (int atom1=(atom0+1); atom1<NumbAtoms; atom1++)
+		for (int atom0=0; atom0<(NumbAtoms-1); atom0++)
 		{
-			int type1   = MCType[atom1];
-			int offset1=NumbTimes*atom1;
+			int type0   = MCType[atom0];
+			int offset0=NumbTimes*atom0;
 
-			double spot_pair=0.0;
-			for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
+			for (int atom1=(atom0+1); atom1<NumbAtoms; atom1++)
 			{
-				int t0 = offset0 + it;
-				int t1 = offset1 + it;
+				int type1   = MCType[atom1];
+				int offset1=NumbTimes*atom1;
 
-				if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (stype=="H2O") && (NumbAtoms > 1))
+				double spot_pair=0.0;
+				for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
 				{
-					double Eulang0[3],Eulang1[3];
-					double com0[3],com1[3];
-					double E_2H2O;
-					for (int id=0;id<NDIM;id++)
+					int t0 = offset0 + it;
+					int t1 = offset1 + it;
+
+					if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (stype=="H2O") && (NumbAtoms > 1))
 					{
-						com0[id] = MCCoords[id][t0];
-						com1[id] = MCCoords[id][t1];
-					}
-					int tm0=offset0 + it/RotRatio;
-					int tm1=offset1 + it/RotRatio;
-					Eulang0[PHI]=MCAngles[PHI][tm0];
-					Eulang0[CHI]=MCAngles[CHI][tm0];
-					Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
-
-					Eulang1[PHI]=MCAngles[PHI][tm1];
-					Eulang1[CHI]=MCAngles[CHI][tm1];
-					Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
-
-					caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
-					spot_pair += E_2H2O;
-				}
-
-				else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1)) // 3D interaction, no density is calculated now
-				{
-
-					int tm;
-
-					double RCOM[3];
-					double Rpt[3];
-					double Eulang[3];
-					double vpot3d;
-					double radret;
-					double theret;
-					double chiret;
-					double hatx[3];
-					double haty[3];
-					double hatz[3];
-					int    ivcord = 0;
-					if(MCAtom[type0].molecule == 2)
-					{
-						tm  = offset0 + it/RotRatio;
+						double Eulang0[3],Eulang1[3];
+						double com0[3],com1[3];
+						double E_2H2O;
 						for (int id=0;id<NDIM;id++)
 						{
-							RCOM[id] = MCCoords[id][t0];
-							Rpt[id]  = MCCoords[id][t1];
-						}	
-					}
-					else
-					{
-						tm  = offset1 + it/RotRatio;
-						for (int id=0;id<NDIM;id++)
-						{
-							Rpt[id]  = MCCoords[id][t0];
-							RCOM[id] = MCCoords[id][t1];
+							com0[id] = MCCoords[id][t0];
+							com1[id] = MCCoords[id][t1];
 						}
-					}
-					Eulang[PHI]=MCAngles[PHI][tm];
-					Eulang[CTH]=acos(MCAngles[CTH][tm]);
-					Eulang[CHI]=MCAngles[CHI][tm];
+						int tm0=offset0 + it/RotRatio;
+						int tm1=offset1 + it/RotRatio;
+						Eulang0[PHI]=MCAngles[PHI][tm0];
+						Eulang0[CHI]=MCAngles[CHI][tm0];
+						Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
 
-					vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
-					spot_pair += vpot3d;
+						Eulang1[PHI]=MCAngles[PHI][tm1];
+						Eulang1[CHI]=MCAngles[CHI][tm1];
+						Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
+
+						caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
+						spot_pair += E_2H2O;
+					}
+
+					else if (((MCAtom[type0].molecule == 2)||(MCAtom[type1].molecule == 2)) && (MCAtom[type0].molecule != MCAtom[type1].molecule) && (NumbAtoms > 1)) // 3D interaction, no density is calculated now
+					{
+
+						int tm;
+
+						double RCOM[3];
+						double Rpt[3];
+						double Eulang[3];
+						double vpot3d;
+						double radret;
+						double theret;
+						double chiret;
+						double hatx[3];
+						double haty[3];
+						double hatz[3];
+						int    ivcord = 0;
+						if(MCAtom[type0].molecule == 2)
+						{
+							tm  = offset0 + it/RotRatio;
+							for (int id=0;id<NDIM;id++)
+							{
+								RCOM[id] = MCCoords[id][t0];
+								Rpt[id]  = MCCoords[id][t1];
+							}	
+						}
+						else
+						{
+							tm  = offset1 + it/RotRatio;
+							for (int id=0;id<NDIM;id++)
+							{
+								Rpt[id]  = MCCoords[id][t0];
+								RCOM[id] = MCCoords[id][t1];
+							}
+						}
+						Eulang[PHI]=MCAngles[PHI][tm];
+						Eulang[CTH]=acos(MCAngles[CTH][tm]);
+						Eulang[CHI]=MCAngles[CHI][tm];
+
+						vcord_(Eulang,RCOM,Rpt,vtable,&Rgrd,&THgrd,&CHgrd,&Rvmax,&Rvmin,&Rvstep,&vpot3d,&radret,&theret,&chiret,hatx,haty,hatz,&ivcord);
+						spot_pair += vpot3d;
+					}
 				}
+				spot += spot_pair;
 			}
-			spot += spot_pair;
 		}
 	}
 
@@ -1854,7 +1854,6 @@ double GetTotalEnergy(void)
     }
 #endif
 
-#ifdef ONSITE
     if (NumbAtoms == 1)
     {
         int offset0 = 0;
@@ -1863,14 +1862,9 @@ double GetTotalEnergy(void)
         for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
 		{
             int t0  = offset0 + it;
-			//Eulang0[PHI] = MCAngles[PHI][t0];
-            //Eulang0[CTH] = acos(MCAngles[CTH][t0]);
-			//Eulang0[CHI] = MCAngles[CHI][t0];
-            //spot   += PotFunc(Eulang0);
-            spot   += -100.0*MCAngles[CTH][t0];
+            spot   += -DipoleMoment*MCAngles[CTH][t0];
         }
     }
-#endif
 
 #ifdef HARMONIC
     if (MCAtom[IMTYPE].numb==1)
@@ -2914,9 +2908,11 @@ double GetRotEnergy(void)
          double rdens = SRotDens(p0,type);
 
          if  (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
-	   srot += (SRotDensDeriv(p0,type)/rdens);
-         Erot_termSQ += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
-         ErotSQ += SRotDensEsqrt(p0,type)/rdens;
+		{
+			srot += (SRotDensDeriv(p0,type)/rdens);
+			Erot_termSQ += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
+			ErotSQ += SRotDensEsqrt(p0,type)/rdens;
+		}
       }
       else if(RotDenType == 1)
       {
@@ -2936,7 +2932,8 @@ double GetRotEnergy(void)
    return (srot);	      
 }
 
-double GetRotEnergyIndex(int index)
+#ifdef INDEXMC
+double GetRotEnergyIndex(void)
 {
 	int type = IMTYPE; 
 
@@ -2966,6 +2963,7 @@ double GetRotEnergyIndex(int index)
 	}
 	return (srot);	      
 }
+#endif
 
 double GetRotPlanarEnergy(void)
 {

@@ -1348,12 +1348,10 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
         } //loop over atom1 (molecules)
     }
 
-#ifdef ONSITE
 	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb == 1) )
 	{
         spot = weight*PotFunc(Eulang0);
     }
-#endif
     double spot_cage = 0.0;
 #ifdef CAGEPOT
 	double coordsXYZ[NDIM];
@@ -5826,6 +5824,8 @@ double PotEnergyPIGS(int atom0, double **pos)
     return spot;
 }
 
+
+#ifdef INDEXMC
 void MCRotationsMoveIndex(int type) // update all time slices for rotational degrees of freedom
 {
 #ifdef DEBUG_PIMC
@@ -5900,6 +5900,7 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 	EulangOld[CTH] = acos(cost);
 	EulangOld[CHI] = 0.0;
 
+/*
 // 	the old density
    	double dens_old;
 // 	If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
@@ -5913,6 +5914,7 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 #else
    if (dens_old<0.0) dens_old=fabs(dens_old);
 #endif
+*/
 
    double pot_old  = 0.0;
 
@@ -5933,6 +5935,7 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 	EulangNew[CTH] = acos(cost);
 	EulangNew[CHI] = 0.0;
 
+/*
    	double sint = sqrt(1.0 - cost*cost);
 
    	newcoords[AXIS_X][t1] = sint*cos(phi);
@@ -5950,6 +5953,7 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 #else
 	if (dens_new<0.0) dens_new=fabs(dens_new);
 #endif
+*/
 
 	double pot_new  = 0.0;
 
@@ -5960,11 +5964,7 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 
 	double rd;
 
-	if (dens_old>RZERO)
-		rd = dens_new/dens_old;
-	else rd = 1.0;
-
-	rd *= exp(- MCTau*(pot_new-pot_old));
+	rd = exp(- MCTau*(pot_new-pot_old));
 
 	bool Accepted = false;
 	if (rd>1.0)         Accepted = true;
@@ -5980,8 +5980,11 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 		MCAngles[PHI][t1] = phi;
 		MCIndices[t1] = index1;
 
+/*
 		for (int id=0;id<NDIM;id++)
     		MCCosine[id][t1] = newcoords[id][t1];
+*/
 	}
 
 }
+#endif

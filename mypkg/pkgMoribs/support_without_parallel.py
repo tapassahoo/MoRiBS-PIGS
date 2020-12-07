@@ -1234,13 +1234,13 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 			walltime   = "7-00:00"
 		elif ((numbbeads >= 70) and (numbbeads < 160)):
 			thread     = 4
-			walltime   = "07-00:00"
+			walltime   = "01-00:00"
 		elif ((numbbeads >= 30) and (numbbeads < 70)):
 			thread     = 4
-			walltime   = "03-00:00"
+			walltime   = "01-00:00"
 		else:
 			thread     = 1
-			walltime   = "03-00:00"
+			walltime   = "01-00:00"
 	
 	job_name       = file_name+str(value)
 	omp_thread     = str(thread)

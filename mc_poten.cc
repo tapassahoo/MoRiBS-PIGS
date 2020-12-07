@@ -212,15 +212,19 @@ void DoneRotDensity(void)
 		delete [] _rotdens_drv2 [atype]; 
 		delete [] _rotderv_drv2 [atype]; 
 		delete [] _rotesqr_drv2 [atype]; 
+#ifdef INDEXMC
 		free_doubleMatrix(_cosg_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotden_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotderv_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotesqr_indices[atype]);  // atoms 
+#endif
 
 	}
-	delete [] cost_indices;
-	delete [] phi_indices;
-	delete [] MCIndices;
+#ifdef INDEXMC
+	delete cost_indices;
+	delete phi_indices;
+	delete MCIndices;
+#endif
 }
 
 /*
@@ -1058,6 +1062,7 @@ void readPairDensity(void)
 }
 #endif
 
+#ifdef INDEXMC
 void init_rotdensIndex(int type)
 //
 //  read/initialize rotational density matrix for IMTYPE type molecule
@@ -1178,3 +1183,4 @@ double GetRotDensEsqr(int index_ii, int index_jj, int type)
 {
 	return _rotesqr_indices[type][index_ii][index_jj];
 }
+#endif
