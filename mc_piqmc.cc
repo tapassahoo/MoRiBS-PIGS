@@ -5837,7 +5837,6 @@ void MCRotationsMoveIndex(int type) // update all time slices for rotational deg
    	nrerror(_proc_,"Rotational sampling for 3D systems only");
 #endif
 
-   	double step = MCAtom[type].rtstep; 
    	double MCRotChunkTot = 0.0;
    	double MCRotChunkAcp = 0.0;
 
@@ -5853,7 +5852,7 @@ void MCRotationsMoveIndex(int type) // update all time slices for rotational deg
 			int gatom=offset/NumbTimes;    // and translational degrees of freedom
 			rand1=runif(Rng);
 			rand2=runif(Rng);
-			if (PIMC_SIM) MCRotLinStepIndex(itrot,offset,gatom,type,step,rand1,rand2,MCRotChunkTot,MCRotChunkAcp);
+			if (PIMC_SIM) MCRotLinStepIndex(itrot,offset,gatom,type,rand1,rand2,MCRotChunkTot,MCRotChunkAcp);
 		}
 	}
 
@@ -5872,7 +5871,7 @@ void MCRotationsMoveIndex(int type) // update all time slices for rotational deg
 			int gatom=offset/NumbTimes;    // and translational degrees of freedom
 			rand1=runif(Rng);
 			rand2=runif(Rng);
-			if (PIMC_SIM) MCRotLinStepIndex(itrot,offset,gatom,type,step,rand1,rand2,MCRotChunkTot,MCRotChunkAcp);
+			if (PIMC_SIM) MCRotLinStepIndex(itrot,offset,gatom,type,rand1,rand2,MCRotChunkTot,MCRotChunkAcp);
 		}
 	}
 
@@ -5881,7 +5880,7 @@ void MCRotationsMoveIndex(int type) // update all time slices for rotational deg
 }
 
 
-void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double &MCRotChunkTot,double &MCRotChunkAcp)
+void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double rand1,double rand2,double &MCRotChunkTot,double &MCRotChunkAcp)
 {
 	int it0 = (it1 - 1);
 	int it2 = (it1 + 1);
@@ -5899,22 +5898,6 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 	EulangOld[PHI] = phi;
 	EulangOld[CTH] = acos(cost);
 	EulangOld[CHI] = 0.0;
-
-/*
-// 	the old density
-   	double dens_old;
-// 	If it1 = 0 (the first bead), dens_new = SRotDens(p1,type)
-// 	if it1 = (NumbRotTimes-1) is the last bead, dens_new = SRotDens(p0,type)
-
-	dens_old = GetRotDens(MCIndices[t0], MCIndices[t1], type)*GetRotDens(MCIndices[t1], MCIndices[t2], type);
-
-   if (fabs(dens_old)<RZERO) dens_old = 0.0;
-#ifndef NEGATIVEDENSITY
-   if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-   if (dens_old<0.0) dens_old=fabs(dens_old);
-#endif
-*/
 
    double pot_old  = 0.0;
 
@@ -5934,26 +5917,6 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 	EulangNew[PHI] = phi;
 	EulangNew[CTH] = acos(cost);
 	EulangNew[CHI] = 0.0;
-
-/*
-   	double sint = sqrt(1.0 - cost*cost);
-
-   	newcoords[AXIS_X][t1] = sint*cos(phi);
-   	newcoords[AXIS_Y][t1] = sint*sin(phi);
-   	newcoords[AXIS_Z][t1] = cost;
-
-
-   double dens_new;
-
-	dens_new = GetRotDens(MCIndices[t0], index1, type)*GetRotDens(index1, MCIndices[t2], type);
-
-	if (fabs(dens_new)<RZERO) dens_new = 0.0;
-#ifndef NEGATIVEDENSITY
-	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-	if (dens_new<0.0) dens_new=fabs(dens_new);
-#endif
-*/
 
 	double pot_new  = 0.0;
 
@@ -5979,11 +5942,6 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double step,double 
 		MCAngles[CTH][t1] = cost;
 		MCAngles[PHI][t1] = phi;
 		MCIndices[t1] = index1;
-
-/*
-		for (int id=0;id<NDIM;id++)
-    		MCCosine[id][t1] = newcoords[id][t1];
-*/
 	}
 
 }

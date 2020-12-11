@@ -212,19 +212,14 @@ void DoneRotDensity(void)
 		delete [] _rotdens_drv2 [atype]; 
 		delete [] _rotderv_drv2 [atype]; 
 		delete [] _rotesqr_drv2 [atype]; 
-#ifdef INDEXMC
 		free_doubleMatrix(_cosg_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotden_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotderv_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotesqr_indices[atype]);  // atoms 
-#endif
-
 	}
-#ifdef INDEXMC
-	delete cost_indices;
-	delete phi_indices;
-	delete MCIndices;
-#endif
+	delete [] cost_indices;
+	delete [] phi_indices;
+	delete [] MCIndices;
 }
 
 /*
@@ -641,11 +636,9 @@ void init_rotdens(int type)
 //  read_datafile(fname.c_str(),_rotgrid[type],_rotdens[type],_rotderv[type]);
     read_datafile(fname.c_str(),_rotgrid[type],_rotdens[type],_rotderv[type],_rotesqr[type]);
 
-#ifndef INDEXMC
     init_spline(_rotgrid[type],_rotdens[type],_rotdens_drv2[type],_rotsize[type]);
     init_spline(_rotgrid[type],_rotderv[type],_rotderv_drv2[type],_rotsize[type]);
     init_spline(_rotgrid[type],_rotesqr[type],_rotesqr_drv2[type],_rotsize[type]);
-#endif
 }
 
 double SRotDens(double gamma,int type)   // rotational density matrix 
@@ -1091,8 +1084,7 @@ void init_rotdensIndex(int type)
 	_io_error(_proc_,IO_ERR_FOPEN,fname.c_str());
 
 //---- read  grid information -------------------------------------
-    fid >> THgrd;
-    fid >> PHgrd;
+    fid >> THgrd>>PHgrd;
 
 	cout<<"Rotational density matrix elements are read!"<<endl;
     cout<<"THgrd="<<THgrd<<" PHgrd="<<PHgrd<<endl;
@@ -1143,7 +1135,7 @@ void init_rotdensIndex(int type)
 
 int GetRotDensIndex(int ind0, int ind2, int type, double randu)   // rotational density matrix 
 {
-	double hh[THgrd*PHgrd];
+	double *hh = new double [THgrd*PHgrd];
 	double sum=0.0;
 	for (int i=0; i<THgrd*PHgrd; i++) {
 		hh[i]=_rotden_indices[type][ind0][i]*_rotden_indices[type][i][ind2];
@@ -1155,18 +1147,23 @@ int GetRotDensIndex(int ind0, int ind2, int type, double randu)   // rotational 
 		hh[i]=hh[i]/norm;
 	}
 
-	double cdf[THgrd*PHgrd];
+	double *cdf = new double [THgrd*PHgrd];
 	double tmp=0.0;
 	for (int i=0; i<THgrd*PHgrd; i++) {
 		tmp += hh[i];
 		cdf[i] = tmp;
 	}
 
+	int index;
 	for (int i=0; i<THgrd*PHgrd; i++) {
 		if (cdf[i] > randu) {
-			return i;
+			index= i;
+			break;
 		}
 	}
+	delete [] hh;
+	delete [] cdf;
+	return index;
 }
 
 double GetRotDens(int index_ii, int index_jj, int type)

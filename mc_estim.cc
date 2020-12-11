@@ -1525,6 +1525,7 @@ double GetPotEnergy_Densities(void)
 		}     // LOOP OVER ATOM PAIRS
 	}
 
+	/*
     if ((MCAtom[IMTYPE].molecule == 2) && (MCAtom[IMTYPE].numb == 1))
 	{
 		int atom0   = 0;
@@ -1567,6 +1568,7 @@ double GetPotEnergy_Densities(void)
 		}  // LOOP OVER TIME SLICES
 		spot = spot_pair;
 	}
+	*/
 
     double spot_cage = 0.0;
 #ifdef CAGEPOT
@@ -2954,12 +2956,15 @@ double GetRotEnergyIndex(void)
 
 		double rdens = GetRotDens(MCIndices[t0], MCIndices[t1], type);
 
-		if (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
-		{
-			srot += (GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens);
-			Erot_termSQ += (GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens)*(GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens);
-			ErotSQ += GetRotDensEsqr(MCIndices[t0], MCIndices[t1], type)/rdens;
-		}
+		//if (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
+		//{
+			//srot += (GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens);
+			//Erot_termSQ += (GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens)*(GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)/rdens);
+			//ErotSQ += GetRotDensEsqr(MCIndices[t0], MCIndices[t1], type)/rdens;
+			srot += GetRotDensDerv(MCIndices[t0], MCIndices[t1], type);
+			Erot_termSQ += GetRotDensDerv(MCIndices[t0], MCIndices[t1], type)*GetRotDensDerv(MCIndices[t0], MCIndices[t1], type);
+			ErotSQ += GetRotDensEsqr(MCIndices[t0], MCIndices[t1], type);
+		//}
 	}
 	return (srot);	      
 }
