@@ -81,7 +81,8 @@ if (simType1 == "analysis"):
 		RList = [rmin+dr*i for i in range(nr)]
 
 
-stringName2 = '""'
+#stringName2 = '""'
+stringName2 = '"potzero-"'
 
 if simType1 == "analysis":
 	cmd1 = "--preskip 0"

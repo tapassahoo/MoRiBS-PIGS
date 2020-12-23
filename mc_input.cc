@@ -15,10 +15,9 @@
 
 //----- INPUT PARAMETERS----------------------------
 
-long int totalStep;
 double sumsCount;
 double totalCount;
-//double _tot_total;
+double _tot_total;
 double _pot_total;
 double _rot_total;
 double _kin_total;
@@ -596,13 +595,14 @@ void StatusIO(int tstatus, const char file_name[])
 	{
 		case IOWrite: 
 		fid<<STATUS_STARTBLOCK<<" "<<MCStartBlock<<endl;
-        fid<<totalStep<<endl;
         fid<<sumsCount<<endl;
         fid<<totalCount<<endl;
-		if (ENT_SIM) {
+		if (ENT_SIM) 
+		{
 			fid<<Distribution<<endl;
 		}
-		else {	
+		else 
+		{	
 			fid<<_tot_total<<endl;
 			fid<<_kin_total<<endl;
 			fid<<_pot_total<<endl;
@@ -614,7 +614,6 @@ void StatusIO(int tstatus, const char file_name[])
 		{  
 			if (status==STATUS_STARTBLOCK)
 			fid>>MCStartBlock;
-			fid>>totalStep;
 			fid>>sumsCount;
 			fid>>totalCount;
 			if (ENT_SIM) {

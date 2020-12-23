@@ -857,10 +857,22 @@ double GetPotEnergyPIGS(void)
 					double Eulang0[3],Eulang1[3];
 					double com0[3],com1[3];
 					double E_2H2O;
+					double dr[3];
 					for (int id=0;id<NDIM;id++)
-					{
-						com0[id] = MCCoords[id][t0];
-						com1[id] = MCCoords[id][t1];
+				   	{
+						if (MINIMAGE)
+						{
+							dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+							//dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
+							dr[id] -= (Distance*rint(dr[id]/Distance));
+							com0[id]=MCCoords[id][t0];
+							com1[id]=MCCoords[id][t0]-dr[id];
+						}
+						else
+						{
+							com0[id]=MCCoords[id][t0];
+							com1[id]=MCCoords[id][t1];
+						}
 					}
 					int tm0=offset0 + it/RotRatio;
 					int tm1=offset1 + it/RotRatio;
@@ -1677,11 +1689,24 @@ double GetTotalEnergy(void)
 						double Eulang0[3],Eulang1[3];
 						double com0[3],com1[3];
 						double E_2H2O;
+						double dr[3];
 						for (int id=0;id<NDIM;id++)
-						{
-							com0[id] = MCCoords[id][t0];
-							com1[id] = MCCoords[id][t1];
+					   {
+							if (MINIMAGE)
+							{
+								dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+								//dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
+								dr[id] -= (Distance*rint(dr[id]/Distance));
+								com0[id]=MCCoords[id][t0];
+								com1[id]=MCCoords[id][t0]-dr[id];
+							}
+							else
+							{
+								com0[id]=MCCoords[id][t0];
+								com1[id]=MCCoords[id][t1];
+							}
 						}
+
 						int tm0=offset0 + it/RotRatio;
 						int tm1=offset1 + it/RotRatio;
 						Eulang0[PHI]=MCAngles[PHI][tm0];
@@ -2909,12 +2934,12 @@ double GetRotEnergy(void)
       {
          double rdens = SRotDens(p0,type);
 
-         if  (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
-		{
+         //if  (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
+		//{
 			srot += (SRotDensDeriv(p0,type)/rdens);
 			Erot_termSQ += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
 			ErotSQ += SRotDensEsqrt(p0,type)/rdens;
-		}
+		//}
       }
       else if(RotDenType == 1)
       {

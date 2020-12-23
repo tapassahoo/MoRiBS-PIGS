@@ -185,10 +185,10 @@ void InitRotDensity(void)
 
 	if(MCAtom[IMTYPE].molecule == 4 && RotDenType == 0)
 	{
-#ifndef INDEXMC
-		 init_rotdens(IMTYPE);
-#else
+#ifdef INDEXMC
 		 init_rotdensIndex(IMTYPE);
+#else
+		 init_rotdens(IMTYPE);
 #endif
 	}
 
@@ -212,14 +212,18 @@ void DoneRotDensity(void)
 		delete [] _rotdens_drv2 [atype]; 
 		delete [] _rotderv_drv2 [atype]; 
 		delete [] _rotesqr_drv2 [atype]; 
+#ifdef INDEXMC
 		free_doubleMatrix(_cosg_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotden_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotderv_indices[atype]);  // atoms 
 		free_doubleMatrix(_rotesqr_indices[atype]);  // atoms 
+#endif
 	}
+#ifdef INDEXMC
 	delete [] cost_indices;
 	delete [] phi_indices;
 	delete [] MCIndices;
+#endif
 }
 
 /*

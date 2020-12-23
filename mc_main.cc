@@ -76,7 +76,7 @@ double _trOfDensitySq;
 //double _pot_total;  // kinetic   energy, global average // defined in mc_input.cc
 //double _kin_total;  // potential energy, global average //defined in mc_input.cc
 double _dpot_total;  // potential energy differences, global average  added by Hui Li
-double _tot_total;  // kinetic   energy, global average
+//double _tot_total;  // kinetic   energy, global average
 
 double _brot;       // rotational kin energy, block average
 double _brotsq;     // rotational energy square, block average
@@ -84,7 +84,6 @@ double _rotsq_total; // rotational energy square, global average
 double _Cv_total;    // heat capacity, global average
 double _Cv1_total;    // heat capacity, global average
 double _Cv2_total;    // heat capacity, global average
-double _Cv3_total;    // heat capacity, global average
 double _Cv_trans_total;    // translational heat capacity, global average
 double _Cv_trans_1_total;    // translational heat capacity, global average
 double _Cv_trans_2_total;    // translational heat capacity, global average
@@ -1120,7 +1119,6 @@ void MCGetAveragePIMC(void)
 	{
 		double sCv1;
 		double sCv2;
-		double sCv3;
 		sCv1 = (spot + srot)*(spot + srot); //
 		sCv2 = Erot_termSQ - ErotSQ;// Works well
 
@@ -1403,7 +1401,6 @@ void SaveSumEnergy (double acount, double numb)  // global average
 		*/
 		_feng << setw(IO_WIDTH) <<_Cv1_total*(Units.energy*Units.energy)/acount << BLANK;
 		_feng << setw(IO_WIDTH) <<_Cv2_total*(Units.energy*Units.energy)/acount << BLANK;
-		_feng << setw(IO_WIDTH) <<_Cv3_total*(Units.energy*Units.energy)/acount << BLANK;
 	}
 	else if (PIGS_SIM)
 	{
@@ -1538,7 +1535,6 @@ void InitTotalAverage(void)  // DUMP
 	_Cv_total = 0.0;
 	_Cv1_total = 0.0;
 	_Cv2_total = 0.0;
-	_Cv3_total = 0.0;
 	_Cv_trans_total = 0.0;
 	_Cv_trans_1_total = 0.0;
 	_Cv_trans_2_total = 0.0;

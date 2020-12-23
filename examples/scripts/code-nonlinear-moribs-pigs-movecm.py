@@ -15,29 +15,26 @@ simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
-SpinIsomer = 0
+SpinIsomer = int(-1)
 
-#var = "beta" # for fixed tau
-#param = 0.001 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.001 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.05 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.05 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
 nblocks = 10000
-npass = 500
+npass = 200
 
 if simType1 == "analysis":
-	cmd1 = "--preskip 8000"
+	cmd1 = "--preskip 0"
 else:
 	cmd1 = ""
 
 #stringName2 = '""'
-#stringName2 = '"COM-and-Bisection-moves-"'
-#stringName2 = '"COM-Bisection-Norm-moves-"'
-#stringName2 = '"qTIP4PF-"'
-stringName2 = '"qspcfw-"'
+stringName2 = '"qTIP4P-"'
 
 rmin = 6.0
 rmax = 6.0
