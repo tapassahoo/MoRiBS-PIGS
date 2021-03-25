@@ -858,7 +858,7 @@ double GetPotEnergyPIGS(void)
 					double com0[3],com1[3];
 					double E_2H2O;
 					double dr[3];
-					for (int id=0;id<NDIM;id++)
+					for (int id=NDIMinit;id<NDIM;id++)
 				   	{
 						if (MINIMAGE)
 						{
@@ -874,8 +874,8 @@ double GetPotEnergyPIGS(void)
 							com1[id]=MCCoords[id][t1];
 						}
 					}
-					int tm0=offset0 + it/RotRatio;
-					int tm1=offset1 + it/RotRatio;
+					int tm0=offset0 + ((NumbRotTimes-1)/2);
+					int tm1=offset1 + ((NumbRotTimes-1)/2);
 					Eulang0[PHI]=MCAngles[PHI][tm0];
 					Eulang0[CHI]=MCAngles[CHI][tm0];
 					Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
@@ -1690,7 +1690,7 @@ double GetTotalEnergy(void)
 						double com0[3],com1[3];
 						double E_2H2O;
 						double dr[3];
-						for (int id=0;id<NDIM;id++)
+						for (int id=NDIMinit;id<NDIM;id++)
 					   {
 							if (MINIMAGE)
 							{
@@ -1707,8 +1707,18 @@ double GetTotalEnergy(void)
 							}
 						}
 
-						int tm0=offset0 + it/RotRatio;
-						int tm1=offset1 + it/RotRatio;
+						int tm0, tm1;
+						if (it == 0)
+						{
+							tm0=offset0;
+							tm1=offset1;
+						} 
+						else if (it == (NumbTimes-1))
+						{
+							tm0=offset0 + (NumbRotTimes-1);
+							tm1=offset1 + (NumbRotTimes-1);
+						}
+						
 						Eulang0[PHI]=MCAngles[PHI][tm0];
 						Eulang0[CHI]=MCAngles[CHI][tm0];
 						Eulang0[CTH]=acos(MCAngles[CTH][tm0]);

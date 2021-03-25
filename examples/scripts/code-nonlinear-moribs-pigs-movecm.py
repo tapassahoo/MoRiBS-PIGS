@@ -15,17 +15,17 @@ simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
-SpinIsomer = int(-1)
+SpinIsomer = 0# int(-1)
 
-var = "beta" # for fixed tau
-param = 0.001 # for fixed tau
+#var = "beta" # for fixed tau
+#param = 0.001 # for fixed tau
 
-#var = "tau"  # for fixed beta
-#param = 0.05 # for fixed beta
+var = "tau"  # for fixed beta
+param = 0.05 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule = 2
-nblocks = 10000
+nblocks = 20000
 npass = 200
 
 if simType1 == "analysis":
@@ -33,8 +33,11 @@ if simType1 == "analysis":
 else:
 	cmd1 = ""
 
-#stringName2 = '""'
-stringName2 = '"qTIP4P-"'
+stringName2 = '""'
+#stringName2 = '"qTIP4P-spec-geometry-"'
+#stringName2 = '"qTIP4P-paramas-matt-"'
+#stringName2 = '"qTIP4P-RotBeads21-"'
+#stringName2 = '"qTIP4P-RotBeads21-only-z-"'
 
 rmin = 6.0
 rmax = 6.0

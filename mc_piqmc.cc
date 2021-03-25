@@ -339,7 +339,7 @@ void MCMolecularMovePIGS(int type)
     	int offset=MCAtom[type].offset+NumbTimes*atom;
     	int gatom=offset/NumbTimes;
 
-    	for (int id=0; id<NDIM; id++)	  // MOVE
+    	for (int id=NDIMinit; id<NDIM; id++)	  // MOVE
     	{
 			disp[id]=MCAtom[type].mcstep*(rnd1()-0.5);
     		#pragma omp parallel for
@@ -365,7 +365,7 @@ void MCMolecularMovePIGS(int type)
     	{
        		MCAccep[type][MCMOLEC]+=1.0; 
 
-       		for (int id=0; id<NDIM; id++)       // save accepted configuration	
+       		for (int id=NDIMinit; id<NDIM; id++)       // save accepted configuration	
        		{
        			#pragma omp parallel for
        			for (int it=0; it<NumbTimes; it++) MCCoords[id][offset+it]=newcoords[id][offset+it];
@@ -391,7 +391,7 @@ void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
       	int offset = MCAtom[type].offset + NumbTimes*atom;
       	int gatom  = offset/NumbTimes;
 
-      	for (int id=0;id<NDIM;id++)             
+      	for (int id=NDIMinit;id<NDIM;id++)             
       	{	  
          	newcoords[id][offset + time] = MCCoords[id][offset + time];
          	newcoords[id][offset + pit]  = MCCoords[id][offset + pit];
@@ -429,7 +429,7 @@ void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
 
 //  change the offset if exchange
  
-            	for (int id=0;id<NDIM;id++)
+            	for (int id=NDIMinit;id<NDIM;id++)
             	{  	   
                		newcoords[id][offset+pt1]  = 0.5*(newcoords[id][offset+pt0]+newcoords[id][offset+pt2]);
                		newcoords[id][offset+pt1] += gauss(bkin_norm);
@@ -463,7 +463,7 @@ void MCBisectionMovePIGS(int type, int time)  // multilevel Metropolis
      	{
          	MCAccep[type][MCMULTI] += 1.0;
  
-         	for (int id=0;id<NDIM;id++)                // save new coordinates
+         	for (int id=NDIMinit;id<NDIM;id++)                // save new coordinates
          	for (int it=time;it<=(time+seg_size);it++)    
          	{  
             	int pit = it % NumbTimes;                // periodicity in time 	       	
@@ -627,9 +627,6 @@ void MCTransLinStepPIGSNorm(int it1, int offset, int gatom, int type, double ran
 	int it0=(it1-1);
 	int it2=(it1+1);
 
-	if (it0<0)          it0 += NumbTimes; // NumbTimes - 1
-	if (it2>=NumbTimes) it2 -= NumbTimes; // 0
-	  
 	int t0 = offset + it0;
 	int t1 = offset + it1;
 	int t2 = offset + it2;
@@ -640,19 +637,34 @@ void MCTransLinStepPIGSNorm(int it1, int offset, int gatom, int type, double ran
 	double muX, muY, muZ;
 
 	if (it1 == 0){
-		muX=MCCoords[AXIS_X][t2];
-		muY=MCCoords[AXIS_Y][t2];
-		muZ=MCCoords[AXIS_Z][t2];
+		if (NDIMinit==0){
+			muX=MCCoords[AXIS_X][t2];
+			muY=MCCoords[AXIS_Y][t2];
+			muZ=MCCoords[AXIS_Z][t2];
+		} 
+		else if (NDIMinit==2) {
+			muZ=MCCoords[AXIS_Z][t2];
+		}
 	}
 	else if (it1 == (NumbTimes-1)){
-		muX=MCCoords[AXIS_X][t0];
-		muY=MCCoords[AXIS_Y][t0];
-		muZ=MCCoords[AXIS_Z][t0];
+		if (NDIMinit==0){
+			muX=MCCoords[AXIS_X][t0];
+			muY=MCCoords[AXIS_Y][t0];
+			muZ=MCCoords[AXIS_Z][t0];
+		} 
+		else if (NDIMinit==2) {
+			muZ=MCCoords[AXIS_Z][t0];
+		}
 	}
 
-	newcoords[AXIS_X][t1]=rnorm(Rng, muX, sigma);
-	newcoords[AXIS_Y][t1]=rnorm(Rng, muY, sigma);
-	newcoords[AXIS_Z][t1]=rnorm(Rng, muZ, sigma);
+	if (NDIMinit==0){
+		newcoords[AXIS_X][t1]=rnorm(Rng, muX, sigma);
+		newcoords[AXIS_Y][t1]=rnorm(Rng, muY, sigma);
+		newcoords[AXIS_Z][t1]=rnorm(Rng, muZ, sigma);
+	} 
+	else if (NDIMinit==2) {
+		newcoords[AXIS_Z][t1]=rnorm(Rng, muZ, sigma);
+	}
 
 	double pot_old=PotEnergyPIGS(gatom,MCCoords,it1);
 	double pot_new=PotEnergyPIGS(gatom,newcoords,it1);
@@ -667,7 +679,7 @@ void MCTransLinStepPIGSNorm(int it1, int offset, int gatom, int type, double ran
 	if (Accepted)
 	{
 		MCTransChunkAcp +=1.0;
-		for (int id=0;id<NDIM;id++) MCCoords[id][t1]=newcoords[id][t1];
+		for (int id=NDIMinit;id<NDIM;id++) MCCoords[id][t1]=newcoords[id][t1];
 	}	      
 }
 
@@ -2808,9 +2820,6 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	int it0 = (it1 - 1);
 	int it2 = (it1 + 1);
 
-	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
-	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
-	  
 	int t0 = offset + it0;
 	int t1 = offset + it1;
 	int t2 = offset + it2;
@@ -2863,12 +2872,19 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 
 	double pot_old  = 0.0;
 
-	int itr0 = it1*RotRatio;     // interval to average over
-	int itr1 = itr0+RotRatio;     // translational time slices
-
-	for (int it=itr0;it<itr1;it++)  // average over tr time slices
-	pot_old+=PotRotE3DPIGS(gatom,Eulan1,it);
-	//Toby: pot_old can be calculated with MCAngles
+	int itr0, itr1;
+	if (it1 < (NumbRotTimes-1))
+	{
+		itr0 = it1*RotRatio;     // interval to average over
+		itr1 = itr0+RotRatio;     // translational time slices
+		for (int it=itr0;it<itr1;it++)  // average over tr time slices
+		pot_old+=PotRotE3DPIGS(gatom,Eulan1,it, it1);
+	}
+	else if (it1 == (NumbRotTimes-1))
+	{
+		itr0 = NumbTimes-1;     // interval to average over
+		pot_old=PotRotE3DPIGS(gatom,Eulan1,itr0, it1);
+	}
 
 	Eulan1[PHI]=newcoords[PHI][t1];
 	Eulan1[CHI]=newcoords[CHI][t1];
@@ -2883,16 +2899,32 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 	if (dens_new<0.0) dens_new=fabs(dens_new);
 
 	double pot_new  = 0.0;
-	for (int it=itr0;it<itr1;it++) 
-	pot_new  += PotRotE3DPIGS(gatom,Eulan1,it);
-     
+	if (it1 < (NumbRotTimes-1))
+	{
+		itr0 = it1*RotRatio;     // interval to average over
+		itr1 = itr0+RotRatio;     // translational time slices
+		for (int it=itr0;it<itr1;it++)  // average over tr time slices
+		pot_new  += PotRotE3DPIGS(gatom,Eulan1,it,it1);
+	}
+     else if (it1 == (NumbRotTimes-1))
+	{
+		itr0 = NumbTimes-1;     // interval to average over
+		pot_new  = PotRotE3DPIGS(gatom,Eulan1,itr0,it1);
+	}
 	double rd;
 
 	if(RotDenType == 0)
     {
     	if (dens_old>RZERO) rd = dens_new/dens_old;
         else rd = 1.0;
-		rd *= exp(-MCTau*(pot_new-pot_old));
+		if (it1 < (NumbRotTimes-1))
+		{
+			rd *= exp(-MCTau*(pot_new-pot_old));
+		}
+		else if (it1 == (NumbRotTimes-1))
+		{
+			rd *= exp(-(MCTau/RotRatio)*(pot_new-pot_old));
+		}
     }
 
 	bool Accepted = false;
@@ -2914,10 +2946,10 @@ void MCRot3DstepPIGS(int it1, int offset, int gatom, int type, double step,doubl
 		MCAngles[PHI][t1] = phi;
 		MCAngles[CHI][t1] = chi; //toby adds
   
-		double sint=sqrt(1.0-cost*cost);
-		MCCosine[AXIS_X][t1] = sint*cos(phi);
-		MCCosine[AXIS_Y][t1] = sint*sin(phi);
-		MCCosine[AXIS_Z][t1] = cost;
+		//double sint=sqrt(1.0-cost*cost);
+		//MCCosine[AXIS_X][t1] = sint*cos(phi);
+		//MCCosine[AXIS_Y][t1] = sint*sin(phi);
+		//MCCosine[AXIS_Z][t1] = cost;
 		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
 		//and Ieff about and perpendicular to one molecule-ixed axis.
 	}	      
@@ -3530,7 +3562,7 @@ double PotRotE3D(int atom0, double *Eulang, int it)
 	return (spot);
 }
 
-double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is PotRotE3DPIGS
+double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original function is PotRotE3DPIGS
 {
 	int type0   =  MCType[atom0];
 	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
@@ -3564,7 +3596,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 					double Eulang_2[3];
 					double E_2H2O;
 				   double dr[3];
-                   for (int id=0;id<NDIM;id++)
+                   for (int id=NDIMinit;id<NDIM;id++)
                    {
                         if (MINIMAGE)
                         {
@@ -3580,7 +3612,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
                             com_2[id]=MCCoords[id][t1];
                         }
 					}
-					int tm1=offset1+it/RotRatio;
+					int	tm1=offset1+it/RotRatio;
 					Eulang_2[CTH]=acos(MCAngles[CTH][tm1]);
 					Eulang_2[PHI]=MCAngles[PHI][tm1];
 					Eulang_2[CHI]=MCAngles[CHI][tm1];
@@ -3621,7 +3653,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 			double Eulang_2[3];
 			double E_2H2O;
 			for (int id=0; id<NDIM; id++) com_1[id] = MCCoords[id][t0];
-			Eulang_2[CTH]=M_PI;
+			Eulang_2[CTH]=0.0;//M_PI;
 			Eulang_2[PHI]=0.0;
 			Eulang_2[CHI]=0.0;
 			caleng_(com_1, com_2, &E_2H2O, Eulang, Eulang_2);
@@ -3630,7 +3662,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it)   //Original function is
 	}
 
     double weight = 1.0;
-    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
+    if ((itrot == 0) || (itrot == (NumbRotTimes - 1))) weight = 0.5;
 	return (weight*spot);
 }
 
@@ -5648,7 +5680,7 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 				   double Eulang2[3];
 				   double E_2H2O;
 					double dr[3];
-				   for (int id=0;id<NDIM;id++)
+				   for (int id=NDIMinit;id<NDIM;id++)
 				   {
 						if (MINIMAGE)
 						{
@@ -5664,8 +5696,17 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 							com2[id]=MCCoords[id][t1];
 						}
 				   }
-				   int tm0=offset0+it/RotRatio;
-				   int tm1=offset1+it/RotRatio;
+					int tm0, tm1;
+					if ((it/RotRatio) < NumbRotTimes)
+					{	
+						tm0=offset0+it/RotRatio;
+						tm1=offset1+it/RotRatio;
+					}
+					else
+					{
+						tm0=offset0+(NumbRotTimes-1);
+						tm1=offset1+(NumbRotTimes-1);
+					}
 
 				   Eulang1[PHI]=MCAngles[PHI][tm0];
 				   Eulang1[CHI]=MCAngles[CHI][tm0];
@@ -5766,7 +5807,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 						double Eulang2[3];
 						double E_2H2O;
 					   double dr[3];
-					   for (int id=0;id<NDIM;id++)
+					   for (int id=NDIMinit;id<NDIM;id++)
 					   {
 							if (MINIMAGE)
 							{
@@ -5782,8 +5823,17 @@ double PotEnergyPIGS(int atom0, double **pos)
 								com2[id]=MCCoords[id][t1];
 							}
 					   }
-						int tm0=offset0+it/RotRatio;
-						int tm1=offset1+it/RotRatio;
+						int tm0, tm1;
+						if ((it/RotRatio) < NumbRotTimes)
+						{	
+							tm0=offset0+it/RotRatio;
+							tm1=offset1+it/RotRatio;
+						}
+						else
+						{
+							tm0=offset0+(NumbRotTimes-1);
+							tm1=offset1+(NumbRotTimes-1);
+						}
 
 						Eulang1[PHI]=MCAngles[PHI][tm0];
 						Eulang1[CHI]=MCAngles[CHI][tm0];

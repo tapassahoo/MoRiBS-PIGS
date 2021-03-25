@@ -37,7 +37,6 @@ type_input  molecule_input  numbmolecules_input   BOLTZMANN    dstep_tr_input  l
 #         [type]  [MC steps for orient df]  [Number of time slices for rotations]
 
 cal_type_input   molecule_input    dstep_input   numbbeads_input   den_path_input
-#cal_type_input   molecule_input    dstep_input   21   /scratch/tapas/rot-dens-asymmetric-top/rot-dens-matrix-of-spin-less-H2O-Temp25.000000Kelvin-Beads20/
 #ROTDENSI  0  -1  0.0  27.877  14.512  9.285  1
 
 # parameters for the worm algorithm (C is redefined) 

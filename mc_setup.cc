@@ -49,6 +49,7 @@ int     NDIM;
 double  Temperature;
 
 double Distance;
+int    NDIMinit;
 double DipoleMoment;
 double DipoleMomentAU2;
 double RR;
@@ -411,6 +412,7 @@ void MCInit(void)  // only undimensional parameters in this function
 
 	//  INITIALIZE MC TABLES ---------------------------------------
 
+	NDIMinit = 0;
 	int natom = 0;    // map atom number into atom type
 	for (int type = 0; type < NumbTypes; type++)
 	for (int atom = 0; atom < MCAtom[type].numb; atom++)
@@ -476,8 +478,15 @@ void MCInit(void)  // only undimensional parameters in this function
 
 	if (ROTATION)
 	{
-		RotRatio = NumbTimes/NumbRotTimes;  // div_t quot
-		int rt   = NumbTimes%NumbRotTimes;  // div_t rem
+		int rt;
+		if (PIMC_SIM) {
+			RotRatio = NumbTimes/NumbRotTimes;  // div_t quot
+			rt   = NumbTimes%NumbRotTimes;  // div_t rem
+		} 
+		else {
+			RotRatio = (NumbTimes-1)/(NumbRotTimes-1);  // div_t quot
+			rt   = (NumbTimes-1)%(NumbRotTimes-1);  // div_t rem
+		}
 #ifndef ROTS_TEST
 		if (rt)
 		nrerror (_proc_,"NumbTimes is not proportional to NumbRotTimes");
@@ -573,7 +582,7 @@ void MCConfigInit(void)
 	for (int it=0;it<(NumbAtoms*NumbTimes);it++)
     {
 		MCAngles[PHI][it] = 0.0;
-		MCAngles[CTH][it] = -1.0;
+		MCAngles[CTH][it] = 1.0;
 		MCAngles[CHI][it] = 0.0;
 
 		double phi  = MCAngles[PHI][it];

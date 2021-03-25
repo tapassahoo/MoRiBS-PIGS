@@ -62,6 +62,7 @@ extern double dphi;
 extern int     NDIM;
 extern double  Temperature;
 extern double  Distance;
+extern int     NDIMinit;
 extern double DipoleMoment;
 extern int     RefAtom;
 extern double  Density;

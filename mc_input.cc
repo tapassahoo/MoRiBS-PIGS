@@ -465,6 +465,7 @@ void IOReadParams(const char in_file[],int & mc_status)
    cout << "Temperature "<<Temperature<<endl;
    cout << "Density  "   <<Density<<endl;
    cout << "DIM = "        <<NDIM<<endl;
+	cout<<"MINIMAGE   "<<MINIMAGE<<endl;
 
    int w = 6;
    

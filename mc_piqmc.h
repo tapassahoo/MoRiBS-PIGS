@@ -56,7 +56,7 @@ double PotEnergyPIGS(int,double **,int);
 
 double PotRotEnergy(int,double **,int it);   
 double PotRotE3D(int,double *,int it);   
-double PotRotE3DPIGS(int,double *,int it);   
+double PotRotE3DPIGS(int,double *,int it, int it1);   
 double PotRotE3DHF(int,double **,int it);   
 
 extern double  **MCTotal;  // MC counters (total number of moves)
