@@ -176,7 +176,12 @@ double * Eigen;
 #ifdef CHAINCONFIG
 void initChain_config(double **);
 #endif
+#ifdef LATTICECONFIG
 void initLattice_config(double **);
+#endif
+#ifdef WATERCLUSTER
+void initCluster_config(double **, double **);
+#endif
 void replInitial_config(double **);
 
 void MCMemAlloc(void)  // allocate  memmory 
@@ -567,8 +572,12 @@ void MCConfigInit(void)
 #ifndef HOSC_TEST
 #ifdef CHAINCONFIG
 	initChain_config(MCCoords); 
-#else
+#endif
+#ifdef LATTICECONFIG
 	initLattice_config(MCCoords); 
+#endif
+#ifdef WATERCLUSTER
+	initCluster_config(MCCoords,MCAngles); 
 #endif
 	replInitial_config(MCCoords);
 
@@ -581,10 +590,11 @@ void MCConfigInit(void)
 #endif
 	for (int it=0;it<(NumbAtoms*NumbTimes);it++)
     {
+#ifndef WATERCLUSTER
 		MCAngles[PHI][it] = 0.0;
 		MCAngles[CTH][it] = 1.0;
 		MCAngles[CHI][it] = 0.0;
-
+#endif
 		double phi  = MCAngles[PHI][it];
 		double cost = MCAngles[CTH][it];
 		double chi = MCAngles[CHI][it];
@@ -823,6 +833,55 @@ void initChain_config(double **pos)
 	}	
 }
 
+void initCluster_config(double **pos, double **MCAngles)
+{
+	cout<<"in initCluster_config"<<endl;
+	const char *_proc_ = __func__;    // "initCluster_config";
+
+	string fname="initial_euler_angles_and_com.txt";
+	cout<<"Initial configurations are read from - "<<endl;
+	cout<<fname<<endl;
+
+	ifstream fid(fname.c_str(),ios::in);
+
+	double ** _comcoord = doubleMatrix(NumbAtoms,NDIM);  
+	double ** _eulerangle = doubleMatrix(NumbAtoms,NDIM);  
+
+	for (int iatom=0; iatom<NumbAtoms; iatom++) {
+		for (int id=0; id<NDIM; id++) {
+			fid >> _eulerangle[iatom][id];
+			cout<<_eulerangle[iatom][id]<<"   ";
+		}
+		cout<<endl;
+	}
+
+	for (int iatom=0; iatom<NumbAtoms; iatom++) {
+		for (int id=0; id<NDIM; id++) {
+			fid >> _comcoord[iatom][id];
+			cout<<_comcoord[iatom][id]<<"    ";
+		}
+		cout<<endl;
+	}
+
+    fid.close();
+
+	for (int iatom = 0; iatom < NumbAtoms; iatom++)
+	{
+		for (int it = 0; it < NumbTimes; it++)
+		{
+			int ii = it + iatom*NumbTimes;
+			for (int id = 0; id < NDIM; id++)   // set the center of the box at the origin
+			{
+				pos[id][ii] = _comcoord[iatom][id];
+				MCAngles[id][ii] = _eulerangle[iatom][id];
+			}
+		}
+	}
+
+	free_doubleMatrix(_comcoord);
+	free_doubleMatrix(_eulerangle);
+}
+
 #ifdef PROPOSED
 void proposedGrid(void)
 {
@@ -1020,3 +1079,70 @@ void print_matrix( char *desc, int m, int n, double* a, int lda )
     }
 }
 #endif
+
+/*
+#ifdef WATERCLUSTER
+void GetInitialCoords()
+{
+	const char *_proc_=__func__;    // "init_rotdens"; 
+
+	string fname="initial_euler_angles_and_com.txt";
+	string pathr=PathToDensity;
+	fname = pathr+fname;
+	cout<<fname<<endl;
+
+	ifstream fid(fname.c_str(),ios::in);
+
+	if (!fid.good())
+	_io_error(_proc_,IO_ERR_FOPEN,fname.c_str());
+
+//---- read  grid information -------------------------------------
+    fid >> THgrd>>PHgrd;
+
+	cout<<"Rotational density matrix elements are read!"<<endl;
+    cout<<"THgrd="<<THgrd<<" PHgrd="<<PHgrd<<endl;
+
+	_cosg_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+	_rotden_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+	_rotderv_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+	_rotesqr_indices[type] = doubleMatrix(THgrd*PHgrd,THgrd*PHgrd);  
+
+	int ii, jj;
+	double cc, dd;
+	for (int i=0; i<THgrd; i++) {
+		for (int j=0; j<PHgrd; j++) {
+			ii = j+i*PHgrd;
+			for (int k=0; k<THgrd; k++) {
+				for (int l=0; l<PHgrd; l++) {
+					jj = l+k*PHgrd;
+					fid >> _cosg_indices[type][ii][jj]>>_rotden_indices[type][ii][jj]>>_rotderv_indices[type][ii][jj]>>_rotesqr_indices[type][ii][jj]; 
+					//cout<<_cosg_indices[type][ii][jj]<<" "<<_rotden_indices[type][ii][jj]<<_rotderv_indices[type][ii][jj]<<_rotesqr_indices[type][ii][jj]<<endl;
+				}
+			}
+		}
+	}
+
+    fid.close();
+
+	double cost,phi;
+	double cstep=2.0/(double)(THgrd-1.0);
+    double pstep=2.0*M_PI/(double)(PHgrd-1.0);
+	cost_indices = new double [THgrd*PHgrd];
+	phi_indices = new double [THgrd*PHgrd];
+
+	for (int i=0; i<THgrd; i++) {
+		cost = i*cstep-1.0;
+		for (int j=0; j<PHgrd; j++) {
+			phi = j*pstep;
+			ii=j+i*PHgrd;
+			cost_indices[ii] = cost;
+			phi_indices[ii] = phi;
+		}
+	}
+
+	MCIndices = new int [NumbTimes*NumbAtoms]; 
+	for (int it=0; it<NumbTimes*NumbAtoms; it++) {
+		MCIndices[it]=0;
+	} 
+}
+*/

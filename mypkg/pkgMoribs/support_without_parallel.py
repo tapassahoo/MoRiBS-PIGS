@@ -1061,6 +1061,7 @@ def Submission(NameOfServer,status, TransMove, RotMove, RUNDIR, dir_run_job, fol
                                 call(["cp", dir_dens+file_rotdens+".eng", dir_dens+file_rotdens_mod+".eng"])
                                 call(["cp", dir_dens+file_rotdens+".esq", dir_dens+file_rotdens_mod+".esq"])
                         path_Density = dir_dens+"/"
+                        call(["cp","initial_euler_angles_and_com.txt", dir_run_input_pimc])
 
                 if (crystal == True):
                         call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
@@ -1225,7 +1226,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
         This function creats jobstring for #SBATCH script
         '''
         if (numbblocks <= 1000):
-                walltime   = "01-00:00"
+                walltime   = "00-00:30"
                 thread     = 1
         else:
                 if (numbbeads >= 160):
@@ -1250,6 +1251,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 
         input_file     = dir_run_input_pimc+"/qmcbeads"+str(value)+".input"
         exe_file       = dir_run_input_pimc+"/pimc"
+        input_file1    = dir_run_input_pimc+"/initial_euler_angles_and_com.txt"
         qmcinp         = "qmcbeads"+str(value)+".input"
 
         if (status_cagepot == True):
@@ -1319,11 +1321,12 @@ mv %s %s
 cd %s
 cp %s qmc.input
 cp %s %s
+cp %s %s
 %s cp %s %s
 #valgrind --tool=memcheck --leak-check=yes --show-reachable=yes ./pimc
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, input_file1, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
 
         job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s

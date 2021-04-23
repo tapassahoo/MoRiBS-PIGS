@@ -19,8 +19,8 @@ rotor="H2O"
 SpinIsomer=0
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule=1
-nblocks=20000
+nMolecule=6
+nblocks=10
 npass=200
 
 #var = "beta" # for fixed tau
@@ -83,8 +83,8 @@ if (simType1 == "analysis"):
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
-#stringName2 = '"qTIP4P-"'
-stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
+stringName2 = '"water-cluster-"'
+#stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
 #stringName2 = '"qSPCFw-"'
 #stringName2 = '"qTIP4P-thread12-"'
 
