@@ -10,22 +10,22 @@ module_path=module_path.replace('__init__.py', '')
 
 # Informations about the system
 simType = "PIGS"
-#simType1="submission "
-simType1 = "analysis"
+simType1="submission "
+#simType1 = "analysis"
 
 molecule = "H2O"
 rotor = "H2O"
 SpinIsomer = 0# int(-1)
 
-#var = "beta" # for fixed tau
-#param = 0.001 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.001 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.05 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.05 # for fixed beta
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule = 2
-nblocks = 20000
+nMolecule = 6
+nblocks = 10
 npass = 200
 
 if simType1 == "analysis":
@@ -38,6 +38,7 @@ stringName2 = '""'
 #stringName2 = '"qTIP4P-paramas-matt-"'
 #stringName2 = '"qTIP4P-RotBeads21-"'
 #stringName2 = '"qTIP4P-RotBeads21-only-z-"'
+stringName2 = '"mbpol-6-prism-water-cluster-"'
 
 rmin = 6.0
 rmax = 6.0

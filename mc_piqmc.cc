@@ -55,6 +55,7 @@ extern "C" void rflmfz_(double *RCOM,double *hatx,double *haty,double *hatz,doub
 
 // GG ---> potentiel H2O ---- H2O
 extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eulang_1, double *Eulang_2);
+extern "C" void mbxeng_(double *com, double *Eulang, double *E_2H2O);
 // Hinde potential for H2 - H2
 extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *t1, double *t2, double *phi, double *potl);
 
@@ -3581,6 +3582,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 
 	if (NumbAtoms > 1)
 	{
+#ifndef WATERCLUSTER 
 		for (int atom1=0; atom1<NumbAtoms; atom1++)
 		{
 			if (atom1 != atom0)                    // skip "self-interaction"
@@ -3642,6 +3644,45 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 				} // stype
 			} // atom1 != atom0
 		} // END sum over atoms
+#endif
+#ifdef WATERCLUSTER
+		double com_mbx[NDIM*NumbAtoms];
+		double Eulang_mbx[NDIM*NumbAtoms];
+		double E_2H2O;
+		int ii;
+
+		for (int atom1=0; atom1<NumbAtoms; atom1++)
+		{
+			int type1   = MCType[atom1];
+			if ((stype == H2O) && (type0 == type1) && (MCAtom[IMTYPE].numb>1))
+			{
+				int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+				int t1 = offset1 + it;
+
+				for (int id=0;id<NDIM;id++)
+				{
+					ii = id+atom1*NDIM;
+					com_mbx[ii]=MCCoords[id][t1];
+				}
+									
+				int	tm1=offset1+it/RotRatio;
+				for (int id=0;id<NDIM;id++) 
+				{
+					ii=id+atom1*NDIM;
+					if (id == 1) 
+					{
+						Eulang_mbx[ii]=acos(MCAngles[id][tm1]);
+					}
+					else 
+					{
+						Eulang_mbx[ii]=MCAngles[id][tm1];
+					}
+				}
+			} // stype
+		} // END sum over atoms
+		mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
+		spot = E_2H2O;
+#endif
 	} // NumbAtoms > 1
 
 	if (NumbAtoms == 1) 
