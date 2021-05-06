@@ -92,8 +92,9 @@ wipe:
 .f.o:
 	${FC} -O3 -c $<
 
-caleng_mbpol.o: 	caleng_mbpol.f90 rotden.f rotpro_sub.f /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so
-	$(FC) -c caleng_mbpol.f90 rotden.f rotpro_sub.f  /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so $(FFLAGS)
+caleng_mbpol.o: 	caleng_mbpol.f90
+	$(FC) -c caleng_mbpol.f90 $(FFLAGS)
+#	$(FC) -c caleng_mbpol.f90 rotden.f rotpro_sub.f  /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so $(FFLAGS)
 
 #---------------------------------------------------------------------------
 # %.o: %.cxx
