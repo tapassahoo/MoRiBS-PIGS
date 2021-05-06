@@ -41,12 +41,12 @@ FFLAGS = -lstdc++ -g
 #-------------------------------------------------------------------------
 # objects for QMC
  
-pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_mbpol.o omprng.o rngstream.o vh2h2.o h2oc60.o hfc60.o plgndr.o 
+pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_qtip4p_rigid.o caleng_mbpol.o omprng.o rngstream.o vh2h2.o h2oc60.o hfc60.o plgndr.o 
  
 #----------------------------------------- PIMC --------------------------
 
 pimc:			mc_main.o $(pimcOBJS) 
-			$(CC) -o $@  mc_main.o $(pimcOBJS) $(LDFLAGS) -fopenmp
+			$(CC) -o $@  mc_main.o $(pimcOBJS) $(LDFLAGS) $(FFLAGS) -fopenmp /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so
 
 mc_main.o:		mc_main.cc mc_confg.h mc_input.h mc_setup.h mc_randg.h mc_utils.h mc_const.h mc_piqmc.h mc_estim.h mc_qworm.h
 			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
@@ -92,8 +92,8 @@ wipe:
 .f.o:
 	${FC} -O3 -c $<
 
-caleng_mbpol.o: caleng_mbpol.f90 /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so
-	$(FC) caleng_mbpol.f90 rotden.f rotpro_sub.f  /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so $(FFLAGS) -o caleng_mbpol.o
+caleng_mbpol.o: 	caleng_mbpol.f90 rotden.f rotpro_sub.f /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so
+	$(FC) -c caleng_mbpol.f90 rotden.f rotpro_sub.f  /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so $(FFLAGS)
 
 #---------------------------------------------------------------------------
 # %.o: %.cxx
