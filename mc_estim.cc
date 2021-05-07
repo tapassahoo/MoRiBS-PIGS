@@ -155,12 +155,14 @@ extern "C" double plgndr(int l, int m, double x);
 extern "C" void calengy_(double *com_1, double *Eulang_1, double *E_H2OC60);
 //Potential of interaction of two cages with water inside
 #endif
+/*
 #ifdef CAGEPOT
 extern "C" void enhfc60_(double *RCage, double *EulangL, double *EulangJ, double *EHFC60);
-//extern"C" {
-//void fortfunc_(int *ii, float *ff);
-//}
+extern"C" {
+void fortfunc_(int *ii, float *ff);
+}
 #endif
+*/
 
 void InitMCEstims(void)
 {
@@ -5309,6 +5311,7 @@ double PotFunc(const double *Eulang0)
     return PotReturn;
 }
 
+/*
 #ifdef CAGEPOT
 double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 {
@@ -5357,6 +5360,7 @@ double PotFuncCage(double *coordsXYZ, const double *Eulang0)
 	return spot_cage;
 }
 #endif
+*/
 
 /*
 #ifdef EWALDSUM
