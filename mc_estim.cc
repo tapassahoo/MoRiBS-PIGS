@@ -163,6 +163,7 @@ void fortfunc_(int *ii, float *ff);
 }
 #endif
 */
+extern "C" void mbxeng_(double *com, double *Eulang, double *E_2H2O);
 
 void InitMCEstims(void)
 {
@@ -840,6 +841,7 @@ double GetPotEnergyPIGS(void)
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbTimes-1)/2);
 	double spot = 0.0;
+#ifndef WATERCLUSTER
 	if (NumbAtoms > 1)
 	{
 		for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
@@ -1025,6 +1027,7 @@ double GetPotEnergyPIGS(void)
         	}// loop over atoms1 
        	}// loop over atoms0 
     }
+#endif
 #ifdef GAUSSIANMOVE
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
@@ -1070,6 +1073,47 @@ double GetPotEnergyPIGS(void)
 		double coordsXYZ[NDIM];
 		for (int id = 0; id < NDIM; id++) coordsXYZ[id] = MCCoords[id][t0];
     	spot_cage += PotFuncCage(coordsXYZ,Eulang0);
+	}
+#endif
+#ifdef WATERCLUSTER
+	if (NumbAtoms > 1)
+	{
+		double com_mbx[NDIM*NumbAtoms];
+		double Eulang_mbx[NDIM*NumbAtoms];
+		double E_2H2O;
+		int ii;
+
+		for (int atom0=0;atom0<NumbAtoms;atom0++)
+		{
+			int type0   = MCType[atom0];
+			int offset0 = NumbTimes*atom0;
+			int t0 = offset0 + it;
+
+			if ((MCAtom[type0].molecule==2) && (NumbAtoms > 1) && (stype==H2O))
+			{
+				for (int id=NDIMinit;id<NDIM;id++)
+				{
+					ii = id+atom0*NDIM;
+					com_mbx[ii]=MCCoords[id][t0];
+				}
+
+				int tm0=offset0 + ((NumbRotTimes-1)/2);
+				for (int id=0;id<NDIM;id++) 
+				{
+					ii=id+atom0*NDIM;
+					if (id == 1) 
+					{
+						Eulang_mbx[ii]=acos(MCAngles[id][tm0]);
+					}
+					else 
+					{
+						Eulang_mbx[ii]=MCAngles[id][tm0];
+					}
+				}
+			}
+		}	
+		mbxeng_(com_mbx, Eulang_mbx, &E_2H2O);
+		spot = E_2H2O;
 	}
 #endif
 	double spotReturn = (spot + spot_cage);
@@ -1668,6 +1712,7 @@ double GetTotalEnergy(void)
 {
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
+#ifndef WATERCLUSTER
 	if (NumbAtoms > 1) 
 	{
 		for (int atom0=0; atom0<(NumbAtoms-1); atom0++)
@@ -1872,6 +1917,7 @@ double GetTotalEnergy(void)
         	}// loop over atoms (molecules)
         }// loop over atoms (molecules)
     }
+#endif
 #ifdef GAUSSIANMOVE
     if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb == 1) )
     {
@@ -1941,6 +1987,61 @@ double GetTotalEnergy(void)
 		}
 		spot_cage += spot_beads;
     }
+#endif
+#ifdef WATERCLUSTER
+	if (NumbAtoms > 1) 
+	{
+		double com_mbx[NDIM*NumbAtoms];
+		double Eulang_mbx[NDIM*NumbAtoms];
+		double E_2H2O;
+		int ii;
+
+		double spot=0.0;
+		for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
+		{
+			for (int atom0=0; atom0<NumbAtoms; atom0++)
+			{
+				int type0   = MCType[atom0];
+				int offset0=NumbTimes*atom0;
+
+				int t0 = offset0 + it;
+
+				if ((MCAtom[type0].molecule==2) && (stype=="H2O"))
+				{
+					for (int id=0;id<NDIM;id++)
+					{
+						ii = id+atom0*NDIM;
+						com_mbx[ii]=MCCoords[id][t0];
+					}
+
+					int tm0;
+					if (it == 0)
+					{
+						tm0=offset0;
+					} 
+					else if (it == (NumbTimes-1))
+					{
+						tm0=offset0 + (NumbRotTimes-1);
+					}
+					
+					for (int id=0;id<NDIM;id++) 
+					{
+						ii=id+atom0*NDIM;
+						if (id == 1) 
+						{
+							Eulang_mbx[ii]=acos(MCAngles[id][tm0]);
+						}
+						else 
+						{
+							Eulang_mbx[ii]=MCAngles[id][tm0];
+						}
+					}
+				} //stype
+			} // loop over atoms
+			mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
+			spot += E_2H2O;
+		} // loop over beads
+	} // NumbAtoms > 1
 #endif
 	double spotReturn = 0.5*(spot+spot_cage);
 	return spotReturn;

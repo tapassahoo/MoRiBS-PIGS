@@ -32,10 +32,7 @@ c     _______________________________________________________
 c     q-TIP4P/F parameters
       parameter(angHOH=107.4d0,dOH=0.9419d0,agamma=0.73612d0,
      +          epsoo1=0.1852d0,sigoo=3.1589d0,qh=0.5564d0)
-      data ROwf/zero,zero,0.062404d0/,
-     +  RH1wf/-0.759103d0,zero,-0.495212d0/,
-     +  RH2wf/0.759103d0,zero,-0.495212d0/,
-     +  RMwf/zero,zero,-0.0847397d0/
+      data ROwf/zero,zero,zero/
 c     units
 c     angHOH in degree
 c     dOH in Angstrom
@@ -43,6 +40,24 @@ c     dOM in Angstrom
 c     epsoo1 in kcal/mole
 c     sigoo in Angstrom
 c     qh in e
+
+      pi=4.0d0*datan(1.0d0)
+c     Geometry of water molecules
+      ang1=(angHOH*pi)/180.0d0
+      zH=ROwf(3)-dsqrt(0.5*dOH*dOH*(1.0+dcos(ang1))) 
+      xH=dsqrt(dOH*dOH-(ROwf(3)-zH)*(ROwf(3)-zH))
+c...
+      RH1wf(1)=xH
+      RH1wf(2)=zero
+      RH1wf(3)=zH
+c...
+      RH2wf(1)=-RH1wf(1)
+      RH2wf(2)=RH1wf(2)
+      RH2wf(3)=RH1wf(3)
+c...
+      do i=1,3
+         RMwf(i)=agamma*ROwf(i)+0.5*(1.0-agamma)*(RH1wf(i)+RH2wf(i))
+      enddo
 c...
       epsoo=epsoo1*akcal2k
       qm=-2.0d0*qh
