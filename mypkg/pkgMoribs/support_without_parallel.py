@@ -1231,10 +1231,10 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
         else:
                 if (numbbeads >= 160):
                         thread     = 8
-                        walltime   = "3-00:00"
+                        walltime   = "7-00:00"
                 elif ((numbbeads >= 50) and (numbbeads < 160)):
-                        thread     = 8
-                        walltime   = "03-00:00"
+                        thread     = 4#8
+                        walltime   = "03-00:00"#7
                 elif ((numbbeads >= 30) and (numbbeads < 50)):
                         thread     = 4
                         walltime   = "03-00:00"

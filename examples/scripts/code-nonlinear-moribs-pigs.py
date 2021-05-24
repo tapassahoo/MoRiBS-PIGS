@@ -19,8 +19,8 @@ rotor="H2O"
 SpinIsomer=0
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule=6
-nblocks=10
+nMolecule=1
+nblocks=20000
 npass=200
 
 #var = "beta" # for fixed tau
@@ -31,9 +31,9 @@ param = 0.1 # for fixed beta
 
 
 if (simType1 == "submission"):
-    rmin = 3.0
-    rmax = 3.0
-    dr = 0.02
+    rmin = 5.0
+    rmax = 8.0
+    dr = 0.2
     nr = int(((rmax-rmin)+dr*0.5)/dr)
     nr = nr+1
     print(nr)
@@ -83,10 +83,10 @@ if (simType1 == "analysis"):
 
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
-stringName2 = '"water-cluster-"'
-#stringName2 = '"qTIP4P-one-rotor-fixed-cost1-moribs-pimc-"'
+#stringName2 = '"water-cluster-"'
+stringName2 = '"qTIP4P-correct-one-rotor-fixed-cost1-moribs-pimc-"'
 #stringName2 = '"qSPCFw-"'
-#stringName2 = '"qTIP4P-thread12-"'
+#stringName2 = '"qTIP4P-correct-"'
 
 if simType1 == "analysis":
     cmd1 = "--preskip 0"

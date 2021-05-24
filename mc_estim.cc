@@ -1042,12 +1042,14 @@ double GetPotEnergyPIGS(void)
     }
 #endif
 
+#ifdef IOWRITE
     if (MCAtom[IMTYPE].numb == 1) 
     {
         int offset0 = 0;
         int t0  = offset0 + it;
 		spot = -DipoleMoment*MCAngles[CTH][t0];
     }
+#endif
 
 #ifdef HARMONIC
     if (MCAtom[IMTYPE].numb==1)
@@ -1116,6 +1118,39 @@ double GetPotEnergyPIGS(void)
 		spot = E_2H2O;
 	}
 #endif
+
+#ifndef WATERCLUSTER
+	if (NumbAtoms == 1)
+	{
+		int atom0 = 0;
+		int type0   = MCType[atom0];
+		int offset0 = NumbTimes*atom0;
+		int t0 = offset0 + it;
+
+		if ((MCAtom[type0].molecule==2) && (stype==H2O))
+		{
+			double Eulang0[3],Eulang1[3];
+			double com0[3];
+			double com1[3] = {0.0, 0.0, Distance};
+			double E_2H2O;
+
+			int tm0=offset0 + ((NumbRotTimes-1)/2);
+
+			for (int id=0; id<NDIM; id++) com0[id] = MCCoords[id][t0];
+
+			Eulang0[PHI]=MCAngles[PHI][tm0];
+			Eulang0[CHI]=MCAngles[CHI][tm0];
+			Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
+
+			Eulang1[CTH]=0.0;//M_PI;
+			Eulang1[PHI]=0.0;
+			Eulang1[CHI]=0.0;
+			caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
+			spot = E_2H2O;
+		}
+	}
+#endif
+
 	double spotReturn = (spot + spot_cage);
 	return spotReturn;
 }
@@ -1939,6 +1974,7 @@ double GetTotalEnergy(void)
     }
 #endif
 
+#ifdef IOWRITE
     if (NumbAtoms == 1)
     {
         int offset0 = 0;
@@ -1950,6 +1986,7 @@ double GetTotalEnergy(void)
             spot   += -DipoleMoment*MCAngles[CTH][t0];
         }
     }
+#endif
 
 #ifdef HARMONIC
     if (MCAtom[IMTYPE].numb==1)
@@ -2043,6 +2080,54 @@ double GetTotalEnergy(void)
 		} // loop over beads
 	} // NumbAtoms > 1
 #endif
+
+#ifndef WATERCLUSTER
+	if (NumbAtoms == 1) 
+	{
+		int atom0=0;
+		int type0   = MCType[atom0];
+		int offset0=NumbTimes*atom0;
+
+		double spot_pair=0.0;
+		for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
+		{
+			int t0 = offset0 + it;
+
+			if ((MCAtom[type0].molecule==2) && (stype=="H2O"))
+			{
+				double Eulang0[3],Eulang1[3];
+				double com0[3];
+				double com1[3] = {0.0, 0.0, Distance};
+				double E_2H2O;
+
+				for (int id=0; id<NDIM; id++) com0[id] = MCCoords[id][t0];
+
+				int tm0, tm1;
+				if (it == 0)
+				{
+					tm0=offset0;
+				} 
+				else if (it == (NumbTimes-1))
+				{
+					tm0=offset0 + (NumbRotTimes-1);
+				}
+				
+				Eulang0[PHI]=MCAngles[PHI][tm0];
+				Eulang0[CHI]=MCAngles[CHI][tm0];
+				Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
+
+				Eulang1[CTH]=0.0;//M_PI;
+				Eulang1[PHI]=0.0;
+				Eulang1[CHI]=0.0;
+
+				caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
+				spot_pair += E_2H2O;
+			}
+		}
+		spot = spot_pair;
+	}
+#endif
+
 	double spotReturn = 0.5*(spot+spot_cage);
 	return spotReturn;
 }

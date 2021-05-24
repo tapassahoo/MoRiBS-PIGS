@@ -35,7 +35,7 @@ c     q-TIP4P/F parameters
       data ROwf/zero,zero,0.062404d0/,
      +  RH1wf/-0.759103d0,zero,-0.495212d0/,
      +  RH2wf/0.759103d0,zero,-0.495212d0/,
-     +  RMwf/zero,zero,-0.0847397d0/
+     +  RMwf/zero,zero,-0.084739d0/
 c     units
 c     angHOH in degree
 c     dOH in Angstrom
