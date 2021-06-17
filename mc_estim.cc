@@ -841,6 +841,7 @@ double GetPotEnergyPIGS(void)
     string stype = MCAtom[IMTYPE].type;
    	int it = ((NumbTimes-1)/2);
 	double spot = 0.0;
+#ifdef IOWRITE
 #ifndef WATERCLUSTER
 	if (NumbAtoms > 1)
 	{
@@ -1077,11 +1078,12 @@ double GetPotEnergyPIGS(void)
     	spot_cage += PotFuncCage(coordsXYZ,Eulang0);
 	}
 #endif
-#ifdef WATERCLUSTER
+#endif //IOWRITE
+#ifdef MBPOLPOT
 	if (NumbAtoms > 1)
 	{
-		double com_mbx[NDIM*NumbAtoms];
-		double Eulang_mbx[NDIM*NumbAtoms];
+		double com_mbx[6];//NDIM*NumbAtoms];
+		double Eulang_mbx[6];//NDIM*NumbAtoms];
 		double E_2H2O;
 		int ii;
 
@@ -1103,22 +1105,17 @@ double GetPotEnergyPIGS(void)
 				for (int id=0;id<NDIM;id++) 
 				{
 					ii=id+atom0*NDIM;
-					if (id == 1) 
-					{
-						Eulang_mbx[ii]=acos(MCAngles[id][tm0]);
-					}
-					else 
-					{
-						Eulang_mbx[ii]=MCAngles[id][tm0];
-					}
+					if (id == 1) Eulang_mbx[ii]=acos(MCAngles[id][tm0]);
+					else Eulang_mbx[ii]=MCAngles[id][tm0];
 				}
 			}
 		}	
 		mbxeng_(com_mbx, Eulang_mbx, &E_2H2O);
-		spot = E_2H2O;
+		spot = E_2H2O*kcalmoleinvToKelvin;
 	}
 #endif
 
+#ifdef IOWRITE
 #ifndef WATERCLUSTER
 	if (NumbAtoms == 1)
 	{
@@ -1150,8 +1147,9 @@ double GetPotEnergyPIGS(void)
 		}
 	}
 #endif
+#endif //IOWRITE
 
-	double spotReturn = (spot + spot_cage);
+	double spotReturn = spot;
 	return spotReturn;
 }
 
@@ -1747,6 +1745,7 @@ double GetTotalEnergy(void)
 {
     string stype = MCAtom[IMTYPE].type;
 	double spot = 0.0;
+#ifdef IOWRITE
 #ifndef WATERCLUSTER
 	if (NumbAtoms > 1) 
 	{
@@ -2025,15 +2024,15 @@ double GetTotalEnergy(void)
 		spot_cage += spot_beads;
     }
 #endif
-#ifdef WATERCLUSTER
+#endif //IOWRITE
+#ifdef MBPOLPOT
 	if (NumbAtoms > 1) 
 	{
-		double com_mbx[NDIM*NumbAtoms];
-		double Eulang_mbx[NDIM*NumbAtoms];
+		double com_mbx[6];//NDIM*NumbAtoms];
+		double Eulang_mbx[6];//NDIM*NumbAtoms];
 		double E_2H2O;
 		int ii;
 
-		double spot=0.0;
 		for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
 		{
 			for (int atom0=0; atom0<NumbAtoms; atom0++)
@@ -2052,35 +2051,24 @@ double GetTotalEnergy(void)
 					}
 
 					int tm0;
-					if (it == 0)
-					{
-						tm0=offset0;
-					} 
-					else if (it == (NumbTimes-1))
-					{
-						tm0=offset0 + (NumbRotTimes-1);
-					}
+					if (it == 0) tm0=offset0;
+					else if (it == (NumbTimes-1)) tm0=offset0 + (NumbRotTimes-1);
 					
 					for (int id=0;id<NDIM;id++) 
 					{
 						ii=id+atom0*NDIM;
-						if (id == 1) 
-						{
-							Eulang_mbx[ii]=acos(MCAngles[id][tm0]);
-						}
-						else 
-						{
-							Eulang_mbx[ii]=MCAngles[id][tm0];
-						}
+						if (id == 1) Eulang_mbx[ii]=acos(MCAngles[id][tm0]);
+						else Eulang_mbx[ii]=MCAngles[id][tm0];
 					}
 				} //stype
 			} // loop over atoms
 			mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
-			spot += E_2H2O;
+			spot += E_2H2O*kcalmoleinvToKelvin;
 		} // loop over beads
 	} // NumbAtoms > 1
 #endif
 
+#ifdef IOWRITE
 #ifndef WATERCLUSTER
 	if (NumbAtoms == 1) 
 	{
@@ -2127,8 +2115,9 @@ double GetTotalEnergy(void)
 		spot = spot_pair;
 	}
 #endif
+#endif
 
-	double spotReturn = 0.5*(spot+spot_cage);
+	double spotReturn = 0.5*spot;
 	return spotReturn;
 }
 
@@ -3407,8 +3396,8 @@ void GetRCF(void) // rotational correlation function //
 
 				for (int id = 0; id < NDIM; id++)
 				{
-					p0x += (MCCosinex[id][t0]*MCCosinex[id][tc]);
-					p0y += (MCCosiney[id][t0]*MCCosiney[id][tc]);
+					p0x += 0.0;//(MCCosinex[id][t0]*MCCosinex[id][tc]);
+					p0y += 0.0;//(MCCosiney[id][t0]*MCCosiney[id][tc]);
 				}
 				_rcfijx[atom0][atom0][0][itc]     +=p0x;
 				_rcfijx_sum[atom0][atom0][0][itc] +=p0x;
@@ -3466,9 +3455,9 @@ void GetRCF(void) // rotational correlation function //
 
           			for (int id=0;id<NDIM;id++)
           			{
-          				p0ijz += (MCCosine[id][t0]*MCCosine[id][tc1]);
-          				p0ijx += (MCCosinex[id][t0]*MCCosinex[id][tc1]);
-          				p0ijy += (MCCosiney[id][t0]*MCCosiney[id][tc1]);
+          				p0ijz += 0.0;//(MCCosine[id][t0]*MCCosine[id][tc1]);
+          				p0ijx += 0.0;//(MCCosinex[id][t0]*MCCosinex[id][tc1]);
+          				p0ijy += 0.0;//(MCCosiney[id][t0]*MCCosiney[id][tc1]);
           			}
          			_rcfijz     [atom0][atom1][0][itc] += p0ijz;   // block average z
          			_rcfijz_sum [atom0][atom1][0][itc] += p0ijz;   // total average z

@@ -1233,7 +1233,7 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
                         thread     = 8
                         walltime   = "7-00:00"
                 elif ((numbbeads >= 50) and (numbbeads < 160)):
-                        thread     = 4#8
+                        thread     = 1#8
                         walltime   = "03-00:00"#7
                 elif ((numbbeads >= 30) and (numbbeads < 50)):
                         thread     = 4
@@ -1310,11 +1310,11 @@ def jobstring_sbatch(NameOfServer, RUNDIR, file_name, value, numbmolecules, fold
 #SBATCH --time=%s
 %s
 #SBATCH --constraint=broadwell
-#SBATCH --mem-per-cpu=600mb
+#SBATCH --mem-per-cpu=1024mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
-export OMP_STACKSIZE=600M
-export GOMP_STACKSIZE=600M
+#export OMP_STACKSIZE=1024M
+export GOMP_STACKSIZE=1024M
 rm -rf %s
 mkdir -p %s
 mv %s %s
@@ -1322,11 +1322,13 @@ cd %s
 cp %s qmc.input
 cp %s %s
 cp %s %s
+cp /home/tapas/MoRiBS-PIGS/mbx_gas_phase.json %s
 %s cp %s %s
 #valgrind --tool=memcheck --leak-check=yes --show-reachable=yes ./pimc
+#valgrind --leak-check=full --show-leak-kinds=all --leak-check=yes ./pimc
 time ./pimc 
 %s
-""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, input_file1, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, input_file1, folder_run_path, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
 
         job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s

@@ -13,6 +13,7 @@ const double AuToDebye     = 1.0/0.39343;
 const double AuToCmInverse = 219474.63137;
 const double AuToKelvin    = 315777.0;
 const double KCalperMolToCmInverse = 349.75509;
+const double kcalmoleinvToKelvin = 503.228;
 
 const double HBAR  = 1.05457266; //  (10^-34 Js)     Planck constant
 const double AMU   = 1.6605402;  //  (10^-27 kg)     atomic mass unit 

@@ -19,9 +19,9 @@ rotor="H2O"
 SpinIsomer=0
 
 #field_strength = 20.0 # Unit inverse of Kelvin
-nMolecule=1
-nblocks=20000
-npass=200
+nMolecule=2
+nblocks=5000
+npass=10
 
 #var = "beta" # for fixed tau
 #param = 0.001 # for fixed tau
@@ -31,8 +31,8 @@ param = 0.1 # for fixed beta
 
 
 if (simType1 == "submission"):
-    rmin = 5.0
-    rmax = 8.0
+    rmin = 2.9
+    rmax = 2.9
     dr = 0.2
     nr = int(((rmax-rmin)+dr*0.5)/dr)
     nr = nr+1
@@ -42,6 +42,7 @@ if (simType1 == "submission"):
 
 if (simType1 == "analysis"):
     if ((param == 0.1) and (var == "tau")):
+        '''
         rmin = 2.5
         rmax = 2.7
         dr = 0.02
@@ -55,13 +56,14 @@ if (simType1 == "analysis"):
         nr = int(((rmax-rmin)+dr*0.5)/dr)
         nr += 1
         RList += [rmin+dr*i for i in range(nr)]
-        rmin = 5.2
-        rmax = 8.0
+        '''
+        rmin = 2.9
+        rmax = 2.9
         dr = 0.2
         nr = int(((rmax-rmin)+dr*0.5)/dr)
         nr += 1
         print(nr)
-        RList += [rmin+dr*i for i in range(nr)]
+        RList = [rmin+dr*i for i in range(nr)]
         print(RList)
 
     if ((param == 0.2) and (var == "tau")):
@@ -84,9 +86,9 @@ if (simType1 == "analysis"):
 #stringName2 = '""'
 #stringName2 = '"TIP4P-2005-"'
 #stringName2 = '"water-cluster-"'
-stringName2 = '"qTIP4P-correct-one-rotor-fixed-cost1-moribs-pimc-"'
+#stringName2 = '"qTIP4P-correct-one-rotor-fixed-cost1-moribs-pimc-"'
 #stringName2 = '"qSPCFw-"'
-#stringName2 = '"qTIP4P-correct-"'
+stringName2 = '"mbpol-water-chain-"'
 
 if simType1 == "analysis":
     cmd1 = "--preskip 0"

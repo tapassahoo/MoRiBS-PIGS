@@ -2804,6 +2804,7 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 		//This MCCosine will be used in estimating correlation function of the orientation of one molecule-fixed axis in GetRCF
 		//and Ieff about and perpendicular to one molecule-ixed axis.
 
+		/*
 #ifdef IOWRITE
 		MCCosinex[AXIS_X][t1] = cost*cos(phi)*cos(chi)-sin(phi)*sin(chi);
 		MCCosinex[AXIS_Y][t1] = cost*sin(phi)*cos(chi)+cos(phi)*sin(chi);
@@ -2813,6 +2814,7 @@ void MCRot3Dstep(int it1, int offset, int gatom, int type, double step,double ra
 		MCCosiney[AXIS_Y][t1] = -cost*sin(phi)*sin(chi)+cos(phi)*cos(chi);
 		MCCosiney[AXIS_Z][t1] = sint*sin(chi);
 #endif
+	*/
 	}	      
 }
 
@@ -3582,6 +3584,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 
 	if (NumbAtoms > 1)
 	{
+#ifdef IOWRITE
 #ifndef WATERCLUSTER 
 		for (int atom1=0; atom1<NumbAtoms; atom1++)
 		{
@@ -3645,9 +3648,11 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 			} // atom1 != atom0
 		} // END sum over atoms
 #endif
-#ifdef WATERCLUSTER
-		double com_mbx[NDIM*NumbAtoms];
-		double Eulang_mbx[NDIM*NumbAtoms];
+#endif //IOWRITE
+
+#ifdef MBPOLPOT
+		double com_mbx[6];//NDIM*NumbAtoms];
+		double Eulang_mbx[6];//NDIM*NumbAtoms];
 		double E_2H2O;
 		int ii;
 
@@ -3671,31 +3676,19 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 					ii=id+atom1*NDIM;
 					if (id == 1) 
 					{
-						if (atom1 == atom0)
-						{
-							Eulang_mbx[ii]=acos(MCAngles[id][tm1]);
-						}
-						else
-						{
-							Eulang_mbx[ii]=acos(MCAngles[id][tm1]);
-						}
+						if (atom1 == atom0) Eulang_mbx[ii]=acos(MCAngles[id][tm1]);
+						else Eulang_mbx[ii]=acos(MCAngles[id][tm1]);
 					}
 					else 
 					{
-						if (atom1 == atom0)
-						{
-							Eulang_mbx[ii]=MCAngles[id][tm1];
-						}
-						else
-						{
-							Eulang_mbx[ii]=MCAngles[id][tm1];
-						}
+						if (atom1 == atom0) Eulang_mbx[ii]=MCAngles[id][tm1];
+						else Eulang_mbx[ii]=MCAngles[id][tm1];
 					}
 				}
 			} // stype
 		} // END sum over atoms
 		mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
-		spot = E_2H2O;
+		spot = E_2H2O*kcalmoleinvToKelvin;
 #endif
 	} // NumbAtoms > 1
 
@@ -5866,7 +5859,7 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 			} // stype
 		} //for loop atom1 
 		mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
-		spot=E_2H2O;
+		spot=E_2H2O*kcalmoleinvToKelvin;
 	} // NumbAtoms > 1
 #endif
 
@@ -6057,31 +6050,19 @@ double PotEnergyPIGS(int atom0, double **pos)
 					}
 
 					int  tm1;
-					if ((it/RotRatio) < NumbRotTimes)
-					{	
-						tm1=offset1+it/RotRatio;
-					}
-					else
-					{
-						tm1=offset1+(NumbRotTimes-1);
-					}
+					if ((it/RotRatio) < NumbRotTimes) tm1=offset1+it/RotRatio;
+					else tm1=offset1+(NumbRotTimes-1);
 
 					for (int id=0;id<NDIM;id++) 
 					{
 						ii=id+atom1*NDIM;
-						if (id == 1) 
-						{
-							Eulang_mbx[ii]=acos(MCAngles[id][tm1]);
-						}
-						else 
-						{
-							Eulang_mbx[ii]=MCAngles[id][tm1];
-						}
+						if (id == 1) Eulang_mbx[ii]=acos(MCAngles[id][tm1]);
+						else Eulang_mbx[ii]=MCAngles[id][tm1];
 					}
 				} // stype
 			} // loop over atom1
 			mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
-			spot_pair += weight*E_2H2O;
+			spot_pair += weight*E_2H2O*kcalmoleinvToKelvin;
 		} // loop ober beads
 		spot = spot_pair;
     } // NumbAtoms > 1
