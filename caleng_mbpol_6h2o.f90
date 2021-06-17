@@ -1,9 +1,21 @@
-program test
+  subroutine mbxeng(com,Eulang,Vpot)
   implicit none
 
+  double precision :: angHOH,dOH,pi,xH,zH,ang1
   double precision :: Vpot
   double precision, allocatable :: coord(:)
   double precision, allocatable :: box(:)
+  double precision, allocatable :: com(:)
+  double precision, allocatable :: Eulang(:)
+  double precision, allocatable :: ROwf(:)
+  double precision, allocatable :: RH1wf(:)
+  double precision, allocatable :: RH2wf(:)
+  double precision, allocatable :: com_1(:)
+  double precision, allocatable :: Eulang_1(:)
+  double precision, allocatable :: RO_1_sf(:)
+  double precision, allocatable :: RH1_1_sf(:)
+  double precision, allocatable :: RH2_1_sf(:)
+  double precision, DIMENSION(3,3) :: rotmat_1
 
   character(len=5), allocatable :: at_name(:)
   character(len=5), allocatable :: monomers(:)
@@ -12,7 +24,7 @@ program test
   integer, allocatable :: nats(:)
   character :: atom
 
-  integer :: n_at,i,j,nmon,k
+  integer :: n_at,i,j,nmon,k,ii,jj,j1
 
   external initialize_system
   external get_energy
@@ -87,60 +99,58 @@ program test
   at_name(17)='H'
   at_name(18)='H'
 
-  coord(1)=0.803889
-  coord(2)=0.381762 
-  coord(3)= -1.685143
-  coord(4)=0.362572
-  coord(5)=-0.448201 
-  coord(6)=-1.556674
-  coord(7)=1.668734
-  coord(8)=0.275528
-  coord(9)=-1.301550
-  coord(10)=0.666169
-  coord(11)=-0.420958
-  coord(12)=1.707749
-  coord(13)=0.236843
-  coord(14)=0.404385
-  coord(15)=1.523931
-  coord(16)=0.226003
-  coord(17)=-1.053183
-  coord(18)=1.153395
-  coord(19)=2.996112
-  coord(20)=0.001740
-  coord(21)=0.125207
-  coord(22)=2.356345
-  coord(23)=-0.159970
-  coord(24)=0.813642
-  coord(25)=3.662033
-  coord(26)=-0.660038
-  coord(27)=0.206711
-  coord(28)=-0.847903
-  coord(29)=-1.777751
-  coord(30)=-0.469278
-  coord(31)=-1.654759
-  coord(32)=-1.281222
-  coord(33)=-0.344427
-  coord(34)=-1.091666
-  coord(35)=-2.653858
-  coord(36)=-0.718356
-  coord(37)=-2.898828
-  coord(38)=0.065636
-  coord(39)=0.089967
-  coord(40)=-3.306527
-  coord(41)=0.037245
-  coord(42)=0.940083
-  coord(43)=-2.312757
-  coord(44)=0.817025
-  coord(45)=0.097526
-  coord(46)=-0.655160
-  coord(47)=1.814997
-  coord(48)=0.176741
-  coord(49)=-0.134384
-  coord(50)=1.449649
-  coord(51)=-0.543456
-  coord(52)=-0.526672
-  coord(53)=2.749233
-  coord(54)=0.167243
+  allocate(ROwf(3),RH1wf(3),RH2wf(3))
+
+  angHOH=107.4d0
+  dOH=0.9419d0
+  pi=4.0d0*datan(1.0d0)
+  ang1=(angHOH*pi)/180.0d0
+  zH=ROwf(3)-dsqrt(0.5*dOH*dOH*(1.0+dcos(ang1))) 
+  xH=dsqrt(dOH*dOH-(ROwf(3)-zH)*(ROwf(3)-zH))
+  RH1wf(1)=xH
+  RH1wf(2)=0.0d0
+  RH1wf(3)=zH
+  RH2wf(1)=-RH1wf(1)
+  RH2wf(2)=RH1wf(2)
+  RH2wf(3)=RH1wf(3)
+
+  do i=1,nmon
+    do j=1,3
+        ii=j+(i-1)*3
+        com_1(j)=com(ii)
+        Eulang_1(j)=Eulang(ii)
+    enddo
+
+    call matpre(Eulang_1, rotmat_1)
+    do j=1,3
+        RO_1_sf(j)=0.d0
+    enddo
+    call rottrn(rotmat_1, ROwf, RO_1_sf, com_1)
+    do j=1,3
+        jj=j+(i-1)*9
+        coord(jj)=RO_1_sf(j)
+    enddo
+
+    do j=1,3
+        RH1_1_sf(j)=0.d0
+    enddo
+    call rottrn(rotmat_1, RH1wf, RH1_1_sf, com_1)
+    do j=4,6
+        jj=j+(i-1)*9
+        j1=j-3
+        coord(jj)=RH1_1_sf(j1)
+    enddo
+
+    do j=1,3
+        RH2_1_sf(j)=0.d0
+    enddo
+    call rottrn(rotmat_1, RH2wf, RH2_1_sf, com_1)
+    do j=7,9
+        jj=j+(i-1)*9
+        j1=j-6
+        coord(jj)=RH2_1_sf(j1)
+    enddo
+  enddo
 
   ! MAKE SURE YOU HAVE LEN=5 IN THE CHAR ARRAY!!!!!!
 
@@ -185,11 +195,11 @@ program test
 
   ! Energy call no gradients no pbc
   call get_energy(coord, n_at, Vpot)
-  write(*,*) "Energy = " , Vpot
+  !write(*,*) "Energy = " , Vpot
 
   ! Don't forget to free the system
   call finalize_system()
 
 
-end program
+END SUBROUTINE
 
