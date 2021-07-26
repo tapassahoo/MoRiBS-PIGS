@@ -9,8 +9,9 @@
 //#include <stdlib>
 #include <sstream>
 #include <iomanip>
-#include <math.h>
+#include <cmath>
 //#include <vector>
+#include <stdexcept>
 
 #include "mc_confg.h"
 #include "mc_setup.h"
@@ -28,6 +29,12 @@
 #include <omp.h>
 #include "rngstream.h"
 #include "omprng.h"
+
+#include "io-xyz.h"
+#include "xyz-water-utils.h"
+
+//#include "mbpol.h"
+#include "test-mbpol.h"
 
 using namespace std;
 
@@ -447,6 +454,10 @@ ParamsPotential();
 // BEGIN loop over blocks ------------------------
 
    	InitPotentials(); 
+
+#ifdef MBPOLPOT
+	InitMBpol();
+#endif
 
    	if (ROTATION)
     	InitRotDensity();

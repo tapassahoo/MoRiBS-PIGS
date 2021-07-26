@@ -17,6 +17,7 @@
 
 #include <omp.h>
 #include <cmath>
+#include "test-mbpol.h"
 
 // -----  density distributions ----------------------------
 
@@ -163,7 +164,7 @@ void fortfunc_(int *ii, float *ff);
 }
 #endif
 */
-extern "C" void mbxeng_(double *com, double *Eulang, double *E_2H2O);
+//extern "C" void mbxeng_(double *com, double *Eulang, double *E_2H2O);
 
 void InitMCEstims(void)
 {
@@ -1079,6 +1080,42 @@ double GetPotEnergyPIGS(void)
 	}
 #endif
 #endif //IOWRITE
+
+#ifdef MBPOLPOT
+	if (NumbAtoms > 1)
+	{
+		double com1[3] = {0.0, 0.0, 0.0};
+		double com2[3] = {0.0, 0.0, Distance};
+		double Eulang1[3];
+		double Eulang2[3];
+		double E_nH2O;
+
+		for (int atom0=0;atom0<NumbAtoms;atom0++)
+		{
+			int type0   = MCType[atom0];
+			int offset0 = NumbTimes*atom0;
+
+			if ((MCAtom[type0].molecule==2) && (NumbAtoms > 1) && (stype==H2O))
+			{
+				int tm0=offset0 + ((NumbRotTimes-1)/2);
+				if (atom0 == 0) {
+					Eulang1[0]=MCAngles[0][tm0];
+					Eulang1[1]=acos(MCAngles[1][tm0]);
+					Eulang1[2]=MCAngles[2][tm0];
+				}
+				if (atom0 == 1) {
+					Eulang2[0]=MCAngles[0][tm0];
+					Eulang2[1]=acos(MCAngles[1][tm0]);
+					Eulang2[2]=MCAngles[2][tm0];
+				}
+			}
+		}	
+		calmbpoleng(Eulang1, Eulang2, com1, com2, E_nH2O);
+		spot = E_nH2O*kcalmoleinvToKelvin;
+	}
+#endif
+
+/*
 #ifdef MBPOLPOT
 	if (NumbAtoms > 1)
 	{
@@ -1110,10 +1147,11 @@ double GetPotEnergyPIGS(void)
 				}
 			}
 		}	
-		mbxeng_(com_mbx, Eulang_mbx, &E_2H2O);
+		//mbxeng_(com_mbx, Eulang_mbx, &E_2H2O);
 		spot = E_2H2O*kcalmoleinvToKelvin;
 	}
 #endif
+*/
 
 #ifdef IOWRITE
 #ifndef WATERCLUSTER
@@ -2025,6 +2063,49 @@ double GetTotalEnergy(void)
     }
 #endif
 #endif //IOWRITE
+
+#ifdef MBPOLPOT
+	spot=0.0;
+	if (NumbAtoms > 1) 
+	{
+		double com1[3] = {0.0, 0.0, 0.0};
+		double com2[3] = {0.0, 0.0, Distance};
+		double Eulang1[3];
+		double Eulang2[3];
+		double E_nH2O;
+
+		for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
+		{
+			for (int atom0=0; atom0<NumbAtoms; atom0++)
+			{
+				int type0   = MCType[atom0];
+				int offset0 = NumbTimes*atom0;
+
+				if ((MCAtom[type0].molecule==2) && (stype=="H2O"))
+				{
+					int tm0;
+					if (it == 0) tm0=offset0;
+					else if (it == (NumbTimes-1)) tm0=offset0 + (NumbRotTimes-1);
+					
+					if (atom0 == 0) {
+						Eulang1[0]=MCAngles[0][tm0];
+						Eulang1[1]=acos(MCAngles[1][tm0]);
+						Eulang1[2]=MCAngles[2][tm0];
+					}
+					if (atom0 == 1) {
+						Eulang2[0]=MCAngles[0][tm0];
+						Eulang2[1]=acos(MCAngles[1][tm0]);
+						Eulang2[2]=MCAngles[2][tm0];
+					}
+				} //stype
+			} // loop over atoms
+			calmbpoleng(Eulang1, Eulang2, com1, com2, E_nH2O);
+			spot += E_nH2O*kcalmoleinvToKelvin;
+		} // loop over beads
+	} // NumbAtoms > 1
+#endif
+
+/*
 #ifdef MBPOLPOT
 	if (NumbAtoms > 1) 
 	{
@@ -2062,11 +2143,12 @@ double GetTotalEnergy(void)
 					}
 				} //stype
 			} // loop over atoms
-			mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
+			//mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
 			spot += E_2H2O*kcalmoleinvToKelvin;
 		} // loop over beads
 	} // NumbAtoms > 1
 #endif
+*/
 
 #ifdef IOWRITE
 #ifndef WATERCLUSTER

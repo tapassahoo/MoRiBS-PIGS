@@ -6,9 +6,15 @@
 #include "omprng.h"
 #include <cstdlib>
 #include <omp.h>
-
 #include <math.h>
 
+//#include "io-xyz.h"
+//#include "xyz-water-utils.h"
+//#include "mbpol.h"
+#include <vector>
+
+
+using namespace std;
 //------------- MC FLAGS ---------------------------------
 
 bool    WORM     = false;      // use the worm algorithm 
@@ -137,6 +143,23 @@ double ** MCCosiney;   // orientational cosines
 double ** MCAngles;
 double ** DipoleCoords;   // translational degrees of freedom
 
+#ifdef MBPOLPOT
+double *O1_init;
+double *H1_init;
+double *H2_init;
+vector<double> crd;
+vector<string> elements;
+string comment;
+double *rotmat1;
+double *rotmat2;
+double *O1_rot;
+double *O2_rot;
+double *H1_rot;
+double *H2_rot;
+double *H3_rot;
+double *H4_rot;
+#endif
+
 #ifdef PROPOSED
 double dcost;
 double dphi;
@@ -227,6 +250,20 @@ void MCMemAlloc(void)  // allocate  memmory
 	AMat    = new double [NumbTimes*NumbTimes];
 	Eigen   = new double [NumbTimes];
 #endif
+#ifdef MBPOLPOT
+	O1_init=new double[3];
+	H1_init=new double[3];
+	H2_init=new double[3];
+	rotmat1=new double[9];
+    rotmat2=new double[9];
+
+    O1_rot=new double[3];
+    O2_rot=new double[3];
+    H1_rot=new double[3];
+    H2_rot=new double[3];
+    H3_rot=new double[3];
+    H4_rot=new double[3];
+#endif
 }
 
 void MCMemFree(void)  //  free memory
@@ -263,6 +300,20 @@ void MCMemFree(void)  //  free memory
   	free_doubleMatrix(gausscoords); 
 	delete [] AMat;
 	delete [] Eigen;
+#endif
+#ifdef MBPOLPOT
+	delete [] O1_init;
+	delete [] H1_init;
+	delete [] H2_init;
+	delete [] rotmat1;
+    delete [] rotmat2;
+
+    delete [] O1_rot;
+    delete [] O2_rot;
+    delete [] H1_rot;
+    delete [] H2_rot;
+    delete [] H3_rot;
+    delete [] H4_rot;
 #endif
 }
 

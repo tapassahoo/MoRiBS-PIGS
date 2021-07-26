@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <list>
 #include <cmath>
+#include "test-mbpol.h"
 
 // counters
 
@@ -55,7 +56,7 @@ extern "C" void rflmfz_(double *RCOM,double *hatx,double *haty,double *hatz,doub
 
 // GG ---> potentiel H2O ---- H2O
 extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eulang_1, double *Eulang_2);
-extern "C" void mbxeng_(double *com, double *Eulang, double *E_2H2O);
+//extern "C" void mbxeng_(double *com, double *Eulang, double *E_2H2O);
 // Hinde potential for H2 - H2
 extern "C" void vh2h2_(double *rd, double *r1, double *r2, double *t1, double *t2, double *phi, double *potl);
 
@@ -3575,6 +3576,8 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 #ifdef DEBUG_PIMC
 	const char *_proc_=__func__;         //  PotRotEnergy()
 
+	x2o::mbpol pot;
+
 	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
 	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");
 
@@ -3585,7 +3588,7 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 	if (NumbAtoms > 1)
 	{
 #ifdef IOWRITE
-#ifndef WATERCLUSTER 
+#ifndef WATERCLUSTER
 		for (int atom1=0; atom1<NumbAtoms; atom1++)
 		{
 			if (atom1 != atom0)                    // skip "self-interaction"
@@ -3648,8 +3651,54 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 			} // atom1 != atom0
 		} // END sum over atoms
 #endif
-#endif //IOWRITE
+#endif
 
+#ifdef MBPOLPOT
+		double com1[3] = {0.0, 0.0, 0.0};
+		double com2[3] = {0.0, 0.0, Distance};
+		double Eulang1[3];
+		double Eulang2[3];
+		double E_nH2O;
+
+		for (int atom1=0; atom1<NumbAtoms; atom1++)
+		{
+			int type1   = MCType[atom1];
+			if ((stype == H2O) && (type0 == type1) && (MCAtom[IMTYPE].numb>1))
+			{
+				int offset1 = MCAtom[type1].offset+atom1*NumbTimes;
+				int	tm1=offset1+it/RotRatio;
+
+				if (atom0 == 0) {
+					if (atom1 == atom0) {
+						Eulang1[PHI]=Eulang[PHI];
+						Eulang1[CTH]=Eulang[CTH];
+						Eulang1[CHI]=Eulang[CHI];
+					}
+					else {
+						Eulang2[PHI]=MCAngles[0][tm1];
+						Eulang2[CTH]=acos(MCAngles[1][tm1]);
+						Eulang2[CHI]=MCAngles[2][tm1];
+					}
+				}
+				if (atom0 == 1) {
+					if (atom1 == atom0) {
+						Eulang2[PHI]=Eulang[PHI];
+						Eulang2[CTH]=Eulang[CTH];
+						Eulang2[CHI]=Eulang[CHI];
+					}
+					else {
+						Eulang1[PHI]=MCAngles[0][tm1];
+						Eulang1[CTH]=acos(MCAngles[1][tm1]);
+						Eulang1[CHI]=MCAngles[2][tm1];
+					}
+				}
+			} // stype
+		} // END sum over atoms
+		calmbpoleng(Eulang1, Eulang2, com1, com2, E_nH2O);
+		spot = E_nH2O*kcalmoleinvToKelvin;
+#endif
+
+/*
 #ifdef MBPOLPOT
 		double com_mbx[6];//NDIM*NumbAtoms];
 		double Eulang_mbx[6];//NDIM*NumbAtoms];
@@ -3687,9 +3736,10 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 				}
 			} // stype
 		} // END sum over atoms
-		mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
+		//mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
 		spot = E_2H2O*kcalmoleinvToKelvin;
 #endif
+*/
 	} // NumbAtoms > 1
 
 	if (NumbAtoms == 1) 
@@ -5858,7 +5908,7 @@ double PotEnergyPIGS(int atom0, double **pos, int it)
 				}
 			} // stype
 		} //for loop atom1 
-		mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
+		//mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
 		spot=E_2H2O*kcalmoleinvToKelvin;
 	} // NumbAtoms > 1
 #endif
@@ -6061,7 +6111,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 					}
 				} // stype
 			} // loop over atom1
-			mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
+			//mbxeng_(com_mbx, Eulang_mbx,  &E_2H2O);
 			spot_pair += weight*E_2H2O*kcalmoleinvToKelvin;
 		} // loop ober beads
 		spot = spot_pair;

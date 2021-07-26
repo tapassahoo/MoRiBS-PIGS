@@ -3,6 +3,7 @@
 
 #include "mc_confg.h"
 #include <string>
+#include <vector>
  
 //------------- MC FLAGS ---------------------------------
 
@@ -218,6 +219,22 @@ extern double ** hh;
 #ifdef MOLECULEINCAGE
 extern double ** MCCosinex;  //orientational cosine for x axis
 extern double ** MCCosiney;  //orientational cosine for y axis
+#endif
+#ifdef MBPOLPOT
+extern double * O1_init;
+extern double * H1_init;
+extern double * H2_init;
+extern vector<double> crd;
+extern vector<string> elements;
+extern string comment;
+extern double * rotmat1;
+extern double * rotmat2;
+extern double * O1_rot;
+extern double * O2_rot;
+extern double * H1_rot;
+extern double * H2_rot;
+extern double * H3_rot;
+extern double * H4_rot;
 #endif
 
 //------------ Initial MCCoords and MCAngles;

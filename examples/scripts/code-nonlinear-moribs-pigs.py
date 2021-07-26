@@ -21,7 +21,7 @@ SpinIsomer=0
 #field_strength = 20.0 # Unit inverse of Kelvin
 nMolecule=2
 nblocks=5000
-npass=10
+npass=100
 
 #var = "beta" # for fixed tau
 #param = 0.001 # for fixed tau
@@ -31,8 +31,8 @@ param = 0.1 # for fixed beta
 
 
 if (simType1 == "submission"):
-    rmin = 2.9
-    rmax = 2.9
+    rmin = 3.0
+    rmax = 3.0
     dr = 0.2
     nr = int(((rmax-rmin)+dr*0.5)/dr)
     nr = nr+1
@@ -57,8 +57,8 @@ if (simType1 == "analysis"):
         nr += 1
         RList += [rmin+dr*i for i in range(nr)]
         '''
-        rmin = 2.9
-        rmax = 2.9
+        rmin = 3.0
+        rmax = 3.0
         dr = 0.2
         nr = int(((rmax-rmin)+dr*0.5)/dr)
         nr += 1

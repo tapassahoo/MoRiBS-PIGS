@@ -1,10 +1,12 @@
 #.SUFFIXES: .o .cxx
 
 #options= -Ofast -march=native -fopenmp
-options= -O3 -fopenmp
+#options= -O3 -fopenmp
+options= -O2 -qopenmp
 
 # CFLAGS for PIGS 
-CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DMBPOLPOT -DCHAINCONFIG
+CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DMBPOLPOT -DCHAINCONFIG -I. -I/home/tapas/testing/mbx-potential/tobias-pot/supporting-information/mbpol-2b/mbpol
+
 #-DCHAINCONFIG -DSHORTFORM 
 #-DWATERCLUSTER
 # -DSHORTFORM -DONSITE
@@ -23,12 +25,12 @@ CFLAGS =-I./sprng/include -I/usr/local/include -DTYPE1 -DMBPOLPOT -DCHAINCONFIG
 #-------------------------------------------------------------------------
 
 #CC=mpic++
-CC=g++
+CC=icpc#g++
 FC=gfortran
 #FC=/home/pnroy/Dev/bin/gfortran
 
 #LDFLAGS = -lm -L./sprng/lib -llcg -lifcore
-LDFLAGS = -lm -L./sprng/lib -llcg -lgfortran 
+LDFLAGS = -O2 -mkl=sequential -lm -L./sprng/lib -llcg -lgfortran 
 FFLAGS = -lstdc++ -g
 
 #ifeq ($(FC),gfortran)
@@ -43,14 +45,14 @@ FFLAGS = -lstdc++ -g
 #-------------------------------------------------------------------------
 # objects for QMC
  
-pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_qtip4p_rigid.o caleng_mbpol.o  omprng.o rngstream.o vh2h2.o h2oc60.o plgndr.o 
+pimcOBJS=mc_piqmc.o mc_estim.o mc_qworm.o mc_input.o mc_setup.o mc_poten.o mc_randg.o mc_utils.o rotden.o rotpro_sub.o rotred.o potred.o vcord.o vcalc.o initconf.o vspher.o caleng_qtip4p_rigid.o  omprng.o rngstream.o vh2h2.o h2oc60.o plgndr.o io-xyz.o xyz-water-utils.o test-mbpol.o
  
 #----------------------------------------- PIMC --------------------------
 
 pimc:			mc_main.o $(pimcOBJS) 
-			$(CC) -o $@  mc_main.o $(pimcOBJS) $(LDFLAGS) -fopenmp /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so
+			$(CC) -o $@  mc_main.o $(pimcOBJS) $(LDFLAGS) -fopenmp /home/tapas/testing/mbx-potential/tobias-pot/supporting-information/mbpol-2b/mbpol/libmbpol.a 
 
-mc_main.o:		mc_main.cc mc_confg.h mc_input.h mc_setup.h mc_randg.h mc_utils.h mc_const.h mc_piqmc.h mc_estim.h mc_qworm.h
+mc_main.o:		mc_main.cc mc_confg.h mc_input.h mc_setup.h mc_randg.h mc_utils.h mc_const.h mc_piqmc.h mc_estim.h mc_qworm.h test-mbpol.h io-xyz.h xyz-water-utils.h
 			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
  
 mc_input.o:        	mc_input.cc mc_input.h	mc_confg.h mc_setup.h mc_utils.h mc_const.h
@@ -78,16 +80,16 @@ mc_qworm.o:        	mc_qworm.cc mc_qworm.h mc_setup.h mc_utils.h mc_confg.h mc_r
 			$(CC) $(options) -c  $(CFLAGS) -o $@ $*.cc
 
 omprng.o:               omprng.cc omprng.h
-			$(CC) -c -fopenmp -lgomp omprng.cc
+			$(CC) -c -qopenmp -lgomp omprng.cc
 
 rngstream.o: 		rngstream.cc rngstream.h
-			$(CC) -c -fopenmp -lgomp rngstream.cc
+			$(CC) -c -qopenmp -lgomp rngstream.cc
+
+test-mbpol.o: test-mbpol.cc io-xyz.h xyz-water-utils.h mc_setup.h
+			$(CC) -c  $(CFLAGS) -O2 -mkl=sequential -o $@ $*.cc
 
 .f.o:
 	${FC} -O3 -c $<
-
-caleng_mbpol.o: 	caleng_mbpol.f90
-	$(FC) -c -fopenmp caleng_mbpol.f90 $(FFLAGS) /home/tapas/MBX_20200325_v0.2.2a/install/lib/libmbx.so
 
 .PHONY: clean
 			
