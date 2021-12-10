@@ -5,6 +5,7 @@ import sys
 import time
 from os import system
 from subprocess import call
+import getpass
 
 import numpy as np
 from numpy import *
@@ -68,10 +69,9 @@ else:
 status = args.job
 #
 myhost = os.uname()[1]
-if (myhost == "gra-login1") or (myhost == "gra-login2") or (myhost == "gra-login3"):
+myhost = myhost[0:3]
+if ((myhost == "gra") or (myhost == "ced")):
 	NameOfServer = "graham"
-elif ((myhost == "cedar1.cedar.computecanada.ca") or (myhost == "cedar2.cedar.computecanada.ca") or (myhost == "cedar3.cedar.computecanada.ca") or (myhost == "cedar4.cedar.computecanada.ca") or (myhost == "cedar5.cedar.computecanada.ca")):
-    NameOfServer = "graham"
 else:
 	NameOfServer = "nlogn"
 NameOfPartition = args.partition
@@ -162,7 +162,7 @@ numbblocks_Restart1 = args.NR
 
 # Request to change
 # User should change the following 5 lines as developer already have explained in the README file.
-user_name = os.getlogin()
+user_name = getpass.getuser()
 input_dir = os.getcwd()+"/"
 home = os.path.expanduser("~")
 source_dir = "MoRiBS-PIGS/"

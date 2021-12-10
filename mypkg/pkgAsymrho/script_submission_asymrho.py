@@ -18,6 +18,7 @@ import os
 import sys
 import time
 from subprocess import call
+import getpass
 
 import numpy as np
 
@@ -84,12 +85,21 @@ args = parser.parse_args()
 # Argparser ends here
 
 myhost = os.uname()[1]
-if ((myhost == "gra-login1") or (myhost == "gra-login2") or (myhost == "gra-login3")):
+myhost = myhost[0:3]
+if ((myhost == "gra") or (myhost == "ced")):
+    NameOfServer = "graham"
+else:
+    NameOfServer = "nlogn"
+
+'''
+if ((myhost == "gra-login1") or (myhost == "gra-login2") or (myhost == "gra-login3") or (myhost == "gra768") or (myhost == "gra796")):
     NameOfServer = "graham"
 elif ((myhost == "cedar1.cedar.computecanada.ca") or (myhost == "cedar2.cedar.computecanada.ca") or (myhost == "cedar3.cedar.computecanada.ca") or (myhost == "cedar4.cedar.computecanada.ca") or (myhost == "cedar5.cedar.computecanada.ca")):
     NameOfServer = "graham"
 else:
     NameOfServer = "nlogn"
+'''
+
 NameOfPartition = args.Partition
 
 rotor = args.Rotor
@@ -109,7 +119,7 @@ temperature = "%8.6f" % temperature
 
 extra_file_name = ""
 script_dir = os.getcwd()
-user_name = os.getlogin()
+user_name = getpass.getuser()
 home = os.path.expanduser("~")
 
 if user_name == "tsahoo":

@@ -1,50 +1,26 @@
-#FC=~pnroy/Dev/bin/gfortran
-#LDFLAGS=-L/opt/intel/mkl/lib/intel64 -llapack -L/home/pnroy/Dev/lib64/
-
 HOST=$(shell hostname)
-ifeq ($(HOST), gra-login3)
+server := $(shell echo $(HOST) | cut -c-3)
+#$(info $(server))
+
+ifeq ($(server), gra)
 	FC=ifort
 	LDFLAGS=-mkl=sequential
 endif
-ifeq ($(HOST), gra-login2)
+ifeq ($(server), ced)
 	FC=ifort
 	LDFLAGS=-mkl=sequential
 endif
-ifeq ($(HOST), gra-login1)
-	FC=ifort
-	LDFLAGS=-mkl=sequential
-endif
-ifeq ($(HOST), cedar1.cedar.computecanada.ca)
-	FC=ifort
-	LDFLAGS=-mkl=sequential
-endif
-ifeq ($(HOST), cedar2.cedar.computecanada.ca)
-	FC=ifort
-	LDFLAGS=-mkl=sequential
-endif
-ifeq ($(HOST), cedar3.cedar.computecanada.ca)
-	FC=ifort
-	LDFLAGS=-mkl=sequential
-endif
-ifeq ($(HOST), cedar4.cedar.computecanada.ca)
-	FC=ifort
-	LDFLAGS=-mkl=sequential
-endif
-ifeq ($(HOST), cedar5.cedar.computecanada.ca)
-	FC=ifort
-	LDFLAGS=-mkl=sequential
-endif
-ifeq ($(HOST), feynman)
+ifeq ($(server), fey)
 	FC=gfortran
 	LDFLAGS=-llapack
 endif
-ifeq ($(HOST), nlogn)
+ifeq ($(server), nlo)
 	FC=gfortran
 	LDFLAGS=-llapack
 endif
 
 asymrho.x:	asymrho.o
-		$(FC) -o $@ asymrho.o $(LDFLAGS)
+	$(FC) -o $@ asymrho.o $(LDFLAGS)
 
 .f.o:
 	${FC} -O3 -c $<

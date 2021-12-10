@@ -23,17 +23,17 @@ nMolecule=2
 nblocks=5000
 npass=100
 
-#var = "beta" # for fixed tau
-#param = 0.001 # for fixed tau
+var = "beta" # for fixed tau
+param = 0.001 # for fixed tau
 
-var = "tau"  # for fixed beta
-param = 0.1 # for fixed beta
+#var = "tau"  # for fixed beta
+#param = 0.1 # for fixed beta
 
 
 if (simType1 == "submission"):
     rmin = 3.0
     rmax = 3.0
-    dr = 0.2
+    dr = 1.0
     nr = int(((rmax-rmin)+dr*0.5)/dr)
     nr = nr+1
     print(nr)
@@ -42,7 +42,6 @@ if (simType1 == "submission"):
 
 if (simType1 == "analysis"):
     if ((param == 0.1) and (var == "tau")):
-        '''
         rmin = 2.5
         rmax = 2.7
         dr = 0.02
@@ -56,14 +55,13 @@ if (simType1 == "analysis"):
         nr = int(((rmax-rmin)+dr*0.5)/dr)
         nr += 1
         RList += [rmin+dr*i for i in range(nr)]
-        '''
-        rmin = 3.0
-        rmax = 3.0
+        rmin = 5.2
+        rmax = 10.0
         dr = 0.2
         nr = int(((rmax-rmin)+dr*0.5)/dr)
         nr += 1
         print(nr)
-        RList = [rmin+dr*i for i in range(nr)]
+        RList += [rmin+dr*i for i in range(nr)]
         print(RList)
 
     if ((param == 0.2) and (var == "tau")):
