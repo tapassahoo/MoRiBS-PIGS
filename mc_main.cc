@@ -33,8 +33,10 @@
 #include "io-xyz.h"
 #include "xyz-water-utils.h"
 
+#ifdef MBPOLPOT
 //#include "mbpol.h"
 #include "test-mbpol.h"
+#endif
 
 using namespace std;
 

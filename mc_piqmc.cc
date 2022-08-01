@@ -21,7 +21,9 @@
 #include <algorithm>
 #include <list>
 #include <cmath>
+#ifdef MBPOLPOT
 #include "test-mbpol.h"
+#endif
 
 // counters
 
@@ -3576,7 +3578,9 @@ double PotRotE3DPIGS(int atom0, double *Eulang, int it, int itrot)   //Original 
 #ifdef DEBUG_PIMC
 	const char *_proc_=__func__;         //  PotRotEnergy()
 
+#ifdef MBPOLPOT
 	x2o::mbpol pot;
+#endif
 
 	if ((type0 != IMTYPE) || (MCAtom[type0].molecule == 0))
 	nrerror(_proc_,"Use PotEnergy(int atom0, double **pos, int it)");

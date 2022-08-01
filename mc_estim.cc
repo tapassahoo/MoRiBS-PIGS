@@ -17,7 +17,9 @@
 
 #include <omp.h>
 #include <cmath>
+#ifdef MBPOLTPOT
 #include "test-mbpol.h"
+#endif
 
 // -----  density distributions ----------------------------
 
