@@ -47,7 +47,6 @@ def MakeExecutable(src_dir, source_dir_exe):
 	print("")
 	os.chdir(source_dir_exe)
 	call(["make", "clean"])
-	call(["cp", "Makefile-Copy", "Makefile"])
 	call(["make"])
 	print("")
 	print("#-----------------------Compilation ended here--------------------#")

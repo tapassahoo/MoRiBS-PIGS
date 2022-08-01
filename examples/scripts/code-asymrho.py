@@ -20,7 +20,6 @@ value = 0.2
 #nbeads = [60, 70, 80, 90, 100]
 #nbeads = [120, 140]
 nbeads = [4, 6, 8, 14, 24]
-nbeads = [24]
 Jmax = 66
 spin = 0 #int(-1)
 
