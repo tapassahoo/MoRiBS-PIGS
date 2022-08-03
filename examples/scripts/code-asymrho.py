@@ -10,15 +10,19 @@ space = " "
 file_sim = module_path + "script_submission_asymrho.py"
 
 # Informations about the system
-simType = "S" # "S" - submits 181 jobs in a queue for a particular temperature (or beta) for all theta values from 0-180 degrees. "A"- executes compile.x to collect all the values of all thetas." 
+#---------------------------------------------------------------------------------------------------------------
+# The flag "S" is used to submit 181 jobs in a queue for a particular temperature (or beta) for all Euler angles. 
+# In contrast, the flag "A" generates the final rotational density file called in the MoRiBS code.
+#---------------------------------------------------------------------------------------------------------------
+simType = "S" 
 rotor = "H2O"
 #param = "tau" 
 #value = 0.002
 param = "beta" # beta=1/T K^-1
 value = 0.2 
-nbeads = [10, 20, 30]# 40, 50, 60, 70, 80, 90, 100, 120, 140]
-#nbeads = [60, 70, 80, 90, 100]
-#nbeads = [120, 140]
+nbeads = [90, 100, 120, 140]
+#nbeads = [40, 50, 60, 70, 80]#, 90, 100, 120, 140]
+#nbeads = [10, 20, 30]# 40, 50, 60, 70, 80, 90, 100, 120, 140]
 #nbeads = [4, 6, 8, 14, 24]
 Jmax = 66
 spin = 0 #int(-1)
