@@ -25,9 +25,7 @@ The compilation procedure of `MoRiBS-PIGS` contains the following steps:
 5. at `$MAIN`, `make -f Makefile-GNU clean` and `make -f Makefile-GNU`. If there is no error message, the generated executable is called `pimc`.
 
 
-					************************
-					**   BEFORE RUNNING   **
-					************************
+### Prerequsites of running `pimc`	
 
 Please note that one should delete the following files before each simulation run:
 	1: yw001.*;
