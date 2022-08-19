@@ -1,4 +1,6 @@
-	**MoRiBS-PIGS**: It is derived from the MoRiBS-PIMC (see Computer Physics Communications vol. 204, pp. 170–188, yr 2016) to estimate ground state properties of many-body quantum systems based on Path Integral Ground State (PIGS) approach. 
+## User's Guide for MoRiBS-PIGS
+
+**It is derived from the MoRiBS-PIMC (see Computer Physics Communications vol. 204, pp. 170–188, yr 2016) to estimate ground state properties of many-body quantum systems based on Path Integral Ground State (PIGS) approach.**
 ----
 	* Disclaimer: We disclaim any and all warranties concerning the enclosed program. *
 
