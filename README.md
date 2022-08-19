@@ -2,7 +2,7 @@
 
 * **Note:** It is derived from the MoRiBS (see Computer Physics Communications vol. 204, pp. 170-188, 2016) to estimate ground state properties of many-body interacting quantum systems based on the Path Integral Ground State (PIGS) approach.
 
-* **Disclaimer**: We disclaim any and all warranties concerning the enclosed program. *
+* **Disclaimer**: We disclaim all warranties concerning the enclosed program.
 
 The source codes of MoRiBS-PIGS are mainly written by Tapas Sahoo and Pierre-Nicholas Roy, University of Waterloo, Canada. If you encounter any problem with respect to compiling or running the program, please contact Tapas Sahoo by email (tsahoo@uwaterloo.ca or tapascuchem@gmail.com).
 
