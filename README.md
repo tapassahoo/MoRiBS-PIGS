@@ -16,7 +16,7 @@ The compilation procedure of `MoRiBS-PIGS` contains the following steps:
 
  - `cd $MAIN/spring` and open `make.CHOICES`. One should specify the platform of his/her computer by uncommenting the correct line, i.e., `PLAT = LINUX`;
  - `cd $MAIN/spring/SRC` and open `make.${PLAT}`. With the above choice, it should be `make.LINUX`. In `make.${PLAT}`, one should specify the `fortran` and `C/C++` compilers that are installed in his/her computer. Note that only the non-MPI compilation of SPRNG has been tested with MoRiBS-PIGS;
- - [x] at $MAIN/spring/SRC, `make clean` and `make`. The generated libraries are in $MAIN/spring/lib. Make sure $MAIN/spring/lib is empty before `make`. Sometimes, `make clean` may not clean up $MAIN/spring/lib completely. Steps 1-3 are to compile the sprng libraries that are needed by the main code;
+ - at `$MAIN/spring/SRC`, `make clean` and `make`. The generated libraries are in `$MAIN/spring/lib`. Make sure `$MAIN/spring/lib` is empty before `make`. Sometimes, `make clean` may not clean up `$MAIN/spring/lib` completely. Steps 1-3 are to compile the sprng libraries that are needed by the main code;
  - at $MAIN, open makefile, and specify options, CFLAGS, LDFLAGS, CC and FC. Those are the optimization options, C/C++ compilation flags, link flags, C/C++ compiler, and Fortran compiler respectively;
  - at $MAIN, `make clean` and `make`. If there is no error message, the generated executable is called pimc.
 
