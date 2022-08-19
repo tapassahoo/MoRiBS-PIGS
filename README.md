@@ -25,11 +25,13 @@ The compilation procedure of `MoRiBS-PIGS` contains the following steps:
 5. at `$MAIN`, `make -f Makefile-GNU clean` and `make -f Makefile-GNU`. If there is no error message, the generated executable is called `pimc`.
 
 
-### Prerequsites of running `pimc`	
+### Prerequisites for executing the executable `pimc`	
 
 Please note that one should delete the following files before each simulation run:
-	1: yw001.*;
-	2: permutation,
+```
+1: yw001.*;
+2: permutation,
+```
 Otherwise, the simulation will bomb out.
 
 Remember to use asymrho.x (in nmv_prop/), symrho.x (in symtop_prop/) or linden.x (in linear_prop/) to generate the needed files for PIMC sampling of asymmetric top, symmetric top, or linear rotors. Users should read the respective README files in those directories carefully before compiling and running those programs. Users should carefully name the resultant files in accordance to the rules explained in Computer Physics Communications vol. 204, pp. 170–188, yr 2016.
