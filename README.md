@@ -1,6 +1,6 @@
 ## User's Guide
 
-* **Note:** It is derived from the MoRiBS (see Computer Physics Communications vol. 204, pp. 170-188, 2016) to estimate ground state properties of many-body interacting quantum systems based on the Path Integral Ground State (PIGS) approach.
+* **Note:** It is derived from the MoRiBS (see `Computer Physics Communications vol. 204, pp. 170-188, 2016`) to estimate ground state properties of many-body interacting quantum systems based on the Path Integral Ground State (PIGS) approach.
 
 * **Disclaimer**: We disclaim all warranties concerning the enclosed program.
 
