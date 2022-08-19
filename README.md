@@ -40,9 +40,11 @@ N.B.: For the MoRiBS-PIGS simulations of the nonlinear rotors, the user should a
 
 As for Example:
 
-	H2O_T10.000000t101.rho	
-	H2O_T10.000000t101.eng
-	H2O_T10.000000t101.esq
+```
+H2O_T10.000000t101.rho	
+H2O_T10.000000t101.eng
+H2O_T10.000000t101.esq
+```
 
 To generate the above files by asymrho.f, P-1 beads are used in MoRiBS-PIGS simulations instead of P beads used in the MoRiBS-PIMC simulations. Imaginary time (tau) is defined as (beta/P-1), where P is the number of beads.
 
@@ -54,9 +56,7 @@ The user is advised to read Computer Physics Communications vol. 204, pp. 170–
 
 One may compile the code, move the resultant executable "pimc" to examples/MF_8He_0.37K_512_128 or examples/N2O_5pH2_512_128, and try running the respective simulations. One may also look at the files in those two example directories to have a sense of how many files are needed and their formats. Some of these examples are discussed in our associated paper.
 
-					************************
-					**   OUTPUT SUMMARY   **
-					************************
+### Output Summary
 
 There are two relevant directories for a MoRiBS-PIGS run, the working directory and the output directory. The former is the directory where the program executable is and the latter is specified in qmc.input. In below we simply call the two directories $WORK and $OUTPUT. And we also use $FILNAM to specify the FILENAMEPREFIX that is specified in qmc.input.
 
