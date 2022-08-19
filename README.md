@@ -8,6 +8,10 @@ The source codes of `MoRiBS-PIGS` are mainly written by Tapas Sahoo and Pierre-N
 
 1. **Setup**
 
+To download the package, a user should install git on his/her computer, followed by running the below command on his/her terminal:
+```
+git clone https://github.com/tapassahoo/MoRiBS-PIGS.git
+```
 Users should not change the directory structure after they unzip the distributed file. We label the main directory, where the source codes (`*.cc`, `*.h`, and `*.f`) are, as `$MAIN`. Please note that we have provided example configuration files like `Makefile` with the distribution and one may just adjust the files according to the architecture of his/her computer. There is no need to create new configuration files. 
 
 2. **Compilation** 
