@@ -6,12 +6,12 @@
 
 The source codes of `MoRiBS-PIGS` are mainly written by Tapas Sahoo and Pierre-Nicholas Roy, University of Waterloo, Canada. If you encounter any problem with compiling or running the program, don't hesitate to contact Tapas Sahoo by email `tapascuchem@gmail.com`.
 
-----
+---
 1. **Setup**
 
 Users should not change the directory structure after they unzip the distributed file. We label the main directory, where the source codes (`*.cc`, `*.h`, and `*.f`) are, as `$MAIN`. Please note that we have provided example configuration files like `Makefile` with the distribution and one may just adjust the files according to the architecture of his/her computer. There is no need to create new configuration files. 
 
-----
+--
 2. **Compilation** 
 
 The compilation procedure of `MoRiBS-PIGS` contains the following steps:
