@@ -5,15 +5,17 @@
 **Disclaimer**: We disclaim all warranties concerning the enclosed program.
 
 The source codes of `MoRiBS-PIGS` are mainly written by Tapas Sahoo and Pierre-Nicholas Roy, University of Waterloo, Canada. If you encounter any problem with compiling or running the program, don't hesitate to contact Tapas Sahoo by email `tapascuchem@gmail.com`.
-
-1. Setup
+----
+1. **Setup**
 
 Users should not change the directory structure after they unzip the distributed file. We label the main directory, where the source codes (`*.cc`, `*.h`, and `*.f`) are, as `$MAIN`. Please note that we have provided example configuration files like `Makefile` with the distribution and one may just adjust the files according to the architecture of his/her computer. There is no need to create new configuration files. 
+----
+2. **Compilation** 
 
-2. The compilation procedure of `MoRiBS-PIGS` contains the following steps:
+The compilation procedure of `MoRiBS-PIGS` contains the following steps:
 
-	[X] `cd $MAIN/spring` and open make.CHOICES. One should specify the platform of his/her computer by uncommenting the correct line, i.e., PLAT = LINUX;
-	2: `cd $MAIN/spring/SRC` and open make.${PLAT}. With the above choice, it should be make.LINUX. In make.${PLAT}, one should specify the fortran and C/C++ compilers that are installed in his/her computer. Note that only the non-MPI compilation of SPRNG has been tested with MoRiBS-PIGS;
+	[x] `cd $MAIN/spring` and open make.CHOICES. One should specify the platform of his/her computer by uncommenting the correct line, i.e., PLAT = LINUX;
+	[x] `cd $MAIN/spring/SRC` and open make.${PLAT}. With the above choice, it should be make.LINUX. In make.${PLAT}, one should specify the fortran and C/C++ compilers that are installed in his/her computer. Note that only the non-MPI compilation of SPRNG has been tested with MoRiBS-PIGS;
 	3: at $MAIN/spring/SRC, `make clean` and `make`. The generated libraries are in $MAIN/spring/lib. Make sure $MAIN/spring/lib is empty before `make`. Sometimes, `make clean` may not clean up $MAIN/spring/lib completely. Steps 1-3 are to compile the sprng libraries that are needed by the main code;
 	4: at $MAIN, open makefile, and specify options, CFLAGS, LDFLAGS, CC and FC. Those are the optimization options, C/C++ compilation flags, link flags, C/C++ compiler, and Fortran compiler respectively;
 	5: at $MAIN, `make clean` and `make`. If there is no error message, the generated executable is called pimc.
