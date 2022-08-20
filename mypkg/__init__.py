@@ -1,2 +1,2 @@
-str_mypkg = "First, add PYTHONPATH environment variable in .profile or .bashrc or .bash_profile or .zshrc to import mypkg."
+str_mypkg = 'export PYTHONPATH="$HOME/academic-project/MoRiBS-PIGS/:$PYTHONPATH" >> ~/.zshrc or ~/.bashrc'
 #print(str_mypkg)

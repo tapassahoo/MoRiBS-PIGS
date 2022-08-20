@@ -6,9 +6,9 @@ import decimal
 import numpy as np
 from numpy import *
 import math
-import inputFile
-import mypkg.pkgAsymrho.support_asymrho as asym
-import mypkg.pkgSymrho.support_symrho as sym
+import get_beads_and_mc_steps as mc
+import mypkg.asymrho_runner.support as asym
+import mypkg.symrho_runner.support as sym
 
 def error_message(number):
         if(number<=1):
@@ -642,7 +642,7 @@ def GetAverageEntropyRT(particleAList, TypeCal, molecule_rot, TransMove, RotMove
         '''
         This function gives us Renyi entropy of a many-rotors system simulated by Ratio trick algorithm.
         '''
-        list_nb           = inputFile.Getbeads(TypeCal, variableName)
+        list_nb           = mc.Getbeads(TypeCal, variableName)
         ndim_beads        = int(len(list_nb))
 
         purity_combo      = np.zeros(ndim_beads,dtype = 'f')
