@@ -1,36 +1,11 @@
-import time
-from subprocess import call
-import os
-import decimal
 import numpy as np
-from numpy import *
-import math
 
-def Getbeads(TypeCal, variableName):
-    if (TypeCal == "ENT"):
-        if (variableName == "tau"):
-            list_nb = [10, 20, 30, 40, 50, 60, 80, 100, 120]#, 140]#, 160, 180, 200]
-        if (variableName == "beta"):
-            list_nb = [4, 6, 8, 10, 14, 20, 24, 30, 40, 50, 60, 70, 80, 90, 100]
+class GetBeadStepLevel:
 
-    if (TypeCal == "PIMC"):
-        if (variableName == "tau"):
-            list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]#, 120, 140, 160, 180, 200]
-
-    if (TypeCal == "PIGS"):
-        if (variableName == "tau"):
-            #list_nb  = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200]
-            list_nb  = [50]
-        if (variableName == "beta"):
-            list_nb  = [4, 6, 8, 10, 14, 20, 24, 30, 40, 50, 60, 70, 80, 90, 100]#, 120, 140, 160, 180, 200]
-
-    return list_nb
-
-class GetStepAndLevel:
-    def __init__(self, molecule_rot1, variableName1, TypeCal1):
+    def __init__(self, molecule_rot1, variable1, simulation1):
         self.molecule_rot = molecule_rot1
-        self.variableName = variableName1
-        self.TypeCal = TypeCal1
+        self.variable = variable1
+        self.simulation = simulation1
         if ((self.variableName == "tau") and (self.TypeCal == "ENT")):
             if (self.molecule_rot == "H2"):
                 self.step_trans = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]

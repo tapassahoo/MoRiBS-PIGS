@@ -28,6 +28,8 @@ npass=200
 
 var = "tau"  # for fixed beta
 param = 0.2 # for fixed beta
+print("Tapas Sahoo")
+exit()
 
 
 if (simType1 == "submission"):
