@@ -1,6 +1,19 @@
 import numpy as np
+"""
+Users can modify this code to run the executable, namely "pimc" 
+generated in the MoRiBS-PIGS directory. 
+
+This code provides Monte Carlo steps and levels.
+
+Note that always even beads are used here for both the finite 
+temperature and ground state simulations.
+"""
 
 class GetBeadStepLevel:
+	"""
+	inputs are molecule_rot1, variable1, simulation1
+	outputs are self.beads, self.level_trans, self.step_trans, self.step_rot
+	"""
 	def __init__(self, molecule_rot1, variable1, simulation1):
 		self.molecule_rot = molecule_rot1
 		self.variable = variable1
