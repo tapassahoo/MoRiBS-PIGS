@@ -1,100 +1,30 @@
 import numpy as np
 
 class GetBeadStepLevel:
+	def __init__(self, molecule_rot1, variable1, simulation1):
+		self.molecule_rot = molecule_rot1
+		self.variable = variable1
+		self.simulation = simulation1
 
-    def __init__(self, molecule_rot1, variable1, simulation1):
-        self.molecule_rot = molecule_rot1
-        self.variable = variable1
-        self.simulation = simulation1
-        if ((self.variableName == "tau") and (self.TypeCal == "ENT")):
-            if (self.molecule_rot == "H2"):
-                self.step_trans = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-                self.step    = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K           #change param6
-                self.level    = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+		if (self.simulation == "PIGS"):
+			if (self.variable == "beta"):
+				self.beads=np.arange(10,130,10,dtype=int)
+				if (self.molecule_rot == "HF"):
+					self.level_trans= np.array([1 for i in range(100)],dtype=int)
+					self.step_trans = np.array([0.3 for i in range(100)],dtype=float)
+					self.step_rot   = np.array([2.0 for i in range(100)],dtype=float)
+			if (self.variable == "tau"):
+				self.beads=np.arange(10,110,10,dtype=int)
+				if (self.molecule_rot == "HF"):
+					self.step_trans = {10:2.0, 20:2.0, 30:2.0, 40:2.0, 50:1.5, 60:1.5,
+									   70:1.5, 80:1.5, 90:1.0, 100:1.0, 110:1.0, 120:1.0}
+					self.step_rot   = {10:2.0, 20:2.0, 30:2.0, 40:2.0, 50:1.5, 60:1.5,
+									   70:1.5, 80:1.5, 90:1.0, 100:1.0, 110:1.0, 120:1.0}
+					self.level_trans= np.array([1 for i in range(100)],dtype=int)
 
-            if (self.molecule_rot == "HF"):
-                self.step_trans = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-                self.step    = [2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.5, 1.2, 1.1, 1.1] 
-                self.level    = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-
-            if (self.molecule_rot == "H2O"):
-                self.step_trans = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
-                self.step    = [0.5,0.25,0.2,0.16,0.14,0.13,0.12,0.11,0.1,0.08,0.08,0.08,0.08]
-                self.level    = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-
-        if ((self.variableName == "tau") and (self.TypeCal == "PIGS")):
-            if (self.molecule_rot == "H2"):
-                self.step_trans = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-                self.step    = [1.5,3.0,3.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K           #change param6
-                self.level    = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-
-            if (self.molecule_rot == "HF"):
-                self.step_trans = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-                self.step    = [2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.5, 1.5, 1.0,1.0] #list_nb = [4, 8, 16, 32, 64] beta = 0.05; 
-                self.level    = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-
-            if (self.molecule_rot == "H2O"):
-                self.step_trans = [0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2]
-                self.level    = [  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5,  5, 5, 5,5,5,5,5,5,5,5,5,5,5,5,5,5]
-                #self.step     = [0.4,0.25,0.2,0.16,0.14,0.13,0.12,0.12,0.12,0.11,0.1,0.08,0.08,0.08,0.08,0.06,0.06,0.06,0.05]
-                self.step     = [0.13, 0.11]
-
-            if (self.molecule_rot == "CH3F"):
-                self.step_trans1= [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.8,0.8,0.8,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
-                self.level1    = [  1,  1,  2,  2,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  3,  3,  3,  3,  3,  3,  3,  3]
-                self.step_trans = [0.8,0.6,0.5,0.5,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3]
-                self.level    = [  2,  2,  3,  3,  4,  4,  4,  4,  4,  4,  5,  5,  5,  5,  5,  4,  4,  4,  4,  4,  4,  4,  4]
-                self.step    = [0.2,0.15,0.12,0.10,0.10,0.10,0.08,0.07,0.06,0.06,0.06,0.05,0.04,0.04,0.04,0.04]
-
-
-        if ((self.variableName == "tau") and (self.TypeCal == "PIMC")):
-            if (self.molecule_rot == "H2"):
-                self.step_trans = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-                self.step    = [1.5,2.0,2.0,2.0,1.0,0.7,0.5,2.5,2.02] #temp 100K           #change param6
-                self.level    = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-
-            if (self.molecule_rot == "HF"):
-                self.step_trans = [1.0,1.0,0.1,0.6,0.7,0.8,0.9,1.0,1.10,1.20,1.30,1.40,1.50]
-                self.step    = [2.0, 2.0, 2.0, 2.0, 1.5, 1.5, 1.5, 1.5, 1.0,1.0] #list_nb = [4, 8, 16, 32, 64] beta = 0.05; 
-                self.level    = [1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-
-            if (self.molecule_rot == "H2O"):
-                self.step_trans = [0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2]
-                self.level    = [  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5,  5, 5, 5,5,5,5,5,5,5,5,5,5,5,5,5,5]
-                self.step    = [0.1,0.15,0.25,0.35,0.3,0.2,0.2]
-                #self.step     = [0.1,0.1,0.05]
-
-        if ((self.variableName == "beta") and (self.TypeCal == "PIGS")):
-            if (self.molecule_rot == "H2"):
-                self.step_trans  = [0.3 for i in range(100)]
-                self.step     = [1.6 for i in range(100)]  
-                self.level     = [1    for i in range(100)]
-
-            if (self.molecule_rot == "HF"):
-                self.step_trans  = [0.3 for i in range(100)]
-                self.step     = [2.0 for i in range(100)]  
-                self.level     = [1    for i in range(100)]
-
-            if (self.molecule_rot == "H2O"):
-                self.step_trans  = [0.5, 0.5, 0.4, 0.3, 0.3, 0.3, 0.3, 0.25, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22]
-                self.level     = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-                self.step     = [0.1 for i in range(20)]
-
-            if (self.molecule_rot == "CH3F"):
-                self.step_trans1 = [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6]
-                self.level1     = [  1,   2,    2,   2,   2,   2,   2,     2,   2,   2, 2, 2]
-                self.step_trans  = [0.4, 0.6, 0.5, 0.4, 0.4, 0.4, 0.3, 0.3, 0.3, 0.3, 0.3]
-                self.level     = [  1,   3,    3,   3,   3,   3,   3,     3,   3,   3, 2, 2]
-                self.step     = [0.15 for i in range(20)]
-
-        if ((self.variableName == "beta") and (self.TypeCal == "PIMC")):
-            if (self.molecule_rot == "H2O"):
-                self.step_trans  = [0.3 for i in range(100)]
-                self.step     = [0.1 for i in range(100)]
-                self.level     = [1 for i in range(100)]
-
-        if ((self.variableName == "beta") and (self.TypeCal == "ENT")):
-            if (self.molecule_rot == "H2O"):
-                self.step_trans  = [0.3 for i in range(100)]
-                self.step     = [0.2 for i in range(100)]
-                self.level     = [1 for i in range(100)]
+if __name__ == '__main__':
+	molecule_rot1="HF"
+	variable1="tau"
+	simulation1="PIGS"
+	print(GetBeadStepLevel(molecule_rot1,variable1,simulation1).beads[0])
+	print(GetBeadStepLevel(molecule_rot1,variable1,simulation1).step_rot[10])
