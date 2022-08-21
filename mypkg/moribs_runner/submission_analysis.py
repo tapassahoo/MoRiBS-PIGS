@@ -14,33 +14,152 @@ sys.path.append("../../examples/scripts")
 import get_beads_and_mc_steps as mc
 import mypkg.moribs_runner.support as support
 
-parser = argparse.ArgumentParser(prog="submission_analysis.py",description="It is used to submit jobs in a queue and analyze output data files. Note: Module support.py consists of multiple functions and is not permitted to modify without consulting the developer - Dr Tapas Sahoo. Users should modify module /MoRiBS-PIGS/examples/scripts/get_beads_and_mc_steps.py to generate lists of beads, step lengths for rotational and translational motions, and levels for bisection move associated with each bead.",epilog="Enjoy the program! :)")
-parser.add_argument("job", help="Type of jobs: submission of new jobs or analyzing output files.", choices=["submission", "analysis", "rename"], type=str)
-parser.add_argument("-C", "--compiler", action="store_true", help="Users can use it if the execution file (/MoRiBS-PIGS/pimc) is already generated.")
-parser.add_argument("method", help="The methodology should be specified as one of PIMC, PIGS, and ENT. PIMC is for finite temperature calculation; PIGS is for ground state calculation; ENT is for entanglement by replica algorithm based on PIGS.", choices=["PIMC", "PIGS", "ENT"], type=str)
-parser.add_argument("--scal", help="The subtype of calculations - must be defined in the case of ENT.", default="EXTENDED_ENSMBL", choices=["EXTENDED_ENSMBL", "BROKENPATH"])
-parser.add_argument("--RATIO", help="The subtype of calculations - must be defined in the case of ENT. WR and WOR stand for with and without ratio trick algorithm.", default="WR", choices=["WR", "WOR"])
-parser.add_argument("Molecule", help="Name of a molecular system. E.g., H2, HF, H2O, FCC-H2O, H2O@c60",type=str)
-parser.add_argument("Rotor", help="Name of the rotor. E.g., HF, H2O. It is needed to call the rotational density matrix file.",type=str)
-parser.add_argument("param", type=float, help="Fixed value of beta or tau.")
-parser.add_argument("variable", help="Name of the variable: beta (for param=tau) or tau (param=beta). Note: for finite temperature computations, only the variable tau is needed.", choices=["tau", "beta"],type=str)
-parser.add_argument("--MOVECOM", action="store_true", help="It allows translational motions of molecules or particles.")
-parser.add_argument("--ROTMOVE", action="store_true", help="It allows rotational motions of molecules.")
-parser.add_argument("--Type", default="LINEAR", help="Users should specify the type of the rotor either LINEAR or NONLINEAR.",choices=["LINEAR","NONLINEAR"])
-parser.add_argument("-spin", "--SpinIsomer", type=int, help="It has three values. These are -1, 0, and 1 for spinless, para and ortho isomers, respectively. Users should mention one of them.", default=-1, choices=[-1,0,1])
-parser.add_argument("-N", help="Number of Molecules.", type=int)
-parser.add_argument("-Block", help="Number of Blocks required for Monte Carlo move.", type=int)
-parser.add_argument("-Pass", help="Number of Passes required for Monte Carlo move.", type=int)
-parser.add_argument("-R", "--Rpt", type=float, help="Distance between Centre of Masses of two molecules. The unit is Angstrom.", default=-1.0)
-parser.add_argument("-d", "--DipoleMoment", type=float, help="It defines the dipole moment of a linear polar molecule in Debye.", default=-1.0)
-parser.add_argument("-g", "--gFactor", type=float, help="It defines interaction strength.", default=-1.0)
-parser.add_argument("--RESTART", action="store_true", help="It is used to restart the code.")
-parser.add_argument("-NR", type=int, help="The number of Monte Carlo blocks users wish to extend further is mentioned.", default=0)
-parser.add_argument("--preskip", type=int, help="The number of blocks in outputs skipped from the beginning. It can be necessary while the analysis flag is open to remove pre-equilibrated data.", default=0)
-parser.add_argument("--postskip", type=int, help="The number of blocks in outputs skipped from the end of the file. It can be necessary to increase the error bar. Ensure the analysis flag is open.", default=0)
-parser.add_argument("-IM", "--Impurity", action="store", nargs=4, help="Use it if the system comprises various types of particles and molecules. IMPURITY[0] = type of particle (ATOM, MOLECULE, PLANAR, LINEAR or NONLINEAR); IMPURITY[1] = Name of the particle; IMPURITY[2] = Number of the particle; IMPURITY[3] = Either BOSE or BOLTZMANN.")
-parser.add_argument("--partition", help="It allows submitting jobs in a specific CPU. The user does not need it.", default="ntapas")
-parser.add_argument("--CRYSTAL", action="store_true", help="It is required to read lattice configurations and the associated dipole moments. It is in developing condition.")
+parser = argparse.ArgumentParser(prog="submission_analysis.py",
+                                 description="It is used to submit \
+								 jobs in a queue and analyze output \
+								 data files. Note: Module support.py \
+								 consists of multiple functions \
+								 and is not permitted to modify \
+					             without consulting the developer - \
+								 Dr Tapas Sahoo. Users should modify \
+								 module /MoRiBS-PIGS/examples/scripts/get_beads_and_mc_steps.py \
+								 to generate lists of beads, step lengths \
+								 for rotational and translational motions, \
+								 and levels for bisection move associated \
+								 with each bead.",
+                                 epilog="Enjoy the program! :)")
+parser.add_argument("job",
+					 help="Type of jobs: submission of new jobs or analyzing \
+					 output files.", 
+					 choices=["submission", "analysis", "rename"], 
+				     type=str)
+parser.add_argument("-C",
+					"--compiler", 
+					 action="store_true", 
+					 help="Users can use it if the execution file \
+					 (/MoRiBS-PIGS/pimc) is already generated.")
+parser.add_argument("method", 
+					 help="The methodology should be specified as \
+					 one of PIMC, PIGS, and ENT. PIMC is for finite \
+					 temperature calculation; PIGS is for ground state \
+					 calculation; ENT is for entanglement by replica \
+					 algorithm based on PIGS.", 
+					 choices=["PIMC", "PIGS", "ENT"], 
+					 type=str)
+parser.add_argument("--scal", \
+					 help="The subtype of calculations - \
+					 must be defined in the case of ENT.", 
+					 default="EXTENDED_ENSMBL", 
+					 choices=["EXTENDED_ENSMBL", "BROKENPATH"])
+parser.add_argument("--RATIO", 
+				     help="The subtype of calculations - \
+					 must be defined in the case of ENT. \
+					 WR and WOR stand for with and without \
+					 ratio trick algorithm.", 
+					 default="WR", 
+					 choices=["WR", "WOR"])
+parser.add_argument("Molecule", 
+					 help="Name of a molecular system. \
+					 E.g., H2, HF, H2O, FCC-H2O, H2O@c60",
+					 type=str)
+parser.add_argument("Rotor", 
+					 help="Name of the rotor. E.g., HF, H2O. \
+					 It is needed to call the rotational density matrix file.",
+					 type=str)
+parser.add_argument("param", 
+					type=float, 
+					help="Fixed value of beta or tau.")
+parser.add_argument("variable", 
+					help="Name of the variable: beta (for param=tau) 
+					or tau (param=beta). Note: for finite temperature 
+					computations, only the variable tau is needed.", 
+					choices=["tau", "beta"],
+					type=str)
+parser.add_argument("--MOVECOM", 
+					action="store_true", 
+					help="It allows translational motions of 
+					molecules or particles.")
+parser.add_argument("--ROTMOVE", 
+					action="store_true", 
+					help="It allows rotational motions of molecules.")
+parser.add_argument("--Type", 
+					default="LINEAR", 
+					help="Users should specify the type of the rotor 
+					either LINEAR or NONLINEAR.",
+					choices=["LINEAR","NONLINEAR"])
+parser.add_argument("-spin", 
+					"--SpinIsomer", 
+					type=int, help="It has three values. These are -1, 0, and 1 
+					for spinless, para and ortho isomers, 
+					respectively. Users should mention one of them.", 
+					default=-1, 
+					choices=[-1,0,1])
+parser.add_argument("-N", 
+					help="Number of Molecules.", 
+					type=int)
+parser.add_argument("-Block", 
+					help="Number of Blocks required for Monte Carlo move.", 
+					type=int)
+parser.add_argument("-Pass", 
+					help="Number of Passes required for Monte Carlo move.", 
+					type=int)
+parser.add_argument("-R", 
+					"--Rpt", 
+					type=float, 
+					help="Distance between Centre of Masses of two 
+					molecules. The unit is Angstrom.", 
+					default=-1.0)
+parser.add_argument("-d", 
+					"--DipoleMoment", 
+					type=float, 
+					help="It defines the dipole moment of a linear 
+					polar molecule in Debye.", 
+					default=-1.0)
+parser.add_argument("-g", 
+					"--gFactor", 
+					type=float, 
+					help="It defines interaction strength.", 
+					default=-1.0)
+parser.add_argument("--RESTART", 
+					action="store_true", 
+					help="It is used to restart the code.")
+parser.add_argument("-NR", 
+					type=int, 
+					help="The number of Monte Carlo blocks users 
+					wish to extend further is mentioned.", 
+					default=0)
+parser.add_argument("--preskip", 
+					type=int, help="The number of blocks in outputs 
+					skipped from the beginning. It can be necessary 
+					while the analysis flag is open to remove 
+					pre-equilibrated data.", 
+					default=0)
+parser.add_argument("--postskip", 
+					type=int, 
+					help="The number of blocks in outputs skipped 
+					from the end of the file. It can be necessary 
+					to increase the error bar. Ensure the analysis 
+					flag is open.", default=0)
+parser.add_argument("-IM", 
+					"--Impurity", 
+					action="store", 
+					nargs=4, 
+					help="Use it if the system comprises various 
+					types of particles and molecules. 
+					IMPURITY[0] = type of particle (ATOM, MOLECULE, 
+					PLANAR, LINEAR or NONLINEAR); 
+					IMPURITY[1] = Name of the particle; 
+					IMPURITY[2] = Number of the particle; 
+					IMPURITY[3] = Either BOSE or BOLTZMANN.")
+parser.add_argument("--partition", 
+					help="It allows submitting jobs in a specific CPU. 
+					The user does not need it.", 
+					default="ntapas")
+parser.add_argument("--CRYSTAL", 
+					action="store_true", 
+					help="It is required to read lattice configurations 
+					and the associated dipole moments. 
+					It is in developing condition.")
 args = parser.parse_args()
 
 # ===============================================================================
