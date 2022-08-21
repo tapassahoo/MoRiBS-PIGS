@@ -277,7 +277,7 @@ user_name = getpass.getuser()
 input_dir = os.getcwd()+"/"
 home = os.path.expanduser("~")
 source_dir = "MoRiBS-PIGS/"
-out_dir = "name_of_output_directory/"
+out_dir = "linear-rotors/"
 final_results_path = home + "/results-of-" + method + "/"
 dir = os.path.dirname(final_results_path)
 if not os.path.exists(dir):
@@ -300,11 +300,10 @@ if (status == "submission"):
 		if not args.RESTART:
 			support.makeexecutionfile(src_dir, method, ENT_TYPE, source_dir_exe)
 
-if server_name == "graham":
+if (server_name == "graham"):
 	dir_output = "/scratch/" + user_name + "/" + out_dir
 else:
 	dir_output = "/work/" + user_name + "/" + out_dir
-
 
 if (method == "ENT"):
 	maxloop = int(numbmolecules1/2)
