@@ -220,30 +220,27 @@ run_cpu="nCPU"
 
 preskip = args.preskip
 postskip = args.postskip
-if args.crystal:
-	crystal = args.crystal
-else:
-	crystal = False
+crystal = args.crystal
 rotor_type = args.rotor_type
 
 ent_method = args.ent_method
 ent_algorithm = args.algorithm
 
-extra_file_name = extraName
+extra_file_name = ""
 
 src_dir = os.getcwd()
-if (var_name == "tau"):
-	parameterName = "beta"
-	beta = args.param
+if (variable_name == "tau"):
+	parameter_name = "beta"
+	beta = args.parameter
 	parameter = beta
-	temperature = 1.0 / beta
+	temperature = 1.0/beta
 
-if (var_name == "beta"):
-	parameterName = "tau"
-	tau = args.param
+if (variable_name == "beta"):
+	parameter_name = "tau"
+	tau = args.parameter
 	parameter = tau
 
-spin_isomer = args.SpinIsomer
+spin_isomer = args.spin_isomer
 
 if (spin_isomer == -1):
 	prefix_name = ""
@@ -251,7 +248,10 @@ if (spin_isomer == 0):
 	prefix_name = "-p-"
 if (spin_isomer == 1):
 	prefix_name = "-o-"
-molecule = prefix_name+molecule
+rotor_name = prefix_name+rotor
+
+print(rotor_name)
+exit()
 
 #Monte Carlo step size - Block start
 step_COM = [0.1*i for i in range(20)] 
@@ -300,10 +300,11 @@ if (status == "submission"):
 		if not args.RESTART:
 			support.makeexecutionfile(src_dir, method, ENT_TYPE, source_dir_exe)
 
-if (server_name == "graham"):
+if server_name == "graham":
 	dir_output = "/scratch/" + user_name + "/" + out_dir
 else:
 	dir_output = "/work/" + user_name + "/" + out_dir
+
 
 if (method == "ENT"):
 	maxloop = int(numbmolecules1/2)

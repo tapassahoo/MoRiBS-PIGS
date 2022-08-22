@@ -16,13 +16,14 @@ system      = "HF"
 rotor       = "HF"
 spin_isomer = int(-1)
 
+parameter_value = 0.2
+variable_name   = "tau"
+
 nmolecule   = 1
 nblock      = 20000
 npass       = 200
 # field_strength = 20.0 # Unit inverse of Kelvin
 
-parameter_value = 0.2
-variable_name   = "tau"
 
 if (job_type == "submission"):
 	rlist = np.arange(2.5, 10.1, 0.1, dtype=float)
@@ -37,57 +38,43 @@ if (job_type == "analysis"):
 		if (parameter_value == 0.2):
 			rlist = np.arange(2.5, 10.1, 0.1, dtype=float)
 
-string_layer2 = '""'
+extra_name = '""'
 
 space = " "
 for rcom in rlist:
-	dir_layer1 = "linear-rotors"
+	dir_name = "linear-rotors"
 	original_file_name = module_path + "submission_analysis.py"
 	temp_file_name = "script_submission_analysis.py"
 	support.replace(
 		"name_of_output_directory",
-		dir_layer1,
+		dir_name,
 		original_file_name,
 		temp_file_name)
 
-	#file_name3 = "script_submission_analysis-" + string_layer1 + ".py"
-	#support.replace("extraName", stringName2, fileName2, fileName3)
-	#call(["rm", fileName2])
-#
-#	rcom="{:3.2f}".format(rcom)
-#	field_strength = 20.0 # Unit inverse of Kelvin
-#	exit()
-#
-#	cmd_run = (
-#		"python" + space
-#		+ fileName3 + space
-#		+ "-R" + space
-#		+ str(rcom) + space
-#		+ "-d" + space
-#		+ str(field_strength) + space
-#		+ "-N" + space
-#		+ str(nMolecule) + space
-#		+ "-Block" + space
-#		+ str(nblocks) + space
-#		+ "-Pass" + space
-#		+ str(npass) + space
-#		+ "--ROTMOVE" + space
-#		#+ "--MOVECOM"+space
-#		+ nskip + space
-#		+ "--Type LINEAR" + space
-#		+ "-spin" + space
-#		+ str(SpinIsomer) + space
-#		#+ "-IM"+space+"ATOM"+space+"H2"+space+"1"+space
-#		+ simType + space
-#		+ simType1 + space
-#		+ molecule + space
-#		+ rotor + space
-#		+ str(param) + space
-#		+ variable_name + space
-#		#+ " -C --RESTART"+space
-#		#+ " -NR 20000"+space
-#	)
+	temp_file_name1 = "script_submission_analysis-" + dir_name + ".py"
+	support.replace("extra_name", extra_name, temp_file_name, temp_file_name1)
+	call(["rm", temp_file_name])
 
-	# print(cmd_run)
-	# os.system(cmd_run)
-	#call(["rm", file_name3])
+	rcom="{:3.2f}".format(rcom)
+	field_strength = 20.0 # Unit inverse of Kelvin
+
+	cmd_run = (
+		"python" + space + temp_file_name1 + space
+		+ job_type + space
+		+ method + space
+		+ system + space
+		+ str(parameter_value) + space
+		+ variable_name + space
+		+ "--rotor" + space + rotor +space
+		+ "--rot_move" + space
+		+ "--nmolecule" + space + str(nmolecule) + space
+		+ "--spin_isomer" + space + str(spin_isomer) + space
+		+ "--rpt" + space + str(rcom) + space
+		+ "--dipole_moment" + space + str(field_strength) + space
+		+ "--nblock" + space + str(nblock) + space
+		+ "--npass" + space + str(npass) + space
+	)
+
+	print(cmd_run)
+	os.system(cmd_run)
+	call(["rm", file_name3])
