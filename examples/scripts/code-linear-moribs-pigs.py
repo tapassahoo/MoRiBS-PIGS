@@ -14,10 +14,10 @@ method      = "PIGS"
 
 system      = "HF"
 rotor       = "HF"
-spin_isomer = int(-1)
+spin_isomer = 0
 
+parameter_name  = "beta"
 parameter_value = 0.2
-variable_name   = "tau"
 
 nmolecule   = 1
 nblock      = 20000
@@ -63,8 +63,8 @@ for rcom in rlist:
 		+ job_type + space
 		+ method + space
 		+ system + space
+		+ parameter_name + space
 		+ str(parameter_value) + space
-		+ variable_name + space
 		+ "--rotor" + space + rotor +space
 		+ "--rot_move" + space
 		+ "--nmolecule" + space + str(nmolecule) + space
@@ -77,4 +77,4 @@ for rcom in rlist:
 
 	print(cmd_run)
 	os.system(cmd_run)
-	call(["rm", file_name3])
+	call(["rm", temp_file_name1])

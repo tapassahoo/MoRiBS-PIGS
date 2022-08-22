@@ -233,7 +233,6 @@ if (spin_isomer == 1):
 rotor_name = prefix_name + rotor
 
 mc_step = mc.GetBeadStepLevel(molecular_system, parameter_name, method)
-bead_list = mc_step.beads
 step_com_move = mc_step.step_com
 level_bisection = mc_step.level_com
 step_rot_move = mc_step.step_rot
@@ -246,7 +245,7 @@ user_name = getpass.getuser()
 input_dir = os.getcwd() + "/"
 home = os.path.expanduser("~")
 source_dir = "MoRiBS-PIGS/"
-output_file_dir = "name_of_output_directory/"
+output_file_dir = "linear-rotors/"
 final_results_path = home + "/results-of-" + method + "/"
 temp_dir = os.path.dirname(final_results_path)
 if not os.path.exists(temp_dir):
@@ -425,15 +424,16 @@ for particle_a in particle_a_list:
 			fanalyzeEntropy.write(
 				support.fmtAverageEntropy(
 					status, var_name, ENT_TYPE))
-	'''
 
-	if (method == "ENT"):
-		numb_molecule = 2 * numb_molecule1
+	if method == "ENT":
+		numbmolecules = 2 * numbmolecules1
 	else:
-		numb_molecule = numb_molecule1
+		numbmolecules = numbmolecules1
+
+	list_nb = mc.Getbeads(method, var_name)
 
 	iStep = 0
-	for ib in bead_list:
+	for i in list_nb:
 
 		if (method == "PIMC"):
 
@@ -457,7 +457,7 @@ for particle_a in particle_a_list:
 				else:
 					Restart1 = False
 
-				support.job_submission(
+				support.Submission(
 					server_name,
 					status,
 					translational_move,
@@ -562,7 +562,7 @@ for particle_a in particle_a_list:
 				else:
 					Restart1 = False
 
-				support.job_submission(
+				support.Submission(
 					server_name,
 					status,
 					translational_move,
