@@ -59,16 +59,13 @@ parser.add_argument("system",
 					type=str,
 					help="Name of a molecular system. \
 					E.g., H2, HF, H2O, FCC-H2O, H2O@c60")
-parser.add_argument("parameter", 
-					type=float, 
-					choices=["beta","tau"],
-					help="Fixed value of beta or tau.")
-parser.add_argument("variable", 
-					type=str,
-					choices=["tau", "beta"],
-					help="Name of the variable: beta (for param=tau) \
-					or tau (param=beta). Note: for finite temperature \
-					computations, only the variable tau is needed.")
+parser.add_argument("parameter_name", 
+					type=str, 
+					help="Name of the parameter - either beta or tau.")
+parser.add_argument("parameter_value", 
+					type=float,
+					help="The value associated with the parameter. \
+					The unit is inverse temperature.")
 parser.add_argument("--rotor", 
 					type=str,
 					metavar="NAME",
@@ -178,8 +175,9 @@ parser.add_argument("--crystal",
 					It is in developing condition.")
 args = parser.parse_args()
 
-variable_name = args.variable
-#
+status = args.job
+method = args.method
+parameter_name = args.parameter_name
 tanslational_move = args.com_move
 rotational_move = args.rot_move
 if (args.impurity):
@@ -187,7 +185,8 @@ if (args.impurity):
 else:
 	impurity=[""]
 
-status = args.job
+print(status)
+exit()
 #
 myhost = os.uname()[1]
 myhost = myhost[0:3]
@@ -197,9 +196,8 @@ else:
 	server_name = "nlogn"
 partition_name = args.partition
 #
-method = args.method
 #
-molecule = args.system
+molecular_system = args.system
 rotor = args.rotor
 #
 numb_blocks = args.nblock
@@ -220,30 +218,27 @@ run_cpu="nCPU"
 
 preskip = args.preskip
 postskip = args.postskip
-if args.crystal:
-	crystal = args.crystal
-else:
-	crystal = False
+crystal = args.crystal
 rotor_type = args.rotor_type
 
 ent_method = args.ent_method
 ent_algorithm = args.algorithm
 
-extra_file_name = extraName
+extra_file_name = extra_name
 
 src_dir = os.getcwd()
-if (var_name == "tau"):
-	parameterName = "beta"
-	beta = args.param
+if (variable_name == "tau"):
+	parameter_name = "beta"
+	beta = args.parameter
 	parameter = beta
-	temperature = 1.0 / beta
+	temperature = 1.0/beta
 
-if (var_name == "beta"):
-	parameterName = "tau"
-	tau = args.param
+if (variable_name == "beta"):
+	parameter_name = "tau"
+	tau = args.parameter
 	parameter = tau
 
-spin_isomer = args.SpinIsomer
+spin_isomer = args.spin_isomer
 
 if (spin_isomer == -1):
 	prefix_name = ""
@@ -251,7 +246,10 @@ if (spin_isomer == 0):
 	prefix_name = "-p-"
 if (spin_isomer == 1):
 	prefix_name = "-o-"
-molecule = prefix_name+molecule
+rotor_name = prefix_name+rotor
+
+print(rotor_name)
+exit()
 
 #Monte Carlo step size - Block start
 step_COM = [0.1*i for i in range(20)] 
