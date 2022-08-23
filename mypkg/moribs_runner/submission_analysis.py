@@ -237,6 +237,9 @@ bead_list = mc_step.beads
 step_com_move = mc_step.step_com
 level_bisection = mc_step.level_com
 step_rot_move = mc_step.step_rot
+#
+step_com_impurity = step_com_move
+level_bisection_impurity = level_bisection
 
 numb_block_restart = args.nblock_restart
 
@@ -245,14 +248,14 @@ numb_block_restart = args.nblock_restart
 user_name = getpass.getuser()
 input_dir = os.getcwd() + "/"
 home = os.path.expanduser("~")
-source_dir = "MoRiBS-PIGS/"
+source_code_dir = "MoRiBS-PIGS/"
 output_file_dir = "name_of_output_directory/"
 final_results_path = home + "/results-of-" + method + "/"
 temp_dir = os.path.dirname(final_results_path)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
-source_dir_exe = "/home/" + user_name + "/" + source_dir
+source_dir_exe = "/home/" + user_name + "/" + source_code_dir
 
 if (status == "submission"):
 	if ((dir_run == "scratch") or (server_name == "graham")):
@@ -264,7 +267,7 @@ if (status == "submission"):
 	else:
 		dir_run_job = "/work/" + user_name + "/" + output_file_dir
 
-	execution_file = "/home/" + user_name + "/" + source_dir + "pimc"
+	execution_file = "/home/" + user_name + "/" + source_code_dir + "pimc"
 	if not args.compiled:
 		if not args.restart:
 			support.makeexecutionfile(
@@ -288,7 +291,7 @@ else:
 	particle_a_list = [maxloop]
 
 for particle_a in particle_a_list:
-	working_file_name = support.get_working_file(
+	working_dir_name = support.get_working_file(
 		method,
 		molecular_system,
 		numb_molecule1,
@@ -314,7 +317,7 @@ for particle_a in particle_a_list:
 		numbblocks_rename = args.NR
 		file2_name = support.get_woring_file(
 			method,
-			molecule_rot,
+			rotor,
 			translational_move,
 			rotational_move,
 			rpt_val,
@@ -335,13 +338,13 @@ for particle_a in particle_a_list:
 
 		if (server_name == "graham"):
 			dir_run_input_pimc = "/scratch/" + user_name + \
-				"/" + output_file_dir + working_file_name + "PIMC"
+				"/" + output_file_dir + working_dir_name + "-PIMC"
 			dir_input_pimc_renamed = "/scratch/" + \
-				user_name + "/" + output_file_dir + file2_name + "PIMC"
+				user_name + "/" + output_file_dir + file2_name + "-PIMC"
 		else:
-			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_file_name + "PIMC"
+			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-PIMC"
 			dir_input_pimc_renamed = "/work/" + user_name + \
-				"/" + output_file_dir + file2_name + "PIMC"
+				"/" + output_file_dir + file2_name + "-PIMC"
 
 	'''
 	# ===============================================================================
@@ -353,9 +356,9 @@ for particle_a in particle_a_list:
 	if (status == "submission"):
 		if (server_name == "graham"):
 			dir_run_input_pimc = "/scratch/" + user_name + \
-				"/" + output_file_dir + working_file_name + "PIMC"
+				"/" + output_file_dir + working_dir_name + "-PIMC"
 		else:
-			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_file_name + "PIMC"
+			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-PIMC"
 
 		if not os.path.isdir(dir_run_input_pimc):
 			call(["mkdir", "-p", dir_run_input_pimc])
@@ -378,7 +381,7 @@ for particle_a in particle_a_list:
 		FileAnalysis = support.GetFileNameAnalysis(
 			method,
 			False,
-			molecule_rot,
+			rotor,
 			translational_move,
 			rotational_move,
 			var_name,
@@ -432,71 +435,68 @@ for particle_a in particle_a_list:
 	else:
 		numb_molecule = numb_molecule1
 
-	iStep = 0
-	for ib in bead_list:
+	for index, ibead in enumerate(bead_list, start=0):
 
 		if (method == "PIMC"):
 
-			value = i
-
-			if (var_name == "beta"):
+			if (parameter_name == "tau"):
 				beta = tau * value
 				temperature = 1.0 / beta
 				variable = beta
-			if (var_name == "tau"):
+			if (parameter_name == "beta"):
 				tau = beta / value
 				variable = tau
 
-			numbbeads = value
-			folder_run = working_file_name + str(numbbeads)
+			execution_bead_dir_name = working_dir_name + "-Trotter-Number-" + str(ibead)
+			print(execution_bead_dir_name)
 
-			if status == "submission":
+			'''
+			if (status == "submission"):
 
-				if args.RESTART:
-					Restart1 = True
-				else:
-					Restart1 = False
+				restart_bool = False
+				if args.restart:
+					restart_bool = True
 
 				support.job_submission(
 					server_name,
 					status,
 					translational_move,
 					rotational_move,
-					RUNDIR,
+					dir_run,
 					dir_run_job,
-					folder_run,
-					src_dir,
+					execution_bead_dir_name,
+					input_dir,
 					execution_file,
 					rpt_val,
-					numbbeads,
-					i,
+					bead_list,
+					ibead,
 					step_rot,
 					step_COM,
 					level_bisection,
 					temperature,
-					numbblocks,
-					numbpass,
-					molecule_rot,
-					numbmolecules,
-					gfact,
-					dipolemoment,
+					numb_block,
+					numb_pass,
+					rotor,
+					numb_molecule,
+					gfactor,
+					dipole_moment,
 					method,
-					ENT_TYPE,
-					ENT_ALGR,
-					dir_output,
+					ent_method,
+					ent_algorithm,
+					output_dir_path,
 					dir_run_input_pimc,
 					RUNIN,
-					particleA,
+					particle_a,
 					partition_name,
 					status_cagepot,
-					iStep,
+					index,
 					user_name,
 					output_file_dir,
 					source_dir_exe,
-					Restart1,
+					restart_bool,
 					numbblocks_Restart1,
 					crystal,
-					RotorType,
+					rotor_type,
 					spin_isomer,
 					impurity,
 					step_COM_impurity,
@@ -504,7 +504,7 @@ for particle_a in particle_a_list:
 
 			if (status == "analysis"):
 
-				final_dir_in_work = dir_output + folder_run
+				final_dir_in_work = output_dir_path + execution_bead_dir_name
 				try:
 					fanalyzeEnergy.write(
 						support.GetAverageEnergy(
@@ -527,90 +527,95 @@ for particle_a in particle_a_list:
 							numbblocks))
 				except BaseException:
 					pass
+			'''
 		else:
 
-			if (i % 2) != 0:
-				value = i
+			if (ibead % 2) != 0:
+				numb_bead = ibead
 			else:
-				value = i + 1
+				numb_bead = ibead + 1
 
-			if var_name == "beta":
-				beta = tau * (value - 1)
+			if (parameter_name == "tau"):
+				beta = tau * (numb_bead - 1)
 				temperature = 1.0 / beta
 				variable = beta
-			if var_name == "tau":
-				tau = beta / (value - 1)
+			if (parameter_name == "beta"):
+				beta = parameter_value
+				temperature = 1.0 / beta
+				tau = beta / (numb_bead - 1)
 				variable = tau
 
-			numbbeads = value
-			folder_run = working_file_name + str(numbbeads)
+			execution_bead_dir_name = working_dir_name + "-Trotter-Number-" + str(numb_bead)
+			print(execution_bead_dir_name)
 
+			'''
 			if (status == "rename"):
 				folder_rename = file2_name + str(numbbeads)
 				support.GetRenamingFunc(
 					dir_run_input_pimc,
 					dir_input_pimc_renamed,
-					dir_output,
-					folder_run,
+					output_dir_path,
+					execution_bead_dir_name,
 					folder_rename,
-					src_dir)
+					input_dir)
+			'''
 
 			if (status == "submission"):
 
-				if args.RESTART:
-					Restart1 = True
+				if args.restart:
+					restart_bool = True
 				else:
-					Restart1 = False
+					restart_bool = False
 
 				support.job_submission(
 					server_name,
 					status,
 					translational_move,
 					rotational_move,
-					RUNDIR,
+					dir_run,
 					dir_run_job,
-					folder_run,
-					src_dir,
+					execution_bead_dir_name,
+					input_dir,
 					execution_file,
 					rpt_val,
-					numbbeads,
-					i,
-					step_rot,
-					step_COM,
+					numb_bead,
+					ibead,
+					step_rot_move,
+					step_com_move,
 					level_bisection,
 					temperature,
-					numbblocks,
-					numbpass,
-					molecule_rot,
-					numbmolecules,
-					gfact,
-					dipolemoment,
+					numb_block,
+					numb_pass,
+					rotor,
+					numb_molecule,
+					gfactor,
+					dipole_moment,
 					method,
-					ENT_TYPE,
-					ENT_ALGR,
-					dir_output,
+					ent_method,
+					ent_algorithm,
+					output_dir_path,
 					dir_run_input_pimc,
-					RUNIN,
-					particleA,
+					cpu_run,
+					particle_a,
 					partition_name,
 					status_cagepot,
-					iStep,
 					user_name,
 					output_file_dir,
 					source_dir_exe,
-					Restart1,
-					numbblocks_Restart1,
+					restart_bool,
+					numb_block_restart,
 					crystal,
-					RotorType,
+					rotor_type,
 					spin_isomer,
 					impurity,
-					step_COM_impurity,
+					step_com_impurity,
 					level_bisection_impurity)
 
+			'''
 			if status == "analysis":
 
-				final_dir_in_work = dir_output + folder_run
-				#support.RemoveFiles(method, numbbeads, temperature, molecule_rot, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
+				final_dir_in_work = output_dir_path + execution_bead_dir_name
+				#support.RemoveFiles(method, numbbeads, temperature, rotor, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
 				try:
 					if ((method == "ENT") and (ENT_ALGR == "WOR")):
 						fanalyzeEntropy.write(
@@ -644,7 +649,7 @@ for particle_a in particle_a_list:
 								numbblocks))
 				except BaseException:
 					pass
-		iStep = iStep + 1
+			'''
 
 	if (status == "analysis") and (method != "ENT"):
 		fanalyzeEnergy.close()
@@ -669,13 +674,14 @@ for particle_a in particle_a_list:
 		SavedFile = FileAnalysis.SaveEntropy
 		support.FileCheck(method, list_nb, var_name, SavedFile)
 
+'''
 if ((status == "analysis") and ((method == "ENT") and (
 		ENT_TYPE == "EXTENDED_ENSMBL") and (ENT_ALGR == "WR"))):
 	print("Final Entropy obtained by employing Ratio Trick")
 	support.GetAverageEntropyRT(
 		particleAList,
 		method,
-		molecule_rot,
+		rotor,
 		translational_move,
 		rotational_move,
 		var_name,
@@ -692,13 +698,11 @@ if ((status == "analysis") and ((method == "ENT") and (
 		preskip,
 		postskip,
 		extra_file_name,
-		dir_output,
+		output_dir_path,
 		variable,
 		crystal,
 		final_results_path,
 		impurity,
 		ext_ent)
-	"""
-	support.GetEntropyRT(status, maxloop, method, molecule_rot, translational_move, rotational_move, var_name, rpt_val, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, dir_output, variable, crystal)
-	"""
-	'''
+	support.GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, var_name, rpt_val, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, output_dir_path, variable, crystal)
+'''

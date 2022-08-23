@@ -26,11 +26,11 @@ npass       = 200
 
 
 if (job_type == "submission"):
-	rlist = np.arange(2.5, 10.1, 0.1, dtype=float)
+	rlist = np.arange(2.5, 10.1, 10.1, dtype=float)
 
 if (job_type == "analysis"):
 	if (variable_name == "beta"):
-		rlist = np.arange(3.0, 10.1, 1.0, dtype=float)
+		rlist = np.arange(3.0, 10.1, 11.0, dtype=float)
 
 	if (variable_name == "tau"):
 		if (parameter_value == 0.1):

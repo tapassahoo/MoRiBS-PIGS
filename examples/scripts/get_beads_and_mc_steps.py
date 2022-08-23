@@ -26,8 +26,8 @@ class GetBeadStepLevel:
 					self.level_com = np.array([1 for i in range(100)],dtype=int)
 					self.step_com = np.array([0.3 for i in range(100)],dtype=float)
 					self.step_rot   = np.array([2.0 for i in range(100)],dtype=float)
-				self.beads=np.arange(10,110,10,dtype=int)
 			if (self.parameter == "beta"):
+				self.beads=np.arange(10,110,10,dtype=int)
 				if (self.molecule == "HF"):
 					self.step_com = {10:2.0, 20:2.0, 30:2.0, 40:2.0, 50:1.5, 60:1.5,
 									   70:1.5, 80:1.5, 90:1.0, 100:1.0, 110:1.0, 120:1.0}

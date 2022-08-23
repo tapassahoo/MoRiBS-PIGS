@@ -41,7 +41,7 @@ def maxError_byBining(mean, data, workingNdim):
 	return np.max(error)
 
 
-def makeexecutionfile(src_dir, method, ENT_TYPE, source_dir_exe):
+def makeexecutionfile(input_dir, method, ent_method, source_dir_exe):
 	execution_file_dir = source_dir_exe
 	os.chdir(execution_file_dir)
 	call(["make", "-f", "Makefile-GNU", "clean"])
@@ -51,7 +51,7 @@ def makeexecutionfile(src_dir, method, ENT_TYPE, source_dir_exe):
 	print("The compilation is successful.")
 	print("")
 	print("")
-	os.chdir(src_dir)
+	os.chdir(input_dir)
 
 
 def compile_rotmat(source_dir_exe, input_dir):
@@ -86,13 +86,13 @@ def levels(number):
 		jj = pow(2, j)
 
 		if jj <= (number - 1):
-			level = j
+			level_bisection = j
 		else:
 			break
-	return level
+	return level_bisection
 
 
-def GetBconst(molecule_rot):
+def GetBconst(rotor):
 	'''
 	This function calculates rotational Bconstant for linear rotor
 	'''
@@ -102,13 +102,13 @@ def GetBconst(molecule_rot):
 		energyj1	   = -35999.1009407
 		bconst		 = 0.5*(energyj1-energyj0)	 # in cm^-1
 		'''
-	if (molecule_rot == "HF"):
+	if (rotor == "HF"):
 		# bconst	= 20.9561					 # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
 		# bconst	= 20.9661					 # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
 		# in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12,
 		# page 1464, year 1967
 		bconst = 20.561
-	if (molecule_rot == "H2"):
+	if (rotor == "H2"):
 		bconst = 60.853
 	return bconst
 
@@ -129,14 +129,14 @@ def beads(tau, beta):
 	'''
 	This function determins number of beads
 	'''
-	numbbeads1 = beta / tau + 1
-	numbbeads2 = int(round(numbbeads1, 0))
-	if (numbbeads2 % 2 == 0):
-		numbbeads2 = numbbeads2 + 1
-	return numbbeads2
+	numb_bead1 = beta / tau + 1
+	numb_bead2 = int(round(numb_bead1, 0))
+	if (numb_bead2 % 2 == 0):
+		numb_bead2 = numb_bead2 + 1
+	return numb_bead2
 
 
-def file_operations(method, final_dir_in_work, numbmolecules, numbbeads):
+def file_operations(method, final_dir_in_work, numb_molecule, numb_bead):
 
 	if (method == "ENT"):
 		fileList = ["output.rden", "output.xyz"]
@@ -180,7 +180,7 @@ def file_operations(method, final_dir_in_work, numbmolecules, numbbeads):
 				if (filecat == "output.xyz"):
 					if "H2O1" in open(
 							final_dir_in_work + "/results/" + filecat).read():
-						rmstr = int(numbmolecules * numbbeads + 3)
+						rmstr = int(numb_molecule * numb_bead + 3)
 						file_temp = final_dir_in_work + "/results/" + filecat + "_temp"
 						cmd1 = "tail -n +" + \
 							str(rmstr) + " " + final_dir_in_work + \
@@ -278,12 +278,12 @@ def fmtAverageEnergy(method, status, variable):
 
 def GetAverageEnergy(
 		method,
-		numbbeads,
+		numb_bead,
 		variable,
 		final_dir_in_work,
 		preskip,
 		postskip,
-		numbblocks):
+		numb_block):
 	'''
 	This function gives us the output
 	'''
@@ -346,7 +346,7 @@ def GetAverageEnergy(
 		col_Cv2 = final_data_set[:, 6]
 
 		ncol_block = len(col_block)
-		if (int(len(col_block)) != numbblocks - (preskip + postskip)):
+		if (int(len(col_block)) != numb_block - (preskip + postskip)):
 			print(len(col_block))
 			print(final_dir_in_work)
 
@@ -366,7 +366,7 @@ def GetAverageEnergy(
 		mean_rotsq = np.mean(col_rotsq)
 		mean_Cv1 = np.mean(col_Cv1)
 		mean_Cv2 = np.mean(col_Cv2)
-		mcbeta = variable * numbbeads
+		mcbeta = variable * numb_bead
 		mean_Cv = mcbeta * mcbeta * (mean_Cv1 - mean_Cv2 - mean_tot * mean_tot)
 
 		error_rot = maxError_byBining(mean_rot, col_rot, workingNdim - 6)
@@ -380,7 +380,7 @@ def GetAverageEnergy(
 					   4.0 * mean_tot * mean_tot * error_tot * error_tot))
 
 		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{rotsq:^16.6f}{Cv:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}'.format(
-			blocks=ncol_block, beads=numbbeads, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv)
+			blocks=ncol_block, beads=numb_bead, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv)
 		output += "\n"
 
 	if (method == "PIGS"):
@@ -389,7 +389,7 @@ def GetAverageEnergy(
 		col_tot = final_data_set[:, 2]
 
 		ncol_block = len(col_block)
-		if (int(len(col_block)) != numbblocks - (preskip + postskip)):
+		if (int(len(col_block)) != numb_block - (preskip + postskip)):
 			print(len(col_block))
 			print(final_dir_in_work)
 
@@ -406,7 +406,7 @@ def GetAverageEnergy(
 		error_tot = maxError_byBining(mean_tot, col_tot, workingNdim - 6)
 
 		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}'.format(
-			blocks=ncol_block, beads=numbbeads, var=variable, pot=mean_pot, tot=mean_tot, er1=error_pot, er2=error_tot)
+			blocks=ncol_block, beads=numb_bead, var=variable, pot=mean_pot, tot=mean_tot, er1=error_pot, er2=error_tot)
 		output += "\n"
 
 	return output
@@ -440,13 +440,13 @@ def fmtAverageOrderParam(status, variable):
 
 def GetAverageOrderParam(
 		method,
-		numbmolecules,
-		numbbeads,
+		numb_molecule,
+		numb_bead,
 		variable,
 		final_dir_in_work,
 		preskip,
 		postskip,
-		numbblocks):
+		numb_block):
 	'''
 	See PRL 118, 027402 (2017)
 	'''
@@ -454,10 +454,10 @@ def GetAverageOrderParam(
 		axis_index = {"cost": 0, "phi": 1, "chi": 2}
 		axis_read = "cost"
 		ndofs = 3
-		beads_pos = int((numbbeads - 1) / 2)
+		beads_pos = int((numb_bead - 1) / 2)
 		collist = [0]
-		for i in range(numbmolecules):
-			ncol1 = beads_pos + i * numbbeads
+		for i in range(numb_molecule):
+			ncol1 = beads_pos + i * numb_bead
 			ncol = axis_index[axis_read] + ncol1 * ndofs
 			ncol = ncol + 1
 			collist.append(ncol)
@@ -472,7 +472,7 @@ def GetAverageOrderParam(
 					print(final_dir_in_work + " -- Restarted data")
 					if "H2O1" in open(file_new).read():
 						file_temp = final_dir_in_work + "/results/output_temp.xyz"
-						rmstr = int(numbmolecules * numbbeads + 3)
+						rmstr = int(numb_molecule * numb_bead + 3)
 						cmd1 = "tail -n +" + str(rmstr) + \
 							" " + file_new + ">" + file_temp
 						os.system(cmd1)
@@ -499,7 +499,7 @@ def GetAverageOrderParam(
 					skip_footer=postskip)
 
 	ncol_block = len(final_data_set[:, 0])
-	if (int(ncol_block) != numbblocks - (preskip + postskip)):
+	if (int(ncol_block) != numb_block - (preskip + postskip)):
 		print(ncol_block)
 		print(final_dir_in_work)
 
@@ -507,20 +507,20 @@ def GetAverageOrderParam(
 	trunc = int(ncol_block - 2**workingNdim)
 	raw_data = np.delete(final_data_set, 0, 1)
 
-	if (numbmolecules == 2):
+	if (numb_molecule == 2):
 		raw_data1 = np.absolute(raw_data)
-		eiz = np.sum(raw_data1[trunc:, :], axis=1) / numbmolecules
-	if (numbmolecules == 11):
+		eiz = np.sum(raw_data1[trunc:, :], axis=1) / numb_molecule
+	if (numb_molecule == 11):
 		raw_data1 = np.absolute(raw_data)
-		eiz = np.sum(raw_data1[trunc:, 2:numbmolecules - 3],
-					 axis=1) / len([i for i in range(2, numbmolecules - 2)])
+		eiz = np.sum(raw_data1[trunc:, 2:numb_molecule - 3],
+					 axis=1) / len([i for i in range(2, numb_molecule - 2)])
 	mean_eiz = np.mean(eiz)
 	error_eiz = maxError_byBining(mean_eiz, eiz, workingNdim - 6)
 
-	if (numbmolecules == 2):
-		paireiej = [i for i in range(numbmolecules - 1)]
-	if (numbmolecules == 11):
-		paireiej = [i for i in range(2, numbmolecules - 3)]
+	if (numb_molecule == 2):
+		paireiej = [i for i in range(numb_molecule - 1)]
+	if (numb_molecule == 11):
+		paireiej = [i for i in range(2, numb_molecule - 3)]
 	norm_eiejz = len(paireiej)
 	eiejz = np.zeros(ncol_block - trunc, dtype=float)
 	for i in paireiej:
@@ -530,13 +530,13 @@ def GetAverageOrderParam(
 	error_eiejz = maxError_byBining(mean_eiejz, eiejz, workingNdim - 6)
 
 	output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
-		blocks=ncol_block, beads=numbbeads, var=variable, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
+		blocks=ncol_block, beads=numb_bead, var=variable, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
 	output += "\n"
 	return output
 
 
 '''
-def GetAverageOrderParam(method,numbmolecules,numbbeads,variable,final_dir_in_work,preskip,postskip,numbblocks):
+def GetAverageOrderParam(method,numb_molecule,numb_bead,variable,final_dir_in_work,preskip,postskip,numb_block):
 		#See PRL 118, 027402 (2017)
 		if (os.path.isdir(final_dir_in_work)):
 				condition = True
@@ -592,9 +592,9 @@ def GetAverageOrderParam(method,numbmolecules,numbbeads,variable,final_dir_in_wo
 		axis_index = {"cost":0, "phi":1, "chi":2}
 		axis_read = "cost"
 		ndofs = 3
-		beads_pos = int((numbbeads-1)/2)
-		for i in range(numbmolecules):
-				ncol1 = beads_pos+i*numbbeads
+		beads_pos = int((numb_bead-1)/2)
+		for i in range(numb_molecule):
+				ncol1 = beads_pos+i*numb_bead
 				ncol = axis_index[axis_read]+ncol1*ndofs
 				ncol = ncol+1
 				#print(str(ncol)+'th column')
@@ -610,7 +610,7 @@ def GetAverageOrderParam(method,numbmolecules,numbbeads,variable,final_dir_in_wo
 		col_eiz   = final_data_set[:,7]
 
 		ncol_block = len(col_block)
-		if (int(len(col_block)) != numbblocks-(preskip+postskip)):
+		if (int(len(col_block)) != numb_block-(preskip+postskip)):
 				print(len(col_block))
 				print(final_dir_in_work)
 
@@ -644,29 +644,29 @@ def GetAverageOrderParam(method,numbmolecules,numbbeads,variable,final_dir_in_wo
 		error_eiy = maxError_byBining(mean_eiy, col_eiy, workingNdim-6)
 		error_eiz = maxError_byBining(mean_eiz, col_eiz, workingNdim-6)
 
-		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numbbeads, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
+		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numb_bead, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
 		output  += "\n"
 		return output
 '''
 
 
 def GetAverageEntropy(
-		numbbeads,
+		numb_bead,
 		variable,
 		final_dir_in_work,
 		preskip,
 		postskip,
-		numbblocks,
-		ENT_TYPE):
+		numb_block,
+		ent_method):
 	'''
 	This function gives us the output
 	'''
-	if (ENT_TYPE == "EXTENDED_ENSMBL"):
+	if (ent_method == "EXTENDED_ENSMBL"):
 		col_block, col_nm, col_dm = genfromtxt(
 			final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 				0, 1, 2], skip_header=preskip, skip_footer=postskip)
 		ncol_block = len(col_block)
-		if (int(len(col_block)) != numbblocks - (preskip + postskip)):
+		if (int(len(col_block)) != numb_block - (preskip + postskip)):
 			print(len(col_block))
 			print(final_dir_in_work)
 
@@ -688,10 +688,10 @@ def GetAverageEntropy(
 						(error_nm / mean_nm) * (error_nm / mean_nm))
 
 		output = '{blocks:^8d}{beads:^10d}{var:^10.6f}{nm:^12.6f}{dm:^12.6f}{pur:^12.6f}{ent:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}'.format(
-			blocks=ncol_block, beads=numbbeads, var=variable, nm=mean_nm, dm=mean_dm, pur=purity, ent=mean_EN, er1=error_nm, er2=error_dm, er3=error_purity, er4=error_EN)
+			blocks=ncol_block, beads=numb_bead, var=variable, nm=mean_nm, dm=mean_dm, pur=purity, ent=mean_EN, er1=error_nm, er2=error_dm, er3=error_purity, er4=error_EN)
 		output += "\n"
 
-	if (ENT_TYPE == 'BROKENPATH'):
+	if (ent_method == 'BROKENPATH'):
 		col_block, col_nm, col_dm = genfromtxt(
 			final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 				0, 1, 2], skip_header=preskip, skip_footer=postskip)
@@ -710,10 +710,10 @@ def GetAverageEntropy(
 						(error_nm / mean_nm) * (error_nm / mean_nm))
 
 		output = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}'.format(
-			numbbeads, variable, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
+			numb_bead, variable, mean_nm, mean_dm, mean_EN, error_nm, error_dm, error_EN)
 		output += "\n"
 
-	if (ENT_TYPE == "SWAP"):
+	if (ent_method == "SWAP"):
 		col_block, col_nm, col_dm, col_TrInv = genfromtxt(
 			final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 				0, 1, 2, 3], skip_header=preskip, skip_footer=postskip)
@@ -736,10 +736,10 @@ def GetAverageEntropy(
 		error_EN = abs(1.0 / mean_TrInv) * error_TrInv
 
 		output = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(
-			numbbeads, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
+			numb_bead, variable, mean_nm, mean_dm, purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
 		output += "\n"
 
-	if (ENT_TYPE == "UNSWAP"):
+	if (ent_method == "UNSWAP"):
 		col_block, col_nm, col_dm, col_Tr = genfromtxt(
 			final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 				0, 1, 2, 3], skip_header=preskip, skip_footer=postskip)
@@ -760,13 +760,13 @@ def GetAverageEntropy(
 		error_EN = abs(1.0 / mean_TrInv) * error_TrInv
 
 		output = '{0:10d}{1:20.5f}{2:20.5f}{3:20.5f}{4:20.5f}{5:20.5f}{6:20.5f}{7:20.5f}{8:20.5f}{9:20.5f}'.format(
-			numbbeads, variable, mean_nm, mean_dm, mean_purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
+			numb_bead, variable, mean_nm, mean_dm, mean_purity, mean_EN, error_nm, error_dm, error_purity, error_EN)
 		output += "\n"
 
 	return output
 
 
-def fmtAverageEntropy(status, variable, ENT_TYPE):
+def fmtAverageEntropy(status, variable, ent_method):
 	'''
 	This function gives us the output
 	'''
@@ -777,7 +777,7 @@ def fmtAverageEntropy(status, variable, ENT_TYPE):
 
 	if status == "analysis":
 		output = "#"
-		if (ENT_TYPE == "EXTENDED_ENSMBL"):
+		if (ent_method == "EXTENDED_ENSMBL"):
 			output += '{blocks:^8}{beads:^10}{var:^10}{nm:^12}{dm:^12}{pur:^12}{ent:^12}{er1:^12}{er2:^12}{er3:^12}{er4:^12}'.format(
 				blocks='nBlocks',
 				beads='nBeads',
@@ -791,7 +791,7 @@ def fmtAverageEntropy(status, variable, ENT_TYPE):
 				er2='Err-Dm',
 				er3='Err-Purity',
 				er4='Err-S2')
-		if (ENT_TYPE == "BROKENPATH"):
+		if (ent_method == "BROKENPATH"):
 			output += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}'.format(
 				'Beads',
 				variable +
@@ -802,7 +802,7 @@ def fmtAverageEntropy(status, variable, ENT_TYPE):
 				'Error of Nm',
 				'Error of Dm',
 				'Error of Entropy')
-		if (ENT_TYPE == "SWAP"):
+		if (ent_method == "SWAP"):
 			output += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format(
 				'Beads',
 				variable +
@@ -815,7 +815,7 @@ def fmtAverageEntropy(status, variable, ENT_TYPE):
 				'Error of Dm',
 				'Error of Purity',
 				'Error of Entropy')
-		if (ENT_TYPE == "REGULARPATH"):
+		if (ent_method == "REGULARPATH"):
 			output += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format(
 				'Beads',
 				variable +
@@ -837,24 +837,24 @@ def fmtAverageEntropy(status, variable, ENT_TYPE):
 def GetAverageEntropyRT(
 		particleAList,
 		method,
-		molecule_rot,
-		TransMove,
-		RotMove,
+		rotor,
+		translational_move,
+		rotational_move,
 		variableName,
 		rpt_val,
-		gfact,
-		dipolemoment,
+		gfactor,
+		dipole_moment,
 		parameter_name,
 		parameter,
-		numbblocks,
-		numbpass,
+		numb_block,
+		numb_pass,
 		numbmolecules1,
 		molecule,
-		ENT_TYPE,
+		ent_method,
 		preskip,
 		postskip,
 		extra_file_name,
-		dir_output,
+		output_dir_path,
 		variable,
 		crystal,
 		final_results_path,
@@ -887,7 +887,7 @@ def GetAverageEntropyRT(
 			tau = parameter / (value - 1)
 			variable = tau
 
-		numbbeads = value
+		numb_bead = value
 
 		col_purity = np.zeros(len(particleAList), dtype='f')
 		col_err_purity = np.zeros(len(particleAList), dtype='f')
@@ -897,26 +897,26 @@ def GetAverageEntropyRT(
 		for partition in particleAList:
 			final_file_name = get_working_file(
 				method,
-				molecule_rot,
-				TransMove,
-				RotMove,
+				rotor,
+				translational_move,
+				rotational_move,
 				rpt_val,
-				gfact,
-				dipolemoment,
+				gfactor,
+				dipole_moment,
 				parameter_name,
 				parameter,
-				numbblocks,
-				numbpass,
+				numb_block,
+				numb_pass,
 				numbmolecules1,
 				molecule,
-				ENT_TYPE,
+				ent_method,
 				partition,
 				extra_file_name,
 				crystal,
 				impurity,
 				ext_ent)
-			folder_run = final_file_name + str(numbbeads)
-			final_dir_in_work = dir_output + folder_run
+			execution_bead_dir_name = final_file_name + str(numb_bead)
+			final_dir_in_work = output_dir_path + execution_bead_dir_name
 			if os.path.isdir(final_dir_in_work):
 				condition = True
 
@@ -968,9 +968,9 @@ def GetAverageEntropyRT(
 					col_block, col_nm, col_dm = genfromtxt(
 						final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 							0, 1, 2], skip_header=preskip, skip_footer=postskip)
-				if (int(len(col_block)) != numbblocks - (preskip + postskip)):
+				if (int(len(col_block)) != numb_block - (preskip + postskip)):
 					print(len(col_block))
-					print(folder_run)
+					print(execution_bead_dir_name)
 
 				workingNdim = int(math.log(len(col_nm)) / math.log(2))
 				trunc = int(len(col_nm) - 2**workingNdim)
@@ -1003,7 +1003,7 @@ def GetAverageEntropyRT(
 
 			purity_combo[ii] = purity
 			entropy_combo[ii] = entropy
-			col_beads[ii] = numbbeads
+			col_beads[ii] = numb_bead
 			col_var[ii] = variable
 			err_purity_combo[ii] = err_purity
 			err_entropy_combo[ii] = err_entropy
@@ -1013,20 +1013,20 @@ def GetAverageEntropyRT(
 	FileAnalysis = GetFileNameAnalysis(
 		method,
 		True,
-		molecule_rot,
-		TransMove,
-		RotMove,
+		rotor,
+		translational_move,
+		rotational_move,
 		variableName,
 		rpt_val,
-		gfact,
-		dipolemoment,
+		gfactor,
+		dipole_moment,
 		parameter_name,
 		parameter,
-		numbblocks,
-		numbpass,
+		numb_block,
+		numb_pass,
 		numbmolecules1,
 		molecule,
-		ENT_TYPE,
+		ent_method,
 		preskip,
 		postskip,
 		extra_file_name,
@@ -1063,29 +1063,29 @@ def fmtAverageEntropyRT(variable):
 	return output
 
 
-def GetInput(
+def get_input_file(
 		method,
-		ENT_TYPE,
-		ENT_ALGR,
+		ent_method,
+		ent_algorithm,
 		temperature,
-		numbbeads,
-		numbblocks,
-		numbpass,
-		molecule_rot,
-		numbmolecules,
+		numb_bead,
+		numb_block,
+		numb_pass,
+		rotor,
+		numb_molecule,
 		distance,
-		level,
-		step,
-		step_trans,
-		gfact,
-		dipolemoment,
-		particleA,
-		Restart1,
-		numbblocks_Restart1,
+		level_bisection,
+		step_rot_move,
+		step_com_move,
+		gfactor,
+		dipole_moment,
+		particle_a,
+		restart_bool,
+		numb_block_restart,
 		crystal,
-		RotorType,
-		TransMove,
-		RotMove,
+		rotor_type,
+		translational_move,
+		rotational_move,
 		path_Density,
 		impurity,
 		step_trans1,
@@ -1093,60 +1093,60 @@ def GetInput(
 	'''
 	This function modifies parameters in qmc_run.input
 	'''
-	src_dir = os.getcwd() + "/"
+	input_dir = os.getcwd() + "/"
 
 	replace("temperature_input", str(temperature),
 			"qmc_run.input", "qmc2.input")
-	replace("numbbeads_input", str(numbbeads), "qmc2.input", "qmc3.input")
+	replace("numb_bead_input", str(numb_bead), "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
-	if (molecule_rot == "CH3F"):
+	if (rotor == "CH3F"):
 		replace("potread_input", "pesch3fph2-180", "qmc2.input", "qmc3.input")
-	elif (molecule_rot == "H2O"):
+	elif (rotor == "H2O"):
 		replace("potread", "nopot", "qmc2.input", "qmc3.input")
-	elif (molecule_rot == "HF"):
+	elif (rotor == "HF"):
 		replace("potread_input", "nopot", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("PathToPot", src_dir, "qmc2.input", "qmc3.input")
+	replace("PathToPot", input_dir, "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
 	replace("sim_input", method + "_SIM", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("sim_ensmbl_input", ENT_TYPE, "qmc2.input", "qmc3.input")
+	replace("sim_ensmbl_input", ent_method, "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if (ENT_ALGR == "WR"):
+	if (ent_algorithm == "WR"):
 		replace("sim_algr_input", "RATIOTRICK", "qmc2.input", "qmc3.input")
-	elif (ENT_ALGR == "WOR"):
+	elif (ent_algorithm == "WOR"):
 		replace("sim_algr_input", "NORATIOTRICK", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if TransMove:
+	if translational_move:
 		replace("#TRANSLATION", "TRANSLATION", "qmc2.input", "qmc3.input")
 	else:
 		replace("#TRANSLATION", "#TRANSLATION", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if RotMove:
+	if rotational_move:
 		replace("cal_type_input", "ROTATION", "qmc2.input", "qmc3.input")
 	else:
 		replace("cal_type_input", "#ROTATION", "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if RotMove:
+	if rotational_move:
 		replace("den_path_input", path_Density, "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if Restart1:
-		replace("numbblocks_input", str(numbblocks_Restart1),
+	if restart_bool:
+		replace("numbblocks_input", str(numb_block_restart),
 				"qmc2.input", "qmc3.input")
 	else:
-		replace("numbblocks_input", str(numbblocks),
+		replace("numbblocks_input", str(numb_block),
 				"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("numbmolecules_input", str(numbmolecules),
+	replace("numbmolecules_input", str(numb_molecule),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
@@ -1164,65 +1164,65 @@ def GetInput(
 				"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("type_input", RotorType,
+	replace("type_input", rotor_type,
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("molecule_input", str(molecule_rot),
+	replace("molecule_input", str(rotor),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("level_input", str(level),
+	replace("level_input", str(level_bisection),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("dstep_input", str(step),
+	replace("dstep_input", str(step_rot_move),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("dstep_tr_input", str(step_trans),
+	replace("dstep_tr_input", str(step_com_move),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if ((dipolemoment < 0.0) and (gfact < 0.0)):
+	if ((dipole_moment < 0.0) and (gfactor < 0.0)):
 		replace("dipolemomentArg_input", "",
 				"qmc2.input", "qmc3.input")
 		call(["mv", "qmc3.input", "qmc2.input"])
 		replace("dipolemoment_input", "",
 				"qmc2.input", "qmc3.input")
 	else:
-		if (dipolemoment >= 0.0):
-			replace("dipolemomentArg_input", "DIPOLEMOMENT",
+		if (dipole_moment >= 0.0):
+			replace("dipolemomentArg_input", "dipole_moment",
 					"qmc2.input", "qmc3.input")
 			call(["mv", "qmc3.input", "qmc2.input"])
 			replace("dipolemoment_input", str(
-				dipolemoment), "qmc2.input", "qmc3.input")
+				dipole_moment), "qmc2.input", "qmc3.input")
 
-		if (gfact >= 0.0):
-			replace("dipolemomentArg_input", "DIPOLEMOMENT",
+		if (gfactor >= 0.0):
+			replace("dipolemomentArg_input", "dipole_moment",
 					"qmc2.input", "qmc3.input")
 			call(["mv", "qmc3.input", "qmc2.input"])
-			dipolemoment = GetDipoleMomentFromGFactor(
-				molecule_rot, distance, gfact)
+			dipole_moment = GetDipoleMomentFromGFactor(
+				rotor, distance, gfactor)
 			replace("dipolemoment_input", str(
-				dipolemoment), "qmc2.input", "qmc3.input")
+				dipole_moment), "qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("numbpass_input", str(numbpass),
+	replace("numbpass_input", str(numb_pass),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	mcskip = numbbeads * numbpass
+	mcskip = numb_bead * numb_pass
 	replace("mskip_input", str(mcskip),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	mcskip_avg = numbbeads * numbpass
+	mcskip_avg = numb_bead * numb_pass
 	replace("mskip_avg_input", str(mcskip_avg),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	replace("numbparticle_input", str(particleA),
+	replace("numbparticle_input", str(particle_a),
 			"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
@@ -1234,7 +1234,7 @@ def GetInput(
 				"qmc2.input", "qmc3.input")
 	call(["mv", "qmc3.input", "qmc2.input"])
 
-	if Restart1:
+	if restart_bool:
 		replace("job_input", "RESTART",
 				"qmc2.input", "qmc3.input")
 	else:
@@ -1269,29 +1269,29 @@ def GetInput(
 	call(["mv", "qmc2.input", "qmc.input"])
 
 
-def rotmat(method, molecule, temperature, numbbeads, source_dir_exe):
+def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
 	'''
 	This function generates rotational density matrix - linden.dat
 	'''
 	#temperature1	= dropzeros(temperature)
 	temperature1 = "%8.6f" % temperature
 	if (method == 'PIMC'):
-		numbbeads1 = numbbeads
+		numb_bead1 = numb_bead
 	else:
-		numbbeads1 = numbbeads - 1
+		numb_bead1 = numb_bead - 1
 	command_linden_run = source_dir_exe + "linear_prop/linden.x " + \
-		str(temperature) + " " + str(numbbeads1) + " " + \
+		str(temperature) + " " + str(numb_bead1) + " " + \
 		str(GetBconst(molecule)) + " 150000 -1"
 	system(command_linden_run)
 	file_rotdens = molecule + "_T" + \
-		str(temperature1) + "t" + str(numbbeads) + ".rot"
+		str(temperature1) + "t" + str(numb_bead) + ".rot"
 	call(["mv", "linden.out", file_rotdens])
 
 
 def GetTwoBodyDensity(
 		rpt_val,
-		DipoleMoment,
-		numbbeads,
+		dipole_moment,
+		numb_bead,
 		lmax,
 		ltotalmax,
 		tau,
@@ -1306,7 +1306,7 @@ def GetTwoBodyDensity(
 	BConstant = GetBconst(molecule)  # in wavenumber
 	BConstantK = BConstant * Units.CMRECIP2KL
 	##########################################################################
-	RFactorList = GetrAndgFactor(molecule, rpt_val, DipoleMoment)
+	RFactorList = GetrAndgFactor(molecule, rpt_val, dipole_moment)
 	RFactor = RFactorList[0]
 	tau = tau * BConstantK
 	if ltotalmax == 0:
@@ -1336,7 +1336,7 @@ def jobstring_scratch(
 		run_dir,
 		molecule,
 		temperature,
-		numbbeads,
+		numb_bead,
 		final_dir,
 		dir_run_input_pimc,
 		status_cagepot):
@@ -1381,121 +1381,120 @@ mv %s /work/tapas/linear_rotors
 
 
 def job_submission(
-		NameOfServer,
+		server_name,
 		status,
-		TransMove,
-		RotMove,
-		RUNDIR,
+		translational_move,
+		rotational_move,
+		dir_run,
 		dir_run_job,
-		folder_run,
-		src_dir,
+		execution_bead_dir_name,
+		input_dir,
 		execution_file,
 		rpt_val,
-		numbbeads,
-		i,
-		step,
-		step_trans,
-		level,
+		numb_bead,
+		ibead,
+		step_rot_move,
+		step_com_move,
+		level_bisection,
 		temperature,
-		numbblocks,
-		numbpass,
-		molecule_rot,
-		numbmolecules,
-		gfact,
-		dipolemoment,
+		numb_block,
+		numb_pass,
+		rotor,
+		numb_molecule,
+		gfactor,
+		dipole_moment,
 		method,
-		ENT_TYPE,
-		ENT_ALGR,
-		dir_output,
+		ent_method,
+		ent_algorithm,
+		output_dir_path,
 		dir_run_input_pimc,
-		RUNIN,
-		particleA,
-		NameOfPartition,
+		cpu_run,
+		particle_a,
+		partition_name,
 		status_cagepot,
-		iStep,
-		PPA1,
 		user_name,
-		out_dir,
+		output_file_dir,
 		source_dir_exe,
-		Restart1,
-		numbblocks_Restart1,
+		restart_bool,
+		numb_block_restart,
 		crystal,
-		RotorType,
+		rotor_type,
 		spin_isomer,
 		impurity,
-		step_trans_impurity,
+		step_com_impurity,
 		level_impurity):
-	argument1 = rpt_val
-	step1_trans = step_trans[iStep]
-	level1 = level[iStep]
-	step1 = step[iStep]
-	step_trans_impurity1 = step_trans_impurity[iStep]
-	level_impurity1 = level_impurity[iStep]
-	final_dir_in_work = dir_output + folder_run
+	arg1 = rpt_val
+	step1_trans = step_com_move[ibead]
+	level1 = level_bisection[ibead]
+	step1 = step_rot_move[ibead]
+	step_com_impurity1 = step_com_impurity[ibead]
+	level_impurity1 = level_impurity[ibead]
+	final_dir_in_work = output_dir_path + execution_bead_dir_name
 
 	if (method == 'PIGS'):
-		argument2 = "pgR" + str(rpt_val) + 'n' + str(numbmolecules) + "b"
+		job_name_temp = "pgR" + str(rpt_val) + 'n' + str(numb_molecule) + "b"
 	if (method == 'PIMC'):
-		argument2 = "pm" + str(numbmolecules) + "b"
+		job_name_temp = "pm" + str(numb_molecule) + "b"
 	if (method == 'ENT'):
-		argument2 = "et" + str(numbmolecules) + "a" + str(particleA) + "b"
-	job_name = argument2 + str(i) + ".out"
+		job_name_temp = "et" + str(numb_molecule) + "a" + str(particle_a) + "b"
+	job_name = job_name_temp + str(numb_bead) + ".log"
 
-	if not Restart1:
-		os.chdir(dir_output)
-		if (os.path.isdir(folder_run)):
+	if not restart_bool:
+		os.chdir(output_dir_path)
+		if (os.path.isdir(execution_bead_dir_name)):
 			print("")
 			print("")
 			print("Error message")
 			print("")
 			print("")
-			printingMessage = "Remove " + str(dir_output) + str(folder_run)
+			printingMessage = "Remove " + str(output_dir_path) + str(execution_bead_dir_name)
 			print(printingMessage)
-			os.chdir(src_dir)
+			os.chdir(input_dir)
 			return
 
-		os.chdir(src_dir)
-		if (RotorType == "LINEAR"):
-			rotmat(method, molecule_rot, temperature,
-				   numbbeads, source_dir_exe)
+		os.chdir(input_dir)
 
-			#call(["rm", "-rf", folder_run])
+		if (rotor_type == "LINEAR"):
+			get_rotmat(method, rotor, temperature,
+				   numb_bead, source_dir_exe)
+
+			#call(["rm", "-rf", execution_bead_dir_name])
 
 		temperature1 = "%8.6f" % temperature
-		if (RotorType == "LINEAR"):
-			file_rotdens = molecule_rot + "_T" + \
-				str(temperature1) + "t" + str(numbbeads) + ".rot"
+		if (rotor_type == "LINEAR"):
+			file_rotdens = rotor + "_T" + \
+				str(temperature1) + "t" + str(numb_bead) + ".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
 			path_Density = dir_run_input_pimc + "/"
 		else:
 			iodevn = spin_isomer
 			jmax = 70
 			if (method == 'PIMC'):
-				numbbeads2 = int(numbbeads)
+				numb_bead2 = int(numb_bead)
 			else:
-				numbbeads2 = int(numbbeads - 1)
-			if (molecule_rot == "H2O"):
-				if (NameOfServer == "graham"):
+				numb_bead2 = int(numb_bead - 1)
+			if (rotor == "H2O"):
+				if (server_name == "graham"):
 					dir_dens = "/scratch/" + user_name + "/rot-dens-asymmetric-top/" + \
 						asym.GetDirNameSubmission(
-							molecule_rot, temperature1, numbbeads2, iodevn, jmax)
-				if (NameOfServer == "nlogn"):
+							rotor, temperature1, numb_bead2, iodevn, jmax)
+				if (server_name == "nlogn"):
 					dir_dens = "/work/" + user_name + "/rot-dens-asymmetric-top/" + \
 						asym.GetDirNameSubmission(
-							molecule_rot, temperature1, numbbeads2, iodevn, jmax)
-			if (molecule_rot == "CH3F"):
-				if (NameOfServer == "nlogn"):
+							rotor, temperature1, numb_bead2, iodevn, jmax)
+			if (rotor == "CH3F"):
+				if (server_name == "nlogn"):
 					dir_dens = "/work/" + user_name + "/rot-dens-symmetric-top/" + \
 						sym.GetDirNameSubmission(
-							molecule_rot, temperature1, numbbeads2, 3, jmax)
-				if (NameOfServer == "graham"):
+							rotor, temperature1, numb_bead2, 3, jmax)
+				if (server_name == "graham"):
 					dir_dens = "/scratch/" + user_name + "/rot-dens-symmetric-top/" + \
 						sym.GetDirNameSubmission(
-							molecule_rot, temperature1, numbbeads2, 3, jmax)
-			file_rotdens = "/" + molecule_rot + "_T" + \
-				str(dropzeros(temperature1)) + "t" + str(numbbeads2)
-			file_rotdens_mod = "/" + molecule_rot + "_T" + \
-				str(temperature1) + "t" + str(numbbeads)
+							rotor, temperature1, numb_bead2, 3, jmax)
+			file_rotdens = "/" + rotor + "_T" + \
+				str(dropzeros(temperature1)) + "t" + str(numb_bead2)
+			file_rotdens_mod = "/" + rotor + "_T" + \
+				str(temperature1) + "t" + str(numb_bead)
 			if (os.path.isfile(dir_dens + file_rotdens_mod + ".rho") == False):
 				call(["cp", dir_dens + file_rotdens + ".rho",
 					  dir_dens + file_rotdens_mod + ".rho"])
@@ -1509,18 +1508,18 @@ def job_submission(
 		if (crystal):
 			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
 	else:
-		os.chdir(dir_output)
+		os.chdir(output_dir_path)
 
 		#
-		if (os.path.isdir(folder_run) == False):
+		if not os.path.isdir(execution_bead_dir_name):
 			print("")
 			print("")
 			print("Error message")
 			print("")
 			print("")
-			printingMessage = dir_output + folder_run + "  --- This directory is absent."
+			printingMessage = output_dir_path + execution_bead_dir_name + "  --- This directory is absent."
 			print(printingMessage)
-			os.chdir(src_dir)
+			os.chdir(input_dir)
 			return
 
 		#
@@ -1528,9 +1527,9 @@ def job_submission(
 
 		if "slurmstepd" not in open(logout_file).read():
 			if "real" not in open(logout_file).read():
-				printingMessage = dir_output + folder_run + "  --- This job is running."
+				printingMessage = output_dir_path + execution_bead_dir_name + "  --- This job is running."
 				print(printingMessage)
-				os.chdir(src_dir)
+				os.chdir(input_dir)
 				return
 
 		#
@@ -1540,60 +1539,60 @@ def job_submission(
 			file_count = "output.rden"
 
 		#
-		os.chdir(dir_output + folder_run + "/results")
+		os.chdir(output_dir_path + execution_bead_dir_name + "/results")
 		if (os.path.isfile(file_count)):
 			col_data_new = genfromtxt(file_count)
 			lastIndex = int(col_data_new[-1, 0])
-			if ((numbblocks - lastIndex) <= 0):
-				print(dir_output + folder_run)
+			if ((numb_block - lastIndex) <= 0):
+				print(output_dir_path + execution_bead_dir_name)
 				print(" Done. Do not need to resubmit it.")
-				os.chdir(src_dir)
+				os.chdir(input_dir)
 				return
 
 		#
-		os.chdir(src_dir)
+		os.chdir(input_dir)
 
 		flag = file_operations(method, final_dir_in_work,
-							   numbmolecules, numbbeads)
+							   numb_molecule, numb_bead)
 		if (flag == False):
-			print(dir_output + folder_run)
+			print(output_dir_path + execution_bead_dir_name)
 			print("Already resubmitted.")
 			return
 
-		print(dir_output + folder_run)
+		print(output_dir_path + execution_bead_dir_name)
 		print(" Just resubmitted.")
 
 		# Rotational density matrices
 		temperature1 = "%8.6f" % temperature
-		if (RotorType != "LINEAR"):
+		if (rotor_type != "LINEAR"):
 			iodevn = spin_isomer
 			jmax = 66
 			if (method == 'PIMC'):
-				numbbeads2 = int(numbbeads)
+				numb_bead2 = int(numb_bead)
 			else:
-				numbbeads2 = int(numbbeads - 1)
-		if (molecule_rot == "H2O"):
-			if (NameOfServer == "graham"):
+				numb_bead2 = int(numb_bead - 1)
+		if (rotor == "H2O"):
+			if (server_name == "graham"):
 				dir_dens = "/scratch/" + user_name + "/rot-dens-asymmetric-top/" + \
 					asym.GetDirNameSubmission(
-						molecule_rot, temperature1, numbbeads2, iodevn, jmax)
-			if (NameOfServer == "nlogn"):
+						rotor, temperature1, numb_bead2, iodevn, jmax)
+			if (server_name == "nlogn"):
 				dir_dens = "/work/" + user_name + "/rot-dens-asymmetric-top/" + \
 					asym.GetDirNameSubmission(
-						molecule_rot, temperature1, numbbeads2, iodevn, jmax)
-		if (molecule_rot == "CH3F"):
-			if (NameOfServer == "nlogn"):
+						rotor, temperature1, numb_bead2, iodevn, jmax)
+		if (rotor == "CH3F"):
+			if (server_name == "nlogn"):
 				dir_dens = "/work/" + user_name + "/rot-dens-symmetric-top/" + \
 					sym.GetDirNameSubmission(
-						molecule_rot, temperature1, numbbeads2, 3, jmax)
-			if (NameOfServer == "graham"):
+						rotor, temperature1, numb_bead2, 3, jmax)
+			if (server_name == "graham"):
 				dir_dens = "/scratch/" + user_name + "/rot-dens-symmetric-top/" + \
 					sym.GetDirNameSubmission(
-						molecule_rot, temperature1, numbbeads2, 3, jmax)
-		file_rotdens = "/" + molecule_rot + "_T" + \
-			str(dropzeros(temperature1)) + "t" + str(numbbeads2)
-		file_rotdens_mod = "/" + molecule_rot + "_T" + \
-			str(temperature1) + "t" + str(numbbeads)
+						rotor, temperature1, numb_bead2, 3, jmax)
+		file_rotdens = "/" + rotor + "_T" + \
+			str(dropzeros(temperature1)) + "t" + str(numb_bead2)
+		file_rotdens_mod = "/" + rotor + "_T" + \
+			str(temperature1) + "t" + str(numb_bead)
 		if (os.path.isfile(dir_dens + file_rotdens_mod + ".rho") == False):
 			call(["cp", dir_dens + file_rotdens + ".rho",
 				  dir_dens + file_rotdens_mod + ".rho"])
@@ -1604,123 +1603,121 @@ def job_submission(
 		path_Density = dir_dens + "/"
 
 	# For qmc.imput
-	GetInput(
+	get_input_file(
 		method,
-		ENT_TYPE,
-		ENT_ALGR,
+		ent_method,
+		ent_algorithm,
 		temperature,
-		numbbeads,
-		numbblocks,
-		numbpass,
-		molecule_rot,
-		numbmolecules,
-		argument1,
+		numb_bead,
+		numb_block,
+		numb_pass,
+		rotor,
+		numb_molecule,
+		arg1,
 		level1,
 		step1,
 		step1_trans,
-		gfact,
-		dipolemoment,
-		particleA,
-		Restart1,
-		numbblocks_Restart1,
+		gfactor,
+		dipole_moment,
+		particle_a,
+		restart_bool,
+		numb_block_restart,
 		crystal,
-		RotorType,
-		TransMove,
-		RotMove,
+		rotor_type,
+		translational_move,
+		rotational_move,
 		path_Density,
 		impurity,
-		step_trans_impurity1,
-		level_impurity1)
+		step_com_impurity,
+		level_impurity)
 
-	input_file = "qmcbeads" + str(i) + ".input"
+	input_file = "qmcbeads" + str(numb_bead) + ".input"
 	call(["mv", "qmc.input", dir_run_input_pimc + "/" + input_file])
-	folder_run_path = dir_run_job + folder_run
+	execution_bead_dir_name_path = dir_run_job + execution_bead_dir_name
 
 	# job submission
-	fname = 'job-for-P' + str(numbbeads)
+	fname = 'job-for-P' + str(numb_bead)
 	fwrite = open(fname, 'w')
 
-	if RUNDIR == "scratch":
-		if RUNIN == "CPU":
+	if (dir_run == "scratch"):
+		if (cpu_run == "CPU"):
 			fwrite.write(
 				jobstring_scratch_cpu(
-					argument2,
-					i,
-					numbmolecules,
-					folder_run_path,
-					molecule_rot,
+					job_name_temp,
+					ibead,
+					numb_molecule,
+					execution_bead_dir_name_path,
+					rotor,
 					temperature,
-					numbbeads,
+					numb_bead,
 					final_dir_in_work,
 					dir_run_input_pimc,
-					src_dir,
-					Restart1,
+					input_dir,
+					restart_bool,
 					dir_run_job,
 					status_cagepot,
-					dir_output))
+					output_dir_path))
 		else:
 			fwrite.write(
 				jobstring_sbatch(
-					NameOfServer,
-					RUNDIR,
-					argument2,
-					i,
-					numbmolecules,
-					folder_run_path,
-					molecule_rot,
+					server_name,
+					dir_run,
+					job_name_temp,
+					ibead,
+					numb_molecule,
+					execution_bead_dir_name_path,
+					rotor,
 					temperature,
-					numbbeads,
+					numb_bead,
 					final_dir_in_work,
 					dir_run_input_pimc,
-					PPA1,
 					user_name,
-					out_dir,
-					Restart1,
+					output_file_dir,
+					restart_bool,
 					dir_run_job,
 					status_cagepot,
-					dir_output,
-					numbblocks))
+					output_dir_path,
+					numb_block))
 	else:
 		fwrite.write(
 			jobstring_sbatch(
-				NameOfServer,
-				RUNDIR,
-				argument2,
-				i,
-				numbmolecules,
-				folder_run_path,
-				molecule_rot,
+				server_name,
+				dir_run,
+				job_name_temp,
+				ibead,
+				numb_molecule,
+				execution_bead_dir_name_path,
+				rotor,
 				temperature,
-				numbbeads,
+				numb_bead,
 				final_dir_in_work,
 				dir_run_input_pimc,
-				PPA1,
 				user_name,
-				out_dir,
-				Restart1,
+				output_file_dir,
+				restart_bool,
 				dir_run_job,
 				status_cagepot,
-				dir_output,
-				numbblocks))
+				output_dir_path,
+				numb_block))
 
 	fwrite.close()
 	call(["mv", fname, dir_run_input_pimc])
 	os.chdir(dir_run_input_pimc)
 
-	if (RUNIN == "CPU"):
+	if (cpu_run == "CPU"):
 		call(["chmod", "755", fname])
-		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(i)+" & "
-		command_pimc_run = "./" + fname + ">outpimc" + str(i) + " & "
+		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(ibead)+" & "
+		command_pimc_run = "./" + fname + ">outpimc" + str(ibead) + " & "
 		print(command_pimc_run)
 		system(command_pimc_run)
 	else:
 		#call(["qsub", fname])
-		if (NameOfPartition == user_name):
+		if (partition_name == user_name):
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
 
-	os.chdir(src_dir)
+	os.chdir(input_dir)
 
 
 def jobstring_scratch_cpu(
@@ -1730,14 +1727,14 @@ def jobstring_scratch_cpu(
 		run_dir,
 		molecule,
 		temperature,
-		numbbeads,
+		numb_bead,
 		final_dir,
 		dir_run_input_pimc,
-		src_dir,
-		Restart1,
+		input_dir,
+		restart_bool,
 		dir_run_job,
 		status_cagepot,
-		dir_output):
+		output_dir_path):
 	'''
 	This function creats jobstring for #PBS script
 	'''
@@ -1745,7 +1742,7 @@ def jobstring_scratch_cpu(
 	output_dir = run_dir + "/results"
 	temperature1 = "%5.3f" % temperature
 	file_rotdens = dir_run_input_pimc + "/" + molecule + \
-		"_T" + str(temperature1) + "t" + str(numbbeads) + ".rot"
+		"_T" + str(temperature1) + "t" + str(numb_bead) + ".rot"
 
 	input_file = dir_run_input_pimc + "/qmc" + \
 		file_name + str(value) + ".input"
@@ -1764,44 +1761,43 @@ cp %s qmc.input
 cp %s %s
 ./pimc
 mv %s /work/tapas/linear_rotors
-""" % (omp_thread, run_dir, output_dir, src_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+""" % (omp_thread, run_dir, output_dir, input_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
 	return job_string
 
 
 def jobstring_sbatch(
-		NameOfServer,
-		RUNDIR,
+		server_name,
+		dir_run,
 		file_name,
 		value,
-		numbmolecules,
-		folder_run_path,
+		numb_molecule,
+		execution_bead_dir_name_path,
 		molecule,
 		temperature,
-		numbbeads,
+		numb_bead,
 		final_dir_in_work,
 		dir_run_input_pimc,
-		PPA1,
 		user_name,
-		out_dir,
-		Restart1,
+		output_file_dir,
+		restart_bool,
 		dir_run_job,
 		status_cagepot,
-		dir_output,
-		numbblocks):
+		output_dir_path,
+		numb_block):
 	'''
 	This function creats jobstring for #SBATCH script
 	'''
-	if (numbblocks <= 1000):
+	if (numb_block <= 1000):
 		walltime = "00-00:30"
 		thread = 1
 	else:
-		if (numbbeads >= 160):
+		if (numb_bead >= 160):
 			thread = 8
 			walltime = "7-00:00"
-		elif ((numbbeads >= 50) and (numbbeads < 160)):
+		elif ((numb_bead >= 50) and (numb_bead < 160)):
 			thread = 1
 			walltime = "03-00:00"
-		elif ((numbbeads >= 30) and (numbbeads < 50)):
+		elif ((numb_bead >= 30) and (numb_bead < 50)):
 			thread = 1
 			walltime = "03-00:00"
 		else:
@@ -1810,10 +1806,10 @@ def jobstring_sbatch(
 
 	job_name = file_name + str(value)
 	omp_thread = str(thread)
-	output_dir = folder_run_path + "/results"
+	output_dir = execution_bead_dir_name_path + "/results"
 	temperature1 = "%8.6f" % temperature
 	file_rotdens = dir_run_input_pimc + "/" + molecule + \
-		"_T" + str(temperature1) + "t" + str(numbbeads) + ".*"
+		"_T" + str(temperature1) + "t" + str(numb_bead) + ".*"
 	logpath = dir_run_input_pimc + "/" + job_name
 
 	input_file = dir_run_input_pimc + "/qmcbeads" + str(value) + ".input"
@@ -1823,28 +1819,22 @@ def jobstring_sbatch(
 
 	if (status_cagepot):
 		cagepot_file = dir_run_input_pimc + "/hfc60.pot"
-		cagepot_cp = "cp " + cagepot_file + " " + folder_run_path
+		cagepot_cp = "cp " + cagepot_file + " " + execution_bead_dir_name_path
 	else:
 		cagepot_cp = ""
 
-	if NameOfServer == "graham":
+	if server_name == "graham":
 		CommandForMove = " "
 	else:
-		if (RUNDIR == "scratch"):
-			CommandForMove = "mv " + folder_run_path + " " + dir_output
-		if (RUNDIR == "work"):
+		if (dir_run == "scratch"):
+			CommandForMove = "mv " + execution_bead_dir_name_path + " " + output_dir_path
+		if (dir_run == "work"):
 			CommandForMove = " "
 
-	if NameOfServer == "graham":
+	if server_name == "graham":
 		account = "#SBATCH --account=rrg-pnroy"
 	else:
 		account = ""
-
-	if not PPA1:
-		CommandForPPA = "#"
-	else:
-		CommandForPPA = ""
-	file_PPA = dir_run_input_pimc + "/PairDensity.txt"
 
 	print("")
 	print("")
@@ -1852,7 +1842,7 @@ def jobstring_sbatch(
 	print("*****************Important Notice***********************")
 	print("")
 	print("Full path of the directory where the submitted job is running - ")
-	print(folder_run_path)
+	print(execution_bead_dir_name_path)
 	print("")
 	print("Full path of the directory where all the outputs of MoRiBs are stored - ")
 	print(output_dir)
@@ -1894,7 +1884,7 @@ cp /home/tapas/MoRiBS-PIGS/mbx_gas_phase.json %s
 #valgrind --leak-check=full --show-leak-kinds=all --leak-check=yes ./pimc
 time ./pimc
 %s
-""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, folder_run_path, output_dir, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, input_file1, folder_run_path, folder_run_path, CommandForPPA, file_PPA, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmcinp, exe_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, execution_bead_dir_name_path, execution_bead_dir_name_path, CommandForMove)
 
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s
@@ -1912,9 +1902,9 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc
 time ./pimc
 %s
-""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, final_dir_in_work, dir_run_job, input_file, folder_run_path, folder_run_path, qmcinp, exe_file, folder_run_path, CommandForMove)
+""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, final_dir_in_work, dir_run_job, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmcinp, exe_file, execution_bead_dir_name_path, CommandForMove)
 
-	if Restart1:
+	if restart_bool:
 		return job_string_restart
 	else:
 		return job_string
@@ -1975,7 +1965,7 @@ def get_working_file(
 		add2 = ""
 
 	name_layer1 = parameter_name + str(parameter_value) + "Kinv-Blocks" + str(numb_block) + "-Passes" + str(
-		numb_pass) + add + "-System-" + str(numb_molecule) + str(rotor_name) + add1 + "-Trotter-Number" + add2
+		numb_pass) + add + "-System-" + str(numb_molecule) + str(rotor_name) + add1 + add2
 
 	front_layer = method+"-"+extra_file_name
 
@@ -1993,15 +1983,15 @@ def get_working_file(
 
 	if (dipole_moment >= 0.0):
 		if (numb_molecule > 1):
-			name_dipole_moment = "DipoleMoment" + \
-				str(dipolemoment) + "Debye-"
+			name_dipole_moment = "dipole_moment" + \
+				str(dipole_moment) + "Debye-"
 		else:
 			name_dipole_moment = "Field" + str(dipole_moment) + "Kinv-"
 	else:
 		name_dipole_moment = ""
 
 	if (gfactor >= 0.0):
-		name_gfactor = "gFactor" + str(gfact) + "-"
+		name_gfactor = "gFactor" + str(gfactor) + "-"
 	else:
 		name_gfactor = ""
 
@@ -2019,8 +2009,8 @@ class GetFileNameAnalysis:
 			method1,
 			method2,
 			molecule_rot1,
-			TransMove1,
-			RotMove1,
+			translational_move1,
+			rotational_move1,
 			variableName1,
 			rpt_val1,
 			gfact1,
@@ -2035,44 +2025,44 @@ class GetFileNameAnalysis:
 			preskip1,
 			postskip1,
 			extra1,
-			src_dir1,
+			input_dir1,
 			particleA1,
-			ENT_ALGR):
+			ent_algorithm):
 		self.method = method1
-		self.molecule_rot = molecule_rot1
-		self.TransMove = TransMove1
-		self.RotMove = RotMove1
+		self.rotor = molecule_rot1
+		self.translational_move = translational_move1
+		self.rotational_move = rotational_move1
 		self.variableName = variableName1
 		self.rpt_val = rpt_val1
-		self.dipolemoment = dipolemoment1
-		self.gfact = gfact1
+		self.dipole_moment = dipolemoment1
+		self.gfactor = gfact1
 		self.parameter = parameter1
 		self.parameter_name = parameter_name1
-		self.numbblocks = numbblocks1
-		self.numbpass = numbpass1
-		self.numbmolecules = numbmolecules1
+		self.numb_block = numbblocks1
+		self.numb_pass = numbpass1
+		self.numb_molecule = numbmolecules1
 		self.molecule = molecule1
-		self.ENT_TYPE = ENT_TYPE1
+		self.ent_method = ENT_TYPE1
 		self.preskip = preskip1
 		self.postskip = postskip1
 		self.extra = extra1
-		self.src_dir = src_dir1
-		self.particleA = particleA1
+		self.input_dir = input_dir1
+		self.particle_a = particleA1
 
 		if (self.method == "ENT"):
 			front_layer = "ENT-" + self.extra
-			add1 = "-ParticleA" + str(self.particleA)
-			add2 = "-" + self.ENT_TYPE + "-" + ENT_ALGR
+			add1 = "-ParticleA" + str(self.particle_a)
+			add2 = "-" + self.ent_method + "-" + ent_algorithm
 		else:
 			front_layer = self.method + "-" + self.extra
 			add1 = ""
 			add2 = ""
 
-		if ((self.TransMove) and (self.RotMove)):
+		if ((self.translational_move) and (self.rotational_move)):
 			front_layer += "TransAndRotDOFs-"
-		if ((self.TransMove == False) and (self.RotMove)):
+		if ((self.translational_move == False) and (self.rotational_move)):
 			front_layer += "RotDOFs-"
-		if ((self.TransMove) and (self.RotMove == False)):
+		if ((self.translational_move) and (self.rotational_move == False)):
 			front_layer += "TransDOFs-"
 
 		if (self.rpt_val >= 0.0):
@@ -2080,24 +2070,24 @@ class GetFileNameAnalysis:
 		else:
 			name_rpt = ""
 
-		if (self.dipolemoment >= 0.0):
-			if (self.numbmolecules > 1):
-				name_dipole_moment = "DipoleMoment" + \
-					str(self.dipolemoment) + "Debye-"
+		if (self.dipole_moment >= 0.0):
+			if (self.numb_molecule > 1):
+				name_dipole_moment = "dipole_moment" + \
+					str(self.dipole_moment) + "Debye-"
 			else:
 				name_dipole_moment = "Field" + \
-					str(self.dipolemoment) + "Kinv-"
+					str(self.dipole_moment) + "Kinv-"
 		else:
 			name_dipole_moment = ""
 
-		if (self.gfact >= 0.0):
-			name_gfactor = "gFactor" + str(self.gfact) + "-"
+		if (self.gfactor >= 0.0):
+			name_gfactor = "gFactor" + str(self.gfactor) + "-"
 		else:
 			name_gfactor = ""
 
 		name_layer1 = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + \
-			str(self.parameter) + "Kinv-Blocks" + str(self.numbblocks)
-		name_layer1 += "-Passes" + str(self.numbpass) + "-System" + str(self.numbmolecules) + str(
+			str(self.parameter) + "Kinv-Blocks" + str(self.numb_block)
+		name_layer1 += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 			self.molecule) + add1 + add2 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip)
 
 		file_output1 = front_layer + name_rpt + \
@@ -2117,9 +2107,9 @@ class GetFileNameAnalysis:
 		file_output8 = front_layer + name_rpt + \
 			name_dipole_moment + name_gfactor + "Entropy-"
 
-		self.SaveEnergy = self.src_dir + file_output1 + name_layer1 + ".txt"
-		self.SaveCorr = self.src_dir + file_output2 + name_layer1 + ".txt"
-		self.SaveEntropy = self.src_dir + file_output8 + name_layer1 + ".txt"
+		self.SaveEnergy = self.input_dir + file_output1 + name_layer1 + ".txt"
+		self.SaveCorr = self.input_dir + file_output2 + name_layer1 + ".txt"
+		self.SaveEntropy = self.input_dir + file_output8 + name_layer1 + ".txt"
 
 		if (method2 == False):
 			if os.path.exists(self.SaveEntropy):
@@ -2132,7 +2122,7 @@ class GetFileNameAnalysis:
 		if (self.method != "ENT"):
 			print("#-------------------------------------#")
 			print("Final analyzed results are stored in - ")
-			print(self.src_dir)
+			print(self.input_dir)
 			print("")
 			print("Final results - Energy vs " + str(self.variableName))
 			print(file_output1 + name_layer1 + ".txt")
@@ -2142,14 +2132,14 @@ class GetFileNameAnalysis:
 
 		if (self.method == "ENT"):
 			name_layer1RT = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + str(
-				self.parameter) + "Kinv-Blocks" + str(self.numbblocks)
-			name_layer1RT += "-Passes" + str(self.numbpass) + "-System" + str(self.numbmolecules) + str(
+				self.parameter) + "Kinv-Blocks" + str(self.numb_block)
+			name_layer1RT += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 				self.molecule) + add1 + add2 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip)
 
-			self.SaveEntropyRT = self.src_dir + file_output8 + name_layer1RT + ".txt"
-			if (ENT_ALGR != "WR"):
+			self.SaveEntropyRT = self.input_dir + file_output8 + name_layer1RT + ".txt"
+			if (ent_algorithm != "WR"):
 				# print(self.SaveEntropyRT)
-				print(self.src_dir)
+				print(self.input_dir)
 				print("")
 				print("Final results - Entropy vs " + str(self.variableName))
 				print(self.SaveEntropy)
@@ -2163,8 +2153,8 @@ class GetFileNamePlot:
 			self,
 			method1,
 			molecule_rot1,
-			TransMove1,
-			RotMove1,
+			translational_move1,
+			rotational_move1,
 			variableName1,
 			rpt_val1,
 			gfact1,
@@ -2179,36 +2169,36 @@ class GetFileNamePlot:
 			preskip1,
 			postskip1,
 			extra1,
-			src_dir1,
+			input_dir1,
 			particleA1,
 			var1):
 		self.method = method1
-		self.molecule_rot = molecule_rot1
-		self.TransMove = TransMove1
-		self.RotMove = RotMove1
+		self.rotor = molecule_rot1
+		self.translational_move = translational_move1
+		self.rotational_move = rotational_move1
 		self.variableName = variableName1
 		self.var = var1
 		self.rpt_val = rpt_val1
-		self.dipolemoment = dipolemoment1
-		self.gfact = gfact1
+		self.dipole_moment = dipolemoment1
+		self.gfactor = gfact1
 		self.parameter = parameter1
 		self.parameter_name = parameter_name1
-		self.numbblocks = numbblocks1
-		self.numbpass = numbpass1
-		self.numbmolecules = numbmolecules1
+		self.numb_block = numbblocks1
+		self.numb_pass = numbpass1
+		self.numb_molecule = numbmolecules1
 		self.molecule = molecule1
-		self.ENT_TYPE = ENT_TYPE1
+		self.ent_method = ENT_TYPE1
 		self.preskip = preskip1
 		self.postskip = postskip1
 		self.extra = extra1
-		self.src_dir = src_dir1
-		self.particleA = particleA1
+		self.input_dir = input_dir1
+		self.particle_a = particleA1
 
 		if (self.method == "ENT"):
 			front_layer = "ENT-" + self.extra
-			add1 = "-ParticleA" + str(self.particleA)
-			if (self.ENT_TYPE):
-				add2 = "-" + self.ENT_TYPE
+			add1 = "-ParticleA" + str(self.particle_a)
+			if (self.ent_method):
+				add2 = "-" + self.ent_method
 			else:
 				add2 = ""
 		else:
@@ -2216,11 +2206,11 @@ class GetFileNamePlot:
 			add1 = ""
 			add2 = ""
 
-		if ((self.TransMove) and (self.RotMove)):
+		if ((self.translational_move) and (self.rotational_move)):
 			front_layer += "TransAndRotDOFs-"
-		if ((self.TransMove == False) and (self.RotMove)):
+		if ((self.translational_move == False) and (self.rotational_move)):
 			front_layer += "RotDOFs-"
-		if ((self.TransMove) and (self.RotMove == False)):
+		if ((self.translational_move) and (self.rotational_move == False)):
 			front_layer += "TransDOFs-"
 
 		if (self.rpt_val >= 0.0):
@@ -2228,20 +2218,20 @@ class GetFileNamePlot:
 		else:
 			name_rpt = ""
 
-		if (self.dipolemoment >= 0.0):
-			name_dipole_moment = "DipoleMoment" + \
-				str(self.dipolemoment) + "Debye-"
+		if (self.dipole_moment >= 0.0):
+			name_dipole_moment = "dipole_moment" + \
+				str(self.dipole_moment) + "Debye-"
 		else:
 			name_dipole_moment = ""
 
-		if (self.gfact >= 0.0):
-			name_gfactor = "gFactor" + str(self.gfact) + "-"
+		if (self.gfactor >= 0.0):
+			name_gfactor = "gFactor" + str(self.gfactor) + "-"
 		else:
 			name_gfactor = ""
 
 		name_layer1 = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + \
-			str(self.parameter) + "Kinv-Blocks" + str(self.numbblocks)
-		name_layer1 += "-Passes" + str(self.numbpass) + "-System" + str(self.numbmolecules) + str(
+			str(self.parameter) + "Kinv-Blocks" + str(self.numb_block)
+		name_layer1 += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 			self.molecule) + add1 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip) + add2
 
 		file_output1 = front_layer + name_rpt + \
@@ -2266,89 +2256,89 @@ class GetFileNamePlot:
 		file_output11 = front_layer + name_dipole_moment + \
 			name_gfactor + "Order-parameters-vs-R-"
 		name_layer1FitvsR = "fixed-" + self.parameter_name + \
-			str(self.parameter) + "Kinv-Blocks" + str(self.numbblocks)
-		name_layer1FitvsR += "-Passes" + str(self.numbpass) + "-System" + str(self.numbmolecules) + str(
+			str(self.parameter) + "Kinv-Blocks" + str(self.numb_block)
+		name_layer1FitvsR += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 			self.molecule) + add1 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip) + add2
 
-		self.SaveEnergy = self.src_dir + file_output1 + name_layer1
-		self.SaveCorr = self.src_dir + file_output2 + name_layer1
-		self.SaveChemPot = self.src_dir + file_output8 + name_layer1
-		self.SaveEntropy = self.src_dir + file_output9 + name_layer1
-		self.SaveEnergyFitvsR = self.src_dir + file_output10 + name_layer1FitvsR
-		self.SaveCorrFitvsR = self.src_dir + file_output11 + name_layer1FitvsR
+		self.SaveEnergy = self.input_dir + file_output1 + name_layer1
+		self.SaveCorr = self.input_dir + file_output2 + name_layer1
+		self.SaveChemPot = self.input_dir + file_output8 + name_layer1
+		self.SaveEntropy = self.input_dir + file_output9 + name_layer1
+		self.SaveEnergyFitvsR = self.input_dir + file_output10 + name_layer1FitvsR
+		self.SaveCorrFitvsR = self.input_dir + file_output11 + name_layer1FitvsR
 
 #---------------------------------------------------------------------------#
 #	   special cases														   #
 #---------------------------------------------------------------------------#
 		'''
-				name_layer1CP		= "vs-number-of-"+str(self.molecule)+"-fixed-"+self.parameter_name+str(self.parameter)+"Kinv-Blocks"+str(self.numbblocks)
-				name_layer1CP	   += "-Passes"+str(self.numbpass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
-				name_layer1CONV	  = "vs-beta-and-tau-Blocks"+str(self.numbblocks)
-				name_layer1CONV	 += "-Passes"+str(self.numbpass)+"-System"+str(self.numbmolecules)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
-				self.SaveChemPot	  = self.src_dir+file_output8+name_layer1CP
-				self.SaveEntropyCONV  = self.src_dir+"/ResultsOfPIGSENT/"+file_output1+name_layer1CONV+"-"+self.ENT_TYPE
+				name_layer1CP		= "vs-number-of-"+str(self.molecule)+"-fixed-"+self.parameter_name+str(self.parameter)+"Kinv-Blocks"+str(self.numb_block)
+				name_layer1CP	   += "-Passes"+str(self.numb_pass)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+				name_layer1CONV	  = "vs-beta-and-tau-Blocks"+str(self.numb_block)
+				name_layer1CONV	 += "-Passes"+str(self.numb_pass)+"-System"+str(self.numb_molecule)+str(self.molecule)+add1+"-preskip"+str(self.preskip)+"-postskip"+str(self.postskip)
+				self.SaveChemPot	  = self.input_dir+file_output8+name_layer1CP
+				self.SaveEntropyCONV  = self.input_dir+"/ResultsOfPIGSENT/"+file_output1+name_layer1CONV+"-"+self.ent_method
 
 				'''
 #
 		name_layer1GFAC = "vs-gFactor-of-" + str(self.molecule) + "-fixed-" + self.parameter_name + str(
-			self.parameter) + "Kinv-numbbeads" + str(self.var) + "-Blocks" + str(self.numbblocks)
+			self.parameter) + "Kinv-numb_bead" + str(self.var) + "-Blocks" + str(self.numb_block)
 		name_layer1GFAC += "-Passes" + \
-			str(self.numbpass) + "-preskip" + str(self.preskip) + \
+			str(self.numb_pass) + "-preskip" + str(self.preskip) + \
 			"-postskip" + str(self.postskip) + add2
 		name_layer1GFACFit = "vs-gFactor-of-" + \
 			str(self.molecule) + "-fixed-" + self.parameter_name + \
-			str(self.parameter) + "Kinv-Blocks" + str(self.numbblocks)
+			str(self.parameter) + "Kinv-Blocks" + str(self.numb_block)
 		name_layer1GFACFit += "-Passes" + \
-			str(self.numbpass) + "-preskip" + str(self.preskip) + \
+			str(self.numb_pass) + "-preskip" + str(self.preskip) + \
 			"-postskip" + str(self.postskip) + add2 + "-Fit"
 #
 		name_layer1RFAC = "vs-RFactor-of-" + str(self.molecule) + "-fixed-" + self.parameter_name + str(
-			self.parameter) + "Kinv-numbbeads" + str(self.var) + "-Blocks" + str(self.numbblocks)
+			self.parameter) + "Kinv-numb_bead" + str(self.var) + "-Blocks" + str(self.numb_block)
 		name_layer1RFAC += "-Passes" + \
-			str(self.numbpass) + "-preskip" + str(self.preskip) + \
+			str(self.numb_pass) + "-preskip" + str(self.preskip) + \
 			"-postskip" + str(self.postskip) + add2
 		name_layer1MM = "vs-" + \
 			str(self.variableName) + "-fixed-" + \
 			self.parameter_name + str(self.parameter) + "Kinv"
 		name_layer1MM += "-System" + \
-			str(self.numbmolecules) + str(self.molecule) + add1
+			str(self.numb_molecule) + str(self.molecule) + add1
 		name_layer1COMBO = "vs-gFactor-fixed-" + self.parameter_name + \
-			str(self.parameter) + "Kinv-Blocks" + str(self.numbblocks)
-		name_layer1COMBO += "-Passes" + str(self.numbpass) + "-System" + str(self.numbmolecules) + str(
+			str(self.parameter) + "Kinv-Blocks" + str(self.numb_block)
+		name_layer1COMBO += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 			self.molecule) + add1 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip)
 		name_layer1ED = "of-System" + \
-			str(self.numbmolecules) + str(self.molecule) + add1
+			str(self.numb_molecule) + str(self.molecule) + add1
 #
-		self.SaveEntropyGFAC = self.src_dir + front_layer + \
+		self.SaveEntropyGFAC = self.input_dir + front_layer + \
 			name_rpt + "Entropy-" + name_layer1GFAC
-		self.SaveEntropyRFAC = self.src_dir + front_layer + \
+		self.SaveEntropyRFAC = self.input_dir + front_layer + \
 			name_rpt + "Entropy-" + name_layer1RFAC
-		self.SaveEnergyGFAC = self.src_dir + front_layer + \
+		self.SaveEnergyGFAC = self.input_dir + front_layer + \
 			name_rpt + "Energy-" + name_layer1GFAC
-		self.SaveEnergyRFAC = self.src_dir + front_layer + \
+		self.SaveEnergyRFAC = self.input_dir + front_layer + \
 			name_rpt + "Energy-" + name_layer1RFAC
-		self.SaveEnergyED = self.src_dir + file_output1 + name_layer1ED + add2 + "-ED"
-		self.SaveEntropyED = self.src_dir + file_output9 + name_layer1ED + add2 + "-ED"
-		self.SaveCorrGFAC = self.src_dir + front_layer + \
+		self.SaveEnergyED = self.input_dir + file_output1 + name_layer1ED + add2 + "-ED"
+		self.SaveEntropyED = self.input_dir + file_output9 + name_layer1ED + add2 + "-ED"
+		self.SaveCorrGFAC = self.input_dir + front_layer + \
 			name_rpt + "correlation-" + name_layer1GFAC
-		self.SaveCorrRFAC = self.src_dir + front_layer + \
+		self.SaveCorrRFAC = self.input_dir + front_layer + \
 			name_rpt + "correlation-" + name_layer1RFAC
-		self.SaveEnergyMM = self.src_dir + file_output1 + name_layer1MM + add2 + "-MM"
-		self.SaveEntropyMM = self.src_dir + file_output9 + name_layer1MM + add2 + "-MM"
-		self.SaveEntropyCOMBO = self.src_dir + front_layer + \
+		self.SaveEnergyMM = self.input_dir + file_output1 + name_layer1MM + add2 + "-MM"
+		self.SaveEntropyMM = self.input_dir + file_output9 + name_layer1MM + add2 + "-MM"
+		self.SaveEntropyCOMBO = self.input_dir + front_layer + \
 			name_rpt + "Entropy-" + name_layer1GFACFit + "-COMBINE"
-		self.SaveEntropyGFACFit = self.src_dir + front_layer + \
+		self.SaveEntropyGFACFit = self.input_dir + front_layer + \
 			name_rpt + "Entropy-" + name_layer1GFACFit
-		self.SaveEnergyGFACFit = self.src_dir + front_layer + \
+		self.SaveEnergyGFACFit = self.input_dir + front_layer + \
 			name_rpt + "Energy-" + name_layer1GFACFit
 
 		if (self.method == "ENT"):
 			name_layer1RT = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + str(
-				self.parameter) + "Kinv-Blocks" + str(self.numbblocks)
-			name_layer1RT += "-Passes" + str(self.numbpass) + "-System" + str(self.numbmolecules) + str(
+				self.parameter) + "Kinv-Blocks" + str(self.numb_block)
+			name_layer1RT += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 				self.molecule) + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip) + add2
 
-			self.SaveEntropyRT = self.src_dir + file_output9 + name_layer1RT
+			self.SaveEntropyRT = self.input_dir + file_output9 + name_layer1RT
 
 
 def FileCheck(method, list_nb, variableName, SavedFile):
@@ -2393,21 +2383,21 @@ class GetUnitConverter:
 		self.kcalmoleinvToKelvin = 503.228
 
 
-def GetrAndgFactor(molecule, RCOM, DipoleMoment):
+def GetrAndgFactor(molecule, RCOM, dipole_moment):
 	'''
 	It calculates g and R value
 	'''
 	Units = GetUnitConverter()
 	BConstant = GetBconst(molecule)  # in wavenumber
-	DipoleMomentAU = DipoleMoment / Units.AuToDebye
+	DipoleMomentAU = dipole_moment / Units.AuToDebye
 	RCOMAU = RCOM / Units.BOHRRADIUS
 	BConstantAU = BConstant / Units.AuToCmInverse
 	rFactor = RCOMAU / \
 		((DipoleMomentAU * DipoleMomentAU / BConstantAU)**(1.0 / 3.0))
 	gFactor = (DipoleMomentAU * DipoleMomentAU) / \
 		(RCOMAU * RCOMAU * RCOMAU * BConstantAU)
-	printingmessage = " DipoleMoment = " + \
-		str(DipoleMoment) + " gFactor = " + \
+	printingmessage = " dipole_moment = " + \
+		str(dipole_moment) + " gFactor = " + \
 		str(gFactor) + " rFactor = " + str(rFactor)
 	print(printingmessage)
 	returnList = [rFactor, gFactor]
@@ -2423,8 +2413,8 @@ def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
 	RCOMAU = RCOM / Units.BOHRRADIUS
 	BConstantAU = BConstant / Units.AuToCmInverse
 	DipoleMomentAU = sqrt(gFactor * RCOMAU * RCOMAU * RCOMAU * BConstantAU)
-	DipoleMoment = DipoleMomentAU * Units.AuToDebye
-	return DipoleMoment
+	dipole_moment = DipoleMomentAU * Units.AuToDebye
+	return dipole_moment
 
 
 def GetEDResults(
@@ -2432,8 +2422,8 @@ def GetEDResults(
 		FilePlotName,
 		srcCodePath,
 		RFactor,
-		numbmolecules,
-		particleA,
+		numb_molecule,
+		particle_a,
 		lmax,
 		ltotalmax):
 	'''
@@ -2448,27 +2438,27 @@ def GetEDResults(
 	print(FileToBeSavedED)
 
 	commandRunED = "julia " + srcCodePath + "diagonalization.jl -R " + str(RFactor) + " -N " + str(
-		numbmolecules) + " --l-max " + str(lmax) + " --l-total-max " + str(ltotalmax) + " --A-start 1 --A-size " + str(particleA)
+		numb_molecule) + " --l-max " + str(lmax) + " --l-total-max " + str(ltotalmax) + " --A-start 1 --A-size " + str(particle_a)
 	call(["rm", "outputED.txt"])
 	system(commandRunED)
 	call(["mv", "outputED.txt", FileToBeSavedED])
 	'''
-		if (numbmolecules >6):
+		if (numb_molecule >6):
 				print("It is not computing Matrix multiplication stuffs")
 				return
 
-		if (numbmolecules <= 4):
+		if (numb_molecule <= 4):
 				call(["rm", "outputMM.txt"])
 
-				for numbbeads in loop:
-						print(numbbeads)
-						RFactor	  = GetrAndgFactor(molecule_rot, rpt_val, dipolemoment)
+				for numb_bead in loop:
+						print(numb_bead)
+						RFactor	  = GetrAndgFactor(rotor, rpt_val, dipole_moment)
 						if (variableName == "beta"):
 								parameterR	= parameter*BConstantK
-								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 6 --tau "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
+								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numb_molecule)+" --l-max 6 --tau "+str(parameterR)+" -P "+str(numb_bead)+" --pigs --A-start 1"+" --A-size "+str(particle_a)
 						if (variableName == "tau"):
 								parameterR	= parameter*BConstantK
-								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numbmolecules)+" --l-max 6 --beta "+str(parameterR)+" -P "+str(numbbeads)+" --pigs --A-start 1"+" --A-size "+str(particleA)
+								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numb_molecule)+" --l-max 6 --beta "+str(parameterR)+" -P "+str(numb_bead)+" --pigs --A-start 1"+" --A-size "+str(particle_a)
 						system(commandRun)
 				call(["mv", "outputMM.txt", FileToBeSavedMM])
 		'''
@@ -2478,19 +2468,19 @@ def GetPairDensity(
 		FilePlotName,
 		srcCodePath,
 		RFactor,
-		numbmolecules,
+		numb_molecule,
 		loop,
-		particleA,
-		molecule_rot,
+		particle_a,
+		rotor,
 		rpt_val,
-		dipolemoment,
+		dipole_moment,
 		parameter,
 		BConstantK,
 		variableName,
 		method):
 	FileToBeSavedDensity = FilePlotName + ".txt"
-	for numbbeads in loop:
-		print(numbbeads)
+	for numb_bead in loop:
+		print(numb_bead)
 		parameterR = parameter * BConstantK
 		commandRun = "julia " + srcCodePath + "pair_density.jl -R " + \
 			str(RFactor) + " --l-max 2 --l-total-max 2 --tau " + str(parameterR)
@@ -2499,22 +2489,22 @@ def GetPairDensity(
 		system(commandRun)
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
 
-# def GetEntropyRT(status, maxloop, method, molecule_rot, TransMove, RotMove, variableName, rpt_val, gfact, dipolemoment, parameter_name, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable):
-	#FileAnalysis = GetFileNameAnalysis(method, True, molecule_rot, TransMove, RotMove, variableName, rpt_val, gfact, dipolemoment, parameter_name, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA)
-#	   GetAverageEntropyRT(maxloop, method, molecule_rot, TransMove, RotMove, variableName, rpt_val, gfact, dipolemoment, parameter_name, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, final_results_path, particleA, variable)
+# def GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, variableName, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable):
+	#FileAnalysis = GetFileNameAnalysis(method, True, rotor, translational_move, rotational_move, variableName, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a)
+#	   GetAverageEntropyRT(maxloop, method, rotor, translational_move, rotational_move, variableName, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable)
 
 
-def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
+def GetPreFactDDPot(molecule, RCOM, dipole_moment):
 	'''
 	It calculates the pre factor in inverse temperature of dipole - dipole interaction potential
 	'''
 	Units = GetUnitConverter()
-	DipoleMomentAU = DipoleMoment / Units.AuToDebye
+	DipoleMomentAU = dipole_moment / Units.AuToDebye
 	RCOMAU = RCOM / Units.BOHRRADIUS
 	preFact = (DipoleMomentAU * DipoleMomentAU) / (RCOMAU * RCOMAU * RCOMAU)
 	preFact = preFact * Units.HARTREE2KL
-	printingmessage = " DipoleMoment = " + \
-		str(DipoleMoment) + " Debye and the prefactor of the dipole-dipole interaction potential = " + \
+	printingmessage = " dipole_moment = " + \
+		str(dipole_moment) + " Debye and the prefactor of the dipole-dipole interaction potential = " + \
 		str(preFact) + " K^-1"
 	print(printingmessage)
 
@@ -2522,33 +2512,33 @@ def GetPreFactDDPot(molecule, RCOM, DipoleMoment):
 def GetRenamingFunc(
 		dir_run_input_pimc,
 		dir_input_pimc_renamed,
-		dir_output,
-		folder_run,
+		output_dir_path,
+		execution_bead_dir_name,
 		folder_renamed,
-		src_dir):
-	#final_dir_in_work = dir_output + folder_run
+		input_dir):
+	#final_dir_in_work = output_dir_path + execution_bead_dir_name
 
 	call(["mkdir", "-p", dir_input_pimc_renamed])
 	cmd_run = "cp -r " + dir_run_input_pimc + "/*  " + dir_input_pimc_renamed + "/"
 	os.system(cmd_run)
-	os.chdir(dir_output)
-	if (os.path.isdir(folder_run)):
-		call(["mv", folder_run, folder_renamed])
+	os.chdir(output_dir_path)
+	if (os.path.isdir(execution_bead_dir_name)):
+		call(["mv", execution_bead_dir_name, folder_renamed])
 		print(dir_input_pimc_renamed)
-		printingMessage = "move " + str(dir_output) + str(folder_run)
+		printingMessage = "move " + str(output_dir_path) + str(execution_bead_dir_name)
 		print(printingMessage)
-	os.chdir(src_dir)
+	os.chdir(input_dir)
 
 
 def RemoveFiles(
 		method,
-		numbbeads,
+		numb_bead,
 		temperature,
-		molecule_rot,
-		RotorType,
+		rotor,
+		rotor_type,
 		preskip,
 		postskip,
-		numbblocks,
+		numb_block,
 		final_dir_in_work):
 
 	col_block = genfromtxt(
@@ -2558,20 +2548,20 @@ def RemoveFiles(
 		usecols=[0],
 		skip_header=preskip,
 		skip_footer=postskip)
-	if (int(len(col_block)) == numbblocks - (preskip + postskip)):
+	if (int(len(col_block)) == numb_block - (preskip + postskip)):
 
 		temperature1 = "%8.6f" % temperature
-		if (RotorType == "LINEAR"):
-			file_rotdens = molecule_rot + "_T" + \
-				str(temperature1) + "t" + str(numbbeads) + ".rot"
+		if (rotor_type == "LINEAR"):
+			file_rotdens = rotor + "_T" + \
+				str(temperature1) + "t" + str(numb_bead) + ".rot"
 			call(["rm", final_dir_in_work + "/" + file_rotdens])
 		else:
 			if (method == 'PIMC'):
-				numbbeads2 = int(numbbeads)
+				numb_bead2 = int(numb_bead)
 			else:
-				numbbeads2 = int(numbbeads - 1)
-			file_rotdens_mod = molecule_rot + "_T" + \
-				str(temperature1) + "t" + str(numbbeads)
+				numb_bead2 = int(numb_bead - 1)
+			file_rotdens_mod = rotor + "_T" + \
+				str(temperature1) + "t" + str(numb_bead)
 			if (os.path.exists(final_dir_in_work + "/" + file_rotdens_mod + ".rho")):
 				call(["rm", final_dir_in_work + "/" + file_rotdens_mod + ".rho"])
 				call(["rm", final_dir_in_work + "/" + file_rotdens_mod + ".eng"])
