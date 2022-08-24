@@ -1349,21 +1349,21 @@ def jobstring_scratch(
 	if (thread > 4):
 		thread = 4
 	job_name = "job_" + str(file_name) + str(value)
-	walltime = "200:00:00"
+	wall_time = "200:00:00"
 	processors = "nodes=1:ppn=" + str(thread)
 	omp_thread = str(thread)
 	output_dir = run_dir + "/results"
 	temperature1 = "%5.3f" % temperature
-	logpath = final_dir + "/"
+	log_file_path = final_dir + "/"
 
 	input_file = dir_run_input_pimc + "/qmc" + \
 		file_name + str(value) + ".input"
-	exe_file = dir_run_input_pimc + "/pimc"
-	qmcinp = "qmc" + file_name + str(value) + ".input"
+	execution_file = dir_run_input_pimc + "/pimc"
+	qmc_input = "qmc" + file_name + str(value) + ".input"
 
 	job_string = """#!/bin/bash
 #PBS -N %s
-#PBS -l walltime=%s
+#PBS -l wall_time=%s
 ##PBS -q medium
 #PBS -l %s
 #PBS -o %s%s.out
@@ -1379,7 +1379,7 @@ cp %s qmc.input
 cp %s %s
 ./pimc
 mv %s /work/tapas/linear_rotors
-""" % (job_name, walltime, processors, logpath, job_name, logpath, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+""" % (job_name, wall_time, processors, log_file_path, job_name, log_file_path, job_name, omp_thread, run_dir, output_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmc_input, execution_file, run_dir, run_dir)
 	return job_string
 
 
@@ -1634,7 +1634,7 @@ def job_submission(
 		step_com_impurity,
 		level_impurity)
 
-	input_file = "qmcbeads" + str(numb_bead) + ".input"
+	input_file = "qmc_trotter_number" + str(numb_bead) + ".input"
 	call(["mv", "qmc.input", dir_run_input_pimc + "/" + input_file])
 	execution_bead_dir_name_path = dir_run_job + execution_bead_dir_name
 
@@ -1749,8 +1749,8 @@ def jobstring_scratch_cpu(
 
 	input_file = dir_run_input_pimc + "/qmc" + \
 		file_name + str(value) + ".input"
-	exe_file = dir_run_input_pimc + "/pimc"
-	qmcinp = "qmc" + file_name + str(value) + ".input"
+	execution_file = dir_run_input_pimc + "/pimc"
+	qmc_input = "qmc" + file_name + str(value) + ".input"
 
 	job_string = """#!/bin/bash
 export OMP_NUM_THREADS=%s
@@ -1764,7 +1764,7 @@ cp %s qmc.input
 cp %s %s
 ./pimc
 mv %s /work/tapas/linear_rotors
-""" % (omp_thread, run_dir, output_dir, input_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmcinp, exe_file, run_dir, run_dir)
+""" % (omp_thread, run_dir, output_dir, input_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmc_input, execution_file, run_dir, run_dir)
 	return job_string
 
 
@@ -1791,21 +1791,21 @@ def jobstring_sbatch(
 	This function creats jobstring for #SBATCH script
 	'''
 	if (numb_block <= 1000):
-		walltime = "00-00:30"
+		wall_time = "00-00:30"
 		thread = 1
 	else:
 		if (numb_bead >= 160):
 			thread = 8
-			walltime = "7-00:00"
+			wall_time = "7-00:00"
 		elif ((numb_bead >= 50) and (numb_bead < 160)):
 			thread = 1
-			walltime = "03-00:00"
+			wall_time = "03-00:00"
 		elif ((numb_bead >= 30) and (numb_bead < 50)):
 			thread = 1
-			walltime = "03-00:00"
+			wall_time = "03-00:00"
 		else:
 			thread = 1
-			walltime = "03-00:00"
+			wall_time = "03-00:00"
 
 	job_name = file_name + str(value)
 	omp_thread = str(thread)
@@ -1813,12 +1813,12 @@ def jobstring_sbatch(
 	temperature1 = "%8.6f" % temperature
 	file_rotdens = dir_run_input_pimc + "/" + molecule + \
 		"_T" + str(temperature1) + "t" + str(numb_bead) + ".*"
-	logpath = dir_run_input_pimc + "/" + job_name
+	log_file_path = dir_run_input_pimc + "/" + job_name
 
 	input_file = dir_run_input_pimc + "/qmcbeads" + str(value) + ".input"
-	exe_file = dir_run_input_pimc + "/pimc"
+	execution_file = dir_run_input_pimc + "/pimc"
 	input_file1 = dir_run_input_pimc + "/initial_euler_angles_and_com.txt"
-	qmcinp = "qmcbeads" + str(value) + ".input"
+	qmc_input = "qmcbeads" + str(value) + ".input"
 
 	if (status_cagepot):
 		cagepot_file = dir_run_input_pimc + "/hfc60.pot"
@@ -1827,14 +1827,14 @@ def jobstring_sbatch(
 		cagepot_cp = ""
 
 	if server_name == "graham":
-		CommandForMove = " "
+		mv_cmd = " "
 	else:
 		if (dir_run == "scratch"):
-			CommandForMove = "mv " + execution_bead_dir_name_path + " " + output_dir_path
+			mv_cmd = "mv " + execution_bead_dir_name_path + " " + output_dir_path
 		if (dir_run == "work"):
-			CommandForMove = " "
+			mv_cmd = " "
 
-	if server_name == "graham":
+	if (server_name == "graham"):
 		account = "#SBATCH --account=rrg-pnroy"
 	else:
 		account = ""
@@ -1851,7 +1851,7 @@ def jobstring_sbatch(
 	print(output_dir)
 	print("")
 	print("Informations about all types of acceptance ratios of Monte Carlo simulations are saved at - ")
-	print(logpath + ".out")
+	print(log_file_path + ".out")
 	print("")
 	print("Number of OpenMP thread used = " + str(thread))
 	print("")
@@ -1880,14 +1880,12 @@ mv %s %s
 cd %s
 cp %s qmc.input
 cp %s %s
-cp %s %s
-cp /home/tapas/MoRiBS-PIGS/mbx_gas_phase.json %s
-%s cp %s %s
+#cp %s %s
 #valgrind --tool=memcheck --leak-check=yes --show-reachable=yes ./pimc
 #valgrind --leak-check=full --show-leak-kinds=all --leak-check=yes ./pimc
 time ./pimc
 %s
-""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmcinp, exe_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, execution_bead_dir_name_path, execution_bead_dir_name_path, CommandForMove)
+""" % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
 
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s
@@ -1905,7 +1903,7 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc
 time ./pimc
 %s
-""" % (job_name, logpath, walltime, account, omp_thread, omp_thread, final_dir_in_work, dir_run_job, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmcinp, exe_file, execution_bead_dir_name_path, CommandForMove)
+""" % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, final_dir_in_work, dir_run_job, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, mv_cmd)
 
 	if restart_bool:
 		return job_string_restart
