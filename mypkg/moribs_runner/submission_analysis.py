@@ -47,7 +47,7 @@ parser.add_argument("--ent_method",
 					choices=["EXTENDED_ENSMBL", "BROKENPATH"],
 					help="The subtype of calculations - \
 					must be defined in the case of ENT.")
-parser.add_argument("--algorithm",
+parser.add_argument("--ent_algorithm",
 					type=str,
 					default="WR",
 					choices=["WR", "WOR"],
@@ -193,7 +193,7 @@ rpt_val = args.rpt
 dipole_moment = args.dipole_moment
 crystal = args.crystal
 ent_method = args.ent_method
-ent_algorithm = args.algorithm
+ent_algorithm = args.ent_algorithm
 gfactor = args.gfactor
 #
 if (args.impurity):
@@ -278,14 +278,13 @@ if (server_name == "graham"):
 else:
 	output_dir_path = "/work/" + user_name + "/" + output_file_dir
 
+ent_algorithm = args.ent_algorithm
 if (method == "ENT"):
 	maxloop = int(numb_molecule1 / 2)
-	ent_algorithm = args.ent_algorithm
 else:
 	maxloop = 1
-	ent_algorithm = ""
 
-if (args.algorithm == "WR"):
+if (args.ent_algorithm == "WR"):
 	particle_a_list = np.arange(1, maxloop + 1)
 else:
 	particle_a_list = [maxloop]

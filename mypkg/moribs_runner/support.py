@@ -1086,187 +1086,190 @@ def get_input_file(
 		rotor_type,
 		translational_move,
 		rotational_move,
-		path_Density,
+		propagator_path,
 		impurity,
 		step_trans1,
 		level1):
 	'''
-	This function modifies parameters in qmc_run.input
+	This function modifies parameters in qmc_run.input.
 	'''
 	input_dir = os.getcwd() + "/"
 
+	if restart_bool:
+		replace("job_input", "RESTART",
+				"qmc_run.input", "qmc_temp.input")
+	else:
+		replace("job_input", "START",
+				"qmc_run.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
+
 	replace("temperature_input", str(temperature),
-			"qmc_run.input", "qmc2.input")
-	replace("numb_bead_input", str(numb_bead), "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
+
+	replace("numb_bead_input", str(numb_bead), "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
+
 	if (rotor == "CH3F"):
-		replace("potread_input", "pesch3fph2-180", "qmc2.input", "qmc3.input")
+		replace("pot_read_input", "pesch3fph2-180", "qmc_temp1.input", "qmc_temp.input")
 	elif (rotor == "H2O"):
-		replace("potread", "nopot", "qmc2.input", "qmc3.input")
+		replace("pot_read", "nopot", "qmc_temp1.input", "qmc_temp.input")
 	elif (rotor == "HF"):
-		replace("potread_input", "nopot", "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+		replace("pot_read_input", "nopot", "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("PathToPot", input_dir, "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("pot_path_input", input_dir, "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("sim_input", method + "_SIM", "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("method_input", method + "_SIM", "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("sim_ensmbl_input", ent_method, "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("pigs_ent_input", ent_method, "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if (ent_algorithm == "WR"):
-		replace("sim_algr_input", "RATIOTRICK", "qmc2.input", "qmc3.input")
+		replace("pigs_ent_algorithm_input", "RATIOTRICK", "qmc_temp1.input", "qmc_temp.input")
 	elif (ent_algorithm == "WOR"):
-		replace("sim_algr_input", "NORATIOTRICK", "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+		replace("pigs_ent_algorithm_input", "NORATIOTRICK", "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if translational_move:
-		replace("#TRANSLATION", "TRANSLATION", "qmc2.input", "qmc3.input")
+		replace("#TRANSLATION", "TRANSLATION", "qmc_temp1.input", "qmc_temp.input")
 	else:
-		replace("#TRANSLATION", "#TRANSLATION", "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+		replace("translation_flag_input", "#TRANSLATION", "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if rotational_move:
-		replace("cal_type_input", "ROTATION", "qmc2.input", "qmc3.input")
+		replace("rotation_flag_input", "ROTATION", "qmc_temp1.input", "qmc_temp.input")
 	else:
-		replace("cal_type_input", "#ROTATION", "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+		replace("rotation_flag_input", "#ROTATION", "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if rotational_move:
-		replace("den_path_input", path_Density, "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+		replace("rotor_type_input", rotor_type, "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	if restart_bool:
-		replace("numbblocks_input", str(numb_block_restart),
-				"qmc2.input", "qmc3.input")
-	else:
-		replace("numbblocks_input", str(numb_block),
-				"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	if rotational_move:
+		replace("propagator_path_input", propagator_path, "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("numbmolecules_input", str(numb_molecule),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("numb_molecule_input", str(numb_molecule),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if (distance >= 0.0):
-		replace("distanceArg_input", "DISTANCE",
-				"qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("distance_flag_input", "DISTANCE",
+				"qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 		replace("distance_input", str(distance),
-				"qmc2.input", "qmc3.input")
+				"qmc_temp1.input", "qmc_temp.input")
 	else:
-		replace("distanceArg_input", "",
-				"qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("distance_flag_input", "",
+				"qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 		replace("distance_input", "",
-				"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+				"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("type_input", rotor_type,
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("rotor_type_input", rotor_type,
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	replace("molecule_input", str(rotor),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("level_input", str(level_bisection),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("level_bisection_com_input", str(level_bisection),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("dstep_input", str(step_rot_move),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("step_rot_input", str(step_rot_move),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("dstep_tr_input", str(step_com_move),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("step_com_input", str(step_com_move),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if ((dipole_moment < 0.0) and (gfactor < 0.0)):
-		replace("dipolemomentArg_input", "",
-				"qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
-		replace("dipolemoment_input", "",
-				"qmc2.input", "qmc3.input")
+		replace("dipole_moment_flag_input", "",
+				"qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
+		replace("dipole_moment_input", "",
+				"qmc_temp1.input", "qmc_temp.input")
 	else:
 		if (dipole_moment >= 0.0):
-			replace("dipolemomentArg_input", "dipole_moment",
-					"qmc2.input", "qmc3.input")
-			call(["mv", "qmc3.input", "qmc2.input"])
-			replace("dipolemoment_input", str(
-				dipole_moment), "qmc2.input", "qmc3.input")
+			replace("dipole_moment_flag_input", "DIPOLE_MOMENT",
+					"qmc_temp1.input", "qmc_temp.input")
+			call(["mv", "qmc_temp.input", "qmc_temp1.input"])
+			replace("dipole_moment_input", str(
+				dipole_moment), "qmc_temp1.input", "qmc_temp.input")
 
 		if (gfactor >= 0.0):
-			replace("dipolemomentArg_input", "dipole_moment",
-					"qmc2.input", "qmc3.input")
-			call(["mv", "qmc3.input", "qmc2.input"])
+			replace("dipole_moment_flag_input", "DIPOLE_MOMENT",
+					"qmc_temp1.input", "qmc_temp.input")
+			call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 			dipole_moment = GetDipoleMomentFromGFactor(
 				rotor, distance, gfactor)
-			replace("dipolemoment_input", str(
-				dipole_moment), "qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+			replace("dipole_moment_input", str(
+				dipole_moment), "qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("numbpass_input", str(numb_pass),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("numb_block_input", str(numb_block),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
+
+	replace("numb_pass_input", str(numb_pass),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	mcskip = numb_bead * numb_pass
 	replace("mskip_input", str(mcskip),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	mcskip_avg = numb_bead * numb_pass
 	replace("mskip_avg_input", str(mcskip_avg),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("numbparticle_input", str(particle_a),
-			"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+	replace("numb_molecule_input", str(particle_a),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if (crystal):
 		replace("read_input", "READMCCOORDS",
-				"qmc2.input", "qmc3.input")
+				"qmc_temp1.input", "qmc_temp.input")
 	else:
 		replace("read_input", "",
-				"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
-
-	if restart_bool:
-		replace("job_input", "RESTART",
-				"qmc2.input", "qmc3.input")
-	else:
-		replace("job_input", "START",
-				"qmc2.input", "qmc3.input")
-	call(["mv", "qmc3.input", "qmc2.input"])
+				"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if (len(impurity) == 4):
-		replace("#type_impurity", impurity[0], "qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("#type_impurity", impurity[0], "qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-		replace("molecule_impurity", impurity[1], "qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("molecule_impurity", impurity[1], "qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-		replace("numbmolecules_impurity", str(
-			impurity[2]), "qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("numb_molecule_impurity", str(
+			impurity[2]), "qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-		replace("stat_impurity", impurity[3], "qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("stat_impurity", impurity[3], "qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-		replace("dstep_tr_impurity", str(step_trans1),
-				"qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("step_com_impurity", str(step_trans1),
+				"qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-		replace("level_impurity", str(level1), "qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("level_bisection_com_impurity", str(level1), "qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-		replace("potread_impurity", "nopot", "qmc2.input", "qmc3.input")
-		call(["mv", "qmc3.input", "qmc2.input"])
+		replace("pot_read_impurity", "nopot", "qmc_temp1.input", "qmc_temp.input")
+		call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	call(["mv", "qmc2.input", "qmc.input"])
+	call(["mv", "qmc_temp1.input", "qmc.input"])
 
 
 def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
@@ -1465,7 +1468,7 @@ def job_submission(
 			file_rotdens = rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead) + ".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
-			path_Density = dir_run_input_pimc + "/"
+			propagator_path = dir_run_input_pimc + "/"
 		else:
 			iodevn = spin_isomer
 			jmax = 70
@@ -1502,7 +1505,7 @@ def job_submission(
 					  dir_dens + file_rotdens_mod + ".eng"])
 				call(["cp", dir_dens + file_rotdens + ".esq",
 					  dir_dens + file_rotdens_mod + ".esq"])
-			path_Density = dir_dens + "/"
+			propagator_path = dir_dens + "/"
 			call(["cp", "initial_euler_angles_and_com.txt", dir_run_input_pimc])
 
 		if (crystal):
@@ -1600,7 +1603,7 @@ def job_submission(
 				  dir_dens + file_rotdens_mod + ".eng"])
 			call(["cp", dir_dens + file_rotdens + ".esq",
 				  dir_dens + file_rotdens_mod + ".esq"])
-		path_Density = dir_dens + "/"
+		propagator_path = dir_dens + "/"
 
 	# For qmc.imput
 	get_input_file(
@@ -1626,7 +1629,7 @@ def job_submission(
 		rotor_type,
 		translational_move,
 		rotational_move,
-		path_Density,
+		propagator_path,
 		impurity,
 		step_com_impurity,
 		level_impurity)

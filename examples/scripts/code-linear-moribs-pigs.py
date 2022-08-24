@@ -41,18 +41,23 @@ if (job_type == "analysis"):
 extra_name = '""'
 
 space = " "
+dir_name = "linear-rotors"
+original_file_name = module_path + "submission_analysis.py"
+temp_file_name = "script_submission_analysis.py"
+temp_file_name1 = "script_submission_analysis-" + dir_name + ".py"
 for rcom in rlist:
-	dir_name = "linear-rotors"
-	original_file_name = module_path + "submission_analysis.py"
-	temp_file_name = "script_submission_analysis.py"
 	support.replace(
 		"name_of_output_directory",
 		dir_name,
 		original_file_name,
 		temp_file_name)
 
-	temp_file_name1 = "script_submission_analysis-" + dir_name + ".py"
-	support.replace("extra_name", extra_name, temp_file_name, temp_file_name1)
+	support.replace(
+		"extra_name", 
+		extra_name, 
+		temp_file_name, 
+		temp_file_name1)
+
 	call(["rm", temp_file_name])
 
 	rcom="{:3.2f}".format(rcom)
