@@ -545,7 +545,6 @@ for particle_a in particle_a_list:
 				variable = tau
 
 			execution_bead_dir_name = working_dir_name + "-Trotter-Number-" + str(numb_bead)
-			print(execution_bead_dir_name)
 
 			'''
 			if (status == "rename"):
@@ -577,8 +576,8 @@ for particle_a in particle_a_list:
 					input_dir,
 					execution_file,
 					rpt_val,
-					numb_bead,
 					ibead,
+					numb_bead,
 					step_rot_move,
 					step_com_move,
 					level_bisection,

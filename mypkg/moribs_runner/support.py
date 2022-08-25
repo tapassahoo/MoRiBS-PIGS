@@ -6,6 +6,7 @@ import decimal
 import numpy as np
 from numpy import *
 import math
+from pathlib import Path
 import get_beads_and_mc_steps as mc
 import mypkg.asymrho_runner.support as asym
 import mypkg.symrho_runner.support as sym
@@ -46,11 +47,21 @@ def makeexecutionfile(input_dir, method, ent_method, source_dir_exe):
 	os.chdir(execution_file_dir)
 	call(["make", "-f", "Makefile-GNU", "clean"])
 	call(["make", "-f", "Makefile-GNU"])
+	path = Path(execution_file_dir + "pimc")
+
 	print("")
 	print("")
-	print("The compilation is successful.")
+	print("****************** Important message *******************")
 	print("")
-	print("")
+	if path.is_file():
+		print(" ---- The compilation is successful. ----")
+		print("")
+		print("********************************************************")
+	else:
+		print(f' ---- The file {execution_file_dir}pimc does not exist ---- ')
+		os.chdir(input_dir)
+		print("********************************************************")
+		exit()
 	os.chdir(input_dir)
 
 
@@ -1146,7 +1157,7 @@ def get_input_file(
 	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if rotational_move:
-		replace("rotor_type_input", rotor_type, "qmc_temp1.input", "qmc_temp.input")
+		replace("molecule_type_input", rotor_type, "qmc_temp1.input", "qmc_temp.input")
 	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	if rotational_move:
@@ -1154,6 +1165,10 @@ def get_input_file(
 	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	replace("numb_molecule_input", str(numb_molecule),
+			"qmc_temp1.input", "qmc_temp.input")
+	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
+
+	replace("numb_rotor_input", str(numb_molecule),
 			"qmc_temp1.input", "qmc_temp.input")
 	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
@@ -1276,7 +1291,6 @@ def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
 	'''
 	This function generates rotational density matrix - linden.dat
 	'''
-	#temperature1	= dropzeros(temperature)
 	temperature1 = "%8.6f" % temperature
 	if (method == 'PIMC'):
 		numb_bead1 = numb_bead
@@ -1284,10 +1298,10 @@ def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
 		numb_bead1 = numb_bead - 1
 	command_linden_run = source_dir_exe + "linear_prop/linden.x " + \
 		str(temperature) + " " + str(numb_bead1) + " " + \
-		str(GetBconst(molecule)) + " 150000 -1"
+		str(GetBconst(molecule)) + " 15000 -1"
 	system(command_linden_run)
 	file_rotdens = molecule + "_T" + \
-		str(temperature1) + "t" + str(numb_bead) + ".rot"
+		str(temperature1) + "t" + str(numb_bead1) + ".rot"
 	call(["mv", "linden.out", file_rotdens])
 
 
@@ -1366,7 +1380,7 @@ def jobstring_scratch(
 #PBS -l wall_time=%s
 ##PBS -q medium
 #PBS -l %s
-#PBS -o %s%s.out
+#PBS -o %s%s.log
 #PBS -e %s%s.err
 export OMP_NUM_THREADS=%s
 rm -rf %s
@@ -1394,8 +1408,8 @@ def job_submission(
 		input_dir,
 		execution_file,
 		rpt_val,
-		numb_bead,
 		ibead,
+		numb_bead,
 		step_rot_move,
 		step_com_move,
 		level_bisection,
@@ -1426,6 +1440,7 @@ def job_submission(
 		impurity,
 		step_com_impurity,
 		level_impurity):
+
 	arg1 = rpt_val
 	step1_trans = step_com_move[ibead]
 	level1 = level_bisection[ibead]
@@ -1445,10 +1460,8 @@ def job_submission(
 	if not restart_bool:
 		os.chdir(output_dir_path)
 		if (os.path.isdir(execution_bead_dir_name)):
-			print("")
-			print("")
+			print("====")
 			print("Error message")
-			print("")
 			print("")
 			printingMessage = "Remove " + str(output_dir_path) + str(execution_bead_dir_name)
 			print(printingMessage)
@@ -1465,8 +1478,12 @@ def job_submission(
 
 		temperature1 = "%8.6f" % temperature
 		if (rotor_type == "LINEAR"):
+			if (method == 'PIMC'):
+				numb_bead1 = numb_bead
+			else:
+				numb_bead1 = numb_bead - 1
 			file_rotdens = rotor + "_T" + \
-				str(temperature1) + "t" + str(numb_bead) + ".rot"
+				str(temperature1) + "t" + str(numb_bead1) + ".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
 			propagator_path = dir_run_input_pimc + "/"
 		else:
@@ -1647,7 +1664,6 @@ def job_submission(
 			fwrite.write(
 				jobstring_scratch_cpu(
 					job_name_temp,
-					ibead,
 					numb_molecule,
 					execution_bead_dir_name_path,
 					rotor,
@@ -1666,7 +1682,6 @@ def job_submission(
 					server_name,
 					dir_run,
 					job_name_temp,
-					ibead,
 					numb_molecule,
 					execution_bead_dir_name_path,
 					rotor,
@@ -1687,7 +1702,6 @@ def job_submission(
 				server_name,
 				dir_run,
 				job_name_temp,
-				ibead,
 				numb_molecule,
 				execution_bead_dir_name_path,
 				rotor,
@@ -1709,8 +1723,8 @@ def job_submission(
 
 	if (cpu_run == "CPU"):
 		call(["chmod", "755", fname])
-		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(ibead)+" & "
-		command_pimc_run = "./" + fname + ">outpimc" + str(ibead) + " & "
+		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(numb_bead)+" & "
+		command_pimc_run = "./" + fname + ">outpimc" + str(numb_bead) + " & "
 		print(command_pimc_run)
 		system(command_pimc_run)
 	else:
@@ -1772,7 +1786,6 @@ def jobstring_sbatch(
 		server_name,
 		dir_run,
 		file_name,
-		value,
 		numb_molecule,
 		execution_bead_dir_name_path,
 		molecule,
@@ -1807,7 +1820,7 @@ def jobstring_sbatch(
 			thread = 1
 			wall_time = "03-00:00"
 
-	job_name = file_name + str(value)
+	job_name = file_name + str(numb_bead)
 	omp_thread = str(thread)
 	output_dir = execution_bead_dir_name_path + "/results"
 	temperature1 = "%8.6f" % temperature
@@ -1815,10 +1828,10 @@ def jobstring_sbatch(
 		"_T" + str(temperature1) + "t" + str(numb_bead) + ".*"
 	log_file_path = dir_run_input_pimc + "/" + job_name
 
-	input_file = dir_run_input_pimc + "/qmcbeads" + str(value) + ".input"
+	qmc_input = "qmc_trotter_number" + str(numb_bead) + ".input"
+	input_file = dir_run_input_pimc + "/" + qmc_input
 	execution_file = dir_run_input_pimc + "/pimc"
 	input_file1 = dir_run_input_pimc + "/initial_euler_angles_and_com.txt"
-	qmc_input = "qmcbeads" + str(value) + ".input"
 
 	if (status_cagepot):
 		cagepot_file = dir_run_input_pimc + "/hfc60.pot"
@@ -1842,20 +1855,20 @@ def jobstring_sbatch(
 	print("")
 	print("")
 	print("")
-	print("*****************Important Notice***********************")
+	print("*****************Important Note*************************")
 	print("")
-	print("Full path of the directory where the submitted job is running - ")
+	print("The full path of the directory where the submitted job is running is given below:")
 	print(execution_bead_dir_name_path)
 	print("")
-	print("Full path of the directory where all the outputs of MoRiBs are stored - ")
+	print("The full path of the directory where all the outputs are stored is geven below:")
 	print(output_dir)
 	print("")
-	print("Informations about all types of acceptance ratios of Monte Carlo simulations are saved at - ")
-	print(log_file_path + ".out")
+	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
+	print(log_file_path + ".log")
 	print("")
-	print("Number of OpenMP thread used = " + str(thread))
+	print("iThe number of OpenMP threads used = " + str(thread))
 	print("")
-	print("After the job is completed successfully, the directory where the job was running is moved to - ")
+	print("The outputs exist in the below-mentioned directory after the job is executed successfully.")
 	print(final_dir_in_work)
 	print("")
 	print("********************************************************")
@@ -1865,7 +1878,7 @@ def jobstring_sbatch(
 
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
-#SBATCH --output=%s.out
+#SBATCH --output=%s.log
 #SBATCH --time=%s
 %s
 #SBATCH --constraint=broadwell
@@ -1889,7 +1902,7 @@ time ./pimc
 
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s
-#SBATCH --output=%s.out
+#SBATCH --output=%s.log
 #SBATCH --time=%s
 %s
 #SBATCH --mem-per-cpu=8192mb
