@@ -1273,9 +1273,8 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
 
 	double spot = 0.0;
 
-    double weight;
-	weight = 1.0;
-    if (it == 0 || it == (NumbRotTimes - 1)) weight = 0.5;
+    double weight=1.0;
+    if ((it == 0) || (it == (NumbRotTimes - 1))) weight = 0.5;
 
 	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb > 1) )
 	{
@@ -1359,7 +1358,7 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
         		spot += weight*PotFunc(atom0, atom1, Eulang0, Eulang1, it);
             }  //stype
         } //loop over atom1 (molecules)
-    }
+    } // for multiple rotors
 
 	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb == 1) )
 	{
