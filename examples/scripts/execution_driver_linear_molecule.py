@@ -40,7 +40,7 @@ if (job_type == "analysis"):
 
 extra_name = '""'
 
-space = " "
+blank_blank = " "
 dir_name = "linear-rotors"
 original_file_name = module_path + "submission_analysis.py"
 temp_file_name = "script_submission_analysis.py"
@@ -64,20 +64,20 @@ for rcom in rlist:
 	field_strength = 20.0 # Unit inverse of Kelvin
 
 	cmd_run = (
-		"python" + space + temp_file_name1 + space
-		+ job_type + space
-		+ method + space
-		+ system + space
-		+ parameter_name + space
-		+ str(parameter_value) + space
-		+ "--rotor" + space + rotor +space
-		+ "--rot_move" + space
-		+ "--nmolecule" + space + str(nmolecule) + space
-		+ "--spin_isomer" + space + str(spin_isomer) + space
-		+ "--rpt" + space + str(rcom) + space
-		+ "--dipole_moment" + space + str(field_strength) + space
-		+ "--nblock" + space + str(nblock) + space
-		+ "--npass" + space + str(npass) + space
+		"python" + blank_space + temp_file_name1 + blank_space
+		+ job_type + blank_space
+		+ method + blank_space
+		+ system + blank_space
+		+ parameter_name + blank_space
+		+ str(parameter_value) + blank_space
+		+ "--rotor" + blank_space + rotor +blank_space
+		+ "--rot_move" + blank_space
+		+ "--nmolecule" + blank_space + str(nmolecule) + blank_space
+		+ "--spin_isomer" + blank_space + str(spin_isomer) + blank_space
+		+ "--rpt" + blank_space + str(rcom) + blank_space
+		+ "--dipole_moment" + blank_space + str(field_strength) + blank_space
+		+ "--nblock" + blank_space + str(nblock) + blank_space
+		+ "--npass" + blank_space + str(npass) + blank_space
 	)
 
 	print(cmd_run)

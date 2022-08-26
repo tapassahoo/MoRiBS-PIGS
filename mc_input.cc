@@ -473,7 +473,7 @@ void IOReadParams(const char in_file[],int & mc_status)
    {
       cout << setw(w) << MCAtom[type].type << BLANK;
       cout << setw(w) << MCAtom[type].numb << BLANK;
-      cout<<"MCAtom[type].molecule   "<<MCAtom[type].molecule<<endl;
+      cout<<"MCAtom[type].molecule   "<<MCAtom[type].molecule<<BLANK;
 
       cout << setw(10) << STATISTICS[MCAtom[type].stat] << BLANK;
 

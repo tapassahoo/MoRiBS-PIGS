@@ -168,8 +168,6 @@ Distribution = "unSwap";
 
 	int restart = 0;
 	IOReadParams(FINPUT,restart); // read input parameters 
-	cout<<"Dr. Tapas Sahoo  I am here"<<endl;
-	exit(111);
 // get the number of rotational steps treated by worker CPUs
 // chunksize = NumbRotTimes / numprocs;
 
@@ -375,6 +373,8 @@ ParamsPotential();
 		cout<<" Caleng value "<<spot<<endl;
 #endif
 
+	cout<<"Dr. Tapas Sahoo  I am here"<<endl;
+	exit(111);
 //--------------------------------------------------------
 
 //PIMCRESTART begins here//

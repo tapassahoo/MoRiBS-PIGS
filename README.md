@@ -91,4 +91,8 @@ Another important output is output.xyz where all the instantaneous values of rot
 
 The output.xyz file is required to plot order parameters, angular distribution functions and <O-H..O distributions.
  
+### An alternative way of the simulation
 
+Here I discuss how one can use our code like a black box for the simulation.
+
+	1: execution_driver_linear_molecule.py
