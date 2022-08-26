@@ -5561,7 +5561,13 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 double PotFunc(const double *Eulang0)
 {
 	/*
-	Here DipoleMoment is acting as a field and its unit is Kelvin^-1. The field is -F*Cos(theta).
+	The form of the potential is taken as 
+	V(cos(theta))=-F*cos(theta), 
+	where the quantity F is the field strength, 
+	and its unit is the inverse of kelvin.
+
+	Note: In this code, the magnitude of the parameter 
+	includes field strength called "DipoleMoment".
 	*/
     double PotReturn = -DipoleMoment*cos(Eulang0[CTH]);
 #ifdef POTZERO

@@ -40,7 +40,7 @@ if (job_type == "analysis"):
 
 extra_name = '""'
 
-blank_blank = " "
+blank_space = " "
 dir_name = "linear-rotors"
 original_file_name = module_path + "submission_analysis.py"
 temp_file_name = "script_submission_analysis.py"

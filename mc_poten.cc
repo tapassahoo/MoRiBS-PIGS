@@ -613,7 +613,10 @@ void init_rotdens(int type)
 
     string  fname = MCAtom[type].type;
 
-    stringstream time; time << NumbRotTimes;                  // number of time slices 
+	double NumbRotTimesDens;
+	if (PIMC_SIM) NumbRotTimesDens=NumbRotTimes;
+	else NumbRotTimesDens=(NumbRotTimes-1);
+    stringstream time; time << NumbRotTimesDens;                  // number of time slices 
 //    stringstream temp; temp << Temperature*Units.temperature; // temperature
     stringstream temp; temp << std::fixed << std::setprecision(6)<<Temperature*Units.temperature; // temperature
 

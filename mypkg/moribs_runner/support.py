@@ -1291,6 +1291,9 @@ def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
 	'''
 	This function generates rotational density matrix - linden.dat
 	'''
+	print("********************************************************")
+	print("          Generation of rotational propagator           ")
+	print("********************************************************")
 	temperature1 = "%8.6f" % temperature
 	if (method == 'PIMC'):
 		numb_bead1 = numb_bead
@@ -1463,8 +1466,8 @@ def job_submission(
 			print("====")
 			print("Error message")
 			print("")
-			printingMessage = "Remove " + str(output_dir_path) + str(execution_bead_dir_name)
-			print(printingMessage)
+			print_message = "Remove " + str(output_dir_path) + str(execution_bead_dir_name)
+			print(print_message)
 			os.chdir(input_dir)
 			return
 
@@ -1537,8 +1540,8 @@ def job_submission(
 			print("Error message")
 			print("")
 			print("")
-			printingMessage = output_dir_path + execution_bead_dir_name + "  --- This directory is absent."
-			print(printingMessage)
+			print_message = output_dir_path + execution_bead_dir_name + "  --- This directory is absent."
+			print(print_message)
 			os.chdir(input_dir)
 			return
 
@@ -1547,8 +1550,8 @@ def job_submission(
 
 		if "slurmstepd" not in open(logout_file).read():
 			if "real" not in open(logout_file).read():
-				printingMessage = output_dir_path + execution_bead_dir_name + "  --- This job is running."
-				print(printingMessage)
+				print_message = output_dir_path + execution_bead_dir_name + "  --- This job is running."
+				print(print_message)
 				os.chdir(input_dir)
 				return
 
@@ -1728,11 +1731,13 @@ def job_submission(
 		print(command_pimc_run)
 		system(command_pimc_run)
 	else:
-		#call(["qsub", fname])
 		if (partition_name == user_name):
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
+	print("***************** Successfully submitted ***************")
+	print("")
+	print("")
 
 	os.chdir(input_dir)
 
@@ -1866,14 +1871,12 @@ def jobstring_sbatch(
 	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
 	print(log_file_path + ".log")
 	print("")
-	print("The number of OpenMP threads used = " + str(thread))
+	print("The number of threads used = " + str(thread))
 	print("")
 	print("The outputs exist in the below-mentioned directory after the job is executed successfully.")
 	print(final_dir_in_work)
 	print("")
 	print("********************************************************")
-	print("")
-	print("")
 	print("")
 
 	job_string = """#!/bin/bash
@@ -2539,8 +2542,8 @@ def GetRenamingFunc(
 	if (os.path.isdir(execution_bead_dir_name)):
 		call(["mv", execution_bead_dir_name, folder_renamed])
 		print(dir_input_pimc_renamed)
-		printingMessage = "move " + str(output_dir_path) + str(execution_bead_dir_name)
-		print(printingMessage)
+		print_message = "move " + str(output_dir_path) + str(execution_bead_dir_name)
+		print(print_message)
 	os.chdir(input_dir)
 
 

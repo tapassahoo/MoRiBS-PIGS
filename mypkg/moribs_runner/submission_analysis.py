@@ -337,13 +337,13 @@ for particle_a in particle_a_list:
 
 		if (server_name == "graham"):
 			dir_run_input_pimc = "/scratch/" + user_name + \
-				"/" + output_file_dir + working_dir_name + "-PIMC"
+				"/" + output_file_dir + working_dir_name + "-Logs"
 			dir_input_pimc_renamed = "/scratch/" + \
-				user_name + "/" + output_file_dir + file2_name + "-PIMC"
+				user_name + "/" + output_file_dir + file2_name + "-Logs"
 		else:
-			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-PIMC"
+			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
 			dir_input_pimc_renamed = "/work/" + user_name + \
-				"/" + output_file_dir + file2_name + "-PIMC"
+				"/" + output_file_dir + file2_name + "-Logs"
 
 	'''
 	# ===============================================================================
@@ -355,9 +355,9 @@ for particle_a in particle_a_list:
 	if (status == "submission"):
 		if (server_name == "graham"):
 			dir_run_input_pimc = "/scratch/" + user_name + \
-				"/" + output_file_dir + working_dir_name + "-PIMC"
+				"/" + output_file_dir + working_dir_name + "-Logs"
 		else:
-			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-PIMC"
+			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
 
 		if not os.path.isdir(dir_run_input_pimc):
 			call(["mkdir", "-p", dir_run_input_pimc])

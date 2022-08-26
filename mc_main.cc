@@ -373,8 +373,6 @@ ParamsPotential();
 		cout<<" Caleng value "<<spot<<endl;
 #endif
 
-	cout<<"Dr. Tapas Sahoo  I am here"<<endl;
-	exit(111);
 //--------------------------------------------------------
 
 //PIMCRESTART begins here//
