@@ -1080,15 +1080,8 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
    	cost += (step*(rand1-0.5));
    	phi  += (step*(rand2-0.5));
 
-   	if (cost >  1.0)
-   	{
-      	cost = 2.0 - cost;
-   	}
-
-   	if (cost < -1.0)
-   	{
-       	cost = -2.0 - cost;
-   	}
+   	if (cost >  1.0) cost = 2.0 - cost;
+   	if (cost < -1.0) cost = -2.0 - cost;
 
 	if (abs(cost) > 2.0) 
 	{
@@ -1128,19 +1121,10 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	{
         if (it1 == 0 || it1 == (NumbRotTimes - 1))
         {
-            if (it1 == 0)
-            {
-                dens_old = SRotDens(p1, type);
-            }
-            else
-            {
-                dens_old = SRotDens(p0, type);
-            }
+            if (it1 == 0) dens_old = SRotDens(p1, type);
+            else dens_old = SRotDens(p0, type);
         }
-        else
-        {
-            dens_old = SRotDens(p0,type)*SRotDens(p1,type);
-        }
+        else dens_old = SRotDens(p0,type)*SRotDens(p1,type);
 	}
     else if(RotDenType == 1)
     {
@@ -1163,7 +1147,6 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
-   		//pot_old  += (PotRotEnergyPIGS(gatom,MCCosine,it));
    		pot_old  += (PotRotEnergyPIGS(gatom,EulangOld,it,type));
 	}
 
@@ -1185,19 +1168,10 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	{
         if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
         {
-            if (it1 == 0)
-            {
-                dens_new = SRotDens(p1, type);
-            }
-            else
-            {
-                dens_new = SRotDens(p0, type);
-            }
+            if (it1 == 0) dens_new = SRotDens(p1, type);
+            else dens_new = SRotDens(p0, type);
         }
-        else
-        {
-            dens_new = SRotDens(p0,type)*SRotDens(p1,type);
-        }
+        else dens_new = SRotDens(p0,type)*SRotDens(p1,type);
 	}
 	else if(RotDenType == 1)
 	{
@@ -1217,7 +1191,6 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
-		//pot_new  += (PotRotEnergyPIGS(gatom,newcoords,it));
 		pot_new  += (PotRotEnergyPIGS(gatom,EulangNew,it,type));
 	}
 
@@ -1225,8 +1198,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 	if(RotDenType == 0)
 	{
-		if (dens_old>RZERO)
-			rd = dens_new/dens_old;
+		if (dens_old>RZERO) rd = dens_new/dens_old;
 		else rd = 1.0;
 
 		rd *= exp(- MCTau*(pot_new-pot_old));
@@ -1271,11 +1243,10 @@ double PotRotEnergyPIGS(int atom0, double *Eulang0, int it, int type)
 	int offset0 =  NumbTimes*atom0;
 	int t0  = offset0 + it;
 
-	double spot = 0.0;
-
     double weight=1.0;
     if ((it == 0) || (it == (NumbRotTimes - 1))) weight = 0.5;
 
+	double spot = 0.0;
 	if ( (MCAtom[type].molecule == 4) && (MCAtom[type].numb > 1) )
 	{
         for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
