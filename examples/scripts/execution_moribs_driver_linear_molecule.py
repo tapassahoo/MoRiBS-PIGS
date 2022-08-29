@@ -14,7 +14,7 @@ method      = "PIGS"
 
 system      = "HF"
 rotor       = "HF"
-spin_isomer = 0
+spin_isomer = int(-1)
 
 parameter_name  = "beta"
 parameter_value = 0.2
@@ -22,11 +22,9 @@ parameter_value = 0.2
 nmolecule   = 1
 nblock      = 20000
 npass       = 200
-# field_strength = 20.0 # Unit inverse of Kelvin
-
 
 if (job_type == "submission"):
-	rlist = np.arange(2.5, 10.1, 10.1, dtype=float)
+	rlist = np.arange(3.0, 10.1, 1.0, dtype=float)
 
 if (job_type == "analysis"):
 	if (variable_name == "beta"):
