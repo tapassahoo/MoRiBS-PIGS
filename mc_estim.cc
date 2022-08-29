@@ -5487,74 +5487,20 @@ double PotFunc(int atom0, int atom1, const double *Eulang0, const double *Eulang
 
 	double DipoleMomentInAU = DipoleMoment/AuToDebye; // DipoleMoment in Debye
 
-	double R12[NDIM];
+	double R12Vec[NDIM];
 	double dr2 = 0.0;
-	double DipoleMoment0[NDIM], DipoleMoment1[NDIM];
     for (int id = 0; id < NDIM; id++)
 	{
-		DipoleMoment0[id] = 0.0;
-		DipoleMoment1[id] = 0.0;
-        R12[id]  = (MCCoords[id][t1] - MCCoords[id][t0]);
-		R12[id] /= BOHRRADIUS;
-        dr2     += (R12[id]*R12[id]);
+        R12Vec[id]  = (MCCoords[id][t1] - MCCoords[id][t0]);
+		R12Vec[id] /= BOHRRADIUS;
+        dr2     += (R12Vec[id]*R12Vec[id]);
 	}
 
-	double RCOM = sqrt(dr2);	
-	double R2   = RCOM*RCOM;
-	double R5   = R2*R2*RCOM;
+	double r3 = dr2*sqrt(dr2);	
 
-#ifdef SHORTFORM
-	double R3         = R2*RCOM; 
-    double PreFactor  = DipoleMomentInAU*DipoleMomentInAU/R3;
+    double PreFactor = DipoleMomentInAU*DipoleMomentInAU/r3;
     double potential = PreFactor*(sin(Eulang0[CTH])*sin(Eulang1[CTH])*cos(Eulang0[PHI]-Eulang1[PHI])-2.0*cos(Eulang0[CTH])*cos(Eulang1[CTH]));
-#else
-	double dm[NDIM];
-	dm[0] = 0.0;
-	dm[1] = 0.0;
-	dm[2] = DipoleMomentInAU;
-
-	double RotMat0[NDIM*NDIM];
-	for (int i = 0; i < (NDIM*NDIM); i++) RotMat0[i] = 0.0;
-	UnitVectors(Eulang0, RotMat0);
-
-	double RotMat1[NDIM*NDIM];
-	for (int i = 0; i < (NDIM*NDIM); i++) RotMat1[i] = 0.0;
-	UnitVectors(Eulang1, RotMat1);
-
-	double delta[NDIM*NDIM];
-    for (int i = 0; i < NDIM; i++)
-	{
-		for (int j = 0; j < NDIM; j++)
-		{
-			int jj = j + i*NDIM;
-			DipoleMoment0[i] += RotMat0[jj]*dm[j];
-			DipoleMoment1[i] += RotMat1[jj]*dm[j];
-
-			if (i == j)
-            {
-                delta[jj] = 1.0;
-            }
-            else
-            {
-                delta[jj] = 0.0;
-            }
-		}
-	}
-
-	double potential = 0.0;
-	for (int i = 0; i < NDIM; i++)
-	{
-		for (int j = 0; j < NDIM; j++)
-		{
-			int jj = j + i*NDIM;
-        	potential += - DipoleMoment0[i]*DipoleMoment1[j]*(3.0*R12[i]*R12[j] - R2*delta[jj])/R5;
-		}
-	}
-#endif
-    double PotReturn = potential*AuToKelvin;
-#ifdef POTZERO
-	PotReturn = 0.0;
-#endif
+	double PotReturn = potential*AuToKelvin;
     return PotReturn;
 }
 
