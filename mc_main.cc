@@ -834,16 +834,8 @@ void MCResetBlockAveragePIGS(void)
 	ResetMCCounts();
 	ResetQWCounts();
 
-	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
 	_btot      = 0.0;
-	_bkin      = 0.0;
-
-	_brot      = 0.0;
-	_brotsq    = 0.0;
-	_bCv       = 0.0;
-	_bCv_trans = 0.0;
-	_bCv_rot   = 0.0;
 
 	PrintXYZprl = 0;
 
@@ -961,34 +953,8 @@ void MCGetAveragePIGS(void)
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
 	double stotal     = GetTotalEnergy();         // Total energy
-	_btot            += stotal;                   // kin+pot
+	_btot            += stotal;        
 	_tot_total       += stotal;
-
-	double srot;
-	if (ROTATION)
-	{
-		if(MCAtom[IMTYPE].molecule == 1)
-		{
-			srot      = GetRotEnergy();           // kin energy
-		}
-
-		if(MCAtom[IMTYPE].molecule == 3)
-		{
-			srot      = GetRotPlanarEnergy();     // kin energy
-		}
-
-		if(MCAtom[IMTYPE].molecule == 2)
-		{
-			//srot          = GetRotE3D();
-			srot          = 0.0;
-		}
-        
-		if(MCAtom[IMTYPE].molecule == 4)
-		{
-			srot      = GetRotEnergyPIGS();           // kin energy
-		}
-		_brot        += srot;
-	}
 
 //  reflect for MF molecule
 	if(IREFLY == 1)
