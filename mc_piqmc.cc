@@ -809,8 +809,7 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 {
 #ifdef DEBUG_PIMC
 	const char *_proc_=__func__;    //  MCRotationsMove() 
-   	if (type != IMTYPE)
-   	nrerror(_proc_,"Wrong impurity type");
+   	if (type != IMTYPE) nrerror(_proc_,"Wrong impurity type");
 
    	if (NDIM != 3)
    	nrerror(_proc_,"Rotational sampling for 3D systems only");
@@ -1060,11 +1059,12 @@ void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double r
 
 void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
 {
+	const char *_proc_=__func__; 
 	int it0 = (it1 - 1);
 	int it2 = (it1 + 1);
 
-   	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
-   	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+   	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1 that refers to the last bead
+   	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0 that refers to the first bead
 
    	int t0 = offset + it0;
    	int t1 = offset + it1;
@@ -1085,7 +1085,8 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 	if (abs(cost) > 2.0) 
 	{
-        cout<<"Upper or lower limit of cost is excided " << cost<<endl;
+		nrerror(_proc_,"The upper or lower limit of cost is exceeded.");
+        cerr<<"The absolute value is "<<cost<<endl;
 		exit(0);
 	}
 
@@ -1119,7 +1120,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 	if(RotDenType == 0)
 	{
-        if (it1 == 0 || it1 == (NumbRotTimes - 1))
+        if ((it1 == 0) || (it1 == (NumbRotTimes - 1)))
         {
             if (it1 == 0) dens_old = SRotDens(p1, type);
             else dens_old = SRotDens(p0, type);
