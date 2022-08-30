@@ -952,7 +952,7 @@ void MCGetAveragePIGS(void)
 	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
-	double stotal     = GetTotalEnergy();         // Total energy
+	double stotal     = GetTotalEnergyPIGS();         // Total energy
 	_btot            += stotal;        
 	_tot_total       += stotal;
 

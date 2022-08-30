@@ -24,6 +24,7 @@ double GetPotEnergy_Densities(void);
 double GetPotEnergyPIGS(void);
 double GetPotEnergyCage(const double *);
 double GetTotalEnergy(void);
+double GetTotalEnergyPIGS(void);
 double GetPotEnergy(void);
 double GetKinEnergy(void);
 double GetPotEnergy_Entanglement(int atom0, int atom1);

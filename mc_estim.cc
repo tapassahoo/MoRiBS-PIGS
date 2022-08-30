@@ -836,6 +836,110 @@ double GetPotEnergyPIGS(void)
 {
 	const char *_proc_=__func__; 
 
+    string stype = MCAtom[IMTYPE].type;
+   	int it = ((NumbTimes-1)/2);
+	double spot = 0.0;
+	if (NumbAtoms > 1)
+	{
+		for (int atom0=0;atom0<(NumbAtoms-1);atom0++)
+		{
+			int type0   = MCType[atom0];
+			int offset0 = NumbTimes*atom0;
+			int t0 = offset0 + it;
+
+			for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
+			{
+				int type1   = MCType[atom1];
+				int offset1 = NumbTimes*atom1;
+				int t1 = offset1 + it;
+
+				if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (NumbAtoms > 1) && (stype==H2O))
+				{
+					double Eulang0[3],Eulang1[3];
+					double com0[3],com1[3];
+					double E_2H2O;
+					double dr[3];
+					for (int id=NDIMinit;id<NDIM;id++)
+				   	{
+						if (MINIMAGE)
+						{
+							dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+							//dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
+							dr[id] -= (Distance*rint(dr[id]/Distance));
+							com0[id]=MCCoords[id][t0];
+							com1[id]=MCCoords[id][t0]-dr[id];
+						}
+						else
+						{
+							com0[id]=MCCoords[id][t0];
+							com1[id]=MCCoords[id][t1];
+						}
+					}
+					int tm0=offset0 + ((NumbRotTimes-1)/2);
+					int tm1=offset1 + ((NumbRotTimes-1)/2);
+					Eulang0[PHI]=MCAngles[PHI][tm0];
+					Eulang0[CHI]=MCAngles[CHI][tm0];
+					Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
+
+					Eulang1[PHI]=MCAngles[PHI][tm1];
+					Eulang1[CHI]=MCAngles[CHI][tm1];
+					Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
+
+					caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
+					spot += E_2H2O;
+				}
+			}
+		}
+	}
+
+	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
+	{
+		double Eulang0[3],Eulang1[3];
+        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+		{
+           	int offset0 = NumbTimes*atom0;
+           	int t0 = offset0 + it;
+
+			if (stype == HF)
+			{
+   				Eulang0[PHI] = MCAngles[PHI][t0];
+   				Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+   				Eulang0[CHI] = 0.0;
+			}
+
+        	for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
+       		{
+            	int offset1 = NumbTimes*atom1;
+            	int t1 = offset1 + it;
+
+            	if (stype == HF)
+            	{
+   					Eulang1[PHI] = MCAngles[PHI][t1];
+   					Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+   					Eulang1[CHI] = 0.0;
+                	spot += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+            	} //stype
+        	}// loop over atoms1 
+       	}// loop over atoms0 
+    }
+    if (MCAtom[IMTYPE].numb == 1) 
+    {
+		double Eulang0[NDIM];
+        int offset0 = 0;
+        int t0  = offset0 + it;
+		Eulang0[PHI] = MCAngles[PHI][t0];
+		Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+		Eulang0[CHI] = 0.0;
+		spot = PotFunc(Eulang0);
+    }
+	double spotReturn = spot;
+	return spotReturn;
+}
+/*
+double GetPotEnergyPIGS(void)
+{
+	const char *_proc_=__func__; 
+
 #ifdef DEBUG_WORM
 	if (Worm.exists)
 	nrerror(_proc_," Only for Z-configurations");
@@ -1028,6 +1132,7 @@ double GetPotEnergyPIGS(void)
             	} //stype
 				*/
 
+				/*
         	}// loop over atoms1 
        	}// loop over atoms0 
     }
@@ -1116,6 +1221,7 @@ double GetPotEnergyPIGS(void)
 		spot = E_nH2O*kcalmoleinvToKelvin;
 	}
 #endif
+*/
 
 /*
 #ifdef MBPOLPOT
@@ -1155,6 +1261,7 @@ double GetPotEnergyPIGS(void)
 #endif
 */
 
+/*
 #ifdef IOWRITE
 #ifndef WATERCLUSTER
 	if (NumbAtoms == 1)
@@ -1192,6 +1299,7 @@ double GetPotEnergyPIGS(void)
 	double spotReturn = spot;
 	return spotReturn;
 }
+*/
 
 double GetPotEnergyPIGSENT(void)
 {
@@ -1780,6 +1888,135 @@ void GetDensitiesEndBeads(void)
     }
 }
 #endif
+
+double GetTotalEnergyPIGS(void)
+{
+    string stype = MCAtom[IMTYPE].type;
+	double spot = 0.0;
+	if (NumbAtoms > 1) 
+	{
+		for (int atom0=0; atom0<(NumbAtoms-1); atom0++)
+		{
+			int type0   = MCType[atom0];
+			int offset0=NumbTimes*atom0;
+
+			for (int atom1=(atom0+1); atom1<NumbAtoms; atom1++)
+			{
+				int type1   = MCType[atom1];
+				int offset1=NumbTimes*atom1;
+
+				double spot_pair=0.0;
+				for (int it=0; it<NumbTimes; it+=(NumbTimes-1))
+				{
+					int t0 = offset0 + it;
+					int t1 = offset1 + it;
+
+					if ((MCAtom[type0].molecule==2) && (MCAtom[type0].molecule == MCAtom[type1].molecule) && (stype=="H2O") && (NumbAtoms > 1))
+					{
+						double Eulang0[3],Eulang1[3];
+						double com0[3],com1[3];
+						double E_2H2O;
+						double dr[3];
+						for (int id=NDIMinit;id<NDIM;id++)
+					   {
+							if (MINIMAGE)
+							{
+								dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+								//dr[id] -= (BoxSize*rint(dr[id]/BoxSize));
+								dr[id] -= (Distance*rint(dr[id]/Distance));
+								com0[id]=MCCoords[id][t0];
+								com1[id]=MCCoords[id][t0]-dr[id];
+							}
+							else
+							{
+								com0[id]=MCCoords[id][t0];
+								com1[id]=MCCoords[id][t1];
+							}
+						}
+
+						int tm0, tm1;
+						if (it == 0)
+						{
+							tm0=offset0;
+							tm1=offset1;
+						} 
+						else if (it == (NumbTimes-1))
+						{
+							tm0=offset0 + (NumbRotTimes-1);
+							tm1=offset1 + (NumbRotTimes-1);
+						}
+						
+						Eulang0[PHI]=MCAngles[PHI][tm0];
+						Eulang0[CHI]=MCAngles[CHI][tm0];
+						Eulang0[CTH]=acos(MCAngles[CTH][tm0]);
+
+						Eulang1[PHI]=MCAngles[PHI][tm1];
+						Eulang1[CHI]=MCAngles[CHI][tm1];
+						Eulang1[CTH]=acos(MCAngles[CTH][tm1]);
+
+						caleng_(com0, com1, &E_2H2O, Eulang0, Eulang1);
+						spot_pair += E_2H2O;
+					}
+				}
+				spot += spot_pair;
+			}
+		}
+	}
+
+	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
+	{
+        for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+		{
+           	int offset0 = NumbTimes*atom0;
+
+        	for (int atom1=(atom0+1);atom1<NumbAtoms;atom1++)
+        	{
+            	int offset1 = NumbTimes*atom1;
+
+        		double spot_pair=0.0;
+            	for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
+				{
+                	int t0 = offset0 + it;
+                	int t1 = offset1 + it;
+                	int tm0=offset0 + it/RotRatio;
+                	int tm1=offset1 + it/RotRatio;
+
+                	if (stype == HF)
+                	{
+						double Eulang0[3], Eulang1[3];
+   						Eulang0[PHI] = MCAngles[PHI][t0];
+   						Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+   						Eulang0[CHI] = 0.0;
+   						Eulang1[PHI] = MCAngles[PHI][t1];
+   						Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+   						Eulang1[CHI] = 0.0;
+                		spot_pair += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+                	} //stype
+				}//loop over beads
+				spot += spot_pair;
+        	}// loop over atoms (molecules)
+        }// loop over atoms (molecules)
+    }
+
+    if (NumbAtoms == 1)
+    {
+        int offset0 = 0;
+
+        spot = 0.0;
+		double Eulang0[NDIM];
+        for (int it = 0; it < NumbTimes; it += (NumbTimes - 1))
+		{
+            int t0  = offset0 + it;
+			Eulang0[PHI] = MCAngles[PHI][t0];
+			Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+			Eulang0[CHI] = 0.0;
+            spot   += PotFunc(Eulang0);
+        }
+    }
+
+	double spotReturn = 0.5*spot;
+	return spotReturn;
+}
 
 double GetTotalEnergy(void)
 {
@@ -5516,9 +5753,6 @@ double PotFunc(const double *Eulang0)
 	includes field strength called "DipoleMoment".
 	*/
     double PotReturn = -DipoleMoment*cos(Eulang0[CTH]);
-#ifdef POTZERO
-	PotReturn = 0.0;
-#endif
     return PotReturn;
 }
 

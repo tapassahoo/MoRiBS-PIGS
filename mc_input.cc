@@ -70,7 +70,7 @@ const char STATUS_STARTBLOCK[] = "STARTBLOCK";
 
 //--------------------------------------------------
 const char IO_DISTANCE[]       = "DISTANCE";
-const char IO_DIPOLEMOMENT[]   = "DIPOLEMOMENT";
+const char IO_DIPOLEMOMENT[]   = "DIPOLE_MOMENT";
 const char IO_NUMBPARTICLE[]   = "NUMBPARTICLE";
 const char IO_TRANSLATION[]    = "TRANSLATION";
 
