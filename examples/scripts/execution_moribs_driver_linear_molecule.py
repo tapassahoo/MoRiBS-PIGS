@@ -9,7 +9,9 @@ import mypkg.moribs_runner.support as support
 module_path = mypkg.moribs_runner.__file__
 module_path = module_path.replace('__init__.py', '')
 
-job_type    = "submission"
+# job_type is two types - "submission" and "analysis"
+#job_type    = "submission"
+job_type    = "analysis"
 method      = "PIGS"
 
 system      = "HF"

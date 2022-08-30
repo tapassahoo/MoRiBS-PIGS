@@ -375,7 +375,6 @@ for particle_a in particle_a_list:
 				support.cagepot(source_dir_exe)
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
-	'''
 	if (status == "analysis"):
 		FileAnalysis = support.GetFileNameAnalysis(
 			method,
@@ -422,6 +421,7 @@ for particle_a in particle_a_list:
 			fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
 			fanalyzeCorr.write(support.fmtAverageOrderParam(status, var_name))
 
+	'''
 		if ((status == "analysis") and ((method == "ENT") and (ENT_ALGR == "WOR"))):
 			fanalyzeEntropy = open(FileAnalysis.SaveEntropy, "a")
 			fanalyzeEntropy.write(
