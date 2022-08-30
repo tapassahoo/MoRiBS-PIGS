@@ -570,7 +570,7 @@ ParamsPotential();
        	if (ENT_SIM) MCResetBlockAveragePIGSENT();
      
        	long int passCount = 0;        // BEGIN NEW MC PASS
-       	long int passTotal = 0;        // total number of Moves = passCount*time 
+       	long int passTotal = 0;        // total number of Moves = passCount*number of beads = passTotal
 
        	while (passCount++ < NumberOfMCPasses) 
        	for (int time=0; time<NumbTimes; time++)
@@ -607,7 +607,7 @@ ParamsPotential();
 		    	PIMCPass(type,time);
 			}
 
-   			if (blockCount>NumberOfEQBlocks)        // skip equilibration steps
+   			if (blockCount>NumberOfEQBlocks)        // skiping the number of blocks after that the system get equilibrated.
    			{
 				// evaluate averages 
            		if (passTotal % MCSKIP_AVERG == 0)   // skip correlated configurations
@@ -836,7 +836,7 @@ void MCResetBlockAveragePIGS(void)
 
 	_dbpot     = 0.0;  //added by Hui Li
 	_bpot      = 0.0;
-	_btot    = 0.0;
+	_btot      = 0.0;
 	_bkin      = 0.0;
 
 	_brot      = 0.0;
