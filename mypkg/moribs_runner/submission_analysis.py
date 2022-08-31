@@ -250,7 +250,12 @@ input_dir = os.getcwd() + "/"
 home = os.path.expanduser("~")
 source_code_dir = "MoRiBS-PIGS/"
 output_file_dir = "name_of_output_directory/"
-final_results_path = home + "/results-of-" + method + "/"
+if (method == "PIGS"):
+	final_results_path = home + "/final-pigs-outputs-for-plotting/"
+elif (method == "PIMC"):
+	final_results_path = home + "/final-pimc-outputs-for-plotting/"
+else:
+	final_results_path = home + "/final-ent-outputs-for-plotting/"
 temp_dir = os.path.dirname(final_results_path)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
@@ -320,7 +325,7 @@ for particle_a in particle_a_list:
 			translational_move,
 			rotational_move,
 			rpt_val,
-			gfact,
+			gfactor,
 			dipolemoment,
 			parameterName,
 			parameter,
@@ -328,7 +333,7 @@ for particle_a in particle_a_list:
 			numbpass,
 			numbmolecules1,
 			molecule,
-			ENT_TYPE,
+			ent_method,
 			particleA,
 			extra_file_name,
 			crystal,
@@ -376,37 +381,36 @@ for particle_a in particle_a_list:
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
 	if (status == "analysis"):
-		FileAnalysis = support.GetFileNameAnalysis(
+		analysis_file_name = support.get_analysis_file_name(
 			method,
 			False,
 			rotor,
 			translational_move,
 			rotational_move,
-			var_name,
 			rpt_val,
-			gfact,
-			dipolemoment,
-			parameterName,
-			parameter,
-			numbblocks,
-			numbpass,
-			numbmolecules1,
-			molecule,
-			ENT_TYPE,
+			gfactor,
+			dipole_moment,
+			parameter_name,
+			parameter_value,
+			numb_block,
+			numb_pass,
+			numb_molecule1,
+			molecular_system,
+			ent_method,
 			preskip,
 			postskip,
 			extra_file_name,
 			final_results_path,
-			particleA,
-			ENT_ALGR)
+			particle_a,
+			ent_algorithm)
 
 		if (method != "ENT"):
-			if preskip >= numbblocks:
+			if preskip >= numb_block:
 				print("")
 				print("Warning!!!!!!!")
 				print(
 					"============================================================================")
-				print("Number of Blocks = " + str(numbblocks))
+				print("Number of Blocks = " + str(numb_block))
 				print("Number of preskip= " + str(preskip))
 				print(
 					"Error message: Number of preskip data must be less than Number of Blocks")
@@ -414,20 +418,20 @@ for particle_a in particle_a_list:
 					"============================================================================")
 				exit()
 
-			fanalyzeEnergy = open(FileAnalysis.SaveEnergy, "a")
-			fanalyzeEnergy.write(
-				support.fmtAverageEnergy(
-					method, status, var_name))
-			fanalyzeCorr = open(FileAnalysis.SaveCorr, "a")
-			fanalyzeCorr.write(support.fmtAverageOrderParam(status, var_name))
+			analyzed_energy_file = open(analysis_file_name.save_file_energy, "a")
+			analyzed_energy_file.write(
+				support.fmt_energy_data(
+					method, parameter_name))
+			analyzed_correlation_file = open(analysis_file_name.save_file_correlation, "a")
+			analyzed_correlation_file.write(support.fmtAverageOrderParam(status, parameter_name))
 
-	'''
-		if ((status == "analysis") and ((method == "ENT") and (ENT_ALGR == "WOR"))):
-			fanalyzeEntropy = open(FileAnalysis.SaveEntropy, "a")
-			fanalyzeEntropy.write(
+		'''
+		if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
+			analyzed_entropy_file = open(analysis_file_name.SaveEntropy, "a")
+			analyzed_entropy_file.write(
 				support.fmtAverageEntropy(
-					status, var_name, ENT_TYPE))
-	'''
+					status, parameter_name, ent_method))
+		'''
 
 	if (method == "ENT"):
 		numb_molecule = 2 * numb_molecule1
@@ -505,8 +509,8 @@ for particle_a in particle_a_list:
 
 				final_dir_in_work = output_dir_path + execution_bead_dir_name
 				try:
-					fanalyzeEnergy.write(
-						support.GetAverageEnergy(
+					analyzed_energy_file.write(
+						support.get_average_energy(
 							method,
 							numbbeads,
 							variable,
@@ -514,7 +518,7 @@ for particle_a in particle_a_list:
 							preskip,
 							postskip,
 							numbblocks))
-					fanalyzeCorr.write(
+					analyzed_correlation_file.write(
 						support.GetAverageOrderParam(
 							method,
 							numbmolecules,
@@ -609,72 +613,74 @@ for particle_a in particle_a_list:
 					step_com_impurity,
 					level_bisection_impurity)
 
-			'''
-			if status == "analysis":
+			if (status == "analysis"):
 
 				final_dir_in_work = output_dir_path + execution_bead_dir_name
 				#support.RemoveFiles(method, numbbeads, temperature, rotor, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
 				try:
-					if ((method == "ENT") and (ENT_ALGR == "WOR")):
-						fanalyzeEntropy.write(
+					if ((method == "ENT") and (ent_algorithm == "WOR")):
+						analyzed_entropy_file.write(
 							support.GetAverageEntropy(
-								numbbeads,
-								variable,
+								numb_bead,
+								parameter_value,
 								final_dir_in_work,
 								preskip,
 								postskip,
-								numbblocks,
-								ENT_TYPE))
+								numb_block,
+								ent_method))
 					if (method != "ENT"):
-						fanalyzeEnergy.write(
-							support.GetAverageEnergy(
+						analyzed_energy_file.write(
+							support.get_average_energy(
 								method,
-								numbbeads,
-								variable,
+								numb_bead,
+								parameter_name,
+								parameter_value,
 								final_dir_in_work,
 								preskip,
 								postskip,
-								numbblocks))
-						fanalyzeCorr.write(
+								numb_block))
+						'''
+						analyzed_correlation_file.write(
 							support.GetAverageOrderParam(
 								method,
-								numbmolecules,
-								numbbeads,
-								variable,
+								numb_molecule,
+								numb_bead,
+								parameter_name,
+								parameter_value,
 								final_dir_in_work,
 								preskip,
 								postskip,
-								numbblocks))
+								numb_block))
+						'''
 				except BaseException:
 					pass
-			'''
 
 	if (status == "analysis") and (method != "ENT"):
-		fanalyzeEnergy.close()
-		fanalyzeCorr.close()
-		call(["cat", FileAnalysis.SaveEnergy])
+		analyzed_energy_file.close()
+		analyzed_correlation_file.close()
+		call(["cat", analysis_file_name.save_file_energy])
 		print("")
 		print("")
-		call(["cat", FileAnalysis.SaveCorr])
+		call(["cat", analysis_file_name.save_file_correlation])
 		print("")
 		print("")
 		# =========================File Checking===============================#
-		SavedFile = FileAnalysis.SaveEnergy
-		support.FileCheck(method, list_nb, var_name, SavedFile)
-		SavedFile = FileAnalysis.SaveCorr
-		support.FileCheck(method, list_nb, var_name, SavedFile)
+		SavedFile = analysis_file_name.save_file_energy
+		support.FileCheck(method, bead_list, parameter_name, SavedFile)
+		SavedFile = analysis_file_name.save_file_correlation
+		support.FileCheck(method, bead_list, parameter_name, SavedFile)
 
-	if ((status == "analysis") and ((method == "ENT") and (ENT_ALGR == "WOR"))):
-		fanalyzeEntropy.close()
-		call(["cat", FileAnalysis.SaveEntropy])
+	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
+		analyzed_entropy_file.close()
+		call(["cat", analysis_file_name.SaveEntropy])
 		print("")
 		print("")
-		SavedFile = FileAnalysis.SaveEntropy
-		support.FileCheck(method, list_nb, var_name, SavedFile)
+		SavedFile = analysis_file_name.SaveEntropy
+		support.FileCheck(method, bead_list, parameter_name, SavedFile)
 
 '''
 if ((status == "analysis") and ((method == "ENT") and (
-		ENT_TYPE == "EXTENDED_ENSMBL") and (ENT_ALGR == "WR"))):
+		ent_method == "EXTENDED_ENSMBL") and (ent_algorithm == "WR"))):
 	print("Final Entropy obtained by employing Ratio Trick")
 	support.GetAverageEntropyRT(
 		particleAList,
@@ -682,9 +688,9 @@ if ((status == "analysis") and ((method == "ENT") and (
 		rotor,
 		translational_move,
 		rotational_move,
-		var_name,
+		parameter_name,
 		rpt_val,
-		gfact,
+		gfactor,
 		dipolemoment,
 		parameterName,
 		parameter,
@@ -692,7 +698,7 @@ if ((status == "analysis") and ((method == "ENT") and (
 		numbpass,
 		numbmolecules1,
 		molecule,
-		ENT_TYPE,
+		ent_method,
 		preskip,
 		postskip,
 		extra_file_name,
@@ -702,5 +708,5 @@ if ((status == "analysis") and ((method == "ENT") and (
 		final_results_path,
 		impurity,
 		ext_ent)
-	support.GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, var_name, rpt_val, gfact, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ENT_TYPE, preskip, postskip, extra_file_name, output_dir_path, variable, crystal)
+	support.GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, parameter_name, rpt_val, gfactor, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, output_dir_path, variable, crystal)
 '''

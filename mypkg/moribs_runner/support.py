@@ -4,7 +4,6 @@ from os import system
 import os
 import decimal
 import numpy as np
-from numpy import *
 import math
 from pathlib import Path
 import get_beads_and_mc_steps as mc
@@ -19,18 +18,17 @@ def error_message(number):
 		exit(0)
 
 
-def errorpropagation(mean, data):
+def error_propagation(mean, data):
 	ndim = len(data)
-	error = np.std(data, ddof=0) / sqrt(ndim)
+	error = np.std(data, ddof=0) / math.sqrt(ndim)
 	return error
 
 
-def maxError_byBining(mean, data, workingNdim):
-	error_message(workingNdim)
-	error = np.zeros(workingNdim)
-	i = 0
-	error[0] = errorpropagation(mean, data)
-	for i in range(1, workingNdim):
+def get_error(mean, data, binary_exponent):
+	error_message(binary_exponent)
+	error = np.zeros(binary_exponent)
+	error[0] = error_propagation(mean, data)
+	for i in range(1, binary_exponent):
 		ndim = int(len(data) / 2)
 		data1 = np.zeros(ndim)
 
@@ -38,7 +36,7 @@ def maxError_byBining(mean, data, workingNdim):
 			data1[j] = 0.5 * (data[2 * j] + data[2 * j + 1])
 
 		data = data1
-		error[i] = errorpropagation(mean, data)
+		error[i] = error_propagation(mean, data)
 	return np.max(error)
 
 
@@ -103,7 +101,7 @@ def levels(number):
 	return level_bisection
 
 
-def GetBconst(rotor):
+def get_rotational_bconstant(rotor):
 	'''
 	This function calculates rotational Bconstant for linear rotor
 	'''
@@ -218,79 +216,80 @@ def file_operations(method, final_dir_in_work, numb_molecule, numb_bead):
 	return flag
 
 
-def fmtAverageEnergy(method, status, variable):
+def fmt_energy_data(method, parameter_name):
 	'''
-	This function gives us the output
+	This function produces formatted output.
 	'''
-	if (variable == "rpt_val"):
-		unit = "(Angstrom)"
-	else:
-		unit = "(1/K)"
+	if (parameter_name == "beta"):
+		variable_name = "tau"
+	if (parameter_name == "tau"):
+		variable_name = "beta"
+	unit = "(1/K)"
 
-	if (status == "analysis"):
-		output = "# Unit of all kind of energies is expessed in Kelvin."
+	output = "# Unit of all kinds of energies is expressed in Kelvin."
+	output += "\n"
+	output += "# "
+	output += "\n"
+	output += "# "
+	if (method == "PIMC"):
+		output += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{rotsq:^16}{cv:^16}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er5:^12}'.format(
+			blocks='nBlocks',
+			beads='nBeads',
+			var=variable_name +
+			' invK',
+			rot='<K>',
+			pot='<V>',
+			tot='<E>',
+			rotsq='<Ksq>',
+			cv='<Cv>',
+			er1='Err-K',
+			er2='Err-V',
+			er3='Err-E',
+			er4='Err-Ksq',
+			er5='Err-Cv',
+		)
 		output += "\n"
-		output += "# "
+		output += '{0:=<170}'.format('#')
 		output += "\n"
-		output += "# "
-		if (method == "PIMC"):
-			output += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{rotsq:^16}{cv:^16}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er5:^12}'.format(
-				blocks='nBlocks',
-				beads='nBeads',
-				var=variable +
-				' invK',
-				rot='<K>',
-				pot='<V>',
-				tot='<E>',
-				rotsq='<Ksq>',
-				cv='<Cv>',
-				er1='Err-K',
-				er2='Err-V',
-				er3='Err-E',
-				er4='Err-Ksq',
-				er5='Err-Cv',
-			)
-			output += "\n"
-			output += '{0:=<170}'.format('#')
-			output += "\n"
 
-		if (method == "PIGS"):
-			output += '{blocks:^10}{beads:^10}{var:^10}{pot:^16}{tot:^16}{er1:^12}{er2:^12}'.format(
-				blocks='nBlocks',
-				beads='nBeads',
-				var=variable +
-				' invK',
-				pot='<V>',
-				tot='<E>',
-				er1='Err-V',
-				er2='Err-E')
-			output += "\n"
-			output += '{0:=<90}'.format('#')
-			output += "\n"
+	if (method == "PIGS"):
+		output += '{blocks:^10}{beads:^10}{var:^10}{pot:^16}{tot:^16}{er1:^12}{er2:^12}'.format(
+			blocks='nBlocks',
+			beads='nBeads',
+			var=variable_name +
+			' invK',
+			pot='<V>',
+			tot='<E>',
+			er1='Err-V',
+			er2='Err-E')
+		output += "\n"
+		output += '{0:=<90}'.format('#')
+		output += "\n"
 
-		if (method == "ENT"):
-			output += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format(
-				'Beads',
-				variable,
-				'Avg. rotational',
-				'Avg. (E - V)',
-				'Avg. Potential',
-				'Avg. Total',
-				'Error of Rotational',
-				'Error of (E - V)',
-				'Error of Potential',
-				'Error of Total')
-			output += "\n"
-			output += '{0:=<90}'.format('#')
-			output += "\n"
+	if (method == "ENT"):
+		output += '{0:^15}{1:^20}{2:^20}{3:^20}{4:^20}{5:^20}{6:^20}{7:^20}{8:^20}{9:^20}'.format(
+			'Beads',
+			variable,
+			'Avg. rotational',
+			'Avg. (E - V)',
+			'Avg. Potential',
+			'Avg. Total',
+			'Error of Rotational',
+			'Error of (E - V)',
+			'Error of Potential',
+			'Error of Total')
+		output += "\n"
+		output += '{0:=<90}'.format('#')
+		output += "\n"
 
-		return output
+	return output
 
 
-def GetAverageEnergy(
+def get_average_energy(
 		method,
 		numb_bead,
-		variable,
+		parameter_name,
+		parameter_value,
 		final_dir_in_work,
 		preskip,
 		postskip,
@@ -298,6 +297,11 @@ def GetAverageEnergy(
 	'''
 	This function gives us the output
 	'''
+	if (parameter_name == "beta"):
+		variable_value = parameter_value/(numb_bead-1)
+	if (parameter_name == "tau"):
+		variable_value = parameter_value*(numb_bead-1)
+
 	if (os.path.isdir(final_dir_in_work)):
 		condition = True
 
@@ -306,15 +310,15 @@ def GetAverageEnergy(
 			file_old_1 = final_dir_in_work + "/results/output.eng_old_1"
 			file_new = final_dir_in_work + "/results/output.eng"
 			if (os.path.isfile(file_old_1)):
-				col_data_new = genfromtxt(
+				col_data_new = np.genfromtxt(
 					final_dir_in_work + "/results/output.eng_old_1")
 				index = int(col_data_new[0, 0])
-				col_data_old = genfromtxt(
+				col_data_old = np.genfromtxt(
 					final_dir_in_work + "/results/output.eng_old")
 				marged_data = np.concatenate(
 					(col_data_old[:index - 1], col_data_new), axis=0)
 
-				col_data_new = genfromtxt(
+				col_data_new = np.genfromtxt(
 					final_dir_in_work + "/results/output.eng")
 				index = int(col_data_new[0, 0])
 				marged_data = np.concatenate(
@@ -324,10 +328,10 @@ def GetAverageEnergy(
 					int(aa[-1]) - postskip), :]
 			elif ((os.path.isfile(file_new)) and (os.path.isfile(file_old_1) == False)):
 				print(final_dir_in_work + " -- Restarted data")
-				col_data_new = genfromtxt(
+				col_data_new = np.genfromtxt(
 					final_dir_in_work + "/results/output.eng")
 				index = int(col_data_new[0, 0])
-				col_data_old = genfromtxt(
+				col_data_old = np.genfromtxt(
 					final_dir_in_work + "/results/output.eng_old")
 				marged_data = np.concatenate(
 					(col_data_old[:index - 1], col_data_new), axis=0)
@@ -335,13 +339,13 @@ def GetAverageEnergy(
 				final_data_set = marged_data[preskip:(
 					int(aa[-1]) - postskip), :]
 			elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
-				final_data_set = genfromtxt(
+				final_data_set = np.genfromtxt(
 					final_dir_in_work +
 					"/results/output.eng_old",
 					skip_header=preskip,
 					skip_footer=postskip)
 		else:
-			final_data_set = genfromtxt(
+			final_data_set = np.genfromtxt(
 				final_dir_in_work +
 				"/results/output.eng",
 				skip_header=preskip,
@@ -361,8 +365,8 @@ def GetAverageEnergy(
 			print(len(col_block))
 			print(final_dir_in_work)
 
-		workingNdim = int(math.log(len(col_tot)) / math.log(2))
-		trunc = int(len(col_tot) - 2**workingNdim)
+		binary_exponent = int(math.log(len(col_tot)) / math.log(2))
+		trunc = int(len(col_tot) - pow(2,binary_exponent))
 
 		col_rot = col_rot[trunc:]
 		col_pot = col_pot[trunc:]
@@ -377,21 +381,21 @@ def GetAverageEnergy(
 		mean_rotsq = np.mean(col_rotsq)
 		mean_Cv1 = np.mean(col_Cv1)
 		mean_Cv2 = np.mean(col_Cv2)
-		mcbeta = variable * numb_bead
+		mcbeta = variable_value * numb_bead
 		mean_Cv = mcbeta * mcbeta * (mean_Cv1 - mean_Cv2 - mean_tot * mean_tot)
 
-		error_rot = maxError_byBining(mean_rot, col_rot, workingNdim - 6)
-		error_pot = maxError_byBining(mean_pot, col_pot, workingNdim - 6)
-		error_tot = maxError_byBining(mean_tot, col_tot, workingNdim - 6)
-		error_rotsq = maxError_byBining(mean_rotsq, col_rotsq, workingNdim - 6)
-		error_Cv1 = maxError_byBining(mean_Cv1, col_Cv1, workingNdim - 6)
-		error_Cv2 = maxError_byBining(mean_Cv2, col_Cv2, workingNdim - 6)
+		error_rot = get_error(mean_rot, col_rot, binary_exponent - 6)
+		error_pot = get_error(mean_pot, col_pot, binary_exponent - 6)
+		error_tot = get_error(mean_tot, col_tot, binary_exponent - 6)
+		error_rotsq = get_error(mean_rotsq, col_rotsq, binary_exponent - 6)
+		error_Cv1 = get_error(mean_Cv1, col_Cv1, binary_exponent - 6)
+		error_Cv2 = get_error(mean_Cv2, col_Cv2, binary_exponent - 6)
 		error_Cv = mcbeta * mcbeta * \
 			(math.sqrt(error_Cv1 * error_Cv1 + error_Cv2 * error_Cv2 +
 					   4.0 * mean_tot * mean_tot * error_tot * error_tot))
 
 		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{rot:^16.6f}{pot:^16.6f}{tot:^16.6f}{rotsq:^16.6f}{Cv:^16.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}'.format(
-			blocks=ncol_block, beads=numb_bead, var=variable, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv)
+			blocks=ncol_block, beads=numb_bead, var=variable_value, rot=mean_rot, pot=mean_pot, tot=mean_tot, rotsq=mean_rotsq, Cv=mean_Cv, er1=error_rot, er2=error_pot, er3=error_tot, er4=error_rotsq, er5=error_Cv)
 		output += "\n"
 
 	if (method == "PIGS"):
@@ -404,8 +408,8 @@ def GetAverageEnergy(
 			print(len(col_block))
 			print(final_dir_in_work)
 
-		workingNdim = int(math.log(len(col_tot)) / math.log(2))
-		trunc = int(len(col_tot) - 2**workingNdim)
+		binary_exponent = int(math.log(len(col_tot)) / math.log(2))
+		trunc = int(len(col_tot) - pow(2, binary_exponent))
 
 		col_pot = col_pot[trunc:]
 		col_tot = col_tot[trunc:]
@@ -413,11 +417,11 @@ def GetAverageEnergy(
 		mean_pot = np.mean(col_pot)
 		mean_tot = np.mean(col_tot)
 
-		error_pot = maxError_byBining(mean_pot, col_pot, workingNdim - 6)
-		error_tot = maxError_byBining(mean_tot, col_tot, workingNdim - 6)
+		error_pot = get_error(mean_pot, col_pot, binary_exponent - 6)
+		error_tot = get_error(mean_tot, col_tot, binary_exponent - 6)
 
 		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{pot:^16.6f}{tot:^16.6f}{er1:^12.6f}{er2:^12.6f}'.format(
-			blocks=ncol_block, beads=numb_bead, var=variable, pot=mean_pot, tot=mean_tot, er1=error_pot, er2=error_tot)
+			blocks=ncol_block, beads=numb_bead, var=variable_value, pot=mean_pot, tot=mean_tot, er1=error_pot, er2=error_tot)
 		output += "\n"
 
 	return output
@@ -499,10 +503,10 @@ def GetAverageOrderParam(
 					final_data_set = marged_data[preskip:(
 						int(aa[-1]) - postskip), :]
 				else:
-					final_data_set = genfromtxt(
+					final_data_set = np.genfromtxt(
 						file_old, usecols=col, skip_header=preskip, skip_footer=postskip)
 			else:
-				final_data_set = genfromtxt(
+				final_data_set = np.genfromtxt(
 					final_dir_in_work +
 					"/results/output.xyz",
 					usecols=col,
@@ -514,8 +518,8 @@ def GetAverageOrderParam(
 		print(ncol_block)
 		print(final_dir_in_work)
 
-	workingNdim = int(math.log(ncol_block) / math.log(2))
-	trunc = int(ncol_block - 2**workingNdim)
+	binary_exponent = int(math.log(ncol_block) / math.log(2))
+	trunc = int(ncol_block - 2**binary_exponent)
 	raw_data = np.delete(final_data_set, 0, 1)
 
 	if (numb_molecule == 2):
@@ -526,7 +530,7 @@ def GetAverageOrderParam(
 		eiz = np.sum(raw_data1[trunc:, 2:numb_molecule - 3],
 					 axis=1) / len([i for i in range(2, numb_molecule - 2)])
 	mean_eiz = np.mean(eiz)
-	error_eiz = maxError_byBining(mean_eiz, eiz, workingNdim - 6)
+	error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
 
 	if (numb_molecule == 2):
 		paireiej = [i for i in range(numb_molecule - 1)]
@@ -538,7 +542,7 @@ def GetAverageOrderParam(
 		eiejz += np.multiply(raw_data[trunc:, i],
 							 raw_data[trunc:, i + 1]) / norm_eiejz
 	mean_eiejz = np.mean(eiejz)
-	error_eiejz = maxError_byBining(mean_eiejz, eiejz, workingNdim - 6)
+	error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
 
 	output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
 		blocks=ncol_block, beads=numb_bead, var=variable, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
@@ -625,8 +629,8 @@ def GetAverageOrderParam(method,numb_molecule,numb_bead,variable,final_dir_in_wo
 				print(len(col_block))
 				print(final_dir_in_work)
 
-		workingNdim   = int(math.log(len(col_eiz))/math.log(2))
-		trunc		 = int(len(col_eiz)-2**workingNdim)
+		binary_exponent   = int(math.log(len(col_eiz))/math.log(2))
+		trunc		 = int(len(col_eiz)-2**binary_exponent)
 
 		col_eiejx = col_eiejx[trunc:]
 		col_eiejy = col_eiejy[trunc:]
@@ -638,10 +642,10 @@ def GetAverageOrderParam(method,numb_molecule,numb_bead,variable,final_dir_in_wo
 		mean_eiejz = np.mean(col_eiejz)
 		mean_eiej = np.mean(col_eiej)
 
-		error_eiejx = maxError_byBining(mean_eiejx, col_eiejx, workingNdim-6)
-		error_eiejy = maxError_byBining(mean_eiejy, col_eiejy, workingNdim-6)
-		error_eiejz = maxError_byBining(mean_eiejz, col_eiejz, workingNdim-6)
-		error_eiej = maxError_byBining(mean_eiej, col_eiej, workingNdim-6)
+		error_eiejx = get_error(mean_eiejx, col_eiejx, binary_exponent-6)
+		error_eiejy = get_error(mean_eiejy, col_eiejy, binary_exponent-6)
+		error_eiejz = get_error(mean_eiejz, col_eiejz, binary_exponent-6)
+		error_eiej = get_error(mean_eiej, col_eiej, binary_exponent-6)
 
 		col_eix = col_eix[trunc:]
 		col_eiy = col_eiy[trunc:]
@@ -651,9 +655,9 @@ def GetAverageOrderParam(method,numb_molecule,numb_bead,variable,final_dir_in_wo
 		mean_eiy = np.mean(col_eiy)
 		mean_eiz = np.mean(col_eiz)
 
-		error_eix = maxError_byBining(mean_eix, col_eix, workingNdim-6)
-		error_eiy = maxError_byBining(mean_eiy, col_eiy, workingNdim-6)
-		error_eiz = maxError_byBining(mean_eiz, col_eiz, workingNdim-6)
+		error_eix = get_error(mean_eix, col_eix, binary_exponent-6)
+		error_eiy = get_error(mean_eiy, col_eiy, binary_exponent-6)
+		error_eiz = get_error(mean_eiz, col_eiz, binary_exponent-6)
 
 		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numb_bead, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
 		output  += "\n"
@@ -681,8 +685,8 @@ def GetAverageEntropy(
 			print(len(col_block))
 			print(final_dir_in_work)
 
-		workingNdim = int(math.log(len(col_nm)) / math.log(2))
-		trunc = int(len(col_nm) - 2**workingNdim)
+		binary_exponent = int(math.log(len(col_nm)) / math.log(2))
+		trunc = int(len(col_nm) - 2**binary_exponent)
 
 		col_nm = col_nm[trunc:]
 		col_dm = col_dm[trunc:]
@@ -691,8 +695,8 @@ def GetAverageEntropy(
 		purity = mean_nm / mean_dm
 		mean_EN = -log(purity)
 
-		error_nm = maxError_byBining(mean_nm, col_nm, workingNdim - 6)
-		error_dm = maxError_byBining(mean_dm, col_dm, workingNdim - 6)
+		error_nm = get_error(mean_nm, col_nm, binary_exponent - 6)
+		error_dm = get_error(mean_dm, col_dm, binary_exponent - 6)
 		error_purity = abs(purity) * sqrt((error_dm / mean_dm) *
 										  (error_dm / mean_dm) + (error_nm / mean_nm) * (error_nm / mean_nm))
 		error_EN = sqrt((error_dm / mean_dm) * (error_dm / mean_dm) +
@@ -706,8 +710,8 @@ def GetAverageEntropy(
 		col_block, col_nm, col_dm = genfromtxt(
 			final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 				0, 1, 2], skip_header=preskip, skip_footer=postskip)
-		workingNdim = int(math.log(len(col_nm)) / math.log(2))
-		trunc = int(len(col_nm) - 2**workingNdim)
+		binary_exponent = int(math.log(len(col_nm)) / math.log(2))
+		trunc = int(len(col_nm) - 2**binary_exponent)
 
 		col_nm = col_nm[trunc:]
 		col_dm = col_dm[trunc:]
@@ -715,8 +719,8 @@ def GetAverageEntropy(
 		mean_dm = np.mean(col_dm)
 		mean_EN = -log(mean_nm / mean_dm)
 
-		error_nm = maxError_byBining(mean_nm, col_nm, workingNdim - 6)
-		error_dm = maxError_byBining(mean_dm, col_dm, workingNdim - 6)
+		error_nm = get_error(mean_nm, col_nm, binary_exponent - 6)
+		error_dm = get_error(mean_dm, col_dm, binary_exponent - 6)
 		error_EN = sqrt((error_dm / mean_dm) * (error_dm / mean_dm) +
 						(error_nm / mean_nm) * (error_nm / mean_nm))
 
@@ -728,8 +732,8 @@ def GetAverageEntropy(
 		col_block, col_nm, col_dm, col_TrInv = genfromtxt(
 			final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 				0, 1, 2, 3], skip_header=preskip, skip_footer=postskip)
-		workingNdim = int(math.log(len(col_nm)) / math.log(2))
-		trunc = int(len(col_nm) - 2**workingNdim)
+		binary_exponent = int(math.log(len(col_nm)) / math.log(2))
+		trunc = int(len(col_nm) - 2**binary_exponent)
 
 		col_nm = col_nm[trunc:]
 		col_dm = col_dm[trunc:]
@@ -739,8 +743,8 @@ def GetAverageEntropy(
 		purity = 1.0 / mean_TrInv
 		mean_EN = -log(purity)
 
-		error_nm = maxError_byBining(mean_nm, col_nm, workingNdim - 6)
-		error_dm = maxError_byBining(mean_dm, col_dm, workingNdim - 6)
+		error_nm = get_error(mean_nm, col_nm, binary_exponent - 6)
+		error_dm = get_error(mean_dm, col_dm, binary_exponent - 6)
 		error_TrInv = np.std(col_TrInv, ddof=1) / sqrt(len(col_block))
 		error_purity = abs(1.0 / (mean_TrInv * mean_TrInv)) * error_TrInv
 		# Write the proper equation
@@ -754,8 +758,8 @@ def GetAverageEntropy(
 		col_block, col_nm, col_dm, col_Tr = genfromtxt(
 			final_dir_in_work + "/results/output.rden", unpack=True, usecols=[
 				0, 1, 2, 3], skip_header=preskip, skip_footer=postskip)
-		workingNdim = int(math.log(len(col_nm)) / math.log(2))
-		trunc = int(len(col_nm) - 2**workingNdim)
+		binary_exponent = int(math.log(len(col_nm)) / math.log(2))
+		trunc = int(len(col_nm) - 2**binary_exponent)
 
 		col_nm = col_nm[trunc:]
 		col_dm = col_dm[trunc:]
@@ -764,8 +768,8 @@ def GetAverageEntropy(
 		mean_purity = np.mean(col_Tr)
 		mean_EN = -log(mean_Tr)
 
-		error_nm = maxError_byBining(mean_nm, col_nm, workingNdim - 6)
-		error_dm = maxError_byBining(mean_dm, col_dm, workingNdim - 6)
+		error_nm = get_error(mean_nm, col_nm, binary_exponent - 6)
+		error_dm = get_error(mean_dm, col_dm, binary_exponent - 6)
 		error_purity = np.std(col_Tr, ddof=1) / sqrt(len(col_block))
 		# Write the proper equation
 		error_EN = abs(1.0 / mean_TrInv) * error_TrInv
@@ -851,7 +855,7 @@ def GetAverageEntropyRT(
 		rotor,
 		translational_move,
 		rotational_move,
-		variableName,
+		variable_name,
 		rpt_val,
 		gfactor,
 		dipole_moment,
@@ -874,7 +878,7 @@ def GetAverageEntropyRT(
 	'''
 	This function gives us Renyi entropy of a many-rotors system simulated by Ratio trick algorithm.
 	'''
-	list_nb = mc.Getbeads(method, variableName)
+	list_nb = mc.Getbeads(method, variable_name)
 	ndim_beads = int(len(list_nb))
 
 	purity_combo = np.zeros(ndim_beads, dtype='f')
@@ -891,10 +895,10 @@ def GetAverageEntropyRT(
 		else:
 			value = iBead + 1
 
-		if (variableName == "beta"):
+		if (variable_name == "beta"):
 			beta = parameter * (value - 1)
 			variable = beta
-		if (variableName == "tau"):
+		if (variable_name == "tau"):
 			tau = parameter / (value - 1)
 			variable = tau
 
@@ -983,14 +987,14 @@ def GetAverageEntropyRT(
 					print(len(col_block))
 					print(execution_bead_dir_name)
 
-				workingNdim = int(math.log(len(col_nm)) / math.log(2))
-				trunc = int(len(col_nm) - 2**workingNdim)
+				binary_exponent = int(math.log(len(col_nm)) / math.log(2))
+				trunc = int(len(col_nm) - 2**binary_exponent)
 				mean_nm = np.mean(col_nm[trunc:])
 				mean_dm = np.mean(col_dm[trunc:])
-				err_nm = maxError_byBining(
-					mean_nm, col_nm[trunc:], workingNdim - 6)
-				err_dm = maxError_byBining(
-					mean_dm, col_dm[trunc:], workingNdim - 6)
+				err_nm = get_error(
+					mean_nm, col_nm[trunc:], binary_exponent - 6)
+				err_dm = get_error(
+					mean_dm, col_dm[trunc:], binary_exponent - 6)
 
 				col_purity[iPartition] = mean_nm / mean_dm
 				col_err_purity[iPartition] = abs(mean_nm / mean_dm) * sqrt(
@@ -1021,13 +1025,12 @@ def GetAverageEntropyRT(
 			ii = ii + 1
 
 	#extra_file_name = 'Ratio-Trick-'
-	FileAnalysis = GetFileNameAnalysis(
+	FileAnalysis = get_analysis_file_name(
 		method,
 		True,
 		rotor,
 		translational_move,
 		rotational_move,
-		variableName,
 		rpt_val,
 		gfactor,
 		dipole_moment,
@@ -1060,7 +1063,7 @@ def GetAverageEntropyRT(
 					'%10.6f'],
 			   header=headerString)
 	SavedFile = FileAnalysis.SaveEntropyRT
-	FileCheck(method, list_nb, variableName, SavedFile)
+	FileCheck(method, list_nb, variable_name, SavedFile)
 	call(["cat", FileAnalysis.SaveEntropyRT])
 	print("Successful execution!")
 
@@ -1301,7 +1304,7 @@ def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
 		numb_bead1 = numb_bead - 1
 	command_linden_run = source_dir_exe + "linear_prop/linden.x " + \
 		str(temperature) + " " + str(numb_bead1) + " " + \
-		str(GetBconst(molecule)) + " 15000 -1"
+		str(get_rotational_bconstant(molecule)) + " 15000 -1"
 	system(command_linden_run)
 	file_rotdens = molecule + "_T" + \
 		str(temperature1) + "t" + str(numb_bead1) + ".rot"
@@ -1323,7 +1326,7 @@ def GetTwoBodyDensity(
 	'''
 	srcCodePath = os.path.expanduser("~") + "/DipoleChain.jl-master/examples/"
 	Units = GetUnitConverter()
-	BConstant = GetBconst(molecule)  # in wavenumber
+	BConstant = get_rotational_bconstant(molecule)  # in wavenumber
 	BConstantK = BConstant * Units.CMRECIP2KL
 	##########################################################################
 	RFactorList = GetrAndgFactor(molecule, rpt_val, dipole_moment)
@@ -1928,7 +1931,7 @@ time ./pimc
 
 
 def GetRotEnergy(molecule, jrot):
-	Energy = GetBconst(molecule) * jrot * (jrot + 1.0)
+	Energy = get_rotational_bconstant(molecule) * jrot * (jrot + 1.0)
 	return Energy
 
 
@@ -2020,7 +2023,7 @@ def get_working_file(
 	return final_file_name
 
 
-class GetFileNameAnalysis:
+class get_analysis_file_name:
 	def __init__(
 			self,
 			method1,
@@ -2028,50 +2031,48 @@ class GetFileNameAnalysis:
 			molecule_rot1,
 			translational_move1,
 			rotational_move1,
-			variableName1,
 			rpt_val1,
-			gfact1,
-			dipolemoment1,
+			gfacor1,
+			dipole_moment1,
 			parameter_name1,
-			parameter1,
-			numbblocks1,
-			numbpass1,
-			numbmolecules1,
-			molecule1,
-			ENT_TYPE1,
+			parameter_value1,
+			numb_block1,
+			numb_pass1,
+			numb_molecule1,
+			molecular_system1,
+			ent_method1,
 			preskip1,
 			postskip1,
-			extra1,
+			extra_file_name1,
 			input_dir1,
-			particleA1,
+			particle_a1,
 			ent_algorithm):
 		self.method = method1
 		self.rotor = molecule_rot1
 		self.translational_move = translational_move1
 		self.rotational_move = rotational_move1
-		self.variableName = variableName1
 		self.rpt_val = rpt_val1
-		self.dipole_moment = dipolemoment1
-		self.gfactor = gfact1
-		self.parameter = parameter1
+		self.dipole_moment = dipole_moment1
+		self.gfactor = gfacor1
+		self.parameter_value = parameter_value1
 		self.parameter_name = parameter_name1
-		self.numb_block = numbblocks1
-		self.numb_pass = numbpass1
-		self.numb_molecule = numbmolecules1
-		self.molecule = molecule1
-		self.ent_method = ENT_TYPE1
+		self.numb_block = numb_block1
+		self.numb_pass = numb_pass1
+		self.numb_molecule = numb_molecule1
+		self.molecular_system = molecular_system1
+		self.ent_method = ent_method1
 		self.preskip = preskip1
 		self.postskip = postskip1
-		self.extra = extra1
+		self.extra_file_name = extra_file_name1
 		self.input_dir = input_dir1
-		self.particle_a = particleA1
+		self.particle_a = particle_a1
 
 		if (self.method == "ENT"):
-			front_layer = "ENT-" + self.extra
+			front_layer = "ENT-" + self.extra_file_name
 			add1 = "-ParticleA" + str(self.particle_a)
 			add2 = "-" + self.ent_method + "-" + ent_algorithm
 		else:
-			front_layer = self.method + "-" + self.extra
+			front_layer = self.method + "-" + self.extra_file_name
 			add1 = ""
 			add2 = ""
 
@@ -2083,13 +2084,13 @@ class GetFileNameAnalysis:
 			front_layer += "TransDOFs-"
 
 		if (self.rpt_val >= 0.0):
-			name_rpt = "rpt_val" + str(self.rpt_val) + "Angstrom-"
+			name_rpt = "Rpt" + str(self.rpt_val) + "Angstrom-"
 		else:
 			name_rpt = ""
 
 		if (self.dipole_moment >= 0.0):
 			if (self.numb_molecule > 1):
-				name_dipole_moment = "dipole_moment" + \
+				name_dipole_moment = "Dipole-Moment" + \
 					str(self.dipole_moment) + "Debye-"
 			else:
 				name_dipole_moment = "Field" + \
@@ -2102,10 +2103,15 @@ class GetFileNameAnalysis:
 		else:
 			name_gfactor = ""
 
-		name_layer1 = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + \
-			str(self.parameter) + "Kinv-Blocks" + str(self.numb_block)
+		if (self.parameter_name == "beta"):
+			variable_name = "tau"
+		if (self.parameter_name == "tau"):
+			variable_name = "beta"
+
+		name_layer1 = "vs-" + str(variable_name) + "-fixed-" + self.parameter_name + \
+			str(self.parameter_value) + "Kinv-Blocks" + str(self.numb_block)
 		name_layer1 += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
-			self.molecule) + add1 + add2 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip)
+			self.molecular_system) + add1 + add2 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip)
 
 		file_output1 = front_layer + name_rpt + \
 			name_dipole_moment + name_gfactor + "Energy-"
@@ -2124,31 +2130,31 @@ class GetFileNameAnalysis:
 		file_output8 = front_layer + name_rpt + \
 			name_dipole_moment + name_gfactor + "Entropy-"
 
-		self.SaveEnergy = self.input_dir + file_output1 + name_layer1 + ".txt"
-		self.SaveCorr = self.input_dir + file_output2 + name_layer1 + ".txt"
+		self.save_file_energy = self.input_dir + file_output1 + name_layer1 + ".txt"
+		self.save_file_correlation = self.input_dir + file_output2 + name_layer1 + ".txt"
 		self.SaveEntropy = self.input_dir + file_output8 + name_layer1 + ".txt"
 
 		if (method2 == False):
 			if os.path.exists(self.SaveEntropy):
 				os.remove(self.SaveEntropy)
-			if os.path.exists(self.SaveEnergy):
-				os.remove(self.SaveEnergy)
-			if os.path.exists(self.SaveCorr):
-				os.remove(self.SaveCorr)
+			if os.path.exists(self.save_file_energy):
+				os.remove(self.save_file_energy)
+			if os.path.exists(self.save_file_correlation):
+				os.remove(self.save_file_correlation)
 
 		if (self.method != "ENT"):
 			print("#-------------------------------------#")
 			print("Final analyzed results are stored in - ")
 			print(self.input_dir)
 			print("")
-			print("Final results - Energy vs " + str(self.variableName))
+			print("Final results - Energy vs " + str(variable_name))
 			print(file_output1 + name_layer1 + ".txt")
 			print(file_output2 + name_layer1 + ".txt")
 			print(
 				"#------------------------------------------------------------------------#")
 
 		if (self.method == "ENT"):
-			name_layer1RT = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + str(
+			name_layer1RT = "vs-" + str(self.variable_name) + "-fixed-" + self.parameter_name + str(
 				self.parameter) + "Kinv-Blocks" + str(self.numb_block)
 			name_layer1RT += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 				self.molecule) + add1 + add2 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip)
@@ -2158,7 +2164,7 @@ class GetFileNameAnalysis:
 				# print(self.SaveEntropyRT)
 				print(self.input_dir)
 				print("")
-				print("Final results - Entropy vs " + str(self.variableName))
+				print("Final results - Entropy vs " + str(self.variable_name))
 				print(self.SaveEntropy)
 
 				print(
@@ -2172,9 +2178,9 @@ class GetFileNamePlot:
 			molecule_rot1,
 			translational_move1,
 			rotational_move1,
-			variableName1,
+			variable_name1,
 			rpt_val1,
-			gfact1,
+			gfacor1,
 			dipolemoment1,
 			parameter_name1,
 			parameter1,
@@ -2182,7 +2188,7 @@ class GetFileNamePlot:
 			numbpass1,
 			numbmolecules1,
 			molecule1,
-			ENT_TYPE1,
+			ent_method1,
 			preskip1,
 			postskip1,
 			extra1,
@@ -2193,18 +2199,18 @@ class GetFileNamePlot:
 		self.rotor = molecule_rot1
 		self.translational_move = translational_move1
 		self.rotational_move = rotational_move1
-		self.variableName = variableName1
+		self.variable_name = variable_name1
 		self.var = var1
 		self.rpt_val = rpt_val1
 		self.dipole_moment = dipolemoment1
-		self.gfactor = gfact1
+		self.gfactor = gfacor1
 		self.parameter = parameter1
 		self.parameter_name = parameter_name1
 		self.numb_block = numbblocks1
 		self.numb_pass = numbpass1
 		self.numb_molecule = numbmolecules1
 		self.molecule = molecule1
-		self.ent_method = ENT_TYPE1
+		self.ent_method = ent_method1
 		self.preskip = preskip1
 		self.postskip = postskip1
 		self.extra = extra1
@@ -2246,7 +2252,7 @@ class GetFileNamePlot:
 		else:
 			name_gfactor = ""
 
-		name_layer1 = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + \
+		name_layer1 = "vs-" + str(self.variable_name) + "-fixed-" + self.parameter_name + \
 			str(self.parameter) + "Kinv-Blocks" + str(self.numb_block)
 		name_layer1 += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 			self.molecule) + add1 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip) + add2
@@ -2277,12 +2283,12 @@ class GetFileNamePlot:
 		name_layer1FitvsR += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 			self.molecule) + add1 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip) + add2
 
-		self.SaveEnergy = self.input_dir + file_output1 + name_layer1
-		self.SaveCorr = self.input_dir + file_output2 + name_layer1
+		self.save_file_energy = self.input_dir + file_output1 + name_layer1
+		self.save_file_correlation = self.input_dir + file_output2 + name_layer1
 		self.SaveChemPot = self.input_dir + file_output8 + name_layer1
 		self.SaveEntropy = self.input_dir + file_output9 + name_layer1
-		self.SaveEnergyFitvsR = self.input_dir + file_output10 + name_layer1FitvsR
-		self.SaveCorrFitvsR = self.input_dir + file_output11 + name_layer1FitvsR
+		self.save_file_energyFitvsR = self.input_dir + file_output10 + name_layer1FitvsR
+		self.save_file_correlationFitvsR = self.input_dir + file_output11 + name_layer1FitvsR
 
 #---------------------------------------------------------------------------#
 #	   special cases														   #
@@ -2315,7 +2321,7 @@ class GetFileNamePlot:
 			str(self.numb_pass) + "-preskip" + str(self.preskip) + \
 			"-postskip" + str(self.postskip) + add2
 		name_layer1MM = "vs-" + \
-			str(self.variableName) + "-fixed-" + \
+			str(self.variable_name) + "-fixed-" + \
 			self.parameter_name + str(self.parameter) + "Kinv"
 		name_layer1MM += "-System" + \
 			str(self.numb_molecule) + str(self.molecule) + add1
@@ -2330,27 +2336,27 @@ class GetFileNamePlot:
 			name_rpt + "Entropy-" + name_layer1GFAC
 		self.SaveEntropyRFAC = self.input_dir + front_layer + \
 			name_rpt + "Entropy-" + name_layer1RFAC
-		self.SaveEnergyGFAC = self.input_dir + front_layer + \
+		self.save_file_energyGFAC = self.input_dir + front_layer + \
 			name_rpt + "Energy-" + name_layer1GFAC
-		self.SaveEnergyRFAC = self.input_dir + front_layer + \
+		self.save_file_energyRFAC = self.input_dir + front_layer + \
 			name_rpt + "Energy-" + name_layer1RFAC
-		self.SaveEnergyED = self.input_dir + file_output1 + name_layer1ED + add2 + "-ED"
+		self.save_file_energyED = self.input_dir + file_output1 + name_layer1ED + add2 + "-ED"
 		self.SaveEntropyED = self.input_dir + file_output9 + name_layer1ED + add2 + "-ED"
-		self.SaveCorrGFAC = self.input_dir + front_layer + \
+		self.save_file_correlationGFAC = self.input_dir + front_layer + \
 			name_rpt + "correlation-" + name_layer1GFAC
-		self.SaveCorrRFAC = self.input_dir + front_layer + \
+		self.save_file_correlationRFAC = self.input_dir + front_layer + \
 			name_rpt + "correlation-" + name_layer1RFAC
-		self.SaveEnergyMM = self.input_dir + file_output1 + name_layer1MM + add2 + "-MM"
+		self.save_file_energyMM = self.input_dir + file_output1 + name_layer1MM + add2 + "-MM"
 		self.SaveEntropyMM = self.input_dir + file_output9 + name_layer1MM + add2 + "-MM"
 		self.SaveEntropyCOMBO = self.input_dir + front_layer + \
 			name_rpt + "Entropy-" + name_layer1GFACFit + "-COMBINE"
 		self.SaveEntropyGFACFit = self.input_dir + front_layer + \
 			name_rpt + "Entropy-" + name_layer1GFACFit
-		self.SaveEnergyGFACFit = self.input_dir + front_layer + \
+		self.save_file_energyGFACFit = self.input_dir + front_layer + \
 			name_rpt + "Energy-" + name_layer1GFACFit
 
 		if (self.method == "ENT"):
-			name_layer1RT = "vs-" + str(self.variableName) + "-fixed-" + self.parameter_name + str(
+			name_layer1RT = "vs-" + str(self.variable_name) + "-fixed-" + self.parameter_name + str(
 				self.parameter) + "Kinv-Blocks" + str(self.numb_block)
 			name_layer1RT += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 				self.molecule) + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip) + add2
@@ -2358,7 +2364,7 @@ class GetFileNamePlot:
 			self.SaveEntropyRT = self.input_dir + file_output9 + name_layer1RT
 
 
-def FileCheck(method, list_nb, variableName, SavedFile):
+def FileCheck(method, list_nb, variable_name, SavedFile):
 	for i in list_nb:
 		if (method == "PIMC"):
 			if ((i % 2) == 0):
@@ -2405,7 +2411,7 @@ def GetrAndgFactor(molecule, RCOM, dipole_moment):
 	It calculates g and R value
 	'''
 	Units = GetUnitConverter()
-	BConstant = GetBconst(molecule)  # in wavenumber
+	BConstant = get_rotational_bconstant(molecule)  # in wavenumber
 	DipoleMomentAU = dipole_moment / Units.AuToDebye
 	RCOMAU = RCOM / Units.BOHRRADIUS
 	BConstantAU = BConstant / Units.AuToCmInverse
@@ -2426,7 +2432,7 @@ def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
 	It extracts dipole moment from a g value - g
 	'''
 	Units = GetUnitConverter()
-	BConstant = GetBconst(molecule)  # in wavenumber
+	BConstant = get_rotational_bconstant(molecule)  # in wavenumber
 	RCOMAU = RCOM / Units.BOHRRADIUS
 	BConstantAU = BConstant / Units.AuToCmInverse
 	DipoleMomentAU = sqrt(gFactor * RCOMAU * RCOMAU * RCOMAU * BConstantAU)
@@ -2450,8 +2456,8 @@ def GetEDResults(
 		FileToBeSavedED = FilePlotName.SaveEntropyED + ".txt"
 		FileToBeSavedMM = FilePlotName.SaveEntropyMM + ".txt"
 	if (method == "PIGS"):
-		FileToBeSavedED = FilePlotName.SaveEnergyED + ".txt"
-		FileToBeSavedMM = FilePlotName.SaveEnergyMM + ".txt"
+		FileToBeSavedED = FilePlotName.save_file_energyED + ".txt"
+		FileToBeSavedMM = FilePlotName.save_file_energyMM + ".txt"
 	print(FileToBeSavedED)
 
 	commandRunED = "julia " + srcCodePath + "diagonalization.jl -R " + str(RFactor) + " -N " + str(
@@ -2470,10 +2476,10 @@ def GetEDResults(
 				for numb_bead in loop:
 						print(numb_bead)
 						RFactor	  = GetrAndgFactor(rotor, rpt_val, dipole_moment)
-						if (variableName == "beta"):
+						if (variable_name == "beta"):
 								parameterR	= parameter*BConstantK
 								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numb_molecule)+" --l-max 6 --tau "+str(parameterR)+" -P "+str(numb_bead)+" --pigs --A-start 1"+" --A-size "+str(particle_a)
-						if (variableName == "tau"):
+						if (variable_name == "tau"):
 								parameterR	= parameter*BConstantK
 								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numb_molecule)+" --l-max 6 --beta "+str(parameterR)+" -P "+str(numb_bead)+" --pigs --A-start 1"+" --A-size "+str(particle_a)
 						system(commandRun)
@@ -2493,7 +2499,7 @@ def GetPairDensity(
 		dipole_moment,
 		parameter,
 		BConstantK,
-		variableName,
+		variable_name,
 		method):
 	FileToBeSavedDensity = FilePlotName + ".txt"
 	for numb_bead in loop:
@@ -2506,9 +2512,9 @@ def GetPairDensity(
 		system(commandRun)
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
 
-# def GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, variableName, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable):
-	#FileAnalysis = GetFileNameAnalysis(method, True, rotor, translational_move, rotational_move, variableName, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a)
-#	   GetAverageEntropyRT(maxloop, method, rotor, translational_move, rotational_move, variableName, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable)
+# def GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable):
+	#FileAnalysis = get_analysis_file_name(method, True, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a)
+#	   GetAverageEntropyRT(maxloop, method, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable)
 
 
 def GetPreFactDDPot(molecule, RCOM, dipole_moment):
