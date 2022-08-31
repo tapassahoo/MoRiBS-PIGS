@@ -86,6 +86,7 @@ void VectorNormalisation(double *);
 double DotProduct(double *, double *);
 void CrossProduct(double *, double *, double *);
 void UnitVectors(const double *, double *);
+double GetDipoleDipolePotEnergy(int atom0, int atom1, const double *Eulang0, const double *Eulang1, int it);
 double PotFunc(int , int , const double *, const double *, int );
 double PotFunc(const double *);
 double PotFuncCage(double *, const double *);
