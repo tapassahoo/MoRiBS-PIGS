@@ -103,20 +103,10 @@ def levels(number):
 
 def get_rotational_bconstant(rotor):
 	'''
-	This function calculates rotational Bconstant for linear rotor
+	The unit is cm inverse.
 	'''
-	'''
-		autocminverse  = 2.1947463137e+5
-		energyj0	   = -36117.5942855
-		energyj1	   = -35999.1009407
-		bconst		 = 0.5*(energyj1-energyj0)	 # in cm^-1
-		'''
 	if (rotor == "HF"):
-		# bconst	= 20.9561					 # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
-		# bconst	= 20.9661					 # in cm^-1  and it is  taken from http://webbook.nist.gov/cgi/inchi?ID=C7664393&Mask=1000#Diatomic
-		# in cm^-1  and it is  taken from J. Opt. Soc. Am. Vol. 57, issue 12,
-		# page 1464, year 1967
-		bconst = 20.561
+		bconst = 20.559 # https://opg.optica.org/josa/abstract.cfm?URI=josa-54-1-20
 	if (rotor == "H2"):
 		bconst = 60.853
 	return bconst
