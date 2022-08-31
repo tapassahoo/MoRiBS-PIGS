@@ -213,7 +213,7 @@ postskip = args.postskip
 status_cagepot = False
 dir_run = "scratch"  # work
 cpu_run = "nCPU"
-extra_file_name = extra_name
+extra_file_name = ""
 #
 myhost = os.uname()[1]
 myhost = myhost[0:3]
@@ -249,7 +249,7 @@ user_name = getpass.getuser()
 input_dir = os.getcwd() + "/"
 home = os.path.expanduser("~")
 source_code_dir = "MoRiBS-PIGS/"
-output_file_dir = "name_of_output_directory/"
+output_file_dir = "linear-rotors/"
 if (method == "PIGS"):
 	final_results_path = home + "/final-pigs-outputs-for-plotting/"
 elif (method == "PIMC"):

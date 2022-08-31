@@ -10,16 +10,15 @@ module_path = mypkg.moribs_runner.__file__
 module_path = module_path.replace('__init__.py', '')
 
 # job_type is two types - "submission" and "analysis"
-#job_type    = "submission"
-job_type    = "analysis"
+job_type    = "submission"
 method      = "PIGS"
 
 system      = "HF"
 rotor       = "HF"
 spin_isomer = int(-1)
 
-parameter_name  = "beta"
-parameter_value = 0.2
+parameter_name  = "tau"
+parameter_value = 0.001
 
 nmolecule   = 1
 nblock      = 20000
