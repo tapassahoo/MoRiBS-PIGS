@@ -81,24 +81,13 @@ def compile_cagepot(source_dir_exe, input_dir):
 	os.chdir(path_exit_cagepot)
 
 
-def jackknife(mean, data):
+def jack_knife(mean, data):
 	ai = [((np.sum(data) - data[j]) / (len(data) - 1.0))
 		  for j in range(len(data))]
 	deviation = ai - mean
 	devsq = np.multiply(deviation, deviation)
 	error = sqrt(np.sum(devsq) * (len(data) - 1.0) / len(data))
 	return error
-
-
-def levels(number):
-	for j in range(10):
-		jj = pow(2, j)
-
-		if jj <= (number - 1):
-			level_bisection = j
-		else:
-			break
-	return level_bisection
 
 
 def get_rotational_bconstant(rotor):
@@ -1440,7 +1429,7 @@ def job_submission(
 	arg1 = rpt_val
 	step1_trans = step_com_move[ibead]
 	level1 = level_bisection[ibead]
-	step1 = step_rot_move[ibead]
+	step1_rot = step_rot_move[ibead]
 	step_com_impurity1 = step_com_impurity[ibead]
 	level_impurity1 = level_impurity[ibead]
 	final_dir_in_work = output_dir_path + execution_bead_dir_name
@@ -1631,7 +1620,7 @@ def job_submission(
 		numb_molecule,
 		arg1,
 		level1,
-		step1,
+		step1_rot,
 		step1_trans,
 		gfactor,
 		dipole_moment,
