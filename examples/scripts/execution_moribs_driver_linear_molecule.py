@@ -17,15 +17,15 @@ system      = "HF"
 rotor       = "HF"
 spin_isomer = int(-1)
 
-parameter_name  = "tau"
-parameter_value = 0.001
+parameter_name  = "beta"
+parameter_value = 0.1
 
 nmolecule   = 1
-nblock      = 20000
+nblock      = 20
 npass       = 200
 
 if (job_type == "submission"):
-	rlist = np.arange(3.0, 10.1, 1.0, dtype=float)
+	rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
