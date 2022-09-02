@@ -11,8 +11,10 @@ module_path = module_path.replace('__init__.py', '')
 
 # User needs to modify once
 dir_name = "linear-rotors"
+# /home/tapas/MoRiBS-PIGS/examples/scripts
+dir_moribs = '""'
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
-dir_moribs = '"academic-project/"'
+# dir_moribs = '"academic-project/"'
 extra_name = '""'
 blank_space = " "
 
@@ -25,7 +27,7 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.1
+parameter_value = 0.2
 
 nmolecule = 1
 nblock = 20
