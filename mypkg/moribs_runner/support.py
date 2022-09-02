@@ -2122,15 +2122,14 @@ class get_analysis_file_name:
 				os.remove(self.save_file_correlation)
 
 		if (self.method != "ENT"):
-			print("#-------------------------------------#")
+			print("****************** Important message *******************")
+			print(f'Name of the file where the potential and the total energies computed for several {variable_name} values are stored are given below:')
+			print(file_output1 + name_layer1 + ".txt")
+			print("")
 			print("Final analyzed results are stored in - ")
 			print(self.input_dir)
 			print("")
-			print("Final results - Energy vs " + str(variable_name))
-			print(file_output1 + name_layer1 + ".txt")
-			print(file_output2 + name_layer1 + ".txt")
-			print(
-				"#------------------------------------------------------------------------#")
+			print("********************************************************")
 
 		if (self.method == "ENT"):
 			name_layer1RT = "vs-" + str(self.variable_name) + "-fixed-" + self.parameter_name + str(

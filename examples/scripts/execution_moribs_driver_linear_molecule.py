@@ -18,24 +18,21 @@ rotor       = "HF"
 spin_isomer = int(-1)
 
 parameter_name  = "beta"
-parameter_value = 0.1
+parameter_value = 0.2
 
 nmolecule   = 1
-nblock      = 20
+nblock      = 20000
 npass       = 200
 
 if (job_type == "submission"):
-	rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
+	rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
 		rlist = np.arange(3.0, 10.1, 1.0, dtype=float)
 
 	if (parameter_name == "tau"):
-		if (parameter_value == 0.1):
-			rlist = np.arange(2.5, 10.1, 0.1, dtype=float)
-		if (parameter_value == 0.2):
-			rlist = np.arange(2.5, 10.1, 0.1, dtype=float)
+		rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
 extra_name = '""'
 

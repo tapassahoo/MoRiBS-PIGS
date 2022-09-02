@@ -211,7 +211,7 @@ postskip = args.postskip
 # "No" flag must be turned into "Yes" by the user.
 
 status_cagepot = False
-dir_run = "scratch"  # work
+root_dir_run = "scratch"  # work
 cpu_run = "nCPU"
 extra_file_name = extra_name
 #
@@ -219,8 +219,10 @@ myhost = os.uname()[1]
 myhost = myhost[0:3]
 if ((myhost == "gra") or (myhost == "ced")):
 	server_name = "graham"
-else:
+elif ((myhost == "feynman") or (myhost == "nlogn")):
 	server_name = "nlogn"
+else:
+	server_name = "moribs"
 #
 submit_job_dir = os.getcwd()
 
@@ -263,14 +265,16 @@ if not os.path.exists(temp_dir):
 source_dir_exe = "/home/" + user_name + "/" + source_code_dir
 
 if (status == "submission"):
-	if ((dir_run == "scratch") or (server_name == "graham")):
+	if (server_name == "graham"):
 		dir_run_job = "/scratch/" + user_name + "/" + output_file_dir
-		if (server_name == "graham"):
-			temp_dir = os.path.dirname(dir_run_job)
-			if not os.path.exists(temp_dir):
-				os.makedirs(temp_dir)
-	else:
+	elif (server_name == "nlogn"):
 		dir_run_job = "/work/" + user_name + "/" + output_file_dir
+	else:
+		dir_run_job = "/home/" + user_name + "/" + output_file_dir
+
+	temp_dir = os.path.dirname(dir_run_job)
+	if not os.path.exists(temp_dir):
+		os.makedirs(temp_dir)
 
 	execution_file = "/home/" + user_name + "/" + source_code_dir + "pimc"
 	if not args.compiled:
@@ -280,8 +284,11 @@ if (status == "submission"):
 
 if (server_name == "graham"):
 	output_dir_path = "/scratch/" + user_name + "/" + output_file_dir
-else:
+elif (server_name == "nlogn"):
 	output_dir_path = "/work/" + user_name + "/" + output_file_dir
+else:
+	output_dir_path = "/home/" + user_name + "/" + output_file_dir
+
 
 ent_algorithm = args.ent_algorithm
 if (method == "ENT"):
@@ -361,8 +368,10 @@ for particle_a in particle_a_list:
 		if (server_name == "graham"):
 			dir_run_input_pimc = "/scratch/" + user_name + \
 				"/" + output_file_dir + working_dir_name + "-Logs"
-		else:
+		elif (server_name == "nlogn"):
 			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
+		else:
+			dir_run_input_pimc = "/home/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
 
 		if not os.path.isdir(dir_run_input_pimc):
 			call(["mkdir", "-p", dir_run_input_pimc])
@@ -465,7 +474,7 @@ for particle_a in particle_a_list:
 					status,
 					translational_move,
 					rotational_move,
-					dir_run,
+					root_dir_run,
 					dir_run_job,
 					execution_bead_dir_name,
 					input_dir,
@@ -574,7 +583,7 @@ for particle_a in particle_a_list:
 					status,
 					translational_move,
 					rotational_move,
-					dir_run,
+					root_dir_run,
 					dir_run_job,
 					execution_bead_dir_name,
 					input_dir,
