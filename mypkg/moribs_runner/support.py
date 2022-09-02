@@ -1644,7 +1644,7 @@ def job_submission(
 	fname = 'job-for-P' + str(numb_bead)
 	fwrite = open(fname, 'w')
 
-	if (dir_run == "scratch"):
+	if ((server_name == "graham") or (server_name == "nlogn")):
 		if (cpu_run == "CPU"):
 			fwrite.write(
 				jobstring_scratch_cpu(
@@ -1712,11 +1712,14 @@ def job_submission(
 		command_pimc_run = "./" + fname + ">outpimc" + str(numb_bead) + " & "
 		print(command_pimc_run)
 		system(command_pimc_run)
-	else:
+	elif ((server_name == "graham") or (server_name == "nlogn")):
 		if (partition_name == user_name):
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			call(["sbatch", fname])
+	else:
+		call(["chmod", "+x", fname])
+		os.system("./"+fname+ " &")
 	print("***************** Successfully submitted ***************")
 	print("")
 	print("")
@@ -1885,6 +1888,19 @@ time ./pimc
 %s
 """ % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
 
+	job_string_desktop = """#!/bin/bash
+export OMP_NUM_THREADS=%s
+export GOMP_STACKSIZE=1024M
+rm -rf %s
+mkdir -p %s
+mv %s %s
+cd %s
+cp %s qmc.input
+cp %s %s
+./pimc 1>> %s.log 2>&1
+""" % (omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, log_file_path)
+
+
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.log
@@ -1906,7 +1922,10 @@ time ./pimc
 	if restart_bool:
 		return job_string_restart
 	else:
-		return job_string
+		if (server_name == "graham"):
+			return job_string
+		else:
+			return job_string_desktop
 
 
 def GetRotEnergy(molecule, jrot):

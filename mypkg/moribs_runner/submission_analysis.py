@@ -250,7 +250,7 @@ numb_block_restart = args.nblock_restart
 user_name = getpass.getuser()
 input_dir = os.getcwd() + "/"
 home = os.path.expanduser("~")
-source_code_dir = "MoRiBS-PIGS/"
+source_code_dir = path_moribs_dir+"MoRiBS-PIGS/"
 output_file_dir = "name_of_output_directory/"
 if (method == "PIGS"):
 	final_results_path = home + "/final-pigs-outputs-for-plotting/"
