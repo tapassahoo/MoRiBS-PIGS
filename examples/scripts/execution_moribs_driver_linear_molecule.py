@@ -29,16 +29,21 @@ spin_isomer = int(-1)
 parameter_name = "beta"
 parameter_value = 0.2
 
-nmolecule = 1
-nblock = 20
-npass = 200
+numb_molecule = 2
+numb_block = 20000
+numb_pass = 200
+
+if (numb_molecule > 1):
+	dipole_moment = 1.827
+elif (numb_molecule == 1):
+    dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-    rlist = np.arange(3.0, 10.01, 10.2, dtype=float)
+    rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 
 if (job_type == "analysis"):
     if (parameter_name == "beta"):
-        rlist = np.arange(3.0, 10.1, 1.0, dtype=float)
+        rlist = np.arange(3.0, 10.1, 0.2, dtype=float)
 
     if (parameter_name == "tau"):
         rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
@@ -70,7 +75,6 @@ for rcom in rlist:
     call(["mv", temp_file_name1, temp_file_name])
 
     rcom = "{:3.2f}".format(rcom)
-    field_strength = 20.0  # Unit inverse of Kelvin
 
     cmd_run = (
         "python" + blank_space + temp_file_name + blank_space
@@ -81,12 +85,12 @@ for rcom in rlist:
         + str(parameter_value) + blank_space
         + "--rotor" + blank_space + rotor + blank_space
         + "--rot_move" + blank_space
-        + "--nmolecule" + blank_space + str(nmolecule) + blank_space
+        + "--nmolecule" + blank_space + str(numb_molecule) + blank_space
         + "--spin_isomer" + blank_space + str(spin_isomer) + blank_space
         + "--rpt" + blank_space + str(rcom) + blank_space
-        + "--dipole_moment" + blank_space + str(field_strength) + blank_space
-        + "--nblock" + blank_space + str(nblock) + blank_space
-        + "--npass" + blank_space + str(npass) + blank_space
+        + "--dipole_moment" + blank_space + str(dipole_moment) + blank_space
+        + "--nblock" + blank_space + str(numb_block) + blank_space
+        + "--npass" + blank_space + str(numb_pass) + blank_space
     )
 
     print(cmd_run)
