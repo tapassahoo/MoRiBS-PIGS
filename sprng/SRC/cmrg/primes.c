@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "primes.h"
 #include "primelist.h"
+#include <string.h>
 
 #define YES 1
 #define NO  0

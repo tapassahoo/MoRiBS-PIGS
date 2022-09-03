@@ -13,6 +13,11 @@ SHELL = /bin/sh
 include ../make.CHOICES
 LIBDIR = ../$(LIB_REL_DIR)
 CHKDIR = ..
+CC=gcc
+CPP=g++
+CXX=g++
+f77=gfortran
+F77=gfortran
 
 
 ##############################################################################

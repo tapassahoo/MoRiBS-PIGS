@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(
 	epilog="Enjoy the program! :)")
 parser.add_argument("job",
 					type=str,
-					choices=["submission", "analysis", "rename", "plot"],
+					choices=["submission", "analysis", "rename"],
 					help="Type of jobs: submission of new jobs or analyzing \
 					output files.")
 parser.add_argument("method",
@@ -250,7 +250,6 @@ numb_block_restart = args.nblock_restart
 user_name = getpass.getuser()
 input_dir = os.getcwd() + "/"
 home = os.path.expanduser("~")
-
 source_code_dir = path_moribs_dir+"MoRiBS-PIGS/"
 output_file_dir = "name_of_output_directory/"
 if (method == "PIGS"):
@@ -263,7 +262,7 @@ temp_dir = os.path.dirname(final_results_path)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
-source_dir_exe = home + "/" + source_code_dir
+source_dir_exe = "/home/" + user_name + "/" + source_code_dir
 
 if (status == "submission"):
 	if (server_name == "graham"):
@@ -271,13 +270,13 @@ if (status == "submission"):
 	elif (server_name == "nlogn"):
 		dir_run_job = "/work/" + user_name + "/" + output_file_dir
 	else:
-		dir_run_job = home + "/" + output_file_dir
+		dir_run_job = "/home/" + user_name + "/" + output_file_dir
 
 	temp_dir = os.path.dirname(dir_run_job)
 	if not os.path.exists(temp_dir):
 		os.makedirs(temp_dir)
 
-	execution_file = home + "/" + source_code_dir + "pimc"
+	execution_file = "/home/" + user_name + "/" + source_code_dir + "pimc"
 	if not args.compiled:
 		if not args.restart:
 			support.makeexecutionfile(
@@ -288,7 +287,7 @@ if (server_name == "graham"):
 elif (server_name == "nlogn"):
 	output_dir_path = "/work/" + user_name + "/" + output_file_dir
 else:
-	output_dir_path = home + "/" + output_file_dir
+	output_dir_path = "/home/" + user_name + "/" + output_file_dir
 
 
 ent_algorithm = args.ent_algorithm
@@ -372,7 +371,7 @@ for particle_a in particle_a_list:
 		elif (server_name == "nlogn"):
 			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
 		else:
-			dir_run_input_pimc = home + "/" + output_file_dir + working_dir_name + "-Logs"
+			dir_run_input_pimc = "/home/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
 
 		if not os.path.isdir(dir_run_input_pimc):
 			call(["mkdir", "-p", dir_run_input_pimc])
@@ -442,9 +441,6 @@ for particle_a in particle_a_list:
 				support.fmtAverageEntropy(
 					status, parameter_name, ent_method))
 		'''
-	if (status == "Plot"):
-		print("Tapas")
-		exit()
 
 	if (method == "ENT"):
 		numb_molecule = 2 * numb_molecule1
