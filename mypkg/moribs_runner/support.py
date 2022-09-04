@@ -1720,8 +1720,8 @@ def job_submission(
 	else:
 		call(["chmod", "+x", fname])
 		os.system("./" + fname + " &" )
-	print("***************** Successfully submitted ***************")
 	print("")
+	print("***************** Successfully submitted ***************")
 	print("")
 
 	os.chdir(input_dir)
