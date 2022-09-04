@@ -193,6 +193,7 @@ check_genf_ptr.o : check_genf_ptr.$(FSUFFIX) sprng_f.h
 #---------------------------------------------------------------------------
 clean :
 	rm -f *.o *.i
+	rm -rf ../lib/*
 	@for l in $(LIBLIST) ;  do \
 	  cd $$l ; \
 	  $(MAKE) PLAT=$(PLAT) clean ; \

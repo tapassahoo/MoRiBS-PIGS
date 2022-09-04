@@ -6,7 +6,7 @@
 #define TIMING_TRIAL_SIZE 1000000
 #define PARAM 0
 
-main()
+int main()
 {
   int i;
   int *gen;
