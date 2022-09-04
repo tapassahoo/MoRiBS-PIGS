@@ -280,7 +280,7 @@ if (status == "submission"):
 	execution_file = home + "/" + source_code_dir + "pimc"
 	if not args.compiled:
 		if not args.restart:
-			support.makeexecutionfile(
+			support.get_execution_file(
 				submit_job_dir, method, ent_method, source_dir_exe)
 
 if (server_name == "graham"):

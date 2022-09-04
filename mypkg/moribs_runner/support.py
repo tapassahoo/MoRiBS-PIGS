@@ -40,7 +40,7 @@ def get_error(mean, data, binary_exponent):
 	return np.max(error)
 
 
-def makeexecutionfile(input_dir, method, ent_method, source_dir_exe):
+def get_execution_file(input_dir, method, ent_method, source_dir_exe):
 	execution_file_dir = source_dir_exe
 	os.chdir(execution_file_dir)
 	call(["make", "-f", "Makefile-GNU", "clean"])
@@ -1719,7 +1719,7 @@ def job_submission(
 			call(["sbatch", fname])
 	else:
 		call(["chmod", "+x", fname])
-		os.system("./"+fname+ " &")
+		os.system("./" + fname + " &" )
 	print("***************** Successfully submitted ***************")
 	print("")
 	print("")
