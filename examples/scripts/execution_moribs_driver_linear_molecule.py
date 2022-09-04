@@ -12,9 +12,9 @@ module_path = module_path.replace('__init__.py', '')
 # User needs to modify once
 dir_name = "linear-rotors"
 # /home/tapas/MoRiBS-PIGS/examples/scripts
-# dir_moribs = '""'
+dir_moribs = '""'
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
-dir_moribs = '"academic-project/"'
+#dir_moribs = '"academic-project/"'
 extra_name = '""'
 blank_space = " "
 
@@ -27,10 +27,10 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "tau"
-parameter_value = 0.002
+parameter_value = 0.001
 
 numb_molecule = 2
-numb_block = 10
+numb_block = 20000
 numb_pass = 200
 
 if (numb_molecule > 1):
@@ -39,7 +39,7 @@ elif (numb_molecule == 1):
     dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-    rlist = np.arange(3.0, 10.01, 2.0, dtype=float)
+    rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
 if (job_type == "analysis"):
     if (parameter_name == "beta"):
