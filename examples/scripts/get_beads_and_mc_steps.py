@@ -21,11 +21,13 @@ class GetBeadStepLevel:
 
 		if (self.simulation == "PIGS"):
 			if (self.parameter_name == "tau"):
-				self.beads=np.arange(10,110,10,dtype=int)
+				beads1=np.array([4, 6, 8, 14, 24])
+				beads2=np.arange(10,110,10,dtype=int)
+				self.beads=beads1 #np.append(beads1, beads2)
 				if (self.molecule == "HF"):
-					self.step_com  = {10:1.5, 20:1.5, 30:1.5, 40:1.5, 50:1.5, 60:1.5, 70:1.5, 80:1.5, 90:1.5, 100:1.5}
-					self.step_rot  = {10:0.8, 20:0.8, 30:0.8, 40:0.8, 50:0.8, 60:0.8, 70:0.8, 80:0.8, 90:0.8, 100:0.8}
-					self.level_com = {10:1, 20:1, 30:1, 40:1, 50:1, 60:1, 70:1, 80:1, 90:1, 100:1}
+					self.step_com  = {4:1.5, 6:1.5, 8:1.5, 10:1.5, 14:1.5, 20:1.5, 24:1.5, 30:1.5, 40:1.5, 50:1.5, 60:1.5, 70:1.5, 80:1.5, 90:1.5, 100:1.5}
+					self.step_rot  = {4:1.0, 6:1.0, 8:1.0, 10:1.0, 14:1.0, 20:1.0, 24:1.0, 30:1.0, 40:1.0, 50:1.0, 60:1.0, 70:1.0, 80:1.0, 90:1.0, 100:1.0}
+					self.level_com = {4:1, 6:1, 8:1, 10:1, 14:1, 20:1, 24:1, 30:1, 40:1, 50:1, 60:1, 70:1, 80:1, 90:1, 100:1}
 			if (self.parameter_name == "beta"):
 				self.beads=np.arange(10,110,10,dtype=int)
 				if (self.molecule == "HF"):

@@ -27,7 +27,7 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "tau"
-parameter_value = 0.001
+parameter_value = 0.002
 
 numb_molecule = 2
 numb_block = 20000
