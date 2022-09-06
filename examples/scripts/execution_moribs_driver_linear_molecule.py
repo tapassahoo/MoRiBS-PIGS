@@ -19,19 +19,21 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "submission"
+# job_type = "submission"
+job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
 rotor = "HF"
 spin_isomer = int(-1)
 
-parameter_name = "tau"
-parameter_value = 0.002
+parameter_name = "beta"
+parameter_value = 0.1
 
 numb_molecule = 2
 numb_block = 20000
 numb_pass = 200
+numb_preskip = 0
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
@@ -91,6 +93,7 @@ for rcom in rlist:
         + "--dipole_moment" + blank_space + str(dipole_moment) + blank_space
         + "--nblock" + blank_space + str(numb_block) + blank_space
         + "--npass" + blank_space + str(numb_pass) + blank_space
+        + "--preskip" + blank_space + str(numb_preskip) + blank_space
     )
 
     print(cmd_run)
