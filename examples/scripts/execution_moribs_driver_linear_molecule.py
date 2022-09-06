@@ -19,8 +19,8 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-# job_type = "submission"
-job_type = "analysis"
+job_type = "submission"
+#job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
@@ -41,7 +41,7 @@ elif (numb_molecule == 1):
     dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-    rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
+    rlist = np.arange(3.0, 3.41, 0.2, dtype=float)
 
 if (job_type == "analysis"):
     if (parameter_name == "beta"):
