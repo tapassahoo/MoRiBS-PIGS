@@ -205,9 +205,8 @@ def fmt_energy_data(method, parameter_name):
 		variable_name = "beta"
 	unit = "(1/K)"
 
-	output = "# Unit of all kinds of energies is expressed in Kelvin."
-	output += "\n"
-	output += "# "
+	print("")
+	output = "# The units of all kinds of energies are in Kelvin."
 	output += "\n"
 	output += "# "
 	if (method == "PIMC"):
