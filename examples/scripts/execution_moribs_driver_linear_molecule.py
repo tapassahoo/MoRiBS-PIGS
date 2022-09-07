@@ -14,23 +14,23 @@ dir_name = "linear-rotors"
 # /home/tapas/MoRiBS-PIGS/examples/scripts
 dir_moribs = '""'
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
-dir_moribs = '"academic-project/"'
+#dir_moribs = '"academic-project/"'
 extra_name = '""'
-plot_dir_path = '"academic-project/outputs/"'
+#plot_dir_path = '"academic-project/outputs/"'
+plot_dir_path = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
 #job_type = "submission"
-#job_type = "analysis"
-job_type = "plot"
+job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
 rotor = "HF"
 spin_isomer = int(-1)
 
-parameter_name = "tau"
-parameter_value = 0.001
+parameter_name = "beta"
+parameter_value = 0.1
 
 numb_molecule = 2
 numb_block = 20000
@@ -41,9 +41,6 @@ if (numb_molecule > 1):
 	dipole_moment = 1.827
 elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
-
-if (job_type == "plot"):
-	rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
 if (job_type == "submission"):
 	rlist = np.arange(2.5, 2.91, 0.1, dtype=float)

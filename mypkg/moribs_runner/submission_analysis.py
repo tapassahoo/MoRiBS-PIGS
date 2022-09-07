@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(
 	epilog="Enjoy the program! :)")
 parser.add_argument("job",
 					type=str,
-					choices=["submission", "analysis", "rename", "plot"],
+					choices=["submission", "analysis", "rename"],
 					help="Type of jobs: submission of new jobs or analyzing \
 					output files.")
 parser.add_argument("method",
@@ -254,12 +254,12 @@ home = os.path.expanduser("~")
 source_code_dir = path_moribs_dir+"MoRiBS-PIGS/"
 output_file_dir = "name_of_output_directory/"
 if (method == "PIGS"):
-	final_results_path = home + "/" + plot_dir_path + "final-pigs-outputs-for-plotting/"
+	final_result_path = home + "/" + plot_dir_path + "final-pigs-outputs-for-plotting/"
 elif (method == "PIMC"):
-	final_results_path = home + "/" + plot_dir_path + "final-pimc-outputs-for-plotting/"
+	final_result_path = home + "/" + plot_dir_path + "final-pimc-outputs-for-plotting/"
 else:
-	final_results_path = home + "/" + plot_dir_path + "final-ent-outputs-for-plotting/"
-temp_dir = os.path.dirname(final_results_path)
+	final_result_path = home + "/" + plot_dir_path + "final-ent-outputs-for-plotting/"
+temp_dir = os.path.dirname(final_result_path)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
@@ -391,27 +391,27 @@ for particle_a in particle_a_list:
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
 	if (status == "analysis"):
-		analysis_file_name = support.get_analysis_file_name(
+		analysis_file_name = support.GetAnalysisFileName(
+			final_result_path,
 			method,
 			False,
+			molecular_system,
 			rotor,
+			numb_molecule1,
 			translational_move,
 			rotational_move,
-			rpt_val,
-			gfactor,
-			dipole_moment,
 			parameter_name,
 			parameter_value,
+			rpt_val,
+			dipole_moment,
+			gfactor,
 			numb_block,
 			numb_pass,
-			numb_molecule1,
-			molecular_system,
-			ent_method,
 			preskip,
 			postskip,
 			extra_file_name,
-			final_results_path,
 			particle_a,
+			ent_method,
 			ent_algorithm)
 
 		if (method != "ENT"):
@@ -442,57 +442,6 @@ for particle_a in particle_a_list:
 				support.fmtAverageEntropy(
 					status, parameter_name, ent_method))
 		'''
-	if (status == "plot"):
-		analysis_file_name = support.GetAnalysisFileName(
-			method,
-			True,
-			rotor,
-			translational_move,
-			rotational_move,
-			rpt_val,
-			gfactor,
-			dipole_moment,
-			parameter_name,
-			parameter_value,
-			numb_block,
-			numb_pass,
-			numb_molecule1,
-			molecular_system,
-			ent_method,
-			preskip,
-			postskip,
-			extra_file_name,
-			final_results_path,
-			particle_a,
-			ent_algorithm)
-
-		var=11
-		plot_file_name = support.get_plot_file_name(
-            method,
-            translational_move,
-            rotational_move,
-            molecular_system,
-            rotor,
-            numb_molecule1,
-            parameter_name,
-            parameter_value,
-            rpt_val,
-            dipole_moment,
-            gfactor,
-            numb_block,
-            numb_pass,
-            preskip,
-            postskip,
-            ent_method,
-            extra_file_name,
-            final_results_path,
-            particle_a,
-            var)
-
-
-		print(analysis_file_name)
-		print("Tapas")
-		exit()
 
 	if (method == "ENT"):
 		numb_molecule = 2 * numb_molecule1
@@ -766,7 +715,7 @@ if ((status == "analysis") and ((method == "ENT") and (
 		output_dir_path,
 		variable,
 		crystal,
-		final_results_path,
+		final_result_path,
 		impurity,
 		ext_ent)
 	support.GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, parameter_name, rpt_val, gfactor, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, output_dir_path, variable, crystal)
