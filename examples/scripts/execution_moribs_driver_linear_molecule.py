@@ -35,7 +35,7 @@ parameter_value = 0.001
 numb_molecule = 2
 numb_block = 20000
 numb_pass = 200
-numb_preskip = 10000
+numb_preskip = 0
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
@@ -43,10 +43,10 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "plot"):
-	rlist = np.arange(3.0, 10.41, 1.0, dtype=float)
+	rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
 if (job_type == "submission"):
-	rlist = np.arange(3.0, 3.41, 0.2, dtype=float)
+	rlist = np.arange(2.5, 2.91, 0.1, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):

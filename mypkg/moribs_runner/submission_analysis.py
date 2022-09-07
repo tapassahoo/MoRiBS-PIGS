@@ -443,7 +443,7 @@ for particle_a in particle_a_list:
 					status, parameter_name, ent_method))
 		'''
 	if (status == "plot"):
-		analysis_file_name = support.get_analysis_file_name(
+		analysis_file_name = support.GetAnalysisFileName(
 			method,
 			True,
 			rotor,

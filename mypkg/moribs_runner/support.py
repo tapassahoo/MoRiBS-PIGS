@@ -1003,7 +1003,7 @@ def GetAverageEntropyRT(
 			ii = ii + 1
 
 	#extra_file_name = 'Ratio-Trick-'
-	FileAnalysis = get_analysis_file_name(
+	FileAnalysis = GetAnalysisFileName(
 		method,
 		True,
 		rotor,
@@ -2020,29 +2020,29 @@ def get_working_file(
 	return final_file_name
 
 
-class get_analysis_file_name:
+class GetAnalysisFileName:
 	def __init__(
 			self,
+			input_dir1,
 			method1,
 			method2,
+			molecular_system1,
 			molecule_rot1,
+			numb_molecule1,
 			translational_move1,
 			rotational_move1,
-			rpt_val1,
-			gfacor1,
-			dipole_moment1,
 			parameter_name1,
 			parameter_value1,
+			rpt_val1,
+			dipole_moment1,
+			gfacor1,
 			numb_block1,
 			numb_pass1,
-			numb_molecule1,
-			molecular_system1,
-			ent_method1,
 			preskip1,
 			postskip1,
 			extra_file_name1,
-			input_dir1,
 			particle_a1,
+			ent_method1,
 			ent_algorithm):
 		self.method = method1
 		self.rotor = molecule_rot1
@@ -2170,7 +2170,7 @@ class get_analysis_file_name:
 					"#------------------------------------------------------------------------#")
 
 
-class get_plot_file_name:
+class GetPlotFileName:
 	def __init__(
 			self,
 			method1,
@@ -2181,7 +2181,7 @@ class get_plot_file_name:
 			numb_molecule1,
 			parameter_name1,
 			parameter_value1,
-			rpt_val1,
+			rpt_value1,
 			dipole_moment1,
 			gfactor1,
 			numb_block1,
@@ -2189,7 +2189,7 @@ class get_plot_file_name:
 			preskip1,
 			postskip1,
 			ent_method1,
-			extra1,
+			extra_file_name1,
 			input_dir1,
 			particle_a1,
 			var1):
@@ -2199,7 +2199,7 @@ class get_plot_file_name:
 		self.rotational_move = rotational_move1
 		self.parameter_name = parameter_name1
 		self.var = var1
-		self.rpt_val = rpt_val1
+		self.rpt_value = rpt_value1
 		self.dipole_moment = dipole_moment1
 		self.gfactor = gfactor1
 		self.parameter_value = parameter_value1
@@ -2211,7 +2211,7 @@ class get_plot_file_name:
 		self.ent_method = ent_method1
 		self.preskip = preskip1
 		self.postskip = postskip1
-		self.extra = extra1
+		self.extra_file_name = extra_file_name1
 		self.input_dir = input_dir1
 		self.particle_a = particle_a1
 
@@ -2223,7 +2223,7 @@ class get_plot_file_name:
 			else:
 				add2 = ""
 		else:
-			front_layer = self.method + "-" + self.extra
+			front_layer = self.method + "-" + self.extra_file_name
 			add1 = ""
 			add2 = ""
 
@@ -2234,8 +2234,8 @@ class get_plot_file_name:
 		if ((self.translational_move) and (self.rotational_move == False)):
 			front_layer += "TransDOFs-"
 
-		if (self.rpt_val >= 0.0):
-			name_rpt = "Rpt" + str(self.rpt_val) + "Angstrom-"
+		if (self.rpt_value >= 0.0):
+			name_rpt = "Rpt" + str(self.rpt_value) + "Angstrom-"
 		else:
 			name_rpt = ""
 
@@ -2287,8 +2287,6 @@ class get_plot_file_name:
 			self.molecular_system) + add1 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip) + add2
 
 		self.save_file_energy = self.input_dir + file_output1 + name_layer1
-		print(self.save_file_energy)
-		exit()
 		self.save_file_correlation = self.input_dir + file_output2 + name_layer1
 		self.SaveChemPot = self.input_dir + file_output8 + name_layer1
 		self.SaveEntropy = self.input_dir + file_output9 + name_layer1
@@ -2390,7 +2388,7 @@ def FileCheck(method, list_nb, variable_name, SavedFile):
 		call(["rm", SavedFile])
 
 
-class GetUnitConverter:
+class UnitConverter:
 	def __init__(self):
 		self.BOHRRADIUS = 0.5291772108	  # angstrom
 		self.HARTREE2JL = 4.359748e-18		 # hartree to joule  conversion factor
@@ -2400,7 +2398,7 @@ class GetUnitConverter:
 
 		self.AuToDebye = 1.0 / 0.39343
 		self.AuToCmInverse = 219474.63137
-		self.AuToKelvin = 315777.0
+		self.au_to_kelvin = 315777.0
 		self.KCalperMolToCmInverse = 349.75509
 
 		self.HBAR = 1.05457266  # (10^-34 Js)	 Planck constant
@@ -2408,7 +2406,7 @@ class GetUnitConverter:
 		self.K_B = 1.380658  # (10^-23 JK^-1)  Boltzmann constant
 		# conversion from CM-1 to K
 		self.WNO2K = 0.6950356
-		self.kcalmoleinvToKelvin = 503.228
+		self.kcal_mole_inverse_to_kelvin = 503.228
 
 
 def GetrAndgFactor(molecule, RCOM, dipole_moment):
@@ -2518,7 +2516,7 @@ def GetPairDensity(
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
 
 # def GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable):
-	#FileAnalysis = get_analysis_file_name(method, True, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a)
+	#FileAnalysis = GetAnalysisFileName(method, True, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a)
 #	   GetAverageEntropyRT(maxloop, method, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable)
 
 
