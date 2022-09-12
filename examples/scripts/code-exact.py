@@ -1,36 +1,30 @@
 import os
-from os import system
+import numpy as np
 import support
-from subprocess import call
 
 # Informations about the system
-nMolecule = 4
-RCOM = 10.05
-lmax = 10
-ltotalmax = 10
-Rotor = " HF "
-Simulation = " ENT "
+rotor_name="HF"
+numb_molecule=2
+rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
+dipole_moment = 1.827
+l_max=10
+l_total_max=l_max
 #
-if nMolecule == 2:
-    gFactorList = [0.5 + 0.1 * i for i in range(76)]
-if nMolecule == 4:
-    gFactorList = [0.5 + 0.1 * i for i in range(31)]
-#
-for gFactor in gFactorList:
-    gFactor = "{:03.1f}".format(gFactor)
-    command_line = (
-        "python script_exact_energy_entropy.py -g "
-        + str(gFactor)
-        + " -R "
-        + str(RCOM)
-        + " -N "
-        + str(nMolecule)
-        + " -lmax "
-        + str(lmax)
-        + " -ltotalmax "
-        + str(ltotalmax)
-        + " --Rotor"
-        + Rotor
-        + Simulation
-    )
-    system(command_line)
+blank_space = " "
+
+for rpt in rlist:
+	rpt_value = "{:3.2f}".format(rpt)
+	command_line = (
+		+ str(rfactor)
+		+ "-rpt"
+		+ rpt_value
+		+ " -N "
+		+ str(numb_molecule)
+		+ "--l-max "
+		+ str(lmax)
+		+ "--l-total-max"
+		+ str(l_total_max)
+		+ " --rotor"
+		+ rotor_name
+	)
+	os.system(command_line)
