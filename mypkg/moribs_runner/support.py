@@ -2165,9 +2165,7 @@ class GetAnalysisFileName:
 				print("")
 				print("Final results - Entropy vs " + str(self.variable_name))
 				print(self.SaveEntropy)
-
-				print(
-					"#------------------------------------------------------------------------#")
+				print("********************************************************")
 
 
 def FileCheck(method, list_nb, variable_name, SavedFile):
