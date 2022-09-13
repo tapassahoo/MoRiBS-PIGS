@@ -1,1 +1,2 @@
-python3 get_beads_and_mc_steps.py
+#python3 get_beads_and_mc_steps.py
+python execution_driver_for_exact_computation_of_dipole_chain.py

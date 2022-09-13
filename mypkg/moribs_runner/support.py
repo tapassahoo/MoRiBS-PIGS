@@ -2191,44 +2191,37 @@ def FileCheck(method, list_nb, variable_name, SavedFile):
 
 class UnitConverter:
 	def __init__(self):
-		self.BOHRRADIUS = 0.5291772108	  # angstrom
-		self.HARTREE2JL = 4.359748e-18		 # hartree to joule  conversion factor
-		self.HARTREE2KL = 3.157732e+05		 # hartree to Kelvin conversion factor
-		self.CMRECIP2KL = 1.4387672			# cm^-1 to Kelvin conversion factor
-		self.MHZ2RCM = 3.335640952e-5	   # MHz to cm^-1 conversion factor
+		self.bohr_radius = 0.5291772108			# angstrom
+		self.hartree_to_jule = 4.359748e-18		
+		self.hartree_to_kelvin = 3.157732e+05	
+		self.cm_recip_to_kelvin = 1.4387672	
 
-		self.AuToDebye = 1.0 / 0.39343
-		self.AuToCmInverse = 219474.63137
+		self.au_to_debye = 1.0 / 0.39343
+		self.au_to_cm_inverse = 219474.63137
 		self.au_to_kelvin = 315777.0
-		self.KCalperMolToCmInverse = 349.75509
-
-		self.HBAR = 1.05457266  # (10^-34 Js)	 Planck constant
-		self.AMU = 1.6605402  # (10^-27 kg)	 atomic mass unit
-		self.K_B = 1.380658  # (10^-23 JK^-1)  Boltzmann constant
-		# conversion from CM-1 to K
-		self.WNO2K = 0.6950356
-		self.kcal_mole_inverse_to_kelvin = 503.228
+		self.kcal_per_mol_to_cm_inverse = 349.75509
+		self.kcal_per_mole_to_kelvin = 503.228
 
 
-def GetrAndgFactor(molecule, RCOM, dipole_moment):
+def get_gfactor_rfactor(rotor, rcom, dipole_moment):
 	'''
 	It calculates g and R value
 	'''
-	Units = GetUnitConverter()
-	BConstant = get_rotational_bconstant(molecule)  # in wavenumber
-	DipoleMomentAU = dipole_moment / Units.AuToDebye
-	RCOMAU = RCOM / Units.BOHRRADIUS
-	BConstantAU = BConstant / Units.AuToCmInverse
-	rFactor = RCOMAU / \
-		((DipoleMomentAU * DipoleMomentAU / BConstantAU)**(1.0 / 3.0))
-	gFactor = (DipoleMomentAU * DipoleMomentAU) / \
-		(RCOMAU * RCOMAU * RCOMAU * BConstantAU)
-	printingmessage = " dipole_moment = " + \
+	unit_conversion_factor = UnitConverter()
+	rotational_b_constant = get_rotational_bconstant(rotor)  # in wavenumber
+	dipole_moment_in_au = dipole_moment / unit_conversion_factor.au_to_debye
+	rcom_in_au = rcom / unit_conversion_factor.bohr_radius
+	rotational_b_constant_in_au = rotational_b_constant / unit_conversion_factor.au_to_cm_inverse
+	rfactor = rcom_in_au / \
+		((dipole_moment_in_au * dipole_moment_in_au / rotational_b_constant_in_au)**(1.0 / 3.0))
+	gfactor = (dipole_moment_in_au * dipole_moment_in_au) / \
+		(rcom_in_au * rcom_in_au * rcom_in_au * rotational_b_constant_in_au)
+	print_message = " Dipole Moment = " + \
 		str(dipole_moment) + " gFactor = " + \
-		str(gFactor) + " rFactor = " + str(rFactor)
-	print(printingmessage)
-	returnList = [rFactor, gFactor]
-	return returnList
+		str(gfactor) + " Dmitri's rFactor = " + str(rfactor)
+	print(print_message)
+	return_list = {"g":gfactor,"R":rfactor}
+	return return_list
 
 
 def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
@@ -2244,51 +2237,22 @@ def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
 	return dipole_moment
 
 
-def GetEDResults(
-		method,
-		FilePlotName,
-		srcCodePath,
-		RFactor,
-		numb_molecule,
-		particle_a,
-		lmax,
-		ltotalmax):
+def get_dmrg_result(
+	source_code_dir,
+	numb_molecule,
+	rfactor,
+	l_max,
+	l_total_max):
 	'''
 	It will give ground state energy, von Neuman and Renyi entropies computed by diagonalizing full Hamiltonian matrix. It is developed by Dmitri https://github.com/0/DipoleChain.jl
 	'''
-	if (method == "ENT"):
-		FileToBeSavedED = FilePlotName.SaveEntropyED + ".txt"
-		FileToBeSavedMM = FilePlotName.SaveEntropyMM + ".txt"
-	if (method == "PIGS"):
-		FileToBeSavedED = FilePlotName.save_file_energyED + ".txt"
-		FileToBeSavedMM = FilePlotName.save_file_energyMM + ".txt"
-	print(FileToBeSavedED)
+	#FileToBeSavedED = FilePlotName.save_file_energyED + ".txt"
 
-	commandRunED = "julia " + srcCodePath + "diagonalization.jl -R " + str(RFactor) + " -N " + str(
-		numb_molecule) + " --l-max " + str(lmax) + " --l-total-max " + str(ltotalmax) + " --A-start 1 --A-size " + str(particle_a)
-	call(["rm", "outputED.txt"])
-	system(commandRunED)
-	call(["mv", "outputED.txt", FileToBeSavedED])
-	'''
-		if (numb_molecule >6):
-				print("It is not computing Matrix multiplication stuffs")
-				return
-
-		if (numb_molecule <= 4):
-				call(["rm", "outputMM.txt"])
-
-				for numb_bead in loop:
-						print(numb_bead)
-						RFactor	  = GetrAndgFactor(rotor, rpt_val, dipole_moment)
-						if (variable_name == "beta"):
-								parameterR	= parameter*BConstantK
-								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numb_molecule)+" --l-max 6 --tau "+str(parameterR)+" -P "+str(numb_bead)+" --pigs --A-start 1"+" --A-size "+str(particle_a)
-						if (variable_name == "tau"):
-								parameterR	= parameter*BConstantK
-								commandRun   = "julia "+srcCodePath+"path_integral.jl -R "+str(RFactor)+" -N "+str(numb_molecule)+" --l-max 6 --beta "+str(parameterR)+" -P "+str(numb_bead)+" --pigs --A-start 1"+" --A-size "+str(particle_a)
-						system(commandRun)
-				call(["mv", "outputMM.txt", FileToBeSavedMM])
-		'''
+	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(
+		numb_molecule) + " --l-max " + str(l_max) + " --l-total-max " + str(l_total_max) + " --A-start 1 --A-size 1"
+	#call(["rm", "dmrg_output.txt"])
+	os.system(cmd_run)
+	#call(["mv", "dmrg_output.txt", FileToBeSavedED])
 
 
 def GetPairDensity(

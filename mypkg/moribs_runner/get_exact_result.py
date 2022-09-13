@@ -1,11 +1,13 @@
 #!/usr/bin/python
 
 from subprocess import call
+import os
 from os import system
 import decimal
 import numpy as np
-import support
 import argparse
+import getpass
+import mypkg.moribs_runner.support as support
 
 parser = argparse.ArgumentParser(
 	description="The script is used to calculate the ground-state energy, \
@@ -47,13 +49,13 @@ parser.add_argument(
 	metavar='N',
 	help="Number of Molecules.")
 parser.add_argument(
-	"--l-max",
+	"--l_max",
 	type=int,
 	metavar='L',
 	help="Local basis truncation.",
 	default=0)
 parser.add_argument(
-	"--l-total-max",
+	"--l_total_max",
 	type=int,
 	metavar='L',
 	help="Many-body basis truncation (default: no truncation)",
@@ -73,76 +75,24 @@ if (args.dipole_moment):
 	dipole_moment = args.dipole_moment
 if (args.rfactor):
 	rfactor = args.rfactor
-print("Dr. Tapas Sahoo")
-exit()
 #
-l_max = args.l-max
-l_total_max = args.l-total-max
+l_max = args.l_max
+l_total_max = args.l_total_max
 #
-src_dir = os.getcwd()
-extra_file_name = ""
-
-particleA = int(numbmolecules / 2)
-
-if (variableName == "tau"):
-	parameterName = "beta"
-	beta = args.param
-	parameter = beta
-	temperature = 1.0 / beta
-
-if (variableName == "beta"):
-	parameterName = "tau"
-	tau = args.param
-	parameter = tau
-
-numbblocks = 100000
-numbpass = 100
+# File systems
+job_submit_dir = os.getcwd()
+home = os.path.expanduser("~")
+source_code_dir = home + "/" + path_dmrg_dir + "DipoleChain.jl/examples/"
+final_result_path = home + "/" + plot_dir_path + "final-dmrg-outputs-for-plotting/"
+temp_dir = os.path.dirname(final_result_path)
+if not os.path.exists(temp_dir):
+	os.makedirs(temp_dir)
 #
-srcCodePath = "/home/tapas/DipoleChain.jl/examples/"
-#srcCodePath		 = "/home/tapas/DipoleChain.jl-master/examples/"
-Units = support.GetUnitConverter()
-BConstant = support.GetBconst(molecule)  # in wavenumber
-BConstantK = BConstant * Units.CMRECIP2KL
+rfactor = support.get_gfactor_rfactor(rotor, rpt_value, dipole_moment)["R"]
 #
-user_name = "tapas"
-final_results_path = "/home/" + user_name + "/ResultsOf" + TypeCal + "/"
-#
-FilePlotName = support.GetFileNamePlot(
-	TypeCal,
-	molecule_rot,
-	False,
-	True,
-	variableName,
-	Rpt,
-	gfact,
-	dipolemoment,
-	parameterName,
-	parameter,
-	numbblocks,
-	numbpass,
-	numbmolecules,
-	molecule,
-	ENT_TYPE,
-	0,
-	0,
-	extra_file_name,
-	final_results_path,
-	particleA,
-	10)
-#
-if (args.dipole_moment > 0.0):
-	rfactor_list = support.get_rfactor(rotor, rpt_value, dipole_moment)
-	RFactor = RFactorList[0]
-if (args.gfactor > 0.0):
-	RFactor = 1.0 / math.pow(gfact, 1.0 / 3.0)
-exit()
-
-support.GetEDResults(
-	TypeCal,
-	FilePlotName,
-	srcCodePath,
-	RFactor,
-	numbmolecules,
-	particleA,
-	lmax,
-	ltotalmax)
+support.get_dmrg_result(
+	source_code_dir,
+	numb_molecule,
+	rfactor,
+	l_max,
+	l_total_max)

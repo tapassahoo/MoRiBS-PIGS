@@ -224,7 +224,7 @@ elif ((myhost == "feynman") or (myhost == "nlogn")):
 else:
 	server_name = "moribs"
 #
-submit_job_dir = os.getcwd()
+job_submit_dir = os.getcwd()
 
 if (spin_isomer == -1):
 	prefix_name = ""
@@ -281,7 +281,7 @@ if (status == "submission"):
 	if not args.compiled:
 		if not args.restart:
 			support.get_execution_file(
-				submit_job_dir, method, ent_method, source_dir_exe)
+				job_submit_dir, method, ent_method, source_dir_exe)
 
 if (server_name == "graham"):
 	output_dir_path = "/scratch/" + user_name + "/" + output_file_dir
