@@ -96,3 +96,6 @@ support.get_dmrg_result(
 	rfactor,
 	l_max,
 	l_total_max)
+
+file_moved_name = final_result_path + "ground-state-energy-of-" + str(numb_molecule) + rotor + "-at" + str(rpt_value) + "angstrom.txt"
+call(["mv", "dmrg_output_for_energy.txt", file_moved_name]) 
