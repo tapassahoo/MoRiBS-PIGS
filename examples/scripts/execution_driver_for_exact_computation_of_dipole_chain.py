@@ -23,7 +23,7 @@ blank_space = " "
 # Informations about the system
 rotor_name="HF"
 numb_molecule=2
-rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
+rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 dipole_moment = 1.827
 l_max=20
 l_total_max=l_max
