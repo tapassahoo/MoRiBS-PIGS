@@ -20,6 +20,11 @@ parser = argparse.ArgumentParser(
 				before you carry out the computations.",
 	epilog="Enjoy the program! :)")
 parser.add_argument(
+	"method",
+	type=str,
+	choices=["dmrg","mm"],
+	help="Either dmrg or piqmc.")
+parser.add_argument(
 	"-d",
 	"--dipole_moment",
 	type=float,
@@ -67,8 +72,9 @@ parser.add_argument(
 	help="Name of the rotor. E.g., HF, H2O.")
 args = parser.parse_args()
 #
-rotor = args.rotor
-numb_molecule = args.nmolecule
+method = args.method
+rotor_name = args.rotor
+numb_rotor = args.nmolecule
 #
 rpt_value = args.rpt
 if (args.dipole_moment):
@@ -80,6 +86,16 @@ l_max = args.l_max
 l_total_max = args.l_total_max
 #
 # File systems
+root_dir_execution = "scratch"
+myhost = os.uname()[1]
+myhost = myhost[0:3]
+if ((myhost == "gra") or (myhost == "ced")):
+	server_name = "graham"
+elif ((myhost == "feynman") or (myhost == "nlogn")):
+	server_name = "nlogn"
+else:
+	server_name = "moribs"
+#
 job_submit_dir = os.getcwd()
 home = os.path.expanduser("~")
 source_code_dir = home + "/" + path_dmrg_dir + "DipoleChain.jl/examples/"
@@ -87,16 +103,48 @@ final_result_path = home + "/" + plot_dir_path + "final-dmrg-outputs-for-plottin
 temp_dir = os.path.dirname(final_result_path)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
+
+output_file_dir = name_of_output_directory + "/"
+user_name = getpass.getuser()
+input_dir = os.getcwd() + "/"
+
+if (server_name == "graham"):
+	dir_run_job = "/scratch/" + user_name + "/" + output_file_dir
+elif (server_name == "nlogn"):
+	dir_run_job = "/work/" + user_name + "/" + output_file_dir
+else:
+	dir_run_job = home + "/" + output_file_dir
+
+temp_dir = os.path.dirname(dir_run_job)
+if not os.path.exists(temp_dir):
+	os.makedirs(temp_dir)
+
+working_file_name = support.get_dmrg_working_file(
+	method,
+	rotor_name,
+	numb_rotor,
+	rpt_value,
+	dipole_moment,
+	l_max,
+	l_total_max)
+job_execution_dir = working_file_name
 #
-rfactor = support.get_gfactor_rfactor(rotor, rpt_value, dipole_moment)["R"]
+rfactor = support.get_gfactor_rfactor(rotor_name, rpt_value, dipole_moment)["R"]
 #
 support.get_dmrg_result(
+	server_name,
+	root_dir_execution,
+	method,
+	rotor_name,
+	dir_run_job,
+	job_execution_dir,
+	input_dir,
 	source_code_dir,
-	numb_molecule,
+	numb_rotor,
 	rfactor,
 	l_max,
 	l_total_max)
 
 rpt_value = "{:3.2f}".format(args.rpt)
-file_moved_name = final_result_path + "ground-state-energy-of-" + str(numb_molecule) + rotor + "-at" + str(rpt_value) + "angstrom.txt"
+file_moved_name = final_result_path + "ground-state-energy-of-" + str(numb_molecule) + rotor_name + "-at" + str(rpt_value) + "angstrom.txt"
 call(["mv", "dmrg_output_for_energy.txt", file_moved_name]) 

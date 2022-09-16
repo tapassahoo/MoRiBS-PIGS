@@ -10,22 +10,26 @@ module_path = mypkg.moribs_runner.__file__
 module_path = module_path.replace('__init__.py', '')
 
 # User needs to modify once
+dir_name = '"linear-rotors"'
+ 
 # /home/tapas/MoRiBS-PIGS/examples/scripts
+#project_dir = '""'
 #plot_dir_path = '""'
-#dir_moribs = '""'
-#
+
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
 project_dir = '"academic-project/"'
 plot_dir_path = '"academic-project/outputs/"'
+
 extra_file_name = '""'
 blank_space = " "
 #
 # Informations about the system
+method="dmrg"
 rotor_name="HF"
 numb_molecule=2
 rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 dipole_moment = 1.827
-l_max=20
+l_max=10
 l_total_max=l_max
 #
 # No need to change the below three lines
@@ -37,13 +41,20 @@ for rpt in rlist:
 	rpt_value = "{:3.2f}".format(rpt)
 
 	support.replace(
-		"path_dmrg_dir",
-		project_dir,
+		"name_of_output_directory",
+		dir_name,
 		original_file_name,
 		temp_file_name)
 
 	support.replace(
-		"extra_file_name",
+		"path_dmrg_dir",
+		project_dir,
+		temp_file_name,
+		temp_file_name1)
+	call(["mv", temp_file_name1, temp_file_name])
+
+	support.replace(
+		"extra_name",
 		extra_file_name,
 		temp_file_name,
 		temp_file_name1)
@@ -58,6 +69,7 @@ for rpt in rlist:
 
 	cmd_run = (
 		"python" + blank_space + temp_file_name + blank_space
+		+ method + blank_space
 		+ "--dipole_moment" + blank_space + str(dipole_moment) + blank_space
 		+ "--rpt" + blank_space + rpt_value + blank_space
 		+ " --rotor" + blank_space + rotor_name + blank_space

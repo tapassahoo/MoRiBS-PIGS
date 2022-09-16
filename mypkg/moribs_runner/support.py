@@ -1947,7 +1947,6 @@ def GetAvgRotEnergy(molecule, beta):
 	AvgEnergy = Nsum * CMRECIP2KL / Zsum
 	return AvgEnergy
 
-
 def get_working_file(
 		method,
 		molecular_system,
@@ -2000,7 +1999,7 @@ def get_working_file(
 
 	if (dipole_moment >= 0.0):
 		if (numb_molecule > 1):
-			name_dipole_moment = "dipole_moment" + \
+			name_dipole_moment = "Dipole-Moment" + \
 				str(dipole_moment) + "Debye-"
 		else:
 			name_dipole_moment = "Field" + str(dipole_moment) + "Kinv-"
@@ -2016,6 +2015,31 @@ def get_working_file(
 		name_dipole_moment + name_gfactor + name_layer1
 	if (method == "ENT"):
 		final_file_name += ent_method + "-" + ent_algorithm + "-"
+
+	return final_file_name
+
+
+def get_dmrg_working_file(
+		method,
+		rotor_name,
+		numb_rotor,
+		rpt_value,
+		dipole_moment,
+		l_max,
+		l_total_max):
+
+	system_fragment = "-of-" + str(numb_rotor) + str(rotor_name) 
+
+	parameter_fragment = ""
+	if (rpt_value >= 0.0):
+		parameter_fragment += "-Rpt" + str(rpt_value) + "Angstrom"
+
+	if (dipole_moment >= 0.0):
+		parameter_fragment += "-Dipole-Moment" + str(dipole_moment) + "Debye"
+
+	parameter_fragment += "-lmax" + str(l_max) + "-ltotalmax" + str(l_total_max)
+	first_fragment = method + "-output" 
+	final_file_name = first_fragment + system_fragment + parameter_fragment
 
 	return final_file_name
 
@@ -2238,22 +2262,143 @@ def GetDipoleMomentFromGFactor(molecule, RCOM, gFactor):
 
 
 def get_dmrg_result(
+	server_name,
+	root_dir_execution,
+	method,
+	rotor_name,
+	dir_run_job,
+	job_execution_dir,
+	input_dir,
 	source_code_dir,
-	numb_molecule,
+	numb_rotor,
 	rfactor,
 	l_max,
 	l_total_max):
 	'''
 	It will give ground state energy, von Neuman and Renyi entropies computed by diagonalizing full Hamiltonian matrix. It is developed by Dmitri https://github.com/0/DipoleChain.jl
 	'''
-	#FileToBeSavedED = FilePlotName.save_file_energyED + ".txt"
+	log_file = method + ".log"
+
+	os.chdir(dir_run_job)
+	if (os.path.isdir(job_execution_dir)):
+		print("====")
+		print("Error message")
+		print("")
+		print_message = "Remove " + str(dir_run_job) + str(job_execution_dir)
+		print(print_message)
+		os.chdir(input_dir)
+		return
+
+	os.chdir(input_dir)
+
+	job_execution_dir_path = dir_run_job + job_execution_dir
+	print(job_execution_dir_path)
+	temp_dir = os.path.dirname(job_execution_dir_path)
+	if not os.path.exists(temp_dir):
+		os.makedirs(temp_dir)
+
+	job_submission_file = job_execution_dir_path + "/job-submission-script.sh"
+
+	fwrite = open(submission_file_name, 'w')
+
+
+	fwrite.close()
+	exit()
+	os.chdir(job_execution_dir_path)
+	if ((server_name == "graham") or (server_name == "nlogn")):
+		call(["sbatch", submission_file_name])
+	else:
+		call(["chmod", "+x", submission_file_name])
+		os.system("./" + submission_file_name + " &" )
+	print("")
+	print("***************** Successfully submitted ***************")
+	print("")
+
+	os.chdir(input_dir)
+
+
+def get_job_submission_script(
+		server_name,
+		root_dir_execution,
+		file_name,
+		numb_rotor,
+		job_execution_dir_path,
+		molecule,
+		final_dir_in_work,
+		dir_run_input_pimc,
+		user_name,
+		output_file_dir,
+		dir_run_job,
+		final_output_dir):
+
+	if (numb_rotor <= 5):
+		wall_time = "00-03:00"
+	else:
+		wall_time = "01-00:00"
+
+	job_name = file_name + str(numb_bead)
+	omp_thread = str(thread)
+	log_file_path = dir_run_input_pimc + "/" + job_name
+
+	if (server_name == "graham"):
+		mv_cmd = " "
+	else:
+		if (dir_run == "scratch"):
+			mv_cmd = "mv " + job_execution_dir_path + " " + final_output_dir
+		if (dir_run == "work"):
+			mv_cmd = " "
+
+	if (server_name == "graham"):
+		account = "#SBATCH --account=rrg-pnroy"
+	else:
+		account = ""
 
 	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(
 		numb_molecule) + " --l-max " + str(l_max) + " --l-total-max " + str(l_total_max) + " --A-start 1 --A-size 1"
-	#call(["rm", "dmrg_output.txt"])
-	os.system(cmd_run)
-	#call(["mv", "dmrg_output.txt", FileToBeSavedED])
 
+	print("")
+	print("")
+	print("")
+	print("**************** Important Note ************************")
+	print("")
+	print("The full path of the directory where the submitted job is running is given below:")
+	print(job_execution_dir_path)
+	print("")
+	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
+	print(log_file_path + ".log")
+	print("")
+	print("The outputs exist in the below-mentioned directory after the job is executed successfully.")
+	print(final_output_dir)
+	print("")
+	print("********************************************************")
+	print("")
+
+	job_string = """#!/bin/bash
+#SBATCH --job-name=%s
+#SBATCH --output=%s.log
+#SBATCH --time=%s
+%s
+#SBATCH --constraint=broadwell
+#SBATCH --mem-per-cpu=1024mb
+#SBATCH --cpus-per-task=%s
+export OMP_NUM_THREADS=%s
+#export OMP_STACKSIZE=1024M
+export GOMP_STACKSIZE=1024M
+rm -rf %s
+mkdir -p %s
+cd %s
+time ./pimc
+%s
+""" % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
+
+	job_string_desktop = """#!/bin/bash
+export OMP_NUM_THREADS=%s
+export GOMP_STACKSIZE=1024M
+rm -rf %s
+mkdir -p %s
+cd %s
+./pimc 1>> %s.log 2>&1
+""" % (omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, log_file_path)
 
 def GetPairDensity(
 		FilePlotName,
