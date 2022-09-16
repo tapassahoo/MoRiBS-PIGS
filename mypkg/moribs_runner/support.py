@@ -2273,7 +2273,8 @@ def get_dmrg_result(
 	numb_rotor,
 	rfactor,
 	l_max,
-	l_total_max):
+	l_total_max,
+	final_output_dir):
 	'''
 	It will give ground state energy, von Neuman and Renyi entropies computed by diagonalizing full Hamiltonian matrix. It is developed by Dmitri https://github.com/0/DipoleChain.jl
 	'''
@@ -2288,22 +2289,34 @@ def get_dmrg_result(
 		print(print_message)
 		os.chdir(input_dir)
 		return
-
 	os.chdir(input_dir)
 
 	job_execution_dir_path = dir_run_job + job_execution_dir
-	print(job_execution_dir_path)
 	temp_dir = os.path.dirname(job_execution_dir_path)
 	if not os.path.exists(temp_dir):
 		os.makedirs(temp_dir)
 
+	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(
+		numb_rotor) + " --l-max " + str(l_max) + " --l-total-max " + str(l_total_max) + " --A-start 1 --A-size 1"
+
 	job_submission_file = job_execution_dir_path + "/job-submission-script.sh"
-
+	print(job_submission_file)
+	exit()
 	fwrite = open(submission_file_name, 'w')
-
+	fwrite.write(
+		get_job_submission_script(
+		server_name,
+		root_dir_execution,
+		job_execution_dir_path,
+		final_output_dir,
+		numb_rotor,
+		cmd_run,
+		job_name,
+		log_file))
 
 	fwrite.close()
-	exit()
+
+	job_name = method+str(rfactor)-str(numb_rotor)
 	os.chdir(job_execution_dir_path)
 	if ((server_name == "graham") or (server_name == "nlogn")):
 		call(["sbatch", submission_file_name])
@@ -2319,26 +2332,21 @@ def get_dmrg_result(
 
 def get_job_submission_script(
 		server_name,
-		root_dir_execution,
-		file_name,
-		numb_rotor,
 		job_execution_dir_path,
-		molecule,
-		final_dir_in_work,
-		dir_run_input_pimc,
-		user_name,
-		output_file_dir,
-		dir_run_job,
-		final_output_dir):
+		root_dir_execution,
+		final_output_dir,
+		numb_rotor,
+		cmd_run,
+		job_name,
+		log_file):
 
 	if (numb_rotor <= 5):
 		wall_time = "00-03:00"
 	else:
 		wall_time = "01-00:00"
 
-	job_name = file_name + str(numb_bead)
 	omp_thread = str(thread)
-	log_file_path = dir_run_input_pimc + "/" + job_name
+	log_file_path = job_execution_dir_path + "/" + log_file
 
 	if (server_name == "graham"):
 		mv_cmd = " "
@@ -2353,8 +2361,6 @@ def get_job_submission_script(
 	else:
 		account = ""
 
-	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(
-		numb_molecule) + " --l-max " + str(l_max) + " --l-total-max " + str(l_total_max) + " --A-start 1 --A-size 1"
 
 	print("")
 	print("")
@@ -2373,6 +2379,7 @@ def get_job_submission_script(
 	print("********************************************************")
 	print("")
 
+	'''
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.log
@@ -2384,21 +2391,16 @@ def get_job_submission_script(
 export OMP_NUM_THREADS=%s
 #export OMP_STACKSIZE=1024M
 export GOMP_STACKSIZE=1024M
-rm -rf %s
-mkdir -p %s
-cd %s
 time ./pimc
 %s
 """ % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
+	'''
 
 	job_string_desktop = """#!/bin/bash
 export OMP_NUM_THREADS=%s
 export GOMP_STACKSIZE=1024M
-rm -rf %s
-mkdir -p %s
-cd %s
-./pimc 1>> %s.log 2>&1
-""" % (omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, log_file_path)
+%s 1>> %s.log 2>&1
+""" % (omp_thread, cmd_run, log_file_path)
 
 def GetPairDensity(
 		FilePlotName,

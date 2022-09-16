@@ -99,8 +99,8 @@ else:
 job_submit_dir = os.getcwd()
 home = os.path.expanduser("~")
 source_code_dir = home + "/" + path_dmrg_dir + "DipoleChain.jl/examples/"
-final_result_path = home + "/" + plot_dir_path + "final-dmrg-outputs-for-plotting/"
-temp_dir = os.path.dirname(final_result_path)
+final_output_dir = home + "/" + plot_dir_path + "final-dmrg-outputs-for-plotting/"
+temp_dir = os.path.dirname(final_output_dir)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
@@ -119,17 +119,18 @@ temp_dir = os.path.dirname(dir_run_job)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
+rpt_value = "{:3.2f}".format(args.rpt)
 working_file_name = support.get_dmrg_working_file(
 	method,
 	rotor_name,
 	numb_rotor,
-	rpt_value,
+	float(rpt_value),
 	dipole_moment,
 	l_max,
 	l_total_max)
 job_execution_dir = working_file_name
 #
-rfactor = support.get_gfactor_rfactor(rotor_name, rpt_value, dipole_moment)["R"]
+rfactor = support.get_gfactor_rfactor(rotor_name, float(rpt_value), dipole_moment)["R"]
 #
 support.get_dmrg_result(
 	server_name,
@@ -143,8 +144,5 @@ support.get_dmrg_result(
 	numb_rotor,
 	rfactor,
 	l_max,
-	l_total_max)
-
-rpt_value = "{:3.2f}".format(args.rpt)
-file_moved_name = final_result_path + "ground-state-energy-of-" + str(numb_molecule) + rotor_name + "-at" + str(rpt_value) + "angstrom.txt"
-call(["mv", "dmrg_output_for_energy.txt", file_moved_name]) 
+	l_total_max,
+	final_output_dir)
