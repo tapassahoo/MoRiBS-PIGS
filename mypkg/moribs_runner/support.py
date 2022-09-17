@@ -2291,23 +2291,21 @@ def get_dmrg_result(
 		return
 	os.chdir(input_dir)
 
-	job_execution_dir_path = dir_run_job + job_execution_dir
-	temp_dir = os.path.dirname(job_execution_dir_path)
-	if not os.path.exists(temp_dir):
-		os.makedirs(temp_dir)
+	job_execution_dir_path = os.path.join(dir_run_job, job_execution_dir)
+	if not os.path.exists(job_execution_dir_path):
+		os.makedirs(job_execution_dir_path)
 
 	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(
 		numb_rotor) + " --l-max " + str(l_max) + " --l-total-max " + str(l_total_max) + " --A-start 1 --A-size 1"
 
+	job_name = method+str(rfactor)+"-"+str(numb_rotor)
 	job_submission_file = job_execution_dir_path + "/job-submission-script.sh"
-	print(job_submission_file)
-	exit()
-	fwrite = open(submission_file_name, 'w')
+	fwrite = open(job_submission_file, 'w')
 	fwrite.write(
 		get_job_submission_script(
 		server_name,
-		root_dir_execution,
 		job_execution_dir_path,
+		root_dir_execution,
 		final_output_dir,
 		numb_rotor,
 		cmd_run,
@@ -2316,13 +2314,12 @@ def get_dmrg_result(
 
 	fwrite.close()
 
-	job_name = method+str(rfactor)-str(numb_rotor)
 	os.chdir(job_execution_dir_path)
 	if ((server_name == "graham") or (server_name == "nlogn")):
-		call(["sbatch", submission_file_name])
+		call(["sbatch", job_submission_file])
 	else:
-		call(["chmod", "+x", submission_file_name])
-		os.system("./" + submission_file_name + " &" )
+		call(["chmod", "+x", job_submission_file])
+		os.system(job_submission_file + " &" )
 	print("")
 	print("***************** Successfully submitted ***************")
 	print("")
@@ -2340,6 +2337,7 @@ def get_job_submission_script(
 		job_name,
 		log_file):
 
+	thread=1
 	if (numb_rotor <= 5):
 		wall_time = "00-03:00"
 	else:
@@ -2350,11 +2348,13 @@ def get_job_submission_script(
 
 	if (server_name == "graham"):
 		mv_cmd = " "
-	else:
-		if (dir_run == "scratch"):
+	elif (server_name == "nlogn"):
+		if (root_dir_execution == "scratch"):
 			mv_cmd = "mv " + job_execution_dir_path + " " + final_output_dir
-		if (dir_run == "work"):
+		if (root_dir_execution == "work"):
 			mv_cmd = " "
+	elif (server_name == "moribs"):
+		mv_cmd = " "
 
 	if (server_name == "graham"):
 		account = "#SBATCH --account=rrg-pnroy"
@@ -2371,7 +2371,7 @@ def get_job_submission_script(
 	print(job_execution_dir_path)
 	print("")
 	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
-	print(log_file_path + ".log")
+	print(log_file_path)
 	print("")
 	print("The outputs exist in the below-mentioned directory after the job is executed successfully.")
 	print(final_output_dir)
@@ -2396,11 +2396,13 @@ time ./pimc
 """ % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
 	'''
 
-	job_string_desktop = """#!/bin/bash
+	job_string = """#!/bin/bash
 export OMP_NUM_THREADS=%s
 export GOMP_STACKSIZE=1024M
-%s 1>> %s.log 2>&1
+%s 1>> %s 2>&1
 """ % (omp_thread, cmd_run, log_file_path)
+
+	return job_string
 
 def GetPairDensity(
 		FilePlotName,

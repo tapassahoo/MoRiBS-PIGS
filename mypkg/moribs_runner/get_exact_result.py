@@ -86,15 +86,17 @@ l_max = args.l_max
 l_total_max = args.l_total_max
 #
 # File systems
-root_dir_execution = "scratch"
 myhost = os.uname()[1]
 myhost = myhost[0:3]
 if ((myhost == "gra") or (myhost == "ced")):
 	server_name = "graham"
+	root_dir_execution = "scratch"
 elif ((myhost == "feynman") or (myhost == "nlogn")):
 	server_name = "nlogn"
+	root_dir_execution = "work"
 else:
 	server_name = "moribs"
+	root_dir_execution = "home"
 #
 job_submit_dir = os.getcwd()
 home = os.path.expanduser("~")
