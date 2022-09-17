@@ -13,12 +13,12 @@ module_path = module_path.replace('__init__.py', '')
 dir_name = '"linear-rotors"'
  
 # /home/tapas/MoRiBS-PIGS/examples/scripts
-#project_dir = '""'
-#plot_dir_path = '""'
+project_dir = '""'
+plot_dir_path = '""'
 
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
-project_dir = '"academic-project/"'
-plot_dir_path = '"academic-project/outputs/"'
+#project_dir = '"academic-project/"'
+#plot_dir_path = '"academic-project/outputs/"'
 
 extra_file_name = '""'
 blank_space = " "

@@ -2379,10 +2379,10 @@ def get_job_submission_script(
 	print("********************************************************")
 	print("")
 
-	'''
-	job_string = """#!/bin/bash
+	if (server_name == "graham"):
+		job_string = """#!/bin/bash
 #SBATCH --job-name=%s
-#SBATCH --output=%s.log
+#SBATCH --output=%s
 #SBATCH --time=%s
 %s
 #SBATCH --constraint=broadwell
@@ -2391,12 +2391,12 @@ def get_job_submission_script(
 export OMP_NUM_THREADS=%s
 #export OMP_STACKSIZE=1024M
 export GOMP_STACKSIZE=1024M
-time ./pimc
 %s
-""" % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
-	'''
+%s
+""" % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, cmd_run, mv_cmd)
 
-	job_string = """#!/bin/bash
+	if (server_name == "moribs"):
+		job_string = """#!/bin/bash
 export OMP_NUM_THREADS=%s
 export GOMP_STACKSIZE=1024M
 %s 1>> %s 2>&1
