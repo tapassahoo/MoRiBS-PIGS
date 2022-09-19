@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(
 	epilog="Enjoy the program! :)")
 parser.add_argument("job",
 					type=str,
-					choices=["submission", "analysis", "rename"],
+					choices=["submission", "analysis"],
 					help="Type of jobs: submission of new jobs or analyzing \
 					output files.")
 parser.add_argument("method",
@@ -324,47 +324,6 @@ for particle_a in particle_a_list:
 		particle_a,
 		ent_algorithm)
 
-	'''
-	if (status == "rename"):
-		numbblocks_rename = args.NR
-		file2_name = support.get_woring_file(
-			method,
-			rotor,
-			translational_move,
-			rotational_move,
-			rpt_val,
-			gfactor,
-			dipolemoment,
-			parameterName,
-			parameter,
-			numbblocks_rename,
-			numbpass,
-			numbmolecules1,
-			molecule,
-			ent_method,
-			particleA,
-			extra_file_name,
-			crystal,
-			impurity,
-			ext_ent)
-
-		if (server_name == "graham"):
-			dir_run_input_pimc = "/scratch/" + user_name + \
-				"/" + output_file_dir + working_dir_name + "-Logs"
-			dir_input_pimc_renamed = "/scratch/" + \
-				user_name + "/" + output_file_dir + file2_name + "-Logs"
-		else:
-			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
-			dir_input_pimc_renamed = "/work/" + user_name + \
-				"/" + output_file_dir + file2_name + "-Logs"
-
-	'''
-	# ===============================================================================
-	#																			   |
-	#	compilation of linden.f to generate rotational density matrix - linden.out |
-	#	Yet to be generalized													   |
-	#																			   |
-	# ===============================================================================
 	if (status == "submission"):
 		if (server_name == "graham"):
 			dir_run_input_pimc = "/scratch/" + user_name + \
@@ -559,18 +518,6 @@ for particle_a in particle_a_list:
 				variable = tau
 
 			execution_bead_dir_name = working_dir_name + "-Trotter-Number-" + str(numb_bead)
-
-			'''
-			if (status == "rename"):
-				folder_rename = file2_name + str(numbbeads)
-				support.GetRenamingFunc(
-					dir_run_input_pimc,
-					dir_input_pimc_renamed,
-					output_dir_path,
-					execution_bead_dir_name,
-					folder_rename,
-					input_dir)
-			'''
 
 			if (status == "submission"):
 

@@ -2449,27 +2449,6 @@ def GetPreFactDDPot(molecule, RCOM, dipole_moment):
 	print(printingmessage)
 
 
-def GetRenamingFunc(
-		dir_run_input_pimc,
-		dir_input_pimc_renamed,
-		output_dir_path,
-		execution_bead_dir_name,
-		folder_renamed,
-		input_dir):
-	#final_dir_in_work = output_dir_path + execution_bead_dir_name
-
-	call(["mkdir", "-p", dir_input_pimc_renamed])
-	cmd_run = "cp -r " + dir_run_input_pimc + "/*  " + dir_input_pimc_renamed + "/"
-	os.system(cmd_run)
-	os.chdir(output_dir_path)
-	if (os.path.isdir(execution_bead_dir_name)):
-		call(["mv", execution_bead_dir_name, folder_renamed])
-		print(dir_input_pimc_renamed)
-		print_message = "move " + str(output_dir_path) + str(execution_bead_dir_name)
-		print(print_message)
-	os.chdir(input_dir)
-
-
 def RemoveFiles(
 		method,
 		numb_bead,
