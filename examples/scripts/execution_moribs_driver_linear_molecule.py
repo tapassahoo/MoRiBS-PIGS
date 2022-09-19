@@ -13,14 +13,14 @@ module_path = module_path.replace('__init__.py', '')
 submission_root_dir_name = "linear-rotors"
 # /home/tapas/MoRiBS-PIGS/examples/scripts
 
-"""
 dir_moribs = '""'
 plot_dir_path = '""'
-"""
 
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
+"""
 dir_moribs = '"academic-project/"'
 plot_dir_path = '"academic-project/outputs/"'
+"""
 
 extra_name = '""'
 blank_space = " "
@@ -37,8 +37,8 @@ spin_isomer = int(-1)
 parameter_name = "beta"
 parameter_value = 0.2
 
-numb_molecule = 4
-numb_block = 20
+numb_molecule = 5
+numb_block = 20000
 numb_pass = 200
 numb_preskip = 0
 
@@ -48,11 +48,11 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(5.0, 10.01, 5.2, dtype=float)
+	rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
-		rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
+		rlist = np.arange(5.0, 10.01, 10.2, dtype=float)
 
 	if (parameter_name == "tau"):
 		rlist = np.arange(10.0, 10.01, 1.0, dtype=float)
@@ -109,7 +109,7 @@ for rcom in rlist:
 		+ "--npass" + blank_space + str(numb_pass) + blank_space
 		+ "--preskip" + blank_space + str(numb_preskip) + blank_space
 		+ "--restart" + blank_space
-		+ "--nblock_restart" + blank_space + str(40) + blank_space
+		+ "--nblock_restart" + blank_space + str(numb_block) + blank_space
 	)
 
 	print(cmd_run)

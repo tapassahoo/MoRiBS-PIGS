@@ -1496,7 +1496,7 @@ def job_submission(
 						sym.GetDirNameSubmission(
 							rotor, temperature1, numb_bead2, 3, jmax)
 			file_rotdens = "/" + rotor + "_T" + \
-				str(dropzeros(temperature1)) + "t" + str(numb_bead2)
+				str(temperature1) + "t" + str(numb_bead2)
 			file_rotdens_mod = "/" + rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead)
 			if (os.path.isfile(dir_dens + file_rotdens_mod + ".rho") == False):
@@ -1545,7 +1545,7 @@ def job_submission(
 		#
 		os.chdir(output_dir_path + execution_bead_dir_name + "/results")
 		if (os.path.isfile(file_count)):
-			col_data_new = genfromtxt(file_count)
+			col_data_new = np.genfromtxt(file_count)
 			lastIndex = int(col_data_new[-1, 0])
 			if ((numb_block - lastIndex) <= 0):
 				print(output_dir_path + execution_bead_dir_name)
@@ -1568,43 +1568,44 @@ def job_submission(
 
 		# Rotational density matrices
 		temperature1 = "%8.6f" % temperature
+		if (method == 'PIMC'):
+			numb_bead2 = int(numb_bead)
+		else:
+			numb_bead2 = int(numb_bead - 1)
+		propagator_path = dir_run_input_pimc + "/"
 		if (rotor_type != "LINEAR"):
 			iodevn = spin_isomer
 			jmax = 66
-			if (method == 'PIMC'):
-				numb_bead2 = int(numb_bead)
-			else:
-				numb_bead2 = int(numb_bead - 1)
-		if (rotor == "H2O"):
-			if (server_name == "graham"):
-				dir_dens = "/scratch/" + user_name + "/rot-dens-asymmetric-top/" + \
-					asym.GetDirNameSubmission(
-						rotor, temperature1, numb_bead2, iodevn, jmax)
-			if (server_name == "nlogn"):
-				dir_dens = "/work/" + user_name + "/rot-dens-asymmetric-top/" + \
-					asym.GetDirNameSubmission(
-						rotor, temperature1, numb_bead2, iodevn, jmax)
-		if (rotor == "CH3F"):
-			if (server_name == "nlogn"):
-				dir_dens = "/work/" + user_name + "/rot-dens-symmetric-top/" + \
-					sym.GetDirNameSubmission(
-						rotor, temperature1, numb_bead2, 3, jmax)
-			if (server_name == "graham"):
-				dir_dens = "/scratch/" + user_name + "/rot-dens-symmetric-top/" + \
-					sym.GetDirNameSubmission(
-						rotor, temperature1, numb_bead2, 3, jmax)
-		file_rotdens = "/" + rotor + "_T" + \
-			str(dropzeros(temperature1)) + "t" + str(numb_bead2)
-		file_rotdens_mod = "/" + rotor + "_T" + \
-			str(temperature1) + "t" + str(numb_bead)
-		if (os.path.isfile(dir_dens + file_rotdens_mod + ".rho") == False):
-			call(["cp", dir_dens + file_rotdens + ".rho",
-				  dir_dens + file_rotdens_mod + ".rho"])
-			call(["cp", dir_dens + file_rotdens + ".eng",
-				  dir_dens + file_rotdens_mod + ".eng"])
-			call(["cp", dir_dens + file_rotdens + ".esq",
-				  dir_dens + file_rotdens_mod + ".esq"])
-		propagator_path = dir_dens + "/"
+			if (rotor == "H2O"):
+				if (server_name == "graham"):
+					dir_dens = "/scratch/" + user_name + "/rot-dens-asymmetric-top/" + \
+						asym.GetDirNameSubmission(
+							rotor, temperature1, numb_bead2, iodevn, jmax)
+				if (server_name == "nlogn"):
+					dir_dens = "/work/" + user_name + "/rot-dens-asymmetric-top/" + \
+						asym.GetDirNameSubmission(
+							rotor, temperature1, numb_bead2, iodevn, jmax)
+			if (rotor == "CH3F"):
+				if (server_name == "nlogn"):
+					dir_dens = "/work/" + user_name + "/rot-dens-symmetric-top/" + \
+						sym.GetDirNameSubmission(
+							rotor, temperature1, numb_bead2, 3, jmax)
+				if (server_name == "graham"):
+					dir_dens = "/scratch/" + user_name + "/rot-dens-symmetric-top/" + \
+						sym.GetDirNameSubmission(
+							rotor, temperature1, numb_bead2, 3, jmax)
+			file_rotdens = "/" + rotor + "_T" + \
+				str(temperature1) + "t" + str(numb_bead2)
+			file_rotdens_mod = "/" + rotor + "_T" + \
+				str(temperature1) + "t" + str(numb_bead)
+			if (os.path.isfile(dir_dens + file_rotdens_mod + ".rho") == False):
+				call(["cp", dir_dens + file_rotdens + ".rho",
+					  dir_dens + file_rotdens_mod + ".rho"])
+				call(["cp", dir_dens + file_rotdens + ".eng",
+					  dir_dens + file_rotdens_mod + ".eng"])
+				call(["cp", dir_dens + file_rotdens + ".esq",
+					  dir_dens + file_rotdens_mod + ".esq"])
+			propagator_path = dir_dens + "/"
 
 	# For qmc.imput
 	get_input_file(
@@ -1905,7 +1906,7 @@ cp %s %s
 #SBATCH --output=%s.log
 #SBATCH --time=%s
 %s
-#SBATCH --mem-per-cpu=8192mb
+#SBATCH --mem-per-cpu=1024mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 mv %s %s
