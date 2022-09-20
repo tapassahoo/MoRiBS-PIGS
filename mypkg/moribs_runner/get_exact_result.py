@@ -5,7 +5,7 @@ import os
 from os import system
 import decimal
 import numpy as np
-import argparse
+import argparse, json
 import getpass
 import mypkg.moribs_runner.support as support
 
@@ -46,10 +46,9 @@ parser.add_argument(
 	help="It defines interaction strength. \
 	It is applicable only for the polar linear rotors.")
 parser.add_argument(
-	"--rpt",
+	"--r_list",
 	type=float,
-	metavar='VALUE',
-	default=-1.0,
+	nargs='+',
 	help="Distance between Centre of Masses of two \
 	molecules. The unit is Angstrom.")
 parser.add_argument(
@@ -82,7 +81,7 @@ method = args.method
 rotor_name = args.rotor
 numb_rotor = args.nmolecule
 #
-rpt_value = args.rpt
+rpt_list = args.r_list
 if (args.dipole_moment):
 	dipole_moment = args.dipole_moment
 if (args.rfactor):
@@ -127,38 +126,42 @@ temp_dir = os.path.dirname(job_submission_root_dir)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
-rpt_value = "{:3.2f}".format(args.rpt)
-working_file_name = support.get_dmrg_working_file(
-	method,
-	rotor_name,
-	numb_rotor,
-	float(rpt_value),
-	dipole_moment,
-	l_max,
-	l_total_max)
-job_execution_dir = working_file_name
-#
-if (status == "submission"):
-	rfactor = support.get_gfactor_rfactor(rotor_name, float(rpt_value), dipole_moment)["R"]
-#
-	support.get_dmrg_result(
-		server_name,
-		root_dir_execution,
-		method,
-		rotor_name,
-		job_submission_root_dir,
-		job_execution_dir,
-		input_dir,
-		source_code_dir,
-		numb_rotor,
-		rfactor,
-		l_max,
-		l_total_max,
-		final_output_dir)
 if (status == "analysis"):
-	dmrg_output_dir = job_submission_root_dir + working_file_name
 	final_result_dir = home + "/final-dmrg-outputs-for-plotting"
 	final_output_file = final_result_dir + "/dmrg-results-of-" + str(numb_rotor) + rotor_name + "-for-energy-von-neumann-and-second-renyi-entropies-vs-intermolecular-distance-lmax" + str(l_max) + "-ltotalmax" + str(l_total_max) + ".txt"
-	data_file = dmrg_output_dir + "/dmrg_output_for_energy.txt"
-	get_data = np.genfromtxt(data_file)
-	print(get_data)
+
+for rpt_value in rpt_list:
+	rpt_value = "{:3.2f}".format(rpt_value)
+	working_file_name = support.get_dmrg_working_file(
+		method,
+		rotor_name,
+		numb_rotor,
+		float(rpt_value),
+		dipole_moment,
+		l_max,
+		l_total_max)
+	job_execution_dir = working_file_name
+
+	if (status == "submission"):
+		rfactor = support.get_gfactor_rfactor(rotor_name, float(rpt_value), dipole_moment)["R"]
+
+		support.get_dmrg_result(
+			server_name,
+			root_dir_execution,
+			method,
+			rotor_name,
+			job_submission_root_dir,
+			job_execution_dir,
+			input_dir,
+			source_code_dir,
+			numb_rotor,
+			rfactor,
+			l_max,
+			l_total_max,
+			final_output_dir)
+
+	if (status == "analysis"):
+		dmrg_output_dir = job_submission_root_dir + working_file_name
+		data_file = dmrg_output_dir + "/dmrg_output_for_energy.txt"
+		get_data = np.genfromtxt(data_file)
+		print(get_data)
