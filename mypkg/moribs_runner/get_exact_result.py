@@ -19,6 +19,11 @@ parser = argparse.ArgumentParser(
 				it. Please visit the GitHub page - https://github.com/tapassahoo/DipoleChain \
 				before you carry out the computations.",
 	epilog="Enjoy the program! :)")
+parser.add_argument("job",
+	type=str,
+	choices=["submission", "analysis"],
+	help="Type of jobs: submission of new jobs or analyzing \
+	output files.")
 parser.add_argument(
 	"method",
 	type=str,
@@ -72,6 +77,7 @@ parser.add_argument(
 	help="Name of the rotor. E.g., HF, H2O.")
 args = parser.parse_args()
 #
+status=args.job
 method = args.method
 rotor_name = args.rotor
 numb_rotor = args.nmolecule
@@ -111,13 +117,13 @@ user_name = getpass.getuser()
 input_dir = os.getcwd() + "/"
 
 if (server_name == "graham"):
-	dir_run_job = "/scratch/" + user_name + "/" + output_file_dir
+	job_submission_root_dir = "/scratch/" + user_name + "/" + output_file_dir
 elif (server_name == "nlogn"):
-	dir_run_job = "/work/" + user_name + "/" + output_file_dir
+	job_submission_root_dir = "/work/" + user_name + "/" + output_file_dir
 else:
-	dir_run_job = home + "/" + output_file_dir
+	job_submission_root_dir = home + "/" + output_file_dir
 
-temp_dir = os.path.dirname(dir_run_job)
+temp_dir = os.path.dirname(job_submission_root_dir)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
@@ -132,19 +138,27 @@ working_file_name = support.get_dmrg_working_file(
 	l_total_max)
 job_execution_dir = working_file_name
 #
-rfactor = support.get_gfactor_rfactor(rotor_name, float(rpt_value), dipole_moment)["R"]
+if (status == "submission"):
+	rfactor = support.get_gfactor_rfactor(rotor_name, float(rpt_value), dipole_moment)["R"]
 #
-support.get_dmrg_result(
-	server_name,
-	root_dir_execution,
-	method,
-	rotor_name,
-	dir_run_job,
-	job_execution_dir,
-	input_dir,
-	source_code_dir,
-	numb_rotor,
-	rfactor,
-	l_max,
-	l_total_max,
-	final_output_dir)
+	support.get_dmrg_result(
+		server_name,
+		root_dir_execution,
+		method,
+		rotor_name,
+		job_submission_root_dir,
+		job_execution_dir,
+		input_dir,
+		source_code_dir,
+		numb_rotor,
+		rfactor,
+		l_max,
+		l_total_max,
+		final_output_dir)
+if (status == "analysis"):
+	dmrg_output_dir = job_submission_root_dir + working_file_name
+	final_result_dir = home + "/final-dmrg-outputs-for-plotting"
+	final_output_file = final_result_dir + "/dmrg-results-of-" + str(numb_rotor) + rotor_name + "-for-energy-von-neumann-and-second-renyi-entropies-vs-intermolecular-distance-lmax" + str(l_max) + "-ltotalmax" + str(l_total_max) + ".txt"
+	data_file = dmrg_output_dir + "/dmrg_output_for_energy.txt"
+	get_data = np.genfromtxt(data_file)
+	print(get_data)

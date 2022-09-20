@@ -24,9 +24,11 @@ extra_file_name = '""'
 blank_space = " "
 #
 # Informations about the system
+#job_type = "submission"
+job_type = "analysis"
 method="dmrg"
 rotor_name="HF"
-numb_molecule=4
+numb_molecule=2
 rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 dipole_moment = 1.827
 l_max=20
@@ -69,6 +71,7 @@ for rpt in rlist:
 
 	cmd_run = (
 		"python" + blank_space + temp_file_name + blank_space
+		+ job_type + blank_space
 		+ method + blank_space
 		+ "--dipole_moment" + blank_space + str(dipole_moment) + blank_space
 		+ "--rpt" + blank_space + rpt_value + blank_space

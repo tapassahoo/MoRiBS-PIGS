@@ -2392,6 +2392,7 @@ def get_job_submission_script(
 export OMP_NUM_THREADS=%s
 #export OMP_STACKSIZE=1024M
 export GOMP_STACKSIZE=1024M
+module load julia
 %s
 %s
 """ % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, cmd_run, mv_cmd)
