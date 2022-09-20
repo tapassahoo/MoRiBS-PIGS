@@ -130,7 +130,7 @@ if (status == "analysis"):
 	final_result_dir = home + "/final-dmrg-outputs-for-plotting"
 	final_output_file = final_result_dir + "/dmrg-results-of-" + str(numb_rotor) + rotor_name + "-for-energy-von-neumann-and-second-renyi-entropies-vs-intermolecular-distance-lmax" + str(l_max) + "-ltotalmax" + str(l_total_max) + ".txt"
 
-for rpt_value in rpt_list:
+for count, rpt_value in enumerate(rpt_list):
 	rpt_value = "{:3.2f}".format(rpt_value)
 	working_file_name = support.get_dmrg_working_file(
 		method,
@@ -164,4 +164,13 @@ for rpt_value in rpt_list:
 		dmrg_output_dir = job_submission_root_dir + working_file_name
 		data_file = dmrg_output_dir + "/dmrg_output_for_energy.txt"
 		get_data = np.genfromtxt(data_file)
-		print(get_data)
+		if (count == 0):
+			get_data_vs_r = get_data
+		if (count > 0):
+			get_data_vs_r = np.vstack((get_data_vs_r, get_data))
+
+if (status == "analysis"):
+	get_merged_data = np.column_stack((np.array(rpt_list), get_data_vs_r[:,0], get_data_vs_r[:,1], get_data_vs_r[:,2]))
+
+	np.savetxt(final_output_file, get_merged_data, fmt='%20.8f', delimiter=' ', header='#          Distance       ground-state energy   von-Neumann entropy   second Renyi entropy ', comments="# The first, second, third and fourth columns represent\n# the intermolecular distance, the ground-state energy divided by the rotational constant, von-Neumann entropy and second Renyi entropy of " + str(numb_rotor) + rotor_name + ".\n# The unit of the distance is the angstrom and the energy is the Hartree.\n" )
+

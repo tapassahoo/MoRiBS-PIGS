@@ -13,14 +13,14 @@ module_path = module_path.replace('__init__.py', '')
 dir_name = '"linear-rotors"'
  
 # /home/tapas/MoRiBS-PIGS/examples/scripts
-"""
 project_dir = '""'
 plot_dir_path = '""'
-"""
 
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
+"""
 project_dir = '"academic-project/"'
 plot_dir_path = '"academic-project/outputs/"'
+"""
 
 extra_file_name = '""'
 blank_space = " "
@@ -30,7 +30,7 @@ blank_space = " "
 job_type = "analysis"
 method="dmrg"
 rotor_name="HF"
-numb_molecule=2
+numb_molecule=4
 dipole_moment = 1.827
 l_max=20
 l_total_max=l_max
