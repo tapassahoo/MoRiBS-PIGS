@@ -56,13 +56,14 @@ parser.add_argument(
 	"--nmolecule",
 	type=int,
 	metavar='N',
+	required=True,
 	help="Number of Molecules.")
 parser.add_argument(
 	"--l_max",
 	type=int,
 	metavar='L',
 	help="Local basis truncation.",
-	default=0)
+	required=True)
 parser.add_argument(
 	"--l_total_max",
 	type=int,
@@ -128,7 +129,7 @@ if not os.path.exists(temp_dir):
 
 if (status == "analysis"):
 	final_result_dir = home + "/final-dmrg-outputs-for-plotting"
-	final_output_file = final_result_dir + "/dmrg-results-of-" + str(numb_rotor) + rotor_name + "-for-energy-von-neumann-and-second-renyi-entropies-vs-intermolecular-distance-lmax" + str(l_max) + "-ltotalmax" + str(l_total_max) + ".txt"
+	final_output_file = final_result_dir + "/dmrg-results-of-" + str(numb_rotor) + rotor_name + "-for-ground-state-energy-vs-intermolecular-distance-lmax" + str(l_max) + ".txt"
 
 for count, rpt_value in enumerate(rpt_list):
 	rpt_value = "{:3.2f}".format(rpt_value)
@@ -138,8 +139,7 @@ for count, rpt_value in enumerate(rpt_list):
 		numb_rotor,
 		float(rpt_value),
 		dipole_moment,
-		l_max,
-		l_total_max)
+		l_max)
 	job_execution_dir = working_file_name
 
 	if (status == "submission"):
@@ -157,7 +157,6 @@ for count, rpt_value in enumerate(rpt_list):
 			numb_rotor,
 			rfactor,
 			l_max,
-			l_total_max,
 			final_output_dir)
 
 	if (status == "analysis"):
@@ -170,7 +169,7 @@ for count, rpt_value in enumerate(rpt_list):
 			get_data_vs_r = np.vstack((get_data_vs_r, get_data))
 
 if (status == "analysis"):
-	get_merged_data = np.column_stack((np.array(rpt_list), get_data_vs_r[:,0], get_data_vs_r[:,1], get_data_vs_r[:,2]))
+	get_merged_data = np.column_stack((np.array(rpt_list), get_data_vs_r[:,0]))
 
-	np.savetxt(final_output_file, get_merged_data, fmt='%20.8f', delimiter=' ', header='#          Distance       ground-state energy   von-Neumann entropy   second Renyi entropy ', comments="# The first, second, third and fourth columns represent\n# the intermolecular distance, the ground-state energy divided by the rotational constant, von-Neumann entropy and second Renyi entropy of " + str(numb_rotor) + rotor_name + ".\n# The unit of the distance is the angstrom and the energy is the Hartree.\n" )
+	np.savetxt(final_output_file, get_merged_data, fmt="%20.8f", delimiter=" ", header="#          Distance       ground-state energy", comments="# The first and second columns represent the intermolecular distance \n# and the ground-state energy divided by the rotational constant, respectively, of " + str(numb_rotor) + rotor_name + ".\n# The unit of the distance is the angstrom and the energy is the Hartree.\n" )
 

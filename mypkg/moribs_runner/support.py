@@ -1663,7 +1663,7 @@ def job_submission(
 					output_dir_path))
 		else:
 			fwrite.write(
-				jobstring_sbatch(
+				job_string_sbatch_moribs(
 					server_name,
 					dir_run,
 					job_name_temp,
@@ -1683,7 +1683,7 @@ def job_submission(
 					numb_block))
 	else:
 		fwrite.write(
-			jobstring_sbatch(
+			job_string_sbatch_moribs(
 				server_name,
 				dir_run,
 				job_name_temp,
@@ -1772,7 +1772,7 @@ mv %s /work/tapas/linear_rotors
 	return job_string
 
 
-def jobstring_sbatch(
+def job_string_sbatch_moribs(
 		server_name,
 		dir_run,
 		file_name,
@@ -1796,19 +1796,23 @@ def jobstring_sbatch(
 	if (numb_block <= 1000):
 		wall_time = "00-00:30"
 		thread = 1
-	else:
-		if (numb_bead >= 160):
-			thread = 8
-			wall_time = "7-00:00"
-		elif ((numb_bead >= 50) and (numb_bead < 160)):
+	elif (numb_molecule <= 3):
+		thread = 1
+		wall_time = "03-00:00"
+	elif (numb_molecule == 4):
+		if (numb_bead < 81):
 			thread = 1
 			wall_time = "03-00:00"
-		elif ((numb_bead >= 30) and (numb_bead < 50)):
+		else: 
+			thread = 1
+			wall_time = "05-00:00"
+	elif (numb_molecule == 5):
+		if (numb_bead < 71):
 			thread = 1
 			wall_time = "03-00:00"
-		else:
+		else: 
 			thread = 1
-			wall_time = "03-00:00"
+			wall_time = "05-00:00"
 
 	job_name = file_name + str(numb_bead)
 	omp_thread = str(thread)
@@ -2026,8 +2030,7 @@ def get_dmrg_working_file(
 		numb_rotor,
 		rpt_value,
 		dipole_moment,
-		l_max,
-		l_total_max):
+		l_max):
 
 	system_fragment = "-of-" + str(numb_rotor) + str(rotor_name) 
 
@@ -2038,7 +2041,7 @@ def get_dmrg_working_file(
 	if (dipole_moment >= 0.0):
 		parameter_fragment += "-Dipole-Moment" + str(dipole_moment) + "Debye"
 
-	parameter_fragment += "-lmax" + str(l_max) + "-ltotalmax" + str(l_total_max)
+	parameter_fragment += "-lmax" + str(l_max) 
 	first_fragment = method + "-output" 
 	final_file_name = first_fragment + system_fragment + parameter_fragment
 
@@ -2274,7 +2277,6 @@ def get_dmrg_result(
 	numb_rotor,
 	rfactor,
 	l_max,
-	l_total_max,
 	final_output_dir):
 	'''
 	It will give ground state energy, von Neuman and Renyi entropies computed by diagonalizing full Hamiltonian matrix. It is developed by Dmitri https://github.com/0/DipoleChain.jl
@@ -2296,8 +2298,7 @@ def get_dmrg_result(
 	if not os.path.exists(job_execution_dir_path):
 		os.makedirs(job_execution_dir_path)
 
-	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(
-		numb_rotor) + " --l-max " + str(l_max) + " --l-total-max " + str(l_total_max) + " --A-start 1 --A-size 1"
+	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(numb_rotor) + " --l-max " + str(l_max) 
 
 	job_name = method+str(rfactor)+"-"+str(numb_rotor)
 	job_submission_file = job_execution_dir_path + "/job-submission-script.sh"
@@ -2387,11 +2388,11 @@ def get_job_submission_script(
 #SBATCH --time=%s
 %s
 #SBATCH --constraint=broadwell
-#SBATCH --mem-per-cpu=1024mb
+#SBATCH --mem-per-cpu=4048mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
-#export OMP_STACKSIZE=1024M
-export GOMP_STACKSIZE=1024M
+#export OMP_STACKSIZE=4048M
+export GOMP_STACKSIZE=4048M
 module load julia
 %s
 %s

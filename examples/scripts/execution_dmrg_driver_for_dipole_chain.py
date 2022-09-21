@@ -26,14 +26,13 @@ extra_file_name = '""'
 blank_space = " "
 #
 # Informations about the system
-#job_type = "submission"
+job_type = "submission"
 job_type = "analysis"
 method="dmrg"
 rotor_name="HF"
-numb_molecule=4
+numb_molecule=2
 dipole_moment = 1.827
 l_max=20
-l_total_max=l_max
 #
 # No need to change the below three lines
 original_file_name = module_path + "get_exact_result.py"
@@ -82,7 +81,6 @@ cmd_run = (
 	+ " --rotor" + blank_space + rotor_name + blank_space
 	+ " --nmolecule" + blank_space + str(numb_molecule) + blank_space
 	+ "--l_max" + blank_space + str(l_max) + blank_space
-	+ "--l_total_max" + blank_space + str(l_total_max) + blank_space
 )
 print(cmd_run)
 os.system(cmd_run)
