@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from subprocess import call
 import os
 from os import system

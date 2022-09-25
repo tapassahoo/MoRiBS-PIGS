@@ -34,13 +34,13 @@ system = "HF"
 rotor = "HF"
 spin_isomer = int(-1)
 
-parameter_name = "beta"
-parameter_value = 0.2
+parameter_name = "tau"
+parameter_value = 0.0005
 
-numb_molecule = 5
-numb_block = 20000
-numb_pass = 200
-numb_preskip = 0
+numb_molecule=5
+numb_block=20000
+numb_pass=200
+numb_preskip=0
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
@@ -48,14 +48,14 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
+	rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
-		rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
+		rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 
 	if (parameter_name == "tau"):
-		rlist = np.arange(10.0, 10.01, 1.0, dtype=float)
+		rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
 # No need to change the below three lines
 original_file_name = module_path + "submission_analysis.py"
