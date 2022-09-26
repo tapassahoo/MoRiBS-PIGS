@@ -2391,7 +2391,7 @@ def get_job_submission_script(
 #SBATCH --mem-per-cpu=64GB
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
-export GOMP_STACKSIZE=64GB
+export GOMP_STACKSIZE=64G
 module load julia
 %s
 %s
