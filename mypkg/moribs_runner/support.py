@@ -2388,10 +2388,10 @@ def get_job_submission_script(
 #SBATCH --time=%s
 %s
 #SBATCH --constraint=broadwell
-#SBATCH --mem-per-cpu=40048mb
+#SBATCH --mem-per-cpu=64GB
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
-export GOMP_STACKSIZE=40048M
+export GOMP_STACKSIZE=64GB
 module load julia
 %s
 %s
