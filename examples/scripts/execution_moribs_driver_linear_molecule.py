@@ -26,8 +26,8 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "submission"
-#job_type = "analysis"
+#job_type = "submission"
+job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
@@ -37,10 +37,10 @@ spin_isomer = int(-1)
 parameter_name = "tau"
 parameter_value = 0.0005
 
-numb_molecule=5
+numb_molecule=2
 numb_block=20000
 numb_pass=200
-numb_preskip=0
+numb_preskip=10000
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
