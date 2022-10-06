@@ -26,13 +26,13 @@ extra_file_name = '""'
 blank_space = " "
 #
 # Informations about the system
-job_type = "submission"
-#job_type = "analysis"
+#job_type = "submission"
+job_type = "analysis"
 method="dmrg"
 rotor_name="HF"
-numb_molecule=5
+numb_molecule=4
 dipole_moment = 1.827
-l_max=8
+l_max=12
 #
 # No need to change the below three lines
 original_file_name = module_path + "get_exact_result.py"
