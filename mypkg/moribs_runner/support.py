@@ -1806,13 +1806,23 @@ def job_string_sbatch_moribs(
 		else: 
 			thread = 1
 			wall_time = "05-00:00"
-	elif (numb_molecule >= 5):
+	elif ((numb_molecule >= 5) and (numb_molecule <=7)):
 		if (numb_bead < 71):
 			thread = 1
 			wall_time = "03-00:00"
 		else: 
 			thread = 1
 			wall_time = "05-00:00"
+	elif ((numb_molecule >= 8) and (numb_molecule <=9)):
+		if (numb_bead < 51):
+			thread = 1
+			wall_time = "03-00:00"
+		if ((numb_bead >= 51) and (numb_bead < 81):
+			thread = 1
+			wall_time = "05-00:00"
+		else: 
+			thread = 1
+			wall_time = "07-00:00"
 
 
 	job_name = file_name + str(numb_bead)
