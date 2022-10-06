@@ -37,7 +37,7 @@ spin_isomer = int(-1)
 parameter_name = "beta"
 parameter_value = 0.2
 
-numb_molecule=7
+numb_molecule=8
 numb_block=20000
 numb_pass=200
 numb_preskip=0
@@ -108,8 +108,10 @@ for rcom in rlist:
 		+ "--nblock" + blank_space + str(numb_block) + blank_space
 		+ "--npass" + blank_space + str(numb_pass) + blank_space
 		+ "--preskip" + blank_space + str(numb_preskip) + blank_space
+		"""
 		+ "--restart" + blank_space
 		+ "--nblock_restart" + blank_space + str(numb_block) + blank_space
+		"""
 	)
 
 	print(cmd_run)
