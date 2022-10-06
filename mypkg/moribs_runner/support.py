@@ -1806,13 +1806,14 @@ def job_string_sbatch_moribs(
 		else: 
 			thread = 1
 			wall_time = "05-00:00"
-	elif (numb_molecule == 5):
+	elif (numb_molecule >= 5):
 		if (numb_bead < 71):
 			thread = 1
 			wall_time = "03-00:00"
 		else: 
 			thread = 1
 			wall_time = "05-00:00"
+
 
 	job_name = file_name + str(numb_bead)
 	omp_thread = str(thread)
@@ -2388,10 +2389,10 @@ def get_job_submission_script(
 #SBATCH --time=%s
 %s
 #SBATCH --constraint=broadwell
-#SBATCH --mem-per-cpu=64GB
+#SBATCH --mem-per-cpu=128GB
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
-export GOMP_STACKSIZE=64G
+export GOMP_STACKSIZE=128G
 module load julia
 %s
 %s
