@@ -1813,7 +1813,7 @@ def job_string_sbatch_moribs(
 		else: 
 			thread = 1
 			wall_time = "05-00:00"
-	elif ((numb_molecule >= 8) and (numb_molecule <=9)):
+	elif ((numb_molecule >= 8) and (numb_molecule <=10)):
 		if (numb_bead < 51):
 			thread = 1
 			wall_time = "03-00:00"
