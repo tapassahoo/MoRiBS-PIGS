@@ -1,15 +1,34 @@
 import time
 from subprocess import call
-from os import system
 import os
+from os import system
 import decimal
 import numpy as np
 import math
+import glob
 from pathlib import Path
 import get_beads_and_mc_steps as mc
 import mypkg.asymrho_runner.support as asym
 import mypkg.symrho_runner.support as sym
 
+
+def is_non_zero_file(fpath):
+	return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
+
+def append_id(file_name,count):
+	p = Path(file_name)
+	return "{0}_{2}{1}".format(Path.joinpath(p.parent, p.stem), p.suffix, count)
+
+
+def check_file_exist_and_rename(results_dir_path,check_file_name,renamed_file_name):
+	is_file = os.path.isfile(os.path.join(results_dir_path, check_file_name))
+	print(os.path.join(results_dir_path, check_file_name))
+	exit()
+	if is_file:
+		os.rename(os.path.join(results_dir_path + "output.eng_old"), os.path.join(results_dir_path + "output0.eng"))
+		#os.rename(os.path.join(results_dir_path + "output.xyz_old"), os.path.join(results_dir_path + "output0.xyz"))
+		print(os.path.join(results_dir_path + ""))
+	return
 
 def error_message(number):
 	if (number <= 1):
@@ -123,21 +142,21 @@ def beads(tau, beta):
 		numb_bead2 = numb_bead2 + 1
 	return numb_bead2
 
+#def rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead):
 
-def file_operations(method, final_dir_in_work, numb_molecule, numb_bead):
-
+	"""
 	if (method == "ENT"):
-		fileList = ["output.rden", "output.xyz"]
+		generic_files = ["output.rden", "output.xyz"]
 		file_old = final_dir_in_work + "/results/output.rden_old"
 	else:
-		fileList = ["output.eng", "output.xyz"]
+		generic_files = ["output.eng", "output.xyz"]
 		file_old = final_dir_in_work + "/results/output.eng_old"
 
 	flag = False
-	if (os.path.isfile(final_dir_in_work + "/results/" + fileList[0])):
+	if (os.path.isfile(final_dir_in_work + "/results/" + generic_files[0])):
 		flag = True
 		if (os.path.isfile(file_old)):
-			for filecat in fileList:
+			for filecat in generic_files:
 				if (filecat != "output.xyz"):
 					col_data_new = np.genfromtxt(
 						final_dir_in_work + "/results/" + filecat)
@@ -189,7 +208,78 @@ def file_operations(method, final_dir_in_work, numb_molecule, numb_bead):
 
 				call(["rm", final_dir_in_work + "/results/" + filecat])
 		else:
-			for filemv in fileList:
+			for filemv in generic_files:
+				call(["mv", final_dir_in_work + "/results/" + filemv,
+					  final_dir_in_work + "/results/" + filemv + "_old"])
+	return flag
+	"""
+
+def rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead):
+
+	if (method == "ENT"):
+		generic_files = ["output.rden", "output.xyz"]
+		file_old = final_dir_in_work + "/results/output.rden_old"
+	else:
+		generic_files = ["output.eng", "output.xyz"]
+		file_old = final_dir_in_work + "/results/output.eng_old"
+
+	flag = False
+	if (os.path.isfile(final_dir_in_work + "/results/" + generic_files[0])):
+		flag = True
+		if (os.path.isfile(file_old)):
+			for filecat in generic_files:
+				if (filecat != "output.xyz"):
+					col_data_new = np.genfromtxt(
+						final_dir_in_work + "/results/" + filecat)
+					index = int(col_data_new[0, 0])
+					col_data_old = np.genfromtxt(
+						final_dir_in_work + "/results/" + filecat + "_old")
+					merged_data = np.concatenate(
+						(col_data_old[:index - 1], col_data_new), axis=0)
+
+					if (filecat == "output.eng"):
+						np.savetxt(
+							final_dir_in_work +
+							"/results/" +
+							filecat +
+							"_old",
+							merged_data,
+							fmt='%d	%.6e	%.6e	%.6e	%.6e')
+					else:
+						np.savetxt(
+							final_dir_in_work +
+							"/results/" +
+							filecat +
+							"_old",
+							merged_data,
+							fmt='%.6e',
+							delimiter='	')
+
+				if (filecat == "output.xyz"):
+					if "H2O1" in open(
+							final_dir_in_work + "/results/" + filecat).read():
+						rmstr = int(numb_molecule * numb_bead + 3)
+						file_temp = final_dir_in_work + "/results/" + filecat + "_temp"
+						cmd1 = "tail -n +" + \
+							str(rmstr) + " " + final_dir_in_work + \
+							"/results/" + filecat + ">" + file_temp
+						os.system(cmd1)
+						col_data_new = np.genfromtxt(file_temp)
+						call(["rm", file_temp])
+					else:
+						col_data_new = np.genfromtxt(
+							final_dir_in_work + "/results/" + filecat)
+					index = int(col_data_new[0, 0])
+					col_data_old = np.genfromtxt(
+						final_dir_in_work + "/results/" + filecat + "_old")
+					merged_data = np.concatenate(
+						(col_data_old[:index - 1], col_data_new), axis=0)
+					np.savetxt(final_dir_in_work + "/results/" + filecat +
+							   "_old", merged_data, fmt='%.6e', delimiter='	')
+
+				call(["rm", final_dir_in_work + "/results/" + filecat])
+		else:
+			for filemv in generic_files:
 				call(["mv", final_dir_in_work + "/results/" + filemv,
 					  final_dir_in_work + "/results/" + filemv + "_old"])
 	return flag
@@ -1521,43 +1611,65 @@ def job_submission(
 			print("Error message")
 			print("")
 			print("")
-			print_message = output_dir_path + execution_bead_dir_name + "  --- This directory is absent."
+			print_message = output_dir_path + execution_bead_dir_name + " The directory is not there.\n You need to submit the job first."
 			print(print_message)
 			os.chdir(input_dir)
 			return
 
 		#
-		logout_file = dir_run_input_pimc + "/" + job_name
+		pimc_log_file = dir_run_input_pimc + "/" + job_name
 
-		if "slurmstepd" not in open(logout_file).read():
-			if "real" not in open(logout_file).read():
-				print_message = output_dir_path + execution_bead_dir_name + "  --- This job is running."
+		if "slurmstepd" not in open(pimc_log_file).read():
+			if "real" not in open(pimc_log_file).read():
+				print_message = output_dir_path + execution_bead_dir_name + " The job is in progress."
 				print(print_message)
 				os.chdir(input_dir)
 				return
 
 		#
 		if ((method == 'PIGS') or (method == "PIMC")):
-			file_count = "output.eng"
+			file_check_name = "output.eng"
 		if (method == 'ENT'):
-			file_count = "output.rden"
+			file_check_name = "output.rden"
 
 		#
 		os.chdir(output_dir_path + execution_bead_dir_name + "/results")
-		if (os.path.isfile(file_count)):
-			col_data_new = np.genfromtxt(file_count)
-			lastIndex = int(col_data_new[-1, 0])
-			if ((numb_block - lastIndex) <= 0):
+		if (os.path.isfile(file_check_name)):
+			ncol = np.genfromtxt(file_check_name)
+			last_index = int(ncol[-1, 0])
+			if ((numb_block - last_index) <= 0):
 				print(output_dir_path + execution_bead_dir_name)
-				print(" Done. Do not need to resubmit it.")
+				print(" The job was finished. You do not need to resubmit it.")
 				os.chdir(input_dir)
 				return
 
 		#
 		os.chdir(input_dir)
 
-		flag = file_operations(method, final_dir_in_work,
-							   numb_molecule, numb_bead)
+		results_dir_path=os.path.join(output_dir_path, execution_bead_dir_name, "results", "")
+		files_to_be_renamed=glob.glob(results_dir_path + '*_old*')
+		print("Below, the files be renamed:")
+		print(files_to_be_renamed)
+		print("")
+		#
+		if not files_to_be_renamed:
+			print("output.eng_old is not present.")
+		else:
+			for count, file_name in enumerate(files_to_be_renamed):
+				if is_non_zero_file(file_name):
+					print(count, file_name)
+					print(append_id(file_name,count))
+					print("\n ATTENTION: FIX THE RENAMING FUNCTION\n")
+				#check_file_exist_and_rename(results_dir_path,file_name,renamed_file_name)
+			eng_files=glob.glob(results_dir_path + '*eng_old*')
+			if is_non_zero_file(os.path.join(results_dir_path, "output.eng")):
+				suffix=len(eng_files)
+				append_id(file_name,suffix)
+		exit()
+		return
+
+		flag = rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead)
+		exit()
 		if (flag == False):
 			print(output_dir_path + execution_bead_dir_name)
 			print("Already resubmitted.")

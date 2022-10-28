@@ -35,9 +35,9 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.1
+parameter_value = 0.2
 
-numb_molecule=10
+numb_molecule=8
 numb_block=20000
 numb_pass=200
 numb_preskip=0
@@ -48,11 +48,11 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(5.2, 10.01, 0.2, dtype=float)
+	rlist = np.arange(5.6, 5.61, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
-		rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
+		rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 
 	if (parameter_name == "tau"):
 		rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
@@ -108,8 +108,8 @@ for rcom in rlist:
 		+ "--nblock" + blank_space + str(numb_block) + blank_space
 		+ "--npass" + blank_space + str(numb_pass) + blank_space
 		+ "--preskip" + blank_space + str(numb_preskip) + blank_space
-		#+ "--restart" + blank_space
-		#+ "--nblock_restart" + blank_space + str(numb_block) + blank_space
+		+ "--restart" + blank_space
+		+ "--nblock_restart" + blank_space + str(numb_block) + blank_space
 	)
 
 	print(cmd_run)
