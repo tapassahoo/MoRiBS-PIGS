@@ -1,19 +1,23 @@
-import time
+import time, os, sys, math, glob
 from subprocess import call
-import os
 from os import system
-import decimal
 import numpy as np
-import math
-import glob
 from pathlib import Path
 import get_beads_and_mc_steps as mc
 import mypkg.asymrho_runner.support as asym
 import mypkg.symrho_runner.support as sym
 
 
+def whoami():
+	print("\n")
+	print ('-'*80)
+	print("\nATTENTION: PLEASE RESOLVE THE RESTART ISSUE.\n")
+	return "%s/%s%s" %("The function is \n" + sys._getframe(1).f_code.co_filename, sys._getframe(1).f_code.co_name, "\nand the line number is " + str(sys._getframe(1).f_lineno))
+
+
 def is_non_zero_file(fpath):
 	return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
+
 
 def append_id(file_name,count):
 	p = Path(file_name)
@@ -29,6 +33,7 @@ def check_file_exist_and_rename(results_dir_path,check_file_name,renamed_file_na
 		#os.rename(os.path.join(results_dir_path + "output.xyz_old"), os.path.join(results_dir_path + "output0.xyz"))
 		print(os.path.join(results_dir_path + ""))
 	return
+
 
 def error_message(number):
 	if (number <= 1):
@@ -1659,7 +1664,7 @@ def job_submission(
 				if is_non_zero_file(file_name):
 					print(count, file_name)
 					print(append_id(file_name,count))
-					print("\n ATTENTION: FIX THE RENAMING FUNCTION\n")
+					print(whoami())
 				#check_file_exist_and_rename(results_dir_path,file_name,renamed_file_name)
 			eng_files=glob.glob(results_dir_path + '*eng_old*')
 			if is_non_zero_file(os.path.join(results_dir_path, "output.eng")):
