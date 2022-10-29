@@ -12,7 +12,7 @@ def whoami():
 	print("\n")
 	print ('-'*80)
 	print("\nATTENTION: PLEASE RESOLVE THE RESTART ISSUE.\n")
-	return "%s/%s%s" %("The function is \n" + sys._getframe(1).f_code.co_filename, sys._getframe(1).f_code.co_name, "\nand the line number is " + str(sys._getframe(1).f_lineno))
+	print("%s/%s%s" %("The function is \n" + sys._getframe(1).f_code.co_filename, sys._getframe(1).f_code.co_name, "\nand the line number is " + str(sys._getframe(1).f_lineno)))
 
 
 def is_non_zero_file(fpath):
@@ -24,15 +24,20 @@ def append_id(file_name,count):
 	return "{0}_{2}{1}".format(Path.joinpath(p.parent, p.stem), p.suffix, count)
 
 
-def check_file_exist_and_rename(results_dir_path,check_file_name,renamed_file_name):
-	is_file = os.path.isfile(os.path.join(results_dir_path, check_file_name))
-	print(os.path.join(results_dir_path, check_file_name))
-	exit()
-	if is_file:
-		os.rename(os.path.join(results_dir_path + "output.eng_old"), os.path.join(results_dir_path + "output0.eng"))
-		#os.rename(os.path.join(results_dir_path + "output.xyz_old"), os.path.join(results_dir_path + "output0.xyz"))
-		print(os.path.join(results_dir_path + ""))
-	return
+def check_file_exist_and_rename(check_file_name,renamed_file_name):
+	is_file = os.path.isfile(check_file_name)
+	is_not_file = os.path.isfile(renamed_file_name)
+	whoami()
+	if is_file and not is_not_file:
+		os.rename(check_file_name, renamed_file_name)
+		print("The file be renamed - \n" + check_file_name)
+		print("The renamed file - \n" + renamed_file_name)
+	else:
+		if not is_file:
+			print(check_file_name + " does not exist.")
+		if is_not_file:
+			print(renamed_file_name + " exists.")
+
 
 
 def error_message(number):
@@ -1653,25 +1658,29 @@ def job_submission(
 
 		results_dir_path=os.path.join(output_dir_path, execution_bead_dir_name, "results", "")
 		files_to_be_renamed=glob.glob(results_dir_path + '*_old*')
+		print("-"*80)
 		print("Below, the files be renamed:")
 		print(files_to_be_renamed)
-		print("")
+		print("-"*80)
+		whoami()
 		#
 		if not files_to_be_renamed:
 			print("output.eng_old is not present.")
 		else:
 			for count, file_name in enumerate(files_to_be_renamed):
 				if is_non_zero_file(file_name):
-					print(count, file_name)
-					print(append_id(file_name,count))
-					print(whoami())
-				#check_file_exist_and_rename(results_dir_path,file_name,renamed_file_name)
+					file_name_temp = file_name.split('_')[0]
+					print(file_name)
+					check_file_exist_and_rename(file_name,append_id(file_name_temp,count))
+					#print(append_id(file_name_temp,count))
+			#
 			eng_files=glob.glob(results_dir_path + '*eng_old*')
+			exit()
 			if is_non_zero_file(os.path.join(results_dir_path, "output.eng")):
 				suffix=len(eng_files)
 				append_id(file_name,suffix)
+			print(whoami())
 		exit()
-		return
 
 		flag = rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead)
 		exit()
