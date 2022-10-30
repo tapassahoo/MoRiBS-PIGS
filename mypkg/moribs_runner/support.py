@@ -25,17 +25,16 @@ def append_id(file_name,count):
 
 
 def check_file_exist_and_rename(check_file_name,renamed_file_name):
-	is_file = os.path.isfile(check_file_name)
-	is_not_file = os.path.isfile(renamed_file_name)
-	whoami()
-	if is_file and not is_not_file:
+	is_file_src = os.path.isfile(check_file_name)
+	is_file_dst = os.path.isfile(renamed_file_name)
+	if is_file_src and not is_file_dst:
 		os.rename(check_file_name, renamed_file_name)
 		print("The file be renamed - \n" + check_file_name)
 		print("The renamed file - \n" + renamed_file_name)
 	else:
-		if not is_file:
+		if not is_file_src:
 			print(check_file_name + " does not exist.")
-		if is_not_file:
+		if is_file_dst:
 			print(renamed_file_name + " exists.")
 
 
@@ -151,78 +150,6 @@ def beads(tau, beta):
 	if (numb_bead2 % 2 == 0):
 		numb_bead2 = numb_bead2 + 1
 	return numb_bead2
-
-#def rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead):
-
-	"""
-	if (method == "ENT"):
-		generic_files = ["output.rden", "output.xyz"]
-		file_old = final_dir_in_work + "/results/output.rden_old"
-	else:
-		generic_files = ["output.eng", "output.xyz"]
-		file_old = final_dir_in_work + "/results/output.eng_old"
-
-	flag = False
-	if (os.path.isfile(final_dir_in_work + "/results/" + generic_files[0])):
-		flag = True
-		if (os.path.isfile(file_old)):
-			for filecat in generic_files:
-				if (filecat != "output.xyz"):
-					col_data_new = np.genfromtxt(
-						final_dir_in_work + "/results/" + filecat)
-					index = int(col_data_new[0, 0])
-					col_data_old = np.genfromtxt(
-						final_dir_in_work + "/results/" + filecat + "_old")
-					merged_data = np.concatenate(
-						(col_data_old[:index - 1], col_data_new), axis=0)
-
-					if (filecat == "output.eng"):
-						np.savetxt(
-							final_dir_in_work +
-							"/results/" +
-							filecat +
-							"_old",
-							merged_data,
-							fmt='%d	%.6e	%.6e	%.6e	%.6e')
-					else:
-						np.savetxt(
-							final_dir_in_work +
-							"/results/" +
-							filecat +
-							"_old",
-							merged_data,
-							fmt='%.6e',
-							delimiter='	')
-
-				if (filecat == "output.xyz"):
-					if "H2O1" in open(
-							final_dir_in_work + "/results/" + filecat).read():
-						rmstr = int(numb_molecule * numb_bead + 3)
-						file_temp = final_dir_in_work + "/results/" + filecat + "_temp"
-						cmd1 = "tail -n +" + \
-							str(rmstr) + " " + final_dir_in_work + \
-							"/results/" + filecat + ">" + file_temp
-						os.system(cmd1)
-						col_data_new = np.genfromtxt(file_temp)
-						call(["rm", file_temp])
-					else:
-						col_data_new = np.genfromtxt(
-							final_dir_in_work + "/results/" + filecat)
-					index = int(col_data_new[0, 0])
-					col_data_old = np.genfromtxt(
-						final_dir_in_work + "/results/" + filecat + "_old")
-					merged_data = np.concatenate(
-						(col_data_old[:index - 1], col_data_new), axis=0)
-					np.savetxt(final_dir_in_work + "/results/" + filecat +
-							   "_old", merged_data, fmt='%.6e', delimiter='	')
-
-				call(["rm", final_dir_in_work + "/results/" + filecat])
-		else:
-			for filemv in generic_files:
-				call(["mv", final_dir_in_work + "/results/" + filemv,
-					  final_dir_in_work + "/results/" + filemv + "_old"])
-	return flag
-	"""
 
 def rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead):
 
@@ -1629,12 +1556,14 @@ def job_submission(
 		#
 		pimc_log_file = dir_run_input_pimc + "/" + job_name
 
+		"""
 		if "slurmstepd" not in open(pimc_log_file).read():
 			if "real" not in open(pimc_log_file).read():
 				print_message = output_dir_path + execution_bead_dir_name + " The job is in progress."
 				print(print_message)
 				os.chdir(input_dir)
 				return
+		"""
 
 		#
 		if ((method == 'PIGS') or (method == "PIMC")):
@@ -1657,40 +1586,38 @@ def job_submission(
 		os.chdir(input_dir)
 
 		results_dir_path=os.path.join(output_dir_path, execution_bead_dir_name, "results", "")
-		files_to_be_renamed=glob.glob(results_dir_path + '*_old*')
+		list_files_be_renamed=glob.glob(results_dir_path + '*_old*')
 		print("-"*80)
-		print("Below, the files be renamed:")
-		print(files_to_be_renamed)
+		if (len(list_files_be_renamed)>0):
+			"""
+			print("-"*80)
+			print("Below, the files be renamed:")
+			print(list_files_be_renamed)
+			print("-"*80)
+			"""
+			#
+			for file_be_renamed in list_files_be_renamed:
+				print(file_be_renamed)
+				if os.path.exists(file_be_renamed):
+					if not is_non_zero_file(file_be_renamed):
+						os.remove(file_be_renamed)
+						print("output.eng_old is an empty file and it is removed.")
+				elif not file_be_renamed:
+					print("output.eng_old is not present.")
+			#
+			for file_name in list_files_be_renamed:
+				file_name_temp = file_name.split('_')[0]
+				check_file_exist_and_rename(file_name,append_id(file_name_temp,0))
+				print(append_id(file_name_temp,0))
+			#
+		eng_files=glob.glob(results_dir_path + 'output_[0-9].eng')
+		if is_non_zero_file(os.path.join(results_dir_path, "output.eng")):
+			suffix=len(eng_files)
+			check_file_exist_and_rename(os.path.join(results_dir_path, "output.eng"),append_id(os.path.join(results_dir_path, "output.eng"),suffix))
+			check_file_exist_and_rename(os.path.join(results_dir_path, "output.xyz"),append_id(os.path.join(results_dir_path, "output.xyz"),suffix))
 		print("-"*80)
 		whoami()
-		#
-		if not files_to_be_renamed:
-			print("output.eng_old is not present.")
-		else:
-			for count, file_name in enumerate(files_to_be_renamed):
-				if is_non_zero_file(file_name):
-					file_name_temp = file_name.split('_')[0]
-					print(file_name)
-					check_file_exist_and_rename(file_name,append_id(file_name_temp,count))
-					#print(append_id(file_name_temp,count))
-			#
-			eng_files=glob.glob(results_dir_path + '*eng_old*')
-			exit()
-			if is_non_zero_file(os.path.join(results_dir_path, "output.eng")):
-				suffix=len(eng_files)
-				append_id(file_name,suffix)
-			print(whoami())
 		exit()
-
-		flag = rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead)
-		exit()
-		if (flag == False):
-			print(output_dir_path + execution_bead_dir_name)
-			print("Already resubmitted.")
-			return
-
-		print(output_dir_path + execution_bead_dir_name)
-		print(" Just resubmitted.")
 
 		# Rotational density matrices
 		temperature1 = "%8.6f" % temperature
