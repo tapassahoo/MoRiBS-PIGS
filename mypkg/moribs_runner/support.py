@@ -1556,14 +1556,12 @@ def job_submission(
 		#
 		pimc_log_file = dir_run_input_pimc + "/" + job_name
 
-		"""
 		if "slurmstepd" not in open(pimc_log_file).read():
 			if "real" not in open(pimc_log_file).read():
 				print_message = output_dir_path + execution_bead_dir_name + " The job is in progress."
 				print(print_message)
 				os.chdir(input_dir)
 				return
-		"""
 
 		#
 		if ((method == 'PIGS') or (method == "PIMC")):
@@ -1572,7 +1570,7 @@ def job_submission(
 			file_check_name = "output.rden"
 
 		#
-		os.chdir(output_dir_path + execution_bead_dir_name + "/results")
+		os.chdir(os.path.join(output_dir_path, execution_bead_dir_name, "results"))
 		if (os.path.isfile(file_check_name)):
 			ncol = np.genfromtxt(file_check_name)
 			last_index = int(ncol[-1, 0])
@@ -1586,38 +1584,29 @@ def job_submission(
 		os.chdir(input_dir)
 
 		results_dir_path=os.path.join(output_dir_path, execution_bead_dir_name, "results", "")
-		list_files_be_renamed=glob.glob(results_dir_path + '*_old*')
-		print("-"*80)
-		if (len(list_files_be_renamed)>0):
-			"""
+		if os.path.isfile(os.path.join(results_dir_path, "output.eng")):
+			list_files_be_renamed=glob.glob(results_dir_path + '*_old*')
 			print("-"*80)
-			print("Below, the files be renamed:")
-			print(list_files_be_renamed)
+			if (len(list_files_be_renamed)>0):
+				for file_be_renamed in list_files_be_renamed:
+					print(file_be_renamed)
+					if os.path.exists(file_be_renamed):
+						if not is_non_zero_file(file_be_renamed):
+							os.remove(file_be_renamed)
+							print("output.eng_old is an empty file and it is removed.")
+					elif not file_be_renamed:
+						print("output.eng_old is not present.")
+				#
+				for file_name in list_files_be_renamed:
+					file_name_temp = file_name.split('_')[0]
+					check_file_exist_and_rename(file_name,append_id(file_name_temp,0))
+				#
+			eng_files=glob.glob(results_dir_path + 'output_[0-9].eng')
+			if is_non_zero_file(os.path.join(results_dir_path, "output.eng")):
+				suffix=len(eng_files)
+				check_file_exist_and_rename(os.path.join(results_dir_path, "output.eng"),append_id(os.path.join(results_dir_path, "output.eng"),suffix))
+				check_file_exist_and_rename(os.path.join(results_dir_path, "output.xyz"),append_id(os.path.join(results_dir_path, "output.xyz"),suffix))
 			print("-"*80)
-			"""
-			#
-			for file_be_renamed in list_files_be_renamed:
-				print(file_be_renamed)
-				if os.path.exists(file_be_renamed):
-					if not is_non_zero_file(file_be_renamed):
-						os.remove(file_be_renamed)
-						print("output.eng_old is an empty file and it is removed.")
-				elif not file_be_renamed:
-					print("output.eng_old is not present.")
-			#
-			for file_name in list_files_be_renamed:
-				file_name_temp = file_name.split('_')[0]
-				check_file_exist_and_rename(file_name,append_id(file_name_temp,0))
-				print(append_id(file_name_temp,0))
-			#
-		eng_files=glob.glob(results_dir_path + 'output_[0-9].eng')
-		if is_non_zero_file(os.path.join(results_dir_path, "output.eng")):
-			suffix=len(eng_files)
-			check_file_exist_and_rename(os.path.join(results_dir_path, "output.eng"),append_id(os.path.join(results_dir_path, "output.eng"),suffix))
-			check_file_exist_and_rename(os.path.join(results_dir_path, "output.xyz"),append_id(os.path.join(results_dir_path, "output.xyz"),suffix))
-		print("-"*80)
-		whoami()
-		exit()
 
 		# Rotational density matrices
 		temperature1 = "%8.6f" % temperature
