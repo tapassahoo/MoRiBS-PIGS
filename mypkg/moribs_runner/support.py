@@ -302,6 +302,7 @@ def get_average_energy(
 	'''
 	This function gives us the output
 	'''
+	whoami()
 	if (parameter_name == "beta"):
 		variable_value = parameter_value/(numb_bead-1)
 	if (parameter_name == "tau"):
