@@ -299,63 +299,67 @@ def get_average_energy(
 		preskip,
 		postskip,
 		numb_block):
-	'''
-	This function gives us the output
-	'''
-	whoami()
+	"""
+	It provides the block-averaged energies in Kelvin.
+	"""
 	if (parameter_name == "beta"):
 		variable_value = parameter_value/(numb_bead-1)
 	if (parameter_name == "tau"):
 		variable_value = parameter_value*(numb_bead-1)
 
 	if (os.path.isdir(final_dir_in_work)):
-		condition = True
+		list_eng_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.eng_old*"))
+		list_eng_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].eng"))
+		if (len(list_eng_files_old_convention)>0):
+			for file_be_renamed in list_eng_files_old_convention:
+				if os.path.exists(file_be_renamed):
+					if not is_non_zero_file(file_be_renamed):
+						os.remove(file_be_renamed)
+						print("output.eng_old is an empty file and it is removed.")
+				elif not file_be_renamed:
+					print("output.eng_old is not present.")
+			#
+			for suffix, file_name in enumerate(list_eng_files_old_convention):
+				file_name_temp = file_name.split('_')[0]
+				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
+				check_file_exist_and_rename(file_name.replace(".eng_",".xyz_"),append_id(file_name_temp,suffix))
 
-		file_old = final_dir_in_work + "/results/output.eng_old"
-		if (os.path.isfile(file_old)):
-			file_old_1 = final_dir_in_work + "/results/output.eng_old_1"
-			file_new = final_dir_in_work + "/results/output.eng"
-			if (os.path.isfile(file_old_1)):
-				col_data_new = np.genfromtxt(
-					final_dir_in_work + "/results/output.eng_old_1")
+
+		if (len(list_eng_files_new_convention)>0):
+			for suffix in range(len(list_eng_files_old_convention)):
+				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".eng")
+				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix+1) + ".eng")
+				col_data_new = np.genfromtxt(file_new)
 				index = int(col_data_new[0, 0])
-				col_data_old = np.genfromtxt(
-					final_dir_in_work + "/results/output.eng_old")
+				if (suffix == 0):
+					col_data_old = np.genfromtxt(file_old)
+				else:
+					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+
+			if os.path.exists(os.path.join(final_dir_in_work, "results", "output.eng")):
+				col_data_new = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output.eng")
+				index = int(col_data_new[0, 0])
 				marged_data = np.concatenate(
 					(col_data_old[:index - 1], col_data_new), axis=0)
-
-				col_data_new = np.genfromtxt(
-					final_dir_in_work + "/results/output.eng")
-				index = int(col_data_new[0, 0])
-				marged_data = np.concatenate(
-					(marged_data[:index - 1], col_data_new), axis=0)
 				aa = col_data_new[:, 0]
 				final_data_set = marged_data[preskip:(
 					int(aa[-1]) - postskip), :]
-			elif ((os.path.isfile(file_new)) and (os.path.isfile(file_old_1) == False)):
-				print(final_dir_in_work + " -- Restarted data")
-				col_data_new = np.genfromtxt(
-					final_dir_in_work + "/results/output.eng")
-				index = int(col_data_new[0, 0])
-				col_data_old = np.genfromtxt(
-					final_dir_in_work + "/results/output.eng_old")
-				marged_data = np.concatenate(
-					(col_data_old[:index - 1], col_data_new), axis=0)
-				aa = col_data_new[:, 0]
-				final_data_set = marged_data[preskip:(
-					int(aa[-1]) - postskip), :]
-			elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
-				final_data_set = np.genfromtxt(
-					final_dir_in_work +
-					"/results/output.eng_old",
-					skip_header=preskip,
-					skip_footer=postskip)
+			else:
+				final_data_set = col_data_old
+
 		else:
 			final_data_set = np.genfromtxt(
-				final_dir_in_work +
-				"/results/output.eng",
+				os.path.join(final_dir_in_work, "results", "output.eng"),
 				skip_header=preskip,
 				skip_footer=postskip)
+	else:
+		print(final_dir_in_work + " does not exist.")
+		exit()
+
+	print(final_data_set)
+	whoami()
+	exit()
+
 
 	if (method == "PIMC"):
 		col_block = final_data_set[:, 0]
@@ -1301,7 +1305,7 @@ def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
 	This function generates rotational density matrix - linden.dat
 	'''
 	print("********************************************************")
-	print("          Generation of rotational propagator           ")
+	print("		  Generation of rotational propagator		   ")
 	print("********************************************************")
 	temperature1 = "%8.6f" % temperature
 	if (method == 'PIMC'):
