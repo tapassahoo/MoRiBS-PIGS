@@ -26,8 +26,8 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "submission"
-#job_type = "analysis"
+#job_type = "submission"
+job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
@@ -35,7 +35,7 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.2
+parameter_value = 0.1
 
 numb_molecule=8
 numb_block=20000
@@ -52,7 +52,7 @@ if (job_type == "submission"):
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
-		rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
+		rlist = np.arange(10.0, 10.01, 0.2, dtype=float)
 
 	if (parameter_name == "tau"):
 		rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
