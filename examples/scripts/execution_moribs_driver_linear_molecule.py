@@ -26,8 +26,8 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-#job_type = "submission"
-job_type = "analysis"
+job_type = "submission"
+#job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
@@ -35,7 +35,7 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.1
+parameter_value = 0.2
 
 numb_molecule=8
 numb_block=20000

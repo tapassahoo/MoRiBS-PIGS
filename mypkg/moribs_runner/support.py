@@ -1553,7 +1553,7 @@ def job_submission(
 			return
 
 		#
-		pimc_log_file = dir_run_input_pimc + "/" + job_name
+		pimc_log_file = os.path.join(dir_run_input_pimc, job_name)
 
 		if "slurmstepd" not in open(pimc_log_file).read():
 			if "real" not in open(pimc_log_file).read():
