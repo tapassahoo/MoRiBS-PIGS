@@ -307,59 +307,53 @@ def get_average_energy(
 	if (parameter_name == "tau"):
 		variable_value = parameter_value*(numb_bead-1)
 
+
 	if (os.path.isdir(final_dir_in_work)):
 		list_eng_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.eng_old*"))
 		list_eng_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].eng"))
 		if (len(list_eng_files_old_convention)>0):
-			for file_be_renamed in list_eng_files_old_convention:
-				if os.path.exists(file_be_renamed):
-					if not is_non_zero_file(file_be_renamed):
-						os.remove(file_be_renamed)
-						print("output.eng_old is an empty file and it is removed.")
-				elif not file_be_renamed:
-					print("output.eng_old is not present.")
-			#
+			whoami()
 			for suffix, file_name in enumerate(list_eng_files_old_convention):
+				if os.path.exists(file_name):
+					if not is_non_zero_file(file_name):
+						os.remove(file_name)
+						print(file_name + " an empty file and it is removed.")
+				elif not file_name:
+					print(file_name + " is not present.")
 				file_name_temp = file_name.split('_')[0]
 				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
 				check_file_exist_and_rename(file_name.replace(".eng_",".xyz_"),append_id(file_name_temp,suffix))
 
 
+		last_file = os.path.join(final_dir_in_work, "results", "output.eng")
 		if (len(list_eng_files_new_convention)>0):
-			for suffix in range(len(list_eng_files_old_convention)):
+			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.eng"))
+			for suffix in range(len(list_eng_files_new_convention)):
 				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".eng")
 				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix+1) + ".eng")
-				col_data_new = np.genfromtxt(file_new)
-				index = int(col_data_new[0, 0])
-				if (suffix == 0):
-					col_data_old = np.genfromtxt(file_old)
+				if not os.path.exists(file_new):
+					if os.path.exists(last_file):
+						col_data_new = np.genfromtxt(last_file)
+						index = int(col_data_new[0, 0])
+						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+						aa = col_data_new[:, 0]
+						final_data_set = marged_data[preskip:(int(aa[-1]) - postskip), :]
+					else: 
+						final_data_set = np.genfromtxt(file_old, skip_header=preskip, skip_footer=postskip)
 				else:
+					col_data_new = np.genfromtxt(file_new)
+					index = int(col_data_new[0, 0])
 					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
-
-			if os.path.exists(os.path.join(final_dir_in_work, "results", "output.eng")):
-				col_data_new = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output.eng")
-				index = int(col_data_new[0, 0])
-				marged_data = np.concatenate(
-					(col_data_old[:index - 1], col_data_new), axis=0)
-				aa = col_data_new[:, 0]
-				final_data_set = marged_data[preskip:(
-					int(aa[-1]) - postskip), :]
-			else:
-				final_data_set = col_data_old
-
 		else:
-			final_data_set = np.genfromtxt(
-				os.path.join(final_dir_in_work, "results", "output.eng"),
-				skip_header=preskip,
-				skip_footer=postskip)
+			# if only output.eng exists.
+			if is_non_zero_file(last_file):
+				final_data_set = np.genfromtxt(last_file, skip_header=preskip, skip_footer=postskip)
+			else:
+				print(last_file + " is not present.")
+				exit()
 	else:
 		print(final_dir_in_work + " does not exist.")
 		exit()
-
-	print(final_data_set)
-	whoami()
-	exit()
-
 
 	if (method == "PIMC"):
 		col_block = final_data_set[:, 0]
