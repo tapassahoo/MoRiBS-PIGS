@@ -377,22 +377,22 @@ for particle_a in particle_a_list:
 			if preskip >= numb_block:
 				print("")
 				print("Warning!!!!!!!")
-				print(
-					"============================================================================")
+				print("="*100)
 				print("Number of Blocks = " + str(numb_block))
 				print("Number of preskip= " + str(preskip))
 				print(
 					"Error message: Number of preskip data must be less than Number of Blocks")
-				print(
-					"============================================================================")
+				print("="*100)
 				exit()
 
 			analyzed_energy_file = open(analysis_file_name.save_file_energy, "a")
 			analyzed_energy_file.write(
 				support.fmt_energy_data(
 					method, parameter_name))
+			"""
 			analyzed_correlation_file = open(analysis_file_name.save_file_correlation, "a")
 			analyzed_correlation_file.write(support.fmtAverageOrderParam(status, parameter_name))
+			"""
 
 		'''
 		if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
@@ -536,18 +536,20 @@ for particle_a in particle_a_list:
 
 	if (status == "analysis") and (method != "ENT"):
 		analyzed_energy_file.close()
-		analyzed_correlation_file.close()
+		#analyzed_correlation_file.close()
 		call(["cat", analysis_file_name.save_file_energy])
+		"""
 		print("")
 		print("")
 		call(["cat", analysis_file_name.save_file_correlation])
+		"""
 		print("")
 		print("")
 		# =========================File Checking===============================#
 		SavedFile = analysis_file_name.save_file_energy
 		support.FileCheck(method, bead_list, parameter_name, SavedFile)
-		SavedFile = analysis_file_name.save_file_correlation
-		support.FileCheck(method, bead_list, parameter_name, SavedFile)
+		#SavedFile = analysis_file_name.save_file_correlation
+		#support.FileCheck(method, bead_list, parameter_name, SavedFile)
 
 	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 		analyzed_entropy_file.close()
