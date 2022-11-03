@@ -312,7 +312,7 @@ def get_average_energy(
 		list_eng_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.eng_old*"))
 		list_eng_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].eng"))
 		if (len(list_eng_files_old_convention)>0):
-			whoami()
+			print(list_eng_files_old_convention)
 			for suffix, file_name in enumerate(list_eng_files_old_convention):
 				if os.path.exists(file_name):
 					if not is_non_zero_file(file_name):
@@ -327,6 +327,7 @@ def get_average_energy(
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.eng")
 		if (len(list_eng_files_new_convention)>0):
+			print(list_eng_files_new_convention)
 			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.eng"))
 			for suffix in range(len(list_eng_files_new_convention)):
 				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".eng")
@@ -1553,16 +1554,6 @@ def job_submission(
 			return
 
 		#
-		pimc_log_file = os.path.join(dir_run_input_pimc, job_name)
-
-		if "slurmstepd" not in open(pimc_log_file).read():
-			if "real" not in open(pimc_log_file).read():
-				print_message = output_dir_path + execution_bead_dir_name + " The job is in progress."
-				print(print_message)
-				os.chdir(input_dir)
-				return
-
-		#
 		if ((method == 'PIGS') or (method == "PIMC")):
 			file_check_name = "output.eng"
 		if (method == 'ENT'):
@@ -1578,6 +1569,26 @@ def job_submission(
 				print(" The job was finished. You do not need to resubmit it.")
 				os.chdir(input_dir)
 				return
+
+		#
+		pimc_log_file = os.path.join(dir_run_input_pimc, job_name)
+
+		"""
+		if "slurmstepd" not in open(pimc_log_file).read():
+			if "real" not in open(pimc_log_file).read():
+				print_message = output_dir_path + execution_bead_dir_name + " The job is in progress."
+				print(print_message)
+				os.chdir(input_dir)
+				return
+		"""
+
+		pimc_log_file_read = open(pimc_log_file, 'r')
+		line = pimc_log_file_read.readline()
+		slurm_status=line[0]
+		pimc_log_file_read.close()
+		if ((slurm_status == "Running") or (slurm_status == "Pending")):
+			os.chdir(input_dir)
+			return
 
 		#
 		os.chdir(input_dir)
@@ -1868,19 +1879,19 @@ def job_string_sbatch_moribs(
 
 	job_name = file_name + str(numb_bead)
 	omp_thread = str(thread)
-	output_dir = execution_bead_dir_name_path + "/results"
+	output_dir = os.path.join(execution_bead_dir_name_path, "results")
 	temperature1 = "%8.6f" % temperature
-	file_rotdens = dir_run_input_pimc + "/" + molecule + \
-		"_T" + str(temperature1) + "t" + str(numb_bead) + ".*"
-	log_file_path = dir_run_input_pimc + "/" + job_name
+	file_rotdens = os.path.join(dir_run_input_pimc, molecule + \
+		"_T" + str(temperature1) + "t" + str(numb_bead) + ".*")
+	log_file_path = os.path.join(dir_run_input_pimc, job_name)
 
 	qmc_input = "qmc_trotter_number" + str(numb_bead) + ".input"
-	input_file = dir_run_input_pimc + "/" + qmc_input
-	execution_file = dir_run_input_pimc + "/pimc"
-	input_file1 = dir_run_input_pimc + "/initial_euler_angles_and_com.txt"
+	input_file = os.path.join(dir_run_input_pimc, qmc_input)
+	execution_file = os.path.join(dir_run_input_pimc, "pimc")
+	input_file1 = os.path.join(dir_run_input_pimc, "initial_euler_angles_and_com.txt")
 
 	if (status_cagepot):
-		cagepot_file = dir_run_input_pimc + "/hfc60.pot"
+		cagepot_file = os.path.join(dir_run_input_pimc, "hfc60.pot")
 		cagepot_cp = "cp " + cagepot_file + " " + execution_bead_dir_name_path
 	else:
 		cagepot_cp = ""
@@ -1923,6 +1934,7 @@ def job_string_sbatch_moribs(
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.log
+#SBATCH --error=%s.err
 #SBATCH --time=%s
 %s
 #SBATCH --constraint=broadwell
@@ -1931,6 +1943,7 @@ def job_string_sbatch_moribs(
 export OMP_NUM_THREADS=%s
 #export OMP_STACKSIZE=1024M
 export GOMP_STACKSIZE=1024M
+echo $SLURM_JOB_ID
 rm -rf %s
 mkdir -p %s
 mv %s %s
@@ -1942,11 +1955,12 @@ cp %s %s
 #valgrind --leak-check=full --show-leak-kinds=all --leak-check=yes ./pimc
 time ./pimc
 %s
-""" % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
+""" % (job_name, log_file_path, log_file_path, wall_time, account, omp_thread, omp_thread, execution_bead_dir_name_path, output_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, input_file1, execution_bead_dir_name_path, mv_cmd)
 
 	job_string_desktop = """#!/bin/bash
 export OMP_NUM_THREADS=%s
 export GOMP_STACKSIZE=1024M
+echo $SLURM_JOB_ID
 rm -rf %s
 mkdir -p %s
 mv %s %s
@@ -1960,11 +1974,13 @@ cp %s %s
 	job_string_restart = """#!/bin/bash
 #SBATCH --job-name=%s
 #SBATCH --output=%s.log
+#SBATCH --error=%s.err
 #SBATCH --time=%s
 %s
 #SBATCH --mem-per-cpu=1024mb
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
+echo $SLURM_JOB_ID
 mv %s %s
 mv %s %s
 cd %s
@@ -1973,7 +1989,7 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc
 time ./pimc
 %s
-""" % (job_name, log_file_path, wall_time, account, omp_thread, omp_thread, final_dir_in_work, dir_run_job, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, mv_cmd)
+""" % (job_name, log_file_path, log_file_path, wall_time, account, omp_thread, omp_thread, final_dir_in_work, dir_run_job, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, mv_cmd)
 
 	if restart_bool:
 		return job_string_restart
