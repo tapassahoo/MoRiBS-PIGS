@@ -72,34 +72,33 @@ def get_error(mean, data, binary_exponent):
 
 def get_execution_file(job_submit_dir, method, ent_method, execution_file_path):
 	os.chdir(execution_file_path)
-	print("*"*80)
+	print("*"*80 + "\n")
 	call(["make", "-f", "Makefile-GNU", "clean"])
 	call(["make", "-f", "Makefile-GNU"])
 	execution_file = os.path.join(execution_file_path, "pimc")
 
-	print("\n"*2)
-	print("****************** Important message *******************")
-	print("")
+	print(os.system('date +"Today is: %A %d %B"'),"\n")
+	print("\n" + " Important message ".center(80, "*") + "\n")
 	if os.path.exists(execution_file):
-		print("-"*48, "  The compilation is successful. ")
-		print("")
-		print("********************************************************")
+		print(" The source codes are compiled successfully. ".center(80, " ") + "\n")
+		print("*"*80 + "\n")
 	else:
-		print(f' ---- The file {execution_file_dir}/pimc does not exist ---- ')
+		print("The file called " + execution_file + " does not exist." + "\n")
+		print("*"*80 + "\n")
 		os.chdir(job_submit_dir)
-		print("********************************************************")
 		exit()
 	os.chdir(job_submit_dir)
 
 
-def compile_rotmat(source_dir_exe, input_dir):
-	path_enter_linden = source_dir_exe + "linear_prop/"
+def compile_rotmat(execution_file_path, input_dir_path):
+	path_enter_linden = os.path.join(execution_file_path, "linear_prop")
 	os.chdir(path_enter_linden)
+	print("*"*80 + "\n")
+	print("\n" + " The codes for the propagatorof a linear rotor iscompiled successfully. ".center(80, " ") + "\n") 
 	call(["make", "clean"])
 	call(["make"])
-	path_exit_linden = input_dir
-	os.chdir(path_exit_linden)
-
+	os.chdir(input_dir_path)
+	print("*"*80 + "\n")
 
 def compile_cagepot(source_dir_exe, input_dir):
 	path_enter_cagepot = source_dir_exe + "tabulated_potential/"
@@ -1296,25 +1295,28 @@ def get_input_file(
 	call(["mv", "qmc_temp1.input", "qmc.input"])
 
 
-def get_rotmat(method, molecule, temperature, numb_bead, source_dir_exe):
-	'''
-	This function generates rotational density matrix - linden.dat
-	'''
-	print("********************************************************")
-	print("		  Generation of rotational propagator		   ")
-	print("********************************************************")
+def get_rotmat(method, rotor, temperature, numb_bead, source_dir_exe):
+	"""
+	@description - This function generates rotational density matrix - linden.dat
+	@return -      linden.dat
+	"""
+	print("*"*80)
+	print("\n" + " Generation of rotational propagator ".center(80, " ") + "\n")
 	temperature1 = "%8.6f" % temperature
 	if (method == 'PIMC'):
 		numb_bead1 = numb_bead
 	else:
 		numb_bead1 = numb_bead - 1
-	command_linden_run = source_dir_exe + "linear_prop/linden.x " + \
-		str(temperature) + " " + str(numb_bead1) + " " + \
-		str(get_rotational_bconstant(molecule)) + " 15000 -1"
-	system(command_linden_run)
-	file_rotdens = molecule + "_T" + \
+	command_linden_run = os.path.join(source_dir_exe, "linear_prop", "linden.x") + \
+		" " + str(temperature) + " " + str(numb_bead1) + " " + \
+		str(get_rotational_bconstant(rotor)) + " 15000 -1"
+	os.system(command_linden_run)
+	file_rotdens = rotor + "_T" + \
 		str(temperature1) + "t" + str(numb_bead1) + ".rot"
 	call(["mv", "linden.out", file_rotdens])
+	print("\n" + "*"*80)
+	whoami()
+	exit()
 
 
 def GetTwoBodyDensity(

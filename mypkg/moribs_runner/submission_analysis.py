@@ -1,11 +1,5 @@
-import argparse
-import decimal
-import os
-import sys
-import time
-from subprocess import call
-import getpass
-import datetime
+import argparse, decimal, os, sys, subprocess, getpass
+from datetime import datetime
 import numpy as np
 
 sys.path.append("../../examples/scripts")
@@ -249,9 +243,14 @@ user_name = getpass.getuser()
 input_dir_path = os.getcwd()
 home = os.path.expanduser("~")
 
+print("*"*80)
+print("\n" + " Developer - Dr. Tapas Sahoo ".center(80, " ") + "\n")
+now = datetime.now() # current date and time
+date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
+print("date and time:",date_time, "\n")
+
 debugging=True
 if debugging:
-	support.whoami()
 	print("user_name: " + user_name)
 	print("home: " + home)
 	print("input_dir_path: " + input_dir_path)
@@ -271,7 +270,6 @@ if not os.path.exists(temp_dir):
 execution_file_path = os.path.join(home, source_code_dir_name)
 
 if (debugging):
-	support.whoami()
 	print("source_code_dir_name: " + source_code_dir_name)
 	print("output_file_dir_name: " + output_file_dir_name)
 	print("final_result_path: " + final_result_path)
@@ -291,7 +289,6 @@ if (status == "submission"):
 
 	execution_file = os.path.join(home, source_code_dir_name, "pimc")
 	if (debugging):
-		support.whoami()
 		print("run_job_root_dir: " + run_job_root_dir)
 		print("source_code_dir_name: " + source_code_dir_name)
 		print("execution_file: " + execution_file)
@@ -308,7 +305,6 @@ else:
 	output_dir_path = os.path.join(home, output_file_dir_name)
 
 if (debugging):
-	support.whoami()
 	print("output_dir_path: " + output_dir_path)
 
 ent_algorithm = args.ent_algorithm
@@ -345,19 +341,13 @@ for particle_a in particle_a_list:
 		ent_algorithm)
 
 	if (status == "submission"):
-		if (server_name == "graham"):
-			dir_run_input_pimc = "/scratch/" + user_name + \
-				"/" + output_file_dir_name + working_dir_name + "-Logs"
-		elif (server_name == "nlogn"):
-			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir_name + working_dir_name + "-Logs"
-		else:
-			dir_run_input_pimc = home + "/" + output_file_dir_name + working_dir_name + "-Logs"
+		slurm_script_dir = os.path.join(run_job_root_dir, working_dir_name + "-Logs")
 
-		if not os.path.isdir(dir_run_input_pimc):
-			call(["mkdir", "-p", dir_run_input_pimc])
+		if not os.path.isdir(slurm_script_dir):
+			subprocess.call(["mkdir", "-p", slurm_script_dir])
 
 		if not args.restart:
-			call(["cp", execution_file, dir_run_input_pimc])
+			subprocess.call(["cp", execution_file, slurm_script_dir])
 
 		if (rotor_type == "LINEAR"):
 			if not args.restart:
@@ -367,7 +357,7 @@ for particle_a in particle_a_list:
 			if not args.restart:
 				support.compile_cagepot(execution_file_path, input_dir_path)
 				support.cagepot(execution_file_path)
-				call(["mv", "hfc60.pot", dir_run_input_pimc])
+				subprocess.call(["mv", "hfc60.pot", slurm_script_dir])
 
 	if (status == "analysis"):
 		analysis_file_name = support.GetAnalysisFileName(
@@ -395,14 +385,13 @@ for particle_a in particle_a_list:
 
 		if (method != "ENT"):
 			if preskip >= numb_block:
-				print("")
-				print("Warning!!!!!!!")
-				print("="*100)
+				print("*"*80)
+				print("Warning!!!!!!!".center(80, " ") + "\n")
 				print("Number of Blocks = " + str(numb_block))
 				print("Number of preskip= " + str(preskip))
 				print(
-					"Error message: Number of preskip data must be less than Number of Blocks")
-				print("="*100)
+					"Error message: Number of preskip data must be less than Number of Blocks".center(80, " ") + "\n")
+				print("*"*80)
 				exit()
 
 			analyzed_energy_file = open(analysis_file_name.save_file_energy, "a")
@@ -427,10 +416,6 @@ for particle_a in particle_a_list:
 	else:
 		numb_molecule = numb_molecule1
 
-	if (debugging):
-		support.whoami()
-		print("output_dir_path: " + output_dir_path)
-
 	for index, ibead in enumerate(bead_list, start=0):
 
 		if (method == "PIMC"):
@@ -443,8 +428,8 @@ for particle_a in particle_a_list:
 				tau = beta / value
 				variable = tau
 
-			execution_bead_dir_name = working_dir_name + "-Trotter-Number-" + str(ibead)
-			print(execution_bead_dir_name)
+			dir_name_trotter_number = working_dir_name + "-Trotter-Number-" + str(ibead)
+			print(dir_name_trotter_number)
 
 		else:
 
@@ -463,7 +448,7 @@ for particle_a in particle_a_list:
 				tau = beta / (numb_bead - 1)
 				variable = tau
 
-			execution_bead_dir_name = working_dir_name + "-Trotter-Number-" + str(numb_bead)
+			dir_name_trotter_number = working_dir_name + "-Trotter-Number-" + str(numb_bead)
 
 			if (status == "submission"):
 
@@ -479,7 +464,7 @@ for particle_a in particle_a_list:
 					rotational_move,
 					root_dir_run,
 					run_job_root_dir,
-					execution_bead_dir_name,
+					dir_name_trotter_number,
 					input_dir_path,
 					execution_file,
 					rpt_val,
@@ -499,7 +484,7 @@ for particle_a in particle_a_list:
 					ent_method,
 					ent_algorithm,
 					output_dir_path,
-					dir_run_input_pimc,
+					slurm_script_dir,
 					cpu_run,
 					particle_a,
 					partition_name,
@@ -518,7 +503,7 @@ for particle_a in particle_a_list:
 
 			if (status == "analysis"):
 
-				final_dir_in_work = output_dir_path + execution_bead_dir_name
+				final_dir_in_work = os.path.join(output_dir_path, dir_name_trotter_number)
 				#support.RemoveFiles(method, numbbeads, temperature, rotor, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
 				try:
 					if ((method == "ENT") and (ent_algorithm == "WOR")):
@@ -561,11 +546,11 @@ for particle_a in particle_a_list:
 	if (status == "analysis") and (method != "ENT"):
 		analyzed_energy_file.close()
 		#analyzed_correlation_file.close()
-		call(["cat", analysis_file_name.save_file_energy])
+		subprocess.call(["cat", analysis_file_name.save_file_energy])
 		"""
 		print("")
 		print("")
-		call(["cat", analysis_file_name.save_file_correlation])
+		subprocess.call(["cat", analysis_file_name.save_file_correlation])
 		"""
 		print("")
 		print("")
@@ -577,7 +562,7 @@ for particle_a in particle_a_list:
 
 	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 		analyzed_entropy_file.close()
-		call(["cat", analysis_file_name.SaveEntropy])
+		subprocess.call(["cat", analysis_file_name.SaveEntropy])
 		print("")
 		print("")
 		SavedFile = analysis_file_name.SaveEntropy
