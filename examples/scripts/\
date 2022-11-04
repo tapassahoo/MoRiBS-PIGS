@@ -70,26 +70,27 @@ def get_error(mean, data, binary_exponent):
 	return np.max(error)
 
 
-def get_execution_file(job_submit_dir, method, ent_method, execution_file_path):
-	os.chdir(execution_file_path)
-	print("*"*80)
+def get_execution_file(input_dir, method, ent_method, source_dir_exe):
+	execution_file_dir = source_dir_exe
+	os.chdir(execution_file_dir)
 	call(["make", "-f", "Makefile-GNU", "clean"])
 	call(["make", "-f", "Makefile-GNU"])
-	execution_file = os.path.join(execution_file_path, "pimc")
+	path = os.path.join(execution_file_dir, "pimc")
 
-	print("\n"*2)
+	print("")
+	print("")
 	print("****************** Important message *******************")
 	print("")
-	if os.path.exists(execution_file):
-		print("-"*48, "  The compilation is successful. ")
+	if os.path.exists(path):
+		print(" ---- The compilation is successful. ----")
 		print("")
 		print("********************************************************")
 	else:
 		print(f' ---- The file {execution_file_dir}/pimc does not exist ---- ')
-		os.chdir(job_submit_dir)
+		os.chdir(input_dir)
 		print("********************************************************")
 		exit()
-	os.chdir(job_submit_dir)
+	os.chdir(input_dir)
 
 
 def compile_rotmat(source_dir_exe, input_dir):

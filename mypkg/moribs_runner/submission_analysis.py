@@ -245,51 +245,71 @@ level_bisection_impurity = level_bisection
 
 numb_block_restart = args.nblock_restart
 
-# User should change the following 5 lines as developer already have
-# explained in the README file.
 user_name = getpass.getuser()
-input_dir = os.getcwd() + "/"
+input_dir_path = os.getcwd()
 home = os.path.expanduser("~")
 
-source_code_dir = path_moribs_dir+"MoRiBS-PIGS/"
-output_file_dir = "name_of_output_directory/"
+debugging=True
+if debugging:
+	support.whoami()
+	print("user_name: " + user_name)
+	print("home: " + home)
+	print("input_dir_path: " + input_dir_path)
+
+source_code_dir_name = os.path.join(path_moribs_dir, "MoRiBS-PIGS")
+output_file_dir_name = "name_of_output_directory"
 if (method == "PIGS"):
-	final_result_path = home + "/" + plot_dir_path + "final-pigs-outputs-for-plotting/"
+	final_result_path = os.path.join(home, plot_dir_path, "final-pigs-outputs-for-plotting")
 elif (method == "PIMC"):
-	final_result_path = home + "/" + plot_dir_path + "final-pimc-outputs-for-plotting/"
+	final_result_path = os.path.join(home, plot_dir_path, "final-pimc-outputs-for-plotting")
 else:
-	final_result_path = home + "/" + plot_dir_path + "final-ent-outputs-for-plotting/"
+	final_result_path = os.path.join(home, plot_dir_path, "final-ent-outputs-for-plotting")
 temp_dir = os.path.dirname(final_result_path)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
-source_dir_exe = home + "/" + source_code_dir
+execution_file_path = os.path.join(home, source_code_dir_name)
+
+if (debugging):
+	support.whoami()
+	print("source_code_dir_name: " + source_code_dir_name)
+	print("output_file_dir_name: " + output_file_dir_name)
+	print("final_result_path: " + final_result_path)
+	print("execution_file_path: " + execution_file_path)
 
 if (status == "submission"):
 	if (server_name == "graham"):
-		dir_run_job = "/scratch/" + user_name + "/" + output_file_dir
+		run_job_root_dir = os.path.join("/scratch", user_name, output_file_dir_name)
 	elif (server_name == "nlogn"):
-		dir_run_job = "/work/" + user_name + "/" + output_file_dir
+		run_job_root_dir = os.path.join("/work", user_name, output_file_dir_name)
 	else:
-		dir_run_job = home + "/" + output_file_dir
+		run_job_root_dir = os.path.join(home, output_file_dir_name)
 
-	temp_dir = os.path.dirname(dir_run_job)
+	temp_dir = os.path.dirname(run_job_root_dir)
 	if not os.path.exists(temp_dir):
 		os.makedirs(temp_dir)
 
-	execution_file = home + "/" + source_code_dir + "pimc"
+	execution_file = os.path.join(home, source_code_dir_name, "pimc")
+	if (debugging):
+		support.whoami()
+		print("run_job_root_dir: " + run_job_root_dir)
+		print("source_code_dir_name: " + source_code_dir_name)
+		print("execution_file: " + execution_file)
+
 	if not args.compiled:
 		if not args.restart:
-			support.get_execution_file(
-				job_submit_dir, method, ent_method, source_dir_exe)
+			support.get_execution_file(job_submit_dir, method, ent_method, execution_file_path)
 
 if (server_name == "graham"):
-	output_dir_path = "/scratch/" + user_name + "/" + output_file_dir
+	output_dir_path = os.path.join("/scratch", user_name, output_file_dir_name)
 elif (server_name == "nlogn"):
-	output_dir_path = "/work/" + user_name + "/" + output_file_dir
+	output_dir_path = os.path.join("/work", user_name, output_file_dir_name)
 else:
-	output_dir_path = home + "/" + output_file_dir
+	output_dir_path = os.path.join(home, output_file_dir_name)
 
+if (debugging):
+	support.whoami()
+	print("output_dir_path: " + output_dir_path)
 
 ent_algorithm = args.ent_algorithm
 if (method == "ENT"):
@@ -327,11 +347,11 @@ for particle_a in particle_a_list:
 	if (status == "submission"):
 		if (server_name == "graham"):
 			dir_run_input_pimc = "/scratch/" + user_name + \
-				"/" + output_file_dir + working_dir_name + "-Logs"
+				"/" + output_file_dir_name + working_dir_name + "-Logs"
 		elif (server_name == "nlogn"):
-			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir + working_dir_name + "-Logs"
+			dir_run_input_pimc = "/work/" + user_name + "/" + output_file_dir_name + working_dir_name + "-Logs"
 		else:
-			dir_run_input_pimc = home + "/" + output_file_dir + working_dir_name + "-Logs"
+			dir_run_input_pimc = home + "/" + output_file_dir_name + working_dir_name + "-Logs"
 
 		if not os.path.isdir(dir_run_input_pimc):
 			call(["mkdir", "-p", dir_run_input_pimc])
@@ -341,12 +361,12 @@ for particle_a in particle_a_list:
 
 		if (rotor_type == "LINEAR"):
 			if not args.restart:
-				support.compile_rotmat(source_dir_exe, input_dir)
+				support.compile_rotmat(execution_file_path, input_dir_path)
 
 		if status_cagepot:
 			if not args.restart:
-				support.compile_cagepot(source_dir_exe, input_dir)
-				support.cagepot(source_dir_exe)
+				support.compile_cagepot(execution_file_path, input_dir_path)
+				support.cagepot(execution_file_path)
 				call(["mv", "hfc60.pot", dir_run_input_pimc])
 
 	if (status == "analysis"):
@@ -407,6 +427,10 @@ for particle_a in particle_a_list:
 	else:
 		numb_molecule = numb_molecule1
 
+	if (debugging):
+		support.whoami()
+		print("output_dir_path: " + output_dir_path)
+
 	for index, ibead in enumerate(bead_list, start=0):
 
 		if (method == "PIMC"):
@@ -454,9 +478,9 @@ for particle_a in particle_a_list:
 					translational_move,
 					rotational_move,
 					root_dir_run,
-					dir_run_job,
+					run_job_root_dir,
 					execution_bead_dir_name,
-					input_dir,
+					input_dir_path,
 					execution_file,
 					rpt_val,
 					ibead,
@@ -481,8 +505,8 @@ for particle_a in particle_a_list:
 					partition_name,
 					status_cagepot,
 					user_name,
-					output_file_dir,
-					source_dir_exe,
+					output_file_dir_name,
+					execution_file_path,
 					restart_bool,
 					numb_block_restart,
 					crystal,
