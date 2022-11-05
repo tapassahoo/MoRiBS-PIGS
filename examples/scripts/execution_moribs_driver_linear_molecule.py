@@ -12,15 +12,14 @@ module_path = module_path.replace('__init__.py', '')
 # User needs to modify once
 submission_root_dir_name = "linear-rotors"
 # /home/tapas/MoRiBS-PIGS/examples/scripts
-
+"""
 dir_moribs = '""'
 plot_dir_path = '""'
+"""
 
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
-"""
 dir_moribs = '"academic-project/"'
 plot_dir_path = '"academic-project/outputs/"'
-"""
 
 extra_name = '""'
 blank_space = " "
