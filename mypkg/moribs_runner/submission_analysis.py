@@ -244,16 +244,16 @@ input_dir_path = os.getcwd()
 home = os.path.expanduser("~")
 
 print("*"*80)
-print("\n" + " Developer - Dr. Tapas Sahoo ".center(80, " ") + "\n")
+print("\n" + "Developer:".ljust(30) + "Dr. Tapas Sahoo" + "\n")
 now = datetime.now() # current date and time
-date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
-print("date and time:",date_time, "\n")
+date_time = now.strftime("%d/%m/%Y, %H:%M:%S")
+print("date and time:".capitalize().ljust(30), date_time, "\n")
 
 debugging=True
 if debugging:
-	print("user_name: " + user_name)
-	print("home: " + home)
-	print("input_dir_path: " + input_dir_path)
+	print("user_name: ".ljust(30) + user_name)
+	print("home: ".ljust(30) + home)
+	print("input_dir_path: ".ljust(30) + input_dir_path)
 
 source_code_dir_name = os.path.join(path_moribs_dir, "MoRiBS-PIGS")
 output_file_dir_name = "name_of_output_directory"
@@ -270,10 +270,10 @@ if not os.path.exists(temp_dir):
 execution_file_path = os.path.join(home, source_code_dir_name)
 
 if (debugging):
-	print("source_code_dir_name: " + source_code_dir_name)
-	print("output_file_dir_name: " + output_file_dir_name)
-	print("final_result_path: " + final_result_path)
-	print("execution_file_path: " + execution_file_path)
+	print("source_code_dir_name: ".ljust(30) + source_code_dir_name)
+	print("output_file_dir_name: ".ljust(30) + output_file_dir_name)
+	print("final_result_path: ".ljust(30) + final_result_path)
+	print("execution_file_path: ".ljust(30) + execution_file_path)
 
 if (status == "submission"):
 	if (server_name == "graham"):
@@ -289,9 +289,9 @@ if (status == "submission"):
 
 	execution_file = os.path.join(home, source_code_dir_name, "pimc")
 	if (debugging):
-		print("run_job_root_dir: " + run_job_root_dir)
-		print("source_code_dir_name: " + source_code_dir_name)
-		print("execution_file: " + execution_file)
+		print("run_job_root_dir: ".ljust(30) + run_job_root_dir)
+		print("source_code_dir_name: ".ljust(30) + source_code_dir_name)
+		print("execution_file: ".ljust(30) + execution_file)
 
 	if not args.compiled:
 		if not args.restart:
@@ -305,7 +305,7 @@ else:
 	output_dir_path = os.path.join(home, output_file_dir_name)
 
 if (debugging):
-	print("output_dir_path: " + output_dir_path)
+	print("output_dir_path: ".ljust(30) + output_dir_path)
 
 ent_algorithm = args.ent_algorithm
 if (method == "ENT"):

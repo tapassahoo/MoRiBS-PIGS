@@ -92,7 +92,7 @@ def compile_rotmat(execution_file_path, input_dir_path):
 	print("\n" + " The codes for the propagator of a linear rotor are compiled successfully. ".center(80, " ") + "\n") 
 	call(["make", "-C", path_enter_linden, "clean"])
 	call(["make", "-C", path_enter_linden])
-	print("*"*80 + "\n")
+	print("\n" + "*"*80 + "\n")
 
 def compile_cagepot(source_code_dir_name, input_dir):
 	path_enter_cagepot = source_code_dir_name + "tabulated_potential/"
@@ -1484,7 +1484,7 @@ def job_submission(
 			file_rotdens = rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead1) + ".rot"
 			call(["mv", file_rotdens, dir_run_input_pimc])
-			propagator_path = dir_run_input_pimc + "/"
+			propagator_path = dir_run_input_pimc
 		else:
 			iodevn = spin_isomer
 			jmax = 70
@@ -1521,13 +1521,12 @@ def job_submission(
 					  dir_dens + file_rotdens_mod + ".eng"])
 				call(["cp", dir_dens + file_rotdens + ".esq",
 					  dir_dens + file_rotdens_mod + ".esq"])
-			propagator_path = dir_dens + "/"
+			propagator_path = dir_dens
 			call(["cp", "initial_euler_angles_and_com.txt", dir_run_input_pimc])
 
 		if (crystal):
 			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
 		whoami()
-		exit()
 	else:
 		os.chdir(output_dir_path)
 
@@ -1612,41 +1611,43 @@ def job_submission(
 			numb_bead2 = int(numb_bead)
 		else:
 			numb_bead2 = int(numb_bead - 1)
-		propagator_path = dir_run_input_pimc + "/"
+		propagator_path = dir_run_input_pimc
 		if (rotor_type != "LINEAR"):
 			iodevn = spin_isomer
 			jmax = 66
 			if (rotor == "H2O"):
 				if (server_name == "graham"):
-					dir_dens = "/scratch/" + user_name + "/rot-dens-asymmetric-top/" + \
+					dir_dens = os.path.join("/scratch", user_name, "rot-dens-asymmetric-top", \
 						asym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, iodevn, jmax)
+							rotor, temperature1, numb_bead2, iodevn, jmax))
 				if (server_name == "nlogn"):
-					dir_dens = "/work/" + user_name + "/rot-dens-asymmetric-top/" + \
+					dir_dens = os.path.join("/work", user_name, "rot-dens-asymmetric-top", \
 						asym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, iodevn, jmax)
+							rotor, temperature1, numb_bead2, iodevn, jmax))
 			if (rotor == "CH3F"):
 				if (server_name == "nlogn"):
-					dir_dens = "/work/" + user_name + "/rot-dens-symmetric-top/" + \
+					dir_dens = os.path.join("/work", user_name, "rot-dens-symmetric-top", \
 						sym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, 3, jmax)
+							rotor, temperature1, numb_bead2, 3, jmax))
 				if (server_name == "graham"):
-					dir_dens = "/scratch/" + user_name + "/rot-dens-symmetric-top/" + \
+					dir_dens = os.path.join("/scratch", user_name, "rot-dens-symmetric-top", \
 						sym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, 3, jmax)
-			file_rotdens = "/" + rotor + "_T" + \
+							rotor, temperature1, numb_bead2, 3, jmax))
+			file_rotdens = rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead2)
-			file_rotdens_mod = "/" + rotor + "_T" + \
+			file_rotdens_mod = rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead)
-			if (os.path.isfile(dir_dens + file_rotdens_mod + ".rho") == False):
-				call(["cp", dir_dens + file_rotdens + ".rho",
-					  dir_dens + file_rotdens_mod + ".rho"])
-				call(["cp", dir_dens + file_rotdens + ".eng",
-					  dir_dens + file_rotdens_mod + ".eng"])
-				call(["cp", dir_dens + file_rotdens + ".esq",
-					  dir_dens + file_rotdens_mod + ".esq"])
-			propagator_path = dir_dens + "/"
+			if (os.path.isfile(os.path.join(dir_dens, file_rotdens_mod + ".rho")) == False):
+				call(["cp", os.path.join(dir_dens, file_rotdens + ".rho"),
+					  os.path.join(dir_dens, file_rotdens_mod + ".rho")])
+				call(["cp", os.path.join(dir_dens, file_rotdens + ".eng"),
+					  os.path.join(dir_dens, file_rotdens_mod + ".eng")])
+				call(["cp", os.path.join(dir_dens, file_rotdens + ".esq"),
+					  os.path.join(dir_dens, file_rotdens_mod + ".esq")])
+			propagator_path = dir_dens
 
+	whoami()
+	exit()
 	# For qmc.imput
 	get_input_file(
 		method,
