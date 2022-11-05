@@ -295,7 +295,7 @@ if (status == "submission"):
 
 	if not args.compiled:
 		if not args.restart:
-			support.get_execution_file(job_submit_dir, method, ent_method, execution_file_path)
+			support.get_execution_file(method, ent_method, execution_file_path)
 
 if (server_name == "graham"):
 	output_dir_path = os.path.join("/scratch", user_name, output_file_dir_name)
@@ -548,12 +548,10 @@ for particle_a in particle_a_list:
 		#analyzed_correlation_file.close()
 		subprocess.call(["cat", analysis_file_name.save_file_energy])
 		"""
-		print("")
-		print("")
+		print("\n\n")
 		subprocess.call(["cat", analysis_file_name.save_file_correlation])
 		"""
-		print("")
-		print("")
+		print("\n\n")
 		# =========================File Checking===============================#
 		SavedFile = analysis_file_name.save_file_energy
 		support.FileCheck(method, bead_list, parameter_name, SavedFile)
@@ -563,8 +561,7 @@ for particle_a in particle_a_list:
 	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 		analyzed_entropy_file.close()
 		subprocess.call(["cat", analysis_file_name.SaveEntropy])
-		print("")
-		print("")
+		print("\n\n")
 		SavedFile = analysis_file_name.SaveEntropy
 		support.FileCheck(method, bead_list, parameter_name, SavedFile)
 

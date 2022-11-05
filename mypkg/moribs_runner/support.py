@@ -70,14 +70,12 @@ def get_error(mean, data, binary_exponent):
 	return np.max(error)
 
 
-def get_execution_file(job_submit_dir, method, ent_method, execution_file_path):
-	os.chdir(execution_file_path)
-	print("*"*80 + "\n")
-	call(["make", "-f", "Makefile-GNU", "clean"])
-	call(["make", "-f", "Makefile-GNU"])
+def get_execution_file(method, ent_method, execution_file_path):
+	print("\n" + "*"*80 + "\n")
+	call(["make", "-C", execution_file_path, "-f", "Makefile-GNU", "clean"])
+	call(["make", "-C", execution_file_path, "-f", "Makefile-GNU"])
 	execution_file = os.path.join(execution_file_path, "pimc")
 
-	print(os.system('date +"Today is: %A %d %B"'),"\n")
 	print("\n" + " Important message ".center(80, "*") + "\n")
 	if os.path.exists(execution_file):
 		print(" The source codes are compiled successfully. ".center(80, " ") + "\n")
@@ -85,19 +83,15 @@ def get_execution_file(job_submit_dir, method, ent_method, execution_file_path):
 	else:
 		print("The file called " + execution_file + " does not exist." + "\n")
 		print("*"*80 + "\n")
-		os.chdir(job_submit_dir)
 		exit()
-	os.chdir(job_submit_dir)
 
 
 def compile_rotmat(execution_file_path, input_dir_path):
 	path_enter_linden = os.path.join(execution_file_path, "linear_prop")
-	os.chdir(path_enter_linden)
 	print("*"*80 + "\n")
-	print("\n" + " The codes for the propagatorof a linear rotor iscompiled successfully. ".center(80, " ") + "\n") 
-	call(["make", "clean"])
-	call(["make"])
-	os.chdir(input_dir_path)
+	print("\n" + " The codes for the propagator of a linear rotor are compiled successfully. ".center(80, " ") + "\n") 
+	call(["make", "-C", path_enter_linden, "clean"])
+	call(["make", "-C", path_enter_linden])
 	print("*"*80 + "\n")
 
 def compile_cagepot(source_code_dir_name, input_dir):
@@ -935,8 +929,8 @@ def GetAverageEntropyRT(
 				crystal,
 				impurity,
 				ext_ent)
-			execution_bead_dir_name = final_file_name + str(numb_bead)
-			final_dir_in_work = output_dir_path + execution_bead_dir_name
+			dir_name_trotter_number = final_file_name + str(numb_bead)
+			final_dir_in_work = output_dir_path + dir_name_trotter_number
 			if os.path.isdir(final_dir_in_work):
 				condition = True
 
@@ -990,7 +984,7 @@ def GetAverageEntropyRT(
 							0, 1, 2], skip_header=preskip, skip_footer=postskip)
 				if (int(len(col_block)) != numb_block - (preskip + postskip)):
 					print(len(col_block))
-					print(execution_bead_dir_name)
+					print(dir_name_trotter_number)
 
 				binary_exponent = int(math.log(len(col_nm)) / math.log(2))
 				trunc = int(len(col_nm) - 2**binary_exponent)
@@ -1315,8 +1309,6 @@ def get_rotmat(method, rotor, temperature, numb_bead, source_code_dir_name):
 		str(temperature1) + "t" + str(numb_bead1) + ".rot"
 	call(["mv", "linden.out", file_rotdens])
 	print("\n" + "*"*80)
-	whoami()
-	exit()
 
 
 def GetTwoBodyDensity(
@@ -1416,9 +1408,9 @@ def job_submission(
 		status,
 		translational_move,
 		rotational_move,
-		dir_run,
-		dir_run_job,
-		execution_bead_dir_name,
+		root_dir_run,
+		run_job_root_dir,
+		dir_name_trotter_number,
 		input_dir,
 		execution_file,
 		rpt_val,
@@ -1461,7 +1453,7 @@ def job_submission(
 	step1_rot = step_rot_move[ibead]
 	step_com_impurity1 = step_com_impurity[ibead]
 	level_impurity1 = level_impurity[ibead]
-	final_dir_in_work = output_dir_path + execution_bead_dir_name
+	final_dir_in_work = os.path.join(output_dir_path, dir_name_trotter_number)
 
 	if (method == 'PIGS'):
 		job_name_temp = "pgR" + str(rpt_val) + 'n' + str(numb_molecule) + "b"
@@ -1472,23 +1464,16 @@ def job_submission(
 	job_name = job_name_temp + str(numb_bead) + ".log"
 
 	if not restart_bool:
-		os.chdir(output_dir_path)
-		if (os.path.isdir(execution_bead_dir_name)):
-			print("====")
-			print("Error message")
-			print("")
-			print_message = "Remove " + str(output_dir_path) + str(execution_bead_dir_name)
-			print(print_message)
-			os.chdir(input_dir)
+		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
+			print("*"*80 + "\n")
+			warning_message = "Remove " + os.path.join(output_dir_path, dir_name_trotter_number)
+			print("Warning: " + warning_message)
+			print("\n" + "*"*80 + "\n")
 			return
 
-		os.chdir(input_dir)
-
 		if (rotor_type == "LINEAR"):
-			get_rotmat(method, rotor, temperature,
-				   numb_bead, source_code_dir_name)
+			get_rotmat(method, rotor, temperature, numb_bead, source_code_dir_name)
 
-			#call(["rm", "-rf", execution_bead_dir_name])
 
 		temperature1 = "%8.6f" % temperature
 		if (rotor_type == "LINEAR"):
@@ -1541,17 +1526,19 @@ def job_submission(
 
 		if (crystal):
 			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
+		whoami()
+		exit()
 	else:
 		os.chdir(output_dir_path)
 
 		#
-		if not os.path.isdir(execution_bead_dir_name):
+		if not os.path.isdir(dir_name_trotter_number):
 			print("")
 			print("")
 			print("Error message")
 			print("")
 			print("")
-			print_message = output_dir_path + execution_bead_dir_name + " The directory is not there.\n You need to submit the job first."
+			print_message = output_dir_path + dir_name_trotter_number + " The directory is not there.\n You need to submit the job first."
 			print(print_message)
 			os.chdir(input_dir)
 			return
@@ -1563,12 +1550,12 @@ def job_submission(
 			file_check_name = "output.rden"
 
 		#
-		os.chdir(os.path.join(output_dir_path, execution_bead_dir_name, "results"))
+		os.chdir(os.path.join(output_dir_path, dir_name_trotter_number, "results"))
 		if (os.path.isfile(file_check_name)):
 			ncol = np.genfromtxt(file_check_name)
 			last_index = int(ncol[-1, 0])
 			if ((numb_block - last_index) <= 0):
-				print(output_dir_path + execution_bead_dir_name)
+				print(output_dir_path + dir_name_trotter_number)
 				print(" The job was finished. You do not need to resubmit it.")
 				os.chdir(input_dir)
 				return
@@ -1578,7 +1565,7 @@ def job_submission(
 
 		if "slurmstepd" not in open(pimc_log_file).read():
 			if "real" not in open(pimc_log_file).read():
-				print_message = output_dir_path + execution_bead_dir_name + " The job is in progress."
+				print_message = output_dir_path + dir_name_trotter_number + " The job is in progress."
 				print(print_message)
 				os.chdir(input_dir)
 				return
@@ -1594,7 +1581,7 @@ def job_submission(
 		#
 		os.chdir(input_dir)
 
-		results_dir_path=os.path.join(output_dir_path, execution_bead_dir_name, "results", "")
+		results_dir_path=os.path.join(output_dir_path, dir_name_trotter_number, "results", "")
 		if os.path.isfile(os.path.join(results_dir_path, "output.eng")):
 			list_files_be_renamed=glob.glob(results_dir_path + '*_old*')
 			print("-"*80)
@@ -1691,7 +1678,7 @@ def job_submission(
 
 	input_file = "qmc_trotter_number" + str(numb_bead) + ".input"
 	call(["mv", "qmc.input", dir_run_input_pimc + "/" + input_file])
-	execution_bead_dir_name_path = dir_run_job + execution_bead_dir_name
+	execution_bead_dir_name_path = run_job_root_dir + dir_name_trotter_number
 
 	# job submission
 	fname = 'job-for-P' + str(numb_bead)
@@ -1711,14 +1698,14 @@ def job_submission(
 					dir_run_input_pimc,
 					input_dir,
 					restart_bool,
-					dir_run_job,
+					run_job_root_dir,
 					status_cagepot,
 					output_dir_path))
 		else:
 			fwrite.write(
 				job_string_sbatch_moribs(
 					server_name,
-					dir_run,
+					root_dir_run,
 					job_name_temp,
 					numb_molecule,
 					execution_bead_dir_name_path,
@@ -1730,7 +1717,7 @@ def job_submission(
 					user_name,
 					output_file_dir,
 					restart_bool,
-					dir_run_job,
+					run_job_root_dir,
 					status_cagepot,
 					output_dir_path,
 					numb_block))
@@ -1738,7 +1725,7 @@ def job_submission(
 		fwrite.write(
 			job_string_sbatch_moribs(
 				server_name,
-				dir_run,
+				root_dir_run,
 				job_name_temp,
 				numb_molecule,
 				execution_bead_dir_name_path,
@@ -1750,7 +1737,7 @@ def job_submission(
 				user_name,
 				output_file_dir,
 				restart_bool,
-				dir_run_job,
+				run_job_root_dir,
 				status_cagepot,
 				output_dir_path,
 				numb_block))
@@ -1792,7 +1779,7 @@ def jobstring_scratch_cpu(
 		dir_run_input_pimc,
 		input_dir,
 		restart_bool,
-		dir_run_job,
+		run_job_root_dir,
 		status_cagepot,
 		output_dir_path):
 	'''
@@ -1827,7 +1814,7 @@ mv %s /work/tapas/linear_rotors
 
 def job_string_sbatch_moribs(
 		server_name,
-		dir_run,
+		root_dir_run,
 		file_name,
 		numb_molecule,
 		execution_bead_dir_name_path,
@@ -1839,7 +1826,7 @@ def job_string_sbatch_moribs(
 		user_name,
 		output_file_dir,
 		restart_bool,
-		dir_run_job,
+		run_job_root_dir,
 		status_cagepot,
 		output_dir_path,
 		numb_block):
@@ -1900,9 +1887,9 @@ def job_string_sbatch_moribs(
 	if server_name == "graham":
 		mv_cmd = " "
 	else:
-		if (dir_run == "scratch"):
+		if (root_dir_run == "scratch"):
 			mv_cmd = "mv " + execution_bead_dir_name_path + " " + output_dir_path
-		if (dir_run == "work"):
+		if (root_dir_run == "work"):
 			mv_cmd = " "
 
 	if (server_name == "graham"):
@@ -1990,7 +1977,7 @@ cp %s %s
 ####valgrind --leak-check=full -v --show-leak-kinds=all ./pimc
 time ./pimc
 %s
-""" % (job_name, log_file_path, log_file_path, wall_time, account, omp_thread, omp_thread, final_dir_in_work, dir_run_job, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, mv_cmd)
+""" % (job_name, log_file_path, log_file_path, wall_time, account, omp_thread, omp_thread, final_dir_in_work, run_job_root_dir, input_file, execution_bead_dir_name_path, execution_bead_dir_name_path, qmc_input, execution_file, execution_bead_dir_name_path, mv_cmd)
 
 	if restart_bool:
 		return job_string_restart
@@ -2339,7 +2326,7 @@ def get_dmrg_result(
 	root_dir_execution,
 	method,
 	rotor_name,
-	dir_run_job,
+	run_job_root_dir,
 	job_execution_dir,
 	input_dir,
 	source_code_dir,
@@ -2352,18 +2339,18 @@ def get_dmrg_result(
 	'''
 	log_file = method + ".log"
 
-	os.chdir(dir_run_job)
+	os.chdir(run_job_root_dir)
 	if (os.path.isdir(job_execution_dir)):
 		print("====")
 		print("Error message")
 		print("")
-		print_message = "Remove " + str(dir_run_job) + str(job_execution_dir)
+		print_message = "Remove " + str(run_job_root_dir) + str(job_execution_dir)
 		print(print_message)
 		os.chdir(input_dir)
 		return
 	os.chdir(input_dir)
 
-	job_execution_dir_path = os.path.join(dir_run_job, job_execution_dir)
+	job_execution_dir_path = os.path.join(run_job_root_dir, job_execution_dir)
 	if not os.path.exists(job_execution_dir_path):
 		os.makedirs(job_execution_dir_path)
 
