@@ -100,12 +100,12 @@ def compile_rotmat(execution_file_path, input_dir_path):
 	os.chdir(input_dir_path)
 	print("*"*80 + "\n")
 
-def compile_cagepot(source_dir_exe, input_dir):
-	path_enter_cagepot = source_dir_exe + "tabulated_potential/"
+def compile_cagepot(source_code_dir_name, input_dir):
+	path_enter_cagepot = source_code_dir_name + "tabulated_potential/"
 	os.chdir(path_enter_cagepot)
 	call(["make", "clean"])
 	call(["make"])
-	path_exit_cagepot = source_dir_exe + input_dir
+	path_exit_cagepot = source_code_dir_name + input_dir
 	os.chdir(path_exit_cagepot)
 
 
@@ -1295,7 +1295,7 @@ def get_input_file(
 	call(["mv", "qmc_temp1.input", "qmc.input"])
 
 
-def get_rotmat(method, rotor, temperature, numb_bead, source_dir_exe):
+def get_rotmat(method, rotor, temperature, numb_bead, source_code_dir_name):
 	"""
 	@description - This function generates rotational density matrix - linden.dat
 	@return -      linden.dat
@@ -1307,7 +1307,7 @@ def get_rotmat(method, rotor, temperature, numb_bead, source_dir_exe):
 		numb_bead1 = numb_bead
 	else:
 		numb_bead1 = numb_bead - 1
-	command_linden_run = os.path.join(source_dir_exe, "linear_prop", "linden.x") + \
+	command_linden_run = os.path.join(source_code_dir_name, "linear_prop", "linden.x") + \
 		" " + str(temperature) + " " + str(numb_bead1) + " " + \
 		str(get_rotational_bconstant(rotor)) + " 15000 -1"
 	os.system(command_linden_run)
@@ -1350,11 +1350,11 @@ def GetTwoBodyDensity(
 	system(commandRun)
 
 
-def cagepot(source_dir_exe):
+def cagepot(source_code_dir_name):
 	'''
 	This function generates tabulated potential - cagepot.dat
 	'''
-	command_cagepot_run = source_dir_exe + "tabulated_potential/hfc60.x 100 360"
+	command_cagepot_run = source_code_dir_name + "tabulated_potential/hfc60.x 100 360"
 	system(command_cagepot_run)
 	file_cagepot = "hfc60.pot"
 	call(["mv", "cagepot.out", file_cagepot])
@@ -1445,7 +1445,7 @@ def job_submission(
 		status_cagepot,
 		user_name,
 		output_file_dir,
-		source_dir_exe,
+		source_code_dir_name,
 		restart_bool,
 		numb_block_restart,
 		crystal,
@@ -1486,7 +1486,7 @@ def job_submission(
 
 		if (rotor_type == "LINEAR"):
 			get_rotmat(method, rotor, temperature,
-				   numb_bead, source_dir_exe)
+				   numb_bead, source_code_dir_name)
 
 			#call(["rm", "-rf", execution_bead_dir_name])
 
