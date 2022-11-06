@@ -78,7 +78,7 @@ def get_execution_file(method, ent_method, execution_file_path):
 
 	print("\n" + " Important message ".center(80, "*") + "\n")
 	if os.path.exists(execution_file):
-		print(" The source codes are compiled successfully. ".center(80, " ") + "\n")
+		print("The source codes are compiled successfully.".center(80) + "\n")
 		print("*"*80 + "\n")
 	else:
 		print("The file called " + execution_file + " does not exist." + "\n")
@@ -89,17 +89,17 @@ def get_execution_file(method, ent_method, execution_file_path):
 def compile_rotmat(execution_file_path, input_dir_path):
 	path_enter_linden = os.path.join(execution_file_path, "linear_prop")
 	print("*"*80 + "\n")
-	print("\n" + " The codes for the propagator of a linear rotor are compiled successfully. ".center(80, " ") + "\n") 
+	print("\n" + "The codes for the propagator of a linear rotor are compiled successfully." + "\n") 
 	call(["make", "-C", path_enter_linden, "clean"])
 	call(["make", "-C", path_enter_linden])
 	print("\n" + "*"*80 + "\n")
 
 def compile_cagepot(execution_file_path, input_dir_path):
-	path_enter_cagepot = execution_file_path + "tabulated_potential/"
+	path_enter_cagepot = os.path.join(execution_file_path, "tabulated_potential", "")
 	os.chdir(path_enter_cagepot)
 	call(["make", "clean"])
 	call(["make"])
-	path_exit_cagepot = execution_file_path + input_dir_path
+	path_exit_cagepot = os.path.join(execution_file_path, input_dir_path)
 	os.chdir(path_exit_cagepot)
 
 
@@ -1892,27 +1892,15 @@ def job_string_sbatch_moribs(
 	else:
 		account = ""
 
-	print("")
-	print("")
-	print("")
-	print("**************** Important Note ************************")
-	print("")
-	print("The full path of the directory where the submitted job is running is given below:")
-	print(execution_bead_dir_name_path)
-	print("")
-	print("The full path of the directory where all the outputs are stored is geven below:")
-	print(output_dir)
-	print("")
+	print("\n" + " Important Note ".center(80, "*") + "\n")
+	print("The path of the directory where the submitted job is running is given below:" + "\n" + execution_bead_dir_name_path + "\n")
+	print("The path of the directory where all the outputs are stored is given below:" + "\n" + output_dir + "\n")
 	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
-	print(log_file_path + ".log")
-	print("")
-	print("The number of threads used = " + str(thread))
-	print("")
-	print("The outputs exist in the below-mentioned directory after the job is executed successfully.")
-	print(final_dir_in_work)
-	print("")
-	print("********************************************************")
-	print("")
+	print(log_file_path + ".log" + "\n")
+	print("The number of threads used = " + str(thread) + "\n")
+	print("The output files are moved into the below-mentioned directory after the job is executed successfully.")
+	print(final_dir_in_work + "\n")
+	print("*"*80)
 
 	job_string = """#!/bin/bash
 #SBATCH --job-name=%s
