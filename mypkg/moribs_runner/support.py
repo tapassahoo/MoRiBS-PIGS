@@ -94,12 +94,12 @@ def compile_rotmat(execution_file_path, input_dir_path):
 	call(["make", "-C", path_enter_linden])
 	print("\n" + "*"*80 + "\n")
 
-def compile_cagepot(source_code_dir_name, input_dir):
-	path_enter_cagepot = source_code_dir_name + "tabulated_potential/"
+def compile_cagepot(execution_file_path, input_dir_path):
+	path_enter_cagepot = execution_file_path + "tabulated_potential/"
 	os.chdir(path_enter_cagepot)
 	call(["make", "clean"])
 	call(["make"])
-	path_exit_cagepot = source_code_dir_name + input_dir
+	path_exit_cagepot = execution_file_path + input_dir_path
 	os.chdir(path_exit_cagepot)
 
 
@@ -1106,7 +1106,7 @@ def get_input_file(
 	'''
 	This function modifies parameters in qmc_run.input.
 	'''
-	input_dir = os.getcwd() + "/"
+	input_dir_path = os.path.join(os.getcwd(), "")
 
 	if restart_bool:
 		replace("job_input", "RESTART",
@@ -1131,7 +1131,7 @@ def get_input_file(
 		replace("pot_read_input", "nopot", "qmc_temp1.input", "qmc_temp.input")
 	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
-	replace("pot_path_input", input_dir, "qmc_temp1.input", "qmc_temp.input")
+	replace("pot_path_input", input_dir_path, "qmc_temp1.input", "qmc_temp.input")
 	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
 	replace("method_input", method + "_SIM", "qmc_temp1.input", "qmc_temp.input")
@@ -1289,7 +1289,7 @@ def get_input_file(
 	call(["mv", "qmc_temp1.input", "qmc.input"])
 
 
-def get_rotmat(method, rotor, temperature, numb_bead, source_code_dir_name):
+def get_rotmat(method, rotor, temperature, numb_bead, execution_file_path):
 	"""
 	@description - This function generates rotational density matrix - linden.dat
 	@return -      linden.dat
@@ -1301,7 +1301,7 @@ def get_rotmat(method, rotor, temperature, numb_bead, source_code_dir_name):
 		numb_bead1 = numb_bead
 	else:
 		numb_bead1 = numb_bead - 1
-	command_linden_run = os.path.join(source_code_dir_name, "linear_prop", "linden.x") + \
+	command_linden_run = os.path.join(execution_file_path, "linear_prop", "linden.x") + \
 		" " + str(temperature) + " " + str(numb_bead1) + " " + \
 		str(get_rotational_bconstant(rotor)) + " 15000 -1"
 	os.system(command_linden_run)
@@ -1342,11 +1342,11 @@ def GetTwoBodyDensity(
 	system(commandRun)
 
 
-def cagepot(source_code_dir_name):
+def cagepot(execution_file_path):
 	'''
 	This function generates tabulated potential - cagepot.dat
 	'''
-	command_cagepot_run = source_code_dir_name + "tabulated_potential/hfc60.x 100 360"
+	command_cagepot_run = execution_file_path + "tabulated_potential/hfc60.x 100 360"
 	system(command_cagepot_run)
 	file_cagepot = "hfc60.pot"
 	call(["mv", "cagepot.out", file_cagepot])
@@ -1361,7 +1361,7 @@ def jobstring_scratch(
 		temperature,
 		numb_bead,
 		final_dir,
-		dir_run_input_pimc,
+		slurm_script_dir,
 		status_cagepot):
 	'''
 	This function creats jobstring for #PBS script
@@ -1376,9 +1376,9 @@ def jobstring_scratch(
 	temperature1 = "%5.3f" % temperature
 	log_file_path = final_dir + "/"
 
-	input_file = dir_run_input_pimc + "/qmc" + \
+	input_file = slurm_script_dir + "/qmc" + \
 		file_name + str(value) + ".input"
-	execution_file = dir_run_input_pimc + "/pimc"
+	execution_file = slurm_script_dir + "/pimc"
 	qmc_input = "qmc" + file_name + str(value) + ".input"
 
 	job_string = """#!/bin/bash
@@ -1411,7 +1411,7 @@ def job_submission(
 		root_dir_run,
 		run_job_root_dir,
 		dir_name_trotter_number,
-		input_dir,
+		input_dir_path,
 		execution_file,
 		rpt_val,
 		ibead,
@@ -1430,14 +1430,14 @@ def job_submission(
 		ent_method,
 		ent_algorithm,
 		output_dir_path,
-		dir_run_input_pimc,
+		slurm_script_dir,
 		cpu_run,
 		particle_a,
 		partition_name,
 		status_cagepot,
 		user_name,
-		output_file_dir,
-		source_code_dir_name,
+		output_file_dir_name,
+		execution_file_path,
 		restart_bool,
 		numb_block_restart,
 		crystal,
@@ -1472,7 +1472,7 @@ def job_submission(
 			return
 
 		if (rotor_type == "LINEAR"):
-			get_rotmat(method, rotor, temperature, numb_bead, source_code_dir_name)
+			get_rotmat(method, rotor, temperature, numb_bead, execution_file_path)
 
 
 		temperature1 = "%8.6f" % temperature
@@ -1483,8 +1483,8 @@ def job_submission(
 				numb_bead1 = numb_bead - 1
 			file_rotdens = rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead1) + ".rot"
-			call(["mv", file_rotdens, dir_run_input_pimc])
-			propagator_path = dir_run_input_pimc
+			call(["mv", file_rotdens, slurm_script_dir])
+			propagator_path = os.path.join(slurm_script_dir, "")
 		else:
 			iodevn = spin_isomer
 			jmax = 70
@@ -1494,39 +1494,38 @@ def job_submission(
 				numb_bead2 = int(numb_bead - 1)
 			if (rotor == "H2O"):
 				if (server_name == "graham"):
-					dir_dens = "/scratch/" + user_name + "/rot-dens-asymmetric-top/" + \
+					dir_dens = os.path.join("/scratch", user_name, "rot-dens-asymmetric-top", \
 						asym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, iodevn, jmax)
+							rotor, temperature1, numb_bead2, iodevn, jmax))
 				if (server_name == "nlogn"):
-					dir_dens = "/work/" + user_name + "/rot-dens-asymmetric-top/" + \
+					dir_dens = os.path.join("/work", user_name, "rot-dens-asymmetric-top", \
 						asym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, iodevn, jmax)
+							rotor, temperature1, numb_bead2, iodevn, jmax))
 			if (rotor == "CH3F"):
 				if (server_name == "nlogn"):
-					dir_dens = "/work/" + user_name + "/rot-dens-symmetric-top/" + \
+					dir_dens = os.path.join("/work", user_name, "rot-dens-symmetric-top", \
 						sym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, 3, jmax)
+							rotor, temperature1, numb_bead2, 3, jmax))
 				if (server_name == "graham"):
-					dir_dens = "/scratch/" + user_name + "/rot-dens-symmetric-top/" + \
+					dir_dens = os.path.join("/scratch", user_name, "rot-dens-symmetric-top", \
 						sym.GetDirNameSubmission(
-							rotor, temperature1, numb_bead2, 3, jmax)
-			file_rotdens = "/" + rotor + "_T" + \
+							rotor, temperature1, numb_bead2, 3, jmax))
+			file_rotdens = rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead2)
-			file_rotdens_mod = "/" + rotor + "_T" + \
+			file_rotdens_mod = rotor + "_T" + \
 				str(temperature1) + "t" + str(numb_bead)
 			if (os.path.isfile(dir_dens + file_rotdens_mod + ".rho") == False):
-				call(["cp", dir_dens + file_rotdens + ".rho",
-					  dir_dens + file_rotdens_mod + ".rho"])
-				call(["cp", dir_dens + file_rotdens + ".eng",
-					  dir_dens + file_rotdens_mod + ".eng"])
-				call(["cp", dir_dens + file_rotdens + ".esq",
-					  dir_dens + file_rotdens_mod + ".esq"])
-			propagator_path = dir_dens
-			call(["cp", "initial_euler_angles_and_com.txt", dir_run_input_pimc])
+				call(["cp", os.path.join(dir_dens, file_rotdens + ".rho"),
+					  os.path.join(dir_dens, file_rotdens_mod + ".rho")])
+				call(["cp", os.path.join(dir_dens, file_rotdens + ".eng"),
+					  os.path.join(dir_dens, file_rotdens_mod + ".eng")])
+				call(["cp", os.path.join(dir_dens, file_rotdens + ".esq"),
+					  os.path.join(dir_dens, file_rotdens_mod + ".esq")])
+			propagator_path = os.path.join(dir_dens, "")
+			call(["cp", "initial_euler_angles_and_com.txt", slurm_script_dir])
 
 		if (crystal):
-			call(["cp", "LatticeConfig.xyz", dir_run_input_pimc])
-		whoami()
+			call(["cp", "LatticeConfig.xyz", slurm_script_dir])
 	else:
 		os.chdir(output_dir_path)
 
@@ -1537,9 +1536,9 @@ def job_submission(
 			print("Error message")
 			print("")
 			print("")
-			print_message = output_dir_path + dir_name_trotter_number + " The directory is not there.\n You need to submit the job first."
+			print_message = os.path.join(output_dir_path, dir_name_trotter_number) + " The directory is not there.\n You need to submit the job first."
 			print(print_message)
-			os.chdir(input_dir)
+			os.chdir(input_dir_path)
 			return
 
 		#
@@ -1556,17 +1555,17 @@ def job_submission(
 			if ((numb_block - last_index) <= 0):
 				print(output_dir_path + dir_name_trotter_number)
 				print(" The job was finished. You do not need to resubmit it.")
-				os.chdir(input_dir)
+				os.chdir(input_dir_path)
 				return
 
 		#
-		pimc_log_file = os.path.join(dir_run_input_pimc, job_name)
+		pimc_log_file = os.path.join(slurm_script_dir, job_name)
 
 		if "slurmstepd" not in open(pimc_log_file).read():
 			if "real" not in open(pimc_log_file).read():
 				print_message = output_dir_path + dir_name_trotter_number + " The job is in progress."
 				print(print_message)
-				os.chdir(input_dir)
+				os.chdir(input_dir_path)
 				return
 
 		pimc_log_file_read = open(pimc_log_file, 'r')
@@ -1574,11 +1573,11 @@ def job_submission(
 		slurm_status=line[0]
 		pimc_log_file_read.close()
 		if ((slurm_status == "Running") or (slurm_status == "Pending")):
-			os.chdir(input_dir)
+			os.chdir(input_dir_path)
 			return
 
 		#
-		os.chdir(input_dir)
+		os.chdir(input_dir_path)
 
 		results_dir_path=os.path.join(output_dir_path, dir_name_trotter_number, "results", "")
 		if os.path.isfile(os.path.join(results_dir_path, "output.eng")):
@@ -1611,7 +1610,7 @@ def job_submission(
 			numb_bead2 = int(numb_bead)
 		else:
 			numb_bead2 = int(numb_bead - 1)
-		propagator_path = dir_run_input_pimc
+		propagator_path = slurm_script_dir
 		if (rotor_type != "LINEAR"):
 			iodevn = spin_isomer
 			jmax = 66
@@ -1646,8 +1645,6 @@ def job_submission(
 					  os.path.join(dir_dens, file_rotdens_mod + ".esq")])
 			propagator_path = dir_dens
 
-	whoami()
-	exit()
 	# For qmc.imput
 	get_input_file(
 		method,
@@ -1678,8 +1675,8 @@ def job_submission(
 		level_impurity)
 
 	input_file = "qmc_trotter_number" + str(numb_bead) + ".input"
-	call(["mv", "qmc.input", dir_run_input_pimc + "/" + input_file])
-	execution_bead_dir_name_path = run_job_root_dir + dir_name_trotter_number
+	call(["mv", "qmc.input", os.path.join(slurm_script_dir, input_file)])
+	execution_bead_dir_name_path = os.path.join(run_job_root_dir, dir_name_trotter_number)
 
 	# job submission
 	fname = 'job-for-P' + str(numb_bead)
@@ -1696,8 +1693,8 @@ def job_submission(
 					temperature,
 					numb_bead,
 					final_dir_in_work,
-					dir_run_input_pimc,
-					input_dir,
+					slurm_script_dir,
+					input_dir_path,
 					restart_bool,
 					run_job_root_dir,
 					status_cagepot,
@@ -1714,9 +1711,9 @@ def job_submission(
 					temperature,
 					numb_bead,
 					final_dir_in_work,
-					dir_run_input_pimc,
+					slurm_script_dir,
 					user_name,
-					output_file_dir,
+					output_file_dir_name,
 					restart_bool,
 					run_job_root_dir,
 					status_cagepot,
@@ -1734,9 +1731,9 @@ def job_submission(
 				temperature,
 				numb_bead,
 				final_dir_in_work,
-				dir_run_input_pimc,
+				slurm_script_dir,
 				user_name,
-				output_file_dir,
+				output_file_dir_name,
 				restart_bool,
 				run_job_root_dir,
 				status_cagepot,
@@ -1744,12 +1741,11 @@ def job_submission(
 				numb_block))
 
 	fwrite.close()
-	call(["mv", fname, dir_run_input_pimc])
-	os.chdir(dir_run_input_pimc)
+	call(["mv", fname, slurm_script_dir])
+	os.chdir(slurm_script_dir)
 
 	if (cpu_run == "CPU"):
 		call(["chmod", "755", fname])
-		#command_pimc_run = "./"+fname + ">"+ final_dir_in_work+"/outpimc"+str(numb_bead)+" & "
 		command_pimc_run = "./" + fname + ">outpimc" + str(numb_bead) + " & "
 		print(command_pimc_run)
 		system(command_pimc_run)
@@ -1761,11 +1757,9 @@ def job_submission(
 	else:
 		call(["chmod", "+x", fname])
 		os.system("./" + fname + " &" )
-	print("")
-	print("***************** Successfully submitted ***************")
-	print("")
+	print("\n" + "The job is submitted.".center(80) + "\n")
 
-	os.chdir(input_dir)
+	os.chdir(input_dir_path)
 
 
 def jobstring_scratch_cpu(
@@ -1777,8 +1771,8 @@ def jobstring_scratch_cpu(
 		temperature,
 		numb_bead,
 		final_dir,
-		dir_run_input_pimc,
-		input_dir,
+		slurm_script_dir,
+		input_dir_path,
 		restart_bool,
 		run_job_root_dir,
 		status_cagepot,
@@ -1789,12 +1783,12 @@ def jobstring_scratch_cpu(
 	omp_thread = str(thread)
 	output_dir = run_dir + "/results"
 	temperature1 = "%5.3f" % temperature
-	file_rotdens = dir_run_input_pimc + "/" + molecule + \
+	file_rotdens = slurm_script_dir + "/" + molecule + \
 		"_T" + str(temperature1) + "t" + str(numb_bead) + ".rot"
 
-	input_file = dir_run_input_pimc + "/qmc" + \
+	input_file = slurm_script_dir + "/qmc" + \
 		file_name + str(value) + ".input"
-	execution_file = dir_run_input_pimc + "/pimc"
+	execution_file = slurm_script_dir + "/pimc"
 	qmc_input = "qmc" + file_name + str(value) + ".input"
 
 	job_string = """#!/bin/bash
@@ -1809,7 +1803,7 @@ cp %s qmc.input
 cp %s %s
 ./pimc
 mv %s /work/tapas/linear_rotors
-""" % (omp_thread, run_dir, output_dir, input_dir, input_file, run_dir, file_rotdens, run_dir, run_dir, qmc_input, execution_file, run_dir, run_dir)
+""" % (omp_thread, run_dir, output_dir, input_dir_path, input_file, run_dir, file_rotdens, run_dir, run_dir, qmc_input, execution_file, run_dir, run_dir)
 	return job_string
 
 
@@ -1823,9 +1817,9 @@ def job_string_sbatch_moribs(
 		temperature,
 		numb_bead,
 		final_dir_in_work,
-		dir_run_input_pimc,
+		slurm_script_dir,
 		user_name,
-		output_file_dir,
+		output_file_dir_name,
 		restart_bool,
 		run_job_root_dir,
 		status_cagepot,
@@ -1870,17 +1864,17 @@ def job_string_sbatch_moribs(
 	omp_thread = str(thread)
 	output_dir = os.path.join(execution_bead_dir_name_path, "results")
 	temperature1 = "%8.6f" % temperature
-	file_rotdens = os.path.join(dir_run_input_pimc, molecule + \
+	file_rotdens = os.path.join(slurm_script_dir, molecule + \
 		"_T" + str(temperature1) + "t" + str(numb_bead) + ".*")
-	log_file_path = os.path.join(dir_run_input_pimc, job_name)
+	log_file_path = os.path.join(slurm_script_dir, job_name)
 
 	qmc_input = "qmc_trotter_number" + str(numb_bead) + ".input"
-	input_file = os.path.join(dir_run_input_pimc, qmc_input)
-	execution_file = os.path.join(dir_run_input_pimc, "pimc")
-	input_file1 = os.path.join(dir_run_input_pimc, "initial_euler_angles_and_com.txt")
+	input_file = os.path.join(slurm_script_dir, qmc_input)
+	execution_file = os.path.join(slurm_script_dir, "pimc")
+	input_file1 = os.path.join(slurm_script_dir, "initial_euler_angles_and_com.txt")
 
 	if (status_cagepot):
-		cagepot_file = os.path.join(dir_run_input_pimc, "hfc60.pot")
+		cagepot_file = os.path.join(slurm_script_dir, "hfc60.pot")
 		cagepot_cp = "cp " + cagepot_file + " " + execution_bead_dir_name_path
 	else:
 		cagepot_cp = ""
@@ -2146,7 +2140,7 @@ class GetAnalysisFileName:
 		self.preskip = preskip1
 		self.postskip = postskip1
 		self.extra_file_name = extra_file_name1
-		self.input_dir = input_dir1
+		self.input_dir_path = input_dir1
 		self.particle_a = particle_a1
 
 		if (self.method == "ENT"):
@@ -2212,9 +2206,9 @@ class GetAnalysisFileName:
 		file_output8 = front_layer + name_rpt + \
 			name_dipole_moment + name_gfactor + "Entropy-"
 
-		self.save_file_energy = self.input_dir + file_output1 + name_layer1 + ".txt"
-		self.save_file_correlation = self.input_dir + file_output2 + name_layer1 + ".txt"
-		self.SaveEntropy = self.input_dir + file_output8 + name_layer1 + ".txt"
+		self.save_file_energy = self.input_dir_path + file_output1 + name_layer1 + ".txt"
+		self.save_file_correlation = self.input_dir_path + file_output2 + name_layer1 + ".txt"
+		self.SaveEntropy = self.input_dir_path + file_output8 + name_layer1 + ".txt"
 
 		if (method2 == False):
 			if os.path.exists(self.SaveEntropy):
@@ -2233,7 +2227,7 @@ class GetAnalysisFileName:
 			print(file_output1 + name_layer1 + ".txt")
 			print("")
 			print("Final analyzed results are stored in - ")
-			print(self.input_dir)
+			print(self.input_dir_path)
 			print("")
 			print("********************************************************")
 
@@ -2243,10 +2237,10 @@ class GetAnalysisFileName:
 			name_layer1RT += "-Passes" + str(self.numb_pass) + "-System" + str(self.numb_molecule) + str(
 				self.molecule) + add1 + add2 + "-preskip" + str(self.preskip) + "-postskip" + str(self.postskip)
 
-			self.SaveEntropyRT = self.input_dir + file_output8 + name_layer1RT + ".txt"
+			self.SaveEntropyRT = self.input_dir_path + file_output8 + name_layer1RT + ".txt"
 			if (ent_algorithm != "WR"):
 				# print(self.SaveEntropyRT)
-				print(self.input_dir)
+				print(self.input_dir_path)
 				print("")
 				print("Final results - Entropy vs " + str(self.variable_name))
 				print(self.SaveEntropy)
@@ -2329,7 +2323,7 @@ def get_dmrg_result(
 	rotor_name,
 	run_job_root_dir,
 	job_execution_dir,
-	input_dir,
+	input_dir_path,
 	source_code_dir,
 	numb_rotor,
 	rfactor,
@@ -2347,9 +2341,9 @@ def get_dmrg_result(
 		print("")
 		print_message = "Remove " + str(run_job_root_dir) + str(job_execution_dir)
 		print(print_message)
-		os.chdir(input_dir)
+		os.chdir(input_dir_path)
 		return
-	os.chdir(input_dir)
+	os.chdir(input_dir_path)
 
 	job_execution_dir_path = os.path.join(run_job_root_dir, job_execution_dir)
 	if not os.path.exists(job_execution_dir_path):
@@ -2383,7 +2377,7 @@ def get_dmrg_result(
 	print("***************** Successfully submitted ***************")
 	print("")
 
-	os.chdir(input_dir)
+	os.chdir(input_dir_path)
 
 
 def get_job_submission_script(
