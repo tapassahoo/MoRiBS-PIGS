@@ -12,21 +12,21 @@ module_path = module_path.replace('__init__.py', '')
 # User needs to modify once
 submission_root_dir_name = "linear-rotors"
 # /home/tapas/MoRiBS-PIGS/examples/scripts
-"""
 dir_moribs = '""'
 plot_dir_path = '""'
-"""
 
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
+"""
 dir_moribs = '"academic-project/"'
 plot_dir_path = '"academic-project/outputs/"'
+"""
 
 extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "submission"
-#job_type = "analysis"
+#job_type = "submission"
+job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
@@ -36,8 +36,8 @@ spin_isomer = int(-1)
 parameter_name = "beta"
 parameter_value = 0.2
 
-numb_molecule=12
-numb_block=10
+numb_molecule=9
+numb_block=20000
 numb_pass=200
 numb_preskip=0
 
@@ -47,7 +47,7 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(5.0, 5.01, 0.2, dtype=float)
+	rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):

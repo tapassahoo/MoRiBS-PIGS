@@ -546,13 +546,13 @@ for particle_a in particle_a_list:
 	if (status == "analysis") and (method != "ENT"):
 		analyzed_energy_file.close()
 		#analyzed_correlation_file.close()
+		print("\n" + "*"*80 + "\n")
 		subprocess.call(["cat", analysis_file_name.save_file_energy])
 		"""
 		print("\n\n")
 		subprocess.call(["cat", analysis_file_name.save_file_correlation])
 		"""
-		print("\n\n")
-		# =========================File Checking===============================#
+		print("\n")
 		SavedFile = analysis_file_name.save_file_energy
 		support.FileCheck(method, bead_list, parameter_name, SavedFile)
 		#SavedFile = analysis_file_name.save_file_correlation

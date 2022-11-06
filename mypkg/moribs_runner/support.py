@@ -226,9 +226,7 @@ def fmt_energy_data(method, parameter_name):
 		variable_name = "beta"
 	unit = "(1/K)"
 
-	print("")
-	output = "# The units of all kinds of energies are in Kelvin."
-	output += "\n"
+	output = "# All kinds of energy are measured in units of Kelvin. \n" 
 	output += "# "
 	if (method == "PIMC"):
 		output += '{blocks:^10}{beads:^10}{var:^10}{rot:^16}{pot:^16}{tot:^16}{rotsq:^16}{cv:^16}{er1:^12}{er2:^12}{er3:^12}{er4:^12}{er5:^12}'.format(
@@ -2207,17 +2205,10 @@ class GetAnalysisFileName:
 				os.remove(self.save_file_correlation)
 
 		if (self.method != "ENT"):
-			print("")
-			print("")
-			print("****************** Important message *******************")
-			print("")
-			print(f'Name of the file where the potential and the total energies computed for several {variable_name} values are stored are given below:')
-			print(file_output1 + name_layer1 + ".txt")
-			print("")
-			print("Final analyzed results are stored in - ")
-			print(self.input_dir_path)
-			print("")
-			print("********************************************************")
+			print(" Important message ".center(80, "*") + "\n")
+			print(f'The name of the file where the estimated potential and total energies are reported at several {variable_name} values is')
+			print(os.path.join(self.input_dir_path, file_output1 + name_layer1 + ".txt") + "\n")
+			print("*"*80)
 
 		if (self.method == "ENT"):
 			name_layer1RT = "vs-" + str(self.variable_name) + "-fixed-" + self.parameter_name + str(
