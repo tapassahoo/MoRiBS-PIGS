@@ -398,18 +398,16 @@ for particle_a in particle_a_list:
 			analyzed_energy_file.write(
 				support.fmt_energy_data(
 					method, parameter_name))
-			"""
-			analyzed_correlation_file = open(analysis_file_name.save_file_correlation, "a")
-			analyzed_correlation_file.write(support.fmtAverageOrderParam(status, parameter_name))
-			"""
+			analyzed_order_parameter_file = open(analysis_file_name.save_file_order_parameter, "a")
+			analyzed_order_parameter_file.write(support.fmt_order_parameter(method, parameter_name))
 
-		'''
+		"""
 		if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 			analyzed_entropy_file = open(analysis_file_name.SaveEntropy, "a")
 			analyzed_entropy_file.write(
 				support.fmtAverageEntropy(
 					status, parameter_name, ent_method))
-		'''
+		"""
 
 	if (method == "ENT"):
 		numb_molecule = 2 * numb_molecule1
@@ -527,9 +525,8 @@ for particle_a in particle_a_list:
 								preskip,
 								postskip,
 								numb_block))
-						'''
-						analyzed_correlation_file.write(
-							support.GetAverageOrderParam(
+						analyzed_order_parameter_file.write(
+							support.get_average_order_parameter(
 								method,
 								numb_molecule,
 								numb_bead,
@@ -539,24 +536,20 @@ for particle_a in particle_a_list:
 								preskip,
 								postskip,
 								numb_block))
-						'''
 				except BaseException:
 					pass
 
 	if (status == "analysis") and (method != "ENT"):
 		analyzed_energy_file.close()
-		#analyzed_correlation_file.close()
+		analyzed_order_parameter_file.close()
 		print("\n" + "*"*80 + "\n")
 		subprocess.call(["cat", analysis_file_name.save_file_energy])
-		"""
 		print("\n\n")
-		subprocess.call(["cat", analysis_file_name.save_file_correlation])
-		"""
+		print("\n" + "*"*80 + "\n")
+		subprocess.call(["cat", analysis_file_name.save_file_order_parameter])
 		print("\n")
-		SavedFile = analysis_file_name.save_file_energy
-		support.FileCheck(method, bead_list, parameter_name, SavedFile)
-		#SavedFile = analysis_file_name.save_file_correlation
-		#support.FileCheck(method, bead_list, parameter_name, SavedFile)
+		support.FileCheck(method, bead_list, parameter_name, analysis_file_name.save_file_energy)
+		support.FileCheck(method, bead_list, parameter_name, analysis_file_name.save_file_order_parameter)
 
 	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 		analyzed_entropy_file.close()
@@ -565,7 +558,7 @@ for particle_a in particle_a_list:
 		SavedFile = analysis_file_name.SaveEntropy
 		support.FileCheck(method, bead_list, parameter_name, SavedFile)
 
-'''
+"""
 if ((status == "analysis") and ((method == "ENT") and (
 		ent_method == "EXTENDED_ENSMBL") and (ent_algorithm == "WR"))):
 	print("Final Entropy obtained by employing Ratio Trick")
@@ -596,4 +589,4 @@ if ((status == "analysis") and ((method == "ENT") and (
 		impurity,
 		ext_ent)
 	support.GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, parameter_name, rpt_val, gfactor, dipolemoment, parameterName, parameter, numbblocks, numbpass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, output_dir_path, variable, crystal)
-'''
+"""

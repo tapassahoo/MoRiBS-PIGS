@@ -11,7 +11,7 @@ import mypkg.symrho_runner.support as sym
 def whoami():
 	print("\n")
 	print ('*'*80)
-	print("\nATTENTION: Please implement os.path.join() function.\n")
+	print("\nATTENTION: Check the expressions of the order parameters.\n")
 	print("%s/%s%s" %("The function is \n" + sys._getframe(1).f_code.co_filename, sys._getframe(1).f_code.co_name, "\nand the line number is " + str(sys._getframe(1).f_lineno)))
 	print("")
 	print ('*'*80)
@@ -135,91 +135,36 @@ def replace(string_old, string_new, file1, file2):
 	f2.close()
 
 
-def beads(tau, beta):
-	'''
-	This function determins number of beads
-	'''
-	numb_bead1 = beta / tau + 1
-	numb_bead2 = int(round(numb_bead1, 0))
-	if (numb_bead2 % 2 == 0):
-		numb_bead2 = numb_bead2 + 1
-	return numb_bead2
+def fmt_order_parameter(method, parameter_name):
+	"""
+	@description - This function produces formatted output.
+	"""
+	if (parameter_name == "beta"):
+		variable_name = "tau"
+	if (parameter_name == "tau"):
+		variable_name = "beta"
+	unit = "(1/K)"
 
-def rename_file_name(method, final_dir_in_work, numb_molecule, numb_bead):
-
-	if (method == "ENT"):
-		generic_files = ["output.rden", "output.xyz"]
-		file_old = final_dir_in_work + "/results/output.rden_old"
-	else:
-		generic_files = ["output.eng", "output.xyz"]
-		file_old = final_dir_in_work + "/results/output.eng_old"
-
-	flag = False
-	if (os.path.isfile(final_dir_in_work + "/results/" + generic_files[0])):
-		flag = True
-		if (os.path.isfile(file_old)):
-			for filecat in generic_files:
-				if (filecat != "output.xyz"):
-					col_data_new = np.genfromtxt(
-						final_dir_in_work + "/results/" + filecat)
-					index = int(col_data_new[0, 0])
-					col_data_old = np.genfromtxt(
-						final_dir_in_work + "/results/" + filecat + "_old")
-					merged_data = np.concatenate(
-						(col_data_old[:index - 1], col_data_new), axis=0)
-
-					if (filecat == "output.eng"):
-						np.savetxt(
-							final_dir_in_work +
-							"/results/" +
-							filecat +
-							"_old",
-							merged_data,
-							fmt='%d	%.6e	%.6e	%.6e	%.6e')
-					else:
-						np.savetxt(
-							final_dir_in_work +
-							"/results/" +
-							filecat +
-							"_old",
-							merged_data,
-							fmt='%.6e',
-							delimiter='	')
-
-				if (filecat == "output.xyz"):
-					if "H2O1" in open(
-							final_dir_in_work + "/results/" + filecat).read():
-						rmstr = int(numb_molecule * numb_bead + 3)
-						file_temp = final_dir_in_work + "/results/" + filecat + "_temp"
-						cmd1 = "tail -n +" + \
-							str(rmstr) + " " + final_dir_in_work + \
-							"/results/" + filecat + ">" + file_temp
-						os.system(cmd1)
-						col_data_new = np.genfromtxt(file_temp)
-						call(["rm", file_temp])
-					else:
-						col_data_new = np.genfromtxt(
-							final_dir_in_work + "/results/" + filecat)
-					index = int(col_data_new[0, 0])
-					col_data_old = np.genfromtxt(
-						final_dir_in_work + "/results/" + filecat + "_old")
-					merged_data = np.concatenate(
-						(col_data_old[:index - 1], col_data_new), axis=0)
-					np.savetxt(final_dir_in_work + "/results/" + filecat +
-							   "_old", merged_data, fmt='%.6e', delimiter='	')
-
-				call(["rm", final_dir_in_work + "/results/" + filecat])
-		else:
-			for filemv in generic_files:
-				call(["mv", final_dir_in_work + "/results/" + filemv,
-					  final_dir_in_work + "/results/" + filemv + "_old"])
-	return flag
+	output = "# "
+	output += "{blocks:^10}{beads:^10}{var:^10}{eiz:^12}{eiejz:^12}{er1:^12}{er2:^12}".format(
+		blocks="nBlocks",
+		beads="nBeads",
+		var=variable_name +
+		" invK",
+		eiz="<eiz>",
+		eiejz="<eiejz>",
+		er1="Err-eiz",
+		er2="Err-eiejz")
+	output += "\n"
+	output += '{0:=<80}'.format('#')
+	output += "\n"
+	return output
 
 
 def fmt_energy_data(method, parameter_name):
-	'''
-	This function produces formatted output.
-	'''
+	"""
+	@description - This function produces formatted output.
+	"""
 	if (parameter_name == "beta"):
 		variable_name = "tau"
 	if (parameter_name == "tau"):
@@ -294,10 +239,16 @@ def get_average_energy(
 	"""
 	It provides the block-averaged energies in Kelvin.
 	"""
-	if (parameter_name == "beta"):
-		variable_value = parameter_value/(numb_bead-1)
-	if (parameter_name == "tau"):
-		variable_value = parameter_value*(numb_bead-1)
+	if (method != "PIMC"):
+		if (parameter_name == "beta"):
+			variable_value = parameter_value/(numb_bead-1)
+		if (parameter_name == "tau"):
+			variable_value = parameter_value*(numb_bead-1)
+	else:
+		if (parameter_name == "beta"):
+			variable_value = parameter_value/numb_bead
+		if (parameter_name == "tau"):
+			variable_value = parameter_value*numb_bead
 
 
 	if (os.path.isdir(final_dir_in_work)):
@@ -424,242 +375,146 @@ def get_average_energy(
 	return output
 
 
-def fmtAverageOrderParam(status, variable):
-	'''
-	This function gives us the output
-	'''
-	if variable == "rpt_val":
-		unit = "(Angstrom)"
-	else:
-		unit = "(1/K)"
-
-	if status == "analysis":
-		output = "# "
-		output += '{blocks:^10}{beads:^10}{var:^10}{eiz:^12}{eiejz:^12}{er1:^12}{er2:^12}'.format(
-			blocks='nBlocks',
-			beads='nBeads',
-			var=variable +
-			' invK',
-			eiz='<eiz>',
-			eiejz='<eiejz>',
-			er1='Err-eiz',
-			er2='Err-eiejz')
-		output += "\n"
-		output += '{0:=<80}'.format('#')
-		output += "\n"
-		return output
-
-
-def GetAverageOrderParam(
+def get_average_order_parameter(
 		method,
 		numb_molecule,
 		numb_bead,
-		variable,
+		parameter_name,
+		parameter_value,
 		final_dir_in_work,
 		preskip,
 		postskip,
 		numb_block):
-	'''
+	"""
 	See PRL 118, 027402 (2017)
-	'''
-	if (method != 'PIMC'):
+	"""
+	if (method != "PIMC"):
+		if (parameter_name == "beta"):
+			variable_value = parameter_value/(numb_bead-1)
+		if (parameter_name == "tau"):
+			variable_value = parameter_value*(numb_bead-1)
 		axis_index = {"cost": 0, "phi": 1, "chi": 2}
 		axis_read = "cost"
 		ndofs = 3
-		beads_pos = int((numb_bead - 1) / 2)
-		collist = [0]
+		middle_bead = int((numb_bead - 1) / 2)
+		column_index_list = []
 		for i in range(numb_molecule):
-			ncol1 = beads_pos + i * numb_bead
-			ncol = axis_index[axis_read] + ncol1 * ndofs
+			ncol_temp = middle_bead + i * numb_bead
+			ncol = axis_index[axis_read] + ncol_temp * ndofs
 			ncol = ncol + 1
-			collist.append(ncol)
-			#print(str(ncol)+'th column')
-		col = tuple(collist)
+			column_index_list.append(ncol)
+			print("The index of the column associated with the z-axis of the middle bead of the " + str(i) + "th-rotor:".ljust(10), str(ncol))
+		print("*"*80)
+		column_index_tuple = tuple(column_index_list)
+	else:
+		if (parameter_name == "beta"):
+			variable_value = parameter_value/numb_bead
+		if (parameter_name == "tau"):
+			variable_value = parameter_value*numb_bead
 
-		if (os.path.isdir(final_dir_in_work)):
-			file_old = final_dir_in_work + "/results/output.xyz_old"
-			if (os.path.isfile(file_old)):
-				file_new = final_dir_in_work + "/results/output.xyz"
-				if (os.path.isfile(file_new)):
-					print(final_dir_in_work + " -- Restarted data")
-					if "H2O1" in open(file_new).read():
-						file_temp = final_dir_in_work + "/results/output_temp.xyz"
-						rmstr = int(numb_molecule * numb_bead + 3)
-						cmd1 = "tail -n +" + str(rmstr) + \
-							" " + file_new + ">" + file_temp
-						os.system(cmd1)
-						col_data_new = np.genfromtxt(file_temp, usecols=col)
-						call(["rm", file_temp])
-					else:
-						col_data_new = np.genfromtxt(file_new, usecols=col)
+	if (os.path.isdir(final_dir_in_work)):
+		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
+		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
+		if (len(list_xyz_files_old_convention)>0):
+			print(list_xyz_files_old_convention)
+			for suffix, file_name in enumerate(list_xyz_files_old_convention):
+				if os.path.exists(file_name):
+					if not is_non_zero_file(file_name):
+						os.remove(file_name)
+						print(file_name + " an empty file and it is removed.")
+				elif not file_name:
+					print(file_name + " is not present.")
+				file_name_temp = file_name.split('_')[0]
+				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
+				check_file_exist_and_rename(file_name.replace(".xyz_",".xyz_"),append_id(file_name_temp,suffix))
+
+
+		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
+		if (len(list_xyz_files_new_convention)>0):
+			print(list_xyz_files_new_convention)
+			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
+			for suffix in range(len(list_xyz_files_new_convention)):
+				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".xyz")
+				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix+1) + ".xyz")
+				if not os.path.exists(file_new):
+					if os.path.exists(last_file):
+						col_data_new = np.genfromtxt(last_file, usecols=column_index_tuple)
+						index = int(col_data_new[0, 0])
+						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+						aa = col_data_new[:, 0]
+						final_data_set = marged_data[preskip:(int(aa[-1]) - postskip), :]
+					else: 
+						final_data_set = np.genfromtxt(file_old, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
+				else:
+					col_data_new = np.genfromtxt(file_new, usecols=column_index_tuple)
 					index = int(col_data_new[0, 0])
-					col_data_old = np.genfromtxt(file_old, usecols=col)
-					marged_data = np.concatenate(
-						(col_data_old[:index - 1], col_data_new), axis=0)
-					aa = col_data_new[:, 0]
-					final_data_set = marged_data[preskip:(
-						int(aa[-1]) - postskip), :]
-				else:
-					final_data_set = np.genfromtxt(
-						file_old, usecols=col, skip_header=preskip, skip_footer=postskip)
+					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+		else:
+			# if only output.xyz exists.
+			if is_non_zero_file(last_file):
+				final_data_set = np.genfromtxt(last_file, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
 			else:
-				final_data_set = np.genfromtxt(
-					final_dir_in_work +
-					"/results/output.xyz",
-					usecols=col,
-					skip_header=preskip,
-					skip_footer=postskip)
+				print(last_file + " is not present.")
+				exit()
+	else:
+		print(final_dir_in_work + " does not exist.")
+		exit()
 
-	ncol_block = len(final_data_set[:, 0])
-	if (int(ncol_block) != numb_block - (preskip + postskip)):
-		print(ncol_block)
-		print(final_dir_in_work)
 
-	binary_exponent = int(math.log(ncol_block) / math.log(2))
-	trunc = int(ncol_block - 2**binary_exponent)
-	raw_data = np.delete(final_data_set, 0, 1)
+	if (method != "PIMC"):
+		ncol_block = len(final_data_set[:, 0])
+		if (int(ncol_block) != numb_block - (preskip + postskip)):
+			print(ncol_block)
+			print(final_dir_in_work)
 
-	if (numb_molecule == 2):
-		raw_data1 = np.absolute(raw_data)
-		eiz = np.sum(raw_data1[trunc:, :], axis=1) / numb_molecule
-	if (numb_molecule == 11):
-		raw_data1 = np.absolute(raw_data)
-		eiz = np.sum(raw_data1[trunc:, 2:numb_molecule - 3],
-					 axis=1) / len([i for i in range(2, numb_molecule - 2)])
-	mean_eiz = np.mean(eiz)
-	error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
+		binary_exponent = int(math.log(ncol_block) / math.log(2))
+		trunc = int(ncol_block - 2**binary_exponent)
 
-	if (numb_molecule == 2):
-		paireiej = [i for i in range(numb_molecule - 1)]
-	if (numb_molecule == 11):
-		paireiej = [i for i in range(2, numb_molecule - 3)]
-	norm_eiejz = len(paireiej)
-	eiejz = np.zeros(ncol_block - trunc, dtype=float)
-	for i in paireiej:
-		eiejz += np.multiply(raw_data[trunc:, i],
-							 raw_data[trunc:, i + 1]) / norm_eiejz
-	mean_eiejz = np.mean(eiejz)
-	error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
+		edge_effect=False
+		if not edge_effect:
+			raw_data = np.absolute(final_data_set)
+			eiz = np.sum(raw_data[trunc:, :], axis=1) / numb_molecule
+			mean_eiz = np.mean(eiz)
+			error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
 
-	output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
-		blocks=ncol_block, beads=numb_bead, var=variable, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
-	output += "\n"
+			paireiej = [i for i in range(numb_molecule - 1)]
+			norm_eiejz = len(paireiej)
+			eiejz = np.zeros(ncol_block - trunc, dtype=float)
+			for i in paireiej:
+				eiejz += np.multiply(final_data_set[trunc:, i],
+								 final_data_set[trunc:, i + 1]) / norm_eiejz
+			mean_eiejz = np.mean(eiejz)
+			error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
+
+		"""
+		if (numb_molecule == 2):
+			raw_data1 = np.absolute(raw_data)
+			eiz = np.sum(raw_data1[trunc:, :], axis=1) / numb_molecule
+		if (numb_molecule == 9):
+			raw_data1 = np.absolute(raw_data)
+			eiz = np.sum(raw_data1[trunc:, 2:numb_molecule - 3],
+						 axis=1) / len([i for i in range(2, numb_molecule - 2)])
+		mean_eiz = np.mean(eiz)
+		error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
+
+		if (numb_molecule == 2):
+			paireiej = [i for i in range(numb_molecule - 1)]
+		if (numb_molecule == 11):
+			paireiej = [i for i in range(2, numb_molecule - 3)]
+		norm_eiejz = len(paireiej)
+		eiejz = np.zeros(ncol_block - trunc, dtype=float)
+		for i in paireiej:
+			eiejz += np.multiply(raw_data[trunc:, i],
+								 raw_data[trunc:, i + 1]) / norm_eiejz
+		mean_eiejz = np.mean(eiejz)
+		error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
+		"""
+
+		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
+			blocks=ncol_block, beads=numb_bead, var=variable_value, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
+		output += "\n"
+		whoami()
 	return output
-
-
-'''
-def GetAverageOrderParam(method,numb_molecule,numb_bead,variable,final_dir_in_work,preskip,postskip,numb_block):
-		#See PRL 118, 027402 (2017)
-		if (os.path.isdir(final_dir_in_work)):
-				condition = True
-
-				file_old = final_dir_in_work+"/results/outputOrderPara.corr_old"
-				if (os.path.isfile(file_old) == True):
-						file_old_1 = final_dir_in_work+"/results/outputOrderPara.corr_old_1"
-						file_new = final_dir_in_work+"/results/outputOrderPara.corr"
-						if (os.path.isfile(file_old_1) == True):
-								col_data_new = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old_1")
-								index = int(col_data_new[0,0])
-								col_data_old = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old")
-								marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
-
-								col_data_new = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr")
-								index = int(col_data_new[0,0])
-								marged_data  = np.concatenate((marged_data[:index-1], col_data_new), axis=0)
-								aa = col_data_new[:,0]
-								final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
-						elif ((os.path.isfile(file_new) == True) and (os.path.isfile(file_old_1) == False)):
-								print(final_dir_in_work + " -- Restarted data")
-								col_data_new = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr")
-								index = int(col_data_new[0,0])
-								col_data_old = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old")
-								marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
-								aa = col_data_new[:,0]
-								final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
-						elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
-								final_data_set = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr_old", skip_header=preskip, skip_footer=postskip)
-				else:
-						final_data_set = genfromtxt(final_dir_in_work+"/results/outputOrderPara.corr", skip_header=preskip, skip_footer=postskip)
-		if (method != 'PIMC'):
-				if (os.path.isdir(final_dir_in_work)):
-						condition = True
-
-						file_old = final_dir_in_work+"/results/output.xyz_old"
-						if (os.path.isfile(file_old) == True):
-								file_new = final_dir_in_work+"/results/output.xyz"
-								if (os.path.isfile(file_new) == True):
-										print(final_dir_in_work + " -- Restarted data")
-										col_data_new = genfromtxt(final_dir_in_work+"/results/output.xyz")
-										index = int(col_data_new[0,0])
-										col_data_old = genfromtxt(final_dir_in_work+"/results/output.xyz_old")
-										marged_data  = np.concatenate((col_data_old[:index-1], col_data_new), axis=0)
-										aa = col_data_new[:,0]
-										final_data_set = marged_data[preskip:(int(aa[-1])-postskip),:]
-								elif ((os.path.isfile(file_new) == False) and (os.path.isfile(file_old_1) == False)):
-										final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz_old", skip_header=preskip, skip_footer=postskip)
-						else:
-								final_data_set = genfromtxt(final_dir_in_work+"/results/output.xyz", skip_header=preskip, skip_footer=postskip)
-
-
-		axis_index = {"cost":0, "phi":1, "chi":2}
-		axis_read = "cost"
-		ndofs = 3
-		beads_pos = int((numb_bead-1)/2)
-		for i in range(numb_molecule):
-				ncol1 = beads_pos+i*numb_bead
-				ncol = axis_index[axis_read]+ncol1*ndofs
-				ncol = ncol+1
-				#print(str(ncol)+'th column')
-				save_data[i,:] = final_data_set[(preskip+trunc):(nlen-postskip),ncol]
-
-		col_block = final_data_set[:,0]
-		col_eiejx = final_data_set[:,1]
-		col_eiejy = final_data_set[:,2]
-		col_eiejz = final_data_set[:,3]
-		col_eiej  = final_data_set[:,4]
-		col_eix   = final_data_set[:,5]
-		col_eiy   = final_data_set[:,6]
-		col_eiz   = final_data_set[:,7]
-
-		ncol_block = len(col_block)
-		if (int(len(col_block)) != numb_block-(preskip+postskip)):
-				print(len(col_block))
-				print(final_dir_in_work)
-
-		binary_exponent   = int(math.log(len(col_eiz))/math.log(2))
-		trunc		 = int(len(col_eiz)-2**binary_exponent)
-
-		col_eiejx = col_eiejx[trunc:]
-		col_eiejy = col_eiejy[trunc:]
-		col_eiejz = col_eiejz[trunc:]
-		col_eiej = col_eiej[trunc:]
-
-		mean_eiejx = np.mean(col_eiejx)
-		mean_eiejy = np.mean(col_eiejy)
-		mean_eiejz = np.mean(col_eiejz)
-		mean_eiej = np.mean(col_eiej)
-
-		error_eiejx = get_error(mean_eiejx, col_eiejx, binary_exponent-6)
-		error_eiejy = get_error(mean_eiejy, col_eiejy, binary_exponent-6)
-		error_eiejz = get_error(mean_eiejz, col_eiejz, binary_exponent-6)
-		error_eiej = get_error(mean_eiej, col_eiej, binary_exponent-6)
-
-		col_eix = col_eix[trunc:]
-		col_eiy = col_eiy[trunc:]
-		col_eiz = col_eiz[trunc:]
-
-		mean_eix = np.mean(col_eix)
-		mean_eiy = np.mean(col_eiy)
-		mean_eiz = np.mean(col_eiz)
-
-		error_eix = get_error(mean_eix, col_eix, binary_exponent-6)
-		error_eiy = get_error(mean_eiy, col_eiy, binary_exponent-6)
-		error_eiz = get_error(mean_eiz, col_eiz, binary_exponent-6)
-
-		output  = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiejx:^12.6f}{eiejy:^12.6f}{eiejz:^12.6f}{eiej:^12.6f}{eix:^12.6f}{eiy:^12.6f}{eiz:^12.6f}{er1:^12.6f}{er2:^12.6f}{er3:^12.6f}{er4:^12.6f}{er5:^12.6f}{er6:^12.6f}{er7:^12.6f}'.format(blocks=ncol_block,beads=numb_bead, var=variable, eiejx=mean_eiejx, eiejy=mean_eiejy, eiejz=mean_eiejz, eiej=mean_eiej, eix=mean_eix, eiy=mean_eiy, eiz=mean_eiz, er1=error_eiejx, er2=error_eiejy, er3=error_eiejz, er4=error_eiej, er5=error_eix, er6=error_eiy, er7=error_eiz)
-		output  += "\n"
-		return output
-'''
 
 
 def GetAverageEntropy(
@@ -2191,9 +2046,12 @@ class GetAnalysisFileName:
 			name_gfactor + "XandY-component-correlation-function-"
 		file_output8 = front_layer + name_rpt + \
 			name_dipole_moment + name_gfactor + "Entropy-"
+		file_output_order_parameter = front_layer + name_rpt + \
+			name_dipole_moment + name_gfactor + "order-parameter-"
 
 		self.save_file_energy = self.input_dir_path + file_output1 + name_layer1 + ".txt"
 		self.save_file_correlation = self.input_dir_path + file_output2 + name_layer1 + ".txt"
+		self.save_file_order_parameter = self.input_dir_path + file_output_order_parameter + name_layer1 + ".txt"
 		self.SaveEntropy = self.input_dir_path + file_output8 + name_layer1 + ".txt"
 
 		if (method2 == False):
@@ -2203,6 +2061,8 @@ class GetAnalysisFileName:
 				os.remove(self.save_file_energy)
 			if os.path.exists(self.save_file_correlation):
 				os.remove(self.save_file_correlation)
+			if os.path.exists(self.save_file_order_parameter):
+				os.remove(self.save_file_order_parameter)
 
 		if (self.method != "ENT"):
 			print(" Important message ".center(80, "*") + "\n")
