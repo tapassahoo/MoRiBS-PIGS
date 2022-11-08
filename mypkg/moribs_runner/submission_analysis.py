@@ -249,7 +249,7 @@ now = datetime.now() # current date and time
 date_time = now.strftime("%d/%m/%Y, %H:%M:%S")
 print("date and time:".capitalize().ljust(30), date_time, "\n")
 
-debugging=True
+debugging=False
 if debugging:
 	print("user_name: ".ljust(30) + user_name)
 	print("home: ".ljust(30) + home)
@@ -527,6 +527,7 @@ for particle_a in particle_a_list:
 								numb_block))
 						analyzed_order_parameter_file.write(
 							support.get_average_order_parameter(
+								debugging,
 								method,
 								numb_molecule,
 								numb_bead,
@@ -544,19 +545,17 @@ for particle_a in particle_a_list:
 		analyzed_order_parameter_file.close()
 		print("\n" + "*"*80 + "\n")
 		subprocess.call(["cat", analysis_file_name.save_file_energy])
-		print("\n\n")
 		print("\n" + "*"*80 + "\n")
 		subprocess.call(["cat", analysis_file_name.save_file_order_parameter])
-		print("\n")
-		support.FileCheck(method, bead_list, parameter_name, analysis_file_name.save_file_energy)
-		support.FileCheck(method, bead_list, parameter_name, analysis_file_name.save_file_order_parameter)
+		print("\n" + "*"*80 + "\n")
+		support.is_data_exist(analysis_file_name.save_file_energy)
+		support.is_data_exist(analysis_file_name.save_file_order_parameter)
 
 	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 		analyzed_entropy_file.close()
 		subprocess.call(["cat", analysis_file_name.SaveEntropy])
 		print("\n\n")
-		SavedFile = analysis_file_name.SaveEntropy
-		support.FileCheck(method, bead_list, parameter_name, SavedFile)
+		support.is_data_exist(analysis_file_name.SaveEntropy)
 
 """
 if ((status == "analysis") and ((method == "ENT") and (

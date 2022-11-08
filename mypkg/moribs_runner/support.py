@@ -376,6 +376,7 @@ def get_average_energy(
 
 
 def get_average_order_parameter(
+		debugging,
 		method,
 		numb_molecule,
 		numb_bead,
@@ -403,8 +404,10 @@ def get_average_order_parameter(
 			ncol = axis_index[axis_read] + ncol_temp * ndofs
 			ncol = ncol + 1
 			column_index_list.append(ncol)
-			print("The index of the column associated with the z-axis of the middle bead of the " + str(i) + "th-rotor:".ljust(10), str(ncol))
-		print("*"*80)
+			if debugging:
+				print("The index of the column associated with the z-axis of the middle bead of the " + str(i) + "th-rotor:".ljust(10), str(ncol))
+		if debugging:
+			print("*"*80)
 		column_index_tuple = tuple(column_index_list)
 	else:
 		if (parameter_name == "beta"):
@@ -513,7 +516,6 @@ def get_average_order_parameter(
 		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
 			blocks=ncol_block, beads=numb_bead, var=variable_value, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
 		output += "\n"
-		whoami()
 	return output
 
 
@@ -2049,10 +2051,10 @@ class GetAnalysisFileName:
 		file_output_order_parameter = front_layer + name_rpt + \
 			name_dipole_moment + name_gfactor + "order-parameter-"
 
-		self.save_file_energy = self.input_dir_path + file_output1 + name_layer1 + ".txt"
-		self.save_file_correlation = self.input_dir_path + file_output2 + name_layer1 + ".txt"
-		self.save_file_order_parameter = self.input_dir_path + file_output_order_parameter + name_layer1 + ".txt"
-		self.SaveEntropy = self.input_dir_path + file_output8 + name_layer1 + ".txt"
+		self.save_file_energy = os.path.join(self.input_dir_path, file_output1 + name_layer1 + ".txt")
+		self.save_file_correlation = os.path.join(self.input_dir_path, file_output2 + name_layer1 + ".txt")
+		self.save_file_order_parameter = os.path.join(self.input_dir_path, file_output_order_parameter + name_layer1 + ".txt")
+		self.SaveEntropy = os.path.join(self.input_dir_path, file_output8 + name_layer1 + ".txt")
 
 		if (method2 == False):
 			if os.path.exists(self.SaveEntropy):
@@ -2086,25 +2088,10 @@ class GetAnalysisFileName:
 				print("********************************************************")
 
 
-def FileCheck(method, list_nb, variable_name, SavedFile):
-	for i in list_nb:
-		if (method == "PIMC"):
-			if ((i % 2) == 0):
-				bead = i
-			else:
-				bead = i + 1
-		else:
-			if ((i % 2) != 0):
-				bead = i
-			else:
-				bead = i + 1
-
-		string = str(bead)
-		if string in open(SavedFile).read():
-			return
-
-	if string not in open(SavedFile).read():
-		call(["rm", SavedFile])
+def is_data_exist(output_file):
+	lines=[l for l in open(output_file) if not l.startswith('#')]
+	if (len(lines)==0):
+		os.remove(output_file)
 
 
 class UnitConverter:
@@ -2184,11 +2171,6 @@ def get_dmrg_result(
 		return
 	os.chdir(input_dir_path)
 
-	job_execution_dir_path = os.path.join(run_job_root_dir, job_execution_dir)
-	if not os.path.exists(job_execution_dir_path):
-		os.makedirs(job_execution_dir_path)
-
-	cmd_run = "julia " + source_code_dir + "diagonalization.jl -R " + str(rfactor) + " -N " + str(numb_rotor) + " --l-max " + str(l_max) 
 
 	job_name = method+str(rfactor)+"-"+str(numb_rotor)
 	job_submission_file = job_execution_dir_path + "/job-submission-script.sh"
@@ -2319,6 +2301,11 @@ def GetPairDensity(
 		print(commandRun)
 		call(["rm", "outputDensity.txt"])
 		system(commandRun)
+		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
+
+# def GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable):
+	#FileAnalysis = GetAnalysisFileName(method, True, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a)
+#	   GetAverageEntropyRT(maxloop, method, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable)
 		call(["mv", "outputDensity.txt", FileToBeSavedDensity])
 
 # def GetEntropyRT(status, maxloop, method, rotor, translational_move, rotational_move, variable_name, rpt_val, gfactor, dipole_moment, parameter_name, parameter, numb_block, numb_pass, numbmolecules1, molecule, ent_method, preskip, postskip, extra_file_name, final_results_path, particle_a, variable):
