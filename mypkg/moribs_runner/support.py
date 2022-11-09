@@ -1316,7 +1316,7 @@ def job_submission(
 		job_name_temp = "pm" + str(numb_molecule) + "b"
 	if (method == 'ENT'):
 		job_name_temp = "et" + str(numb_molecule) + "a" + str(particle_a) + "b"
-	job_name = job_name_temp + str(numb_bead) + ".log"
+	job_name = job_name_temp + str(numb_bead)
 
 	if not restart_bool:
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
@@ -1386,13 +1386,8 @@ def job_submission(
 
 		#
 		if not os.path.isdir(dir_name_trotter_number):
-			print("")
-			print("")
-			print("Error message")
-			print("")
-			print("")
 			print_message = os.path.join(output_dir_path, dir_name_trotter_number) + " The directory is not there.\n You need to submit the job first."
-			print(print_message)
+			print("ATTENTION: " + print_message)
 			os.chdir(input_dir_path)
 			return
 
@@ -1408,20 +1403,23 @@ def job_submission(
 			ncol = np.genfromtxt(file_check_name)
 			last_index = int(ncol[-1, 0])
 			if ((numb_block - last_index) <= 0):
-				print(output_dir_path + dir_name_trotter_number)
+				print(os.path.join(output_dir_path, dir_name_trotter_number))
 				print(" The job was finished. You do not need to resubmit it.")
 				os.chdir(input_dir_path)
 				return
 
 		#
-		pimc_log_file = os.path.join(slurm_script_dir, job_name)
+		pimc_log_file = os.path.join(slurm_script_dir, job_name + ".log")
+		pimc_err_file = os.path.join(slurm_script_dir, job_name + ".err")
 
 		if "slurmstepd" not in open(pimc_log_file).read():
 			if "real" not in open(pimc_log_file).read():
-				print_message = output_dir_path + dir_name_trotter_number + " The job is in progress."
-				print(print_message)
-				os.chdir(input_dir_path)
-				return
+				if "slurmstepd" not in open(pimc_err_file).read():
+					if "real" not in open(pimc_err_file).read():
+						print_message = os.path.join(output_dir_path, dir_name_trotter_number) + " The job is in progress."
+						print(print_message)
+						os.chdir(input_dir_path)
+						return
 
 		pimc_log_file_read = open(pimc_log_file, 'r')
 		line = pimc_log_file_read.readline()
@@ -1465,7 +1463,7 @@ def job_submission(
 			numb_bead2 = int(numb_bead)
 		else:
 			numb_bead2 = int(numb_bead - 1)
-		propagator_path = slurm_script_dir
+		propagator_path = os.path.join(slurm_script_dir, "")
 		if (rotor_type != "LINEAR"):
 			iodevn = spin_isomer
 			jmax = 66
@@ -1498,7 +1496,7 @@ def job_submission(
 					  os.path.join(dir_dens, file_rotdens_mod + ".eng")])
 				call(["cp", os.path.join(dir_dens, file_rotdens + ".esq"),
 					  os.path.join(dir_dens, file_rotdens_mod + ".esq")])
-			propagator_path = dir_dens
+			propagator_path = os.path.join(dir_dens, "")
 
 	# For qmc.imput
 	get_input_file(
@@ -2173,7 +2171,7 @@ def get_dmrg_result(
 
 
 	job_name = method+str(rfactor)+"-"+str(numb_rotor)
-	job_submission_file = job_execution_dir_path + "/job-submission-script.sh"
+	job_submission_file = os.path.join(job_execution_dir_path, "job-submission-script.sh")
 	fwrite = open(job_submission_file, 'w')
 	fwrite.write(
 		get_job_submission_script(
@@ -2194,9 +2192,7 @@ def get_dmrg_result(
 	else:
 		call(["chmod", "+x", job_submission_file])
 		os.system(job_submission_file + " &" )
-	print("")
-	print("***************** Successfully submitted ***************")
-	print("")
+	print("\n" + " Successfully submitted ".center(80, "*") + "\n")
 
 	os.chdir(input_dir_path)
 
@@ -2218,7 +2214,7 @@ def get_job_submission_script(
 		wall_time = "01-00:00"
 
 	omp_thread = str(thread)
-	log_file_path = job_execution_dir_path + "/" + log_file
+	log_file_path = os.path.join(job_execution_dir_path, log_file)
 
 	if (server_name == "graham"):
 		mv_cmd = " "
@@ -2236,11 +2232,7 @@ def get_job_submission_script(
 		account = ""
 
 
-	print("")
-	print("")
-	print("")
-	print("**************** Important Note ************************")
-	print("")
+	print("\n" + " Important Note ".center(80) + "\n")
 	print("The full path of the directory where the submitted job is running is given below:")
 	print(job_execution_dir_path)
 	print("")
@@ -2249,9 +2241,7 @@ def get_job_submission_script(
 	print("")
 	print("The outputs exist in the below-mentioned directory after the job is executed successfully.")
 	print(final_output_dir)
-	print("")
-	print("********************************************************")
-	print("")
+	print("\n" + "*"*80 + "\n")
 
 	if (server_name == "graham"):
 		job_string = """#!/bin/bash
