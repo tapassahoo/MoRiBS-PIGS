@@ -3,6 +3,7 @@ from subprocess import call
 from os import system
 import numpy as np
 from pathlib import Path
+sys.path.append("../../examples/scripts")
 import get_beads_and_mc_steps as mc
 import mypkg.asymrho_runner.support as asym
 import mypkg.symrho_runner.support as sym
@@ -479,11 +480,11 @@ def get_average_order_parameter(
 			eiz = np.sum(raw_data[trunc:, :], axis=1) / numb_molecule
 			mean_eiz = np.mean(eiz)
 			error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
-
-			paireiej = [i for i in range(numb_molecule - 1)]
-			norm_eiejz = len(paireiej)
+			#
+			pair_eiej = [i for i in range(numb_molecule - 1)]
+			norm_eiejz = len(pair_eiej)
 			eiejz = np.zeros(ncol_block - trunc, dtype=float)
-			for i in paireiej:
+			for i in pair_eiej:
 				eiejz += np.multiply(final_data_set[trunc:, i],
 								 final_data_set[trunc:, i + 1]) / norm_eiejz
 			mean_eiejz = np.mean(eiejz)

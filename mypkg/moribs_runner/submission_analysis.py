@@ -247,7 +247,7 @@ print("*"*80)
 print("\n" + "Developer:".ljust(30) + "Dr. Tapas Sahoo" + "\n")
 now = datetime.now() # current date and time
 date_time = now.strftime("%d/%m/%Y, %H:%M:%S")
-print("date and time:".capitalize().ljust(30), date_time, "\n")
+print("date and time:".capitalize().ljust(29), date_time, "\n")
 
 debugging=False
 if debugging:
