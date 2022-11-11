@@ -397,7 +397,7 @@ def get_average_order_parameter(
 		axis_read = "cost"
 		ndofs = 3
 		middle_bead = int((numb_bead - 1) / 2)
-		column_index_list = []
+		column_index_list = [0]
 		for i in range(numb_molecule):
 			ncol_temp = middle_bead + i * numb_bead
 			ncol = axis_index[axis_read] + ncol_temp * ndofs
@@ -418,7 +418,6 @@ def get_average_order_parameter(
 		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
 		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
 		if (len(list_xyz_files_old_convention)>0):
-			print(list_xyz_files_old_convention)
 			for suffix, file_name in enumerate(list_xyz_files_old_convention):
 				if os.path.exists(file_name):
 					if not is_non_zero_file(file_name):
@@ -432,12 +431,8 @@ def get_average_order_parameter(
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
-		whoami()
-		print(last_file)
-		whoami()
 		if (len(list_xyz_files_new_convention)>0):
-			print(list_xyz_files_new_convention)
-			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), unpack=True, usecols=column_index_tuple)
+			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
 			for suffix in range(len(list_xyz_files_new_convention)):
 				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".xyz")
 				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix+1) + ".xyz")
@@ -450,7 +445,7 @@ def get_average_order_parameter(
 						final_data_set = marged_data[preskip:(int(aa[-1]) - postskip), :]
 					else: 
 						final_data_set = np.genfromtxt(file_old, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
-				else:
+				elif os.path.exists(file_new):
 					col_data_new = np.genfromtxt(file_new, usecols=column_index_tuple)
 					index = int(col_data_new[0, 0])
 					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
@@ -478,7 +473,7 @@ def get_average_order_parameter(
 		edge_effect=False
 		if not edge_effect:
 			raw_data = np.absolute(final_data_set)
-			eiz = np.sum(raw_data[trunc:, :], axis=1) / numb_molecule
+			eiz = np.sum(raw_data[trunc:, 1:], axis=1) / numb_molecule
 			mean_eiz = np.mean(eiz)
 			error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
 			#
@@ -486,8 +481,8 @@ def get_average_order_parameter(
 			norm_eiejz = len(pair_eiej)
 			eiejz = np.zeros(ncol_block - trunc, dtype=float)
 			for i in pair_eiej:
-				eiejz += np.multiply(final_data_set[trunc:, i],
-								 final_data_set[trunc:, i + 1]) / norm_eiejz
+				eiejz += np.multiply(final_data_set[trunc:, i+1],
+								 final_data_set[trunc:, i + 2]) / norm_eiejz
 			mean_eiejz = np.mean(eiejz)
 			error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
 
