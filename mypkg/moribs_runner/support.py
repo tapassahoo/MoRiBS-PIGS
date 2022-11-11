@@ -256,7 +256,6 @@ def get_average_energy(
 		list_eng_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.eng_old*"))
 		list_eng_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].eng"))
 		if (len(list_eng_files_old_convention)>0):
-			print(list_eng_files_old_convention)
 			for suffix, file_name in enumerate(list_eng_files_old_convention):
 				if os.path.exists(file_name):
 					if not is_non_zero_file(file_name):
@@ -266,12 +265,11 @@ def get_average_energy(
 					print(file_name + " is not present.")
 				file_name_temp = file_name.split('_')[0]
 				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
-				check_file_exist_and_rename(file_name.replace(".eng_",".xyz_"),append_id(file_name_temp,suffix))
+				check_file_exist_and_rename(file_name.replace(".eng_", ".eng"),append_id(file_name_temp,suffix))
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.eng")
 		if (len(list_eng_files_new_convention)>0):
-			print(list_eng_files_new_convention)
 			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.eng"))
 			for suffix in range(len(list_eng_files_new_convention)):
 				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".eng")
@@ -430,13 +428,16 @@ def get_average_order_parameter(
 					print(file_name + " is not present.")
 				file_name_temp = file_name.split('_')[0]
 				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
-				check_file_exist_and_rename(file_name.replace(".xyz_",".xyz_"),append_id(file_name_temp,suffix))
+				check_file_exist_and_rename(file_name.replace(".xyz_",".xyz"),append_id(file_name_temp,suffix))
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
+		whoami()
+		print(last_file)
+		whoami()
 		if (len(list_xyz_files_new_convention)>0):
 			print(list_xyz_files_new_convention)
-			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
+			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), unpack=True, usecols=column_index_tuple)
 			for suffix in range(len(list_xyz_files_new_convention)):
 				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".xyz")
 				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix+1) + ".xyz")
