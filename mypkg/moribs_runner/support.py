@@ -24,6 +24,8 @@ def is_non_zero_file(fpath):
 
 def append_id(file_name,count):
 	p = Path(file_name)
+	print(file_name,count)
+	print(Path.joinpath(p.parent, p.stem), p.suffix, count)
 	return "{0}_{2}{1}".format(Path.joinpath(p.parent, p.stem), p.suffix, count)
 
 
@@ -256,7 +258,7 @@ def get_average_energy(
 		list_eng_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.eng_old*"))
 		list_eng_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].eng"))
 		if (len(list_eng_files_old_convention)>0):
-			for suffix, file_name in enumerate(list_eng_files_old_convention):
+			for suffix_count, file_name in enumerate(list_eng_files_old_convention):
 				if os.path.exists(file_name):
 					if not is_non_zero_file(file_name):
 						os.remove(file_name)
@@ -264,16 +266,16 @@ def get_average_energy(
 				elif not file_name:
 					print(file_name + " is not present.")
 				file_name_temp = file_name.split('_')[0]
-				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
-				check_file_exist_and_rename(file_name.replace(".eng_old", ".eng"),append_id(file_name_temp,suffix))
+				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
+				check_file_exist_and_rename(file_name.replace(Path(file_name).suffix, ".eng"),append_id(file_name_temp,suffix_count))
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.eng")
 		if (len(list_eng_files_new_convention)>0):
 			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.eng"))
-			for suffix in range(len(list_eng_files_new_convention)):
-				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".eng")
-				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix+1) + ".eng")
+			for suffix_count in range(len(list_eng_files_new_convention)):
+				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count) + ".eng")
+				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count+1) + ".eng")
 				if not os.path.exists(file_new):
 					if os.path.exists(last_file):
 						col_data_new = np.genfromtxt(last_file)
@@ -297,6 +299,7 @@ def get_average_energy(
 	else:
 		print(final_dir_in_work + " does not exist.")
 		exit()
+
 
 	if (method == "PIMC"):
 		col_block = final_data_set[:, 0]
@@ -418,7 +421,7 @@ def get_average_order_parameter(
 		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
 		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
 		if (len(list_xyz_files_old_convention)>0):
-			for suffix, file_name in enumerate(list_xyz_files_old_convention):
+			for suffix_count, file_name in enumerate(list_xyz_files_old_convention):
 				if os.path.exists(file_name):
 					if not is_non_zero_file(file_name):
 						os.remove(file_name)
@@ -426,16 +429,16 @@ def get_average_order_parameter(
 				elif not file_name:
 					print(file_name + " is not present.")
 				file_name_temp = file_name.split('_')[0]
-				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
-				check_file_exist_and_rename(file_name.replace(".xyz_",".xyz"),append_id(file_name_temp,suffix))
+				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
+				check_file_exist_and_rename(file_name.replace(Path(file_name).suffix,".xyz"),append_id(file_name_temp,suffix_count))
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
 		if (len(list_xyz_files_new_convention)>0):
 			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
-			for suffix in range(len(list_xyz_files_new_convention)):
-				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix) + ".xyz")
-				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix+1) + ".xyz")
+			for suffix_count in range(len(list_xyz_files_new_convention)):
+				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count) + ".xyz")
+				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count+1) + ".xyz")
 				if not os.path.exists(file_new):
 					if os.path.exists(last_file):
 						col_data_new = np.genfromtxt(last_file, usecols=column_index_tuple)
