@@ -1,4 +1,4 @@
-import os
+import os, subprocess
 from subprocess import call
 import numpy as np
 
@@ -61,8 +61,12 @@ if (job_type == "analysis"):
 
 # No need to change the below three lines
 original_file_name = module_path + "submission_analysis.py"
-temp_file_name = "script_submission_analysis-" + submission_root_dir_name + "-temp.py"
-temp_file_name1 = "script_submission_analysis-" + submission_root_dir_name + "-temp1.py"
+if (job_type=="analysis"):
+	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
+	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
+if (job_type=="submission"):
+	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
+	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
 
 for rcom in rlist:
 	support.replace(
@@ -116,4 +120,4 @@ for rcom in rlist:
 
 	print(cmd_run)
 	os.system(cmd_run)
-	call(["rm", temp_file_name])
+	subprocess.call(["rm", temp_file_name])

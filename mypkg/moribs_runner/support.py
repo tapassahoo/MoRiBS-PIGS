@@ -265,7 +265,7 @@ def get_average_energy(
 					print(file_name + " is not present.")
 				file_name_temp = file_name.split('_')[0]
 				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix))
-				check_file_exist_and_rename(file_name.replace(".eng_", ".eng"),append_id(file_name_temp,suffix))
+				check_file_exist_and_rename(file_name.replace(".eng_old", ".eng"),append_id(file_name_temp,suffix))
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.eng")
