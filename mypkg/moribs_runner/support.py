@@ -24,18 +24,17 @@ def is_non_zero_file(fpath):
 
 def append_id(file_name,count):
 	p = Path(file_name)
-	print(file_name,count)
-	print(Path.joinpath(p.parent, p.stem), p.suffix, count)
 	return "{0}_{2}{1}".format(Path.joinpath(p.parent, p.stem), p.suffix, count)
 
 
 def check_file_exist_and_rename(check_file_name,renamed_file_name):
-	is_file_src = os.path.isfile(check_file_name)
-	is_file_dst = os.path.isfile(renamed_file_name)
-	if is_file_src and not is_file_dst:
-		os.rename(check_file_name, renamed_file_name)
-		print("The file be renamed - \n" + check_file_name)
-		print("The renamed file - \n" + renamed_file_name)
+	is_file_src = os.path.exists(check_file_name)
+	is_file_dst = os.path.exists(renamed_file_name)
+	if is_file_src:
+		if not is_file_dst:
+			os.rename(check_file_name, renamed_file_name)
+			print("The file be renamed - \n" + check_file_name)
+			print("The renamed file - \n" + renamed_file_name)
 	else:
 		if not is_file_src:
 			print(check_file_name + " does not exist.")
@@ -263,11 +262,15 @@ def get_average_energy(
 					if not is_non_zero_file(file_name):
 						os.remove(file_name)
 						print(file_name + " an empty file and it is removed.")
-				elif not file_name:
+						break
+					else:
+						file_name_temp = file_name.split('_')[0]
+						check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
+						check_file_exist_and_rename(file_name.replace(Path(file_name).suffix, ".eng"),append_id(file_name_temp,suffix_count))
+
+				elif not os.path.exists(file_name):
 					print(file_name + " is not present.")
-				file_name_temp = file_name.split('_')[0]
-				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
-				check_file_exist_and_rename(file_name.replace(Path(file_name).suffix, ".eng"),append_id(file_name_temp,suffix_count))
+					break
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.eng")
@@ -426,11 +429,14 @@ def get_average_order_parameter(
 					if not is_non_zero_file(file_name):
 						os.remove(file_name)
 						print(file_name + " an empty file and it is removed.")
-				elif not file_name:
+						break
+					else:
+						file_name_temp = file_name.split('_')[0]
+						check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
+						check_file_exist_and_rename(file_name.replace(Path(file_name).suffix,".xyz"),append_id(file_name_temp,suffix_count))
+				elif not os.path.exists(file_name):
 					print(file_name + " is not present.")
-				file_name_temp = file_name.split('_')[0]
-				check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
-				check_file_exist_and_rename(file_name.replace(Path(file_name).suffix,".xyz"),append_id(file_name_temp,suffix_count))
+					break
 
 
 		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
