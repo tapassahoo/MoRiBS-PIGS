@@ -273,6 +273,7 @@ def get_average_energy(
 					break
 
 
+		list_eng_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].eng"))
 		last_file = os.path.join(final_dir_in_work, "results", "output.eng")
 		if (len(list_eng_files_new_convention)>0):
 			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.eng"))
@@ -439,6 +440,7 @@ def get_average_order_parameter(
 					break
 
 
+		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
 		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
 		if (len(list_xyz_files_new_convention)>0):
 			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
