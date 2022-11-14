@@ -317,7 +317,7 @@ def get_average_energy(
 		ncol_block = len(col_block)
 		if (int(len(col_block)) != numb_block - (preskip + postskip)):
 			print(len(col_block))
-			print(final_dir_in_work)
+			print("The path of the directory of the incomplete result is " + final_dir_in_work)
 
 		binary_exponent = int(math.log(len(col_tot)) / math.log(2))
 		trunc = int(len(col_tot) - pow(2,binary_exponent))
@@ -476,7 +476,7 @@ def get_average_order_parameter(
 		ncol_block = len(final_data_set[:, 0])
 		if (int(ncol_block) != numb_block - (preskip + postskip)):
 			print(ncol_block)
-			print(final_dir_in_work)
+			print("The path of the directory of the incomplete result is " + final_dir_in_work)
 
 		binary_exponent = int(math.log(ncol_block) / math.log(2))
 		trunc = int(ncol_block - 2**binary_exponent)
@@ -1420,6 +1420,7 @@ def job_submission(
 		pimc_log_file = os.path.join(slurm_script_dir, job_name + ".log")
 		pimc_err_file = os.path.join(slurm_script_dir, job_name + ".err")
 
+		"""
 		if "slurmstepd" not in open(pimc_log_file).read():
 			if "real" not in open(pimc_log_file).read():
 				if "slurmstepd" not in open(pimc_err_file).read():
@@ -1428,6 +1429,7 @@ def job_submission(
 						print(print_message)
 						os.chdir(input_dir_path)
 						return
+		"""
 
 		pimc_log_file_read = open(pimc_log_file, 'r')
 		line = pimc_log_file_read.readline()
