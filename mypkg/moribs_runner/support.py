@@ -1721,10 +1721,16 @@ def job_string_sbatch_moribs(
 		else: 
 			thread = 1
 			wall_time = "07-00:00"
+	elif ((numb_molecule >= 11) and (numb_molecule <=20)):
+		if (numb_bead < 41):
+			thread = 1
+			wall_time = "03-00:00"
+		else: 
+			thread = 1
+			wall_time = "07-00:00"
 
-
-	job_name = file_name + str(numb_bead)
 	omp_thread = str(thread)
+	job_name = file_name + str(numb_bead)
 	output_dir = os.path.join(execution_bead_dir_name_path, "results")
 	temperature1 = "%8.6f" % temperature
 	file_rotdens = os.path.join(slurm_script_dir, molecule + \
