@@ -285,8 +285,8 @@ def get_average_energy(
 						col_data_new = np.genfromtxt(last_file)
 						index = int(col_data_new[0, 0])
 						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
-						aa = col_data_new[:, 0]
-						final_data_set = marged_data[preskip:(int(aa[-1]) - postskip), :]
+						skip_index = col_data_new[:, 0]
+						final_data_set = marged_data[preskip:(int(skip_index[-1]) - postskip), :]
 					else: 
 						final_data_set = np.genfromtxt(file_old, skip_header=preskip, skip_footer=postskip)
 				else:
@@ -358,9 +358,9 @@ def get_average_energy(
 		col_tot = final_data_set[:, 2]
 
 		ncol_block = len(col_block)
-		if (int(len(col_block)) != numb_block - (preskip + postskip)):
+		if (int(len(col_block)) != (numb_block - (preskip + postskip))):
 			print(len(col_block))
-			print(final_dir_in_work)
+			print("The path of the directory of the incomplete result is " + final_dir_in_work)
 
 		binary_exponent = int(math.log(len(col_tot)) / math.log(2))
 		trunc = int(len(col_tot) - pow(2, binary_exponent))
@@ -452,8 +452,8 @@ def get_average_order_parameter(
 						col_data_new = np.genfromtxt(last_file, usecols=column_index_tuple)
 						index = int(col_data_new[0, 0])
 						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
-						aa = col_data_new[:, 0]
-						final_data_set = marged_data[preskip:(int(aa[-1]) - postskip), :]
+						skip_index = col_data_new[:, 0]
+						final_data_set = marged_data[preskip:(int(skip_index[-1]) - postskip), :]
 					else: 
 						final_data_set = np.genfromtxt(file_old, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
 				elif os.path.exists(file_new):
