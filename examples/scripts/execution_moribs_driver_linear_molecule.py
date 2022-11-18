@@ -36,9 +36,9 @@ spin_isomer = int(-1)
 parameter_name = "beta"
 parameter_value = 0.1
 
-numb_molecule=11
-numb_block=20000
-numb_pass=200
+numb_molecule=12
+numb_block=10
+numb_pass=20
 numb_preskip=0
 
 if (numb_molecule > 1):
@@ -47,7 +47,7 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(3.0, 3.41, 0.2, dtype=float)
+	rlist = np.arange(3.0, 3.01, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):

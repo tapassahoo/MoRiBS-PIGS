@@ -1,4 +1,4 @@
-import time, os, sys, math, glob
+import time, os, sys, math, glob, subprocess
 from subprocess import call
 from os import system
 import numpy as np
@@ -1326,6 +1326,7 @@ def job_submission(
 		job_name_temp = "et" + str(numb_molecule) + "a" + str(particle_a) + "b"
 	job_name = job_name_temp + str(numb_bead)
 
+	pimc_job_id_file = os.path.join(slurm_script_dir, "job_id.txt")
 	if not restart_bool:
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
 			print("*"*80 + "\n")
@@ -1421,23 +1422,20 @@ def job_submission(
 		pimc_err_file = os.path.join(slurm_script_dir, job_name + ".err")
 
 		"""
-		if "slurmstepd" not in open(pimc_log_file).read():
-			if "real" not in open(pimc_log_file).read():
-				if "slurmstepd" not in open(pimc_err_file).read():
-					if "real" not in open(pimc_err_file).read():
-						print_message = os.path.join(output_dir_path, dir_name_trotter_number) + " The job is in progress."
-						print(print_message)
-						os.chdir(input_dir_path)
-						return
+		if ("slurmstepd" not in open(pimc_log_file).read()) or ("real" not in open(pimc_log_file).read()) or ("slurmstepd" not in open(pimc_err_file).read()) or ("real" not in open(pimc_err_file).read()):
+			print_message = os.path.join(output_dir_path, dir_name_trotter_number) + " The job is in progress."
+			print(print_message)
+			exit()
 		"""
 
-		pimc_log_file_read = open(pimc_log_file, 'r')
-		line = pimc_log_file_read.readline()
-		slurm_status=line[0]
-		pimc_log_file_read.close()
+		pimc_job_id_file_read = open(pimc_job_id_file, 'r')
+		line=pimc_job_id_file_read.readline()
+		job_id_number=int(i) for i in line.split() if i.isdigit()
+		print("The job id is " + job_id_number)
+		pimc_job_id_file_read.close()
 		if ((slurm_status == "Running") or (slurm_status == "Pending")):
-			os.chdir(input_dir_path)
-			return
+			print("The job has been submitted. Running/Pending")
+			exit()
 
 		#
 		os.chdir(input_dir_path)
@@ -1616,7 +1614,11 @@ def job_submission(
 		if (partition_name == user_name):
 			call(["sbatch", "-p", user_name, fname])
 		else:
-			call(["sbatch", fname])
+			job_id=subprocess.run(["sbatch", fname], capture_output=True, text=True)
+			print(job_id.stdout)
+			file_job_id = open(pimc_job_id_file,"w")
+			file_job_id.write(job_id.stdout)
+			file_job_id.close()
 	else:
 		call(["chmod", "+x", fname])
 		os.system("./" + fname + " &" )
@@ -1766,6 +1768,7 @@ def job_string_sbatch_moribs(
 	print("The path of the directory where all the outputs are stored is given below:" + "\n" + output_dir + "\n")
 	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
 	print(log_file_path + ".log" + "\n")
+	print("The job id is stored in " + pimc_job_id_file + "\n")
 	print("The number of threads used = " + str(thread) + "\n")
 	print("The output files are moved into the below-mentioned directory after the job is executed successfully.")
 	print(final_dir_in_work + "\n")
