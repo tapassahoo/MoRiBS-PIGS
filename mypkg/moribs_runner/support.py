@@ -1430,9 +1430,13 @@ def job_submission(
 
 		pimc_job_id_file_read = open(pimc_job_id_file, 'r')
 		line=pimc_job_id_file_read.readline()
-		job_id_number=int(i) for i in line.split() if i.isdigit()
-		print("The job id is " + job_id_number)
+		job_id_number=[int(i) for i in line.split() if i.isdigit()]
 		pimc_job_id_file_read.close()
+		job_id_number=job_id_number[0]
+		print("The job id is " + job_id_number)
+		#slurm_statue=subprocess.run(["sacct", "-j", job_id_number, "-X" "--format=state"], capture_output=True, text=True)
+		#print(slurm_status)
+		exit()
 		if ((slurm_status == "Running") or (slurm_status == "Pending")):
 			print("The job has been submitted. Running/Pending")
 			exit()
