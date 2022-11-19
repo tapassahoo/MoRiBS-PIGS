@@ -1326,7 +1326,9 @@ def job_submission(
 		job_name_temp = "et" + str(numb_molecule) + "a" + str(particle_a) + "b"
 	job_name = job_name_temp + str(numb_bead)
 
-	pimc_job_id_file = os.path.join(slurm_script_dir, "job_id.txt")
+	pimc_job_id_file = os.path.join(slurm_script_dir, "job_id_trotter_number" + str(numb_bead) + ".txt")
+	print("*"*80)
+	print("\nThe job id is stored in " + pimc_job_id_file + "\n")
 	if not restart_bool:
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
 			print("*"*80 + "\n")
@@ -1428,18 +1430,23 @@ def job_submission(
 			exit()
 		"""
 
-		pimc_job_id_file_read = open(pimc_job_id_file, 'r')
-		line=pimc_job_id_file_read.readline()
-		job_id_number=[int(i) for i in line.split() if i.isdigit()]
-		pimc_job_id_file_read.close()
-		job_id_number=job_id_number[0]
-		print("The job id is " + job_id_number)
-		#slurm_statue=subprocess.run(["sacct", "-j", job_id_number, "-X" "--format=state"], capture_output=True, text=True)
-		#print(slurm_status)
-		exit()
-		if ((slurm_status == "Running") or (slurm_status == "Pending")):
-			print("The job has been submitted. Running/Pending")
-			exit()
+		if os.path.exists(pimc_job_id_file):
+			pimc_job_id_file_read = open(pimc_job_id_file, 'r')
+			line=pimc_job_id_file_read.readline()
+			job_id_number=[int(i) for i in line.split() if i.isdigit()]
+			pimc_job_id_file_read.close()
+			job_id_number=job_id_number[0]
+		elif not os.path.exists(pimc_job_id_file):
+			pimc_log_file_read = open(pimc_log_file, 'r')
+			job_id_number=pimc_log_file_read.readline()[0]
+			pimc_log_file_read.close()
+
+
+		slurm_status=subprocess.run(["sacct", "-j", str(job_id_number), "--format=state"], capture_output=True, text=True)
+		if slurm_status.stdout.find("RUNNING") or slurm_status.stdout.find("PENDING"):
+			print("The job has been submitted. The current status is either RUNNING or PENDING.")
+			print("*"*80)
+			return
 
 		#
 		os.chdir(input_dir_path)
@@ -1772,7 +1779,6 @@ def job_string_sbatch_moribs(
 	print("The path of the directory where all the outputs are stored is given below:" + "\n" + output_dir + "\n")
 	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
 	print(log_file_path + ".log" + "\n")
-	print("The job id is stored in " + pimc_job_id_file + "\n")
 	print("The number of threads used = " + str(thread) + "\n")
 	print("The output files are moved into the below-mentioned directory after the job is executed successfully.")
 	print(final_dir_in_work + "\n")

@@ -36,7 +36,7 @@ spin_isomer = int(-1)
 parameter_name = "beta"
 parameter_value = 0.1
 
-numb_molecule=10
+numb_molecule=11
 numb_block=20000
 numb_pass=200
 numb_preskip=0
