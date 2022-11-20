@@ -1423,13 +1423,6 @@ def job_submission(
 		pimc_log_file = os.path.join(slurm_script_dir, job_name + ".log")
 		pimc_err_file = os.path.join(slurm_script_dir, job_name + ".err")
 
-		"""
-		if ("slurmstepd" not in open(pimc_log_file).read()) or ("real" not in open(pimc_log_file).read()) or ("slurmstepd" not in open(pimc_err_file).read()) or ("real" not in open(pimc_err_file).read()):
-			print_message = os.path.join(output_dir_path, dir_name_trotter_number) + " The job is in progress."
-			print(print_message)
-			exit()
-		"""
-
 		if os.path.exists(pimc_job_id_file):
 			pimc_job_id_file_read = open(pimc_job_id_file, 'r')
 			line=pimc_job_id_file_read.readline()
@@ -1438,12 +1431,13 @@ def job_submission(
 			job_id_number=job_id_number[0]
 		elif not os.path.exists(pimc_job_id_file):
 			pimc_log_file_read = open(pimc_log_file, 'r')
-			job_id_number=pimc_log_file_read.readline()[0]
+			job_id_number=pimc_log_file_read.readlines()[0]
 			pimc_log_file_read.close()
 
 
 		slurm_status=subprocess.run(["sacct", "-j", str(job_id_number), "--format=state"], capture_output=True, text=True)
-		if slurm_status.stdout.find("RUNNING") or slurm_status.stdout.find("PENDING"):
+		list_of_words = slurm_status.stdout.split()
+		if ("RUNNING" in list_of_words) or ("PENDING" in list_of_words):
 			print("The job has been submitted. The current status is either RUNNING or PENDING.")
 			print("*"*80)
 			return
