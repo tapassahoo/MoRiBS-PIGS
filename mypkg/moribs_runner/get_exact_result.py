@@ -104,30 +104,30 @@ else:
 #
 job_submit_dir = os.getcwd()
 home = os.path.expanduser("~")
-source_code_dir = home + "/" + path_dmrg_dir + "DipoleChain.jl/examples/"
-final_output_dir = home + "/" + plot_dir_path + "final-dmrg-outputs-for-plotting/"
+source_code_dir = os.path.join(home, path_dmrg_dir, "DipoleChain.jl", "examples")
+final_output_dir = os.path.join(home, plot_dir_path, "final-dmrg-outputs-for-plotting")
 temp_dir = os.path.dirname(final_output_dir)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
-output_file_dir = name_of_output_directory + "/"
+output_file_dir = name_of_output_directory
 user_name = getpass.getuser()
-input_dir = os.getcwd() + "/"
+input_dir = os.getcwd()
 
 if (server_name == "graham"):
-	job_submission_root_dir = "/scratch/" + user_name + "/" + output_file_dir
+	job_submission_root_dir = os.path.join("/scratch", user_name, output_file_dir)
 elif (server_name == "nlogn"):
-	job_submission_root_dir = "/work/" + user_name + "/" + output_file_dir
+	job_submission_root_dir = os.path.join("/work", user_name, output_file_dir)
 else:
-	job_submission_root_dir = home + "/" + output_file_dir
+	job_submission_root_dir = os.path.join(home, output_file_dir)
 
 temp_dir = os.path.dirname(job_submission_root_dir)
 if not os.path.exists(temp_dir):
 	os.makedirs(temp_dir)
 
 if (status == "analysis"):
-	final_result_dir = home + "/final-dmrg-outputs-for-plotting"
-	final_output_file = final_result_dir + "/dmrg-results-of-" + str(numb_rotor) + rotor_name + "-for-ground-state-energy-vs-intermolecular-distance-lmax" + str(l_max) + ".txt"
+	final_result_dir = os.path.join(home, "final-dmrg-outputs-for-plotting")
+	final_output_file = os.path.join(final_result_dir, "dmrg-results-of-" + str(numb_rotor) + rotor_name + "-for-ground-state-energy-vs-intermolecular-distance-lmax" + str(l_max) + ".txt")
 
 for count, rpt_value in enumerate(rpt_list):
 	rpt_value = "{:3.2f}".format(rpt_value)
@@ -158,8 +158,8 @@ for count, rpt_value in enumerate(rpt_list):
 			final_output_dir)
 
 	if (status == "analysis"):
-		dmrg_output_dir = job_submission_root_dir + working_file_name
-		data_file = dmrg_output_dir + "/dmrg_output_for_energy.txt"
+		dmrg_output_dir = os.path.join(job_submission_root_dir, working_file_name)
+		data_file = os.path.join(dmrg_output_dir, "dmrg_output_for_energy.txt")
 		get_data = np.genfromtxt(data_file)
 		if (count == 0):
 			get_data_vs_r = get_data

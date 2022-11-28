@@ -2176,44 +2176,47 @@ def get_dmrg_result(
 	rfactor,
 	l_max,
 	final_output_dir):
-	'''
+	"""
 	It will give ground state energy, von Neuman and Renyi entropies computed by diagonalizing full Hamiltonian matrix. It is developed by Dmitri https://github.com/0/DipoleChain.jl
-	'''
+	"""
 	log_file = method + ".log"
 
 	os.chdir(run_job_root_dir)
 	if (os.path.isdir(job_execution_dir)):
-		print("====")
-		print("Error message")
-		print("")
-		print_message = "Remove " + str(run_job_root_dir) + str(job_execution_dir)
+		print("\n" + "*"*80)
+		print("\nError message\n")
+		print_message = "Remove " + os.path.join(run_job_root_dir, job_execution_dir)
 		print(print_message)
 		os.chdir(input_dir_path)
 		return
 	os.chdir(input_dir_path)
 
 
-	job_name = method+str(rfactor)+"-"+str(numb_rotor)
-	job_submission_file = os.path.join(job_execution_dir_path, "job-submission-script.sh")
+	job_name = method + str(rfactor) + "-" + str(numb_rotor)
+	job_submission_file = os.path.join(run_job_root_dir, job_execution_dir, "job-submission-script.sh")
+	#
+	if not os.path.exists(os.path.join(run_job_root_dir, job_execution_dir)):
+		os.makedirs(os.path.join(run_job_root_dir, job_execution_dir))
+	#
 	fwrite = open(job_submission_file, 'w')
 	fwrite.write(
 		get_job_submission_script(
 		server_name,
-		job_execution_dir_path,
+		job_execution_dir,
 		root_dir_execution,
 		final_output_dir,
 		numb_rotor,
-		cmd_run,
 		job_name,
 		log_file))
-
 	fwrite.close()
+	whoami()
+	exit()
 
-	os.chdir(job_execution_dir_path)
+	os.chdir(job_execution_dir)
 	if ((server_name == "graham") or (server_name == "nlogn")):
-		call(["sbatch", job_submission_file])
+		subprocess.call(["sbatch", job_submission_file])
 	else:
-		call(["chmod", "+x", job_submission_file])
+		subprocess.call(["chmod", "+x", job_submission_file])
 		os.system(job_submission_file + " &" )
 	print("\n" + " Successfully submitted ".center(80, "*") + "\n")
 
@@ -2226,7 +2229,6 @@ def get_job_submission_script(
 		root_dir_execution,
 		final_output_dir,
 		numb_rotor,
-		cmd_run,
 		job_name,
 		log_file):
 

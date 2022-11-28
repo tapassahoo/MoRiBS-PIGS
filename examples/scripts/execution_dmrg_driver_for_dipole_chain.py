@@ -1,5 +1,4 @@
-import os
-from subprocess import call
+import os, subprocess
 import numpy as np
 
 import mypkg
@@ -26,16 +25,16 @@ extra_file_name = '""'
 blank_space = " "
 #
 # Informations about the system
-#job_type = "submission"
-job_type = "analysis"
+job_type = "submission"
+#job_type = "analysis"
 method="dmrg"
 rotor_name="HF"
-numb_molecule=4
+numb_molecule=2
 dipole_moment = 1.827
 l_max=12
 #
 # No need to change the below three lines
-original_file_name = module_path + "get_exact_result.py"
+original_file_name = os.path.join(module_path, "get_exact_result.py")
 temp_file_name = "get-dmrg-temp.py"
 temp_file_name1 = "get-dmrg-temp1.py"
 
@@ -50,21 +49,21 @@ support.replace(
 	project_dir,
 	temp_file_name,
 	temp_file_name1)
-call(["mv", temp_file_name1, temp_file_name])
+subprocess.call(["mv", temp_file_name1, temp_file_name])
 
 support.replace(
 	"extra_name",
 	extra_file_name,
 	temp_file_name,
 	temp_file_name1)
-call(["mv", temp_file_name1, temp_file_name])
+subprocess.call(["mv", temp_file_name1, temp_file_name])
 
 support.replace(
 	"plot_dir_path",
 	plot_dir_path,
 	temp_file_name,
 	temp_file_name1)
-call(["mv", temp_file_name1, temp_file_name])
+subprocess.call(["mv", temp_file_name1, temp_file_name])
 
 rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 
@@ -84,4 +83,4 @@ cmd_run = (
 )
 print(cmd_run)
 os.system(cmd_run)
-call(["rm", temp_file_name])
+subprocess.call(["rm", temp_file_name])
