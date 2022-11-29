@@ -1,5 +1,4 @@
 import os, subprocess
-from subprocess import call
 import numpy as np
 
 import mypkg
@@ -34,9 +33,9 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.2
+parameter_value = 0.1
 
-numb_molecule=11
+numb_molecule=12
 numb_block=20000
 numb_pass=200
 numb_preskip=0
@@ -47,7 +46,7 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
+	rlist = np.arange(3.0, 3.41, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
@@ -80,21 +79,21 @@ for rcom in rlist:
 		dir_moribs,
 		temp_file_name,
 		temp_file_name1)
-	call(["mv", temp_file_name1, temp_file_name])
+	subprocess.call(["mv", temp_file_name1, temp_file_name])
 
 	support.replace(
 		"extra_name",
 		extra_name,
 		temp_file_name,
 		temp_file_name1)
-	call(["mv", temp_file_name1, temp_file_name])
+	subprocess.call(["mv", temp_file_name1, temp_file_name])
 
 	support.replace(
 		"plot_dir_path",
 		plot_dir_path,
 		temp_file_name,
 		temp_file_name1)
-	call(["mv", temp_file_name1, temp_file_name])
+	subprocess.call(["mv", temp_file_name1, temp_file_name])
 
 	rcom = "{:3.2f}".format(rcom)
 
