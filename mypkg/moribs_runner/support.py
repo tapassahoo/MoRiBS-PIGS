@@ -3,6 +3,7 @@ from subprocess import call
 from os import system
 import numpy as np
 from pathlib import Path
+from termcolor import colored
 sys.path.append("../../examples/scripts")
 import get_beads_and_mc_steps as mc
 import mypkg.asymrho_runner.support as asym
@@ -1328,7 +1329,7 @@ def job_submission(
 
 	pimc_job_id_file = os.path.join(slurm_script_dir, "job_id_trotter_number" + str(numb_bead) + ".txt")
 	print("*"*80)
-	print("\nThe job id is stored in " + pimc_job_id_file + "\n")
+	print("\nThe job id is stored in " + colored(pimc_job_id_file,"yellow") + "\n")
 	if not restart_bool:
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
 			print("*"*80 + "\n")
@@ -1409,9 +1410,13 @@ def job_submission(
 			file_check_name = "output.rden"
 
 		#
-		os.chdir(os.path.join(output_dir_path, dir_name_trotter_number, "results"))
-		if (os.path.isfile(file_check_name)):
-			ncol = np.genfromtxt(file_check_name)
+		#os.chdir(os.path.join(output_dir_path, dir_name_trotter_number, "results"))
+		file_check = os.path.join(output_dir_path, dir_name_trotter_number, "results", file_check_name)
+		print(os.path.isfile(file_check))
+		whoami()
+		exit()
+		if os.path.isfile(file_check):
+			ncol = np.genfromtxt(file_check)
 			last_index = int(ncol[-1, 0])
 			if ((numb_block - last_index) <= 0):
 				print(os.path.join(output_dir_path, dir_name_trotter_number))
@@ -1768,14 +1773,16 @@ def job_string_sbatch_moribs(
 	else:
 		account = ""
 
-	print("\n" + " Important Note ".center(80, "*") + "\n")
-	print("The path of the directory where the submitted job is running is given below:" + "\n" + execution_bead_dir_name_path + "\n")
-	print("The path of the directory where all the outputs are stored is given below:" + "\n" + output_dir + "\n")
-	print("Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
-	print(log_file_path + ".log" + "\n")
-	print("The number of threads used = " + str(thread) + "\n")
-	print("The output files are moved into the below-mentioned directory after the job is executed successfully.")
-	print(final_dir_in_work + "\n")
+	print("\n" + "[" + colored("Notice!", "blue") + "]" + "\n")
+	print("[ ] The path of the directory where the submitted job is running is given below.")
+	print("[X] " + execution_bead_dir_name_path + "\n")
+	print("[ ] The path of the directory where all the outputs are stored is given below.")
+	print("[X] " + output_dir + "\n")
+	print("[ ] Detailed information about the system and all the Monte Carlo acceptance ratios are saved in the below-mentioned file.")
+	print("[X] " + colored(log_file_path + ".log", "yellow") + "\n")
+	print("[X] The number of threads used = " + str(thread) + "\n")
+	print("[ ] The output files are moved into the below-mentioned directory after the job is executed successfully.")
+	print("[X] " + final_dir_in_work + "\n")
 	print("*"*80)
 
 	job_string = """#!/bin/bash

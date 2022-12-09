@@ -1,6 +1,7 @@
 import argparse, decimal, os, sys, subprocess, getpass
 from datetime import datetime
 import numpy as np
+from termcolor import colored
 
 sys.path.append("../../examples/scripts")
 import mypkg.moribs_runner.support as support
@@ -243,14 +244,16 @@ user_name = getpass.getuser()
 input_dir_path = os.getcwd()
 home = os.path.expanduser("~")
 
-print("*"*80)
-print("\n" + "Developer:".ljust(30) + "Dr. Tapas Sahoo" + "\n")
+print("*"*80 + "\n")
+print(colored("Developer:".ljust(30),"blue") + colored("Dr. Tapas Sahoo", "yellow") + "\n")
 now = datetime.now() # current date and time
 date_time = now.strftime("%d/%m/%Y, %H:%M:%S")
 print("date and time:".capitalize().ljust(29), date_time, "\n")
+print("*"*80 + "\n")
 
 debugging=False
 if debugging:
+	print(colored("File systems are given below:", "blue") + "\n")
 	print("user_name: ".ljust(30) + user_name)
 	print("home: ".ljust(30) + home)
 	print("input_dir_path: ".ljust(30) + input_dir_path)
