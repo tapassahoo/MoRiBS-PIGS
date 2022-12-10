@@ -17,6 +17,7 @@ def whoami():
 	print("%s/%s%s" %("The function is \n" + sys._getframe(1).f_code.co_filename, sys._getframe(1).f_code.co_name, "\nand the line number is " + str(sys._getframe(1).f_lineno)))
 	print("")
 	print ('*'*80)
+	exit()
 
 
 def is_non_zero_file(fpath):
@@ -1328,9 +1329,10 @@ def job_submission(
 	job_name = job_name_temp + str(numb_bead)
 
 	pimc_job_id_file = os.path.join(slurm_script_dir, "job_id_trotter_number" + str(numb_bead) + ".txt")
-	print("*"*80)
-	print("\nThe job id is stored in " + colored(pimc_job_id_file,"yellow") + "\n")
 	if not restart_bool:
+		print("\n" + "*"*80 + "\n")
+		print("[" + colored("Notice!", "blue") + "]" + "\n")
+		print("\nThe job id is stored in " + colored(pimc_job_id_file,"yellow") + "\n")
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
 			print("*"*80 + "\n")
 			warning_message = "Remove " + os.path.join(output_dir_path, dir_name_trotter_number)
@@ -1394,13 +1396,11 @@ def job_submission(
 		if (crystal):
 			call(["cp", "LatticeConfig.xyz", slurm_script_dir])
 	else:
-		os.chdir(output_dir_path)
-
+		is_dir = os.path.join(output_dir_path, dir_name_trotter_number)
 		#
-		if not os.path.isdir(dir_name_trotter_number):
+		if not os.path.isdir(is_dir):
 			print_message = os.path.join(output_dir_path, dir_name_trotter_number) + " The directory is not there.\n You need to submit the job first."
 			print("ATTENTION: " + print_message)
-			os.chdir(input_dir_path)
 			return
 
 		#
@@ -1410,18 +1410,13 @@ def job_submission(
 			file_check_name = "output.rden"
 
 		#
-		#os.chdir(os.path.join(output_dir_path, dir_name_trotter_number, "results"))
 		file_check = os.path.join(output_dir_path, dir_name_trotter_number, "results", file_check_name)
-		print(os.path.isfile(file_check))
-		whoami()
-		exit()
 		if os.path.isfile(file_check):
 			ncol = np.genfromtxt(file_check)
 			last_index = int(ncol[-1, 0])
 			if ((numb_block - last_index) <= 0):
 				print(os.path.join(output_dir_path, dir_name_trotter_number))
-				print(" The job was finished. You do not need to resubmit it.")
-				os.chdir(input_dir_path)
+				print(colored("The job was finished. You do not need to resubmit it.", "yellow"))
 				return
 
 		#
@@ -1448,12 +1443,10 @@ def job_submission(
 			return
 
 		#
-		os.chdir(input_dir_path)
-
 		results_dir_path=os.path.join(output_dir_path, dir_name_trotter_number, "results", "")
 		if os.path.isfile(os.path.join(results_dir_path, "output.eng")):
 			list_files_be_renamed=glob.glob(results_dir_path + '*_old*')
-			print("-"*80)
+			print("\n" + "*"*80 + "\n")
 			if (len(list_files_be_renamed)>0):
 				for file_be_renamed in list_files_be_renamed:
 					print(file_be_renamed)
@@ -1473,7 +1466,6 @@ def job_submission(
 				suffix=len(eng_files)
 				check_file_exist_and_rename(os.path.join(results_dir_path, "output.eng"),append_id(os.path.join(results_dir_path, "output.eng"),suffix))
 				check_file_exist_and_rename(os.path.join(results_dir_path, "output.xyz"),append_id(os.path.join(results_dir_path, "output.xyz"),suffix))
-			print("-"*80)
 
 		# Rotational density matrices
 		temperature1 = "%8.6f" % temperature
@@ -1515,6 +1507,10 @@ def job_submission(
 				call(["cp", os.path.join(dir_dens, file_rotdens + ".esq"),
 					  os.path.join(dir_dens, file_rotdens_mod + ".esq")])
 			propagator_path = os.path.join(dir_dens, "")
+
+		print("\n" + "*"*80 + "\n")
+		print("\n" + "[" + colored("Notice!", "blue") + "]" + "\n")
+		print("\nThe job id is stored in " + colored(pimc_job_id_file,"yellow") + "\n")
 
 	# For qmc.imput
 	get_input_file(
@@ -1632,7 +1628,7 @@ def job_submission(
 	else:
 		call(["chmod", "+x", fname])
 		os.system("./" + fname + " &" )
-	print("\n" + "The job is submitted.".center(80) + "\n")
+	print("\n" + colored("The job is submitted.", "green") + "\n")
 
 	os.chdir(input_dir_path)
 
@@ -1773,7 +1769,6 @@ def job_string_sbatch_moribs(
 	else:
 		account = ""
 
-	print("\n" + "[" + colored("Notice!", "blue") + "]" + "\n")
 	print("[ ] The path of the directory where the submitted job is running is given below.")
 	print("[X] " + execution_bead_dir_name_path + "\n")
 	print("[ ] The path of the directory where all the outputs are stored is given below.")
