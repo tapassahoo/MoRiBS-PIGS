@@ -2067,8 +2067,8 @@ class GetAnalysisFileName:
 
 		if (self.method != "ENT"):
 			print(" Important message ".center(80, "*") + "\n")
-			print(f'The name of the file where the estimated potential and total energies are reported at several {variable_name} values is')
-			print(os.path.join(self.input_dir_path, file_output1 + name_layer1 + ".txt") + "\n")
+			print(f'[ ] The name of the file where the estimated potential and total energies are reported at several {variable_name} values is')
+			print("[X] " + colored(os.path.join(self.input_dir_path, file_output1 + name_layer1 + ".txt"), "yellow") + "\n")
 			print("*"*80)
 
 		if (self.method == "ENT"):
