@@ -24,8 +24,8 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-#job_type = "submission"
-job_type = "analysis"
+job_type = "submission"
+#job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
@@ -33,9 +33,9 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.2
+parameter_value = 0.1
 
-numb_molecule=12
+numb_molecule=13
 numb_block=20000
 numb_pass=200
 numb_preskip=0
@@ -46,7 +46,7 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
+	rlist = np.arange(9.4, 9.41, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
