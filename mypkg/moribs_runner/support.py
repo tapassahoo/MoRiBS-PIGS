@@ -1638,10 +1638,13 @@ def job_submission(
 			call(["sbatch", "-p", user_name, fname])
 		else:
 			job_id=subprocess.run(["sbatch", fname], capture_output=True, text=True)
-			print(job_id.stdout)
-			file_job_id = open(pimc_job_id_file,"w")
-			file_job_id.write(job_id.stdout)
-			file_job_id.close()
+			if not job_id:
+				print(colored("The maximum limit of jobs a user can submit has been reached; therefore, the job is not submitted.","red",attrs=['blink'])) 
+			else:
+				print(job_id.stdout)
+				file_job_id = open(pimc_job_id_file,"w")
+				file_job_id.write(job_id.stdout)
+				file_job_id.close()
 	else:
 		call(["chmod", "+x", fname])
 		os.system("./" + fname + " &" )
