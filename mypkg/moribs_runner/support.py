@@ -563,6 +563,127 @@ def get_average_order_parameter(
 	return output
 
 
+def get_imaginary_time_correlation(
+		debugging,
+		method,
+		numb_molecule,
+		numb_bead,
+		parameter_name,
+		parameter_value,
+		final_dir_in_work,
+		preskip,
+		postskip,
+		numb_block):
+
+	if (method != "PIMC"):
+		if (parameter_name == "beta"):
+			variable_value = parameter_value/(numb_bead-1)
+		if (parameter_name == "tau"):
+			variable_value = parameter_value*(numb_bead-1)
+		axis_index = {"cost": 0, "phi": 1, "chi": 2}
+		axis_read = "cost"
+		ndofs = 3
+		middle_bead = int((numb_bead - 1) / 2)
+		column_index_list = [0]
+		for i in range(numb_molecule):
+			ncol_temp = middle_bead + i * numb_bead
+			ncol = axis_index[axis_read] + ncol_temp * ndofs
+			ncol = ncol + 1
+			column_index_list.append(ncol)
+			if debugging:
+				print("The index of the column associated with the z-axis of the middle bead of the " + str(i) + "th-rotor:".ljust(10), str(ncol))
+		if debugging:
+			print("*"*80)
+		column_index_tuple = tuple(column_index_list)
+	else:
+		if (parameter_name == "beta"):
+			variable_value = parameter_value/numb_bead
+		if (parameter_name == "tau"):
+			variable_value = parameter_value*numb_bead
+
+	if (os.path.isdir(final_dir_in_work)):
+		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
+		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
+		if (len(list_xyz_files_old_convention)>0):
+			for suffix_count, file_name in enumerate(list_xyz_files_old_convention):
+				if os.path.exists(file_name):
+					if not is_non_zero_file(file_name):
+						os.remove(file_name)
+						print(file_name + " an empty file and it is removed.")
+						break
+					else:
+						file_name_temp = file_name.split('_')[0]
+						check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
+						check_file_exist_and_rename(file_name.replace(Path(file_name).suffix,".xyz"),append_id(file_name_temp,suffix_count))
+				elif not os.path.exists(file_name):
+					print(file_name + " is not present.")
+					break
+
+
+		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
+		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
+		if (len(list_xyz_files_new_convention)>0):
+			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
+			for suffix_count in range(len(list_xyz_files_new_convention)):
+				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count) + ".xyz")
+				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count+1) + ".xyz")
+				if not os.path.exists(file_new):
+					if os.path.exists(last_file):
+						col_data_new = np.genfromtxt(last_file, usecols=column_index_tuple)
+						index = int(col_data_new[0, 0])
+						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+						skip_index = col_data_new[:, 0]
+						final_data_set = marged_data[preskip:(int(skip_index[-1]) - postskip), :]
+					else: 
+						final_data_set = np.genfromtxt(file_old, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
+				elif os.path.exists(file_new):
+					col_data_new = np.genfromtxt(file_new, usecols=column_index_tuple)
+					index = int(col_data_new[0, 0])
+					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+		else:
+			# if only output.xyz exists.
+			if is_non_zero_file(last_file):
+				final_data_set = np.genfromtxt(last_file, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
+			else:
+				print(last_file + " is not present.")
+				exit()
+	else:
+		print(final_dir_in_work + " does not exist.")
+		exit()
+
+
+	if (method != "PIMC"):
+		ncol_block = len(final_data_set[:, 0])
+		if (int(ncol_block) != numb_block - (preskip + postskip)):
+			print(ncol_block)
+			print("The path of the directory of the incomplete result is " + final_dir_in_work)
+
+		binary_exponent = int(math.log(ncol_block) / math.log(2))
+		trunc = int(ncol_block - 2**binary_exponent)
+
+		edge_effect=False
+		if not edge_effect:
+			raw_data = np.absolute(final_data_set)
+			eiz = np.sum(raw_data[trunc:, 1:], axis=1) / numb_molecule
+			mean_eiz = np.mean(eiz)
+			error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
+			#
+			pair_eiej = [i for i in range(numb_molecule - 1)]
+			norm_eiejz = len(pair_eiej)
+			eiejz = np.zeros(ncol_block - trunc, dtype=float)
+			for i in pair_eiej:
+				eiejz += np.multiply(final_data_set[trunc:, i+1],
+								 final_data_set[trunc:, i + 2]) / norm_eiejz
+			mean_eiejz = np.mean(eiejz)
+			error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
+
+		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
+			blocks=ncol_block, beads=numb_bead, var=variable_value, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
+		output += "\n"
+	return output
+
+
+
 def GetAverageEntropy(
 		numb_bead,
 		variable,
