@@ -581,33 +581,11 @@ def get_imaginary_time_correlation(
 		if (parameter_name == "tau"):
 			variable_value = parameter_value*(numb_bead-1)
 
-		middle_bead = int((numb_bead - 1) / 2)
-		ndofs = 3
-		
-		imaginary_time_index = np.array([i for i in range(middle_bead)])
-		imaginary_time = np.zeros(middle_bead)
-		for i in range(middle_bead):
-			imaginary_time[i]=variable_value*i
-		print(imaginary_time)
-		exit()
-		column_index_list = np.zeros((middle_bead,2),int)
-		for i in range(numb_molecule):
-			ncol_temp = middle_bead + i * numb_bead
-			for j in range(ndofs):
-			ncol = j + ncol_temp * ndofs
-			ncol = ncol + 1
-			column_index_list.append(ncol)
-			if debugging:
-				print("The index of the column associated with the z-axis of the middle bead of the " + str(i) + "th-rotor:".ljust(10), str(ncol))
-		if debugging:
-			print("*"*80)
-		column_index_tuple = tuple(column_index_list)
 	if (method == "PIMC"):
 		if (parameter_name == "beta"):
 			variable_value = parameter_value/numb_bead
 		if (parameter_name == "tau"):
 			variable_value = parameter_value*numb_bead
-	exit()
 
 	if (os.path.isdir(final_dir_in_work)):
 		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
@@ -682,6 +660,27 @@ def get_imaginary_time_correlation(
 							 final_data_set[trunc:, i + 2]) / norm_eiejz
 		mean_eiejz = np.mean(eiejz)
 		error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
+
+		# New segment 
+		middle_bead = int((numb_bead - 1) / 2)
+		ndofs = 3
+		
+		imaginary_time_index = np.array([i for i in range(middle_bead)])
+		imaginary_time = np.zeros(middle_bead)
+		for i in range(middle_bead):
+			imaginary_time[i]=variable_value*i
+		column_index_list = np.zeros((middle_bead,2),int)
+		for i in range(numb_molecule):
+			ncol_temp = middle_bead + i * numb_bead
+			for j in range(ndofs):
+			ncol = j + ncol_temp * ndofs
+			ncol = ncol + 1
+			column_index_list.append(ncol)
+			if debugging:
+				print("The index of the column associated with the z-axis of the middle bead of the " + str(i) + "th-rotor:".ljust(10), str(ncol))
+		if debugging:
+			print("*"*80)
+		column_index_tuple = tuple(column_index_list)
 
 		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
 			blocks=ncol_block, beads=numb_bead, var=variable_value, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
