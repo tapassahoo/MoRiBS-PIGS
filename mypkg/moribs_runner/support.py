@@ -501,10 +501,10 @@ def get_average_order_parameter(
 			if is_non_zero_file(last_file):
 				final_data_set = np.genfromtxt(last_file, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
 			else:
-				print(last_file + " is not present.")
+				print(colored(last_file + " is not present.","red",attrs=['blink']))
 				exit()
 	else:
-		print(final_dir_in_work + " does not exist.")
+		print(colored(final_dir_in_work + " does not exist.","red",attrs=['blink']))
 		exit()
 
 
@@ -512,7 +512,7 @@ def get_average_order_parameter(
 		ncol_block = len(final_data_set[:, 0])
 		if (int(ncol_block) != numb_block - (preskip + postskip)):
 			print(ncol_block)
-			print("The path of the directory of the incomplete result is " + final_dir_in_work)
+			print(colored("The path of the directory of the incomplete result is " + final_dir_in_work,"red",attrs=['blink']))
 
 		binary_exponent = int(math.log(ncol_block) / math.log(2))
 		trunc = int(ncol_block - 2**binary_exponent)
@@ -575,19 +575,26 @@ def get_imaginary_time_correlation(
 		postskip,
 		numb_block):
 
-	if (method != "PIMC"):
+	if (method == "PIGS"):
 		if (parameter_name == "beta"):
 			variable_value = parameter_value/(numb_bead-1)
 		if (parameter_name == "tau"):
 			variable_value = parameter_value*(numb_bead-1)
-		axis_index = {"cost": 0, "phi": 1, "chi": 2}
-		axis_read = "cost"
-		ndofs = 3
+
 		middle_bead = int((numb_bead - 1) / 2)
-		column_index_list = [0]
+		ndofs = 3
+		
+		imaginary_time_index = np.array([i for i in range(middle_bead)])
+		imaginary_time = np.zeros(middle_bead)
+		for i in range(middle_bead):
+			imaginary_time[i]=variable_value*i
+		print(imaginary_time)
+		exit()
+		column_index_list = np.zeros((middle_bead,2),int)
 		for i in range(numb_molecule):
 			ncol_temp = middle_bead + i * numb_bead
-			ncol = axis_index[axis_read] + ncol_temp * ndofs
+			for j in range(ndofs):
+			ncol = j + ncol_temp * ndofs
 			ncol = ncol + 1
 			column_index_list.append(ncol)
 			if debugging:
@@ -595,11 +602,12 @@ def get_imaginary_time_correlation(
 		if debugging:
 			print("*"*80)
 		column_index_tuple = tuple(column_index_list)
-	else:
+	if (method == "PIMC"):
 		if (parameter_name == "beta"):
 			variable_value = parameter_value/numb_bead
 		if (parameter_name == "tau"):
 			variable_value = parameter_value*numb_bead
+	exit()
 
 	if (os.path.isdir(final_dir_in_work)):
 		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
@@ -645,37 +653,35 @@ def get_imaginary_time_correlation(
 			if is_non_zero_file(last_file):
 				final_data_set = np.genfromtxt(last_file, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
 			else:
-				print(last_file + " is not present.")
+				print(colored(last_file + " is not present.","red", attrs=['blink']))
 				exit()
 	else:
-		print(final_dir_in_work + " does not exist.")
+		print(colored(final_dir_in_work + " does not exist.","red",attrs=['blink']))
 		exit()
 
 
-	if (method != "PIMC"):
+	if (method == "PIGS"):
 		ncol_block = len(final_data_set[:, 0])
 		if (int(ncol_block) != numb_block - (preskip + postskip)):
 			print(ncol_block)
-			print("The path of the directory of the incomplete result is " + final_dir_in_work)
+			print(colored("The path of the directory of the incomplete result is " + final_dir_in_work, "red", attrs=['blink']))
 
 		binary_exponent = int(math.log(ncol_block) / math.log(2))
 		trunc = int(ncol_block - 2**binary_exponent)
 
-		edge_effect=False
-		if not edge_effect:
-			raw_data = np.absolute(final_data_set)
-			eiz = np.sum(raw_data[trunc:, 1:], axis=1) / numb_molecule
-			mean_eiz = np.mean(eiz)
-			error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
-			#
-			pair_eiej = [i for i in range(numb_molecule - 1)]
-			norm_eiejz = len(pair_eiej)
-			eiejz = np.zeros(ncol_block - trunc, dtype=float)
-			for i in pair_eiej:
-				eiejz += np.multiply(final_data_set[trunc:, i+1],
-								 final_data_set[trunc:, i + 2]) / norm_eiejz
-			mean_eiejz = np.mean(eiejz)
-			error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
+		raw_data = np.absolute(final_data_set)
+		eiz = np.sum(raw_data[trunc:, 1:], axis=1) / numb_molecule
+		mean_eiz = np.mean(eiz)
+		error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
+		#
+		pair_eiej = [i for i in range(numb_molecule - 1)]
+		norm_eiejz = len(pair_eiej)
+		eiejz = np.zeros(ncol_block - trunc, dtype=float)
+		for i in pair_eiej:
+			eiejz += np.multiply(final_data_set[trunc:, i+1],
+							 final_data_set[trunc:, i + 2]) / norm_eiejz
+		mean_eiejz = np.mean(eiejz)
+		error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
 
 		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
 			blocks=ncol_block, beads=numb_bead, var=variable_value, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
