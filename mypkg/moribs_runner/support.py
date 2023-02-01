@@ -13,7 +13,7 @@ import mypkg.symrho_runner.support as sym
 def whoami():
 	print("\n")
 	print ('*'*80)
-	print("\nATTENTION: Check the expressions of the order parameters.\n")
+	print("\nATTENTION: Check the expressions of the imaginary time correlation.\n")
 	print("%s/%s%s" %("The function is \n" + sys._getframe(1).f_code.co_filename, sys._getframe(1).f_code.co_name, "\nand the line number is " + str(sys._getframe(1).f_lineno)))
 	print("")
 	print ('*'*80)
@@ -171,6 +171,31 @@ def replace(string_old, string_new, file1, file2):
 		f2.write(line.replace(string_old, string_new))
 	f1.close()
 	f2.close()
+
+
+def fmt_imaginary_time_correlation(method, parameter_name):
+	"""
+	@description - This function produces formatted output.
+	"""
+	if (parameter_name == "beta"):
+		variable_name = "tau"
+	if (parameter_name == "tau"):
+		variable_name = "beta"
+	unit = "(1/K)"
+
+	output = "# "
+	output += "{blocks:^10}{beads:^10}{var:^10}{time:^12}{itcf:^12}{err:^12}".format(
+		blocks="nBlocks",
+		beads="nBeads",
+		var=variable_name +
+		" invK",
+		time="img t",
+		itcf="itcf",
+		err="err-itcf")
+	output += "\n"
+	output += '{0:=<80}'.format('#')
+	output += "\n"
+	return output
 
 
 def fmt_order_parameter(method, parameter_name):
@@ -609,33 +634,35 @@ def get_imaginary_time_correlation(
 		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
 		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
 		if (len(list_xyz_files_new_convention)>0):
-			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
+			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"))
 			for suffix_count in range(len(list_xyz_files_new_convention)):
 				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count) + ".xyz")
 				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count+1) + ".xyz")
 				if not os.path.exists(file_new):
 					if os.path.exists(last_file):
-						col_data_new = np.genfromtxt(last_file, usecols=column_index_tuple)
+						col_data_new = np.genfromtxt(last_file)
 						index = int(col_data_new[0, 0])
 						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
 						skip_index = col_data_new[:, 0]
 						final_data_set = marged_data[preskip:(int(skip_index[-1]) - postskip), :]
 					else: 
-						final_data_set = np.genfromtxt(file_old, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
+						final_data_set = np.genfromtxt(file_old, skip_header=preskip, skip_footer=postskip)
 				elif os.path.exists(file_new):
-					col_data_new = np.genfromtxt(file_new, usecols=column_index_tuple)
+					col_data_new = np.genfromtxt(file_new)
 					index = int(col_data_new[0, 0])
 					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
 		else:
 			# if only output.xyz exists.
 			if is_non_zero_file(last_file):
-				final_data_set = np.genfromtxt(last_file, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
+				final_data_set = np.genfromtxt(last_file, skip_header=preskip, skip_footer=postskip)
 			else:
 				print(colored(last_file + " is not present.","red", attrs=['blink']))
 				exit()
 	else:
 		print(colored(final_dir_in_work + " does not exist.","red",attrs=['blink']))
 		exit()
+	print("Tapas")
+	exit()
 
 
 	if (method == "PIGS"):
@@ -647,46 +674,11 @@ def get_imaginary_time_correlation(
 		binary_exponent = int(math.log(ncol_block) / math.log(2))
 		trunc = int(ncol_block - 2**binary_exponent)
 
-		raw_data = np.absolute(final_data_set)
-		eiz = np.sum(raw_data[trunc:, 1:], axis=1) / numb_molecule
-		mean_eiz = np.mean(eiz)
-		error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
-		#
-		pair_eiej = [i for i in range(numb_molecule - 1)]
-		norm_eiejz = len(pair_eiej)
-		eiejz = np.zeros(ncol_block - trunc, dtype=float)
-		for i in pair_eiej:
-			eiejz += np.multiply(final_data_set[trunc:, i+1],
-							 final_data_set[trunc:, i + 2]) / norm_eiejz
-		mean_eiejz = np.mean(eiejz)
-		error_eiejz = get_error(mean_eiejz, eiejz, binary_exponent - 6)
-
+		print("TAPAS")
 		# New segment 
 		middle_bead = int((numb_bead - 1) / 2)
 		ndofs = 3
 		
-		imaginary_time_index = np.array([i for i in range(middle_bead)])
-		imaginary_time = np.zeros(middle_bead)
-		for i in range(middle_bead):
-			imaginary_time[i]=variable_value*i
-		column_index_list = np.zeros((middle_bead,2),int)
-		for i in range(numb_molecule):
-			ncol_temp = middle_bead + i * numb_bead
-			for j in range(ndofs):
-			ncol = j + ncol_temp * ndofs
-			ncol = ncol + 1
-			column_index_list.append(ncol)
-			if debugging:
-				print("The index of the column associated with the z-axis of the middle bead of the " + str(i) + "th-rotor:".ljust(10), str(ncol))
-		if debugging:
-			print("*"*80)
-		column_index_tuple = tuple(column_index_list)
-
-		output = '{blocks:^12d}{beads:^10d}{var:^10.6f}{eiz:^12.6f}{eiejz:^12.6f}{er1:^12.6f}{er2:^12.6f}'.format(
-			blocks=ncol_block, beads=numb_bead, var=variable_value, eiz=mean_eiz, eiejz=mean_eiejz, er1=error_eiz, er2=error_eiejz)
-		output += "\n"
-	return output
-
 
 
 def GetAverageEntropy(

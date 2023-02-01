@@ -558,7 +558,7 @@ for particle_a in particle_a_list:
 	if (status == "analysis") and (method != "ENT"):
 		analyzed_energy_file.close()
 		analyzed_order_parameter_file.close()
-		analyzed_imaginery_time_correlation_file.close()
+		analyzed_imaginary_time_correlation_file.close()
 		print("\n" + "*"*80 + "\n")
 		subprocess.call(["cat", analysis_file_name.save_file_energy])
 		print("\n" + "*"*80 + "\n")
