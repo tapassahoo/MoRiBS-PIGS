@@ -2195,10 +2195,13 @@ class GetAnalysisFileName:
 			name_dipole_moment + name_gfactor + "Entropy-"
 		file_output_order_parameter = front_layer + name_rpt + \
 			name_dipole_moment + name_gfactor + "order-parameter-"
+		file_output_imaginary_time_correlation = front_layer + name_rpt + \
+			name_dipole_moment + name_gfactor + "imaginary-time-correlation-function-"
 
 		self.save_file_energy = os.path.join(self.input_dir_path, file_output1 + name_layer1 + ".txt")
 		self.save_file_correlation = os.path.join(self.input_dir_path, file_output2 + name_layer1 + ".txt")
 		self.save_file_order_parameter = os.path.join(self.input_dir_path, file_output_order_parameter + name_layer1 + ".txt")
+		self.save_file_imaginary_time_correlation = os.path.join(self.input_dir_path, file_output_imaginary_time_correlation + name_layer1 + ".txt")
 		self.SaveEntropy = os.path.join(self.input_dir_path, file_output8 + name_layer1 + ".txt")
 
 		if (method2 == False):
@@ -2210,6 +2213,8 @@ class GetAnalysisFileName:
 				os.remove(self.save_file_correlation)
 			if os.path.exists(self.save_file_order_parameter):
 				os.remove(self.save_file_order_parameter)
+			if os.path.exists(self.save_file_imaginary_time_correlation):
+				os.remove(self.save_file_imaginary_time_correlation)
 
 		if (self.method != "ENT"):
 			print(" Important message ".center(80, "*") + "\n")

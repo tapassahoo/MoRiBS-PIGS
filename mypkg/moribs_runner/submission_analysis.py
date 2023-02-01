@@ -398,11 +398,11 @@ for particle_a in particle_a_list:
 				exit()
 
 			analyzed_energy_file = open(analysis_file_name.save_file_energy, "a")
-			analyzed_energy_file.write(
-				support.fmt_energy_data(
-					method, parameter_name))
+			analyzed_energy_file.write(support.fmt_energy_data(method, parameter_name))
 			analyzed_order_parameter_file = open(analysis_file_name.save_file_order_parameter, "a")
 			analyzed_order_parameter_file.write(support.fmt_order_parameter(method, parameter_name))
+			analyzed_imaginary_time_correlation_file = open(analysis_file_name.save_file_imaginary_time_correlation, "a")
+			analyzed_imaginary_time_correlation_file.write(support.fmt_imaginary_time_correlation(method, parameter_name))
 
 		"""
 		if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
@@ -540,19 +540,35 @@ for particle_a in particle_a_list:
 								preskip,
 								postskip,
 								numb_block))
+						analyzed_imaginary_time_correlation_file.write(
+							support.get_imaginary_time_correlation(
+								debugging,
+								method,
+								numb_molecule,
+								numb_bead,
+								parameter_name,
+								parameter_value,
+								final_dir_in_work,
+								preskip,
+								postskip,
+								numb_block))
 				except BaseException:
 					pass
 
 	if (status == "analysis") and (method != "ENT"):
 		analyzed_energy_file.close()
 		analyzed_order_parameter_file.close()
+		analyzed_imaginery_time_correlation_file.close()
 		print("\n" + "*"*80 + "\n")
 		subprocess.call(["cat", analysis_file_name.save_file_energy])
 		print("\n" + "*"*80 + "\n")
 		subprocess.call(["cat", analysis_file_name.save_file_order_parameter])
 		print("\n" + "*"*80 + "\n")
+		subprocess.call(["cat", analysis_file_name.save_file_imaginary_time_correlation])
+		print("\n" + "*"*80 + "\n")
 		support.is_data_exist(analysis_file_name.save_file_energy)
 		support.is_data_exist(analysis_file_name.save_file_order_parameter)
+		support.is_data_exist(analysis_file_name.save_file_imaginary_time_correlation)
 
 	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 		analyzed_entropy_file.close()
