@@ -79,6 +79,59 @@ def check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file):
 				return
 
 
+def get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple):
+	if (os.path.isdir(final_dir_in_work)):
+		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
+		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
+		if (len(list_xyz_files_old_convention)>0):
+			for suffix_count, file_name in enumerate(list_xyz_files_old_convention):
+				if os.path.exists(file_name):
+					if not is_non_zero_file(file_name):
+						os.remove(file_name)
+						print(file_name + " an empty file and it is removed.")
+						break
+					else:
+						file_name_temp = file_name.split('_')[0]
+						check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
+						check_file_exist_and_rename(file_name.replace(Path(file_name).suffix,".xyz"),append_id(file_name_temp,suffix_count))
+				elif not os.path.exists(file_name):
+					print(file_name + " is not present.")
+					break
+
+
+		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
+		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
+		if (len(list_xyz_files_new_convention)>0):
+			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
+			for suffix_count in range(len(list_xyz_files_new_convention)):
+				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count) + ".xyz")
+				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count+1) + ".xyz")
+				if not os.path.exists(file_new):
+					if os.path.exists(last_file):
+						col_data_new = np.genfromtxt(last_file, usecols=column_index_tuple)
+						index = int(col_data_new[0, 0])
+						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+						skip_index = col_data_new[:, 0]
+						final_data_set = marged_data[preskip:(int(skip_index[-1]) - postskip), :]
+					else: 
+						final_data_set = np.genfromtxt(file_old, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
+				elif os.path.exists(file_new):
+					col_data_new = np.genfromtxt(file_new, usecols=column_index_tuple)
+					index = int(col_data_new[0, 0])
+					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
+		else:
+			# if only output.xyz exists.
+			if is_non_zero_file(last_file):
+				final_data_set = np.genfromtxt(last_file, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
+			else:
+				print(colored(last_file + " is not present.","red",attrs=['blink']))
+				exit()
+	else:
+		print(colored(final_dir_in_work + " does not exist.","red",attrs=['blink']))
+		exit()
+	return final_data_set
+
+
 def error_message(number):
 	if (number <= 1):
 		print("Warning!!!")
@@ -482,56 +535,7 @@ def get_average_order_parameter(
 		if (parameter_name == "tau"):
 			variable_value = parameter_value*numb_bead
 
-	if (os.path.isdir(final_dir_in_work)):
-		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
-		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
-		if (len(list_xyz_files_old_convention)>0):
-			for suffix_count, file_name in enumerate(list_xyz_files_old_convention):
-				if os.path.exists(file_name):
-					if not is_non_zero_file(file_name):
-						os.remove(file_name)
-						print(file_name + " an empty file and it is removed.")
-						break
-					else:
-						file_name_temp = file_name.split('_')[0]
-						check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
-						check_file_exist_and_rename(file_name.replace(Path(file_name).suffix,".xyz"),append_id(file_name_temp,suffix_count))
-				elif not os.path.exists(file_name):
-					print(file_name + " is not present.")
-					break
-
-
-		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
-		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
-		if (len(list_xyz_files_new_convention)>0):
-			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"), usecols=column_index_tuple)
-			for suffix_count in range(len(list_xyz_files_new_convention)):
-				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count) + ".xyz")
-				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count+1) + ".xyz")
-				if not os.path.exists(file_new):
-					if os.path.exists(last_file):
-						col_data_new = np.genfromtxt(last_file, usecols=column_index_tuple)
-						index = int(col_data_new[0, 0])
-						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
-						skip_index = col_data_new[:, 0]
-						final_data_set = marged_data[preskip:(int(skip_index[-1]) - postskip), :]
-					else: 
-						final_data_set = np.genfromtxt(file_old, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
-				elif os.path.exists(file_new):
-					col_data_new = np.genfromtxt(file_new, usecols=column_index_tuple)
-					index = int(col_data_new[0, 0])
-					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
-		else:
-			# if only output.xyz exists.
-			if is_non_zero_file(last_file):
-				final_data_set = np.genfromtxt(last_file, usecols=column_index_tuple, skip_header=preskip, skip_footer=postskip)
-			else:
-				print(colored(last_file + " is not present.","red",attrs=['blink']))
-				exit()
-	else:
-		print(colored(final_dir_in_work + " does not exist.","red",attrs=['blink']))
-		exit()
-
+	final_data_set=get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple)
 
 	if (method != "PIMC"):
 		ncol_block = len(final_data_set[:, 0])
@@ -587,18 +591,44 @@ def get_average_order_parameter(
 		output += "\n"
 	return output
 
+def get_column_index(ibead,numb_molecule,numb_bead,ndofs,ndofs_working):
+	column_index = np.zeros(numb_molecule*ndofs_working,int)
+	for i in range(numb_molecule):
+		ncol_temp = ibead + i * numb_bead
+		for k in range(ndofs_working):
+			ncol = k + ncol_temp * ndofs + 1
+			column_index[k+i*ndofs_working]=ncol
+	column_index_tuple = tuple(column_index)
+	return column_index_tuple
+
+def get_truncated_index(final_dir_in_work,final_data_set,numb_block,preskip,postskip):
+	nrow = len(final_data_set[:, 0])
+	if (int(nrow) != numb_block - (preskip + postskip)):
+		print("[X] The number of rows is " + str(nrow))
+		print("[X] " + colored("The path of the directory of the incomplete result is " + final_dir_in_work,"red",attrs=['blink']))
+
+	binary_exponent = int(math.log(nrow) / math.log(2))
+	trunc = int(nrow - 2**binary_exponent)
+	return trunc
 
 def get_imaginary_time_correlation(
 		debugging,
+		final_dir_in_work,
 		method,
+		rotor_type,
 		numb_molecule,
 		numb_bead,
 		parameter_name,
 		parameter_value,
-		final_dir_in_work,
+		numb_block,
 		preskip,
-		postskip,
-		numb_block):
+		postskip):
+
+	debugging=True
+	if debugging:
+		print("[ ] Name of the working directory is ")
+		print("[X] " + colored(final_dir_in_work,"yellow"))
+		print("[X] Trotter number is " + str(numb_bead))
 
 	if (method == "PIGS"):
 		if (parameter_name == "beta"):
@@ -612,73 +642,96 @@ def get_imaginary_time_correlation(
 		if (parameter_name == "tau"):
 			variable_value = parameter_value*numb_bead
 
-	if (os.path.isdir(final_dir_in_work)):
-		list_xyz_files_old_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output.xyz_old*"))
-		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
-		if (len(list_xyz_files_old_convention)>0):
-			for suffix_count, file_name in enumerate(list_xyz_files_old_convention):
-				if os.path.exists(file_name):
-					if not is_non_zero_file(file_name):
-						os.remove(file_name)
-						print(file_name + " an empty file and it is removed.")
-						break
-					else:
-						file_name_temp = file_name.split('_')[0]
-						check_file_exist_and_rename(file_name,append_id(file_name_temp,suffix_count))
-						check_file_exist_and_rename(file_name.replace(Path(file_name).suffix,".xyz"),append_id(file_name_temp,suffix_count))
-				elif not os.path.exists(file_name):
-					print(file_name + " is not present.")
-					break
-
-
-		list_xyz_files_new_convention=glob.glob(os.path.join(final_dir_in_work, "results", "output_[0-9].xyz"))
-		last_file = os.path.join(final_dir_in_work, "results", "output.xyz")
-		if (len(list_xyz_files_new_convention)>0):
-			col_data_old = np.genfromtxt(os.path.join(final_dir_in_work, "results", "output_0.xyz"))
-			for suffix_count in range(len(list_xyz_files_new_convention)):
-				file_old = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count) + ".xyz")
-				file_new = os.path.join(final_dir_in_work, "results", "output_" + str(suffix_count+1) + ".xyz")
-				if not os.path.exists(file_new):
-					if os.path.exists(last_file):
-						col_data_new = np.genfromtxt(last_file)
-						index = int(col_data_new[0, 0])
-						marged_data = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
-						skip_index = col_data_new[:, 0]
-						final_data_set = marged_data[preskip:(int(skip_index[-1]) - postskip), :]
-					else: 
-						final_data_set = np.genfromtxt(file_old, skip_header=preskip, skip_footer=postskip)
-				elif os.path.exists(file_new):
-					col_data_new = np.genfromtxt(file_new)
-					index = int(col_data_new[0, 0])
-					col_data_old = np.concatenate((col_data_old[:index - 1], col_data_new), axis=0)
-		else:
-			# if only output.xyz exists.
-			if is_non_zero_file(last_file):
-				final_data_set = np.genfromtxt(last_file, skip_header=preskip, skip_footer=postskip)
-			else:
-				print(colored(last_file + " is not present.","red", attrs=['blink']))
-				exit()
-	else:
-		print(colored(final_dir_in_work + " does not exist.","red",attrs=['blink']))
-		exit()
-	print("Tapas")
-	exit()
-
-
 	if (method == "PIGS"):
-		ncol_block = len(final_data_set[:, 0])
-		if (int(ncol_block) != numb_block - (preskip + postskip)):
-			print(ncol_block)
-			print(colored("The path of the directory of the incomplete result is " + final_dir_in_work, "red", attrs=['blink']))
-
-		binary_exponent = int(math.log(ncol_block) / math.log(2))
-		trunc = int(ncol_block - 2**binary_exponent)
-
-		print("TAPAS")
-		# New segment 
-		middle_bead = int((numb_bead - 1) / 2)
 		ndofs = 3
-		
+		middle_bead = int((numb_bead - 1) / 2)
+
+		if (rotor_type == "LINEAR"):
+			ndofs_working = 2
+		else:
+			ndofs_working = ndofs
+
+		# Column indices for the middle bead
+		column_index_tuple_middle_bead=get_column_index(middle_bead,numb_molecule,numb_bead,ndofs,ndofs_working)
+		final_data_set_middle_bead=get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple_middle_bead)
+
+		truncate_index=get_truncated_index(final_dir_in_work,final_data_set_middle_bead,numb_block,preskip,postskip)
+		nrows_working=numb_block-truncate_index
+		#mean_eiz = np.mean(eiz)
+		#error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
+		cos_theta_middle_bead=np.zeros((nrows_working,numb_molecule),float)
+		sin_theta_middle_bead=np.zeros((nrows_working,numb_molecule),float)
+		cos_phi_middle_bead=np.zeros((nrows_working,numb_molecule),float)
+		sin_phi_middle_bead=np.zeros((nrows_working,numb_molecule),float)
+		cosinex_middle_bead=np.zeros((nrows_working,numb_molecule),float)
+		cosiney_middle_bead=np.zeros((nrows_working,numb_molecule),float)
+		cosinez_middle_bead=np.zeros((nrows_working,numb_molecule),float)
+		uvec_middle_bead=np.zeros((ndofs,nrows_working,numb_molecule),float)
+		for imolecule in range(numb_molecule):
+			column_index_cost=ndofs_working*imolecule
+			column_index_phi=ndofs_working*imolecule+1
+			cos_theta_middle_bead[:,imolecule] = final_data_set_middle_bead[truncate_index:,column_index_cost]
+			sin_theta_middle_bead[:,imolecule] = np.sqrt(1.0-np.square(final_data_set_middle_bead[truncate_index:,column_index_cost]))
+			cos_phi_middle_bead[:,imolecule] = np.cos(final_data_set_middle_bead[truncate_index:,column_index_phi])
+			sin_phi_middle_bead[:,imolecule] = np.sin(final_data_set_middle_bead[truncate_index:,column_index_phi])
+			#
+			cosinex_middle_bead[:,imolecule] = np.multiply(sin_theta_middle_bead[:,imolecule],cos_phi_middle_bead[:,imolecule])
+			cosiney_middle_bead[:,imolecule] = np.multiply(sin_theta_middle_bead[:,imolecule],sin_phi_middle_bead[:,imolecule])
+			cosinez_middle_bead[:,imolecule] = cos_theta_middle_bead[:,imolecule]
+			# 
+			uvec_middle_bead[:,:,imolecule] = np.array([cosinex_middle_bead[:,imolecule],cosiney_middle_bead[:,imolecule],cosinez_middle_bead[:,imolecule]])
+
+		if debugging:
+			print("[ ] Testing the " + colored("Trigonometric Identity","yellow"))
+			print(np.square(sin_theta_middle_bead)+np.square(cos_theta_middle_bead))
+			print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
+			for imolecule in range(numb_molecule):
+				print(np.dot(uvec_middle_bead[:,:,imolecule],uvec_middle_bead[:,:,imolecule]))
+			print("[X] The middle is " + str(middle_bead))
+			print("[ ] column indices for the middle bead are ")
+			print(column_index_tuple_middle_bead)
+
+		cos_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
+		sin_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
+		cos_phi_bead_p=np.zeros((nrows_working,numb_molecule),float)
+		sin_phi_bead_p=np.zeros((nrows_working,numb_molecule),float)
+		cosinex_bead_p=np.zeros((nrows_working,numb_molecule),float)
+		cosiney_bead_p=np.zeros((nrows_working,numb_molecule),float)
+		cosinez_bead_p=np.zeros((nrows_working,numb_molecule),float)
+		uvec_bead_p=np.zeros((ndofs,nrows_working,numb_molecule),float)
+		#
+		cos_theta_bead_m=np.zeros((nrows_working,numb_molecule),float)
+		sin_theta_bead_m=np.zeros((nrows_working,numb_molecule),float)
+		cos_phi_bead_m=np.zeros((nrows_working,numb_molecule),float)
+		sin_phi_bead_m=np.zeros((nrows_working,numb_molecule),float)
+		cosinex_bead_m=np.zeros((nrows_working,numb_molecule),float)
+		cosiney_bead_m=np.zeros((nrows_working,numb_molecule),float)
+		cosinez_bead_m=np.zeros((nrows_working,numb_molecule),float)
+		uvec_bead_m=np.zeros((ndofs,nrows_working,numb_molecule),float)
+
+		whoami()
+
+		imaginary_time = np.zeros(middle_bead,float)
+		bead_index_m = np.zeros(middle_bead,int)
+		bead_index_p = np.zeros(middle_bead,int)
+		for i in range(np.size(imaginary_time)):
+			imaginary_time[i]=i*variable_value+variable_value
+			bead_index_m[i]=middle_bead-(i+1)
+			bead_index_p[i]=middle_bead+(i+1)
+
+			column_index_tuple_m=get_column_index(bead_index_m[i],numb_molecule,numb_bead,ndofs,ndofs_working)
+			final_data_set_m=get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple_m)
+
+			column_index_tuple_p=get_column_index(bead_index_p[i],numb_molecule,numb_bead,ndofs,ndofs_working)
+			final_data_set_p=get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple_p)
+			if debugging:
+				print("[X] Imaginary time is " + str(imaginary_time[i]))
+				print("[X] Trotter numbers are " + str(bead_index_m[i]) + ", " + str(bead_index_p[i]))
+				print("[ ] The associated columns are ")
+				print(column_index_tuple_m,column_index_tuple_p)
+
+
+	return str(numb_bead)+" number of beads\n"
 
 
 def GetAverageEntropy(
@@ -1929,7 +1982,7 @@ def job_string_sbatch_moribs(
 #SBATCH --cpus-per-task=%s
 export OMP_NUM_THREADS=%s
 #export OMP_STACKSIZE=1024M
-export GOMP_STACKSIZE=1024M
+#export GOMP_STACKSIZE=1024M
 echo $SLURM_JOB_ID
 rm -rf %s
 mkdir -p %s

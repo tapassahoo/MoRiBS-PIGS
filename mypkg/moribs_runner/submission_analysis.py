@@ -146,6 +146,15 @@ parser.add_argument("--postskip",
 					from the end of the file. It can be necessary \
 					to increase the error bar. Ensure the analysis \
 					flag is open.")
+parser.add_argument("--get_energy",
+					action="store_true",
+					help="It provides the expectation value of the total energy of the system.")
+parser.add_argument("--get_op",
+					action="store_true",
+					help="It provides the expectation value of the order parameter of the system.")
+parser.add_argument("--get_itcf",
+					action="store_true",
+					help="It provides the expectation value of the imaginary time correlation function of the system.")
 parser.add_argument("-im",
 					"--impurity",
 					nargs=4,
@@ -199,6 +208,9 @@ else:
 partition_name = args.partition
 preskip = args.preskip
 postskip = args.postskip
+get_energy = args.get_energy
+get_op = args.get_op
+get_itcf = args.get_itcf
 #
 # Request to change
 # User should change the following 4 lines as developer already have
@@ -397,12 +409,15 @@ for particle_a in particle_a_list:
 				print("*"*80)
 				exit()
 
-			analyzed_energy_file = open(analysis_file_name.save_file_energy, "a")
-			analyzed_energy_file.write(support.fmt_energy_data(method, parameter_name))
-			analyzed_order_parameter_file = open(analysis_file_name.save_file_order_parameter, "a")
-			analyzed_order_parameter_file.write(support.fmt_order_parameter(method, parameter_name))
-			analyzed_imaginary_time_correlation_file = open(analysis_file_name.save_file_imaginary_time_correlation, "a")
-			analyzed_imaginary_time_correlation_file.write(support.fmt_imaginary_time_correlation(method, parameter_name))
+			if (get_energy):
+				analyzed_energy_file = open(analysis_file_name.save_file_energy, "a")
+				analyzed_energy_file.write(support.fmt_energy_data(method, parameter_name))
+			if (get_op):
+				analyzed_order_parameter_file = open(analysis_file_name.save_file_order_parameter, "a")
+				analyzed_order_parameter_file.write(support.fmt_order_parameter(method, parameter_name))
+			if (get_itcf):
+				analyzed_imaginary_time_correlation_file = open(analysis_file_name.save_file_imaginary_time_correlation, "a")
+				analyzed_imaginary_time_correlation_file.write(support.fmt_imaginary_time_correlation(method, parameter_name))
 
 		"""
 		if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
@@ -518,57 +533,64 @@ for particle_a in particle_a_list:
 								numb_block,
 								ent_method))
 					if (method != "ENT"):
-						analyzed_energy_file.write(
-							support.get_average_energy(
-								method,
-								numb_bead,
-								parameter_name,
-								parameter_value,
-								final_dir_in_work,
-								preskip,
-								postskip,
-								numb_block))
-						analyzed_order_parameter_file.write(
-							support.get_average_order_parameter(
-								debugging,
-								method,
-								numb_molecule,
-								numb_bead,
-								parameter_name,
-								parameter_value,
-								final_dir_in_work,
-								preskip,
-								postskip,
-								numb_block))
-						analyzed_imaginary_time_correlation_file.write(
-							support.get_imaginary_time_correlation(
-								debugging,
-								method,
-								numb_molecule,
-								numb_bead,
-								parameter_name,
-								parameter_value,
-								final_dir_in_work,
-								preskip,
-								postskip,
-								numb_block))
+						if (get_energy):
+							analyzed_energy_file.write(
+								support.get_average_energy(
+									method,
+									numb_bead,
+									parameter_name,
+									parameter_value,
+									final_dir_in_work,
+									preskip,
+									postskip,
+									numb_block))
+						if (get_op):
+							analyzed_order_parameter_file.write(
+								support.get_average_order_parameter(
+									debugging,
+									method,
+									numb_molecule,
+									numb_bead,
+									parameter_name,
+									parameter_value,
+									final_dir_in_work,
+									preskip,
+									postskip,
+									numb_block))
+						if (get_itcf):
+							analyzed_imaginary_time_correlation_file.write(
+								support.get_imaginary_time_correlation(
+									debugging,
+									final_dir_in_work,
+									method,
+									rotor_type,
+									numb_molecule,
+									numb_bead,
+									parameter_name,
+									parameter_value,
+									numb_block,
+									preskip,
+									postskip))
 				except BaseException:
 					pass
 
 	if (status == "analysis") and (method != "ENT"):
-		analyzed_energy_file.close()
-		analyzed_order_parameter_file.close()
-		analyzed_imaginary_time_correlation_file.close()
+		if (get_energy):
+			analyzed_energy_file.close()
+			print("\n" + "*"*80 + "\n")
+			subprocess.call(["cat", analysis_file_name.save_file_energy])
+			support.is_data_exist(analysis_file_name.save_file_energy)
+		if (get_op):
+			analyzed_order_parameter_file.close()
+			print("\n" + "*"*80 + "\n")
+			subprocess.call(["cat", analysis_file_name.save_file_order_parameter])
+			support.is_data_exist(analysis_file_name.save_file_order_parameter)
+		if (get_itcf):
+			analyzed_imaginary_time_correlation_file.close()
+			print("\n" + "*"*80 + "\n")
+			subprocess.call(["cat", analysis_file_name.save_file_imaginary_time_correlation])
+			support.is_data_exist(analysis_file_name.save_file_imaginary_time_correlation)
 		print("\n" + "*"*80 + "\n")
-		subprocess.call(["cat", analysis_file_name.save_file_energy])
-		print("\n" + "*"*80 + "\n")
-		subprocess.call(["cat", analysis_file_name.save_file_order_parameter])
-		print("\n" + "*"*80 + "\n")
-		subprocess.call(["cat", analysis_file_name.save_file_imaginary_time_correlation])
-		print("\n" + "*"*80 + "\n")
-		support.is_data_exist(analysis_file_name.save_file_energy)
-		support.is_data_exist(analysis_file_name.save_file_order_parameter)
-		support.is_data_exist(analysis_file_name.save_file_imaginary_time_correlation)
 
 	if ((status == "analysis") and ((method == "ENT") and (ent_algorithm == "WOR"))):
 		analyzed_entropy_file.close()

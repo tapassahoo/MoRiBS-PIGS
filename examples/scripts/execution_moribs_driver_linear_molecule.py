@@ -24,7 +24,7 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "submission"
+#job_type = "submission"
 job_type = "analysis"
 method = "PIGS"
 
@@ -61,8 +61,8 @@ if (job_type == "analysis"):
 # No need to change the below three lines
 original_file_name = module_path + "submission_analysis.py"
 if (job_type=="analysis"):
-	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +"_local.py"
-	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +"_local.py"
+	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
+	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
 if (job_type=="submission"):
 	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
 	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
@@ -115,6 +115,9 @@ for rcom in rlist:
 		+ "--preskip" + blank_space + str(numb_preskip) + blank_space
 		+ "--restart" + blank_space
 		+ "--nblock_restart" + blank_space + str(numb_block) + blank_space
+		#+ "--get_energy" + blank_space
+		#+ "--get_op" + blank_space
+		+ "--get_itcf" + blank_space
 	)
 
 	print(cmd_run)
