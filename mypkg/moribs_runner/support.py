@@ -674,23 +674,24 @@ def get_imaginary_time_correlation(
 			sin_theta_middle_bead[:,imolecule] = np.sqrt(1.0-np.square(final_data_set_middle_bead[truncate_index:,column_index_cost]))
 			cos_phi_middle_bead[:,imolecule] = np.cos(final_data_set_middle_bead[truncate_index:,column_index_phi])
 			sin_phi_middle_bead[:,imolecule] = np.sin(final_data_set_middle_bead[truncate_index:,column_index_phi])
-			#
-			cosinex_middle_bead[:,imolecule] = np.multiply(sin_theta_middle_bead[:,imolecule],cos_phi_middle_bead[:,imolecule])
-			cosiney_middle_bead[:,imolecule] = np.multiply(sin_theta_middle_bead[:,imolecule],sin_phi_middle_bead[:,imolecule])
-			cosinez_middle_bead[:,imolecule] = cos_theta_middle_bead[:,imolecule]
-			# 
-			uvec_middle_bead[:,:,imolecule] = np.array([cosinex_middle_bead[:,imolecule],cosiney_middle_bead[:,imolecule],cosinez_middle_bead[:,imolecule]])
+		#
+		cosinex_middle_bead = np.einsum('ij,ij->ij',sin_theta_middle_bead,cos_phi_middle_bead)
+		cosiney_middle_bead = np.einsum('ij,ij->ij',sin_theta_middle_bead,sin_phi_middle_bead)
+		cosinez_middle_bead = cos_theta_middle_bead
+
+		uvec_middle_bead = np.array([cosinex_middle_bead,cosiney_middle_bead,cosinez_middle_bead])
+		# 
 
 		if debugging:
 			print("[ ] Testing the " + colored("Trigonometric Identity","yellow"))
 			print(np.square(sin_theta_middle_bead)+np.square(cos_theta_middle_bead))
 			print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
-			for imolecule in range(numb_molecule):
-				print(np.dot(uvec_middle_bead[:,:,imolecule],uvec_middle_bead[:,:,imolecule]))
+			print(np.einsum('ijk,ijk->jk',uvec_middle_bead,uvec_middle_bead))
 			print("[X] The middle is " + str(middle_bead))
 			print("[ ] column indices for the middle bead are ")
 			print(column_index_tuple_middle_bead)
 
+		"""
 		cos_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
 		sin_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
 		cos_phi_bead_p=np.zeros((nrows_working,numb_molecule),float)
@@ -729,6 +730,7 @@ def get_imaginary_time_correlation(
 				print("[X] Trotter numbers are " + str(bead_index_m[i]) + ", " + str(bead_index_p[i]))
 				print("[ ] The associated columns are ")
 				print(column_index_tuple_m,column_index_tuple_p)
+		"""
 
 
 	return str(numb_bead)+" number of beads\n"
