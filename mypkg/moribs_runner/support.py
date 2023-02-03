@@ -686,7 +686,7 @@ def get_imaginary_time_correlation(
 			print("[ ] Testing the " + colored("Trigonometric Identity","yellow"))
 			print(np.square(sin_theta_middle_bead)+np.square(cos_theta_middle_bead))
 			print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
-			print(np.einsum('ijk,ijk->jk',uvec_middle_bead,uvec_middle_bead))
+			print(np.einsum('ijk,ijk->j',uvec_middle_bead,uvec_middle_bead))
 			print("[X] The middle is " + str(middle_bead))
 			print("[ ] column indices for the middle bead are ")
 			print(column_index_tuple_middle_bead)
