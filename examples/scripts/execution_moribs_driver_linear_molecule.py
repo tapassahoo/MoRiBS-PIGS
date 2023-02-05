@@ -38,7 +38,7 @@ parameter_value = 0.2
 numb_molecule=2
 numb_block=20000
 numb_pass=200
-numb_preskip=0
+numb_preskip=10000
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
@@ -51,7 +51,7 @@ if (job_type == "submission"):
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
 		if (parameter_value == 0.2):
-			rlist = np.arange(5.0, 5.01, 0.2, dtype=float)
+			rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
 		if (parameter_value == 0.1):
 			rlist = np.arange(10.0, 10.01, 0.2, dtype=float)
 

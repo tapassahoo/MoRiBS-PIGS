@@ -692,6 +692,8 @@ def get_imaginary_time_correlation(
 			print("-"*80)
 
 		
+		extra_space=" "*5
+		output=""
 		imaginary_time = np.zeros(middle_bead,float)
 		bead_index_m = np.zeros(middle_bead,int)
 		bead_index_p = np.zeros(middle_bead,int)
@@ -753,9 +755,9 @@ def get_imaginary_time_correlation(
 			itcf=0.5*(np.einsum('ij,ij->j',uvec_bead_m,uvec_middle_bead)+np.einsum('ij,ij->j',uvec_bead_p,uvec_middle_bead))
 			mean_itcf[i]=np.mean(itcf)
 			error_itcf[i]=get_error(mean_itcf[i], itcf, binary_exponent - 6)
-			"""
+			#
+			output += f"{nrows_block:<d}" + extra_space +  f"{numb_bead:<d}" + extra_space + f"{imaginary_time[i]:<.6}" + extra_space + f"{mean_itcf[i]:<.6}" + extra_space + f"{error_itcf[i]:<.6}" + "\n"
 
-			debugging=True
 			if debugging:
 				print("[ ] Testing the " + colored("Trigonometric Identity: sin^2(x)+cos^2(x)=1","yellow"))
 				print(np.einsum('ij,ij->ij',sin_theta_bead_p,sin_theta_bead_p)+np.einsum('ij,ij->ij',cos_theta_bead_p,cos_theta_bead_p))
@@ -763,12 +765,8 @@ def get_imaginary_time_correlation(
 				print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
 				print(np.einsum('ij,ij->j',uvec_bead_p,uvec_bead_p))
 				print("")
-			"""
-
 		
-		output=np.array([imaginary_time,mean_itcf,error_itcf])
-		print(output.T)
-	return output.T
+	return output + "\n"
 
 
 
