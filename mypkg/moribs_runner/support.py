@@ -609,7 +609,7 @@ def get_truncated_index(final_dir_in_work,final_data_set,numb_block,preskip,post
 
 	binary_exponent = int(math.log(nrow) / math.log(2))
 	trunc = int(nrow - 2**binary_exponent)
-	return trunc
+	return trunc, binary_exponent, nrow
 
 def get_imaginary_time_correlation(
 		debugging,
@@ -624,11 +624,12 @@ def get_imaginary_time_correlation(
 		preskip,
 		postskip):
 
-	debugging=True
+	#debugging=True
 	if debugging:
+		print("="*80)
 		print("[ ] Name of the working directory is ")
-		print("[X] " + colored(final_dir_in_work,"yellow"))
-		print("[X] Trotter number is " + str(numb_bead))
+		print("[X] " + colored(final_dir_in_work,"yellow")+"\n")
+		print("[X] Trotter number is " + str(numb_bead)+"\n")
 
 	if (method == "PIGS"):
 		if (parameter_name == "beta"):
@@ -655,18 +656,14 @@ def get_imaginary_time_correlation(
 		column_index_tuple_middle_bead=get_column_index(middle_bead,numb_molecule,numb_bead,ndofs,ndofs_working)
 		final_data_set_middle_bead=get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple_middle_bead)
 
-		truncate_index=get_truncated_index(final_dir_in_work,final_data_set_middle_bead,numb_block,preskip,postskip)
+		truncate_index,binary_exponent,nrows_block=get_truncated_index(final_dir_in_work,final_data_set_middle_bead,numb_block,preskip,postskip)
 		nrows_working=numb_block-truncate_index
-		#mean_eiz = np.mean(eiz)
-		#error_eiz = get_error(mean_eiz, eiz, binary_exponent - 6)
+
 		cos_theta_middle_bead=np.zeros((nrows_working,numb_molecule),float)
 		sin_theta_middle_bead=np.zeros((nrows_working,numb_molecule),float)
 		cos_phi_middle_bead=np.zeros((nrows_working,numb_molecule),float)
 		sin_phi_middle_bead=np.zeros((nrows_working,numb_molecule),float)
-		cosinex_middle_bead=np.zeros((nrows_working,numb_molecule),float)
-		cosiney_middle_bead=np.zeros((nrows_working,numb_molecule),float)
-		cosinez_middle_bead=np.zeros((nrows_working,numb_molecule),float)
-		uvec_middle_bead=np.zeros((ndofs,nrows_working,numb_molecule),float)
+
 		for imolecule in range(numb_molecule):
 			column_index_cost=ndofs_working*imolecule
 			column_index_phi=ndofs_working*imolecule+1
@@ -675,46 +672,31 @@ def get_imaginary_time_correlation(
 			cos_phi_middle_bead[:,imolecule] = np.cos(final_data_set_middle_bead[truncate_index:,column_index_phi])
 			sin_phi_middle_bead[:,imolecule] = np.sin(final_data_set_middle_bead[truncate_index:,column_index_phi])
 		#
-		cosinex_middle_bead = np.einsum('ij,ij->ij',sin_theta_middle_bead,cos_phi_middle_bead)
-		cosiney_middle_bead = np.einsum('ij,ij->ij',sin_theta_middle_bead,sin_phi_middle_bead)
-		cosinez_middle_bead = cos_theta_middle_bead
+		cosinex_middle_bead = np.einsum('ij,ij->i',sin_theta_middle_bead,cos_phi_middle_bead)
+		cosiney_middle_bead = np.einsum('ij,ij->i',sin_theta_middle_bead,sin_phi_middle_bead)
+		cosinez_middle_bead = np.einsum('ij->i',cos_theta_middle_bead)
 
 		uvec_middle_bead = np.array([cosinex_middle_bead,cosiney_middle_bead,cosinez_middle_bead])
 		# 
-
 		if debugging:
-			print("[ ] Testing the " + colored("Trigonometric Identity","yellow"))
-			print(np.square(sin_theta_middle_bead)+np.square(cos_theta_middle_bead))
-			print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
-			print(np.einsum('ijk,ijk->j',uvec_middle_bead,uvec_middle_bead))
-			print("[X] The middle is " + str(middle_bead))
-			print("[ ] column indices for the middle bead are ")
+			print("")
+			print("[X] The middle bead is " + str(middle_bead))
+			print("[ ] The column indices for the middle bead are ")
 			print(column_index_tuple_middle_bead)
+			print("")
+			print("[ ] Testing the " + colored("Trigonometric Identity: sin^2(x)+cos^2(x)=1","yellow"))
+			print(np.einsum('ij,ij->ij',sin_theta_middle_bead,sin_theta_middle_bead)+np.einsum('ij,ij->ij',cos_theta_middle_bead,cos_theta_middle_bead))
+			print("")
+			print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
+			print(np.einsum('ij,ij->j',uvec_middle_bead,uvec_middle_bead))
+			print("-"*80)
 
-		"""
-		cos_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
-		sin_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
-		cos_phi_bead_p=np.zeros((nrows_working,numb_molecule),float)
-		sin_phi_bead_p=np.zeros((nrows_working,numb_molecule),float)
-		cosinex_bead_p=np.zeros((nrows_working,numb_molecule),float)
-		cosiney_bead_p=np.zeros((nrows_working,numb_molecule),float)
-		cosinez_bead_p=np.zeros((nrows_working,numb_molecule),float)
-		uvec_bead_p=np.zeros((ndofs,nrows_working,numb_molecule),float)
-		#
-		cos_theta_bead_m=np.zeros((nrows_working,numb_molecule),float)
-		sin_theta_bead_m=np.zeros((nrows_working,numb_molecule),float)
-		cos_phi_bead_m=np.zeros((nrows_working,numb_molecule),float)
-		sin_phi_bead_m=np.zeros((nrows_working,numb_molecule),float)
-		cosinex_bead_m=np.zeros((nrows_working,numb_molecule),float)
-		cosiney_bead_m=np.zeros((nrows_working,numb_molecule),float)
-		cosinez_bead_m=np.zeros((nrows_working,numb_molecule),float)
-		uvec_bead_m=np.zeros((ndofs,nrows_working,numb_molecule),float)
-
-		whoami()
-
+		
 		imaginary_time = np.zeros(middle_bead,float)
 		bead_index_m = np.zeros(middle_bead,int)
 		bead_index_p = np.zeros(middle_bead,int)
+		mean_itcf=np.zeros(middle_bead,float)
+		error_itcf=np.zeros(middle_bead,float)
 		for i in range(np.size(imaginary_time)):
 			imaginary_time[i]=i*variable_value+variable_value
 			bead_index_m[i]=middle_bead-(i+1)
@@ -725,15 +707,69 @@ def get_imaginary_time_correlation(
 
 			column_index_tuple_p=get_column_index(bead_index_p[i],numb_molecule,numb_bead,ndofs,ndofs_working)
 			final_data_set_p=get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple_p)
+
 			if debugging:
-				print("[X] Imaginary time is " + str(imaginary_time[i]))
-				print("[X] Trotter numbers are " + str(bead_index_m[i]) + ", " + str(bead_index_p[i]))
-				print("[ ] The associated columns are ")
+				print("[X] For the imaginary time " + str(imaginary_time[i]))
+				print("[X] the Trotter numbers are " + str(bead_index_m[i]) + ", " + str(bead_index_p[i]))
+				print("[ ] and the associated columns are ")
 				print(column_index_tuple_m,column_index_tuple_p)
-		"""
+				print("")
 
+			cos_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
+			sin_theta_bead_p=np.zeros((nrows_working,numb_molecule),float)
+			cos_phi_bead_p=np.zeros((nrows_working,numb_molecule),float)
+			sin_phi_bead_p=np.zeros((nrows_working,numb_molecule),float)
+			#
+			cos_theta_bead_m=np.zeros((nrows_working,numb_molecule),float)
+			sin_theta_bead_m=np.zeros((nrows_working,numb_molecule),float)
+			cos_phi_bead_m=np.zeros((nrows_working,numb_molecule),float)
+			sin_phi_bead_m=np.zeros((nrows_working,numb_molecule),float)
 
-	return str(numb_bead)+" number of beads\n"
+			for imolecule in range(numb_molecule):
+				column_index_cost=ndofs_working*imolecule
+				column_index_phi=ndofs_working*imolecule+1
+				#
+				cos_theta_bead_p[:,imolecule] = final_data_set_p[truncate_index:,column_index_cost]
+				sin_theta_bead_p[:,imolecule] = np.sqrt(1.0-np.square(final_data_set_p[truncate_index:,column_index_cost]))
+				cos_phi_bead_p[:,imolecule] = np.cos(final_data_set_p[truncate_index:,column_index_phi])
+				sin_phi_bead_p[:,imolecule] = np.sin(final_data_set_p[truncate_index:,column_index_phi])
+				#
+				cos_theta_bead_m[:,imolecule] = final_data_set_m[truncate_index:,column_index_cost]
+				sin_theta_bead_m[:,imolecule] = np.sqrt(1.0-np.square(final_data_set_m[truncate_index:,column_index_cost]))
+				cos_phi_bead_m[:,imolecule] = np.cos(final_data_set_m[truncate_index:,column_index_phi])
+				sin_phi_bead_m[:,imolecule] = np.sin(final_data_set_m[truncate_index:,column_index_phi])
+			#
+			cosinex_bead_p = np.einsum('ij,ij->i',sin_theta_bead_p,cos_phi_bead_p)
+			cosiney_bead_p = np.einsum('ij,ij->i',sin_theta_bead_p,sin_phi_bead_p)
+			cosinez_bead_p = np.einsum('ij->i',cos_theta_bead_p)
+			#
+			cosinex_bead_m = np.einsum('ij,ij->i',sin_theta_bead_m,cos_phi_bead_m)
+			cosiney_bead_m = np.einsum('ij,ij->i',sin_theta_bead_m,sin_phi_bead_m)
+			cosinez_bead_m = np.einsum('ij->i',cos_theta_bead_m)
+			# 
+			uvec_bead_p = np.array([cosinex_bead_p,cosiney_bead_p,cosinez_bead_p])
+			uvec_bead_m = np.array([cosinex_bead_m,cosiney_bead_m,cosinez_bead_m])
+			#
+			itcf=0.5*(np.einsum('ij,ij->j',uvec_bead_m,uvec_middle_bead)+np.einsum('ij,ij->j',uvec_bead_p,uvec_middle_bead))
+			mean_itcf[i]=np.mean(itcf)
+			error_itcf[i]=get_error(mean_itcf[i], itcf, binary_exponent - 6)
+			"""
+
+			debugging=True
+			if debugging:
+				print("[ ] Testing the " + colored("Trigonometric Identity: sin^2(x)+cos^2(x)=1","yellow"))
+				print(np.einsum('ij,ij->ij',sin_theta_bead_p,sin_theta_bead_p)+np.einsum('ij,ij->ij',cos_theta_bead_p,cos_theta_bead_p))
+				print("")
+				print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
+				print(np.einsum('ij,ij->j',uvec_bead_p,uvec_bead_p))
+				print("")
+			"""
+
+		
+		output=np.array([imaginary_time,mean_itcf,error_itcf])
+		print(output.T)
+	return output.T
+
 
 
 def GetAverageEntropy(
