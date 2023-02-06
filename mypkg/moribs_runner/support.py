@@ -766,7 +766,7 @@ def get_imaginary_time_correlation(
 				print(np.einsum('ij,ij->j',uvec_bead_p,uvec_bead_p))
 				print("")
 		
-	return output + "\n"
+	return output + "\n\n"
 
 
 

@@ -24,8 +24,7 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "submission"
-#job_type = "analysis"
+job_type = "JOB_TYPE"
 method = "PIGS"
 
 system = "HF"
@@ -33,12 +32,12 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.1
+parameter_value = PARAMETER_VALUE
 
-numb_molecule=14
+numb_molecule=NUMB_MOLECULE
 numb_block=20000
 numb_pass=200
-numb_preskip=0
+numb_preskip=NUMB_PRESKIP
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
@@ -51,9 +50,9 @@ if (job_type == "submission"):
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
 		if (parameter_value == 0.2):
-			rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
+			rlist = np.arange(5.0, 10.01, 1.0, dtype=float)
 		if (parameter_value == 0.1):
-			rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
+			rlist = np.arange(5.0, 10.01, 1.0, dtype=float)
 
 	if (parameter_name == "tau"):
 		rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
@@ -61,11 +60,11 @@ if (job_type == "analysis"):
 # No need to change the below three lines
 original_file_name = module_path + "submission_analysis.py"
 if (job_type=="analysis"):
-	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
-	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
+	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +"_generic.py"
+	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +"_generic.py"
 if (job_type=="submission"):
-	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
-	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
+	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_generic.py"
+	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_generic.py"
 
 for rcom in rlist:
 	support.replace(
@@ -117,7 +116,7 @@ for rcom in rlist:
 		+ "--nblock_restart" + blank_space + str(numb_block) + blank_space
 		#+ "--get_energy" + blank_space
 		#+ "--get_op" + blank_space
-		#+ "--get_itcf" + blank_space
+		+ "--get_itcf" + blank_space
 	)
 
 	print(cmd_run)

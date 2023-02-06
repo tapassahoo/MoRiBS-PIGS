@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=jobn2p15000
-#SBATCH --output=jobn2p15000.log
-#SBATCH --error=jobn2p15000.err
-#SBATCH --time=03-00:00
+#SBATCH --job-name=jobn2p0
+#SBATCH --output=jobn2p0.log
+#SBATCH --error=jobn2p0.err
+#SBATCH --time=00-12:00
 #SBATCH --account=rrg-pnroy
 #SBATCH --constraint=broadwell
 #SBATCH --mem-per-cpu=1024mb
