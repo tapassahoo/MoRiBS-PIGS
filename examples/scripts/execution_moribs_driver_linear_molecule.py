@@ -24,8 +24,8 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "submission"
-#job_type = "analysis"
+#job_type = "submission"
+job_type = "analysis"
 method = "PIGS"
 
 system = "HF"
@@ -33,12 +33,12 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.1
+parameter_value = 0.2
 
-numb_molecule=14
+numb_molecule=2
 numb_block=20000
 numb_pass=200
-numb_preskip=0
+numb_preskip=15000
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
@@ -51,7 +51,7 @@ if (job_type == "submission"):
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
 		if (parameter_value == 0.2):
-			rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
+			rlist = np.arange(10.0, 10.01, 0.2, dtype=float)
 		if (parameter_value == 0.1):
 			rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
 
@@ -117,7 +117,7 @@ for rcom in rlist:
 		+ "--nblock_restart" + blank_space + str(numb_block) + blank_space
 		#+ "--get_energy" + blank_space
 		#+ "--get_op" + blank_space
-		#+ "--get_itcf" + blank_space
+		+ "--get_itcf" + blank_space
 	)
 
 	print(cmd_run)

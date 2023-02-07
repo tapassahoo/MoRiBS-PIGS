@@ -657,7 +657,7 @@ def get_imaginary_time_correlation(
 		final_data_set_middle_bead=get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple_middle_bead)
 
 		truncate_index,binary_exponent,nrows_block=get_truncated_index(final_dir_in_work,final_data_set_middle_bead,numb_block,preskip,postskip)
-		nrows_working=numb_block-truncate_index
+		nrows_working=nrows_block-truncate_index
 
 		cos_theta_middle_bead=np.zeros((nrows_working,numb_molecule),float)
 		sin_theta_middle_bead=np.zeros((nrows_working,numb_molecule),float)
