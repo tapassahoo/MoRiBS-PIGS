@@ -1,2 +1,0 @@
-slurmstepd: error: Unable to create TMPDIR [/localscratch/tapas.3387400.0]: Permission denied
-slurmstepd: error: Setting TMPDIR to /tmp
