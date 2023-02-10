@@ -50,9 +50,9 @@ if (job_type == "submission"):
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
 		if (parameter_value == 0.2):
-			rlist = np.arange(5.0, 5.01, 0.2, dtype=float)
+			rlist = np.arange(5.0, 10.01, 0.2, dtype=float)
 		if (parameter_value == 0.1):
-			rlist = np.arange(10.0, 10.01, 0.2, dtype=float)
+			rlist = np.arange(3.0, 10.01, 0.2, dtype=float)
 
 	if (parameter_name == "tau"):
 		rlist = np.arange(3.0, 10.01, 1.0, dtype=float)
