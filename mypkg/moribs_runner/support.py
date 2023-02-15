@@ -63,6 +63,8 @@ def check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file):
 			slurm_status=subprocess.run(["sacct", "-j", str(job_id_number), "--format=state"], capture_output=True, text=True)
 			list_of_words = slurm_status.stdout.split()
 			if ("RUNNING" in list_of_words) or ("PENDING" in list_of_words):
+				print("*"*80)
+				print(pimc_job_id_file)
 				print(colored("The job has been submitted. The current status is either RUNNING or PENDING.","yellow"))
 				print("*"*80)
 				check_status=True
@@ -75,6 +77,7 @@ def check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file):
 			slurm_status=subprocess.run(["sacct", "-j", str(job_id_number), "--format=state"], capture_output=True, text=True)
 			list_of_words = slurm_status.stdout.split()
 			if ("RUNNING" in list_of_words) or ("PENDING" in list_of_words):
+				print("*"*80)
 				print(colored("The job has been submitted. The current status is either RUNNING or PENDING.", "yellow"))
 				print("*"*80)
 				check_status=True
