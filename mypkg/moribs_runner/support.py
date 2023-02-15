@@ -51,6 +51,7 @@ def check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file):
 	pimc_log_file = os.path.join(slurm_script_dir, job_name + ".log")
 	pimc_err_file = os.path.join(slurm_script_dir, job_name + ".err")
 
+	check_status=False
 	if os.path.exists(pimc_job_id_file):
 		if is_non_zero_file(pimc_job_id_file):
 			pimc_job_id_file_read = open(pimc_job_id_file, 'r')
@@ -64,7 +65,7 @@ def check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file):
 			if ("RUNNING" in list_of_words) or ("PENDING" in list_of_words):
 				print(colored("The job has been submitted. The current status is either RUNNING or PENDING.","yellow"))
 				print("*"*80)
-				return
+				check_status=True
 	elif not os.path.exists(pimc_job_id_file):
 		if os.path.exists(pimc_log_file):
 			pimc_log_file_read = open(pimc_log_file, 'r')
@@ -76,8 +77,9 @@ def check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file):
 			if ("RUNNING" in list_of_words) or ("PENDING" in list_of_words):
 				print(colored("The job has been submitted. The current status is either RUNNING or PENDING.", "yellow"))
 				print("*"*80)
-				return
+				check_status=True
 
+	return check_status
 
 def get_concatenated_data(final_dir_in_work,preskip,postskip,column_index_tuple):
 	if (os.path.isdir(final_dir_in_work)):
@@ -1574,16 +1576,21 @@ def job_submission(
 		print("\n" + "*"*80 + "\n")
 		print("[" + colored("Notice!", "blue") + "]" + "\n")
 		print("\nThe job id is stored in " + colored(pimc_job_id_file,"yellow") + "\n")
+
+		#
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
 			print("*"*80 + "\n")
 			warning_message = "Remove " + os.path.join(output_dir_path, dir_name_trotter_number)
 			print("Warning: " + warning_message)
 			print("\n" + "*"*80 + "\n")
 			return
+
 		#
-		check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file)
+		check_status=check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file)
+		if (check_status == True):
+			return
 
-
+		#
 		if (rotor_type == "LINEAR"):
 			get_rotmat(method, rotor, temperature, numb_bead, execution_file_path)
 
@@ -1664,7 +1671,9 @@ def job_submission(
 				return
 
 		#
-		check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file)
+		check_status = check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file)
+		if (check_status == True):
+			return
 
 		#
 		results_dir_path=os.path.join(output_dir_path, dir_name_trotter_number, "results", "")
