@@ -24,7 +24,7 @@ extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-job_type = "JOB_TYPE"
+job_type = "INPUT_JOB_TYPE"
 method = "PIGS"
 
 system = "HF"
@@ -32,12 +32,12 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = PARAMETER_VALUE
+parameter_value = INPUT_PARAMETER_VALUE
 
-numb_molecule=NUMB_MOLECULE
-numb_block=20000
-numb_pass=200
-numb_preskip=NUMB_PRESKIP
+numb_molecule=INPUT_NUMB_MOLECULE
+numb_block=INPUT_NUMB_BLOCK
+numb_pass=INPUT_NUMB_PASS
+numb_preskip=INPUT_NUMB_PRESKIP
 
 if (numb_molecule > 1):
 	dipole_moment = 1.827
@@ -60,11 +60,11 @@ if (job_type == "analysis"):
 # No need to change the below three lines
 original_file_name = module_path + "submission_analysis.py"
 if (job_type=="analysis"):
-	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +"_generic.py"
-	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +"_generic.py"
+	temp_file_name = "temp_0_itcf_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + rotor + "_" + parameter_name + str(parameter_value) + "kelvin_inverse_mcblock" + str(numb_block) + "_mcpass" +str(numb_pass) + "_preskip" + str(numb_preskip) +"_generic.py"
+	temp_file_name1 = "temp_1_itcf_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + rotor + "_" + parameter_name + str(parameter_value) + "kelvin_inverse_mcblock" + str(numb_block) + "_mcpass" +str(numb_pass) + "_preskip" + str(numb_preskip) +"_generic.py"
 if (job_type=="submission"):
-	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_generic.py"
-	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_generic.py"
+	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + rotor + "_" + parameter_name + str(parameter_value) + "kelvin_inverse_mcblock" + str(numb_block) + "_mcpass" +str(numb_pass) + "_generic.py"
+	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + rotor + "_" + parameter_name + str(parameter_value) + "kelvin_inverse_mcblock" + str(numb_block) + "_mcpass" +str(numb_pass) + "_generic.py"
 
 for rcom in rlist:
 	support.replace(

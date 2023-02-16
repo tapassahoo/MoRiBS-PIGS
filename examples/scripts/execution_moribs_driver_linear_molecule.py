@@ -46,7 +46,7 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(9.8, 9.81, 0.2, dtype=float)
+	rlist = np.arange(10.0, 10.01, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
