@@ -17,7 +17,7 @@ set -xv
 
 job_type=analysis
 numb_molecule=2
-parameter_value=0.2
+parameter_value=0.1
 numb_block=10000
 numb_pass=500
 preskip_value=0
