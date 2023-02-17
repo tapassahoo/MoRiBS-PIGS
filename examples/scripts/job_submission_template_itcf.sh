@@ -2,7 +2,7 @@
 #SBATCH --job-name=itcf_n2_p0
 #SBATCH --output=itcf_n2_p0.log
 #SBATCH --error=itcf_n2_p0.err
-#SBATCH --time=00-0:30
+#SBATCH --time=00-3:00
 #SBATCH --account=rrg-pnroy
 #SBATCH --constraint=broadwell
 #SBATCH --mem-per-cpu=1024
