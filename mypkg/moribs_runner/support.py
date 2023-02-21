@@ -242,11 +242,9 @@ def fmt_imaginary_time_correlation(method, parameter_name):
 	unit = "(1/K)"
 
 	output = "# "
-	output += "{blocks:^10}{beads:^10}{var:^10}{time:^12}{itcf:^12}{err:^12}".format(
+	output += "{blocks:^10}{beads:^10}{time:^12}{itcf:^12}{err:^12}".format(
 		blocks="nBlocks",
 		beads="nBeads",
-		var=variable_name +
-		" invK",
 		time="img t",
 		itcf="itcf",
 		err="err-itcf")
@@ -629,12 +627,11 @@ def get_imaginary_time_correlation(
 		preskip,
 		postskip):
 
-	#debugging=True
 	if debugging:
 		print("="*80)
 		print("[ ] Name of the working directory is ")
 		print("[X] " + colored(final_dir_in_work,"yellow")+"\n")
-		print("[X] Trotter number is " + str(numb_bead)+"\n")
+		print("[X] The Trotter number is " + str(numb_bead)+"\n")
 
 	if (method == "PIGS"):
 		if (parameter_name == "beta"):
@@ -677,9 +674,9 @@ def get_imaginary_time_correlation(
 			cos_phi_middle_bead[:,imolecule] = np.cos(final_data_set_middle_bead[truncate_index:,column_index_phi])
 			sin_phi_middle_bead[:,imolecule] = np.sin(final_data_set_middle_bead[truncate_index:,column_index_phi])
 		#
-		cosinex_middle_bead = np.einsum('ij,ij->i',sin_theta_middle_bead,cos_phi_middle_bead)
-		cosiney_middle_bead = np.einsum('ij,ij->i',sin_theta_middle_bead,sin_phi_middle_bead)
-		cosinez_middle_bead = np.einsum('ij->i',cos_theta_middle_bead)
+		cosinex_middle_bead = np.einsum('ij,ij->ij',sin_theta_middle_bead,cos_phi_middle_bead)
+		cosiney_middle_bead = np.einsum('ij,ij->ij',sin_theta_middle_bead,sin_phi_middle_bead)
+		cosinez_middle_bead = np.einsum('ij->ij',cos_theta_middle_bead)
 
 		uvec_middle_bead = np.array([cosinex_middle_bead,cosiney_middle_bead,cosinez_middle_bead])
 		# 
@@ -689,14 +686,30 @@ def get_imaginary_time_correlation(
 			print("[ ] The column indices for the middle bead are ")
 			print(column_index_tuple_middle_bead)
 			print("")
-			print("[ ] Testing the " + colored("Trigonometric Identity: sin^2(x)+cos^2(x)=1","yellow"))
+			print("[ ] Verification of the " + colored("Trigonometric Identity: sin^2(x)+cos^2(x)=1","yellow"))
 			print(np.einsum('ij,ij->ij',sin_theta_middle_bead,sin_theta_middle_bead)+np.einsum('ij,ij->ij',cos_theta_middle_bead,cos_theta_middle_bead))
 			print("")
 			print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
+			print(np.einsum('ijk,ijk->j',uvec_middle_bead,uvec_middle_bead))
+			print("-"*80)
+
+		uvec_middle_bead = np.einsum('ijk->ij',uvec_middle_bead)
+		#
+		if debugging:
+			print("")
+			print("[ ] Testing the " + colored("dot product of two unit vectors that are made of all dipoles","yellow"))
 			print(np.einsum('ij,ij->j',uvec_middle_bead,uvec_middle_bead))
 			print("-"*80)
 
-		
+		norm_middle_bead=np.linalg.norm(uvec_middle_bead,axis=0)
+		uvec_middle_bead = np.einsum('ij,j->ij',uvec_middle_bead,1/norm_middle_bead)
+
+		if debugging:
+			print("")
+			print("[ ] After normalization, " + colored("dot product of two unit vectors that are made of all dipoles","yellow"))
+			print(np.einsum('ij,ij->j',uvec_middle_bead,uvec_middle_bead))
+			print("-"*80)
+
 		extra_space=" "*5
 		output=""
 		imaginary_time = np.zeros(middle_bead,float)
@@ -746,31 +759,49 @@ def get_imaginary_time_correlation(
 				cos_phi_bead_m[:,imolecule] = np.cos(final_data_set_m[truncate_index:,column_index_phi])
 				sin_phi_bead_m[:,imolecule] = np.sin(final_data_set_m[truncate_index:,column_index_phi])
 			#
-			cosinex_bead_p = np.einsum('ij,ij->i',sin_theta_bead_p,cos_phi_bead_p)
-			cosiney_bead_p = np.einsum('ij,ij->i',sin_theta_bead_p,sin_phi_bead_p)
-			cosinez_bead_p = np.einsum('ij->i',cos_theta_bead_p)
+			cosinex_bead_p = np.einsum('ij,ij->ij',sin_theta_bead_p,cos_phi_bead_p)
+			cosiney_bead_p = np.einsum('ij,ij->ij',sin_theta_bead_p,sin_phi_bead_p)
+			cosinez_bead_p = np.einsum('ij->ij',cos_theta_bead_p)
 			#
-			cosinex_bead_m = np.einsum('ij,ij->i',sin_theta_bead_m,cos_phi_bead_m)
-			cosiney_bead_m = np.einsum('ij,ij->i',sin_theta_bead_m,sin_phi_bead_m)
-			cosinez_bead_m = np.einsum('ij->i',cos_theta_bead_m)
+			cosinex_bead_m = np.einsum('ij,ij->ij',sin_theta_bead_m,cos_phi_bead_m)
+			cosiney_bead_m = np.einsum('ij,ij->ij',sin_theta_bead_m,sin_phi_bead_m)
+			cosinez_bead_m = np.einsum('ij->ij',cos_theta_bead_m)
 			# 
 			uvec_bead_p = np.array([cosinex_bead_p,cosiney_bead_p,cosinez_bead_p])
 			uvec_bead_m = np.array([cosinex_bead_m,cosiney_bead_m,cosinez_bead_m])
 			#
+			if debugging:
+				print("[ ] Second verification of the " + colored("Trigonometric Identity: sin^2(x)+cos^2(x)=1","yellow"))
+				print(np.einsum('ij,ij->ij',sin_theta_bead_p,sin_theta_bead_p)+np.einsum('ij,ij->ij',cos_theta_bead_p,cos_theta_bead_p))
+				print("")
+				print("[ ] Second testing the " + colored("dot product of two unit vectors ","yellow"))
+				print(np.einsum('ijk,ijk->j',uvec_bead_p,uvec_bead_p))
+				print("")
+	
+			uvec_bead_p = np.einsum('ijk->ij',uvec_bead_p)
+			uvec_bead_m = np.einsum('ijk->ij',uvec_bead_m)
+
+			norm_bead_p = np.linalg.norm(uvec_bead_p,axis=0)
+			uvec_bead_p = np.einsum('ij,j->ij',uvec_bead_p,1/norm_bead_p)
+			norm_bead_m = np.linalg.norm(uvec_bead_m,axis=0)
+			uvec_bead_m = np.einsum('ij,j->ij',uvec_bead_m,1/norm_bead_m)
+			#
+			if debugging:
+				print("")
+				print("[ ] After normalization, " + colored("dot product of two unit vectors that are made of all dipoles","yellow"))
+				print(np.einsum('ij,ij->j',uvec_bead_p,uvec_bead_p))
+				print(np.einsum('ij,ij->j',uvec_bead_m,uvec_bead_m))
+				print("-"*80)
+
+
 			itcf=0.5*(np.einsum('ij,ij->j',uvec_bead_m,uvec_middle_bead)+np.einsum('ij,ij->j',uvec_bead_p,uvec_middle_bead))
 			mean_itcf[i]=np.mean(itcf)
 			error_itcf[i]=get_error(mean_itcf[i], itcf, binary_exponent - 6)
 			#
-			output += f"{nrows_block:<d}" + extra_space +  f"{numb_bead:<d}" + extra_space + f"{imaginary_time[i]:<.6}" + extra_space + f"{mean_itcf[i]:<.6}" + extra_space + f"{error_itcf[i]:<.6}" + "\n"
+			output += '{blocks:^12d}{beads:^10d}{var:^10.6f}{itcf:^16.6f}{er1:^12.6f}'.format(blocks=nrows_block, beads=numb_bead, var=imaginary_time[i], itcf=mean_itcf[i], er1=error_itcf[i])
+			output += "\n"
 
-			if debugging:
-				print("[ ] Testing the " + colored("Trigonometric Identity: sin^2(x)+cos^2(x)=1","yellow"))
-				print(np.einsum('ij,ij->ij',sin_theta_bead_p,sin_theta_bead_p)+np.einsum('ij,ij->ij',cos_theta_bead_p,cos_theta_bead_p))
-				print("")
-				print("[ ] Testing the " + colored("dot product of two unit vectors ","yellow"))
-				print(np.einsum('ij,ij->j',uvec_bead_p,uvec_bead_p))
-				print("")
-		
+
 	return output + "\n\n"
 
 
