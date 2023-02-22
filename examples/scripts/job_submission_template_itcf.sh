@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=itcf_n2_p5000
-#SBATCH --output=itcf_n2_p5000.log
-#SBATCH --error=itcf_n2_p5000.err
+#SBATCH --job-name=itcf_n2_p0
+#SBATCH --output=itcf_n2_p0.log
+#SBATCH --error=itcf_n2_p0.err
 #SBATCH --time=00-3:00
 #SBATCH --account=rrg-pnroy
 #SBATCH --constraint=broadwell
@@ -17,10 +17,10 @@ set -xv
 
 job_type=analysis
 numb_molecule=2
-parameter_value=0.1
-numb_block=10000
-numb_pass=500
-preskip_value=5000
+parameter_value=0.2
+numb_block=20000
+numb_pass=200
+preskip_value=0
 
 echo "job_type        = $job_type"
 echo "numb_molecule   = $numb_molecule"

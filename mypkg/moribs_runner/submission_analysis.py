@@ -375,6 +375,7 @@ for particle_a in particle_a_list:
 				subprocess.call(["mv", "hfc60.pot", slurm_script_dir])
 
 	if (status == "analysis"):
+		execution_for="write"
 		analysis_file_name = support.GetAnalysisFileName(
 			final_result_path,
 			method,
@@ -396,7 +397,8 @@ for particle_a in particle_a_list:
 			extra_file_name,
 			particle_a,
 			ent_method,
-			ent_algorithm)
+			ent_algorithm,
+			execution_for)
 
 		if (method != "ENT"):
 			if preskip >= numb_block:

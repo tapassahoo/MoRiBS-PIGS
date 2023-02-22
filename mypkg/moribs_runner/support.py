@@ -1166,6 +1166,7 @@ def GetAverageEntropyRT(
 			ii = ii + 1
 
 	#extra_file_name = 'Ratio-Trick-'
+	execution_for == "write"
 	FileAnalysis = GetAnalysisFileName(
 		method,
 		True,
@@ -1187,7 +1188,8 @@ def GetAverageEntropyRT(
 		extra_file_name,
 		final_results_path,
 		partition,
-		ext_ent)
+		ext_ent,
+		execution_for)
 	headerString = fmtAverageEntropyRT('tau')
 	np.savetxt(FileAnalysis.SaveEntropyRT,
 			   np.transpose([col_beads[:ii],
@@ -2254,6 +2256,7 @@ class GetAnalysisFileName:
 		self.extra_file_name = extra_file_name1
 		self.input_dir_path = input_dir1
 		self.particle_a = particle_a1
+		self.execution_for = execution_for
 
 		if (self.method == "ENT"):
 			front_layer = "ENT-" + self.extra_file_name
@@ -2340,7 +2343,7 @@ class GetAnalysisFileName:
 			if os.path.exists(self.save_file_imaginary_time_correlation):
 				os.remove(self.save_file_imaginary_time_correlation)
 
-		if (self.method != "ENT"):
+		if ((self.method != "ENT") ans (self.execution_for == "write")):
 			print(" Important message ".center(80, "*") + "\n")
 			print(f'[ ] The name of the file where the estimated potential and total energies are reported at several {variable_name} values is')
 			print("[X] " + colored(os.path.join(self.input_dir_path, file_output1 + name_layer1 + ".txt"), "yellow") + "\n")
