@@ -2343,7 +2343,7 @@ class GetAnalysisFileName:
 			if os.path.exists(self.save_file_imaginary_time_correlation):
 				os.remove(self.save_file_imaginary_time_correlation)
 
-		if ((self.method != "ENT") ans (self.execution_for == "write")):
+		if ((self.method != "ENT") and (self.execution_for == "write")):
 			print(" Important message ".center(80, "*") + "\n")
 			print(f'[ ] The name of the file where the estimated potential and total energies are reported at several {variable_name} values is')
 			print("[X] " + colored(os.path.join(self.input_dir_path, file_output1 + name_layer1 + ".txt"), "yellow") + "\n")
