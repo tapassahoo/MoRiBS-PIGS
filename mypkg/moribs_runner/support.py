@@ -2236,7 +2236,8 @@ class GetAnalysisFileName:
 			extra_file_name1,
 			particle_a1,
 			ent_method1,
-			ent_algorithm):
+			ent_algorithm,
+			execution_for):
 		self.method = method1
 		self.rotor = molecule_rot1
 		self.translational_move = translational_move1
