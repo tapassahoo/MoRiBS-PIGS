@@ -879,11 +879,12 @@ void MCRotationsMove(int type) // update all time slices for rotational degrees 
 
 void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double rand1,double rand2,double rand3,double &MCRotChunkTot,double &MCRotChunkAcp)
 {
+	const char *_proc_=__func__; 
 	int it0 = (it1 - 1);
 	int it2 = (it1 + 1);
 
-   	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1
-   	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0
+   	if (it0<0)             it0 += NumbRotTimes; // NumbRotTimes - 1 that refers to the last bead
+   	if (it2>=NumbRotTimes) it2 -= NumbRotTimes; // 0 that refers to the first bead
 
    	int t0 = offset + it0;
    	int t1 = offset + it1;
@@ -899,19 +900,13 @@ void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double r
    	cost += (step*(rand1-0.5));
    	phi  += (step*(rand2-0.5));
 
-   	if (cost >  1.0)
-   	{
-      	cost = 2.0 - cost;
-   	}
-
-   	if (cost < -1.0)
-   	{
-       	cost = -2.0 - cost;
-   	}
+   	if (cost >  1.0) cost = 2.0 - cost;
+   	if (cost < -1.0) cost = -2.0 - cost;
 
 	if (abs(cost) > 2.0) 
 	{
-        cout<<"Upper or lower limit of cost is excided " << cost<<endl;
+		nrerror(_proc_,"The upper or lower limit of cost is exceeded.");
+        cerr<<"The absolute value is "<<cost<<endl;
 		exit(0);
 	}
 
@@ -969,7 +964,7 @@ void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double r
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
    		//pot_old  += (PotRotEnergyPIMC(gatom,MCCosine,it));
-   		pot_old  += (PotRotEnergyPIMC(gatom,EulangOld,it));
+   		pot_old  += (PotRotEnergyPIMC(gatom,EulangOld,it,type));
 	}
 
 // the new density 
@@ -1009,15 +1004,14 @@ void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double r
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
 		//pot_new  += (PotRotEnergyPIMC(gatom,newcoords,it));
-		pot_new  += (PotRotEnergyPIMC(gatom,EulangNew,it));
+		pot_new  += (PotRotEnergyPIMC(gatom,EulangNew,it,type));
 	}
 
 	double rd;
 
 	if(RotDenType == 0)
 	{
-		if (dens_old>RZERO)
-			rd = dens_new/dens_old;
+		if (dens_old>RZERO) rd = dens_new/dens_old;
 		else rd = 1.0;
 
 		rd *= exp(- MCTau*(pot_new-pot_old));
@@ -5210,23 +5204,17 @@ int findCeil(double *arr, double rand1)
 #endif
 
 //double PotRotEnergy(int atom0, double **cosine, int it)   
-double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)   
+double PotRotEnergyPIMC(int atom0, double *Eulang0, int it, int type)   
 {
 	int type0 = MCType[atom0];
 	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
 	int t0 = offset0 + it;
 
 	double spot;
-
 	if (MCAtom[type0].numb > 1)
 	{
 		if (MCAtom[type0].molecule == 4)
 		{
-			double cosine[NDIM][NumbAtoms*NumbTimes];
-			cosine[0][t0] = sin(Eulang0[CTH])*cos(Eulang0[PHI]);
-			cosine[1][t0] = sin(Eulang0[CTH])*sin(Eulang0[PHI]);
-			cosine[2][t0] = cos(Eulang0[CTH]);
-
 			spot = 0.0;
 			for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
 			{
@@ -5237,8 +5225,14 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 					int t1  = offset1 + it;
 
 					string stype = MCAtom[type0].type;
+					/*
 					if (stype == H2)
 					{
+						double cosine[NDIM][NumbAtoms*NumbTimes];
+						cosine[0][t0] = sin(Eulang0[CTH])*cos(Eulang0[PHI]);
+						cosine[1][t0] = sin(Eulang0[CTH])*sin(Eulang0[PHI]);
+						cosine[2][t0] = cos(Eulang0[CTH]);
+
 						double s1 = 0.0;
 						double s2 = 0.0;
 						double dr2 = 0.0;
@@ -5294,10 +5288,11 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 						vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
 						spot += potl*CMRECIP2KL;
 					}  //stype
+					*/
 
 					if (stype == HF )
 					{
-						double Eulang1[3];
+						double Eulang1[NDIM];
 						Eulang1[PHI] = MCAngles[PHI][t1];
 						Eulang1[CTH] = acos(MCAngles[CTH][t1]);
 						Eulang1[CHI] = 0.0;
@@ -5305,8 +5300,8 @@ double PotRotEnergyPIMC(int atom0, double *Eulang0, int it)
 					}  //stype
 				} // atom1 != atom0
 			} //loop over atom1 (molecules)
-		}
-	}
+		} // MCAtom[type].molecule == 4
+	} // If number of particles are greater than 1
 //
 	if (MCAtom[type0].numb == 1)
 	{
@@ -6096,6 +6091,7 @@ double PotEnergyPIGS(int atom0, double **pos)
 }
 
 
+/*
 #ifdef INDEXMC
 void MCRotationsMoveIndex(int type) // update all time slices for rotational degrees of freedom
 {
@@ -6177,7 +6173,7 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double rand1,double
 
    	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
-   		pot_old  += (PotRotEnergyPIMC(gatom,EulangOld,it));
+   		pot_old  += (PotRotEnergyPIMC(gatom,EulangOld,it,type));
 	}
 
 // the new density 
@@ -6193,7 +6189,7 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double rand1,double
 
 	for (int it=itr0;it<itr1;it++)  // average over tr time slices
 	{
-		pot_new  += (PotRotEnergyPIMC(gatom,EulangNew,it));
+		pot_new  += (PotRotEnergyPIMC(gatom,EulangNew,it,type));
 	}
 
 	double rd;
@@ -6217,3 +6213,4 @@ void MCRotLinStepIndex(int it1,int offset,int gatom,int type,double rand1,double
 
 }
 #endif
+*/

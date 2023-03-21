@@ -1308,7 +1308,6 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number
 		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy
 		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
-		fid << setw(IO_WIDTH) <<(_bpot+_brot)*Units.energy/avergCount << BLANK;  //total energy including rot energy 
 		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
 		fid << setw(IO_WIDTH) << _bCv1*(Units.energy*Units.energy)/avergCount << BLANK; // heat capacity
 		fid << setw(IO_WIDTH) << _bCv2*(Units.energy*Units.energy)/avergCount << BLANK; // rotational heat capacity
@@ -1364,7 +1363,6 @@ void SaveSumEnergy (double acount, double numb)  // global average
 		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;    
 		_feng << setw(IO_WIDTH) <<_rot_total*Units.energy/acount << BLANK;   
 		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
-		_feng << setw(IO_WIDTH) <<(_pot_total+_rot_total)*Units.energy/acount << BLANK;  //total energy including rot  
 		_feng << setw(IO_WIDTH) <<_rotsq_total*(Units.energy*Units.energy)/acount << BLANK;   
 		// Cv
 		/*
