@@ -28,7 +28,7 @@ int ClusterGrowth(int,double *,int,int,int,int, RngStream *, double **);
 void MCRotLinStepSwap(int,int,int,int,double,double,double,double,double &,double &, string);
 void MCRotLinStepSwapBroken(int,int,int,int,double,double,double,double,double &,double &);
 void MCSwap(int, double, string &);
-double PotRotEnergyPIMC(int, double *,int );   
+double PotRotEnergyPIMC(int, double *,int, int);   
 double PotRotEnergyPIGS(int, double *,int , int );   
 double PotRotEnergySwap(int,int,const double *,int , string);   
 double PotRotE3DSwap(int,int,double *,int , string);   

@@ -3529,7 +3529,7 @@ double GetRotEnergyPIMC(void)
 
 	for (int rotor = 0; rotor < NumbAtoms; rotor++)
 	{
-		int offset = NumbTimes*atom0;
+		int offset = NumbTimes*rotor;
 		for (int it0=0;it0<NumbRotTimes;it0++)
 		{
 			int t0 = offset +  it0;

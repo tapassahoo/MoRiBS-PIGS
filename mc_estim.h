@@ -21,6 +21,7 @@ void SaveRhoThetaChi(const char [], double,int); //added by Toby Zeng
 double GetPotEnergy_Diff(void); //added by Hui Li
 
 double GetPotEnergy_Densities(void);
+double GetPotEnergyPIMC(void);
 double GetPotEnergyPIGS(void);
 double GetPotEnergyCage(const double *);
 double GetTotalEnergy(void);
