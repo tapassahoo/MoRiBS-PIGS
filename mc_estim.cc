@@ -3530,6 +3530,10 @@ double GetRotEnergyPIMC(void)
 	for (int rotor = 0; rotor < NumbAtoms; rotor++)
 	{
 		int offset = NumbTimes*rotor;
+
+		double srot_beads = 0.0;
+		double ErotSQ_beads=0.0; 
+		double Erot_termSQ_beads=0.0;
 		for (int it0=0;it0<NumbRotTimes;it0++)
 		{
 			int t0 = offset +  it0;
@@ -3544,12 +3548,15 @@ double GetRotEnergyPIMC(void)
 
 				//if  (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
 				//{
-				srot += (SRotDensDeriv(p0,type)/rdens);
-				Erot_termSQ += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
-				ErotSQ += SRotDensEsqrt(p0,type)/rdens;
+				srot_beads += (SRotDensDeriv(p0,type)/rdens);
+				Erot_termSQ_beads += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
+				ErotSQ_beads += SRotDensEsqrt(p0,type)/rdens;
 				//}
 			}
 		}
+		srot += srot_beads;
+		Erot_termSQ += Erot_termSQ_beads;
+		ErotSQ += ErotSQ_beads;
 	}
 	return srot;
 }
