@@ -59,6 +59,7 @@ void GetPermutation(void);
 
 double GetRotEnergy(void);
 double GetRotEnergyIndex(void);
+double GetRotEnergyPIMC(void);
 double GetRotEnergyPIGS(void);
 double GetRotEnergyCage(void);
 double GetRotPlanarEnergy(void);

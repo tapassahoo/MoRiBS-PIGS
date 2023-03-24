@@ -1442,6 +1442,110 @@ double GetPotEnergyPIGSENT(void)
 	return spotReturn;
 }
 
+double GetPotEnergyPIMC(void)
+	// should be compatible with PotEnergy() from mc_piqmc.cc
+{
+	const char *_proc_=__func__; 
+
+	// double dr[NDIM];
+	string stype = MCAtom[IMTYPE].type;
+	double spot = 0.0;
+	if ( (MCAtom[IMTYPE].molecule == 4) && (MCAtom[IMTYPE].numb > 1) )
+	{
+		spot = 0.0;
+		for (int atom0 = 0; atom0 < (NumbAtoms-1); atom0++)
+		{
+			int offset0 = NumbTimes*atom0;
+			for (int atom1 = (atom0+1); atom1 < NumbAtoms; atom1++)
+			{
+				int offset1 = NumbTimes*atom1;
+
+				double spot_pair = 0.0;
+#pragma omp parallel for reduction(+: spot_pair)
+				for (int it = 0; it < NumbTimes; it++) 	    
+				{  
+					int t0 = offset0 + it;
+					int t1 = offset1 + it;
+
+					/*
+					   if (stype == H2)
+					   {
+					   double s1 = 0.0;
+					   double s2 = 0.0;
+					   double dr2 = 0.0;
+					   double dr[NDIM];
+					   for (int id=0;id<NDIM;id++)
+					   {
+					   dr[id]  = (MCCoords[id][t0] - MCCoords[id][t1]);
+					   dr2    += (dr[id]*dr[id]);
+					   double cst1 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][t0];
+					   double cst2 = (MCCoords[id][t1] - MCCoords[id][t0])*MCCosine[id][t1];
+					   s1 += cst1;
+					   s2 += cst2;
+					   }
+					   double r = sqrt(dr2);
+					   double th1 = acos(s1/r);
+					   double th2 = acos(s2/r);
+
+					   double b1[NDIM];
+					   double b2[NDIM];
+					   double b3[NDIM];
+					   for (int id = 0; id < NDIM; id++)
+					   {
+					   b1[id] = MCCosine[id][t0];
+					   b2[id] = (MCCoords[id][t1] - MCCoords[id][t0])/r;
+					   b3[id] = MCCosine[id][t1];
+					   }
+					   VectorNormalisation(b1);
+					   VectorNormalisation(b2);
+					   VectorNormalisation(b3);
+
+					//Calculation of dihedral angle 
+					double n1[NDIM];
+					double n2[NDIM];
+					double mm[NDIM];
+
+					CrossProduct(b2, b1, n1);
+					CrossProduct(b2, b3, n2);
+					CrossProduct(b2, n2, mm);
+
+					double xx = DotProduct(n1, n2);
+					double yy = DotProduct(n1, mm);
+
+					double phi = atan2(yy, xx);
+					if (phi<0.0) phi += 2.0*M_PI;
+
+					//Dihedral angle calculation is completed here
+					double r1 = 0.74;// bond length in Angstrom
+					r1 /= BOHRRADIUS;
+					double r2 = r1;// bond length in bohr
+					double rd = r/BOHRRADIUS;
+					double potl;
+					vh2h2_(&rd, &r1, &r2, &th1, &th2, &phi, &potl);
+					spot_pair += potl*CMRECIP2KL;
+					} //stype
+					*/
+
+					if (stype == HF)
+					{
+						double Eulang0[NDIM], Eulang1[NDIM];
+						Eulang0[PHI] = MCAngles[PHI][t0];
+						Eulang0[CTH] = acos(MCAngles[CTH][t0]);
+						Eulang0[CHI] = 0.0;
+						Eulang1[PHI] = MCAngles[PHI][t1];
+						Eulang1[CTH] = acos(MCAngles[CTH][t1]);
+						Eulang1[CHI] = 0.0;
+						spot_pair += PotFunc(atom0, atom1, Eulang0, Eulang1, it);
+					} //stype
+				}
+				spot += spot_pair;
+			}// loop over atoms (molecules)
+		}// loop over atoms (molecules)
+	}
+return (spot/(double)NumbTimes);
+}
+
+
 double GetPotEnergy_Densities(void)
 	// should be compatible with PotEnergy() from mc_piqmc.cc
 {
@@ -3413,6 +3517,41 @@ double GetKinEnergy(void)
 	double kin = (double)NumbTimes*Temperature*(0.5*(double)(NDIM*numb) - r2avr);
 
 	return kin;
+}
+
+double GetRotEnergyPIMC(void)
+{
+	int type  = IMTYPE;
+
+    double srot = 0.0;
+    ErotSQ=0.0; // a global variable
+    Erot_termSQ=0.0; // a global variable
+
+	for (int rotor = 0; rotor < NumbAtoms; rotor++)
+	{
+		int offset = NumbTimes*atom0;
+		for (int it0=0;it0<NumbRotTimes;it0++)
+		{
+			int t0 = offset +  it0;
+			int t1 = offset + (it0 + 1) % NumbRotTimes;
+
+			double p0 = 0.0;
+			for (int id=0;id<NDIM;id++) p0 += (MCCosine[id][t0]*MCCosine[id][t1]);
+
+			if(RotDenType == 0)
+			{
+				double rdens = SRotDens(p0,type);
+
+				//if  (fabs(rdens)>RZERO)               // need to find asymptotic for small rot dens
+				//{
+				srot += (SRotDensDeriv(p0,type)/rdens);
+				Erot_termSQ += (SRotDensDeriv(p0,type)/rdens)*(SRotDensDeriv(p0,type)/rdens);
+				ErotSQ += SRotDensEsqrt(p0,type)/rdens;
+				//}
+			}
+		}
+	}
+	return srot;
 }
 
 double GetRotEnergy(void)

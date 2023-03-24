@@ -1018,7 +1018,7 @@ void MCGetAveragePIMC(void)
 	_bkin            += skin;                     // block average for kin energy
 	_kin_total       += skin;                     // accumulated average 
 
-	double spot       = GetPotEnergy_Densities(); // pot energy and density distributions
+	double spot       = GetPotEnergyPIMC(); // pot energy and density distributions
 	_bpot            += spot;                     // block average for pot energy
 	_pot_total       += spot;
 
@@ -1045,7 +1045,7 @@ void MCGetAveragePIMC(void)
 #ifdef INDEXMC
 			srot      = GetRotEnergyIndex();     // kin energy
 #else
-			srot      = GetRotEnergy();     // kin energy
+			srot      = GetRotEnergyPIMC();     // kin energy
 #endif
 		}
 		_brot        += srot;
