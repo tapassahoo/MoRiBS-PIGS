@@ -241,6 +241,7 @@ if (spin_isomer == 1):
 	prefix_name = "-o-"
 rotor_name = prefix_name + rotor
 
+print("Tapas Sahoo")
 mc_step = mc.GetBeadStepLevel(molecular_system, parameter_name, method)
 bead_list = mc_step.beads
 step_com_move = mc_step.step_com
@@ -249,6 +250,9 @@ step_rot_move = mc_step.step_rot
 #
 step_com_impurity = step_com_move
 level_bisection_impurity = level_bisection
+print(bead_list)
+print("Tapas Sahoo")
+exit()
 
 numb_block_restart = args.nblock_restart
 
