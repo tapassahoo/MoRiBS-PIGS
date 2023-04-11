@@ -20,7 +20,8 @@ dir_moribs = '"academic-project/"'
 plot_dir_path = '"academic-project/outputs/"'
 """
 
-extra_name = '"initial-orientation-theta-180-degree-"'
+#extra_name = '"initial-orientation-theta-180-degree-"'
+extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"

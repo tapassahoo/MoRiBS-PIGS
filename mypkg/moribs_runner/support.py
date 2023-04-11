@@ -177,6 +177,7 @@ def get_execution_file(method, ent_method, execution_file_path):
 		print("The source codes are compiled successfully.".center(80) + "\n")
 		print("*"*80 + "\n")
 	else:
+		print("The compilation failed!\n")
 		print("The file called " + execution_file + " does not exist." + "\n")
 		print("*"*80 + "\n")
 		exit()
@@ -185,7 +186,6 @@ def get_execution_file(method, ent_method, execution_file_path):
 def compile_rotmat(execution_file_path, input_dir_path):
 	path_enter_linden = os.path.join(execution_file_path, "linear_prop")
 	print("*"*80 + "\n")
-	print("\n" + "The codes for the propagator of a linear rotor are compiled successfully." + "\n") 
 	call(["make", "-C", path_enter_linden, "clean"])
 	call(["make", "-C", path_enter_linden])
 	print("\n" + "*"*80 + "\n")

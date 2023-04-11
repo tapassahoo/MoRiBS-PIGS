@@ -241,7 +241,6 @@ if (spin_isomer == 1):
 	prefix_name = "-o-"
 rotor_name = prefix_name + rotor
 
-print("Tapas Sahoo")
 mc_step = mc.GetBeadStepLevel(molecular_system, parameter_name, method)
 bead_list = mc_step.beads
 step_com_move = mc_step.step_com
@@ -250,9 +249,6 @@ step_rot_move = mc_step.step_rot
 #
 step_com_impurity = step_com_move
 level_bisection_impurity = level_bisection
-print(bead_list)
-print("Tapas Sahoo")
-exit()
 
 numb_block_restart = args.nblock_restart
 
@@ -266,6 +262,10 @@ now = datetime.now() # current date and time
 date_time = now.strftime("%d/%m/%Y, %H:%M:%S")
 print("date and time:".capitalize().ljust(29), date_time, "\n")
 print("*"*80 + "\n")
+if (method == "PIMC"):
+	print("\n" + colored("Simulation:".ljust(30),"blue") + "The jobs are submitted for " + colored("finite temperature", "yellow") + " simulations.\n")
+if (method == "PIGS"):
+	print("\n" + colored("Simulation:".ljust(30),"blue") + "The jobs are submitted for " + colored("ground-state", "yellow") + " simulations.\n")
 
 debugging=False
 if debugging:
@@ -361,6 +361,8 @@ for particle_a in particle_a_list:
 
 	if (status == "submission"):
 		slurm_script_dir = os.path.join(run_job_root_dir, working_dir_name + "-Logs")
+		if (debugging):
+			print("slurm_script_dir: ".ljust(30) + slurm_script_dir + "\n")
 
 		if not os.path.isdir(slurm_script_dir):
 			subprocess.call(["mkdir", "-p", slurm_script_dir])
@@ -441,20 +443,16 @@ for particle_a in particle_a_list:
 	for index, ibead in enumerate(bead_list, start=0):
 
 		if (method == "PIMC"):
+			if (ibead % 2) != 0:
+				numb_bead = ibead + 1
+			else:
+				numb_bead = ibead
 
-			if (parameter_name == "tau"):
-				beta = tau * value
-				temperature = 1.0 / beta
-				variable = beta
-			if (parameter_name == "beta"):
-				tau = beta / value
-				variable = tau
-
-			dir_name_trotter_number = working_dir_name + "-Trotter-Number-" + str(ibead)
-			print(dir_name_trotter_number)
-
+			beta = parameter_value
+			temperature = 1.0 / beta
+			tau = beta / numb_bead
+			variable = tau
 		else:
-
 			if (ibead % 2) != 0:
 				numb_bead = ibead
 			else:
@@ -470,115 +468,115 @@ for particle_a in particle_a_list:
 				tau = beta / (numb_bead - 1)
 				variable = tau
 
-			dir_name_trotter_number = working_dir_name + "-Trotter-Number-" + str(numb_bead)
+		dir_name_trotter_number = working_dir_name + "-Trotter-Number-" + str(numb_bead)
 
-			if (status == "submission"):
+		if (status == "submission"):
 
-				if args.restart:
-					restart_bool = True
-				else:
-					restart_bool = False
+			if args.restart:
+				restart_bool = True
+			else:
+				restart_bool = False
 
-				support.job_submission(
-					server_name,
-					status,
-					translational_move,
-					rotational_move,
-					root_dir_run,
-					run_job_root_dir,
-					dir_name_trotter_number,
-					input_dir_path,
-					execution_file,
-					rpt_val,
-					ibead,
-					numb_bead,
-					step_rot_move,
-					step_com_move,
-					level_bisection,
-					temperature,
-					numb_block,
-					numb_pass,
-					rotor,
-					numb_molecule,
-					gfactor,
-					dipole_moment,
-					method,
-					ent_method,
-					ent_algorithm,
-					output_dir_path,
-					slurm_script_dir,
-					cpu_run,
-					particle_a,
-					partition_name,
-					status_cagepot,
-					user_name,
-					output_file_dir_name,
-					execution_file_path,
-					restart_bool,
-					numb_block_restart,
-					crystal,
-					rotor_type,
-					spin_isomer,
-					impurity,
-					step_com_impurity,
-					level_bisection_impurity)
+			support.job_submission(
+				server_name,
+				status,
+				translational_move,
+				rotational_move,
+				root_dir_run,
+				run_job_root_dir,
+				dir_name_trotter_number,
+				input_dir_path,
+				execution_file,
+				rpt_val,
+				ibead,
+				numb_bead,
+				step_rot_move,
+				step_com_move,
+				level_bisection,
+				temperature,
+				numb_block,
+				numb_pass,
+				rotor,
+				numb_molecule,
+				gfactor,
+				dipole_moment,
+				method,
+				ent_method,
+				ent_algorithm,
+				output_dir_path,
+				slurm_script_dir,
+				cpu_run,
+				particle_a,
+				partition_name,
+				status_cagepot,
+				user_name,
+				output_file_dir_name,
+				execution_file_path,
+				restart_bool,
+				numb_block_restart,
+				crystal,
+				rotor_type,
+				spin_isomer,
+				impurity,
+				step_com_impurity,
+				level_bisection_impurity)
 
-			if (status == "analysis"):
+		if (status == "analysis"):
 
-				final_dir_in_work = os.path.join(output_dir_path, dir_name_trotter_number)
-				#support.RemoveFiles(method, numbbeads, temperature, rotor, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
-				try:
-					if ((method == "ENT") and (ent_algorithm == "WOR")):
-						analyzed_entropy_file.write(
-							support.GetAverageEntropy(
+			final_dir_in_work = os.path.join(output_dir_path, dir_name_trotter_number)
+			#support.RemoveFiles(method, numbbeads, temperature, rotor, RotorType, preskip, postskip, numbblocks, final_dir_in_work)
+			try:
+				if ((method == "ENT") and (ent_algorithm == "WOR")):
+					analyzed_entropy_file.write(
+						support.GetAverageEntropy(
+							numb_bead,
+							parameter_value,
+							final_dir_in_work,
+							preskip,
+							postskip,
+							numb_block,
+							ent_method))
+				if (method != "ENT"):
+					if (get_energy):
+						analyzed_energy_file.write(
+							support.get_average_energy(
+								method,
 								numb_bead,
+								parameter_name,
 								parameter_value,
 								final_dir_in_work,
 								preskip,
 								postskip,
+								numb_block))
+					if (get_op):
+						analyzed_order_parameter_file.write(
+							support.get_average_order_parameter(
+								debugging,
+								method,
+								numb_molecule,
+								numb_bead,
+								parameter_name,
+								parameter_value,
+								final_dir_in_work,
+								preskip,
+								postskip,
+								numb_block))
+					if (get_itcf):
+						analyzed_imaginary_time_correlation_file.write(
+							support.get_imaginary_time_correlation(
+								debugging,
+								final_dir_in_work,
+								method,
+								rotor_type,
+								numb_molecule,
+								numb_bead,
+								parameter_name,
+								parameter_value,
 								numb_block,
-								ent_method))
-					if (method != "ENT"):
-						if (get_energy):
-							analyzed_energy_file.write(
-								support.get_average_energy(
-									method,
-									numb_bead,
-									parameter_name,
-									parameter_value,
-									final_dir_in_work,
-									preskip,
-									postskip,
-									numb_block))
-						if (get_op):
-							analyzed_order_parameter_file.write(
-								support.get_average_order_parameter(
-									debugging,
-									method,
-									numb_molecule,
-									numb_bead,
-									parameter_name,
-									parameter_value,
-									final_dir_in_work,
-									preskip,
-									postskip,
-									numb_block))
-						if (get_itcf):
-							analyzed_imaginary_time_correlation_file.write(
-								support.get_imaginary_time_correlation(
-									debugging,
-									final_dir_in_work,
-									method,
-									rotor_type,
-									numb_molecule,
-									numb_bead,
-									parameter_name,
-									parameter_value,
-									numb_block,
-									preskip,
-									postskip))
-				except BaseException:
-					pass
+								preskip,
+								postskip))
+			except BaseException:
+				pass
 
 	if (status == "analysis") and (method != "ENT"):
 		if (get_energy):
