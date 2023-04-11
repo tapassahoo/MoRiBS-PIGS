@@ -688,48 +688,48 @@ while (blockCount<NumberOfMCBlocks) // START NEW BLOCK
 			SaveGraSum(MCFileName.c_str(),totalCount);
 #endif
 
-		/*
+	/*
 #ifdef IOWRITE
-if(IMPURITY && MCAtom[IMTYPE].molecule == 1)
-SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
+	if(IMPURITY && MCAtom[IMTYPE].molecule == 1)
+	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
-if(IMPURITY && MCAtom[IMTYPE].molecule == 3)
-SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
+	if(IMPURITY && MCAtom[IMTYPE].molecule == 3)
+	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
-if(IMPURITY && MCAtom[IMTYPE].molecule == 2)
-{
-SaveDensities3D(MCFileName.c_str(),totalCount,MC_TOTAL); // this step takes lots of space.  temporarily turnned off
-SaveRho1D(MCFileName.c_str(),totalCount,MC_TOTAL);
-		// SaveRhoThetaChi(MCFileName.c_str(),totalCount,MC_TOTAL); // we don't need 2d angular distribution comparison now
-		}
+	if(IMPURITY && MCAtom[IMTYPE].molecule == 2)
+	{
+	SaveDensities3D(MCFileName.c_str(),totalCount,MC_TOTAL); // this step takes lots of space.  temporarily turnned off
+	SaveRho1D(MCFileName.c_str(),totalCount,MC_TOTAL);
+			// SaveRhoThetaChi(MCFileName.c_str(),totalCount,MC_TOTAL); // we don't need 2d angular distribution comparison now
+			}
 
 #endif
-*/
-if (ROTATION && PIMC_SIM)                  // DUMP  accumulated average
-	SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
+	*/
+	if (ROTATION && PIMC_SIM)                  // DUMP  accumulated average
+		SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
 	}
 
-SaveInstantConfig(MCFileName.c_str(),blockCount);
+	SaveInstantConfig(MCFileName.c_str(),blockCount);
 
-//PIMCRESTART begins // 
-//  CHECKPOINT: save status, rnd streams and configs ------
-// The below segment will save the data at each 200 blocks interval. One may change the interval by changing blockCount%200 with blockCount%any number//
+	//PIMCRESTART begins // 
+	//  CHECKPOINT: save status, rnd streams and configs ------
+	// The below segment will save the data at each 200 blocks interval. One may change the interval by changing blockCount%200 with blockCount%any number//
 
-MCStartBlock = blockCount; 
-if (blockCount % 200 == 0)
-{
-	IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
-	IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
-	IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
-	IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
-	IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
-}
+	MCStartBlock = blockCount; 
+	if (blockCount % 200 == 0)
+	{
+		IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
+		IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
+		IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
+		IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+		IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
+	}
 
-if (WORM)
-{
-	IOFileBackUp(FQWORMS);
-	QWormsIO(IOWrite,FQWORMS);
-}
+	if (WORM)
+	{
+		IOFileBackUp(FQWORMS);
+		QWormsIO(IOWrite,FQWORMS);
+	}
 }  
 // END  loop over blocks ------------------------
 // } // master cpu if block ends
