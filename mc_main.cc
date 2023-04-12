@@ -554,58 +554,58 @@ int itfnl=itini+chunksize;
 	chunksize=NumbRotTimes/NThreads;
 } // end omp
 
-cout<<"NThreads="<<NThreads<<" chunksize="<<chunksize<<endl;
+	cout<<"NThreads="<<NThreads<<" chunksize="<<chunksize<<endl;
 
-printf("OpenMP version: %d\n", _OPENMP);
-//randomseed(); //set seed according to clock
-//RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+	printf("OpenMP version: %d\n", _OPENMP);
+	//randomseed(); //set seed according to clock
+	//RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
 
-//Monte Carlo simulation begins here//
-long int blockCount = MCStartBlock;  
-while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
-{      
-	blockCount++; 
-	if (PIMC_SIM) MCResetBlockAveragePIMC();
-	if (PIGS_SIM) MCResetBlockAveragePIGS();
-	if (ENT_SIM) MCResetBlockAveragePIGSENT();
+	//Monte Carlo simulation begins here//
+	long int blockCount = MCStartBlock;  
+	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
+	{      
+		blockCount++; 
+		if (PIMC_SIM) MCResetBlockAveragePIMC();
+		if (PIGS_SIM) MCResetBlockAveragePIGS();
+		if (ENT_SIM) MCResetBlockAveragePIGSENT();
 
-	long int passCount = 0;        // BEGIN NEW MC PASS
-	long int passTotal = 0;        // total number of Moves = passCount*number of beads = passTotal
+		long int passCount = 0;        // BEGIN NEW MC PASS
+		long int passTotal = 0;        // total number of Moves = passCount*number of beads = passTotal
 
-	while (passCount++ < NumberOfMCPasses) 
+		while (passCount++ < NumberOfMCPasses) 
 		for (int time=0; time<NumbTimes; time++)
 		{
 			passTotal++;  
 
 			for (int type=0;type<NumbTypes;type++)
-				if (WORM && (type == Worm.type)) 
+			if (WORM && (type == Worm.type)) 
+			{
+
+				MCWormMove();
+
+				if (!Worm.exists)
 				{
+					/* reactive */
+					int rt = nrnd2(NumbTimes);   // select a time slice
 
-					MCWormMove();
-
-					if (!Worm.exists)
-					{
-						/* reactive */
-						int rt = nrnd2(NumbTimes);   // select a time slice
-
-						if ((type == BSTYPE) || (type == FERMTYPE))
-							MCBisectionMoveExchange (type,rt);
-						else
-							MCBisectionMove (type,rt);
-						/* reactive */
+					if ((type == BSTYPE) || (type == FERMTYPE))
+						MCBisectionMoveExchange (type,rt);
+					else
+						MCBisectionMove (type,rt);
+					/* reactive */
 #ifdef MOVECENTROIDTEST
-						if  (time == 0)
-							if ((type == BSTYPE) || (type == FERMTYPE))
-								MCMolecularMoveExchange(type);        
-							else
-								MCMolecularMove(type);        
+					if  (time == 0)
+						if ((type == BSTYPE) || (type == FERMTYPE))
+							MCMolecularMoveExchange(type);        
+						else
+							MCMolecularMove(type);        
 #endif
-					}
-				} 
-				else
-				{
-					PIMCPass(type,time);
 				}
+			} 
+			else
+			{
+				PIMCPass(type,time);
+			}
 
 			if (blockCount>NumberOfEQBlocks)        // skiping the number of blocks after that the system get equilibrated.
 			{
@@ -656,7 +656,7 @@ while (blockCount<NumberOfMCBlocks) // START NEW BLOCK
 							PrintXYZprl = 0;
 						}
 					}
-				}
+				} // if (passTotal % MCSKIP_AVERG == 0)
 				if (ENT_ENSMBL == EXTENDED_ENSMBL) MCGetAveragePIGSENT(IMTYPE);
 
 				// DUMP, save global average. if avergCount = 0, then MCGetAverage is never called in this block.  All Saving steps are skipped.
@@ -666,86 +666,86 @@ while (blockCount<NumberOfMCBlocks) // START NEW BLOCK
 					sumsCount += 1.0;                 
 					if (!ENT_SIM) SaveSumEnergy (totalCount,sumsCount);
 				}
-			}  
+			} // if (blockCount>NumberOfEQBlocks)  
 
 			if (passTotal % MCSKIP_RATIO == 0)
 				MCSaveAcceptRatio(passTotal,passCount,blockCount);
-		}                               
+		} // for (int time=0; time<NumbTimes; time++) and // while (passCount++ < NumberOfMCPasses) 
 
-	// END  loop over MC passes (time slices) -----------------
+		// END  loop over MC passes (time slices) -----------------
 
-	if (blockCount>NumberOfEQBlocks && avergCount)   // skip equilibration steps
-	{
-		MCSaveBlockAverages(blockCount);
-		// save accumulated interatomic distribution
+		if (blockCount>NumberOfEQBlocks && avergCount)   // skip equilibration steps
+		{
+			MCSaveBlockAverages(blockCount);
+			// save accumulated interatomic distribution
 
 #ifdef HISTOGRAM
-		if (blockCount > 1500)
-			SaveGxyzSum(MCFileName.c_str(),totalCount);
+			if (blockCount > 1500)
+				SaveGxyzSum(MCFileName.c_str(),totalCount);
 #endif
 #ifdef NEWDENSITY
-		if (blockCount > 600)
-			SaveGraSum(MCFileName.c_str(),totalCount);
+			if (blockCount > 600)
+				SaveGraSum(MCFileName.c_str(),totalCount);
 #endif
 
-	/*
+		/*
 #ifdef IOWRITE
-	if(IMPURITY && MCAtom[IMTYPE].molecule == 1)
-	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
+		if(IMPURITY && MCAtom[IMTYPE].molecule == 1)
+		SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
-	if(IMPURITY && MCAtom[IMTYPE].molecule == 3)
-	SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
+		if(IMPURITY && MCAtom[IMTYPE].molecule == 3)
+		SaveDensities2D(MCFileName.c_str(),totalCount,MC_TOTAL);
 
-	if(IMPURITY && MCAtom[IMTYPE].molecule == 2)
-	{
-	SaveDensities3D(MCFileName.c_str(),totalCount,MC_TOTAL); // this step takes lots of space.  temporarily turnned off
-	SaveRho1D(MCFileName.c_str(),totalCount,MC_TOTAL);
-			// SaveRhoThetaChi(MCFileName.c_str(),totalCount,MC_TOTAL); // we don't need 2d angular distribution comparison now
-			}
+		if(IMPURITY && MCAtom[IMTYPE].molecule == 2)
+		{
+		SaveDensities3D(MCFileName.c_str(),totalCount,MC_TOTAL); // this step takes lots of space.  temporarily turnned off
+		SaveRho1D(MCFileName.c_str(),totalCount,MC_TOTAL);
+				// SaveRhoThetaChi(MCFileName.c_str(),totalCount,MC_TOTAL); // we don't need 2d angular distribution comparison now
+				}
 
 #endif
-	*/
-	if (ROTATION && PIMC_SIM)                  // DUMP  accumulated average
-		SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
-	}
+		*/
+		if (ROTATION && PIMC_SIM)                  // DUMP  accumulated average
+			SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
+		}
 
-	SaveInstantConfig(MCFileName.c_str(),blockCount);
+		SaveInstantConfig(MCFileName.c_str(),blockCount);
 
-	//PIMCRESTART begins // 
-	//  CHECKPOINT: save status, rnd streams and configs ------
-	// The below segment will save the data at each 200 blocks interval. One may change the interval by changing blockCount%200 with blockCount%any number//
+		//PIMCRESTART begins // 
+		//  CHECKPOINT: save status, rnd streams and configs ------
+		// The below segment will save the data at each 200 blocks interval. One may change the interval by changing blockCount%200 with blockCount%any number//
 
-	MCStartBlock = blockCount; 
-	if (blockCount % 200 == 0)
-	{
-		IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
-		IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
-		IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
-		IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
-		IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
-	}
+		MCStartBlock = blockCount; 
+		if (blockCount % 200 == 0)
+		{
+			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
+			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
+			IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
+			IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+			IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
+		}
+
+		if (WORM)
+		{
+			IOFileBackUp(FQWORMS);
+			QWormsIO(IOWrite,FQWORMS);
+		}
+	}  
+	// END  loop over blocks ------------------------
+	// } // master cpu if block ends
+
+	//MPI_Finalize();
+
+	DoneTotalAverage();  // DUMP
 
 	if (WORM)
-	{
-		IOFileBackUp(FQWORMS);
-		QWormsIO(IOWrite,FQWORMS);
-	}
-}  
-// END  loop over blocks ------------------------
-// } // master cpu if block ends
-
-//MPI_Finalize();
-
-DoneTotalAverage();  // DUMP
-
-if (WORM)
-	MCWormDone();
+		MCWormDone();
 
 	DoneMCEstims();
 	DonePotentials();
 
-if (ROTATION)
-	DoneRotDensity();
+	if (ROTATION)
+		DoneRotDensity();
 
 	MCMemFree();
 	RandomFree();
@@ -754,7 +754,7 @@ if (ROTATION)
 	MFreeQWCounts();
 
 	return 1; 
-	}
+}
 
 void PIMCPass(int type,int time)
 {
