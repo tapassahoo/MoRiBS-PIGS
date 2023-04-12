@@ -905,8 +905,8 @@ void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double r
 
 	if (abs(cost) > 2.0) 
 	{
-		nrerror(_proc_,"The upper or lower limit of cost is exceeded.");
-        cerr<<"The absolute value is "<<cost<<endl;
+		nrerror(_proc_,"Either the upper or the lower limit of cos(theta) is exceeded.");
+        cerr<<"The absolute value of it is "<<cost<<endl;
 		exit(0);
 	}
 
@@ -950,11 +950,7 @@ void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double r
     }
 
    if (fabs(dens_old)<RZERO) dens_old = 0.0;
-#ifndef NEGATIVEDENSITY
    if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-   if (dens_old<0.0) dens_old=fabs(dens_old);
-#endif
 
    double pot_old  = 0.0;
 
@@ -993,11 +989,7 @@ void MCRotLinStepPIMC(int it1,int offset,int gatom,int type,double step,double r
 	}
 
 	if (fabs(dens_new)<RZERO) dens_new = 0.0;
-#ifndef NEGATIVEDENSITY
 	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-	if (dens_new<0.0) dens_new=fabs(dens_new);
-#endif
 
 	double pot_new  = 0.0;
 
@@ -1079,8 +1071,8 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 
 	if (abs(cost) > 2.0) 
 	{
-		nrerror(_proc_,"The upper or lower limit of cost is exceeded.");
-        cerr<<"The absolute value is "<<cost<<endl;
+		nrerror(_proc_,"Either the upper or the lower limit of cos(theta) is exceeded.");
+        cerr<<"The absolute value of it is "<<cost<<endl;
 		exit(0);
 	}
 
@@ -1129,11 +1121,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
     }
 
    if (fabs(dens_old)<RZERO) dens_old = 0.0;
-#ifndef NEGATIVEDENSITY
    if (dens_old<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-   if (dens_old<0.0) dens_old=fabs(dens_old);
-#endif
 
    double pot_old  = 0.0;
 
@@ -1176,11 +1164,7 @@ void MCRotLinStepPIGS(int it1,int offset,int gatom,int type,double step,double r
 	}
 
 	if (fabs(dens_new)<RZERO) dens_new = 0.0;
-#ifndef NEGATIVEDENSITY
 	if (dens_new<0.0 && RotDenType == 0) nrerror("Rotational Moves: ","Negative rot density");
-#else
-	if (dens_new<0.0) dens_new=fabs(dens_new);
-#endif
 
 	double pot_new  = 0.0;
 
@@ -5204,9 +5188,8 @@ int findCeil(double *arr, double rand1)
 #endif
 
 //double PotRotEnergy(int atom0, double **cosine, int it)   
-double PotRotEnergyPIMC(int atom0, double *Eulang0, int it, int type)   
+double PotRotEnergyPIMC(int atom0, double *Eulang0, int it, int type0)   
 {
-	int type0 = MCType[atom0];
 	int offset0 = MCAtom[type0].offset+atom0*NumbTimes;
 	int t0 = offset0 + it;
 
