@@ -27,17 +27,17 @@ blank_space = " "
 # job_type is two types - "submission" and "analysis"
 job_type = "submission"
 #job_type = "analysis"
-method = "PIMC"
+method = "PIGS"
 
 system = "HF"
 rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.1
+parameter_value = 0.2
 
-numb_molecule=2
-numb_block=20000
+numb_molecule=25
+numb_block=5000
 numb_pass=200
 numb_preskip=0
 
@@ -47,7 +47,7 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(10.0, 10.01, 0.2, dtype=float)
+	rlist = np.arange(7.0, 10.01, 0.2, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
@@ -65,8 +65,8 @@ if (job_type=="analysis"):
 	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
 	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
 if (job_type=="submission"):
-	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
-	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
+	temp_file_name  = "temp0_" + job_type + "_" + method + "_" + submission_root_dir_name + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
+	temp_file_name1 = "temp1_" + job_type + "_" + method + "_" + submission_root_dir_name + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
 
 for rcom in rlist:
 	support.replace(
