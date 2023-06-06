@@ -2002,12 +2002,18 @@ def job_string_sbatch_moribs(
 			thread = 1
 			wall_time = "07-00:00"
 	elif ((numb_molecule >= 11) and (numb_molecule <=20)):
+		wall_time = "03-00:00"
 		if (numb_bead < 41):
 			thread = 1
-			wall_time = "03-00:00"
 		else: 
-			thread = 1
-			wall_time = "07-00:00"
+			thread = 2
+	elif ((numb_molecule >= 21) and (numb_molecule <=30)):
+		wall_time = "03-00:00"
+		if (numb_bead < 41):
+			thread = 2
+		else: 
+			thread = 4
+
 
 	omp_thread = str(thread)
 	job_name = file_name + str(numb_bead)
