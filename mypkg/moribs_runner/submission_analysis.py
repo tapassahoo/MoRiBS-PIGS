@@ -282,9 +282,9 @@ elif (method == "PIMC"):
 	final_result_path = os.path.join(home, plot_dir_path, "final-pimc-outputs-for-plotting")
 else:
 	final_result_path = os.path.join(home, plot_dir_path, "final-ent-outputs-for-plotting")
-temp_dir = os.path.dirname(final_result_path)
-if not os.path.exists(temp_dir):
-	os.makedirs(temp_dir)
+
+if not os.path.exists(final_result_path)
+	os.makedirs(final_result_path)
 
 execution_file_path = os.path.join(home, source_code_dir_name)
 
