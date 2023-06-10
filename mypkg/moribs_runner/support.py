@@ -1888,6 +1888,7 @@ def job_submission(
 	elif ((server_name == "graham") or (server_name == "nlogn")):
 		if (partition_name == user_name):
 			call(["sbatch", "-p", user_name, fname])
+			print("\n" + colored("The job is submitted.", "green") + "\n")
 		else:
 			job_id=subprocess.run(["sbatch", fname], capture_output=True, text=True)
 			if not job_id.stdout:
@@ -1897,10 +1898,11 @@ def job_submission(
 				file_job_id = open(pimc_job_id_file,"w")
 				file_job_id.write(job_id.stdout)
 				file_job_id.close()
+				print("\n" + colored("The job is submitted.", "green") + "\n")
 	else:
 		call(["chmod", "+x", fname])
 		os.system("./" + fname + " &" )
-	print("\n" + colored("The job is submitted.", "green") + "\n")
+		print("\n" + colored("The job is submitted.", "green") + "\n")
 
 	os.chdir(input_dir_path)
 
