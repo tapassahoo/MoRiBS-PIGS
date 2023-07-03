@@ -243,6 +243,8 @@ rotor_name = prefix_name + rotor
 
 mc_step = mc.GetBeadStepLevel(molecular_system, parameter_name, method)
 bead_list = mc_step.beads
+if (numb_molecule1 > 20):
+	bead_list = np.arange(10,81,10,dtype=int)
 step_com_move = mc_step.step_com
 level_bisection = mc_step.level_com
 step_rot_move = mc_step.step_rot
