@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
 		} 
 		cout<<"  "<<endl;
 		cout<<"  "<<endl;
-		exit();
+		exit(111);
 		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
 			int offset0 = NumbTimes*atom0;

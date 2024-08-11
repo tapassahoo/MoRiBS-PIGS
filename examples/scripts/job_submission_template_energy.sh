@@ -32,8 +32,11 @@ echo "numb_block      = $numb_block"
 echo "numb_pass       = $numb_pass"
 echo "numb_preskip    = $preskip_value"
 
-new_file="temp_execution_moribs_${simulation_type}_driver_linear_molecule_n${numb_molecule}HF_beta${parameter_value}inverse_kelvin_mc_blocks${numb_block}_mc_passes${numb_pass}_nskip${preskip_value}_${job_type}.py";
-echo "numb_preskip    = $new_file";
+new_file="temp_file_for_execution_of_moribs_${simulation_type}_driver_for_linear_molecule_${numb_molecule}HF_beta${parameter_value}kelvin_inverse_mc_blocks${numb_block}_mc_passes${numb_pass}_nskip${preskip_value}_${job_type}.py";
+
+echo ""
+echo "Name of the script file for the submission is - $new_file";
+echo ""
 
 cd ${HOME}/${extra_path}MoRiBS-PIGS/examples/scripts/
 cp generic_execution_moribs_driver_linear_molecule.py  $new_file

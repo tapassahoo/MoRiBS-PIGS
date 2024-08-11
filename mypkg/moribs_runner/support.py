@@ -177,7 +177,7 @@ def get_execution_file(method, ent_method, execution_file_path):
 		print("The source codes are compiled successfully.".center(80) + "\n")
 		print("*"*80 + "\n")
 	else:
-		print("The compilation failed!\n")
+		print("Compilation is failed!!!!!!!!\n")
 		print("The file called " + execution_file + " does not exist." + "\n")
 		print("*"*80 + "\n")
 		exit()
