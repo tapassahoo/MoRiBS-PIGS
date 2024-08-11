@@ -832,14 +832,10 @@ void initChain_config(double **pos)
 	double LatticePhi   = 0.25*M_PI;
     for (int atom = 0; atom < NumbAtoms1; atom++)
     {
-        for (int it = 0; it < NumbTimes; it++)
-        {
-            int ii = it + atom*NumbTimes;
-   		    for (int id = 0; id < NDIM; id++)   // set the center of the box at the origin
-    	    {
-	            pos[id][ii] = shift[id];
-	        }
-        }
+		for (int id = 0; id < NDIM; id++)   // set the center of the box at the origin
+		{
+			pos[id][atom*NumbTimes] = shift[id];
+		}
 
 		shift[0] += Distance*sin(LatticeTheta)*cos(LatticePhi);
 		shift[1] += Distance*sin(LatticeTheta)*sin(LatticePhi);

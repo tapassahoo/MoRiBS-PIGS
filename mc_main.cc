@@ -228,15 +228,16 @@ int main(int argc, char *argv[])
 
 		MCConfigInit();                // generate initial configurations
 
-		for (int it=0;it<NumbAtoms*NumbTimes;it++)
+		for (int t1=0; t1<(NumbAtoms*NumbTimes); t1++)
 		{
-			for (int id=0;id<NDIM;id++)
+			for (int id=0; id<NDIM; id++)
 			{
-				cout<<"it " << it<<" id "<< id<< " "<< MCCoords[id][it]<<endl;
+				cout<<"t1 " << t1 <<" id "<< id << " "<< MCCoords[id][t1] << endl;
 			}
 		} 
 		cout<<"  "<<endl;
 		cout<<"  "<<endl;
+		exit();
 		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
 		{
 			int offset0 = NumbTimes*atom0;
