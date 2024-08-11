@@ -25,7 +25,7 @@ blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
 job_type = "INPUT_JOB_TYPE"
-method = "PIGS"
+method = "INPUT_SIMULATION_TYPE"
 
 system = "HF"
 rotor = "HF"
@@ -120,5 +120,6 @@ for rcom in rlist:
 	)
 
 	print(cmd_run)
+	exit()
 	os.system(cmd_run)
 	subprocess.call(["rm", temp_file_name])
