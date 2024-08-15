@@ -1253,10 +1253,10 @@ def get_input_file(
 	input_dir_path = os.path.join(os.getcwd(), "")
 
 	if restart_bool:
-		replace("job_input", "RESTART",
+		replace("job_status_input", "RESTART",
 				"qmc_run.input", "qmc_temp.input")
 	else:
-		replace("job_input", "START",
+		replace("job_status_input", "START",
 				"qmc_run.input", "qmc_temp.input")
 	call(["mv", "qmc_temp.input", "qmc_temp1.input"])
 
@@ -1617,7 +1617,7 @@ def job_submission(
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
 			print("*"*80 + "\n")
 			warning_message = "Remove " + os.path.join(output_dir_path, dir_name_trotter_number)
-			print("Warning: " + warning_message)
+			print(colored("Warning: ","magenta") + warning_message)
 			print("\n" + "*"*80 + "\n")
 			return
 

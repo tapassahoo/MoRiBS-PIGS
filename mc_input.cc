@@ -457,15 +457,15 @@ void IOReadParams(const char in_file[],int & mc_status)
 
 // begin  DUMP -----------------------------------------
 
-   cout << endl;
-   cout << "MasterDir   "       <<MasterDir<<endl;
-   cout << "OutPut   "          <<OutputDir<<endl;
-   cout << "File Name Prefix   "<<FNPrefix<<endl;
-
-   cout << "Temperature "<<Temperature<<endl;
-   cout << "Density  "   <<Density<<endl;
-   cout << "DIM = "        <<NDIM<<endl;
-	cout<<"MINIMAGE   "<<MINIMAGE<<endl;
+	cout << "mc_status          "<<mc_status<<endl;
+	cout << "MasterDir          "<<MasterDir<<endl;
+	cout << "OutPut             "<<OutputDir<<endl;
+	cout << "File Name Prefix   "<<FNPrefix<<endl;
+	cout << endl;
+	cout << "MINIMAGE           "<<MINIMAGE<<endl;
+	cout << "DIM =              "<<NDIM<<endl;
+	cout << "Temperature        "<<Temperature<<endl;
+	cout << "Density            "<<Density<<endl;
 
    int w = 6;
    

@@ -166,8 +166,10 @@ int main(int argc, char *argv[])
 	MPIrank = MPI_MASTER;   // this is for InitRandom()          
 	//-----------------------------
 
-	int restart = 0;
+	int restart;
 	IOReadParams(FINPUT,restart); // read input parameters 
+	cout<<MESSAGE<<__LINE__<<" in "<< __FILE__ << endl;
+	exit(123);
 	// get the number of rotational steps treated by worker CPUs
 	// chunksize = NumbRotTimes / numprocs;
 

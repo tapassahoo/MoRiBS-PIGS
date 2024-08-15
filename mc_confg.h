@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 
 using namespace std;
 
@@ -25,6 +26,7 @@ const int MAX_NUMBER_ROTDN  = 2;   //  max    number of rotational density matri
 
 //--------- FILES  ----------------------
 
+const char MESSAGE[] = "Dr. Tapas Sahoo, I'm at the line number ";
 const char COMMENTS[] = "#";        // comment line in output files
 const char BLANK[]    = "   ";      // spacing between columns
 
