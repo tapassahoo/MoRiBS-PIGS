@@ -1,98 +1,361 @@
-## User's Guide
+# User's Guide to MoRiBS-PIGS
 
-**Note:** It is derived from the MoRiBS (see `Computer Physics Communications vol. 204, pp. 170-188, 2016`) to estimate ground state properties of many-body interacting quantum systems based on the Path Integral Ground State (PIGS) approach.
+## 1. Overview
 
-**Disclaimer**: We disclaim all warranties concerning the enclosed program.
+MoRiBS-PIGS is a computational package derived from MoRiBS (Computer
+Physics Communications, **204**, 170--188, 2016) for estimating
+ground-state properties of many-body interacting quantum systems using
+the Path Integral Ground State (PIGS) method.
 
-The source codes of `MoRiBS-PIGS` are mainly written by Tapas Sahoo and Pierre-Nicholas Roy, University of Waterloo, Canada. If you encounter any problem with compiling or running the program, don't hesitate to contact Tapas Sahoo by email `tapascuchem@gmail.com`.
+The source code of MoRiBS-PIGS was developed primarily by Tapas Sahoo
+and Pierre-Nicholas Roy at the University of Waterloo, Canada.
 
-### **Setup**
+**Disclaimer:** The authors disclaim all warranties concerning the
+enclosed software.
 
-To download the package, a user should install `git` on his/her computer, followed by running the below command on his/her terminal:
-```
+For assistance with compilation or execution, please contact Tapas Sahoo
+at **tapascuchem@gmail.com**.
+
+## 2. Installation and Setup
+
+### 2.1. Downloading the Source Code
+
+Before downloading the package, ensure that Git is installed on your
+computer. Open a terminal and execute:
+
+``` bash
 git clone https://github.com/tapassahoo/MoRiBS-PIGS.git
 ```
-***Users should not change the directory structure after they unzip the distributed file.*** We label the main directory, where the source codes (`*.cc`, `*.h`, and `*.f`) are, as `$MAIN`. Please note that we have provided example configuration files like `Makefile` with the distribution and one may just adjust the files according to the architecture of his/her computer. There is no need to create new configuration files. 
 
-### **Compilation** 
+**Important:** Preserve the original directory structure of the
+downloaded package. Do not move or rename directories unless explicitly
+required by the configuration files.
 
-The compilation procedure of `MoRiBS-PIGS` contains the following steps:
+Throughout this guide, `$MAIN` denotes the main directory of the
+MoRiBS-PIGS package, which contains the principal source files (`*.cc`,
+`*.h`, and `*.f`).
 
-1. `cd $MAIN/spring` and open `make.CHOICES`. One should specify the platform of his/her computer by uncommenting the correct line, i.e., `PLAT = LINUX`;
-2. `cd $MAIN/spring/SRC` and open `make.${PLAT}`. With the above choice, it should be `make.LINUX`. In `make.${PLAT}`, one should specify the `fortran` and `C/C++` compilers that are installed in his/her computer. Note that only the non-MPI compilation of SPRNG has been tested with MoRiBS-PIGS;
-3. at `$MAIN/spring/SRC`, `make clean` and `make`. The generated libraries are in `$MAIN/spring/lib`. Make sure `$MAIN/spring/lib` is empty before `make`. Sometimes, `make clean` may not clean up `$MAIN/spring/lib` completely. Steps 1-3 are to compile the sprng libraries that are needed by the main code;
-4. at `$MAIN`, open `Makefile`, and specify options, `CFLAGS`, `LDFLAGS`, `CC` and `FC`. Those are the optimization options, `C/C++` compilation flags, link flags, `C/C++` compiler, and `Fortran` compiler respectively;
-5. at `$MAIN`, `make -f Makefile-GNU clean` and `make -f Makefile-GNU`. If there is no error message, the generated executable is called `pimc`.
+The distribution includes example configuration files, such as
+`Makefile`, which can be modified to suit the user's computer
+architecture and installed compilers. Creating new configuration files
+is generally unnecessary.
 
+## 3. Compilation
 
-### Prerequisites for executing the executable `pimc`	
+The compilation procedure consists of the following steps.
 
-Please note that one should delete the following files before each simulation run:
+### Step 1: Select the Platform
+
+Navigate to the `spring` directory:
+
+``` bash
+cd $MAIN/spring
 ```
-1: yw001.*;
-2: permutation,
+
+Open `make.CHOICES` and uncomment the line corresponding to your
+operating system and platform. For example, for Linux, select:
+
+``` makefile
+PLAT = LINUX
 ```
-Otherwise, the simulation will bomb out.
 
-Remember to use asymrho.x (in nmv_prop/), symrho.x (in symtop_prop/) or linden.x (in linear_prop/) to generate the needed files for PIMC sampling of asymmetric top, symmetric top, or linear rotors. Users should read the respective README files in those directories carefully before compiling and running those programs. Users should carefully name the resultant files in accordance to the rules explained in Computer Physics Communications vol. 204, pp. 170–188, yr 2016.
+Ensure that the selected platform is compatible with your system.
 
-N.B.: For the MoRiBS-PIGS simulations of the nonlinear rotors, the user should always use an odd number of beads, and the name of all *.rho, *.eng, *.esq files must be of the format - {rotor name}_T{temperature}t{# of rotational beads}.rho/eng/esq. Remember, the {temperature} string's total width must be of six digits after the decimal point.
+### Step 2: Configure the SPRNG Compilation
 
-As for Example:
+Navigate to the SPRNG source directory:
 
+``` bash
+cd $MAIN/spring/SRC
 ```
-H2O_T10.000000t101.rho	
+
+Open the platform-specific configuration file. For Linux, this file is
+`make.LINUX`.
+
+Specify the Fortran and C/C++ compilers available on your system,
+together with any necessary compiler options.
+
+**Note:** Only the non-MPI version of SPRNG has been tested with
+MoRiBS-PIGS.
+
+### Step 3: Compile the SPRNG Libraries
+
+Before compilation, ensure that `$MAIN/spring/lib` is empty. Then
+execute:
+
+``` bash
+make clean
+make
+```
+
+The compiled SPRNG libraries should be generated in:
+
+``` text
+$MAIN/spring/lib
+```
+
+Check that the directory contains the expected libraries before
+proceeding. In some cases, `make clean` may not remove all previously
+generated files from this directory; therefore, verify its contents
+manually.
+
+Steps 1--3 prepare the SPRNG libraries required by the main program.
+
+### Step 4: Configure the Main Program
+
+Navigate to the main directory:
+
+``` bash
+cd $MAIN
+```
+
+Open `Makefile` and configure the following variables according to your
+system:
+
+-   `CFLAGS`: Compiler options for C/C++ source files, including
+    optimization and other compilation flags.
+-   `LDFLAGS`: Linker options and required library paths.
+-   `CC`: C/C++ compiler.
+-   `FC`: Fortran compiler.
+
+Ensure that the selected compilers and flags are compatible with the
+source code and the compiled SPRNG libraries.
+
+### Step 5: Compile MoRiBS-PIGS
+
+From the main directory, execute:
+
+``` bash
+make -f Makefile-GNU clean
+make -f Makefile-GNU
+```
+
+If compilation completes successfully, the executable named `pimc`
+should be generated in the main directory.
+
+## 4. Preparing and Running a Simulation
+
+### 4.1. Cleaning Up Previous Simulation Files
+
+Before starting each new simulation, remove the following files from the
+working directory, as applicable:
+
+``` bash
+rm -f yw001.*
+rm -f permutation
+```
+
+These files may contain data from a previous run. Leaving them in place
+can interfere with a subsequent simulation.
+
+**Caution:** Execute these commands only in the intended simulation
+working directory. Verify the directory and the files before deleting
+them.
+
+### 4.2. Preparing Rotational Density-Matrix Files
+
+Use the appropriate utility to generate the files required for PIGS
+sampling, depending on the molecular rotor type:
+
+  Rotor type       Utility       Directory
+  ---------------- ------------- ----------------
+  Asymmetric top   `asymrho.x`   `nmv_prop/`
+  Symmetric top    `symrho.x`    `symtop_prop/`
+  Linear rotor     `linden.x`    `linear_prop/`
+
+Read the corresponding `README` file in each directory carefully before
+compiling or executing these utilities.
+
+The generated files must follow the naming conventions and formatting
+requirements described in the associated MoRiBS publication (Computer
+Physics Communications, **204**, 170--188, 2016).
+
+### 4.3. Naming Conventions for Nonlinear Rotors
+
+For MoRiBS-PIGS simulations involving nonlinear rotors, the number of
+imaginary-time beads must be **odd**.
+
+The rotational density-matrix and energy files must follow this naming
+convention:
+
+``` text
+{rotor_name}_T{temperature}t{number_of_beads}.{extension}
+```
+
+Here, `{extension}` is `rho`, `eng`, or `esq`, and the temperature must
+be represented using exactly six digits after the decimal point.
+
+For example, for an H2O rotor at 10 K with 101 beads, the files should
+be named:
+
+``` text
+H2O_T10.000000t101.rho
 H2O_T10.000000t101.eng
 H2O_T10.000000t101.esq
 ```
 
-To generate the above files by asymrho.f, P-1 beads are used in MoRiBS-PIGS simulations instead of P beads used in the MoRiBS-PIMC simulations. Imaginary time (tau) is defined as (beta/P-1), where P is the number of beads.
+### 4.4. Imaginary-Time Discretization
 
-The name of the working directory to submit jobs is ~/MoRiBS-PIGS/examples/pigs-simulations-for-para-Water. To execute the simulations, the user must have the following files -
-	1: qmc.input
-	2: *.rho, *.eng, *.esq files
+For generating the files used in MoRiBS-PIGS simulations with
+`asymrho.f`, use (P-1) beads in the density-matrix preparation, rather
+than the (P) beads used in the corresponding MoRiBS-PIMC procedure.
 
-The user is advised to read Computer Physics Communications vol. 204, pp. 170–188, yr 2016, to set up the input (qmc.input).
+The imaginary-time step is defined as
 
-One may compile the code, move the resultant executable "pimc" to examples/MF_8He_0.37K_512_128 or examples/N2O_5pH2_512_128, and try running the respective simulations. One may also look at the files in those two example directories to have a sense of how many files are needed and their formats. Some of these examples are discussed in our associated paper.
+\[ `\tau`{=tex}=`\frac{\beta}{P-1}`{=tex}, \]
 
-### Output Summary
+where (`\beta`{=tex}) is the inverse temperature in the convention used
+by the program and (P) is the number of beads in the PIGS simulation.
 
-There are two relevant directories for a MoRiBS-PIGS run, the working directory and the output directory. The former is the directory where the program executable is and the latter is specified in qmc.input. In below we simply call the two directories $WORK and $OUTPUT. And we also use $FILNAM to specify the FILENAMEPREFIX that is specified in qmc.input.
+**Note:** The bead-count convention and the corresponding imaginary-time
+discretization must be consistent with the implementation described in
+the associated publication.
 
-************
-   energy
-************
-All energy outputs are stored in the following two files:
+### 4.5. Required Input Files
 
-	$OUTPUT/$FILNAM_sum.eng and $OUTPUT/$FILNAM.eng.
+For the example simulation in
 
-The first contains the energy components averaged on the fly while the latter contains the block-averaged quantities for every block. In $OUTPUT/$FILNAM_sum.eng, column
-	1: counting indices of punching out the energy components;
-	2: potential energy;
-	3: total energy (rotational + potential);
+``` text
+~/MoRiBS-PIGS/examples/pigs-simulations-for-para-Water
+```
 
-In $OUTPUT/$FILNAM.eng, column
-	1: block index;
-	2: block averaged potential energy;
-	3: block averaged total energy (rotational + potential);
+the working directory must contain, at a minimum:
 
-All energy quantities have the unit of K.
+1.  `qmc.input`
+2.  The required rotational density-matrix and energy files (`*.rho`,
+    `*.eng`, and `*.esq`).
 
-*******************
-   distribution
-*******************
+The input file `qmc.input` specifies the simulation parameters. Consult
+the associated publication for guidance on selecting these parameters
+and preparing a valid input file.
 
-Another important output is output.xyz where all the instantaneous values of rotational degrees of freedom in the space-fixed frame are stored. For better understanding, the user can see the SaveInstantConfig() function in mc_main.cc.
+For additional guidance, examine the example directories:
 
-	loop over rotors' index
-		loop over rotational beads
-			loop over (cos(theta),phi,chi)
+``` text
+examples/MF_8He_0.37K_512_128
+examples/N2O_5pH2_512_128
+```
 
-The output.xyz file is required to plot order parameters, angular distribution functions and <O-H..O distributions.
- 
-### An alternative way of the simulation
+After successful compilation, the `pimc` executable can be copied into
+the appropriate example directory and executed there. These examples
+illustrate the required input files, directory organization, and file
+formats; some are also discussed in the associated publication.
 
-Here I discuss how one can use our code like a black box for the simulation.
+## 5. Output Files and Their Interpretation
 
-	1: execution_driver_linear_molecule.py
+A MoRiBS-PIGS simulation involves two principal directories:
+
+-   **Working directory (`$WORK`):** The directory from which the
+    executable is run and in which the simulation is configured.
+-   **Output directory (`$OUTPUT`):** The directory specified in
+    `qmc.input` for storing simulation results.
+
+The variable `$FILNAM` denotes the filename prefix specified by
+`FILENAMEPREFIX` in `qmc.input`.
+
+### 5.1. Energy Outputs
+
+The simulation produces two principal energy-output files:
+
+``` text
+$OUTPUT/$FILNAM_sum.eng
+$OUTPUT/$FILNAM.eng
+```
+
+**File 1: `$FILNAM_sum.eng`**
+
+This file contains energy components averaged during the simulation. Its
+columns are interpreted as follows:
+
+  Column   Quantity
+  -------- ----------------------------------------------------------------
+  1        Index associated with the recorded energy output
+  2        Potential energy
+  3        Total energy, including rotational and potential contributions
+
+**File 2: `$FILNAM.eng`**
+
+This file contains block-averaged energy quantities:
+
+  -----------------------------------------------------------------------
+  Column                              Quantity
+  ----------------------------------- -----------------------------------
+  1                                   Block index
+
+  2                                   Block-averaged potential energy
+
+  3                                   Block-averaged total energy,
+                                      including rotational and potential
+                                      contributions
+  -----------------------------------------------------------------------
+
+All energy quantities are expressed in **kelvin (K)**.
+
+### 5.2. Rotational Configurations and Angular Distributions
+
+Another important output file is:
+
+``` text
+output.xyz
+```
+
+This file stores instantaneous configurations of the rotational degrees
+of freedom in the space-fixed frame.
+
+Conceptually, the data are organized by looping over the rotor index,
+then over the rotational beads, and finally over the angular
+coordinates:
+
+\[ (`\cos`{=tex}`\theta`{=tex},`\phi`{=tex},`\chi`{=tex}). \]
+
+The precise output layout should be checked against the implementation
+of the `SaveInstantConfig()` function in `mc_main.cc`.
+
+The `output.xyz` file can be used to analyse rotational configurations
+and calculate quantities such as:
+
+-   Molecular orientational order parameters.
+-   Angular distribution functions.
+-   O--H···O distance distributions and related structural correlations,
+    where applicable.
+
+Appropriate post-processing is required to obtain these quantities from
+the recorded configurations.
+
+## 6. An Alternative Simulation Workflow
+
+MoRiBS-PIGS can also be used through a Python-based execution workflow,
+allowing users to run simulations without manually performing every
+preparation and execution step.
+
+The script
+
+``` text
+execution_driver_linear_molecule.py
+```
+
+provides an alternative entry point for simulations involving linear
+molecules.
+
+Before using the script, examine its command-line arguments,
+configuration requirements, input-file conventions, and execution
+instructions. Ensure that the required executable and input data are
+available in the expected directories.
+
+The precise workflow and supported options should be determined from the
+script and its accompanying documentation.
+
+## 7. Further Information
+
+Users are strongly encouraged to consult the following publication for
+the theoretical background, computational methodology, and detailed
+simulation setup:
+
+*Computer Physics Communications*, **204**, 170--188 (2016).
+
+The example directories and the `README` files supplied with the package
+provide additional practical guidance for preparing input files,
+compiling auxiliary utilities, and executing simulations.
+
+For questions concerning compilation, execution, or the use of
+MoRiBS-PIGS, contact Tapas Sahoo at **tapascuchem@gmail.com**.
