@@ -1613,7 +1613,6 @@ def job_submission(
 			print("\n" + "*"*80 + "\n")
 			return
 
-		whoami()
 		#
 		check_status=check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file)
 		if (check_status == True):

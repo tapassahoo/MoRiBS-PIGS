@@ -5,6 +5,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include <iostream>
+#include <cstdlib>
+#include <string>
+
 //------------ memory allocation ----------------
 
 double **doubleMatrix(long row, long col)
@@ -248,3 +252,19 @@ double dmin(double x, double y)
     return y;
 }
 
+void whoami_impl(const char* file, const char* function, int line)
+{
+    constexpr int WIDTH = 80;
+    const std::string separator(WIDTH, '=');
+
+    std::cout << '\n' << separator
+              << "\nATTENTION\n\n"
+              << "Called from:\n"
+              << "File:     " << file << '\n'
+              << "Function: " << function << '\n'
+              << "Line:     " << line << '\n'
+              << separator << "\n\n";
+
+    std::cout.flush();
+    std::exit(EXIT_SUCCESS);
+}

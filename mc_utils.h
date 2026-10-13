@@ -1,6 +1,7 @@
 #ifndef _MC_UTILS_H
 #define _MC_UTILS_H 1
 
+#define whoami() whoami_impl(__FILE__, __func__, __LINE__)
 //------------ memory allocation ----------------
 
 double      **doubleMatrix (long row, long col);
@@ -30,5 +31,7 @@ void  mmsort(double *, int *,int);  // sort dist and rearrange labels
 
 double dmax(double,double);
 double dmin(double,double);
+
+void whoami_impl(const char* file, const char* function, int line);
 
 #endif  // mc_utils.h
