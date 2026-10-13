@@ -8,6 +8,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <limits.h>
 
 //------------ memory allocation ----------------
 
@@ -257,6 +261,38 @@ void whoami_impl(const char* file, const char* function, int line)
     constexpr int WIDTH = 80;
     const std::string separator(WIDTH, '=');
 
+    char absolute_path[PATH_MAX];
+
+    if (realpath(file, absolute_path) == nullptr)
+        std::snprintf(absolute_path, sizeof(absolute_path), "%s", file);
+
+    const auto now = std::chrono::system_clock::now();
+    const std::time_t current_time =
+        std::chrono::system_clock::to_time_t(now);
+
+    std::cout << '\n' << separator
+              << "\nATTENTION\n\n"
+              << "Called from:\n"
+              << "Path:     " << absolute_path << '\n'
+              << "Function: " << function << '\n'
+              << "Line:     " << line << '\n'
+              << "Date/Time: "
+              << std::put_time(std::localtime(&current_time),
+                               "%Y-%m-%d %H:%M:%S")
+              << '\n'
+              << separator << "\n\n";
+
+    std::cout.flush();
+    std::exit(EXIT_SUCCESS);
+}
+
+
+/*
+void whoami_impl(const char* file, const char* function, int line)
+{
+    constexpr int WIDTH = 80;
+    const std::string separator(WIDTH, '=');
+
     std::cout << '\n' << separator
               << "\nATTENTION\n\n"
               << "Called from:\n"
@@ -268,3 +304,4 @@ void whoami_impl(const char* file, const char* function, int line)
     std::cout.flush();
     std::exit(EXIT_SUCCESS);
 }
+*/
