@@ -6,7 +6,7 @@ all: qpr.x linden.x
 	@echo ""
 	@echo "************************************ linden.f **********************************"
 	@echo ""
-	@echo "[X] Compilation is successful."
+	@echo "[SUCCESS] Compilation is successful."
 	@echo $(shell date)
 
 linden.x:	linden.o

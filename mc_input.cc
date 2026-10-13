@@ -466,28 +466,30 @@ void IOReadParams(const char in_file[],int & mc_status)
 	cout << "DIM =              "<<NDIM<<endl;
 	cout << "Temperature        "<<Temperature<<endl;
 	cout << "Density            "<<Density<<endl;
+	cout << endl;
 
-   int w = 6;
-   
-   for (int type=0;type<NumbTypes;type++)
-   {
-      cout << setw(w) << MCAtom[type].type << BLANK;
-      cout << setw(w) << MCAtom[type].numb << BLANK;
-      cout<<"MCAtom[type].molecule   "<<MCAtom[type].molecule<<BLANK;
+	int w = 6;
 
-      cout << setw(10) << STATISTICS[MCAtom[type].stat] << BLANK;
+	for (int type=0;type<NumbTypes;type++)
+	{
+		cout << setw(w) << MCAtom[type].type << BLANK;
+		cout << setw(w) << MCAtom[type].numb << BLANK;
+		cout<<"MCAtom[type].molecule   "<<MCAtom[type].molecule<<BLANK;
 
-      cout << setw(w) << MCAtom[type].mcstep << BLANK;
-      cout << setw(w) << MCAtom[type].levels << BLANK;
-      cout << setw(w) << MCAtom[type].fpot   << BLANK;
+		cout << setw(10) << STATISTICS[MCAtom[type].stat] << BLANK;
 
-      cout << setw(w) << PMODEL[MCAtom[type].pmod] << BLANK;
+		cout << setw(w) << MCAtom[type].mcstep << BLANK;
+		cout << setw(w) << MCAtom[type].levels << BLANK;
+		cout << setw(w) << MCAtom[type].fpot   << BLANK;
 
-      cout << endl; 
-   }
+		cout << setw(w) << PMODEL[MCAtom[type].pmod] << BLANK;
+		cout << endl; 
+	}
 
-   cout << "Total number of atoms  " << NumbAtoms << endl;
-   cout << "Total number of types  " << NumbTypes << endl;
+	cout << endl;
+	cout << "Total number of atoms" << BLANK << NumbAtoms << endl;
+	cout << "Total number of types" << BLANK << NumbTypes << endl;
+	cout << endl;
 
    if (WORM)
    {  

@@ -1,11 +1,14 @@
 import argparse, decimal, os, sys, subprocess, getpass
-from datetime import datetime
 import numpy as np
+from datetime import datetime
 from termcolor import colored
 
 sys.path.append("../../examples/scripts")
 import mypkg.moribs_runner.support as support
 import get_beads_and_mc_steps as mc
+
+from pkg_utils.utils import whoami
+from pkg_utils.env_report import whom
 
 parser = argparse.ArgumentParser(
 	description="It is used to submit jobs in a queue \
@@ -265,11 +268,11 @@ date_time = now.strftime("%d/%m/%Y, %H:%M:%S")
 print("date and time:".capitalize().ljust(29), date_time, "\n")
 print("*"*80 + "\n")
 if (method == "PIMC"):
-	print("\n" + colored("Simulation:".ljust(30),"blue") + "The jobs are submitted for " + colored("finite temperature", "yellow") + " simulations.\n")
+	print("\n" + colored("Simulation:".ljust(30),"blue") + "Jobs are being submitted for " + colored("finite temperature", "yellow") + " simulations.\n")
 if (method == "PIGS"):
 	print("\n" + colored("Simulation:".ljust(30),"blue") + "The jobs are submitted for " + colored("ground-state", "yellow") + " simulations.\n")
 
-debugging=False
+debugging=True
 if debugging:
 	print(colored("File systems are given below:", "blue") + "\n")
 	print("user_name: ".ljust(30) + user_name)

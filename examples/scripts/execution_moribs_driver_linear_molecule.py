@@ -5,38 +5,41 @@ import mypkg
 import mypkg.moribs_runner as runner
 import mypkg.moribs_runner.support as support
 
+from pkg_utils.utils import whoami
+from pkg_utils.env_report import whom
+
 module_path = mypkg.moribs_runner.__file__
 module_path = module_path.replace('__init__.py', '')
 
 # User needs to modify once
 submission_root_dir_name = "linear-rotors"
 # /home/tapas/MoRiBS-PIGS/examples/scripts
+"""
 dir_moribs = '""'
 plot_dir_path = '""'
+"""
 
 # /home/tapas/academic-project/MoRiBS-PIGS/examples/scripts
-"""
 dir_moribs = '"academic-project/"'
 plot_dir_path = '"academic-project/outputs/"'
-"""
 
 #extra_name = '"initial-orientation-theta-180-degree-"'
 extra_name = '""'
 blank_space = " "
 
 # job_type is two types - "submission" and "analysis"
-#job_type = "submission"
-job_type = "analysis"
-method = "PIGS"
+job_type = "submission"
+#job_type = "analysis"
+method = "PIMC"
 
 system = "HF"
 rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.2
+parameter_value = 0.5
 
-numb_molecule=30
+numb_molecule=2
 numb_block=5000
 numb_pass=200
 numb_preskip=0
@@ -47,7 +50,7 @@ elif (numb_molecule == 1):
 	dipole_moment = 20.0  # It refer to the field strength and the unit inverse of Kelvin
 
 if (job_type == "submission"):
-	rlist = np.arange(7.0, 10.01, 0.2, dtype=float)
+	rlist = np.arange(7.0, 10.01, 5.0, dtype=float)
 
 if (job_type == "analysis"):
 	if (parameter_name == "beta"):
@@ -61,12 +64,24 @@ if (job_type == "analysis"):
 
 # No need to change the below three lines
 original_file_name = module_path + "submission_analysis.py"
-if (job_type=="analysis"):
-	temp_file_name = "temp_0_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
-	temp_file_name1 = "temp_1_" + submission_root_dir_name + "_" + job_type + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv_preskip" + str(numb_preskip) +".py"
-if (job_type=="submission"):
-	temp_file_name  = "temp0_" + job_type + "_" + method + "_" + submission_root_dir_name + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
-	temp_file_name1 = "temp1_" + job_type + "_" + method + "_" + submission_root_dir_name + "_n" + str(numb_molecule) + "_" + parameter_name + str(parameter_value) + "kelvin_inv.py"
+
+if job_type == "analysis":
+    filename_prefix = (
+        f"{submission_root_dir_name}_{job_type}"
+        f"_n{numb_molecule}_{parameter_name}{parameter_value}"
+        f"kelvin_inv_preskip{numb_preskip}"
+    )
+    temp_file_name = f"temp_0_{filename_prefix}.py"
+    temp_file_name1 = f"temp_1_{filename_prefix}.py"
+
+elif job_type == "submission":
+    filename_prefix = (
+        f"{job_type}_{method}_{submission_root_dir_name}"
+        f"_n{numb_molecule}_{parameter_name}{parameter_value}"
+        "kelvin_inv"
+    )
+    temp_file_name = f"temp0_{filename_prefix}.py"
+    temp_file_name1 = f"temp1_{filename_prefix}.py"
 
 for rcom in rlist:
 	support.replace(
@@ -121,6 +136,7 @@ for rcom in rlist:
 		#+ "--get_itcf" + blank_space
 	)
 
+	print("\n*")
 	print(cmd_run)
 	os.system(cmd_run)
 	subprocess.call(["rm", temp_file_name])

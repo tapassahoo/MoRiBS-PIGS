@@ -28,7 +28,7 @@ pimc: mc_main.o $(pimcOBJS)
 	@echo ""
 	@echo "*********************************** MoRiBS *************************************"
 	@echo ""
-	@echo "[X] Compilation is successful."
+	@echo "[SUCCESS] Compilation is successful."
 	@echo $(shell date)
 
 mc_main.o:		mc_main.cc mc_confg.h mc_input.h mc_setup.h mc_randg.h mc_utils.h mc_const.h mc_piqmc.h mc_estim.h mc_qworm.h

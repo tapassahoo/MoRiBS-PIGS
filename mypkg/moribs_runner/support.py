@@ -9,16 +9,8 @@ import get_beads_and_mc_steps as mc
 import mypkg.asymrho_runner.support as asym
 import mypkg.symrho_runner.support as sym
 
-
-def whoami():
-	print("\n")
-	print ('*'*80)
-	print("\nATTENTION: Check the expressions of the imaginary time correlation.\n")
-	print("%s/%s%s" %("The function is \n" + sys._getframe(1).f_code.co_filename, sys._getframe(1).f_code.co_name, "\nand the line number is " + str(sys._getframe(1).f_lineno)))
-	print("")
-	print ('*'*80)
-	exit()
-
+from pkg_utils.utils import whoami
+from pkg_utils.env_report import whom
 
 def is_non_zero_file(fpath):
 	return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
@@ -1611,7 +1603,7 @@ def job_submission(
 	if not restart_bool:
 		print("\n" + "*"*80 + "\n")
 		print("[" + colored("Notice!", "blue") + "]" + "\n")
-		print("\nThe job id is stored in " + colored(pimc_job_id_file,"yellow") + "\n")
+		print("\nThe job id is being stored in " + colored(pimc_job_id_file,"yellow") + "\n")
 
 		#
 		if (os.path.exists(os.path.join(output_dir_path, dir_name_trotter_number))):
@@ -1621,6 +1613,7 @@ def job_submission(
 			print("\n" + "*"*80 + "\n")
 			return
 
+		whoami()
 		#
 		check_status=check_if_job_is_submitted(slurm_script_dir, job_name, pimc_job_id_file)
 		if (check_status == True):
@@ -1779,7 +1772,7 @@ def job_submission(
 
 		print("\n" + "*"*80 + "\n")
 		print("\n" + "[" + colored("Notice!", "blue") + "]" + "\n")
-		print("\nThe job id is stored in " + colored(pimc_job_id_file,"yellow") + "\n")
+		print("\nThe job id is being stored in " + colored(pimc_job_id_file,"yellow") + "\n")
 
 	# For qmc.imput
 	get_input_file(

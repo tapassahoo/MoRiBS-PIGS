@@ -13,6 +13,9 @@
 //#include <vector>
 #include <stdexcept>
 
+//#include <cstdlib>
+//#include <source_location>
+
 #include "mc_confg.h"
 #include "mc_setup.h"
 #include "mc_input.h"
@@ -139,6 +142,8 @@ int iChoose;
 
 int main(int argc, char *argv[])
 {
+	cout<<"Tapas I'm here"<<endl;
+	exit(0);
 	Distribution = "unSwap";
 #ifdef PAIRDENSITY
 	readPairDensity();
@@ -168,8 +173,6 @@ int main(int argc, char *argv[])
 
 	int restart;
 	IOReadParams(FINPUT,restart); // read input parameters 
-	cout<<MESSAGE<<__LINE__<<" in "<< __FILE__ << endl;
-	exit(123);
 	// get the number of rotational steps treated by worker CPUs
 	// chunksize = NumbRotTimes / numprocs;
 
@@ -182,6 +185,8 @@ int main(int argc, char *argv[])
 
 	MemAllocMCCounts();
 	MemAllocQWCounts();
+	cout<<MESSAGE<<__LINE__<<" in "<< __FILE__ << endl;
+	exit(123);
 
 	//head CPU comes in after memory declaration.
 	//if ( rank == MPI_MASTER ){// in the master cpu section
