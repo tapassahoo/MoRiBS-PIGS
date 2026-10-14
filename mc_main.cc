@@ -1,5 +1,5 @@
 //
-//         main()
+//		 main()
 //
 
 #include <fstream>
@@ -68,13 +68,13 @@ extern "C" void caleng_(double *com_1, double *com_2, double *E_2H2O, double *Eu
 
 //--------------- BLOCK AVERAGE ------------
 
-double _dbpot;       // potential energy differencies, block average  added by Hui Li
-double _bpot;       // kinetic   energy, block average
+double _dbpot;	   // potential energy differencies, block average  added by Hui Li
+double _bpot;	   // kinetic   energy, block average
 double _btot;
-double _bkin;       // potential energy, block average
-double _bCv;        // heat capacity, block average
-double _bCv1;        // heat capacity, block average
-double _bCv2;        // heat capacity, block average
+double _bkin;	   // potential energy, block average
+double _bCv;		// heat capacity, block average
+double _bCv1;		// heat capacity, block average
+double _bCv2;		// heat capacity, block average
 double _bCv_trans;  // translational heat capacity, block average
 double _bCv_rot;   //  rotational heat capacity, block average
 //
@@ -87,28 +87,28 @@ double _trOfDensitySq;
 double _dpot_total;  // potential energy differences, global average  added by Hui Li
 //double _tot_total;  // kinetic   energy, global average
 
-double _brot;       // rotational kin energy, block average
-double _brotsq;     // rotational energy square, block average
+double _brot;	   // rotational kin energy, block average
+double _brotsq;	 // rotational energy square, block average
 double _rotsq_total; // rotational energy square, global average
-double _Cv_total;    // heat capacity, global average
-double _Cv1_total;    // heat capacity, global average
-double _Cv2_total;    // heat capacity, global average
-double _Cv_trans_total;    // translational heat capacity, global average
-double _Cv_trans_1_total;    // translational heat capacity, global average
-double _Cv_trans_2_total;    // translational heat capacity, global average
-double _Cv_rot_total;    // rotational heat capacity, global average
+double _Cv_total;	// heat capacity, global average
+double _Cv1_total;	// heat capacity, global average
+double _Cv2_total;	// heat capacity, global average
+double _Cv_trans_total;	// translational heat capacity, global average
+double _Cv_trans_1_total;	// translational heat capacity, global average
+double _Cv_trans_2_total;	// translational heat capacity, global average
+double _Cv_rot_total;	// rotational heat capacity, global average
 
-fstream _feng;      // save accumulated energy
-//fstream _fdc;      // save accumulated energy
-//fstream _fangins;      // save accumulated energy
-//fstream _fengins;      // save accumulated energy
+fstream _feng;	  // save accumulated energy
+//fstream _fdc;	  // save accumulated energy
+//fstream _fangins;	  // save accumulated energy
+//fstream _fengins;	  // save accumulated energy
 
 //---------------- ESTIMATORS ---------------
 
-void SaveEnergy    (const char [],double,long int); // block average
-void SaveSumEnergy (double,double);                 // accumulated average
+void SaveEnergy	(const char [],double,long int); // block average
+void SaveSumEnergy (double,double);				 // accumulated average
 
-void SaveInstantEnergy ();                 // accumulated average
+void SaveInstantEnergy ();				 // accumulated average
 
 void SaveTrReducedDens(const char [], double , long int );
 
@@ -162,8 +162,8 @@ int main(int argc, char *argv[])
 
 
 	//-------------------------
-	MPIsize = 1;            // this is for InitRandom()          
-	MPIrank = MPI_MASTER;   // this is for InitRandom()          
+	MPIsize = 1;			// this is for InitRandom()		  
+	MPIrank = MPI_MASTER;   // this is for InitRandom()		  
 	//-----------------------------
 
 	int restart;
@@ -174,13 +174,12 @@ int main(int argc, char *argv[])
 	// pass numprocs to NProcs, which is a global variable
 	// NProcs = numprocs;
 
-	MCInitParams();               // set system dependent parameters
+	MCInitParams();			   // set system dependent parameters
 	MCSetUnits(); 
 	MCMemAlloc();
 
 	MemAllocMCCounts();
 	MemAllocQWCounts();
-	whoami();
 
 	//head CPU comes in after memory declaration.
 	//if ( rank == MPI_MASTER ){// in the master cpu section
@@ -203,11 +202,11 @@ int main(int argc, char *argv[])
 	if (FileExist(FPERMU))
 		_io_error("QMC ->",IO_ERR_FEXST,FPERMU);
 
-	if (!restart) // new run, generate new status, rnd() streams and config files     
+	if (!restart) // new run, generate new status, rnd() streams and config files	 
 	{
 		// check the existence of the old files first
 
-		if (FileExist(FSTATUS))    
+		if (FileExist(FSTATUS))	
 			_io_error("QMC ->",IO_ERR_FEXST,FSTATUS);
 
 		if (FileExist(FCONFIG)) 
@@ -220,62 +219,70 @@ int main(int argc, char *argv[])
 			_io_error("QMC ->",IO_ERR_FEXST,FSEED);
 
 		//--------------------------------------------------------
-		//    	generate tables - potentals, configurations etc, status
+		//		generate tables - potentals, configurations etc, status
 
 		MCStartBlock = 0;  // PIMCRESTART //
-		//    	SEED for head CPU
+		//		SEED for head CPU
 		SEED = 985456376;
 		RandomInit(MPIrank,MPIsize);
 
-		MCConfigInit();                // generate initial configurations
+		MCConfigInit();				// generate initial configurations
 
-		for (int t1=0; t1<(NumbAtoms*NumbTimes); t1++)
+		cout << MESSAGE << endl;
+
+		// --------------------------------------------------
+		// 1. Print all molecular coordinates
+		// --------------------------------------------------
+		cout << "\n========== Molecular Coordinates ==========\n";
+
+		for (int t1 = 0; t1 < (NumbAtoms * NumbRotTimes); t1++)
 		{
-			for (int id=0; id<NDIM; id++)
+			for (int id = 0; id < NDIM; id++)
 			{
-				cout<<"t1 " << t1 <<" id "<< id << " "<< MCCoords[id][t1] << endl;
-			}
-		} 
-		cout<<"  "<<endl;
-		cout<<"  "<<endl;
-		exit(111);
-		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
-		{
-			int offset0 = NumbTimes*atom0;
-			for (int atom1 = 0; atom1 < NumbAtoms; atom1++)
-			{
-				if (atom0 != atom1)
-				{
-					int offset1 = NumbTimes*atom1;
-
-					int it = ((NumbRotTimes - 1)/2);
-					int t0 = offset0 + it;
-					int t1 = offset1 + it;
-
-					double dr;
-					double dr2 = 0.0;
-					for (int id=0;id<NDIM;id++)
-					{
-						dr   = (MCCoords[id][t0] - MCCoords[id][t1]);
-						dr2 += (dr*dr);
-					}
-					double r = sqrt(dr2);
-					cout<<"atom0 "<<atom0<<" atom1 "<<atom1<<" RCOM "<<r<<endl;
-				}
+				cout << "t1 = " << t1
+					 << ", id = " << id
+					 << ", MCCoords = " << MCCoords[id][t1]
+					 << ", MCCosine = " << MCCosine[id][t1]
+					 << endl;
 			}
 		}
-		/*
-		   cout<<"  "<<endl;
-		   cout<<"  "<<endl;
-		   for (int it=0;it<NumbAtoms*NumbTimes;it++)
-		   {
-		   for (int id=0;id<NDIM;id++)
-		   {
-		   cout<<"it " << it<<" id "<< id<< " "<< MCCosine[id][it]<<endl;
-		   }
-		   }	 
-		   */
-		//    	read in initial MCCoords and MCAngles
+
+		cout << "\n========== Interatomic Distances ==========\n";
+
+		const int it = (NumbRotTimes - 1) / 2;
+
+		for (int atom0 = 0; atom0 < NumbAtoms; atom0++)
+		{
+			const int offset0 = NumbRotTimes * atom0;
+			const int t0 = offset0 + it;
+
+			for (int atom1 = atom0 + 1; atom1 < NumbAtoms; atom1++)
+			{
+				const int offset1 = NumbRotTimes * atom1;
+				const int t1 = offset1 + it;
+
+				double dr2 = 0.0;
+
+				for (int id = 0; id < NDIM; id++)
+				{
+					const double dr =
+						MCCoords[id][t0] - MCCoords[id][t1];
+
+					dr2 += dr * dr;
+				}
+
+				const double r = sqrt(dr2);
+
+				cout << "Atom " << atom0
+					 << " - Atom " << atom1
+					 << " | RCOM = " << r
+					 << endl;
+			}
+		}
+
+		cout << "===========================================\n\n";
+
+		//		read in initial MCCoords and MCAngles
 #ifdef IOWRITE
 		if(InitMCCoords)
 		{
@@ -287,7 +294,7 @@ int main(int argc, char *argv[])
 			{
 				nboson=MCAtom[BSTYPE].numb;
 			}
-			//       	initconf_(MCCooInit,MCAngInit,&ntotal,&MCAtom[BSTYPE].numb,PIndex,RIndex);
+			//	   	initconf_(MCCooInit,MCAngInit,&ntotal,&MCAtom[BSTYPE].numb,PIndex,RIndex);
 			initconf_(MCCooInit,MCAngInit,&ntotal,&nboson,PIndex,RIndex);
 			if(BOSONS)
 			{
@@ -343,7 +350,7 @@ int main(int argc, char *argv[])
 
 		int atom1=1;
 		double spot=0.0;
-		if (atom1 != atom0)                    // skip "self-interaction"
+		if (atom1 != atom0)					// skip "self-interaction"
 		{	
 			int offset1 = atom1*NumbRotTimes;
 			if (MCType[atom1] == IMTYPE)
@@ -389,9 +396,9 @@ int main(int argc, char *argv[])
 			QWormsIO(IOWrite,FQWORMS);
 	}
 
-	MCWormAverageReset();      // debug worm
+	MCWormAverageReset();	  // debug worm
 
-	InitTotalAverage();      // DUMP 
+	InitTotalAverage();	  // DUMP 
 
 	/*
 #ifdef NORATIOTRICK
@@ -410,7 +417,7 @@ string sbuff;
 	for (int atom=0;atom<MCAtom[type].numb;atom++)
 	for (int it=0;it<NumbTimes;it++)
 	{
-	fid>>sbuff;         // skip an atom type
+	fid>>sbuff;		 // skip an atom type
 
 	offset=MCAtom[type].offset+NumbTimes*atom;
 	for (int id=0;id<NDIM;id++)
@@ -426,7 +433,7 @@ string sbuff;
 */
 	// --- RESTART/START NEW RUN ----------------------------
 	//PIMCRESTART begins here//
-	if (restart) // new run, generate new status, rnd() streams and config files     
+	if (restart) // new run, generate new status, rnd() streams and config files	 
 	{
 		StatusIO(IORead,FSTATUS);  // load MCStartBlock
 		ConfigIO(IORead,FCONFIG);  // load atoms/molecules positions
@@ -437,7 +444,7 @@ string sbuff;
 		//IOxyzAng(IOWrite,fname.c_str()); // test output of initial config
 	}
 	//PIMCRESTART ends here//
-	for (int it=0;it<NumbAtoms*NumbTimes;it++)
+	for (int it=0;it<NumbAtoms*NumbRotTimes;it++)
 	{
 		double phi  = MCAngles[PHI][it];
 		double cost = MCAngles[CTH][it];
@@ -448,7 +455,7 @@ string sbuff;
 		MCCosine[AXIS_Y][it] = sint*sin(phi);
 		MCCosine[AXIS_Z][it] = cost;
 	}
-
+	whoami();
 	string fnamew = "writeConf";
 	IOxyzAng(IOWrite,fnamew.c_str());
 
@@ -495,7 +502,7 @@ string sbuff;
 	   MPI_Send(&MCStartBlock,1,MPI_LONG,iproc,tagMCStartBlock,MPI_COMM_WORLD);
 	   MPI_Send(&NumberOfMCBlocks,1,MPI_LONG,iproc,tagNumberOfMCBlocks,MPI_COMM_WORLD);
 	   MPI_Send(&NumberOfMCPasses,1,MPI_LONG,iproc,tagNumberOfMCPasses,MPI_COMM_WORLD);
-	//    MPI_Send(&TZMAT[1][1],NDIM,MPI_DOUBLE,iproc,tagTZMAT,MPI_COMM_WORLD);
+	//	MPI_Send(&TZMAT[1][1],NDIM,MPI_DOUBLE,iproc,tagTZMAT,MPI_COMM_WORLD);
 	MPI_Send(&RotDenType,1,MPI_INT,iproc,tagRotDenType,MPI_COMM_WORLD);
 	MPI_Send(&RotOdEvn,1,MPI_INT,iproc,tagRotOdEvn,MPI_COMM_WORLD);
 	MPI_Send(&RotEoff,1,MPI_DOUBLE,iproc,tagRotEoff,MPI_COMM_WORLD);
@@ -516,7 +523,7 @@ string sbuff;
 	// MPI BLOCK 1 in MASTER done
 	*/
 	InitMCEstims();
-	//InitTotalAverage();      // DUMP 
+	//InitTotalAverage();	  // DUMP 
 
 	ResetMCCounts();
 	ResetQWCounts();
@@ -560,19 +567,19 @@ int itfnl=itini+chunksize;
 
 	printf("OpenMP version: %d\n", _OPENMP);
 	//randomseed(); //set seed according to clock
-	//RngStream Rng[omp_get_num_procs()];     // initialize a parallel RNG named "Rng"
+	//RngStream Rng[omp_get_num_procs()];	 // initialize a parallel RNG named "Rng"
 
 	//Monte Carlo simulation begins here//
 	long int blockCount = MCStartBlock;  
-	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK      
-	{      
+	while (blockCount<NumberOfMCBlocks) // START NEW BLOCK	  
+	{	  
 		blockCount++; 
 		if (PIMC_SIM) MCResetBlockAveragePIMC();
 		if (PIGS_SIM) MCResetBlockAveragePIGS();
 		if (ENT_SIM) MCResetBlockAveragePIGSENT();
 
-		long int passCount = 0;        // BEGIN NEW MC PASS
-		long int passTotal = 0;        // total number of Moves = passCount*number of beads = passTotal
+		long int passCount = 0;		// BEGIN NEW MC PASS
+		long int passTotal = 0;		// total number of Moves = passCount*number of beads = passTotal
 
 		while (passCount++ < NumberOfMCPasses) 
 		for (int time=0; time<NumbTimes; time++)
@@ -598,9 +605,9 @@ int itfnl=itini+chunksize;
 #ifdef MOVECENTROIDTEST
 					if  (time == 0)
 						if ((type == BSTYPE) || (type == FERMTYPE))
-							MCMolecularMoveExchange(type);        
+							MCMolecularMoveExchange(type);		
 						else
-							MCMolecularMove(type);        
+							MCMolecularMove(type);		
 #endif
 				}
 			} 
@@ -609,7 +616,7 @@ int itfnl=itini+chunksize;
 				PIMCPass(type,time);
 			}
 
-			if (blockCount>NumberOfEQBlocks)        // skiping the number of blocks after that the system get equilibrated.
+			if (blockCount>NumberOfEQBlocks)		// skiping the number of blocks after that the system get equilibrated.
 			{
 				// evaluate averages 
 				if (passTotal % MCSKIP_AVERG == 0)   // skip correlated configurations
@@ -624,7 +631,7 @@ int itfnl=itini+chunksize;
 							// print the instantaneous xyz and prl info for the closed path
 							if(PrintXYZprl)
 							{
-								stringstream bc;                // convert block # to string
+								stringstream bc;				// convert block # to string
 								bc.width(IO_BLOCKNUMB_WIDTH);
 								bc.fill('0');
 								bc<<blockCount;
@@ -649,7 +656,7 @@ int itfnl=itini+chunksize;
 						//print the instantaneous xyz and prl info for the closed path
 						if(PrintXYZprl)
 						{
-							stringstream bc;                // convert block # to string
+							stringstream bc;				// convert block # to string
 							bc.width(IO_BLOCKNUMB_WIDTH);
 							bc.fill('0');
 							bc<<blockCount;
@@ -665,7 +672,7 @@ int itfnl=itini+chunksize;
 
 				if (passTotal % MCSKIP_TOTAL == 0 && avergCount)  
 				{
-					sumsCount += 1.0;                 
+					sumsCount += 1.0;				 
 					if (!ENT_SIM) SaveSumEnergy (totalCount,sumsCount);
 				}
 			} // if (blockCount>NumberOfEQBlocks)  
@@ -707,7 +714,7 @@ int itfnl=itini+chunksize;
 
 #endif
 		*/
-		if (ROTATION && PIMC_SIM)                  // DUMP  accumulated average
+		if (ROTATION && PIMC_SIM)				  // DUMP  accumulated average
 			SaveRCF(MCFileName.c_str(),totalCount,MC_TOTAL);
 		}
 
@@ -723,7 +730,7 @@ int itfnl=itini+chunksize;
 			IOFileBackUp(FSTATUS); StatusIO(IOWrite,FSTATUS);
 			IOFileBackUp(FCONFIG); ConfigIO(IOWrite,FCONFIG);
 			IOFileBackUp(FTABLES); TablesIO(IOWrite,FTABLES);
-			IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);      
+			IOFileBackUp(FRANDOM); RandomIO(IOWrite,FRANDOM);	  
 			IOFileBackUp(FSEED); SeedIO(IOWrite,FSEED);
 		}
 
@@ -768,7 +775,7 @@ void PIMCPass(int type,int time)
 #else
 		if (PIGS_SIM || ENT_SIM)
 		{	
-			if (time == 0) { MCMolecularMovePIGS(type); }        
+			if (time == 0) { MCMolecularMovePIGS(type); }		
 			MCBisectionMovePIGS(type,time);
 			MCMolecularMoveNaiveNorm(type);
 			//MCMolecularMoveNaive(type);
@@ -776,7 +783,7 @@ void PIMCPass(int type,int time)
 
 		if (PIMC_SIM)
 		{	
-			if (time == 0) MCMolecularMove(type);        
+			if (time == 0) MCMolecularMove(type);		
 			// move the solvent particles
 			MCBisectionMove(type,time);
 		}	
@@ -808,18 +815,18 @@ void MCResetBlockAveragePIMC(void)
 	ResetMCCounts();
 	ResetQWCounts();
 
-	_dbpot       = 0.0;  //added by Hui Li
-	_bpot        = 0.0;
-	_btot    	 = 0.0;
-	_bkin        = 0.0;
+	_dbpot	   = 0.0;  //added by Hui Li
+	_bpot		= 0.0;
+	_btot		 = 0.0;
+	_bkin		= 0.0;
 
-	_brot        = 0.0;
-	_brotsq      = 0.0;
-	_bCv         = 0.0;
-	_bCv1        = 0.0;
-	_bCv2        = 0.0;
+	_brot		= 0.0;
+	_brotsq	  = 0.0;
+	_bCv		 = 0.0;
+	_bCv1		= 0.0;
+	_bCv2		= 0.0;
 	_bCv_trans   = 0.0;
-	_bCv_rot     = 0.0;
+	_bCv_rot	 = 0.0;
 
 	PrintXYZprl = 0;
 
@@ -836,8 +843,8 @@ void MCResetBlockAveragePIGS(void)
 	ResetMCCounts();
 	ResetQWCounts();
 
-	_bpot      = 0.0;
-	_btot      = 0.0;
+	_bpot	  = 0.0;
+	_btot	  = 0.0;
 
 	PrintXYZprl = 0;
 
@@ -859,8 +866,8 @@ void MCResetBlockAveragePIGSENT(void)
 		MCAccepSwap = 0.0;
 		MCAccepUnSwap = 0.0;
 	}
-	_bnm       = 0.0;
-	_bdm       = 0.0;
+	_bnm	   = 0.0;
+	_bdm	   = 0.0;
 	_trOfDensitySq = 0.0;
 
 	if (ENT_SIM) avergCountENT = 0.0;
@@ -872,8 +879,8 @@ void MCResetBlockAveragePIGSENT(void)
 
 void MCGetAveragePIGSENT(int type) 
 {
-	avergCount       += 1.0;
-	totalCount       += 1.0;  
+	avergCount	   += 1.0;
+	totalCount	   += 1.0;  
 
 	double snm, sdm;
 	if (ENT_ENSMBL == EXTENDED_ENSMBL)
@@ -886,8 +893,8 @@ void MCGetAveragePIGSENT(int type)
 		snm = GetEstimNM(type);
 		sdm = GetEstimDM(type);
 	}
-	_bnm             += snm;
-	_bdm             += sdm;
+	_bnm			 += snm;
+	_bdm			 += sdm;
 #ifdef SWAP
 	_trOfDensitySq   += sdm/snm;
 	_trOfDensitySq_total += sdm/snm;
@@ -905,10 +912,10 @@ void MCGetAveragePIGSENT(int type)
 		{
 			Reflect_MF_XZ();
 		}
-		//      else
-		//      {
-		//      	cout<<"Not in Reflect_MF_XZ"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//	  	cout<<"Not in Reflect_MF_XZ"<<endl;
+		//	  }
 	}
 
 	if(IREFLX == 1)
@@ -918,10 +925,10 @@ void MCGetAveragePIGSENT(int type)
 		{
 			Reflect_MF_YZ();
 		}
-		//      else
-		//      {
-		//          cout<<"Not in Reflect_MF_YZ"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//		  cout<<"Not in Reflect_MF_YZ"<<endl;
+		//	  }
 	}
 
 	if(IREFLZ == 1)
@@ -931,10 +938,10 @@ void MCGetAveragePIGSENT(int type)
 		{
 			Reflect_MF_XY();
 		}
-		//      else
-		//      {
-		//          cout<<"Not in Reflect_MF_XY"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//		  cout<<"Not in Reflect_MF_XY"<<endl;
+		//	  }
 	}
 
 	if(IROTSYM == 1)
@@ -948,15 +955,15 @@ void MCGetAveragePIGSENT(int type)
 
 void MCGetAveragePIGS(void) 
 {
-	avergCount       += 1.0;
-	totalCount       += 1.0;  
+	avergCount	   += 1.0;
+	totalCount	   += 1.0;  
 
-	double spot       = GetPotEnergyPIGS(); // pot energy and density distributions
-	_bpot            += spot;                     // block average for pot energy
-	_pot_total       += spot;
-	double stotal     = GetTotalEnergyPIGS();         // Total energy
-	_btot            += stotal;        
-	_tot_total       += stotal;
+	double spot	   = GetPotEnergyPIGS(); // pot energy and density distributions
+	_bpot			+= spot;					 // block average for pot energy
+	_pot_total	   += spot;
+	double stotal	 = GetTotalEnergyPIGS();		 // Total energy
+	_btot			+= stotal;		
+	_tot_total	   += stotal;
 
 	//  reflect for MF molecule
 	if(IREFLY == 1)
@@ -966,10 +973,10 @@ void MCGetAveragePIGS(void)
 		{
 			Reflect_MF_XZ();
 		}
-		//      else
-		//      {
-		//      	cout<<"Not in Reflect_MF_XZ"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//	  	cout<<"Not in Reflect_MF_XZ"<<endl;
+		//	  }
 	}
 
 	if(IREFLX == 1)
@@ -979,10 +986,10 @@ void MCGetAveragePIGS(void)
 		{
 			Reflect_MF_YZ();
 		}
-		//      else
-		//      {
-		//          cout<<"Not in Reflect_MF_YZ"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//		  cout<<"Not in Reflect_MF_YZ"<<endl;
+		//	  }
 	}
 
 	if(IREFLZ == 1)
@@ -992,10 +999,10 @@ void MCGetAveragePIGS(void)
 		{
 			Reflect_MF_XY();
 		}
-		//      else
-		//      {
-		//          cout<<"Not in Reflect_MF_XY"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//		  cout<<"Not in Reflect_MF_XY"<<endl;
+		//	  }
 	}
 
 	if(IROTSYM == 1)
@@ -1009,60 +1016,60 @@ void MCGetAveragePIGS(void)
 
 void MCGetAveragePIMC(void) 
 {
-	avergCount       += 1.0;
-	totalCount       += 1.0;  
+	avergCount	   += 1.0;
+	totalCount	   += 1.0;  
 #ifdef HISTOGRAM
 	GetDensities();
 #endif
 
-	double skin       = 0.;
-	if (TRANSLATION) skin = GetKinEnergy();           // kin energy
-	_bkin            += skin;                     // block average for kin energy
-	_kin_total       += skin;                     // accumulated average 
+	double skin	   = 0.;
+	if (TRANSLATION) skin = GetKinEnergy();		   // kin energy
+	_bkin			+= skin;					 // block average for kin energy
+	_kin_total	   += skin;					 // accumulated average 
 
-	double spot       = GetPotEnergyPIMC(); // pot energy and density distributions
-	_bpot            += spot;                     // block average for pot energy
-	_pot_total       += spot;
+	double spot	   = GetPotEnergyPIMC(); // pot energy and density distributions
+	_bpot			+= spot;					 // block average for pot energy
+	_pot_total	   += spot;
 
 	double srot;
 	if (ROTATION)
 	{
 		if(MCAtom[IMTYPE].molecule == 1)
 		{
-			srot      = GetRotEnergy();           // kin energy
+			srot	  = GetRotEnergy();		   // kin energy
 		}
 
 		if(MCAtom[IMTYPE].molecule == 3)
 		{
-			srot      = GetRotPlanarEnergy();     // kin energy
+			srot	  = GetRotPlanarEnergy();	 // kin energy
 		}
 
 		if(MCAtom[IMTYPE].molecule == 2)
 		{
-			srot      = GetRotE3D();
+			srot	  = GetRotE3D();
 		}
 
 		if(MCAtom[IMTYPE].molecule == 4)
 		{
 #ifdef INDEXMC
-			srot      = GetRotEnergyIndex();     // kin energy
+			srot	  = GetRotEnergyIndex();	 // kin energy
 #else
-			srot      = GetRotEnergyPIMC();     // kin energy
+			srot	  = GetRotEnergyPIMC();	 // kin energy
 #endif
 		}
-		_brot        += srot;
+		_brot		+= srot;
 		_rot_total   += srot;
 
-		_brotsq      += ErotSQ;
+		_brotsq	  += ErotSQ;
 		_rotsq_total += ErotSQ;
 
 		GetRCF(); 
 
 	}
 
-	double stotal     = skin + srot + spot;
-	_btot            += stotal;                   // kin+pot
-	_tot_total       += stotal;
+	double stotal	 = skin + srot + spot;
+	_btot			+= stotal;				   // kin+pot
+	_tot_total	   += stotal;
 
 	if (TRANSLATION && ROTATION)
 	{
@@ -1144,10 +1151,10 @@ void MCGetAveragePIMC(void)
 		{
 			Reflect_MF_XZ();
 		}
-		//      else
-		//      {
-		//      	cout<<"Not in Reflect_MF_XZ"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//	  	cout<<"Not in Reflect_MF_XZ"<<endl;
+		//	  }
 	}
 
 	if(IREFLX == 1)
@@ -1157,10 +1164,10 @@ void MCGetAveragePIMC(void)
 		{
 			Reflect_MF_YZ();
 		}
-		//      else
-		//      {
-		//          cout<<"Not in Reflect_MF_YZ"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//		  cout<<"Not in Reflect_MF_YZ"<<endl;
+		//	  }
 	}
 
 	if(IREFLZ == 1)
@@ -1170,10 +1177,10 @@ void MCGetAveragePIMC(void)
 		{
 			Reflect_MF_XY();
 		}
-		//      else
-		//      {
-		//          cout<<"Not in Reflect_MF_XY"<<endl;
-		//      }
+		//	  else
+		//	  {
+		//		  cout<<"Not in Reflect_MF_XY"<<endl;
+		//	  }
 	}
 
 	if(IROTSYM == 1)
@@ -1195,9 +1202,9 @@ void MCWormAverage(void)
 
 void MCSaveBlockAverages(long int blocknumb) 
 {
-	const char *_proc_=__func__;    //   MCSaveBlockAverages()
+	const char *_proc_=__func__;	//   MCSaveBlockAverages()
 
-	stringstream bc;                // convert block # to string
+	stringstream bc;				// convert block # to string
 	bc.width(IO_BLOCKNUMB_WIDTH); 
 	bc.fill('0');
 	bc<<blocknumb;
@@ -1212,30 +1219,30 @@ void MCSaveBlockAverages(long int blocknumb)
 #ifdef IOWRITE 
 if( IMPURITY && MCAtom[IMTYPE].molecule == 1)
 {
-SaveDensities1D    (fname.c_str(),avergCount);       
-SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
+SaveDensities1D	(fname.c_str(),avergCount);	   
+SaveDensities2D	(fname.c_str(),avergCount,MC_BLOCK);
 }
 if( IMPURITY && MCAtom[IMTYPE].molecule == 3)
 {
-SaveDensities1D    (fname.c_str(),avergCount);       
-SaveDensities2D    (fname.c_str(),avergCount,MC_BLOCK);
+SaveDensities1D	(fname.c_str(),avergCount);	   
+SaveDensities2D	(fname.c_str(),avergCount,MC_BLOCK);
 }
 if( IMPURITY && MCAtom[IMTYPE].molecule == 2)
 {
-SaveDensities1D    (fname.c_str(),avergCount);
+SaveDensities1D	(fname.c_str(),avergCount);
 
-SaveRho1D          (fname.c_str(),avergCount,MC_BLOCK);
+SaveRho1D		  (fname.c_str(),avergCount,MC_BLOCK);
 
-	// SaveDensities3D    (fname.c_str(),avergCount,MC_BLOCK); // this step takes lots of space. temporarily turnned off
+	// SaveDensities3D	(fname.c_str(),avergCount,MC_BLOCK); // this step takes lots of space. temporarily turnned off
 
-	SaveRhoThetaChi    (fname.c_str(),avergCount,MC_BLOCK);
+	SaveRhoThetaChi	(fname.c_str(),avergCount,MC_BLOCK);
 
 	// IOxyzAng(IOWrite,fname.c_str());
 	}
 
 	if (ROTATION) 
 	{
-	SaveRCF            (fname.c_str(),avergCount,MC_BLOCK); 
+	SaveRCF			(fname.c_str(),avergCount,MC_BLOCK); 
 	}
 #endif
 */
@@ -1275,7 +1282,7 @@ SaveAreaEstim3D (MCFileName.c_str(),avergCount,blocknumb,iframe);
 
 void SaveEnergy (const char fname [], double acount, long int blocknumb)
 {
-	const char *_proc_=__func__;    //  SaveEnergy()
+	const char *_proc_=__func__;	//  SaveEnergy()
 
 	fstream fid;
 	string fenergy;
@@ -1290,15 +1297,15 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 	if (PIMC_SIM && TRANSLATION && ROTATION)
 	{
-		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number
-		fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;    // kinetic energy
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;				 // block number
+		fid << setw(IO_WIDTH) << _bkin*Units.energy/avergCount << BLANK;	// kinetic energy
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;	// potential anergy
 		fid << setw(IO_WIDTH) <<(_bkin+_bpot)*Units.energy/avergCount << BLANK;   
 
 		// if (ROTATION)
-		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy
-		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
-		// fid << setw(IO_WIDTH) << _dbpot*Units.energy/avergCount << BLANK;    // potential differencies added by Hui Li 
+		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;	// rot energy
+		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;	// rot energy square
+		// fid << setw(IO_WIDTH) << _dbpot*Units.energy/avergCount << BLANK;	// potential differencies added by Hui Li 
 		fid << setw(IO_WIDTH) <<(_bkin+_bpot+_brot)*Units.energy/avergCount << BLANK;  //total energy including rot energy 
 		fid << setw(IO_WIDTH) << _bCv/avergCount << BLANK; // heat capacity
 		fid << setw(IO_WIDTH) << _bCv_trans/avergCount << BLANK; // translational heat capacity
@@ -1307,19 +1314,19 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 	}
 	else if (PIMC_SIM && !TRANSLATION && ROTATION)
 	{
-		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number
-		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;    // rot energy
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
-		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;    // rot energy square
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;				 // block number
+		fid << setw(IO_WIDTH) << _brot*Units.energy/avergCount << BLANK;	// rot energy
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;	// potential anergy
+		fid << setw(IO_WIDTH) << _brotsq*(Units.energy*Units.energy)/avergCount << BLANK;	// rot energy square
 		fid << setw(IO_WIDTH) << _bCv1*(Units.energy*Units.energy)/avergCount << BLANK; // heat capacity
 		fid << setw(IO_WIDTH) << _bCv2*(Units.energy*Units.energy)/avergCount << BLANK; // rotational heat capacity
 		fid << endl;
 	}
 	else if (PIGS_SIM)
 	{
-		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number
-		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;    // potential anergy
-		fid << setw(IO_WIDTH) << _btot*Units.energy/avergCount << BLANK;    // rot energy
+		fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;				 // block number
+		fid << setw(IO_WIDTH) << _bpot*Units.energy/avergCount << BLANK;	// potential anergy
+		fid << setw(IO_WIDTH) << _btot*Units.energy/avergCount << BLANK;	// rot energy
 		fid << endl;
 	}
 
@@ -1328,13 +1335,13 @@ void SaveEnergy (const char fname [], double acount, long int blocknumb)
 
 void SaveSumEnergy (double acount, double numb)  // global average
 {
-	const char *_proc_=__func__;    //  SaveSumEnergy()
+	const char *_proc_=__func__;	//  SaveSumEnergy()
 
 	if (PIMC_SIM && TRANSLATION && ROTATION)
 	{
-		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;    
-		_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;    
-		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;	
+		_feng << setw(IO_WIDTH) << _kin_total*Units.energy/acount << BLANK;	
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;	
 		_feng << setw(IO_WIDTH) <<(_kin_total+_pot_total)*Units.energy/acount << BLANK;   
 
 		_feng << setw(IO_WIDTH) <<_rot_total*Units.energy/acount << BLANK;   
@@ -1362,9 +1369,9 @@ void SaveSumEnergy (double acount, double numb)  // global average
 	}
 	else if (PIMC_SIM && !TRANSLATION && ROTATION)
 	{
-		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;    
+		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;	
 		_feng << setw(IO_WIDTH) <<_rot_total*Units.energy/acount << BLANK;   
-		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;	
 		_feng << setw(IO_WIDTH) <<_rotsq_total*(Units.energy*Units.energy)/acount << BLANK;   
 		// Cv
 		/*
@@ -1383,8 +1390,8 @@ void SaveSumEnergy (double acount, double numb)  // global average
 	}
 	else if (PIGS_SIM)
 	{
-		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;    
-		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;    
+		_feng << setw(IO_WIDTH_BLOCK) << numb << BLANK;	
+		_feng << setw(IO_WIDTH) << _pot_total*Units.energy/acount << BLANK;	
 		_feng << setw(IO_WIDTH) <<_tot_total*Units.energy/acount << BLANK;   
 	}
 
@@ -1406,7 +1413,7 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
 
 	if (!fid.is_open()) _io_error(_proc_,IO_ERR_FOPEN,fconfig.c_str());
 
-	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;                 // block number 1 
+	fid << setw(IO_WIDTH_BLOCK) << blocknumb  << BLANK;				 // block number 1 
 
 	if (TRANSLATION)
 	{
@@ -1415,7 +1422,7 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
 			for (int it = 0; it < NumbTimes; it++) 
 			{
 				int offset0 = NumbTimes*atom0;
-				int t0      = offset0 + it;
+				int t0	  = offset0 + it;
 
 				fid << setw(IO_WIDTH) << MCCoords[AXIS_X][t0] << BLANK;
 				fid << setw(IO_WIDTH) << MCCoords[AXIS_Y][t0] << BLANK;
@@ -1431,7 +1438,7 @@ void SaveInstantConfig(const char fname [], long int blocknumb)
 			for (int it = 0; it < NumbRotTimes; it++) 
 			{
 				int offset0 = NumbTimes*atom0;
-				int t0      = offset0 + it;
+				int t0	  = offset0 + it;
 				fid << setw(IO_WIDTH) << MCAngles[CTH][t0] << BLANK;
 				fid << setw(IO_WIDTH) << MCAngles[PHI][t0] << BLANK;
 				fid << setw(IO_WIDTH) << MCAngles[CHI][t0] << BLANK;
@@ -1498,7 +1505,7 @@ void SaveTrReducedDens(const char fname [], double acount, long int blocknumb)
 
 void InitTotalAverage(void)  // DUMP
 {
-	const char *_proc_=__func__;    
+	const char *_proc_=__func__;	
 
 	totalCount = 0.0;  // need to save in the status file 
 	if (ENT_SIM) totalCountENT = 0.0;  // need to save in the status file 
@@ -1583,19 +1590,19 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 		for (int type=0;type<NumbTypes;type++)
 			if (WORM && (type == Worm.type))
 			{
-				double ratio_open    = QWAccep[0][QW_OPEN] /QWTotal[0][QW_OPEN];
+				double ratio_open	= QWAccep[0][QW_OPEN] /QWTotal[0][QW_OPEN];
 				double ratio_close   = QWAccep[0][QW_CLOSE]/QWTotal[0][QW_CLOSE];
 
 				double ratio_advance = QWAccep[0][QW_ADVANCE]/QWTotal[0][QW_ADVANCE];
 				double ratio_recede  = QWAccep[0][QW_RECEDE] /QWTotal[0][QW_RECEDE];
 
-				double ratio_swap    = QWAccep[0][QW_SWAP]/QWTotal[0][QW_SWAP];
+				double ratio_swap	= QWAccep[0][QW_SWAP]/QWTotal[0][QW_SWAP];
 
 				cout<<setw(w)<<"open/close";
 				cout<<" [ "; 
 				cout<<QWTotal[0][QW_OPEN]/countQW<<"-"<<QWTotal[0][QW_CLOSE]/countQW; 
 				cout<<" ] "; 
-				cout<<BLANK;                     
+				cout<<BLANK;					 
 
 				cout<<setw(w)<<ratio_open   << BLANK; // accept ratio for "open"   move
 				cout<<setw(w)<<ratio_close  << BLANK; // accept ratio for "close"  move
@@ -1604,7 +1611,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 				cout<<" [ "; 
 				cout<<QWTotal[0][QW_ADVANCE]/countQW<<"-"<<QWTotal[0][QW_RECEDE]/countQW; 
 				cout<<" ] "; 
-				cout<<BLANK;                     
+				cout<<BLANK;					 
 
 				cout<<setw(w)<<ratio_advance<< BLANK;  // accept ratio for "advance" move 
 				cout<<setw(w)<<ratio_recede << BLANK;  // accept ratio for "recede"  move
@@ -1613,7 +1620,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 				cout<<" [ "; 
 				cout<<QWTotal[0][QW_SWAP]/countQW; 
 				cout<<" ] "; 
-				cout<<BLANK;                     
+				cout<<BLANK;					 
 				cout<<setw(w)<<ratio_swap << BLANK;  // accept ratio for "recede"  move
 			}
 			else
@@ -1624,11 +1631,11 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 
 				cout<<setw(w)<<MCAtom[type].type<<BLANK; // atom type
 
-				cout<<setw(w)<<ratio_molec<<BLANK;       // accept ratio for "molecular" move
-				cout<<setw(w)<<ratio_multi<<BLANK;       // accept ratio for multilevel move 
+				cout<<setw(w)<<ratio_molec<<BLANK;	   // accept ratio for "molecular" move
+				cout<<setw(w)<<ratio_multi<<BLANK;	   // accept ratio for multilevel move 
 				if (PIGS_SIM) {
 					double ratio_end_beads = MCAccepEndBeads[type][MCMOLEC]/MCTotalEndBeads[type][MCMOLEC];
-					cout<<setw(w)<<ratio_end_beads<<BLANK;       // accept ratio for multilevel move 
+					cout<<setw(w)<<ratio_end_beads<<BLANK;	   // accept ratio for multilevel move 
 				}
 #endif
 			}
@@ -1638,7 +1645,7 @@ void MCSaveAcceptRatio(long int step,long int pass,long int block)
 	{
 		double ratio_rotat = MCAccep[IMTYPE][MCROTAT]/MCTotal[IMTYPE][MCROTAT];
 		cout<<BLANK<< "Rot: ";
-		cout<<setw(w)<<ratio_rotat<<BLANK;       // accept ratio for "molecular" move
+		cout<<setw(w)<<ratio_rotat<<BLANK;	   // accept ratio for "molecular" move
 	}
 
 	cout << endl;
