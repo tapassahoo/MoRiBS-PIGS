@@ -168,7 +168,6 @@ int main(int argc, char *argv[])
 
 	int restart;
 	IOReadParams(FINPUT,restart); // read input parameters 
-	whoami();
 	// get the number of rotational steps treated by worker CPUs
 	// chunksize = NumbRotTimes / numprocs;
 
@@ -181,8 +180,7 @@ int main(int argc, char *argv[])
 
 	MemAllocMCCounts();
 	MemAllocQWCounts();
-	cout<<MESSAGE<<__LINE__<<" in "<< __FILE__ << endl;
-	exit(123);
+	whoami();
 
 	//head CPU comes in after memory declaration.
 	//if ( rank == MPI_MASTER ){// in the master cpu section

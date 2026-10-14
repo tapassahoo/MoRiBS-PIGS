@@ -375,11 +375,13 @@ void IOReadParams(const char in_file[],int & mc_status)
      	if (params==IO_PIGS_SIM)
      	{
         	PIGS_SIM = true;
+			inf >> PIGS_SIM;
      	} 
      	else
      	if (params==IO_PIMC_SIM)
      	{
         	PIMC_SIM = true;
+			inf >> PIMC_SIM;
      	} 
      	else
      	if (params==IO_ENT_SIM)
@@ -558,11 +560,18 @@ void IOReadParams(const char in_file[],int & mc_status)
    cout << "   <<<<<<  Free rotor test [ROTS_TEST 1]  >>>>>>>   " << endl;
 #endif
 
-	cout<<" ENT_SIM "<<ENT_SIM<<endl;
+	cout << "PIGS_SIM " << PIGS_SIM << endl;
+	cout << "PIMC_SIM " << PIMC_SIM << endl;
+	cout << "ENT_SIM "  << ENT_SIM  << endl;
+
 	if (ENT_SIM)
 	{
-		cout<<ENT_ENSMBL<<endl;
-		cout<<ENT_ALGR<<endl;
+		cout << "ENT_ENSMBL " << ENT_ENSMBL << endl;
+		cout << "ENT_ALGR "   << ENT_ALGR   << endl;
+	}
+	else
+	{
+		cout << "ENT_SIM is disabled." << endl;
 	}
 
    cout << endl;

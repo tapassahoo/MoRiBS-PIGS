@@ -37,7 +37,7 @@ rotor = "HF"
 spin_isomer = int(-1)
 
 parameter_name = "beta"
-parameter_value = 0.5
+parameter_value = 0.05
 
 numb_molecule=2
 numb_block=5000

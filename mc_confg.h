@@ -26,7 +26,7 @@ const int MAX_NUMBER_ROTDN  = 2;   //  max    number of rotational density matri
 
 //--------- FILES  ----------------------
 
-const char MESSAGE[] = "Dr. Tapas Sahoo, I'm at the line number ";
+const char MESSAGE[] = "DEBUG: Execution reached this point.";
 const char COMMENTS[] = "#";        // comment line in output files
 const char BLANK[]    = "   ";      // spacing between columns
 
